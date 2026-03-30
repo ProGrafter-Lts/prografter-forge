@@ -28,7 +28,7 @@ const steps = [
     desc: "Complete the job, get paid directly. We only take 7.5% — capped at £900 per job.",
     icon: (
       <svg width="32" height="32" fill="none" stroke="#0D9488" strokeWidth="1.5" viewBox="0 0 24 24">
-        <path d="M12 1v22M17 5H9.5a3.5 3.5 0 100 7h5a3.5 3.5 0 110 7H6" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M9 11h8M7 15h8M14.5 4c-3 0-5 1.5-5 4.5v11" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     ),
   },
