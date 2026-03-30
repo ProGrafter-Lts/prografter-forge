@@ -3,7 +3,7 @@ const features = [
   { num: "02", title: "Instant Notifications", desc: "Be the first to respond to new jobs with real-time alerts on your phone." },
   { num: "03", title: "Review & Reputation", desc: "Build your online reputation with verified reviews from completed jobs." },
   { num: "04", title: "Simple Dashboard", desc: "Track leads, jobs, and earnings in one clean, no-nonsense interface." },
-  { num: "05", title: "Fair Pricing Model", desc: "7.5% commission on completed work only. No monthly fees. Capped at £900." },
+  { num: "05", title: "Fair Pricing Model", desc: "7.5% commission on completed work only. No monthly fees. Capped at £900 per job." },
   { num: "06", title: "Direct Communication", desc: "Chat directly with homeowners. No middleman, no phone tag." },
 ];
 

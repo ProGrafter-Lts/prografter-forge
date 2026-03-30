@@ -25,7 +25,7 @@ const steps = [
   {
     num: "03",
     title: "Get Paid",
-    desc: "Complete the job, get paid directly. We only take 7.5% — capped at £900 a year.",
+    desc: "Complete the job, get paid directly. We only take 7.5% — capped at £900 per job.",
     icon: (
       <svg width="32" height="32" fill="none" stroke="#0D9488" strokeWidth="1.5" viewBox="0 0 24 24">
         <path d="M12 1v22M17 5H9.5a3.5 3.5 0 100 7h5a3.5 3.5 0 110 7H6" strokeLinecap="round" strokeLinejoin="round" />

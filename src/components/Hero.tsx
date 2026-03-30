@@ -1,7 +1,7 @@
 const stats = [
   { value: "£0", label: "Monthly Fee" },
   { value: "7.5%", label: "Commission" },
-  { value: "£900", label: "Annual Cap" },
+  { value: "£900", label: "Per Job Cap" },
 ];
 
 const Hero = () => {
@@ -28,7 +28,7 @@ const Hero = () => {
             Grafters.
           </h1>
           <p className="font-body text-secondary-text text-lg max-w-md mb-8 font-light">
-            No monthly fees. No hidden costs. Just a fair commission on the work you win — capped at £900 a year.
+            No monthly fees. No hidden costs. Just a fair commission on the work you win — capped at £900 per job.
           </p>
           <a
             href="#signup"
