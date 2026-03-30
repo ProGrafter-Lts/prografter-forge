@@ -28,7 +28,7 @@ const Hero = () => {
             Grafters.
           </h1>
           <p className="font-body text-secondary-text text-lg max-w-md mb-8 font-light">
-            No monthly fees. No hidden costs. Just a fair commission on the work you win — capped at £900 a year.
+            No monthly fees. No hidden costs. Just a fair commission on the work you win — capped at £900 per job.
           </p>
           <a
             href="#signup"

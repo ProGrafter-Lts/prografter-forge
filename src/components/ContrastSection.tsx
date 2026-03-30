@@ -1,6 +1,6 @@
 const comparisons = [
   { feature: "Monthly subscription", old: "£400/mo", pro: "£0/mo" },
-  { feature: "Commission cap", old: "None", pro: "£900/year" },
+  { feature: "Commission cap", old: "None", pro: "£900/job" },
   { feature: "Transparent pricing", old: false, pro: true },
   { feature: "No lock-in contracts", old: false, pro: true },
   { feature: "Verified local leads", old: false, pro: true },
