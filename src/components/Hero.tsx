@@ -1,7 +1,7 @@
 const stats = [
   { value: "£0", label: "Monthly Fee" },
   { value: "7.5%", label: "Commission" },
-  { value: "£900", label: "Annual Cap" },
+  { value: "£900", label: "Per Job Cap" },
 ];
 
 const Hero = () => {
