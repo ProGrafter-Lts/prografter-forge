@@ -21,7 +21,7 @@ const FeaturesGrid = () => {
           {features.map((f, i) => (
             <div
               key={f.num}
-              className="p-8 border border-border rounded-[4px] fade-up"
+              className="p-8 border border-border rounded-xl fade-up"
               style={{ transitionDelay: `${i * 0.08}s` }}
             >
               <span className="font-mono text-xs text-teal tracking-widest mb-3 block">{f.num}</span>

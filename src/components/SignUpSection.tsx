@@ -60,7 +60,7 @@ const SignUpSection = () => {
         {/* Right — Form */}
         <div className="fade-up">
           {success ? (
-            <div className="bg-teal/10 border border-teal/30 rounded-[4px] p-8 text-center">
+            <div className="bg-teal/10 border border-teal/30 rounded-xl p-8 text-center">
               <h3 className="font-heading text-teal text-3xl mb-2">You're In.</h3>
               <p className="font-body text-cream/70 text-sm">We'll be in touch when we launch near you.</p>
             </div>
@@ -73,7 +73,7 @@ const SignUpSection = () => {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
-                  className="bg-cream/5 border border-cream/10 text-cream placeholder-secondary-text font-body text-sm rounded-[4px] px-4 py-3 focus:border-teal focus:outline-none transition-colors"
+                   className="bg-cream/5 border border-cream/10 text-cream placeholder-secondary-text font-body text-sm rounded-xl px-4 py-3 focus:border-teal focus:outline-none transition-colors"
                 />
                 <input
                   type="text"
@@ -81,7 +81,7 @@ const SignUpSection = () => {
                   value={postcode}
                   onChange={(e) => setPostcode(e.target.value)}
                   required
-                  className="bg-cream/5 border border-cream/10 text-cream placeholder-secondary-text font-body text-sm rounded-[4px] px-4 py-3 focus:border-teal focus:outline-none transition-colors"
+                  className="bg-cream/5 border border-cream/10 text-cream placeholder-secondary-text font-body text-sm rounded-xl px-4 py-3 focus:border-teal focus:outline-none transition-colors"
                 />
               </div>
               <input
@@ -90,12 +90,12 @@ const SignUpSection = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full bg-cream/5 border border-cream/10 text-cream placeholder-secondary-text font-body text-sm rounded-[4px] px-4 py-3 focus:border-teal focus:outline-none transition-colors"
+                className="w-full bg-cream/5 border border-cream/10 text-cream placeholder-secondary-text font-body text-sm rounded-xl px-4 py-3 focus:border-teal focus:outline-none transition-colors"
               />
               <select
                 value={userType}
                 onChange={(e) => setUserType(e.target.value)}
-                className="w-full bg-cream/5 border border-cream/10 text-cream font-body text-sm rounded-[4px] px-4 py-3 focus:border-teal focus:outline-none transition-colors appearance-none"
+                className="w-full bg-cream/5 border border-cream/10 text-cream font-body text-sm rounded-xl px-4 py-3 focus:border-teal focus:outline-none transition-colors appearance-none"
               >
                 <option value="tradesperson" className="bg-deep">Tradesperson</option>
                 <option value="homeowner" className="bg-deep">Homeowner</option>
@@ -105,7 +105,7 @@ const SignUpSection = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-teal text-cream font-mono text-sm py-3 rounded-[4px] hover:bg-teal-hover transition-colors disabled:opacity-50"
+                className="w-full bg-teal text-cream font-mono text-sm py-3 rounded-xl hover:bg-teal-hover transition-colors disabled:opacity-50"
               >
                 {loading ? "Submitting..." : "Get Early Access"}
               </button>

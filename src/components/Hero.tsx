@@ -32,7 +32,7 @@ const Hero = () => {
           </p>
           <a
             href="#signup"
-            className="inline-block bg-teal text-cream font-mono text-sm px-8 py-3 rounded-[4px] hover:bg-teal-hover transition-colors"
+            className="inline-block bg-teal text-cream font-mono text-sm px-8 py-3 rounded-xl hover:bg-teal-hover transition-colors"
           >
             Get Early Access
           </a>
@@ -52,7 +52,7 @@ const Hero = () => {
             {stats.map((stat, i) => (
               <div
                 key={stat.label}
-                className={`bg-navy/50 backdrop-blur-sm border border-teal/20 rounded-[4px] px-6 py-4 ${
+                className={`bg-navy/50 backdrop-blur-sm border border-teal/20 rounded-xl px-6 py-4 ${
                   i === 0 ? "animate-float" : i === 1 ? "animate-float-delayed" : "animate-float-delayed-2"
                 }`}
               >
@@ -67,7 +67,7 @@ const Hero = () => {
       {/* Mobile stats */}
       <div className="craft:hidden absolute bottom-8 left-6 right-6 flex gap-3">
         {stats.map((stat) => (
-          <div key={stat.label} className="flex-1 bg-navy/50 backdrop-blur-sm border border-teal/20 rounded-[4px] px-3 py-3 text-center">
+          <div key={stat.label} className="flex-1 bg-navy/50 backdrop-blur-sm border border-teal/20 rounded-xl px-3 py-3 text-center">
             <div className="font-heading text-teal text-xl">{stat.value}</div>
             <div className="font-mono text-[10px] text-secondary-text uppercase">{stat.label}</div>
           </div>
