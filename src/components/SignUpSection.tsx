@@ -95,7 +95,7 @@ const SignUpSection = () => {
               <select
                 value={userType}
                 onChange={(e) => setUserType(e.target.value)}
-                className="w-full bg-cream/5 border border-cream/10 text-cream font-body text-sm rounded-[4px] px-4 py-3 focus:border-teal focus:outline-none transition-colors appearance-none"
+                className="w-full bg-cream/5 border border-cream/10 text-cream font-body text-sm rounded-xl px-4 py-3 focus:border-teal focus:outline-none transition-colors appearance-none"
               >
                 <option value="tradesperson" className="bg-deep">Tradesperson</option>
                 <option value="homeowner" className="bg-deep">Homeowner</option>
