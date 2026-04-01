@@ -60,7 +60,7 @@ const SignUpSection = () => {
         {/* Right — Form */}
         <div className="fade-up">
           {success ? (
-            <div className="bg-teal/10 border border-teal/30 rounded-[4px] p-8 text-center">
+            <div className="bg-teal/10 border border-teal/30 rounded-xl p-8 text-center">
               <h3 className="font-heading text-teal text-3xl mb-2">You're In.</h3>
               <p className="font-body text-cream/70 text-sm">We'll be in touch when we launch near you.</p>
             </div>
