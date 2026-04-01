@@ -17,7 +17,7 @@ const Navbar = () => {
           <a href="#features" className="font-mono text-sm text-body-text hover:text-teal transition-colors">Features</a>
           <a
             href="#signup"
-            className="bg-teal text-cream font-mono text-sm px-5 py-2 rounded-[4px] hover:bg-teal-hover transition-colors"
+            className="bg-teal text-cream font-mono text-sm px-5 py-2 rounded-xl hover:bg-teal-hover transition-colors"
           >
             Early Access
           </a>
