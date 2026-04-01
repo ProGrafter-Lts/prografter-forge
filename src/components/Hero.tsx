@@ -32,7 +32,7 @@ const Hero = () => {
           </p>
           <a
             href="#signup"
-            className="inline-block bg-teal text-cream font-mono text-sm px-8 py-3 rounded-[4px] hover:bg-teal-hover transition-colors"
+            className="inline-block bg-teal text-cream font-mono text-sm px-8 py-3 rounded-xl hover:bg-teal-hover transition-colors"
           >
             Get Early Access
           </a>

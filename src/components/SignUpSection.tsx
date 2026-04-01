@@ -105,7 +105,7 @@ const SignUpSection = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-teal text-cream font-mono text-sm py-3 rounded-[4px] hover:bg-teal-hover transition-colors disabled:opacity-50"
+                className="w-full bg-teal text-cream font-mono text-sm py-3 rounded-xl hover:bg-teal-hover transition-colors disabled:opacity-50"
               >
                 {loading ? "Submitting..." : "Get Early Access"}
               </button>

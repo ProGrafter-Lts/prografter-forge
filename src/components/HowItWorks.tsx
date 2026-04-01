@@ -46,7 +46,7 @@ const HowItWorks = () => {
 
         <div className="grid craft:grid-cols-3 gap-[2px] bg-cream">
           {steps.map((step) => (
-            <div key={step.num} className="relative bg-card p-8 rounded-[4px] fade-up">
+            <div key={step.num} className="relative bg-card p-8 rounded-xl fade-up">
               {/* Ghost number */}
               <span className="absolute top-4 right-6 font-heading text-[80px] leading-none text-navy/[0.05] select-none pointer-events-none">
                 {step.num}

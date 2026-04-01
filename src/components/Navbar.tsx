@@ -43,7 +43,7 @@ const Navbar = () => {
           <a href="#how-it-works" className="font-mono text-sm text-body-text" onClick={() => setMenuOpen(false)}>How It Works</a>
           <a href="#pricing" className="font-mono text-sm text-body-text" onClick={() => setMenuOpen(false)}>Pricing</a>
           <a href="#features" className="font-mono text-sm text-body-text" onClick={() => setMenuOpen(false)}>Features</a>
-          <a href="#signup" className="bg-teal text-cream font-mono text-sm px-5 py-2 rounded-[4px] text-center" onClick={() => setMenuOpen(false)}>Early Access</a>
+          <a href="#signup" className="bg-teal text-cream font-mono text-sm px-5 py-2 rounded-xl text-center" onClick={() => setMenuOpen(false)}>Early Access</a>
         </div>
       )}
     </nav>
