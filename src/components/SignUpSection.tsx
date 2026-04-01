@@ -90,7 +90,7 @@ const SignUpSection = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full bg-cream/5 border border-cream/10 text-cream placeholder-secondary-text font-body text-sm rounded-[4px] px-4 py-3 focus:border-teal focus:outline-none transition-colors"
+                className="w-full bg-cream/5 border border-cream/10 text-cream placeholder-secondary-text font-body text-sm rounded-xl px-4 py-3 focus:border-teal focus:outline-none transition-colors"
               />
               <select
                 value={userType}
