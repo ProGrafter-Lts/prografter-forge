@@ -52,7 +52,7 @@ const Hero = () => {
             {stats.map((stat, i) => (
               <div
                 key={stat.label}
-                className={`bg-navy/50 backdrop-blur-sm border border-teal/20 rounded-[4px] px-6 py-4 ${
+                className={`bg-navy/50 backdrop-blur-sm border border-teal/20 rounded-xl px-6 py-4 ${
                   i === 0 ? "animate-float" : i === 1 ? "animate-float-delayed" : "animate-float-delayed-2"
                 }`}
               >
