@@ -13,7 +13,7 @@ const Ticker = () => {
   const items = [...features, ...features];
 
   return (
-    <div className="bg-teal py-3 overflow-hidden rounded-2xl mx-4">
+    <div className="bg-teal py-3 overflow-hidden">
       <div className="animate-ticker flex whitespace-nowrap">
         {items.map((item, i) => (
           <span key={i} className="font-mono text-xs text-cream uppercase tracking-widest mx-8">
