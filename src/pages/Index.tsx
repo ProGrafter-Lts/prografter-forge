@@ -5,6 +5,10 @@ import Ticker from "@/components/Ticker";
 import HowItWorks from "@/components/HowItWorks";
 import ContrastSection from "@/components/ContrastSection";
 import FeaturesGrid from "@/components/FeaturesGrid";
+import TradesHowItWorks from "@/components/TradesHowItWorks";
+import HomeownersHowItWorks from "@/components/HomeownersHowItWorks";
+import WhatYouGet from "@/components/WhatYouGet";
+import WhyDifferent from "@/components/WhyDifferent";
 import SignUpSection from "@/components/SignUpSection";
 import Footer from "@/components/Footer";
 
@@ -33,6 +37,10 @@ const Index = () => {
       <HowItWorks />
       <ContrastSection />
       <FeaturesGrid />
+      <TradesHowItWorks />
+      <HomeownersHowItWorks />
+      <WhatYouGet />
+      <WhyDifferent />
       <SignUpSection />
       <Footer />
     </div>
