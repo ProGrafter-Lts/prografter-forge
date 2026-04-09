@@ -41,6 +41,42 @@ export type Database = {
         }
         Relationships: []
       }
+      jobs: {
+        Row: {
+          address: string
+          created_at: string
+          deposit_paid: boolean
+          description: string
+          id: string
+          job_type: string
+          photo_urls: string[] | null
+          postcode: string
+          stripe_payment_id: string | null
+        }
+        Insert: {
+          address: string
+          created_at?: string
+          deposit_paid?: boolean
+          description: string
+          id?: string
+          job_type: string
+          photo_urls?: string[] | null
+          postcode: string
+          stripe_payment_id?: string | null
+        }
+        Update: {
+          address?: string
+          created_at?: string
+          deposit_paid?: boolean
+          description?: string
+          id?: string
+          job_type?: string
+          photo_urls?: string[] | null
+          postcode?: string
+          stripe_payment_id?: string | null
+        }
+        Relationships: []
+      }
       trades: {
         Row: {
           bio: string | null
