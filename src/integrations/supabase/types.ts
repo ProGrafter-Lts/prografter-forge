@@ -41,6 +41,48 @@ export type Database = {
         }
         Relationships: []
       }
+      trades: {
+        Row: {
+          bio: string | null
+          company_name: string
+          created_at: string
+          id: string
+          insurance_cert_url: string | null
+          name: string
+          phone: string
+          postcode: string
+          trade_type: string
+          website: string | null
+          years_experience: number | null
+        }
+        Insert: {
+          bio?: string | null
+          company_name: string
+          created_at?: string
+          id?: string
+          insurance_cert_url?: string | null
+          name: string
+          phone: string
+          postcode: string
+          trade_type: string
+          website?: string | null
+          years_experience?: number | null
+        }
+        Update: {
+          bio?: string | null
+          company_name?: string
+          created_at?: string
+          id?: string
+          insurance_cert_url?: string | null
+          name?: string
+          phone?: string
+          postcode?: string
+          trade_type?: string
+          website?: string | null
+          years_experience?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
