@@ -15,6 +15,7 @@ const Navbar = () => {
           <a href="#how-it-works" className="font-mono text-sm text-body-text hover:text-teal transition-colors">How It Works</a>
           <a href="#pricing" className="font-mono text-sm text-body-text hover:text-teal transition-colors">Pricing</a>
           <a href="#features" className="font-mono text-sm text-body-text hover:text-teal transition-colors">Features</a>
+          <a href="/login" className="font-mono text-sm text-body-text hover:text-teal transition-colors">Login</a>
           <a
             href="/register/trade"
             className="border border-teal text-teal font-mono text-sm px-5 py-2 rounded-xl hover:bg-teal hover:text-cream transition-colors"
