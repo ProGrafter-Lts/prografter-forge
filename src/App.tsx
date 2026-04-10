@@ -8,6 +8,9 @@ import Privacy from "./pages/Privacy.tsx";
 import TradeRegister from "./pages/TradeRegister.tsx";
 import TradeRegisterNew from "./pages/TradeRegisterNew.tsx";
 import PostAJob from "./pages/PostAJob.tsx";
+import Login from "./pages/Login.tsx";
+import TradeDashboard from "./pages/TradeDashboard.tsx";
+import ProtectedRoute from "./components/ProtectedRoute.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -24,6 +27,15 @@ const App = () => (
           <Route path="/register" element={<TradeRegister />} />
           <Route path="/register/trade" element={<TradeRegisterNew />} />
           <Route path="/post-a-job" element={<PostAJob />} />
+          <Route path="/login" element={<Login />} />
+          <Route
+            path="/dashboard/trade"
+            element={
+              <ProtectedRoute>
+                <TradeDashboard />
+              </ProtectedRoute>
+            }
+          />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
