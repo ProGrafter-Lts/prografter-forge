@@ -77,6 +77,42 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          phone: string
+          postcode: string
+          updated_at: string
+          user_id: string
+          user_type: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          phone: string
+          postcode: string
+          updated_at?: string
+          user_id: string
+          user_type?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          phone?: string
+          postcode?: string
+          updated_at?: string
+          user_id?: string
+          user_type?: string
+        }
+        Relationships: []
+      }
       trades: {
         Row: {
           bio: string | null
@@ -88,6 +124,8 @@ export type Database = {
           phone: string
           postcode: string
           trade_type: string
+          user_id: string | null
+          verified: boolean
           website: string | null
           years_experience: number | null
         }
@@ -101,6 +139,8 @@ export type Database = {
           phone: string
           postcode: string
           trade_type: string
+          user_id?: string | null
+          verified?: boolean
           website?: string | null
           years_experience?: number | null
         }
@@ -114,6 +154,8 @@ export type Database = {
           phone?: string
           postcode?: string
           trade_type?: string
+          user_id?: string | null
+          verified?: boolean
           website?: string | null
           years_experience?: number | null
         }
