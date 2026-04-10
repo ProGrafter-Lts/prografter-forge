@@ -41,41 +41,88 @@ export type Database = {
         }
         Relationships: []
       }
+      homeowners: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          name: string
+          phone: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          phone: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          phone?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       jobs: {
         Row: {
           address: string
+          budget: string | null
           created_at: string
           deposit_paid: boolean
           description: string
+          homeowner_id: string | null
           id: string
           job_type: string
           photo_urls: string[] | null
           postcode: string
+          status: string
           stripe_payment_id: string | null
+          title: string | null
         }
         Insert: {
           address: string
+          budget?: string | null
           created_at?: string
           deposit_paid?: boolean
           description: string
+          homeowner_id?: string | null
           id?: string
           job_type: string
           photo_urls?: string[] | null
           postcode: string
+          status?: string
           stripe_payment_id?: string | null
+          title?: string | null
         }
         Update: {
           address?: string
+          budget?: string | null
           created_at?: string
           deposit_paid?: boolean
           description?: string
+          homeowner_id?: string | null
           id?: string
           job_type?: string
           photo_urls?: string[] | null
           postcode?: string
+          status?: string
           stripe_payment_id?: string | null
+          title?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "jobs_homeowner_id_fkey"
+            columns: ["homeowner_id"]
+            isOneToOne: false
+            referencedRelation: "homeowners"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
