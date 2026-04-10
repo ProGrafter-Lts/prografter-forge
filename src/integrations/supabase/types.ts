@@ -68,6 +68,51 @@ export type Database = {
         }
         Relationships: []
       }
+      job_matches: {
+        Row: {
+          created_at: string
+          estimated_value: string | null
+          id: string
+          job_id: string
+          notified_at: string
+          status: string
+          trade_id: string
+        }
+        Insert: {
+          created_at?: string
+          estimated_value?: string | null
+          id?: string
+          job_id: string
+          notified_at?: string
+          status?: string
+          trade_id: string
+        }
+        Update: {
+          created_at?: string
+          estimated_value?: string | null
+          id?: string
+          job_id?: string
+          notified_at?: string
+          status?: string
+          trade_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_matches_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_matches_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "trades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       jobs: {
         Row: {
           address: string
@@ -80,6 +125,7 @@ export type Database = {
           job_type: string
           photo_urls: string[] | null
           postcode: string
+          stage: string
           status: string
           stripe_payment_id: string | null
           title: string | null
@@ -95,6 +141,7 @@ export type Database = {
           job_type: string
           photo_urls?: string[] | null
           postcode: string
+          stage?: string
           status?: string
           stripe_payment_id?: string | null
           title?: string | null
@@ -110,6 +157,7 @@ export type Database = {
           job_type?: string
           photo_urls?: string[] | null
           postcode?: string
+          stage?: string
           status?: string
           stripe_payment_id?: string | null
           title?: string | null
@@ -159,6 +207,54 @@ export type Database = {
           user_type?: string
         }
         Relationships: []
+      }
+      quotes: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          job_id: string
+          message: string | null
+          status: string
+          trade_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          job_id: string
+          message?: string | null
+          status?: string
+          trade_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          job_id?: string
+          message?: string | null
+          status?: string
+          trade_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quotes_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotes_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "trades"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       trades: {
         Row: {
