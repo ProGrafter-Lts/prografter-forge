@@ -11,7 +11,7 @@ const Navbar = () => {
           <span className="text-teal">grafter</span>
         </a>
 
-        <div className="hidden craft:flex items-center gap-8">
+        <div className="hidden craft:flex items-center gap-6">
           <a href="#how-it-works" className="font-mono text-sm text-body-text hover:text-teal transition-colors">How It Works</a>
           <a href="#pricing" className="font-mono text-sm text-body-text hover:text-teal transition-colors">Pricing</a>
           <a href="#features" className="font-mono text-sm text-body-text hover:text-teal transition-colors">Features</a>
@@ -22,10 +22,10 @@ const Navbar = () => {
             Register as a Trade
           </a>
           <a
-            href="#signup"
-            className="bg-teal text-cream font-mono text-sm px-5 py-2 rounded-xl hover:bg-teal-hover transition-colors"
+            href="/post-a-job"
+            className="bg-teal text-cream font-mono text-sm px-5 py-2.5 rounded-xl hover:bg-teal-hover transition-colors shadow-lg shadow-teal/20"
           >
-            Early Access
+            Post a Job
           </a>
         </div>
 
@@ -50,7 +50,7 @@ const Navbar = () => {
           <a href="#pricing" className="font-mono text-sm text-body-text" onClick={() => setMenuOpen(false)}>Pricing</a>
           <a href="#features" className="font-mono text-sm text-body-text" onClick={() => setMenuOpen(false)}>Features</a>
           <a href="/register/trade" className="border border-teal text-teal font-mono text-sm px-5 py-2 rounded-xl text-center" onClick={() => setMenuOpen(false)}>Register as a Trade</a>
-          <a href="#signup" className="bg-teal text-cream font-mono text-sm px-5 py-2 rounded-xl text-center" onClick={() => setMenuOpen(false)}>Early Access</a>
+          <a href="/post-a-job" className="bg-teal text-cream font-mono text-sm px-5 py-2.5 rounded-xl text-center shadow-lg shadow-teal/20" onClick={() => setMenuOpen(false)}>Post a Job</a>
         </div>
       )}
     </nav>
