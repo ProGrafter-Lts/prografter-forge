@@ -11,6 +11,7 @@ import PostAJob from "./pages/PostAJob.tsx";
 import Login from "./pages/Login.tsx";
 import TradeDashboard from "./pages/TradeDashboard.tsx";
 import HomeownerDashboard from "./pages/HomeownerDashboard.tsx";
+import ProjectDetail from "./pages/ProjectDetail.tsx";
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
@@ -42,6 +43,14 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <HomeownerDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/project/:id"
+            element={
+              <ProtectedRoute>
+                <ProjectDetail />
               </ProtectedRoute>
             }
           />
