@@ -208,6 +208,97 @@ export type Database = {
         }
         Relationships: []
       }
+      project_messages: {
+        Row: {
+          created_at: string
+          id: string
+          job_id: string
+          message_text: string
+          sender_id: string
+          sender_type: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          job_id: string
+          message_text: string
+          sender_id: string
+          sender_type?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          job_id?: string
+          message_text?: string
+          sender_id?: string
+          sender_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_messages_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_stages: {
+        Row: {
+          actual_end: string | null
+          actual_start: string | null
+          created_at: string
+          id: string
+          job_id: string
+          payment_amount: number | null
+          payment_status: string
+          planned_end: string | null
+          planned_start: string | null
+          stage_name: string
+          stage_order: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          actual_end?: string | null
+          actual_start?: string | null
+          created_at?: string
+          id?: string
+          job_id: string
+          payment_amount?: number | null
+          payment_status?: string
+          planned_end?: string | null
+          planned_start?: string | null
+          stage_name: string
+          stage_order?: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          actual_end?: string | null
+          actual_start?: string | null
+          created_at?: string
+          id?: string
+          job_id?: string
+          payment_amount?: number | null
+          payment_status?: string
+          planned_end?: string | null
+          planned_start?: string | null
+          stage_name?: string
+          stage_order?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_stages_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quotes: {
         Row: {
           amount: number
@@ -249,6 +340,48 @@ export type Database = {
           },
           {
             foreignKeyName: "quotes_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "trades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stage_updates: {
+        Row: {
+          created_at: string
+          id: string
+          photo_urls: string[] | null
+          stage_id: string
+          trade_id: string
+          update_text: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          photo_urls?: string[] | null
+          stage_id: string
+          trade_id: string
+          update_text: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          photo_urls?: string[] | null
+          stage_id?: string
+          trade_id?: string
+          update_text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stage_updates_stage_id_fkey"
+            columns: ["stage_id"]
+            isOneToOne: false
+            referencedRelation: "project_stages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stage_updates_trade_id_fkey"
             columns: ["trade_id"]
             isOneToOne: false
             referencedRelation: "trades"
@@ -303,6 +436,63 @@ export type Database = {
           years_experience?: number | null
         }
         Relationships: []
+      }
+      variations: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          job_id: string
+          labour_cost: number
+          materials_cost: number
+          programme_impact_days: number
+          status: string
+          title: string
+          trade_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          job_id: string
+          labour_cost?: number
+          materials_cost?: number
+          programme_impact_days?: number
+          status?: string
+          title: string
+          trade_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          job_id?: string
+          labour_cost?: number
+          materials_cost?: number
+          programme_impact_days?: number
+          status?: string
+          title?: string
+          trade_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "variations_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "variations_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "trades"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
