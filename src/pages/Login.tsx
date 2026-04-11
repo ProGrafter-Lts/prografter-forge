@@ -34,10 +34,8 @@ const Login = () => {
 
     if (profile?.user_type === "trade") {
       navigate("/dashboard/trade");
-    } else if (profile?.user_type === "homeowner") {
-      navigate("/dashboard/trade"); // For now, same dashboard
     } else {
-      navigate("/dashboard/trade");
+      navigate("/dashboard/homeowner");
     }
 
     setLoading(false);
