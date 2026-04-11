@@ -354,7 +354,11 @@ const HomeownerDashboard = () => {
             ) : (
               <div className="space-y-3">
                 {jobs.map((job) => (
-                  <div key={job.id} className="bg-white rounded-2xl p-5 border border-navy/10 shadow-sm flex items-center justify-between">
+                  <div
+                    key={job.id}
+                    onClick={() => navigate(`/project/${job.id}`)}
+                    className="bg-white rounded-2xl p-5 border border-navy/10 shadow-sm flex items-center justify-between cursor-pointer hover:border-teal/30 hover:shadow-md transition-all"
+                  >
                     <div>
                       <h3 className="font-heading text-navy text-lg">{job.title || job.job_type}</h3>
                       <div className="flex items-center gap-3 mt-1">
