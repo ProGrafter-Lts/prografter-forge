@@ -14,6 +14,7 @@ import HomeownerDashboard from "./pages/HomeownerDashboard.tsx";
 import ProjectDetail from "./pages/ProjectDetail.tsx";
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import QuoteChecker from "./pages/QuoteChecker.tsx";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +30,7 @@ const App = () => (
           <Route path="/register" element={<TradeRegister />} />
           <Route path="/register/trade" element={<TradeRegisterNew />} />
           <Route path="/post-a-job" element={<PostAJob />} />
+          <Route path="/quote-checker" element={<QuoteChecker />} />
           <Route path="/login" element={<Login />} />
           <Route
             path="/dashboard/trade"

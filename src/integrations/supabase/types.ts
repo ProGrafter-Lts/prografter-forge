@@ -299,6 +299,48 @@ export type Database = {
           },
         ]
       }
+      quote_checks: {
+        Row: {
+          created_at: string
+          description: string
+          email: string
+          id: string
+          pdf_url: string
+          postcode: string
+          project_type: string
+          report_html: string | null
+          status: string
+          stripe_payment_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          email: string
+          id?: string
+          pdf_url: string
+          postcode?: string
+          project_type: string
+          report_html?: string | null
+          status?: string
+          stripe_payment_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          email?: string
+          id?: string
+          pdf_url?: string
+          postcode?: string
+          project_type?: string
+          report_html?: string | null
+          status?: string
+          stripe_payment_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       quotes: {
         Row: {
           amount: number

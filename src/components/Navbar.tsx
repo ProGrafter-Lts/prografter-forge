@@ -15,6 +15,7 @@ const Navbar = () => {
           <a href="#how-it-works" className="font-mono text-sm text-body-text hover:text-teal transition-colors">How It Works</a>
           <a href="#pricing" className="font-mono text-sm text-body-text hover:text-teal transition-colors">Pricing</a>
           <a href="#features" className="font-mono text-sm text-body-text hover:text-teal transition-colors">Features</a>
+          <a href="/quote-checker" className="font-mono text-sm text-body-text hover:text-teal transition-colors">Quote Checker</a>
           <a href="/login" className="font-mono text-sm text-body-text hover:text-teal transition-colors">Login</a>
           <a
             href="/register/trade"
@@ -50,6 +51,7 @@ const Navbar = () => {
           <a href="#how-it-works" className="font-mono text-sm text-body-text" onClick={() => setMenuOpen(false)}>How It Works</a>
           <a href="#pricing" className="font-mono text-sm text-body-text" onClick={() => setMenuOpen(false)}>Pricing</a>
           <a href="#features" className="font-mono text-sm text-body-text" onClick={() => setMenuOpen(false)}>Features</a>
+          <a href="/quote-checker" className="font-mono text-sm text-body-text" onClick={() => setMenuOpen(false)}>Quote Checker</a>
           <a href="/login" className="font-mono text-sm text-body-text" onClick={() => setMenuOpen(false)}>Login</a>
           <a href="/register/trade" className="border border-teal text-teal font-mono text-sm px-5 py-2 rounded-xl text-center" onClick={() => setMenuOpen(false)}>Register as a Trade</a>
           <a href="/post-a-job" className="bg-teal text-cream font-mono text-sm px-5 py-2.5 rounded-xl text-center shadow-lg shadow-teal/20" onClick={() => setMenuOpen(false)}>Post a Job</a>
