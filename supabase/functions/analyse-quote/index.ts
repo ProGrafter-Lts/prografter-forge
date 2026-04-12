@@ -143,7 +143,7 @@ Deno.serve(async (req) => {
       .replaceAll("[HOMEOWNER_DESCRIPTION]", record.description || "Not specified");
 
     // Call Lovable AI Gateway
-    const aiResponse = await fetch("https://ai-gateway.lovable.dev/v1/chat/completions", {
+    const aiResponse = await fetch("https://gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
