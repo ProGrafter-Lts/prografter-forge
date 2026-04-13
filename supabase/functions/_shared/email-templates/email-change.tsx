@@ -11,6 +11,7 @@ import {
   Html,
   Link,
   Preview,
+  Section,
   Text,
 } from 'npm:@react-email/components@0.0.22'
 
@@ -32,14 +33,17 @@ export const EmailChangeEmail = ({
     <Preview>Confirm your email change for {siteName}</Preview>
     <Body style={main}>
       <Container style={container}>
+        <Section style={header}>
+          <Text style={logo}>Pro<span style={{ color: '#0D9488' }}>Grafter</span></Text>
+        </Section>
         <Heading style={h1}>Confirm your email change</Heading>
         <Text style={text}>
           You requested to change your email address for {siteName} from{' '}
-          <Link href={`mailto:${email}`} style={link}>
+          <Link href={`mailto:${email}`} style={linkStyle}>
             {email}
           </Link>{' '}
           to{' '}
-          <Link href={`mailto:${newEmail}`} style={link}>
+          <Link href={`mailto:${newEmail}`} style={linkStyle}>
             {newEmail}
           </Link>
           .
@@ -61,27 +65,12 @@ export const EmailChangeEmail = ({
 
 export default EmailChangeEmail
 
-const main = { backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif' }
-const container = { padding: '20px 25px' }
-const h1 = {
-  fontSize: '22px',
-  fontWeight: 'bold' as const,
-  color: '#000000',
-  margin: '0 0 20px',
-}
-const text = {
-  fontSize: '14px',
-  color: '#55575d',
-  lineHeight: '1.5',
-  margin: '0 0 25px',
-}
-const link = { color: 'inherit', textDecoration: 'underline' }
-const button = {
-  backgroundColor: '#000000',
-  color: '#ffffff',
-  fontSize: '14px',
-  borderRadius: '8px',
-  padding: '12px 20px',
-  textDecoration: 'none',
-}
-const footer = { fontSize: '12px', color: '#999999', margin: '30px 0 0' }
+const main = { backgroundColor: '#ffffff', fontFamily: "'DM Sans', Arial, sans-serif" }
+const container = { padding: '20px 25px', maxWidth: '560px', margin: '0 auto' }
+const header = { borderBottom: '3px solid #0D9488', paddingBottom: '16px', marginBottom: '24px' }
+const logo = { fontSize: '28px', fontFamily: "'Bebas Neue', Arial, sans-serif", letterSpacing: '0.02em', margin: '0', color: '#1B3A4B' }
+const h1 = { fontSize: '22px', fontWeight: 'bold' as const, color: '#1B3A4B', margin: '0 0 20px', fontFamily: "'Bebas Neue', Arial, sans-serif", letterSpacing: '0.02em' }
+const text = { fontSize: '14px', color: '#2E2E2E', lineHeight: '1.6', margin: '0 0 20px' }
+const linkStyle = { color: '#0D9488', textDecoration: 'underline' }
+const button = { backgroundColor: '#0D9488', color: '#ffffff', fontSize: '14px', fontWeight: '600' as const, borderRadius: '8px', padding: '12px 24px', textDecoration: 'none' }
+const footer = { fontSize: '12px', color: '#6B7280', margin: '30px 0 0', borderTop: '1px solid #E5E7EB', paddingTop: '16px' }
