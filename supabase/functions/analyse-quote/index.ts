@@ -7,7 +7,7 @@ const corsHeaders = {
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
 
 const CHECKLIST_PROMPT = `You are ProGrafter's Quote Checker AI. A homeowner has uploaded a construction quote PDF and provided the following details:
 
@@ -20,8 +20,15 @@ For each item, state whether it is: PRESENT (clearly included), MISSING (not men
 
 For every MISSING or VAGUE item provide:
 - A plain English explanation of why it matters
-- A realistic UK cost range for that item in the [POSTCODE] region
+- A realistic UK cost range for that item in the [POSTCODE] region based on current 2024-2025 UK construction market rates. Use your knowledge of BCIS, Spon's, and current trade pricing. Be specific — not generic ranges.
 - A specific question the homeowner should ask the trade
+
+IMPORTANT — COST ACCURACY:
+- All cost estimates MUST reflect current UK construction market rates for the [POSTCODE] region.
+- Factor in regional variation — London and the South East are typically 15-30% above national average.
+- Use your knowledge of real trade day rates, material costs, and labour norms.
+- If you are uncertain about a specific cost, state that clearly rather than guessing.
+- Never quote unrealistically low figures that would undercut legitimate tradespeople.
 
 Checklist:
 PRELIMINARIES (6 items)
@@ -85,7 +92,7 @@ CONTRACT TERMS (6 items)
 
 At the end provide:
 1. An overall completeness score out of 100
-2. An estimated true cost range accounting for all missing/vague items
+2. An estimated true cost range accounting for all missing/vague items — clearly state this is an indicative range based on typical UK market rates and should not be treated as a formal quotation
 3. A plain English executive summary (max 150 words)
 4. Five specific questions to ask the trade before accepting
 
@@ -105,6 +112,10 @@ Deno.serve(async (req) => {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    if (!ANTHROPIC_API_KEY) {
+      throw new Error("ANTHROPIC_API_KEY is not configured");
     }
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
@@ -132,7 +143,7 @@ Deno.serve(async (req) => {
       throw new Error("Failed to download PDF: " + downloadError?.message);
     }
 
-    // Convert PDF to base64 for the AI
+    // Convert PDF to base64
     const pdfBytes = await pdfData.arrayBuffer();
     const pdfBase64 = btoa(String.fromCharCode(...new Uint8Array(pdfBytes)));
 
@@ -142,43 +153,46 @@ Deno.serve(async (req) => {
       .replaceAll("[POSTCODE]", record.postcode || "UK average")
       .replaceAll("[HOMEOWNER_DESCRIPTION]", record.description || "Not specified");
 
-    // Call Lovable AI Gateway
-    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    // Call Claude API
+    const aiResponse = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "x-api-key": ANTHROPIC_API_KEY,
+        "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-pro",
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 8000,
         messages: [
           {
             role: "user",
             content: [
               {
-                type: "text",
-                text: prompt,
+                type: "document",
+                source: {
+                  type: "base64",
+                  media_type: "application/pdf",
+                  data: pdfBase64,
+                },
               },
               {
-                type: "image_url",
-                image_url: {
-                  url: `data:application/pdf;base64,${pdfBase64}`,
-                },
+                type: "text",
+                text: prompt,
               },
             ],
           },
         ],
-        max_tokens: 8000,
       }),
     });
 
     if (!aiResponse.ok) {
       const errText = await aiResponse.text();
-      throw new Error(`AI Gateway error ${aiResponse.status}: ${errText}`);
+      throw new Error(`Claude API error ${aiResponse.status}: ${errText}`);
     }
 
     const aiResult = await aiResponse.json();
-    const reportHtml = aiResult.choices?.[0]?.message?.content || "Analysis failed.";
+    const reportHtml = aiResult.content?.[0]?.text || "Analysis failed.";
 
     // Update the record with the report
     await supabase
@@ -186,13 +200,24 @@ Deno.serve(async (req) => {
       .update({ report_html: reportHtml, status: "complete" })
       .eq("id", quoteCheckId);
 
-    // TODO: Send email via Resend once email domain is configured
-
     return new Response(JSON.stringify({ success: true, reportHtml }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
     console.error("analyse-quote error:", err);
+
+    // Try to mark as error if we have the ID
+    try {
+      const body = await req.clone().json().catch(() => null);
+      if (body?.quoteCheckId) {
+        const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+        await supabase
+          .from("quote_checks")
+          .update({ status: "error" })
+          .eq("id", body.quoteCheckId);
+      }
+    } catch { /* best effort */ }
+
     return new Response(JSON.stringify({ error: err.message }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
