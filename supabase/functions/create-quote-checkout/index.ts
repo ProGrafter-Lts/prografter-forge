@@ -26,12 +26,14 @@ Deno.serve(async (req) => {
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
 
+    const origin = req.headers.get("origin") || "https://graft-craft-co.lovable.app";
+
     const session = await stripe.checkout.sessions.create({
       customer_email: email,
       line_items: [{ price: PRICE_ID, quantity: 1 }],
       mode: "payment",
-      success_url: `${req.headers.get("origin")}/quote-checker?session_id={CHECKOUT_SESSION_ID}&quote_id=${quoteCheckId}`,
-      cancel_url: `${req.headers.get("origin")}/quote-checker?cancelled=true`,
+      success_url: `${origin}/quote-checker?session_id={CHECKOUT_SESSION_ID}&quote_id=${quoteCheckId}`,
+      cancel_url: `${origin}/quote-checker?cancelled=true`,
       metadata: { quoteCheckId },
     });
 
