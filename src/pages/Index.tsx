@@ -42,6 +42,7 @@ const Index = () => {
       <HomeownersHowItWorks />
       <WhatYouGet />
       <WhyDifferent />
+      <PlatformPreview />
       <SignUpSection />
       <Footer />
     </div>
