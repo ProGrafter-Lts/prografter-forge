@@ -274,7 +274,7 @@ const PlatformPreview = () => {
 
         {/* CTA link */}
         <div className="mt-14 text-center fade-up">
-          <a href="#" className="inline-flex items-center gap-2 font-mono text-sm text-teal hover:text-teal-hover transition-colors group">
+          <a href="#see-how-it-works" className="inline-flex items-center gap-2 font-mono text-sm text-teal hover:text-teal-hover transition-colors group">
             Full platform preview
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </a>

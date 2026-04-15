@@ -300,7 +300,7 @@ const SeeHowItWorks = () => {
   const [activeTab, setActiveTab] = useState<"trades" | "homeowners">("trades");
 
   return (
-    <section className="hiw-section">
+    <section id="see-how-it-works" className="hiw-section">
       <div className="hiw-container">
         {/* Header */}
         <div className="flex items-center gap-[10px] mb-3">
