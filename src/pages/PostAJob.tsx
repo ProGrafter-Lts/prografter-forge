@@ -1,6 +1,7 @@
 import { useState, FormEvent, ChangeEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
+import { isGreenTrade } from "@/lib/greenTrades";
 
 const JOB_TYPES = [
   { label: "Extension", icon: "🏗️" },
