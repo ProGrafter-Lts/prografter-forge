@@ -1,31 +1,46 @@
-import { useState, FormEvent, ChangeEvent } from "react";
+import { useState, FormEvent, ChangeEvent, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { isGreenTrade } from "@/lib/greenTrades";
 
-const JOB_TYPES = [
-  { label: "Extension", icon: "🏗️" },
-  { label: "Loft Conversion", icon: "🏠" },
-  { label: "Full Rewire", icon: "⚡" },
-  { label: "Bathroom", icon: "🚿" },
-  { label: "Kitchen", icon: "🍳" },
-  { label: "Boiler / Heating", icon: "🔥" },
-  { label: "Roofing", icon: "🏚️" },
-  { label: "Plastering", icon: "🧱" },
-  { label: "Painting & Decorating", icon: "🎨" },
-  { label: "Landscaping", icon: "🌿" },
-  { label: "New Build", icon: "🏢" },
+const ALL_JOB_TYPES = [
+  { label: "Extension", icon: "🏗️", green: false },
+  { label: "Loft Conversion", icon: "🏠", green: false },
+  { label: "Full Rewire", icon: "⚡", green: false },
+  { label: "Bathroom", icon: "🚿", green: false },
+  { label: "Kitchen", icon: "🍳", green: false },
+  { label: "Boiler / Heating", icon: "🔥", green: false },
+  { label: "Roofing", icon: "🏚️", green: false },
+  { label: "Plastering", icon: "🧱", green: false },
+  { label: "Painting & Decorating", icon: "🎨", green: false },
+  { label: "Landscaping", icon: "🌿", green: false },
+  { label: "New Build", icon: "🏢", green: false },
   // Green / Renewable
-  { label: "Solar PV Installation", icon: "☀️" },
-  { label: "Air Source Heat Pump", icon: "🌡️" },
-  { label: "Ground Source Heat Pump", icon: "🌡️" },
-  { label: "External Wall Insulation (EWI)", icon: "🧱" },
-  { label: "Cavity Wall Insulation", icon: "🏠" },
-  { label: "Loft Insulation", icon: "🏠" },
-  { label: "EV Charger Installation", icon: "🔌" },
-  { label: "Battery Storage", icon: "🔋" },
-  { label: "Other", icon: "🔧" },
+  { label: "Solar PV Installation", icon: "☀️", green: true },
+  { label: "Air Source Heat Pump", icon: "🌡️", green: true },
+  { label: "Ground Source Heat Pump", icon: "🌡️", green: true },
+  { label: "External Wall Insulation (EWI)", icon: "🧱", green: true },
+  { label: "Cavity Wall Insulation", icon: "🏠", green: true },
+  { label: "Loft Insulation", icon: "🏠", green: true },
+  { label: "EV Charger Installation", icon: "🔌", green: true },
+  { label: "Battery Storage", icon: "🔋", green: true },
+  { label: "MVHR Installer", icon: "🌀", green: true },
+  { label: "Underfloor Heating", icon: "🔥", green: true },
+  { label: "Draught Proofing Specialist", icon: "🪟", green: true },
+  { label: "EPC Assessor", icon: "📋", green: true },
+  { label: "Retrofit Coordinator", icon: "📐", green: true },
+  { label: "Other", icon: "🔧", green: false },
 ] as const;
+
+/* Scheme → allowed green trade type labels */
+const SCHEME_TRADE_MAP: Record<string, string[]> = {
+  eco4: ["External Wall Insulation (EWI)", "Cavity Wall Insulation", "Loft Insulation", "Retrofit Coordinator", "EPC Assessor"],
+  bus: ["Air Source Heat Pump", "Ground Source Heat Pump"],
+  gbis: ["External Wall Insulation (EWI)", "Cavity Wall Insulation", "Loft Insulation", "Draught Proofing Specialist"],
+  vat: ["Solar PV Installation", "Air Source Heat Pump", "Ground Source Heat Pump", "External Wall Insulation (EWI)", "Cavity Wall Insulation", "Loft Insulation", "EV Charger Installation", "Battery Storage", "MVHR Installer", "Underfloor Heating", "Draught Proofing Specialist", "EPC Assessor", "Retrofit Coordinator"],
+  hug: ["External Wall Insulation (EWI)", "Cavity Wall Insulation", "Loft Insulation", "Retrofit Coordinator", "EPC Assessor"],
+  epc: ["EPC Assessor"],
+};
 
 const BUDGETS = [
   "Under £1k",
@@ -38,6 +53,20 @@ const BUDGETS = [
 type Step = 1 | 2 | 3 | 4;
 
 const PostAJob = () => {
+  const [searchParams] = useSearchParams();
+  const isGreenFlow = searchParams.get("green") === "1";
+  const schemeParam = searchParams.get("schemes") || "";
+  const schemeIds = schemeParam ? schemeParam.split(",") : [];
+
+  const filteredJobTypes = useMemo(() => {
+    if (!isGreenFlow || schemeIds.length === 0) return ALL_JOB_TYPES.filter(() => true);
+    const allowedLabels = new Set<string>();
+    schemeIds.forEach((id) => {
+      (SCHEME_TRADE_MAP[id] || []).forEach((label) => allowedLabels.add(label));
+    });
+    return ALL_JOB_TYPES.filter((jt) => allowedLabels.has(jt.label));
+  }, [isGreenFlow, schemeParam]);
+
   const [step, setStep] = useState<Step>(1);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -164,7 +193,7 @@ const PostAJob = () => {
     password.length >= 8;
 
   const stepTitles: Record<Step, { white: string; teal: string }> = {
-    1: { white: "What Do You", teal: "Need Done?" },
+    1: { white: isGreenFlow ? "Find a Certified" : "What Do You", teal: isGreenFlow ? "Green Energy Installer" : "Need Done?" },
     2: { white: "Tell Us", teal: "More." },
     3: { white: "Where's The", teal: "Job?" },
     4: { white: "Your", teal: "Details." },
@@ -218,11 +247,16 @@ const PostAJob = () => {
               {/* STEP 1 — Job Type Cards */}
               {step === 1 && (
                 <>
-                  <h2 className="font-heading text-cream text-[36px] leading-none mb-6">
+                  <h2 className="font-heading text-cream text-[36px] leading-none mb-4">
                     {stepTitles[1].white} <span className="text-teal">{stepTitles[1].teal}</span>
                   </h2>
+                  {isGreenFlow && (
+                    <p className="font-body text-cream/60 text-sm mb-6 leading-relaxed">
+                      Based on your eligibility results, these are the certified trade types relevant to your project:
+                    </p>
+                  )}
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    {JOB_TYPES.map((jt) => (
+                    {filteredJobTypes.map((jt) => (
                       <button
                         key={jt.label}
                         type="button"
@@ -240,6 +274,11 @@ const PostAJob = () => {
                       </button>
                     ))}
                   </div>
+                  {isGreenFlow && (
+                    <p className="font-body text-cream/40 text-xs mt-4 leading-relaxed">
+                      All ProGrafter green trades hold the relevant certifications for government-funded work — MCS, TrustMark, PAS 2030, or OZEV approved as applicable.
+                    </p>
+                  )}
                   <button
                     type="button"
                     disabled={!canStep1}
