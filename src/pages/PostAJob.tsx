@@ -193,7 +193,7 @@ const PostAJob = () => {
     password.length >= 8;
 
   const stepTitles: Record<Step, { white: string; teal: string }> = {
-    1: { white: "What Do You", teal: "Need Done?" },
+    1: { white: isGreenFlow ? "Find a Certified" : "What Do You", teal: isGreenFlow ? "Green Energy Installer" : "Need Done?" },
     2: { white: "Tell Us", teal: "More." },
     3: { white: "Where's The", teal: "Job?" },
     4: { white: "Your", teal: "Details." },
@@ -247,11 +247,16 @@ const PostAJob = () => {
               {/* STEP 1 — Job Type Cards */}
               {step === 1 && (
                 <>
-                  <h2 className="font-heading text-cream text-[36px] leading-none mb-6">
+                  <h2 className="font-heading text-cream text-[36px] leading-none mb-4">
                     {stepTitles[1].white} <span className="text-teal">{stepTitles[1].teal}</span>
                   </h2>
+                  {isGreenFlow && (
+                    <p className="font-body text-cream/60 text-sm mb-6 leading-relaxed">
+                      Based on your eligibility results, these are the certified trade types relevant to your project:
+                    </p>
+                  )}
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    {JOB_TYPES.map((jt) => (
+                    {filteredJobTypes.map((jt) => (
                       <button
                         key={jt.label}
                         type="button"
@@ -269,6 +274,11 @@ const PostAJob = () => {
                       </button>
                     ))}
                   </div>
+                  {isGreenFlow && (
+                    <p className="font-body text-cream/40 text-xs mt-4 leading-relaxed">
+                      All ProGrafter green trades hold the relevant certifications for government-funded work — MCS, TrustMark, PAS 2030, or OZEV approved as applicable.
+                    </p>
+                  )}
                   <button
                     type="button"
                     disabled={!canStep1}
