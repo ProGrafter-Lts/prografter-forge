@@ -3,6 +3,7 @@ import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import Ticker from "@/components/Ticker";
 import HowItWorks from "@/components/HowItWorks";
+import GreenEnergySection from "@/components/GreenEnergySection";
 import ContrastSection from "@/components/ContrastSection";
 import FeaturesGrid from "@/components/FeaturesGrid";
 import TradesHowItWorks from "@/components/TradesHowItWorks";
@@ -37,6 +38,7 @@ const Index = () => {
       <Hero />
       <Ticker />
       <HowItWorks />
+      <GreenEnergySection />
       <ContrastSection />
       <FeaturesGrid />
       <TradesHowItWorks />
