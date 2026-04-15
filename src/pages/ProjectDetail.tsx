@@ -16,6 +16,8 @@ import {
   Upload,
 } from "lucide-react";
 import { toast } from "sonner";
+import GreenCertificatePack from "@/components/GreenCertificatePack";
+import { isGreenTrade, GreenLeafBadge } from "@/lib/greenTrades";
 
 // ---------- types ----------
 interface Job {
@@ -29,6 +31,7 @@ interface Job {
   budget: string | null;
   created_at: string;
   homeowner_id: string | null;
+  is_green_job: boolean;
 }
 
 interface Stage {
