@@ -143,6 +143,7 @@ const PostAJob = () => {
       budget,
       photo_urls: photoUrls,
       status: "open",
+      is_green_job: isGreenTrade(jobType),
     });
 
     setLoading(false);
