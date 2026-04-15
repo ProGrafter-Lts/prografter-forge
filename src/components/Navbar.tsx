@@ -12,9 +12,9 @@ const Navbar = () => {
         </a>
 
         <div className="hidden craft:flex items-center gap-6">
-          <a href="#how-it-works" className="font-mono text-sm text-body-text hover:text-teal transition-colors">How It Works</a>
-          <a href="#pricing" className="font-mono text-sm text-body-text hover:text-teal transition-colors">Pricing</a>
-          <a href="#features" className="font-mono text-sm text-body-text hover:text-teal transition-colors">Features</a>
+          <a href="/#how-it-works" className="font-mono text-sm text-body-text hover:text-teal transition-colors">How It Works</a>
+          <a href="/#pricing" className="font-mono text-sm text-body-text hover:text-teal transition-colors">Pricing</a>
+          <a href="/#features" className="font-mono text-sm text-body-text hover:text-teal transition-colors">Features</a>
           <a href="/quote-checker" className="font-mono text-sm text-body-text hover:text-teal transition-colors">Quote Checker</a>
           <a href="/green" className="font-mono text-sm text-[#16A34A] hover:text-[#15803D] transition-colors flex items-center gap-1">🌿 Green Grants</a>
           <a href="/login" className="font-mono text-sm text-body-text hover:text-teal transition-colors">Login</a>
@@ -49,9 +49,9 @@ const Navbar = () => {
 
       {menuOpen && (
         <div className="craft:hidden px-6 pb-4 flex flex-col gap-3" style={{ backgroundColor: "rgba(245, 240, 232, 0.98)" }}>
-          <a href="#how-it-works" className="font-mono text-sm text-body-text" onClick={() => setMenuOpen(false)}>How It Works</a>
-          <a href="#pricing" className="font-mono text-sm text-body-text" onClick={() => setMenuOpen(false)}>Pricing</a>
-          <a href="#features" className="font-mono text-sm text-body-text" onClick={() => setMenuOpen(false)}>Features</a>
+          <a href="/#how-it-works" className="font-mono text-sm text-body-text" onClick={() => setMenuOpen(false)}>How It Works</a>
+          <a href="/#pricing" className="font-mono text-sm text-body-text" onClick={() => setMenuOpen(false)}>Pricing</a>
+          <a href="/#features" className="font-mono text-sm text-body-text" onClick={() => setMenuOpen(false)}>Features</a>
           <a href="/quote-checker" className="font-mono text-sm text-body-text" onClick={() => setMenuOpen(false)}>Quote Checker</a>
           <a href="/green" className="font-mono text-sm text-[#16A34A] flex items-center gap-1" onClick={() => setMenuOpen(false)}>🌿 Green Grants</a>
           <a href="/login" className="font-mono text-sm text-body-text" onClick={() => setMenuOpen(false)}>Login</a>
