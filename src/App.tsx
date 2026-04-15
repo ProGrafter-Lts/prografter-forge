@@ -15,6 +15,7 @@ import ProjectDetail from "./pages/ProjectDetail.tsx";
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import QuoteChecker from "./pages/QuoteChecker.tsx";
+import GreenGrants from "./pages/GreenGrants.tsx";
 
 const queryClient = new QueryClient();
 
