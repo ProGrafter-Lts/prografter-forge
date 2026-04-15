@@ -32,6 +32,7 @@ const App = () => (
           <Route path="/register/trade" element={<TradeRegisterNew />} />
           <Route path="/post-a-job" element={<PostAJob />} />
           <Route path="/quote-checker" element={<QuoteChecker />} />
+          <Route path="/green" element={<GreenGrants />} />
           <Route path="/login" element={<Login />} />
           <Route
             path="/dashboard/trade"
