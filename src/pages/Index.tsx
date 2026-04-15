@@ -10,6 +10,7 @@ import HomeownersHowItWorks from "@/components/HomeownersHowItWorks";
 import WhatYouGet from "@/components/WhatYouGet";
 import WhyDifferent from "@/components/WhyDifferent";
 import PlatformPreview from "@/components/PlatformPreview";
+import SeeHowItWorks from "@/components/SeeHowItWorks";
 import SignUpSection from "@/components/SignUpSection";
 import Footer from "@/components/Footer";
 
