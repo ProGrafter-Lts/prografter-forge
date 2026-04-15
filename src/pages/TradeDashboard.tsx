@@ -247,7 +247,11 @@ const TradeDashboard = () => {
                 Verified
               </span>
             )}
+            {trade?.is_green_trade && <GreenLeafBadge />}
           </div>
+
+          {/* Green Specialist Banner */}
+          {trade && <GreenSpecialistBanner show={trade.is_green_trade} />}
 
           {/* Stats row */}
           <div className="grid grid-cols-2 craft:grid-cols-4 gap-4">
