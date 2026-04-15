@@ -24,7 +24,7 @@ const schemes = [
 const GreenEnergySection = () => {
   return (
     <section className="py-20 px-6 bg-cream">
-      <div className="max-w-5xl mx-auto">
+      <div className="w-full max-w-[1400px] mx-auto">
         <div className="text-center mb-12">
           <span className="text-[#16A34A] font-mono text-sm tracking-widest uppercase mb-3 block">
             🌿 Green Energy
