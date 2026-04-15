@@ -19,6 +19,7 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { GreenSpecialistBanner, CertificationsSection } from "@/components/GreenCertBadges";
 import { GreenLeafBadge } from "@/lib/greenTrades";
+import { PlanningAlertsSection } from "@/components/trade/PlanningAlerts";
 
 interface TradeProfile {
   name: string;
@@ -26,6 +27,7 @@ interface TradeProfile {
   verified: boolean;
   trade_type: string;
   id: string;
+  phone: string;
   is_green_trade: boolean;
   mcs_number: string | null;
   trustmark_number: string | null;
@@ -118,7 +120,7 @@ const TradeDashboard = () => {
     // Get trade profile
     const { data: tradeData } = await supabase
       .from("trades")
-      .select("id, name, company_name, verified, trade_type, is_green_trade, mcs_number, trustmark_number, pas_2030_accredited, pas_2035_coordinator, ozev_approved, fgas_registered, ciga_registered, inca_certified, green_cert_expiry")
+      .select("id, name, company_name, verified, trade_type, phone, is_green_trade, mcs_number, trustmark_number, pas_2030_accredited, pas_2035_coordinator, ozev_approved, fgas_registered, ciga_registered, inca_certified, green_cert_expiry")
       .eq("user_id", user.id)
       .single();
 
@@ -373,6 +375,9 @@ const TradeDashboard = () => {
               </div>
             )}
           </section>
+
+          {/* Planning Intelligence */}
+          {trade && <PlanningAlertsSection trade={trade} />}
 
           {/* Green Certifications */}
           {trade && trade.is_green_trade && <CertificationsSection trade={trade} />}
