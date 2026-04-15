@@ -450,6 +450,7 @@ const HomeownerDashboard = () => {
               </div>
             )}
           </section>
+          </>)}
         </div>
       </main>
     </div>
