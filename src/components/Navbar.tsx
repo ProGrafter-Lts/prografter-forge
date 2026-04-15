@@ -16,7 +16,7 @@ const Navbar = () => {
           <a href="#pricing" className="font-mono text-sm text-body-text hover:text-teal transition-colors">Pricing</a>
           <a href="#features" className="font-mono text-sm text-body-text hover:text-teal transition-colors">Features</a>
           <a href="/quote-checker" className="font-mono text-sm text-body-text hover:text-teal transition-colors">Quote Checker</a>
-          <a href="/green" className="font-mono text-sm text-green-600 hover:text-green-500 transition-colors flex items-center gap-1">🌿 Find Out If You Qualify</a>
+          <a href="/green" className="font-mono text-sm text-[#16A34A] hover:text-[#15803D] transition-colors flex items-center gap-1">🌿 Green Grants</a>
           <a href="/login" className="font-mono text-sm text-body-text hover:text-teal transition-colors">Login</a>
           <a
             href="/register/trade"
@@ -53,7 +53,7 @@ const Navbar = () => {
           <a href="#pricing" className="font-mono text-sm text-body-text" onClick={() => setMenuOpen(false)}>Pricing</a>
           <a href="#features" className="font-mono text-sm text-body-text" onClick={() => setMenuOpen(false)}>Features</a>
           <a href="/quote-checker" className="font-mono text-sm text-body-text" onClick={() => setMenuOpen(false)}>Quote Checker</a>
-          <a href="/green" className="font-mono text-sm text-green-600 flex items-center gap-1" onClick={() => setMenuOpen(false)}>🌿 Find Out If You Qualify</a>
+          <a href="/green" className="font-mono text-sm text-[#16A34A] flex items-center gap-1" onClick={() => setMenuOpen(false)}>🌿 Green Grants</a>
           <a href="/login" className="font-mono text-sm text-body-text" onClick={() => setMenuOpen(false)}>Login</a>
           <a href="/register/trade" className="border border-teal text-teal font-mono text-sm px-5 py-2 rounded-xl text-center" onClick={() => setMenuOpen(false)}>Register as a Trade</a>
           <a href="/post-a-job" className="bg-teal text-cream font-mono text-sm px-5 py-2.5 rounded-xl text-center shadow-lg shadow-teal/20" onClick={() => setMenuOpen(false)}>Post a Job</a>
