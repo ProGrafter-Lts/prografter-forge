@@ -17,6 +17,8 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { GreenSpecialistBanner, CertificationsSection } from "@/components/GreenCertBadges";
+import { GreenLeafBadge } from "@/lib/greenTrades";
 
 interface TradeProfile {
   name: string;
@@ -24,6 +26,16 @@ interface TradeProfile {
   verified: boolean;
   trade_type: string;
   id: string;
+  is_green_trade: boolean;
+  mcs_number: string | null;
+  trustmark_number: string | null;
+  pas_2030_accredited: boolean;
+  pas_2035_coordinator: boolean;
+  ozev_approved: boolean;
+  fgas_registered: boolean;
+  ciga_registered: boolean;
+  inca_certified: boolean;
+  green_cert_expiry: string | null;
 }
 
 interface JobMatch {
@@ -106,7 +118,7 @@ const TradeDashboard = () => {
     // Get trade profile
     const { data: tradeData } = await supabase
       .from("trades")
-      .select("id, name, company_name, verified, trade_type")
+      .select("id, name, company_name, verified, trade_type, is_green_trade, mcs_number, trustmark_number, pas_2030_accredited, pas_2035_coordinator, ozev_approved, fgas_registered, ciga_registered, inca_certified, green_cert_expiry")
       .eq("user_id", user.id)
       .single();
 
@@ -235,7 +247,11 @@ const TradeDashboard = () => {
                 Verified
               </span>
             )}
+            {trade?.is_green_trade && <GreenLeafBadge />}
           </div>
+
+          {/* Green Specialist Banner */}
+          {trade && <GreenSpecialistBanner show={trade.is_green_trade} />}
 
           {/* Stats row */}
           <div className="grid grid-cols-2 craft:grid-cols-4 gap-4">
@@ -357,6 +373,9 @@ const TradeDashboard = () => {
               </div>
             )}
           </section>
+
+          {/* Green Certifications */}
+          {trade && trade.is_green_trade && <CertificationsSection trade={trade} />}
 
           {/* My Quotes */}
           <section>
