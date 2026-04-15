@@ -545,14 +545,24 @@ export type Database = {
       trades: {
         Row: {
           bio: string | null
+          ciga_registered: boolean
           company_name: string
           created_at: string
+          fgas_registered: boolean
+          green_cert_expiry: string | null
           id: string
+          inca_certified: boolean
           insurance_cert_url: string | null
+          is_green_trade: boolean
+          mcs_number: string | null
           name: string
+          ozev_approved: boolean
+          pas_2030_accredited: boolean
+          pas_2035_coordinator: boolean
           phone: string
           postcode: string
           trade_type: string
+          trustmark_number: string | null
           user_id: string | null
           verified: boolean
           website: string | null
@@ -560,14 +570,24 @@ export type Database = {
         }
         Insert: {
           bio?: string | null
+          ciga_registered?: boolean
           company_name: string
           created_at?: string
+          fgas_registered?: boolean
+          green_cert_expiry?: string | null
           id?: string
+          inca_certified?: boolean
           insurance_cert_url?: string | null
+          is_green_trade?: boolean
+          mcs_number?: string | null
           name: string
+          ozev_approved?: boolean
+          pas_2030_accredited?: boolean
+          pas_2035_coordinator?: boolean
           phone: string
           postcode: string
           trade_type: string
+          trustmark_number?: string | null
           user_id?: string | null
           verified?: boolean
           website?: string | null
@@ -575,14 +595,24 @@ export type Database = {
         }
         Update: {
           bio?: string | null
+          ciga_registered?: boolean
           company_name?: string
           created_at?: string
+          fgas_registered?: boolean
+          green_cert_expiry?: string | null
           id?: string
+          inca_certified?: boolean
           insurance_cert_url?: string | null
+          is_green_trade?: boolean
+          mcs_number?: string | null
           name?: string
+          ozev_approved?: boolean
+          pas_2030_accredited?: boolean
+          pas_2035_coordinator?: boolean
           phone?: string
           postcode?: string
           trade_type?: string
+          trustmark_number?: string | null
           user_id?: string | null
           verified?: boolean
           website?: string | null
