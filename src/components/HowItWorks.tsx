@@ -37,16 +37,16 @@ const steps = [
 const HowItWorks = () => {
   return (
     <section id="how-it-works" className="bg-cream py-24 px-6">
-      <div className="max-w-7xl mx-auto">
+      <div className="w-full max-w-[1400px] mx-auto">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-8 h-[2px] bg-teal" />
           <span className="font-mono text-xs text-teal uppercase tracking-widest">Process</span>
         </div>
         <h2 className="font-heading text-navy text-[48px] craft:text-[64px] leading-none mb-12">How It Works</h2>
 
-        <div className="grid craft:grid-cols-3 gap-[2px] bg-cream">
+        <div className="grid craft:grid-cols-3 gap-4">
           {steps.map((step) => (
-            <div key={step.num} className="relative bg-card p-8 rounded-xl fade-up">
+            <div key={step.num} className="relative bg-card p-6 rounded-xl fade-up">
               {/* Ghost number */}
               <span className="absolute top-4 right-6 font-heading text-[80px] leading-none text-navy/[0.05] select-none pointer-events-none">
                 {step.num}
