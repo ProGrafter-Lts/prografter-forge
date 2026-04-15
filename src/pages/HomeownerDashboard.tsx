@@ -14,9 +14,12 @@ import {
   MapPin,
   Image,
   BadgeCheck,
+  Leaf,
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import GreenCertificatePack from "@/components/GreenCertificatePack";
+import { isGreenTrade } from "@/lib/greenTrades";
 
 interface HomeownerProfile {
   id: string;
@@ -220,6 +223,35 @@ const HomeownerDashboard = () => {
             </p>
           </div>
 
+          {/* Homeowner Manual — Green Certificate Pack */}
+          {activeNav === "manual" && (
+            <section className="space-y-6">
+              <h2 className="font-heading text-navy text-2xl flex items-center gap-2">
+                <BookOpen className="w-5 h-5" /> Homeowner Manual
+              </h2>
+              {jobs.filter((j) => isGreenTrade(j.job_type)).length > 0 ? (
+                jobs.filter((j) => isGreenTrade(j.job_type)).map((j) => (
+                  <div key={j.id} className="space-y-4">
+                    <h3 className="font-heading text-navy text-lg flex items-center gap-2">
+                      <Leaf className="w-4 h-4 text-green-500" />
+                      {j.title || j.job_type}
+                    </h3>
+                    <GreenCertificatePack jobType={j.job_type} isComplete={j.stage === "completed"} />
+                  </div>
+                ))
+              ) : (
+                <div className="bg-white rounded-2xl p-8 border border-navy/10 text-center">
+                  <BookOpen className="w-10 h-10 text-navy/20 mx-auto mb-3" />
+                  <p className="font-mono text-sm text-secondary-text">
+                    Your Homeowner Manual will be available once a project is active. Green projects include a full Green Certificate Pack.
+                  </p>
+                </div>
+              )}
+            </section>
+          )}
+
+          {activeNav !== "manual" && (<>
+
           {/* Variation alert */}
           {hasVariation && (
             <div className="bg-amber-50 border border-amber-300 rounded-2xl p-5 flex items-start gap-4">
@@ -418,6 +450,7 @@ const HomeownerDashboard = () => {
               </div>
             )}
           </section>
+          </>)}
         </div>
       </main>
     </div>

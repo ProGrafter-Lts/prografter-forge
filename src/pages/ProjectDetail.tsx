@@ -16,6 +16,8 @@ import {
   Upload,
 } from "lucide-react";
 import { toast } from "sonner";
+import GreenCertificatePack from "@/components/GreenCertificatePack";
+import { isGreenTrade, GreenLeafBadge } from "@/lib/greenTrades";
 
 // ---------- types ----------
 interface Job {
@@ -29,6 +31,7 @@ interface Job {
   budget: string | null;
   created_at: string;
   homeowner_id: string | null;
+  is_green_job: boolean;
 }
 
 interface Stage {
@@ -292,8 +295,9 @@ const ProjectDetail = () => {
         <div className="bg-white rounded-2xl p-6 border border-navy/10 shadow-sm">
           <div className="flex flex-col craft:flex-row craft:items-center justify-between gap-4">
             <div>
-              <h1 className="font-heading text-navy text-3xl craft:text-4xl">
+              <h1 className="font-heading text-navy text-3xl craft:text-4xl flex items-center gap-2">
                 {job.title || job.job_type}
+                {job.is_green_job && <GreenLeafBadge />}
               </h1>
               <div className="flex flex-wrap items-center gap-3 mt-2 font-mono text-xs text-secondary-text">
                 <span>Trade: <span className="text-navy font-semibold">{tradeName}</span></span>
@@ -450,6 +454,13 @@ const ProjectDetail = () => {
                     </button>
                   </div>
                 </div>
+              </section>
+            )}
+
+            {/* Green Certificate Pack */}
+            {job.is_green_job && (
+              <section>
+                <GreenCertificatePack jobType={job.job_type} isComplete={job.status === "complete" || job.stage === "completed"} />
               </section>
             )}
 

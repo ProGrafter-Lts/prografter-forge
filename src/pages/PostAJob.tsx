@@ -1,6 +1,7 @@
 import { useState, FormEvent, ChangeEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
+import { isGreenTrade } from "@/lib/greenTrades";
 
 const JOB_TYPES = [
   { label: "Extension", icon: "🏗️" },
@@ -14,6 +15,15 @@ const JOB_TYPES = [
   { label: "Painting & Decorating", icon: "🎨" },
   { label: "Landscaping", icon: "🌿" },
   { label: "New Build", icon: "🏢" },
+  // Green / Renewable
+  { label: "Solar PV Installation", icon: "☀️" },
+  { label: "Air Source Heat Pump", icon: "🌡️" },
+  { label: "Ground Source Heat Pump", icon: "🌡️" },
+  { label: "External Wall Insulation (EWI)", icon: "🧱" },
+  { label: "Cavity Wall Insulation", icon: "🏠" },
+  { label: "Loft Insulation", icon: "🏠" },
+  { label: "EV Charger Installation", icon: "🔌" },
+  { label: "Battery Storage", icon: "🔋" },
   { label: "Other", icon: "🔧" },
 ] as const;
 
@@ -133,6 +143,7 @@ const PostAJob = () => {
       budget,
       photo_urls: photoUrls,
       status: "open",
+      is_green_job: isGreenTrade(jobType),
     });
 
     setLoading(false);
