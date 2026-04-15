@@ -248,6 +248,7 @@ const GreenGrantsPage = () => {
     ? getSchemes(property, ownership, epc, household)
     : [];
 
+  const schemeIds = schemes.map((s) => s.id);
   const primaryJobType = schemes.length > 0 ? schemes[0].jobType : "insulation";
 
   const toggleHousehold = (flag: HouseholdFlag) => {
@@ -459,7 +460,7 @@ const GreenGrantsPage = () => {
               {/* CTA */}
               <div className="text-center pt-4">
                 <Link
-                  to={`/post-a-job?type=${primaryJobType}`}
+                  to={`/post-a-job?green=1&schemes=${schemeIds.join(",")}`}
                   className="inline-block bg-green-500 text-white font-mono text-sm py-4 px-10 rounded-xl hover:bg-green-600 transition-colors tracking-wider uppercase shadow-lg shadow-green-500/20"
                 >
                   Match Me With a Certified Local Installer →

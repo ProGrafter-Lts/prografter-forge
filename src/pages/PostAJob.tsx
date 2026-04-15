@@ -1,31 +1,46 @@
-import { useState, FormEvent, ChangeEvent } from "react";
+import { useState, FormEvent, ChangeEvent, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { isGreenTrade } from "@/lib/greenTrades";
 
-const JOB_TYPES = [
-  { label: "Extension", icon: "🏗️" },
-  { label: "Loft Conversion", icon: "🏠" },
-  { label: "Full Rewire", icon: "⚡" },
-  { label: "Bathroom", icon: "🚿" },
-  { label: "Kitchen", icon: "🍳" },
-  { label: "Boiler / Heating", icon: "🔥" },
-  { label: "Roofing", icon: "🏚️" },
-  { label: "Plastering", icon: "🧱" },
-  { label: "Painting & Decorating", icon: "🎨" },
-  { label: "Landscaping", icon: "🌿" },
-  { label: "New Build", icon: "🏢" },
+const ALL_JOB_TYPES = [
+  { label: "Extension", icon: "🏗️", green: false },
+  { label: "Loft Conversion", icon: "🏠", green: false },
+  { label: "Full Rewire", icon: "⚡", green: false },
+  { label: "Bathroom", icon: "🚿", green: false },
+  { label: "Kitchen", icon: "🍳", green: false },
+  { label: "Boiler / Heating", icon: "🔥", green: false },
+  { label: "Roofing", icon: "🏚️", green: false },
+  { label: "Plastering", icon: "🧱", green: false },
+  { label: "Painting & Decorating", icon: "🎨", green: false },
+  { label: "Landscaping", icon: "🌿", green: false },
+  { label: "New Build", icon: "🏢", green: false },
   // Green / Renewable
-  { label: "Solar PV Installation", icon: "☀️" },
-  { label: "Air Source Heat Pump", icon: "🌡️" },
-  { label: "Ground Source Heat Pump", icon: "🌡️" },
-  { label: "External Wall Insulation (EWI)", icon: "🧱" },
-  { label: "Cavity Wall Insulation", icon: "🏠" },
-  { label: "Loft Insulation", icon: "🏠" },
-  { label: "EV Charger Installation", icon: "🔌" },
-  { label: "Battery Storage", icon: "🔋" },
-  { label: "Other", icon: "🔧" },
+  { label: "Solar PV Installation", icon: "☀️", green: true },
+  { label: "Air Source Heat Pump", icon: "🌡️", green: true },
+  { label: "Ground Source Heat Pump", icon: "🌡️", green: true },
+  { label: "External Wall Insulation (EWI)", icon: "🧱", green: true },
+  { label: "Cavity Wall Insulation", icon: "🏠", green: true },
+  { label: "Loft Insulation", icon: "🏠", green: true },
+  { label: "EV Charger Installation", icon: "🔌", green: true },
+  { label: "Battery Storage", icon: "🔋", green: true },
+  { label: "MVHR Installer", icon: "🌀", green: true },
+  { label: "Underfloor Heating", icon: "🔥", green: true },
+  { label: "Draught Proofing Specialist", icon: "🪟", green: true },
+  { label: "EPC Assessor", icon: "📋", green: true },
+  { label: "Retrofit Coordinator", icon: "📐", green: true },
+  { label: "Other", icon: "🔧", green: false },
 ] as const;
+
+/* Scheme → allowed green trade type labels */
+const SCHEME_TRADE_MAP: Record<string, string[]> = {
+  eco4: ["External Wall Insulation (EWI)", "Cavity Wall Insulation", "Loft Insulation", "Retrofit Coordinator", "EPC Assessor"],
+  bus: ["Air Source Heat Pump", "Ground Source Heat Pump"],
+  gbis: ["External Wall Insulation (EWI)", "Cavity Wall Insulation", "Loft Insulation", "Draught Proofing Specialist"],
+  vat: ["Solar PV Installation", "Air Source Heat Pump", "Ground Source Heat Pump", "External Wall Insulation (EWI)", "Cavity Wall Insulation", "Loft Insulation", "EV Charger Installation", "Battery Storage", "MVHR Installer", "Underfloor Heating", "Draught Proofing Specialist", "EPC Assessor", "Retrofit Coordinator"],
+  hug: ["External Wall Insulation (EWI)", "Cavity Wall Insulation", "Loft Insulation", "Retrofit Coordinator", "EPC Assessor"],
+  epc: ["EPC Assessor"],
+};
 
 const BUDGETS = [
   "Under £1k",
@@ -38,6 +53,20 @@ const BUDGETS = [
 type Step = 1 | 2 | 3 | 4;
 
 const PostAJob = () => {
+  const [searchParams] = useSearchParams();
+  const isGreenFlow = searchParams.get("green") === "1";
+  const schemeParam = searchParams.get("schemes") || "";
+  const schemeIds = schemeParam ? schemeParam.split(",") : [];
+
+  const filteredJobTypes = useMemo(() => {
+    if (!isGreenFlow || schemeIds.length === 0) return ALL_JOB_TYPES.filter(() => true);
+    const allowedLabels = new Set<string>();
+    schemeIds.forEach((id) => {
+      (SCHEME_TRADE_MAP[id] || []).forEach((label) => allowedLabels.add(label));
+    });
+    return ALL_JOB_TYPES.filter((jt) => allowedLabels.has(jt.label));
+  }, [isGreenFlow, schemeParam]);
+
   const [step, setStep] = useState<Step>(1);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
