@@ -1,7 +1,7 @@
-import { useState, FormEvent, ChangeEvent } from "react";
+import { useState, FormEvent, ChangeEvent, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
-import { format } from "date-fns";
+import { format, differenceInDays } from "date-fns";
 import { CalendarIcon, Leaf } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
@@ -64,6 +64,15 @@ const TradeRegisterNew = () => {
 
   // Step 3
   const [file, setFile] = useState<File | null>(null);
+  const [insuranceExpiry, setInsuranceExpiry] = useState<Date | undefined>();
+
+  const insuranceExpiryStatus = useMemo(() => {
+    if (!insuranceExpiry) return null;
+    const daysUntil = differenceInDays(insuranceExpiry, new Date());
+    if (daysUntil < 0) return "expired";
+    if (daysUntil <= 30) return "expiring";
+    return "valid";
+  }, [insuranceExpiry]);
 
   const inputClass =
     "w-full bg-cream/5 border border-cream/10 text-cream placeholder-cream/40 font-body text-sm rounded-xl px-4 py-3 focus:border-teal focus:outline-none transition-colors";
@@ -217,7 +226,7 @@ const TradeRegisterNew = () => {
             <div className="bg-teal/10 border border-teal/30 rounded-xl p-8 text-center">
               <h2 className="font-heading text-teal text-4xl mb-2">Application Received.</h2>
               <p className="font-body text-cream/70 text-sm mb-6">
-                We'll verify your details within 24 hours.
+                We will verify your details within 24 hours and email you at the address provided.
               </p>
               <Link
                 to="/"
@@ -453,8 +462,46 @@ const TradeRegisterNew = () => {
                         </div>
                       )}
                     </div>
-                    <input type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={handleFileChange} className="hidden" />
+                   <input type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={handleFileChange} className="hidden" />
                   </label>
+
+                  {/* Insurance Expiry Date */}
+                  <div className="mt-6">
+                    <label className={labelClass}>Insurance Expiry Date</label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button
+                          type="button"
+                          className={cn(
+                            inputClass,
+                            "flex items-center justify-between text-left",
+                            !insuranceExpiry && "text-cream/40"
+                          )}
+                        >
+                          {insuranceExpiry ? format(insuranceExpiry, "dd MMM yyyy") : "Select expiry date"}
+                          <CalendarIcon className="w-4 h-4 text-cream/40" />
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0 bg-navy border-cream/10" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={insuranceExpiry}
+                          onSelect={setInsuranceExpiry}
+                          className={cn("p-3 pointer-events-auto")}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    {insuranceExpiryStatus === "expired" && (
+                      <p className="font-mono text-xs text-red-400 mt-1.5 flex items-center gap-1">
+                        ⚠ Your insurance has expired. Please renew before registering.
+                      </p>
+                    )}
+                    {insuranceExpiryStatus === "expiring" && (
+                      <p className="font-mono text-xs text-amber-400 mt-1.5 flex items-center gap-1">
+                        ⚠ Your insurance expires within 30 days. Consider renewing soon.
+                      </p>
+                    )}
+                  </div>
 
                   {error && <p className="text-red-400 font-mono text-xs mt-4">{error}</p>}
 
