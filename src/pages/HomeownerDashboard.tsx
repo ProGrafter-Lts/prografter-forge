@@ -14,9 +14,12 @@ import {
   MapPin,
   Image,
   BadgeCheck,
+  Leaf,
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import GreenCertificatePack from "@/components/GreenCertificatePack";
+import { isGreenTrade } from "@/lib/greenTrades";
 
 interface HomeownerProfile {
   id: string;
