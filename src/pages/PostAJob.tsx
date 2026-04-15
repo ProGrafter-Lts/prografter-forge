@@ -15,6 +15,15 @@ const JOB_TYPES = [
   { label: "Painting & Decorating", icon: "🎨" },
   { label: "Landscaping", icon: "🌿" },
   { label: "New Build", icon: "🏢" },
+  // Green / Renewable
+  { label: "Solar PV Installation", icon: "☀️" },
+  { label: "Air Source Heat Pump", icon: "🌡️" },
+  { label: "Ground Source Heat Pump", icon: "🌡️" },
+  { label: "External Wall Insulation (EWI)", icon: "🧱" },
+  { label: "Cavity Wall Insulation", icon: "🏠" },
+  { label: "Loft Insulation", icon: "🏠" },
+  { label: "EV Charger Installation", icon: "🔌" },
+  { label: "Battery Storage", icon: "🔋" },
   { label: "Other", icon: "🔧" },
 ] as const;
 
