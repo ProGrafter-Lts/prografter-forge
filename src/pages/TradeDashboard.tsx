@@ -17,6 +17,8 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { GreenSpecialistBanner, CertificationsSection } from "@/components/GreenCertBadges";
+import { GreenLeafBadge } from "@/lib/greenTrades";
 
 interface TradeProfile {
   name: string;
@@ -24,6 +26,16 @@ interface TradeProfile {
   verified: boolean;
   trade_type: string;
   id: string;
+  is_green_trade: boolean;
+  mcs_number: string | null;
+  trustmark_number: string | null;
+  pas_2030_accredited: boolean;
+  pas_2035_coordinator: boolean;
+  ozev_approved: boolean;
+  fgas_registered: boolean;
+  ciga_registered: boolean;
+  inca_certified: boolean;
+  green_cert_expiry: string | null;
 }
 
 interface JobMatch {
