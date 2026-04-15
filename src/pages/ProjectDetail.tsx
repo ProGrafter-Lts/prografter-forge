@@ -457,6 +457,13 @@ const ProjectDetail = () => {
               </section>
             )}
 
+            {/* Green Certificate Pack */}
+            {job.is_green_job && (
+              <section>
+                <GreenCertificatePack jobType={job.job_type} isComplete={job.status === "complete" || job.stage === "completed"} />
+              </section>
+            )}
+
             {/* 5 — Messages */}
             <section>
               <h2 className="font-heading text-navy text-2xl mb-4 flex items-center gap-2">
