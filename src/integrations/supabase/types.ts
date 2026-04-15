@@ -209,6 +209,7 @@ export type Database = {
           description: string
           homeowner_id: string | null
           id: string
+          is_green_job: boolean
           job_type: string
           photo_urls: string[] | null
           postcode: string
@@ -225,6 +226,7 @@ export type Database = {
           description: string
           homeowner_id?: string | null
           id?: string
+          is_green_job?: boolean
           job_type: string
           photo_urls?: string[] | null
           postcode: string
@@ -241,6 +243,7 @@ export type Database = {
           description?: string
           homeowner_id?: string | null
           id?: string
+          is_green_job?: boolean
           job_type?: string
           photo_urls?: string[] | null
           postcode?: string

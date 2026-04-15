@@ -1,0 +1,1 @@
+ALTER TABLE public.jobs ADD COLUMN is_green_job boolean NOT NULL DEFAULT false;
