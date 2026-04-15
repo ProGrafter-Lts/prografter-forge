@@ -1,7 +1,7 @@
-import { useState, FormEvent, ChangeEvent } from "react";
+import { useState, FormEvent, ChangeEvent, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
-import { format } from "date-fns";
+import { format, differenceInDays } from "date-fns";
 import { CalendarIcon, Leaf } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
@@ -64,6 +64,15 @@ const TradeRegisterNew = () => {
 
   // Step 3
   const [file, setFile] = useState<File | null>(null);
+  const [insuranceExpiry, setInsuranceExpiry] = useState<Date | undefined>();
+
+  const insuranceExpiryStatus = useMemo(() => {
+    if (!insuranceExpiry) return null;
+    const daysUntil = differenceInDays(insuranceExpiry, new Date());
+    if (daysUntil < 0) return "expired";
+    if (daysUntil <= 30) return "expiring";
+    return "valid";
+  }, [insuranceExpiry]);
 
   const inputClass =
     "w-full bg-cream/5 border border-cream/10 text-cream placeholder-cream/40 font-body text-sm rounded-xl px-4 py-3 focus:border-teal focus:outline-none transition-colors";
