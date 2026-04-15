@@ -19,6 +19,7 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { GreenSpecialistBanner, CertificationsSection } from "@/components/GreenCertBadges";
 import { GreenLeafBadge } from "@/lib/greenTrades";
+import { PlanningAlertsSection } from "@/components/trade/PlanningAlerts";
 
 interface TradeProfile {
   name: string;
