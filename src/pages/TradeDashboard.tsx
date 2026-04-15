@@ -374,6 +374,9 @@ const TradeDashboard = () => {
             )}
           </section>
 
+          {/* Green Certifications */}
+          {trade && trade.is_green_trade && <CertificationsSection trade={trade} />}
+
           {/* My Quotes */}
           <section>
             <h2 className="font-heading text-navy text-2xl mb-4">My Quotes</h2>
