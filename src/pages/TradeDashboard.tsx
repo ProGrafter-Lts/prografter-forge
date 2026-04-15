@@ -118,7 +118,7 @@ const TradeDashboard = () => {
     // Get trade profile
     const { data: tradeData } = await supabase
       .from("trades")
-      .select("id, name, company_name, verified, trade_type")
+      .select("id, name, company_name, verified, trade_type, is_green_trade, mcs_number, trustmark_number, pas_2030_accredited, pas_2035_coordinator, ozev_approved, fgas_registered, ciga_registered, inca_certified, green_cert_expiry")
       .eq("user_id", user.id)
       .single();
 
