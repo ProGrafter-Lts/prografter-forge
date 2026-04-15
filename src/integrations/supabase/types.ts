@@ -259,6 +259,36 @@ export type Database = {
           },
         ]
       }
+      letters_sent: {
+        Row: {
+          address: string
+          application_reference: string
+          created_at: string
+          id: string
+          letter_content: string
+          sent_at: string
+          trade_id: string
+        }
+        Insert: {
+          address: string
+          application_reference: string
+          created_at?: string
+          id?: string
+          letter_content: string
+          sent_at?: string
+          trade_id: string
+        }
+        Update: {
+          address?: string
+          application_reference?: string
+          created_at?: string
+          id?: string
+          letter_content?: string
+          sent_at?: string
+          trade_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
