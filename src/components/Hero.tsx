@@ -30,12 +30,20 @@ const Hero = () => {
           <p className="font-body text-secondary-text text-lg max-w-md mb-8 font-light">
             No monthly fees. No hidden costs. Just a fair commission on the work you win — capped at £900 per job.
           </p>
-          <a
-            href="#signup"
-            className="inline-block bg-teal text-cream font-mono text-sm px-8 py-3 rounded-xl hover:bg-teal-hover transition-colors"
-          >
-            Get Early Access
-          </a>
+          <div className="flex flex-wrap gap-3">
+            <a
+              href="#signup"
+              className="inline-block bg-teal text-cream font-mono text-sm px-8 py-3 rounded-xl hover:bg-teal-hover transition-colors"
+            >
+              Get Early Access
+            </a>
+            <a
+              href="/green"
+              className="inline-block bg-green-600 text-white font-mono text-sm px-8 py-3 rounded-xl hover:bg-green-700 transition-colors shadow-lg shadow-green-600/20"
+            >
+              🌿 Find Out If You Qualify →
+            </a>
+          </div>
         </div>
 
         {/* Right column — stat cards + rotating circles */}

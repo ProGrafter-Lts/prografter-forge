@@ -2,312 +2,481 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Leaf, ChevronDown, ChevronUp, CheckCircle2, XCircle, HelpCircle, Home, Zap, Flame, Sun, Wind, ThermometerSun } from "lucide-react";
+import { Leaf, CheckCircle2, HelpCircle, ChevronLeft, AlertCircle, ExternalLink } from "lucide-react";
 
-/* ─── Grant data ─── */
-const GRANTS = [
-  {
-    id: "bus",
-    name: "Boiler Upgrade Scheme (BUS)",
-    provider: "UK Government (Ofgem)",
-    amount: "Up to £7,500",
-    description: "Covers air source heat pumps (£7,500) and ground source heat pumps (£7,500). Replaces fossil fuel heating in homes.",
-    eligibleWorks: ["Air Source Heat Pump", "Ground Source Heat Pump"],
-    requirements: [
-      "Property must have a valid EPC (no loft/cavity wall recommendations outstanding)",
-      "Existing fossil fuel heating system being replaced",
-      "Installer must be MCS certified",
-      "Property in England or Wales",
-    ],
-    link: "https://www.gov.uk/apply-boiler-upgrade-scheme",
-    active: true,
-  },
-  {
-    id: "eco4",
-    name: "ECO4 Scheme",
-    provider: "Energy suppliers (obligation scheme)",
-    amount: "Varies — can cover full cost",
-    description: "Targets fuel-poor and low-income households. Covers insulation, heating upgrades, and renewable installations.",
-    eligibleWorks: ["Cavity Wall Insulation", "Loft Insulation", "External Wall Insulation (EWI)", "Air Source Heat Pump", "Solar PV Installer", "Underfloor Heating"],
-    requirements: [
-      "Household must be in receipt of qualifying benefits (UC, pension credit, etc.)",
-      "Property EPC rated D, E, F, or G",
-      "Installer must be TrustMark registered and PAS 2030/2035 compliant",
-      "Retrofit assessment required by PAS 2035 Retrofit Coordinator",
-    ],
-    link: "https://www.ofgem.gov.uk/environmental-and-social-schemes/energy-company-obligation-eco",
-    active: true,
-  },
-  {
-    id: "gbis",
-    name: "Great British Insulation Scheme (GBIS)",
-    provider: "UK Government via energy suppliers",
-    amount: "Varies — can cover full cost",
-    description: "Targets homes in council tax bands A-D (England) or A-E (Scotland/Wales). Focused on insulation measures.",
-    eligibleWorks: ["Cavity Wall Insulation", "Loft Insulation", "External Wall Insulation (EWI)", "Underfloor Heating"],
-    requirements: [
-      "Property in council tax bands A-D (England) or A-E (Scotland/Wales)",
-      "OR household in receipt of qualifying benefits",
-      "Installer must be TrustMark registered",
-      "PAS 2030 compliant installation required",
-    ],
-    link: "https://www.gov.uk/apply-great-british-insulation-scheme",
-    active: true,
-  },
-  {
-    id: "seg",
-    name: "Smart Export Guarantee (SEG)",
-    provider: "Energy suppliers",
-    amount: "Ongoing payments per kWh exported",
-    description: "Get paid for surplus renewable electricity you export to the grid. Applies to solar PV, wind, and battery storage.",
-    eligibleWorks: ["Solar PV Installer", "Battery Storage"],
-    requirements: [
-      "Installation must be MCS certified",
-      "Capacity up to 5MW",
-      "Smart meter or export meter required",
-      "Apply through your energy supplier",
-    ],
-    link: "https://www.ofgem.gov.uk/environmental-and-social-schemes/smart-export-guarantee-seg",
-    active: true,
-  },
-  {
-    id: "ozev",
-    name: "OZEV EV Chargepoint Grant",
-    provider: "Office for Zero Emission Vehicles",
-    amount: "Up to £350 (per socket, max 2)",
-    description: "Covers installation of EV chargepoints for renters and flat owners. Landlords can also apply.",
-    eligibleWorks: ["EV Charger Installer"],
-    requirements: [
-      "Applicant must be a tenant, flat owner, or landlord",
-      "Off-street parking required",
-      "Charger must be OZEV-approved model",
-      "Installer must be OZEV-approved",
-    ],
-    link: "https://www.gov.uk/government/collections/government-grants-for-low-emission-vehicles",
-    active: true,
-  },
-  {
-    id: "his",
-    name: "Home Insulation Scheme (Scotland)",
-    provider: "Scottish Government / Home Energy Scotland",
-    amount: "Up to £9,000 (or £12,000 in rural areas)",
-    description: "Grants and interest-free loans for insulation and heating improvements in Scotland.",
-    eligibleWorks: ["Cavity Wall Insulation", "Loft Insulation", "External Wall Insulation (EWI)", "Air Source Heat Pump", "Ground Source Heat Pump"],
-    requirements: [
-      "Property must be in Scotland",
-      "Homeowner or registered social landlord",
-      "Property EPC rated D or below (for some measures)",
-      "Assessment by Home Energy Scotland advisor",
-    ],
-    link: "https://www.homeenergyscotland.org/",
-    active: true,
-  },
+/* ─── Types ─── */
+type PropertyType = "detached" | "semi" | "mid-terrace" | "end-terrace" | "ground-flat" | "upper-flat" | "bungalow";
+type Ownership = "own" | "rent-private" | "rent-social" | "family";
+type EpcBand = "ab" | "c" | "d" | "efg" | "unknown";
+type HouseholdFlag = "benefits" | "low-income" | "off-grid" | "none";
+
+const PROPERTY_OPTIONS: { value: PropertyType; label: string; emoji: string }[] = [
+  { value: "detached", label: "Detached House", emoji: "🏠" },
+  { value: "semi", label: "Semi-Detached House", emoji: "🏘️" },
+  { value: "mid-terrace", label: "Mid-Terrace", emoji: "🏚️" },
+  { value: "end-terrace", label: "End-Terrace", emoji: "🏡" },
+  { value: "ground-flat", label: "Ground Floor Flat", emoji: "🏢" },
+  { value: "upper-flat", label: "Upper Floor Flat", emoji: "🏬" },
+  { value: "bungalow", label: "Bungalow", emoji: "🛖" },
 ];
 
-const WORK_TYPES = [
-  { value: "heat-pump", label: "Heat Pump (Air/Ground Source)", icon: ThermometerSun },
-  { value: "solar", label: "Solar PV / Battery", icon: Sun },
-  { value: "insulation", label: "Insulation (Cavity/Loft/EWI)", icon: Home },
-  { value: "ev-charger", label: "EV Charger", icon: Zap },
-  { value: "other-green", label: "Other Renewable / Energy Efficiency", icon: Wind },
+const OWNERSHIP_OPTIONS: { value: Ownership; label: string }[] = [
+  { value: "own", label: "I own it" },
+  { value: "rent-private", label: "I rent it (private landlord)" },
+  { value: "rent-social", label: "I rent it (housing association / council)" },
+  { value: "family", label: "I live with family" },
 ];
 
-const WORK_TO_TRADES: Record<string, string[]> = {
-  "heat-pump": ["Air Source Heat Pump", "Ground Source Heat Pump"],
-  "solar": ["Solar PV Installer", "Battery Storage"],
-  "insulation": ["Cavity Wall Insulation", "Loft Insulation", "External Wall Insulation (EWI)"],
-  "ev-charger": ["EV Charger Installer"],
-  "other-green": ["MVHR Installer", "Underfloor Heating", "Draught Proofing Specialist", "Green Roof", "Rainwater Harvesting"],
-};
+const EPC_OPTIONS: { value: EpcBand; label: string; sub?: string }[] = [
+  { value: "ab", label: "A or B", sub: "Very efficient" },
+  { value: "c", label: "C", sub: "" },
+  { value: "d", label: "D", sub: "" },
+  { value: "efg", label: "E, F or G", sub: "Least efficient" },
+  { value: "unknown", label: "I don't know", sub: "Help me find out" },
+];
 
-const GrantCard = ({ grant, isMatch }: { grant: typeof GRANTS[0]; isMatch: boolean }) => {
-  const [open, setOpen] = useState(false);
+const HOUSEHOLD_OPTIONS: { value: HouseholdFlag; label: string }[] = [
+  { value: "benefits", label: "We receive Universal Credit or other means-tested benefits" },
+  { value: "low-income", label: "Our household income is under £31,000/yr" },
+  { value: "off-grid", label: "The property is off the gas grid (no mains gas)" },
+  { value: "none", label: "None of these apply" },
+];
 
+/* ─── Scheme definitions ─── */
+interface Scheme {
+  id: string;
+  name: string;
+  icon: string;
+  confidence: "may" | "might";
+  summary: string;
+  value: string;
+  metCriteria: string[];
+  confirmCriteria: string[];
+  jobType: string;
+}
+
+function isHouse(p: PropertyType) {
+  return ["detached", "semi", "mid-terrace", "end-terrace", "bungalow"].includes(p);
+}
+
+function isEpcDOrBelow(epc: EpcBand) {
+  return epc === "d" || epc === "efg";
+}
+
+function getSchemes(
+  property: PropertyType,
+  ownership: Ownership,
+  epc: EpcBand,
+  household: HouseholdFlag[]
+): Scheme[] {
+  const schemes: Scheme[] = [];
+  const hasBenefits = household.includes("benefits");
+  const lowIncome = household.includes("low-income");
+  const offGrid = household.includes("off-grid");
+  const isOwner = ownership === "own";
+  const poorEpc = isEpcDOrBelow(epc);
+
+  // ECO4: EPC D/E/F/G AND (benefits OR income < £31K)
+  if (poorEpc && (hasBenefits || lowIncome)) {
+    const met: string[] = [];
+    const confirm: string[] = [];
+    met.push("EPC rating D or below");
+    if (hasBenefits) met.push("Receives means-tested benefits");
+    if (lowIncome) met.push("Household income under £31,000");
+    confirm.push("TrustMark-registered installer confirms eligibility");
+    schemes.push({
+      id: "eco4",
+      name: "ECO4 Scheme",
+      icon: "🌱",
+      confidence: "may",
+      summary: "Energy suppliers fund insulation, heating & renewable upgrades for qualifying households.",
+      value: "Up to £10,000 funded",
+      metCriteria: met,
+      confirmCriteria: confirm,
+      jobType: "insulation",
+    });
+  }
+
+  // GBIS: EPC D/E/F/G AND house (not flat)
+  if (poorEpc && isHouse(property)) {
+    schemes.push({
+      id: "gbis",
+      name: "Great British Insulation Scheme",
+      icon: "🏠",
+      confidence: "may",
+      summary: "Insulation measures funded through energy suppliers for eligible homes in council tax bands A–D.",
+      value: "Up to £6,000 funded",
+      metCriteria: ["EPC rating D or below", "Property is a house"],
+      confirmCriteria: ["Council tax band confirmed by installer"],
+      jobType: "insulation",
+    });
+  }
+
+  // BUS: owner AND off gas grid
+  if (isOwner && offGrid) {
+    schemes.push({
+      id: "bus",
+      name: "Boiler Upgrade Scheme",
+      icon: "🔥",
+      confidence: "may",
+      summary: "£7,500 grant towards an air or ground source heat pump, replacing fossil fuel heating.",
+      value: "Up to £7,500 grant",
+      metCriteria: ["Owner-occupier", "Off the gas grid"],
+      confirmCriteria: ["MCS-certified installer confirms suitability"],
+      jobType: "heat-pump",
+    });
+  }
+
+  // HUG: owner AND off gas grid AND EPC D or below
+  if (isOwner && offGrid && poorEpc) {
+    schemes.push({
+      id: "hug",
+      name: "Home Upgrade Grant (HUG2)",
+      icon: "⚡",
+      confidence: "might",
+      summary: "Funding for energy efficiency improvements in off-gas-grid homes with low EPC ratings.",
+      value: "Up to £10,000 funded",
+      metCriteria: ["Owner-occupier", "Off the gas grid", "EPC rating D or below"],
+      confirmCriteria: ["Income/benefits verified by local authority"],
+      jobType: "insulation",
+    });
+  }
+
+  // 0% VAT — always show
+  schemes.push({
+    id: "vat",
+    name: "0% VAT on Energy Saving Materials",
+    icon: "💷",
+    confidence: "may",
+    summary: "Zero VAT on insulation, heat pumps, solar panels, and other energy-saving installations until March 2027.",
+    value: "Save 20% VAT on materials & install",
+    metCriteria: ["UK residential property"],
+    confirmCriteria: [],
+    jobType: "insulation",
+  });
+
+  // EPC Assessor — if unknown
+  if (epc === "unknown") {
+    schemes.push({
+      id: "epc",
+      name: "Get an EPC Assessment",
+      icon: "📋",
+      confidence: "might",
+      summary: "Knowing your EPC rating unlocks eligibility for most grant schemes. We can match you with a local assessor.",
+      value: "From £60 — could unlock thousands",
+      metCriteria: ["EPC rating unknown"],
+      confirmCriteria: ["Assessor visit to confirm rating"],
+      jobType: "epc-assessment",
+    });
+  }
+
+  return schemes;
+}
+
+/* ─── Components ─── */
+const StepIndicator = ({ current, total }: { current: number; total: number }) => (
+  <div className="flex items-center gap-2 mb-8">
+    {Array.from({ length: total }, (_, i) => (
+      <div
+        key={i}
+        className={`h-1 flex-1 rounded-full transition-all ${
+          i < current ? "bg-teal" : i === current ? "bg-teal/60" : "bg-cream/10"
+        }`}
+      />
+    ))}
+  </div>
+);
+
+const SchemeCard = ({ scheme }: { scheme: Scheme }) => {
+  const isMay = scheme.confidence === "may";
   return (
-    <div className={`rounded-xl border transition-all ${isMatch ? "border-green-500/30 bg-green-500/[0.04]" : "border-cream/10 bg-cream/[0.02]"}`}>
-      <button
-        type="button"
-        onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between px-6 py-5 text-left"
-      >
+    <div className="rounded-xl border border-green-500/20 bg-green-500/[0.04] p-6 space-y-4">
+      <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-3">
-          {isMatch ? (
-            <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
-          ) : (
-            <HelpCircle className="w-5 h-5 text-cream/30 flex-shrink-0" />
-          )}
+          <span className="text-2xl">{scheme.icon}</span>
           <div>
-            <h3 className="font-heading text-cream text-xl tracking-wide">{grant.name}</h3>
-            <p className="font-mono text-xs text-teal mt-0.5">{grant.amount}</p>
+            <h3 className="font-heading text-cream text-xl tracking-wide">{scheme.name}</h3>
+            <span
+              className={`font-mono text-[11px] uppercase tracking-widest ${
+                isMay ? "text-teal" : "text-amber-400"
+              }`}
+            >
+              {isMay ? "You may qualify" : "You might qualify — check with installer"}
+            </span>
           </div>
         </div>
-        {open ? <ChevronUp className="w-5 h-5 text-cream/40" /> : <ChevronDown className="w-5 h-5 text-cream/40" />}
-      </button>
+        <span className="font-heading text-green-500 text-lg whitespace-nowrap">{scheme.value}</span>
+      </div>
 
-      {open && (
-        <div className="px-6 pb-5 space-y-4 border-t border-cream/5 pt-4">
-          <p className="font-body text-cream/60 text-sm leading-relaxed">{grant.description}</p>
+      <p className="font-body text-cream/60 text-sm leading-relaxed">{scheme.summary}</p>
 
-          <div>
-            <p className="font-mono text-[10px] text-teal uppercase tracking-widest mb-2">Provider</p>
-            <p className="font-body text-cream/80 text-sm">{grant.provider}</p>
-          </div>
-
-          <div>
-            <p className="font-mono text-[10px] text-teal uppercase tracking-widest mb-2">Requirements</p>
-            <ul className="space-y-1.5">
-              {grant.requirements.map((req, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm text-cream/50">
-                  <span className="text-teal mt-0.5">•</span>
-                  <span className="font-body">{req}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <p className="font-mono text-[10px] text-teal uppercase tracking-widest mb-2">Eligible Works</p>
-            <div className="flex flex-wrap gap-2">
-              {grant.eligibleWorks.map((w) => (
-                <span key={w} className="inline-flex items-center gap-1 bg-green-500/10 text-green-400 font-mono text-[10px] px-2.5 py-1 rounded-full">
-                  <Leaf className="w-3 h-3" /> {w}
-                </span>
-              ))}
+      {scheme.metCriteria.length > 0 && (
+        <div className="space-y-1.5">
+          {scheme.metCriteria.map((c) => (
+            <div key={c} className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0" />
+              <span className="font-body text-sm text-cream/70">{c}</span>
             </div>
-          </div>
+          ))}
+        </div>
+      )}
 
-          <a
-            href={grant.link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-block bg-teal text-cream font-mono text-xs py-2.5 px-5 rounded-lg hover:bg-teal-hover transition-colors tracking-wider uppercase"
-          >
-            Learn More & Apply →
-          </a>
+      {scheme.confirmCriteria.length > 0 && (
+        <div className="space-y-1.5">
+          {scheme.confirmCriteria.map((c) => (
+            <div key={c} className="flex items-center gap-2">
+              <HelpCircle className="w-4 h-4 text-amber-400 flex-shrink-0" />
+              <span className="font-body text-sm text-cream/50">{c}</span>
+            </div>
+          ))}
         </div>
       )}
     </div>
   );
 };
 
+/* ─── Main Page ─── */
 const GreenGrantsPage = () => {
-  const [selectedWork, setSelectedWork] = useState<string>("");
+  const [step, setStep] = useState(0);
+  const [property, setProperty] = useState<PropertyType | null>(null);
+  const [ownership, setOwnership] = useState<Ownership | null>(null);
+  const [epc, setEpc] = useState<EpcBand | null>(null);
+  const [household, setHousehold] = useState<HouseholdFlag[]>([]);
 
-  const matchedTradeTypes = selectedWork ? WORK_TO_TRADES[selectedWork] || [] : [];
-  const matchedGrants = GRANTS.filter((g) =>
-    g.eligibleWorks.some((ew) => matchedTradeTypes.includes(ew))
-  );
-  const otherGrants = GRANTS.filter((g) => !matchedGrants.includes(g));
+  const showResults = step === 4;
+  const schemes = showResults && property && ownership && epc
+    ? getSchemes(property, ownership, epc, household)
+    : [];
+
+  const primaryJobType = schemes.length > 0 ? schemes[0].jobType : "insulation";
+
+  const toggleHousehold = (flag: HouseholdFlag) => {
+    if (flag === "none") {
+      setHousehold(["none"]);
+      return;
+    }
+    setHousehold((prev) => {
+      const without = prev.filter((f) => f !== "none");
+      return without.includes(flag) ? without.filter((f) => f !== flag) : [...without, flag];
+    });
+  };
+
+  const canAdvance = () => {
+    if (step === 0) return !!property;
+    if (step === 1) return !!ownership;
+    if (step === 2) return !!epc;
+    if (step === 3) return household.length > 0;
+    return false;
+  };
+
+  const advance = () => {
+    if (canAdvance()) setStep(step + 1);
+  };
+
+  const cardClass = (isActive: boolean) =>
+    `cursor-pointer rounded-xl border px-5 py-4 transition-all text-left ${
+      isActive
+        ? "border-teal/60 bg-teal/10 text-cream"
+        : "border-cream/10 bg-cream/[0.02] text-cream/60 hover:border-cream/20"
+    }`;
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "hsl(var(--deep))" }}>
       <Navbar />
 
       {/* Hero */}
-      <section className="pt-32 pb-16 px-6">
+      <section className="pt-32 pb-12 px-6">
         <div className="max-w-3xl mx-auto text-center">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="w-8 h-[2px] bg-green-500" />
-            <span className="font-mono text-xs text-green-500 uppercase tracking-widest">Grant Eligibility Checker</span>
-            <div className="w-8 h-[2px] bg-green-500" />
+            <div className="w-8 h-[2px] bg-teal" />
+            <span className="font-mono text-xs text-teal uppercase tracking-widest">Green Funding Checker</span>
+            <div className="w-8 h-[2px] bg-teal" />
           </div>
-          <h1 className="font-heading text-cream text-[52px] md:text-[72px] leading-[0.9] mb-4">
-            FIND YOUR <span className="text-green-500">GREEN GRANT.</span>
+          <h1 className="font-heading text-cream text-[44px] md:text-[64px] leading-[0.9] mb-4">
+            FIND OUT WHAT <span className="text-teal">HELP</span> YOU COULD GET
           </h1>
           <p className="font-body text-cream/50 text-lg max-w-xl mx-auto leading-relaxed">
-            UK homeowners can access thousands in grants for energy-efficient home improvements. Select your planned work to see which schemes you may qualify for.
+            Government schemes are funding thousands of pounds of energy improvements for UK homeowners. Answer 4 questions to see what you may qualify for.
           </p>
         </div>
       </section>
 
-      {/* Selector */}
-      <section className="px-6 pb-8">
-        <div className="max-w-3xl mx-auto">
-          <p className="font-mono text-xs text-teal uppercase tracking-widest mb-4">What work are you planning?</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-            {WORK_TYPES.map((wt) => {
-              const Icon = wt.icon;
-              const isActive = selectedWork === wt.value;
-              return (
-                <button
-                  key={wt.value}
-                  onClick={() => setSelectedWork(isActive ? "" : wt.value)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl border transition-all text-left ${
-                    isActive
-                      ? "border-green-500/50 bg-green-500/10 text-green-400"
-                      : "border-cream/10 bg-cream/[0.02] text-cream/60 hover:border-cream/20"
-                  }`}
-                >
-                  <Icon className={`w-5 h-5 flex-shrink-0 ${isActive ? "text-green-500" : "text-cream/30"}`} />
-                  <span className="font-body text-sm">{wt.label}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* Results */}
+      {/* The Checker */}
       <section className="px-6 pb-24">
-        <div className="max-w-3xl mx-auto space-y-4">
-          {selectedWork && matchedGrants.length > 0 && (
-            <>
+        <div className="max-w-2xl mx-auto">
+          {!showResults && <StepIndicator current={step} total={4} />}
+
+          {/* Step 1 — Property type */}
+          {step === 0 && (
+            <div>
+              <h2 className="font-heading text-cream text-2xl mb-6">What type of property do you live in?</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {PROPERTY_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setProperty(opt.value)}
+                    className={cardClass(property === opt.value)}
+                  >
+                    <span className="text-xl mr-3">{opt.emoji}</span>
+                    <span className="font-body text-sm">{opt.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Step 2 — Ownership */}
+          {step === 1 && (
+            <div>
+              <h2 className="font-heading text-cream text-2xl mb-6">Do you own or rent your home?</h2>
+              <div className="grid grid-cols-1 gap-3">
+                {OWNERSHIP_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setOwnership(opt.value)}
+                    className={cardClass(ownership === opt.value)}
+                  >
+                    <span className="font-body text-sm">{opt.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Step 3 — EPC */}
+          {step === 2 && (
+            <div>
+              <h2 className="font-heading text-cream text-2xl mb-6">What is your home's current EPC energy rating?</h2>
+              <div className="grid grid-cols-1 gap-3">
+                {EPC_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setEpc(opt.value)}
+                    className={cardClass(epc === opt.value)}
+                  >
+                    <div>
+                      <span className="font-body text-sm font-medium">{opt.label}</span>
+                      {opt.sub && <span className="font-body text-xs text-cream/40 ml-2">{opt.sub}</span>}
+                    </div>
+                  </button>
+                ))}
+              </div>
+              {epc === "unknown" && (
+                <div className="mt-4 flex items-start gap-3 bg-teal/10 border border-teal/20 rounded-xl px-5 py-4">
+                  <AlertCircle className="w-5 h-5 text-teal flex-shrink-0 mt-0.5" />
+                  <p className="font-body text-sm text-cream/70">
+                    You can find your EPC rating for free at{" "}
+                    <a
+                      href="https://www.gov.uk/find-energy-certificate"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-teal underline underline-offset-2"
+                    >
+                      epcregister.com <ExternalLink className="inline w-3 h-3" />
+                    </a>{" "}
+                    or we can match you with a local EPC assessor.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Step 4 — Household */}
+          {step === 3 && (
+            <div>
+              <h2 className="font-heading text-cream text-2xl mb-6">Which of these best describes your household?</h2>
+              <p className="font-mono text-xs text-cream/40 uppercase tracking-widest mb-4">Select all that apply</p>
+              <div className="grid grid-cols-1 gap-3">
+                {HOUSEHOLD_OPTIONS.map((opt) => {
+                  const isActive = household.includes(opt.value);
+                  return (
+                    <button
+                      key={opt.value}
+                      onClick={() => toggleHousehold(opt.value)}
+                      className={cardClass(isActive)}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+                            isActive ? "bg-teal border-teal" : "border-cream/30"
+                          }`}
+                        >
+                          {isActive && <CheckCircle2 className="w-3.5 h-3.5 text-cream" />}
+                        </div>
+                        <span className="font-body text-sm">{opt.label}</span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Navigation buttons */}
+          {!showResults && (
+            <div className="flex items-center justify-between mt-8">
+              {step > 0 ? (
+                <button
+                  onClick={() => setStep(step - 1)}
+                  className="flex items-center gap-2 font-mono text-sm text-cream/50 hover:text-cream transition-colors"
+                >
+                  <ChevronLeft className="w-4 h-4" /> Back
+                </button>
+              ) : (
+                <div />
+              )}
+              <button
+                onClick={advance}
+                disabled={!canAdvance()}
+                className="bg-teal text-cream font-mono text-sm px-8 py-3 rounded-xl hover:bg-teal-hover transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                {step === 3 ? "See My Results" : "Next →"}
+              </button>
+            </div>
+          )}
+
+          {/* Results */}
+          {showResults && (
+            <div className="space-y-6">
               <div className="flex items-center gap-3 mb-2">
-                <CheckCircle2 className="w-5 h-5 text-green-500" />
+                <Leaf className="w-5 h-5 text-green-500" />
                 <p className="font-mono text-xs text-green-500 uppercase tracking-widest">
-                  {matchedGrants.length} grant{matchedGrants.length > 1 ? "s" : ""} matched
+                  {schemes.length} scheme{schemes.length !== 1 ? "s" : ""} found
                 </p>
               </div>
-              {matchedGrants.map((g) => (
-                <GrantCard key={g.id} grant={g} isMatch />
+
+              {schemes.map((s) => (
+                <SchemeCard key={s.id} scheme={s} />
               ))}
-            </>
-          )}
 
-          {selectedWork && matchedGrants.length === 0 && (
-            <div className="text-center py-12 border border-cream/10 rounded-xl">
-              <XCircle className="w-8 h-8 text-cream/20 mx-auto mb-3" />
-              <p className="font-heading text-cream text-2xl mb-1">No Direct Matches</p>
-              <p className="font-body text-cream/40 text-sm">But check the grants below — you may still qualify based on your circumstances.</p>
-            </div>
-          )}
-
-          {(otherGrants.length > 0 || !selectedWork) && (
-            <>
-              <div className="flex items-center gap-3 mt-8 mb-2">
-                <HelpCircle className="w-5 h-5 text-cream/30" />
-                <p className="font-mono text-xs text-cream/40 uppercase tracking-widest">
-                  {selectedWork ? "Other available grants" : "All available grants"}
+              {/* Disclaimer */}
+              <div className="bg-cream/[0.03] border border-cream/10 rounded-xl px-6 py-5">
+                <p className="font-body text-cream/50 text-sm leading-relaxed">
+                  <strong className="text-cream/70">These results are a guide only</strong> — a certified installer will confirm your exact eligibility during a free site assessment. ProGrafter signposts available schemes but does not provide financial or energy advice.
                 </p>
               </div>
-              {(selectedWork ? otherGrants : GRANTS).map((g) => (
-                <GrantCard key={g.id} grant={g} isMatch={false} />
-              ))}
-            </>
-          )}
 
-          {/* CTA */}
-          <div className="mt-12 bg-green-500/[0.06] border border-green-500/20 rounded-xl p-8 text-center">
-            <Leaf className="w-8 h-8 text-green-500 mx-auto mb-3" />
-            <h3 className="font-heading text-cream text-2xl mb-2">NEED A CERTIFIED GREEN TRADE?</h3>
-            <p className="font-body text-cream/50 text-sm mb-6 max-w-md mx-auto">
-              All ProGrafter green trades are MCS, TrustMark, and PAS accredited — so your grant application goes through first time.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Link
-                to="/post-a-job"
-                className="bg-green-500 text-white font-mono text-sm py-3 px-8 rounded-xl hover:bg-green-600 transition-colors tracking-wider uppercase"
-              >
-                Post a Green Job
-              </Link>
-              <Link
-                to="/register/trade"
-                className="border border-cream/20 text-cream font-mono text-sm py-3 px-8 rounded-xl hover:bg-cream/5 transition-colors tracking-wider uppercase"
-              >
-                Register as Green Trade
-              </Link>
+              {/* CTA */}
+              <div className="text-center pt-4">
+                <Link
+                  to={`/post-a-job?type=${primaryJobType}`}
+                  className="inline-block bg-green-500 text-white font-mono text-sm py-4 px-10 rounded-xl hover:bg-green-600 transition-colors tracking-wider uppercase shadow-lg shadow-green-500/20"
+                >
+                  Match Me With a Certified Local Installer →
+                </Link>
+              </div>
+
+              {/* Start over */}
+              <div className="text-center">
+                <button
+                  onClick={() => { setStep(0); setProperty(null); setOwnership(null); setEpc(null); setHousehold([]); }}
+                  className="font-mono text-xs text-cream/40 hover:text-cream/60 underline underline-offset-4 transition-colors"
+                >
+                  Start over
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </section>
 
