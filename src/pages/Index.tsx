@@ -44,6 +44,7 @@ const Index = () => {
       <WhatYouGet />
       <WhyDifferent />
       <PlatformPreview />
+      <SeeHowItWorks />
       <SignUpSection />
       <Footer />
     </div>
