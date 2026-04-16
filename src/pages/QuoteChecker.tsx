@@ -57,8 +57,8 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0];
     if (selected && selected.type === "application/pdf") {
-      if (selected.size > 20 * 1024 * 1024) {
-        toast({ title: "File too large", description: "Maximum file size is 20MB.", variant: "destructive" });
+      if (selected.size > 10 * 1024 * 1024) {
+        toast({ title: "File too large", description: "Maximum file size is 10MB.", variant: "destructive" });
         return;
       }
       setFile(selected);
@@ -68,8 +68,8 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
   };
 
   const handleSubmit = async () => {
-    if (!file || !projectType || !email) {
-      toast({ title: "Missing fields", description: "Please fill in all required fields.", variant: "destructive" });
+    if (!file || !projectType || !email || description.length < 30) {
+      toast({ title: "Missing fields", description: "Please fill in all required fields. Description must be at least 30 characters.", variant: "destructive" });
       return;
     }
     setIsSubmitting(true);
@@ -136,7 +136,7 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
               <div>
                 <Upload className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
                 <p className="font-mono text-sm text-muted-foreground">Click to upload your quote PDF</p>
-                <p className="font-mono text-xs text-muted-foreground mt-1">Max 20MB</p>
+                <p className="font-mono text-xs text-muted-foreground mt-1">PDF only — Max 10MB</p>
               </div>
             )}
           </div>
@@ -160,12 +160,13 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
         </div>
 
         <div className="space-y-2">
-          <Label className="font-mono text-sm text-navy">What did you ask to be quoted for?</Label>
+          <Label className="font-mono text-sm text-navy">What did you ask to be quoted for? *</Label>
           <textarea
             placeholder="e.g. Single storey rear extension, 4m x 3m, with bi-fold doors..."
             value={description} onChange={(e) => setDescription(e.target.value)} rows={3}
             className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 font-mono resize-none"
           />
+          <p className="font-mono text-xs text-muted-foreground">Minimum 30 characters ({description.length}/30)</p>
         </div>
 
         <div className="space-y-2">
@@ -176,7 +177,7 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
 
         <Button
           onClick={handleSubmit}
-          disabled={isSubmitting || !file || !projectType || !email}
+          disabled={isSubmitting || !file || !projectType || !email || description.length < 30}
           className="w-full h-12 bg-teal text-white font-mono text-sm rounded-xl hover:bg-teal-hover transition-colors shadow-lg shadow-teal/20"
         >
           {isSubmitting ? (
@@ -334,9 +335,9 @@ const QuoteChecker = () => {
               <ShieldCheck className="h-3.5 w-3.5" />
               43-Point Quote Analysis
             </div>
-            <h1 className="font-heading text-4xl md:text-5xl text-navy mb-3">Quote Checker</h1>
+            <h1 className="font-heading text-4xl md:text-5xl text-navy mb-3">AI Quote Checker</h1>
             <p className="text-muted-foreground font-mono text-sm max-w-md mx-auto leading-relaxed">
-              Upload your builder's quote and get a professional analysis highlighting missing items, vague costs, and questions to ask — in under 60 seconds.
+              Upload any building quote. Our AI checks it against a 43-point checklist and tells you exactly what's missing. Report in your inbox within 2 hours. <span className="font-semibold text-navy">£49.</span>
             </p>
           </div>
 
