@@ -1,0 +1,102 @@
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  LayoutDashboard,
+  Briefcase,
+  FolderKanban,
+  Bell,
+  PoundSterling,
+  UserCircle,
+  LogOut,
+} from "lucide-react";
+
+const NAV_ITEMS = [
+  { label: "Dashboard", icon: LayoutDashboard, id: "dashboard" },
+  { label: "Available Jobs", icon: Briefcase, id: "jobs" },
+  { label: "Active Projects", icon: FolderKanban, id: "projects" },
+  { label: "Planning Alerts", icon: Bell, id: "alerts" },
+  { label: "Earnings", icon: PoundSterling, id: "earnings" },
+  { label: "My Profile", icon: UserCircle, id: "profile" },
+];
+
+interface TradeSidebarProps {
+  activeNav: string;
+  setActiveNav: (id: string) => void;
+  sidebarOpen: boolean;
+  setSidebarOpen: (open: boolean) => void;
+}
+
+const TradeSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen }: TradeSidebarProps) => {
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate("/login");
+  };
+
+  return (
+    <>
+      {/* Mobile toggle */}
+      <button
+        className="md:hidden fixed top-4 left-4 z-50 bg-primary text-primary-foreground p-2 rounded-xl shadow-lg"
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+      >
+        <LayoutDashboard className="w-5 h-5" />
+      </button>
+
+      {/* Sidebar */}
+      <aside
+        className={`fixed md:static inset-y-0 left-0 z-40 w-64 bg-primary flex flex-col transition-transform duration-300 ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+        }`}
+      >
+        <div className="p-6 border-b border-white/10">
+          <a href="/" className="font-heading text-[24px] leading-none tracking-wide">
+            <span className="text-primary-foreground">Pro</span>
+            <span className="text-secondary">grafter</span>
+          </a>
+        </div>
+
+        <nav className="flex-1 p-4 space-y-1">
+          {NAV_ITEMS.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => {
+                setActiveNav(item.id);
+                setSidebarOpen(false);
+              }}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-mono text-sm transition-colors ${
+                activeNav === item.id
+                  ? "bg-secondary/20 text-secondary"
+                  : "text-primary-foreground/60 hover:text-primary-foreground hover:bg-white/5"
+              }`}
+            >
+              <item.icon className="w-4 h-4" />
+              {item.label}
+            </button>
+          ))}
+        </nav>
+
+        <div className="p-4 border-t border-white/10">
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-mono text-sm text-primary-foreground/40 hover:text-destructive hover:bg-white/5 transition-colors"
+          >
+            <LogOut className="w-4 h-4" />
+            Sign Out
+          </button>
+        </div>
+      </aside>
+
+      {/* Overlay */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/40 z-30 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+    </>
+  );
+};
+
+export default TradeSidebar;
