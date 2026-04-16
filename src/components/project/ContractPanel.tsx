@@ -10,6 +10,11 @@ interface Quote {
   message: string | null;
   status: string;
   trade_id: string;
+  tier_enabled?: boolean;
+  budget_price?: number | null;
+  standard_price?: number | null;
+  premium_price?: number | null;
+  selected_tier?: string | null;
 }
 
 interface Contract {
