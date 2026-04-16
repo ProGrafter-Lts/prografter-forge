@@ -21,15 +21,20 @@ const SignUpSection = () => {
 
     const { error: dbError } = await supabase.from("early_signups").insert({
       name: name.trim(),
-      email: email.trim(),
+      email: email.trim().toLowerCase(),
       postcode: postcode.trim(),
       user_type: userType,
     });
 
     setLoading(false);
     if (dbError) {
-      setError("Something went wrong. Please try again.");
-      console.error(dbError);
+      // Postgres unique violation
+      if ((dbError as { code?: string }).code === "23505") {
+        setError("You're already on the waitlist for this option. We'll be in touch!");
+      } else {
+        setError("Something went wrong. Please try again.");
+        console.error(dbError);
+      }
     } else {
       setSuccess(true);
     }
