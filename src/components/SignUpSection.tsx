@@ -42,7 +42,7 @@ const SignUpSection = () => {
         GRAFT
       </span>
 
-      <div className="max-w-5xl mx-auto grid craft:grid-cols-2 gap-16 items-start relative z-10">
+      <div className="max-w-[1800px] mx-auto grid craft:grid-cols-2 gap-16 items-start relative z-10">
         {/* Left */}
         <div className="fade-up">
           <div className="flex items-center gap-3 mb-4">

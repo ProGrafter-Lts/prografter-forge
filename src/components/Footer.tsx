@@ -1,7 +1,7 @@
 const Footer = () => {
   return (
     <footer className="bg-deep border-t border-cream/5 py-8 px-6">
-      <div className="max-w-7xl mx-auto flex flex-col craft:flex-row items-center justify-between gap-4">
+      <div className="max-w-[1800px] mx-auto flex flex-col craft:flex-row items-center justify-between gap-4">
         <a href="#" className="font-heading text-[22px] leading-none">
           <span className="text-cream">Pro</span>
           <span className="text-teal">grafter</span>
