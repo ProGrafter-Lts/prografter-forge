@@ -14,6 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
+      contracts: {
+        Row: {
+          agreed_price: number
+          contract_text: string
+          created_at: string
+          homeowner_id: string
+          homeowner_signed_at: string | null
+          id: string
+          job_id: string
+          payment_schedule: Json
+          quote_id: string
+          status: string
+          trade_id: string
+          trade_signed_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          agreed_price: number
+          contract_text: string
+          created_at?: string
+          homeowner_id: string
+          homeowner_signed_at?: string | null
+          id?: string
+          job_id: string
+          payment_schedule?: Json
+          quote_id: string
+          status?: string
+          trade_id: string
+          trade_signed_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          agreed_price?: number
+          contract_text?: string
+          created_at?: string
+          homeowner_id?: string
+          homeowner_signed_at?: string | null
+          id?: string
+          job_id?: string
+          payment_schedule?: Json
+          quote_id?: string
+          status?: string
+          trade_id?: string
+          trade_signed_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contracts_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "quotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       early_signups: {
         Row: {
           created_at: string
@@ -551,6 +614,66 @@ export type Database = {
           },
         ]
       }
+      sub_trade_assignments: {
+        Row: {
+          access_token: string
+          created_at: string
+          external_sub_email: string | null
+          external_sub_name: string | null
+          external_sub_phone: string | null
+          id: string
+          job_id: string
+          main_trade_id: string
+          stage_id: string
+          status: string
+          sub_trade_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          access_token?: string
+          created_at?: string
+          external_sub_email?: string | null
+          external_sub_name?: string | null
+          external_sub_phone?: string | null
+          id?: string
+          job_id: string
+          main_trade_id: string
+          stage_id: string
+          status?: string
+          sub_trade_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          access_token?: string
+          created_at?: string
+          external_sub_email?: string | null
+          external_sub_name?: string | null
+          external_sub_phone?: string | null
+          id?: string
+          job_id?: string
+          main_trade_id?: string
+          stage_id?: string
+          status?: string
+          sub_trade_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sub_trade_assignments_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sub_trade_assignments_stage_id_fkey"
+            columns: ["stage_id"]
+            isOneToOne: false
+            referencedRelation: "project_stages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suppressed_emails: {
         Row: {
           created_at: string
@@ -662,6 +785,9 @@ export type Database = {
           labour_cost: number
           materials_cost: number
           programme_impact_days: number
+          reason: string | null
+          signed_at: string | null
+          signed_by: string | null
           status: string
           title: string
           trade_id: string
@@ -675,6 +801,9 @@ export type Database = {
           labour_cost?: number
           materials_cost?: number
           programme_impact_days?: number
+          reason?: string | null
+          signed_at?: string | null
+          signed_by?: string | null
           status?: string
           title: string
           trade_id: string
@@ -688,6 +817,9 @@ export type Database = {
           labour_cost?: number
           materials_cost?: number
           programme_impact_days?: number
+          reason?: string | null
+          signed_at?: string | null
+          signed_by?: string | null
           status?: string
           title?: string
           trade_id?: string
