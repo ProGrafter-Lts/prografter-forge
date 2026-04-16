@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import { FolderKanban } from "lucide-react";
 import HomeownerSidebar from "@/components/homeowner/HomeownerSidebar";
 import ActiveProjectHero from "@/components/homeowner/ActiveProjectHero";
@@ -49,7 +50,7 @@ const HomeownerDashboard = () => {
         .order("created_at", { ascending: false }),
       supabase
         .from("quotes")
-        .select("id, amount, message, status, created_at, trade_id, job_id, trades(name, company_name, verified), jobs(title, job_type)")
+        .select("id, amount, message, status, created_at, trade_id, job_id, tier_enabled, budget_price, budget_description, standard_price, standard_description, premium_price, premium_description, selected_tier, trades(name, company_name, verified), jobs(title, job_type)")
         .order("created_at", { ascending: false }),
       supabase
         .from("variations")
@@ -88,6 +89,19 @@ const HomeownerDashboard = () => {
     // Find active project
     const active = jobData.find((j: any) => ["scheduled", "in_progress", "review"].includes(j.stage));
     setActiveProject(active || null);
+  };
+
+  const handleSelectTier = async (quoteId: string, tier: string, price: number) => {
+    const { error } = await supabase
+      .from("quotes")
+      .update({ selected_tier: tier, amount: price } as any)
+      .eq("id", quoteId);
+    if (error) {
+      toast.error("Failed to select tier");
+    } else {
+      toast.success(`${tier.charAt(0).toUpperCase() + tier.slice(1)} tier selected`);
+      loadData();
+    }
   };
 
   return (
@@ -173,7 +187,7 @@ const HomeownerDashboard = () => {
                 </div>
               )}
 
-              <QuotesReceived quotes={quotes} />
+              <QuotesReceived quotes={quotes} onSelectTier={handleSelectTier} />
               <MyJobs jobs={jobs} />
               <RecentSiteUpdates updates={siteUpdates} />
             </>

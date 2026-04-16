@@ -39,6 +39,10 @@ interface Variation {
 }
 interface Quote {
   id: string; amount: number; message: string | null; status: string; trade_id: string;
+  tier_enabled?: boolean; budget_price?: number | null; budget_description?: string | null;
+  standard_price?: number | null; standard_description?: string | null;
+  premium_price?: number | null; premium_description?: string | null;
+  selected_tier?: string | null;
 }
 interface Contract {
   id: string; job_id: string; quote_id: string; trade_id: string; homeowner_id: string;

@@ -10,6 +10,11 @@ interface Quote {
   message: string | null;
   status: string;
   trade_id: string;
+  tier_enabled?: boolean;
+  budget_price?: number | null;
+  standard_price?: number | null;
+  premium_price?: number | null;
+  selected_tier?: string | null;
 }
 
 interface Contract {
@@ -86,7 +91,14 @@ const ContractPanel = ({ jobId, jobType, quotes, contract, userRole, userId, tra
     if (!userId) return;
     setSigning(true);
 
-    const amount = Number(quote.amount);
+    // Use the selected tier price if tiers are enabled
+    const amount = quote.tier_enabled && quote.selected_tier
+      ? Number(
+          quote.selected_tier === "budget" ? quote.budget_price :
+          quote.selected_tier === "premium" ? quote.premium_price :
+          quote.standard_price
+        )
+      : Number(quote.amount);
     const contractText = generateContractText(jobType, tradeName, homeownerName, amount, quote.message);
     const paymentSchedule = [
       { label: "Commencement (25%)", amount: amount * 0.25, status: "unpaid" },

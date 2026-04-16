@@ -527,31 +527,55 @@ export type Database = {
       quotes: {
         Row: {
           amount: number
+          budget_description: string | null
+          budget_price: number | null
           created_at: string
           id: string
           job_id: string
           message: string | null
+          premium_description: string | null
+          premium_price: number | null
+          selected_tier: string | null
+          standard_description: string | null
+          standard_price: number | null
           status: string
+          tier_enabled: boolean
           trade_id: string
           updated_at: string
         }
         Insert: {
           amount: number
+          budget_description?: string | null
+          budget_price?: number | null
           created_at?: string
           id?: string
           job_id: string
           message?: string | null
+          premium_description?: string | null
+          premium_price?: number | null
+          selected_tier?: string | null
+          standard_description?: string | null
+          standard_price?: number | null
           status?: string
+          tier_enabled?: boolean
           trade_id: string
           updated_at?: string
         }
         Update: {
           amount?: number
+          budget_description?: string | null
+          budget_price?: number | null
           created_at?: string
           id?: string
           job_id?: string
           message?: string | null
+          premium_description?: string | null
+          premium_price?: number | null
+          selected_tier?: string | null
+          standard_description?: string | null
+          standard_price?: number | null
           status?: string
+          tier_enabled?: boolean
           trade_id?: string
           updated_at?: string
         }
