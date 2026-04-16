@@ -36,6 +36,14 @@ const App = () => (
           <Route path="/green" element={<GreenGrants />} />
           <Route path="/login" element={<Login />} />
           <Route
+            path="/planning-alerts"
+            element={
+              <ProtectedRoute>
+                <PlanningAlertsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/dashboard/trade"
             element={
               <ProtectedRoute>
