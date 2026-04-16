@@ -16,6 +16,7 @@ import ProtectedRoute from "./components/ProtectedRoute.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import QuoteChecker from "./pages/QuoteChecker.tsx";
 import GreenGrants from "./pages/GreenGrants.tsx";
+import PlanningAlertsPage from "./pages/PlanningAlerts.tsx";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,14 @@ const App = () => (
           <Route path="/quote-checker" element={<QuoteChecker />} />
           <Route path="/green" element={<GreenGrants />} />
           <Route path="/login" element={<Login />} />
+          <Route
+            path="/planning-alerts"
+            element={
+              <ProtectedRoute>
+                <PlanningAlertsPage />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/dashboard/trade"
             element={

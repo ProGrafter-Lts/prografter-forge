@@ -355,6 +355,97 @@ export type Database = {
         }
         Relationships: []
       }
+      planning_alert_subs: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          radius_miles: number
+          stripe_subscription_id: string | null
+          tier: string
+          trade_id: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          radius_miles?: number
+          stripe_subscription_id?: string | null
+          tier: string
+          trade_id: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          radius_miles?: number
+          stripe_subscription_id?: string | null
+          tier?: string
+          trade_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "planning_alert_subs_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "trades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      planning_alerts: {
+        Row: {
+          address: string
+          application_ref: string
+          application_type: string
+          approved_date: string | null
+          created_at: string
+          description: string | null
+          distance_miles: number | null
+          id: string
+          letter_generated: boolean
+          postcode: string
+          trade_id: string
+        }
+        Insert: {
+          address: string
+          application_ref: string
+          application_type: string
+          approved_date?: string | null
+          created_at?: string
+          description?: string | null
+          distance_miles?: number | null
+          id?: string
+          letter_generated?: boolean
+          postcode: string
+          trade_id: string
+        }
+        Update: {
+          address?: string
+          application_ref?: string
+          application_type?: string
+          approved_date?: string | null
+          created_at?: string
+          description?: string | null
+          distance_miles?: number | null
+          id?: string
+          letter_generated?: boolean
+          postcode?: string
+          trade_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "planning_alerts_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "trades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string

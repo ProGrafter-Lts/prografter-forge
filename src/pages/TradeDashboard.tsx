@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { BadgeCheck } from "lucide-react";
 import { GreenSpecialistBanner, CertificationsSection } from "@/components/GreenCertBadges";
 import { GreenLeafBadge } from "@/lib/greenTrades";
-import { PlanningAlertsSection } from "@/components/trade/PlanningAlerts";
+import DashboardPlanningAlerts from "@/components/trade/DashboardPlanningAlerts";
 import TradeSidebar from "@/components/trade/TradeSidebar";
 import StatsRow from "@/components/trade/StatsRow";
 import JobMatchesList from "@/components/trade/JobMatchesList";
@@ -157,7 +157,7 @@ const TradeDashboard = () => {
             totalReceived={marginData.totalReceived}
           />
 
-          {trade && <PlanningAlertsSection trade={trade} />}
+          {trade && <DashboardPlanningAlerts trade={trade} />}
           {trade && trade.is_green_trade && <CertificationsSection trade={trade} />}
 
           <QuotesList quotes={quotes} />
