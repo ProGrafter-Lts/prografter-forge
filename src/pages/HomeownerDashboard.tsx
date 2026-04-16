@@ -49,7 +49,7 @@ const HomeownerDashboard = () => {
         .order("created_at", { ascending: false }),
       supabase
         .from("quotes")
-        .select("id, amount, message, status, created_at, trade_id, job_id, trades(name, company_name, verified), jobs(title, job_type)")
+        .select("id, amount, message, status, created_at, trade_id, job_id, tier_enabled, budget_price, budget_description, standard_price, standard_description, premium_price, premium_description, selected_tier, trades(name, company_name, verified), jobs(title, job_type)")
         .order("created_at", { ascending: false }),
       supabase
         .from("variations")
