@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -13,33 +13,40 @@ type HouseholdFlag = "benefits" | "low-income" | "off-grid" | "none";
 const PROPERTY_OPTIONS: { value: PropertyType; label: string; emoji: string }[] = [
   { value: "detached", label: "Detached House", emoji: "🏠" },
   { value: "semi", label: "Semi-Detached House", emoji: "🏘️" },
-  { value: "mid-terrace", label: "Mid-Terrace", emoji: "🏚️" },
-  { value: "end-terrace", label: "End-Terrace", emoji: "🏡" },
+  { value: "mid-terrace", label: "Mid-Terrace", emoji: "🏠" },
+  { value: "end-terrace", label: "End-Terrace", emoji: "🏠" },
   { value: "ground-flat", label: "Ground Floor Flat", emoji: "🏢" },
-  { value: "upper-flat", label: "Upper Floor Flat", emoji: "🏬" },
-  { value: "bungalow", label: "Bungalow", emoji: "🛖" },
+  { value: "upper-flat", label: "Upper Floor Flat", emoji: "🏢" },
+  { value: "bungalow", label: "Bungalow", emoji: "🏡" },
 ];
 
-const OWNERSHIP_OPTIONS: { value: Ownership; label: string }[] = [
-  { value: "own", label: "I own it" },
-  { value: "rent-private", label: "I rent it (private landlord)" },
-  { value: "rent-social", label: "I rent it (housing association / council)" },
-  { value: "family", label: "I live with family" },
+const OWNERSHIP_OPTIONS: { value: Ownership; label: string; emoji: string }[] = [
+  { value: "own", label: "I own it (owner-occupier)", emoji: "🔑" },
+  { value: "rent-private", label: "I rent — private landlord", emoji: "📋" },
+  { value: "rent-social", label: "I rent — housing association or council", emoji: "🏛️" },
+  { value: "family", label: "I live with family (not my property)", emoji: "👨‍👩‍👧" },
 ];
 
-const EPC_OPTIONS: { value: EpcBand; label: string; sub?: string }[] = [
-  { value: "ab", label: "A or B", sub: "Very efficient" },
-  { value: "c", label: "C", sub: "" },
-  { value: "d", label: "D", sub: "" },
-  { value: "efg", label: "E, F or G", sub: "Least efficient" },
-  { value: "unknown", label: "I don't know", sub: "Help me find out" },
+const EPC_OPTIONS: { value: EpcBand; label: string; sub: string; color: string }[] = [
+  { value: "ab", label: "A or B", sub: "Very efficient", color: "🟢" },
+  { value: "c", label: "C", sub: "", color: "🟡" },
+  { value: "d", label: "D", sub: "", color: "🟠" },
+  { value: "efg", label: "E, F or G", sub: "Least efficient", color: "🔴" },
+  { value: "unknown", label: "I don't know", sub: "", color: "❓" },
 ];
 
-const HOUSEHOLD_OPTIONS: { value: HouseholdFlag; label: string }[] = [
-  { value: "benefits", label: "We receive Universal Credit or other means-tested benefits" },
-  { value: "low-income", label: "Our household income is under £31,000/yr" },
-  { value: "off-grid", label: "The property is off the gas grid (no mains gas)" },
-  { value: "none", label: "None of these apply" },
+const HOUSEHOLD_OPTIONS: { value: HouseholdFlag; label: string; emoji: string }[] = [
+  { value: "benefits", label: "We receive Universal Credit or other means-tested benefits", emoji: "💳" },
+  { value: "low-income", label: "Total household income is under £31,000 per year", emoji: "💰" },
+  { value: "off-grid", label: "Our property is off the gas grid (no mains gas supply)", emoji: "🔥" },
+  { value: "none", label: "None of these apply to us", emoji: "✖️" },
+];
+
+const SCHEME_OVERVIEW = [
+  { title: "ECO4", desc: "Up to £18,000 fully funded for eligible households", bg: "bg-[#16A34A]" },
+  { title: "Boiler Upgrade Scheme", desc: "£7,500 towards a heat pump", bg: "bg-teal" },
+  { title: "Great British Insulation Scheme", desc: "Up to £10,000 for insulation", bg: "bg-navy" },
+  { title: "0% VAT on Energy Saving Materials", desc: "20% saving on all installations", bg: "bg-deep" },
 ];
 
 /* ─── Scheme definitions ─── */
@@ -52,7 +59,7 @@ interface Scheme {
   value: string;
   metCriteria: string[];
   confirmCriteria: string[];
-  jobType: string;
+  govUrl: string;
 }
 
 function isHouse(p: PropertyType) {
@@ -63,12 +70,7 @@ function isEpcDOrBelow(epc: EpcBand) {
   return epc === "d" || epc === "efg";
 }
 
-function getSchemes(
-  property: PropertyType,
-  ownership: Ownership,
-  epc: EpcBand,
-  household: HouseholdFlag[]
-): Scheme[] {
+function getSchemes(property: PropertyType, ownership: Ownership, epc: EpcBand, household: HouseholdFlag[]): Scheme[] {
   const schemes: Scheme[] = [];
   const hasBenefits = household.includes("benefits");
   const lowIncome = household.includes("low-income");
@@ -76,113 +78,101 @@ function getSchemes(
   const isOwner = ownership === "own";
   const poorEpc = isEpcDOrBelow(epc);
 
-  // ECO4: EPC D/E/F/G AND (benefits OR income < £31K)
   if (poorEpc && (hasBenefits || lowIncome)) {
-    const met: string[] = [];
-    const confirm: string[] = [];
-    met.push("EPC rating D or below");
+    const met: string[] = ["EPC rating D or below"];
     if (hasBenefits) met.push("Receives means-tested benefits");
     if (lowIncome) met.push("Household income under £31,000");
-    confirm.push("TrustMark-registered installer confirms eligibility");
     schemes.push({
-      id: "eco4",
-      name: "ECO4 Scheme",
-      icon: "🌱",
-      confidence: "may",
+      id: "eco4", name: "ECO4 Scheme", icon: "🌱", confidence: "may",
       summary: "Energy suppliers fund insulation, heating & renewable upgrades for qualifying households.",
-      value: "Up to £10,000 funded",
-      metCriteria: met,
-      confirmCriteria: confirm,
-      jobType: "insulation",
+      value: "Up to £18,000", metCriteria: met,
+      confirmCriteria: ["TrustMark-registered installer confirms eligibility"],
+      govUrl: "https://www.gov.uk/apply-great-british-insulation-scheme",
     });
   }
 
-  // GBIS: EPC D/E/F/G AND house (not flat)
   if (poorEpc && isHouse(property)) {
     schemes.push({
-      id: "gbis",
-      name: "Great British Insulation Scheme",
-      icon: "🏠",
-      confidence: "may",
+      id: "gbis", name: "Great British Insulation Scheme", icon: "🏠", confidence: "may",
       summary: "Insulation measures funded through energy suppliers for eligible homes in council tax bands A–D.",
-      value: "Up to £6,000 funded",
-      metCriteria: ["EPC rating D or below", "Property is a house"],
+      value: "Up to £10,000", metCriteria: ["EPC rating D or below", "Property is a house"],
       confirmCriteria: ["Council tax band confirmed by installer"],
-      jobType: "insulation",
+      govUrl: "https://www.gov.uk/apply-great-british-insulation-scheme",
     });
   }
 
-  // BUS: owner AND off gas grid
   if (isOwner && offGrid) {
     schemes.push({
-      id: "bus",
-      name: "Boiler Upgrade Scheme",
-      icon: "🔥",
-      confidence: "may",
+      id: "bus", name: "Boiler Upgrade Scheme", icon: "🔥", confidence: "may",
       summary: "£7,500 grant towards an air or ground source heat pump, replacing fossil fuel heating.",
-      value: "Up to £7,500 grant",
-      metCriteria: ["Owner-occupier", "Off the gas grid"],
+      value: "£7,500 grant", metCriteria: ["Owner-occupier", "Off the gas grid"],
       confirmCriteria: ["MCS-certified installer confirms suitability"],
-      jobType: "heat-pump",
+      govUrl: "https://www.gov.uk/apply-boiler-upgrade-scheme",
     });
   }
 
-  // HUG: owner AND off gas grid AND EPC D or below
-  if (isOwner && offGrid && poorEpc) {
+  if (isOwner && offGrid && (epc === "ab" || epc === "c" || epc === "d")) {
     schemes.push({
-      id: "hug",
-      name: "Home Upgrade Grant (HUG2)",
-      icon: "⚡",
-      confidence: "might",
-      summary: "Funding for energy efficiency improvements in off-gas-grid homes with low EPC ratings.",
-      value: "Up to £10,000 funded",
-      metCriteria: ["Owner-occupier", "Off the gas grid", "EPC rating D or below"],
+      id: "hug", name: "Home Upgrade Grant (HUG2)", icon: "⚡", confidence: "might",
+      summary: "Funding for energy efficiency improvements in off-gas-grid homes.",
+      value: "Up to £10,000", metCriteria: ["Owner-occupier", "Off the gas grid", "EPC rating A–D"],
       confirmCriteria: ["Income/benefits verified by local authority"],
-      jobType: "insulation",
+      govUrl: "https://www.gov.uk/apply-home-upgrade-grant",
     });
   }
 
-  // 0% VAT — always show
   schemes.push({
-    id: "vat",
-    name: "0% VAT on Energy Saving Materials",
-    icon: "💷",
-    confidence: "may",
+    id: "vat", name: "0% VAT on Energy Saving Materials", icon: "💷", confidence: "may",
     summary: "Zero VAT on insulation, heat pumps, solar panels, and other energy-saving installations until March 2027.",
-    value: "Save 20% VAT on materials & install",
-    metCriteria: ["UK residential property"],
+    value: "Save 20% on materials & install", metCriteria: ["UK residential property"],
     confirmCriteria: [],
-    jobType: "insulation",
+    govUrl: "https://www.gov.uk/guidance/vat-on-energy-saving-materials-and-heating-equipment-notice-7086",
   });
 
-  // EPC Assessor — if unknown
   if (epc === "unknown") {
     schemes.push({
-      id: "epc",
-      name: "Get an EPC Assessment",
-      icon: "📋",
-      confidence: "might",
+      id: "epc", name: "Get an EPC Assessment", icon: "📋", confidence: "might",
       summary: "Knowing your EPC rating unlocks eligibility for most grant schemes. We can match you with a local assessor.",
-      value: "From £60 — could unlock thousands",
-      metCriteria: ["EPC rating unknown"],
+      value: "From £60 — could unlock thousands", metCriteria: ["EPC rating unknown"],
       confirmCriteria: ["Assessor visit to confirm rating"],
-      jobType: "epc-assessment",
+      govUrl: "https://www.gov.uk/find-energy-certificate",
     });
   }
 
   return schemes;
 }
 
+function getGreenJobTypes(schemes: Scheme[]): string[] {
+  const ids = schemes.map((s) => s.id);
+  const types: string[] = [];
+  if (ids.includes("eco4") || ids.includes("gbis")) {
+    types.push("External Wall Insulation (EWI)", "Cavity Wall Insulation", "Loft Insulation", "Retrofit Coordinator", "EPC Assessor");
+  }
+  if (ids.includes("bus") || ids.includes("hug")) {
+    types.push("Air Source Heat Pump", "Ground Source Heat Pump");
+  }
+  if (ids.includes("epc")) {
+    types.push("EPC Assessor");
+  }
+  if (types.length === 0) {
+    types.push("Solar PV Installer", "Air Source Heat Pump", "Ground Source Heat Pump", "External Wall Insulation (EWI)",
+      "Cavity Wall Insulation", "Loft Insulation", "EV Charger Installer", "Battery Storage", "EPC Assessor");
+  }
+  return [...new Set(types)];
+}
+
 /* ─── Components ─── */
 const StepIndicator = ({ current, total }: { current: number; total: number }) => (
-  <div className="flex items-center gap-2 mb-8">
+  <div className="flex items-center gap-3 mb-8">
     {Array.from({ length: total }, (_, i) => (
-      <div
-        key={i}
-        className={`h-1 flex-1 rounded-full transition-all ${
-          i < current ? "bg-teal" : i === current ? "bg-teal/60" : "bg-cream/10"
-        }`}
-      />
+      <div key={i} className="flex items-center gap-3 flex-1">
+        <div className={`w-8 h-8 rounded-full flex items-center justify-center font-mono text-sm transition-all ${
+          i < current ? "bg-[#16A34A] text-white" : i === current ? "bg-teal text-cream" : "bg-cream/10 text-cream/30"
+        }`}>
+          {i < current ? "✓" : i + 1}
+        </div>
+        {i < total - 1 && <div className={`h-[2px] flex-1 ${i < current ? "bg-[#16A34A]" : "bg-cream/10"}`} />}
+      </div>
     ))}
   </div>
 );
@@ -190,37 +180,30 @@ const StepIndicator = ({ current, total }: { current: number; total: number }) =
 const SchemeCard = ({ scheme }: { scheme: Scheme }) => {
   const isMay = scheme.confidence === "may";
   return (
-    <div className="rounded-xl border border-green-500/20 bg-green-500/[0.04] p-6 space-y-4">
+    <div className="rounded-xl border border-[#16A34A]/20 bg-[#16A34A]/[0.04] p-6 space-y-4">
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-3">
           <span className="text-2xl">{scheme.icon}</span>
           <div>
             <h3 className="font-heading text-cream text-xl tracking-wide">{scheme.name}</h3>
-            <span
-              className={`font-mono text-[11px] uppercase tracking-widest ${
-                isMay ? "text-teal" : "text-amber-400"
-              }`}
-            >
-              {isMay ? "You may qualify" : "You might qualify — check with installer"}
+            <span className={`font-mono text-[11px] uppercase tracking-widest ${isMay ? "text-[#16A34A]" : "text-amber-400"}`}>
+              {isMay ? "You may qualify ✓" : "Worth checking ?"}
             </span>
           </div>
         </div>
-        <span className="font-heading text-green-500 text-lg whitespace-nowrap">{scheme.value}</span>
+        <span className="font-heading text-[#16A34A] text-lg whitespace-nowrap">{scheme.value}</span>
       </div>
-
       <p className="font-body text-cream/60 text-sm leading-relaxed">{scheme.summary}</p>
-
       {scheme.metCriteria.length > 0 && (
         <div className="space-y-1.5">
           {scheme.metCriteria.map((c) => (
             <div key={c} className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0" />
+              <CheckCircle2 className="w-4 h-4 text-[#16A34A] flex-shrink-0" />
               <span className="font-body text-sm text-cream/70">{c}</span>
             </div>
           ))}
         </div>
       )}
-
       {scheme.confirmCriteria.length > 0 && (
         <div className="space-y-1.5">
           {scheme.confirmCriteria.map((c) => (
@@ -231,31 +214,29 @@ const SchemeCard = ({ scheme }: { scheme: Scheme }) => {
           ))}
         </div>
       )}
+      <a href={scheme.govUrl} target="_blank" rel="noopener noreferrer"
+        className="inline-flex items-center gap-1.5 font-mono text-xs text-[#16A34A] hover:text-[#15803D] transition-colors">
+        Find Out More <ExternalLink className="w-3 h-3" />
+      </a>
     </div>
   );
 };
 
 /* ─── Main Page ─── */
 const GreenGrantsPage = () => {
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(-1);
   const [property, setProperty] = useState<PropertyType | null>(null);
   const [ownership, setOwnership] = useState<Ownership | null>(null);
   const [epc, setEpc] = useState<EpcBand | null>(null);
   const [household, setHousehold] = useState<HouseholdFlag[]>([]);
+  const checkerRef = useRef<HTMLDivElement>(null);
 
   const showResults = step === 4;
-  const schemes = showResults && property && ownership && epc
-    ? getSchemes(property, ownership, epc, household)
-    : [];
-
+  const schemes = showResults && property && ownership && epc ? getSchemes(property, ownership, epc, household) : [];
   const schemeIds = schemes.map((s) => s.id);
-  const primaryJobType = schemes.length > 0 ? schemes[0].jobType : "insulation";
 
   const toggleHousehold = (flag: HouseholdFlag) => {
-    if (flag === "none") {
-      setHousehold(["none"]);
-      return;
-    }
+    if (flag === "none") { setHousehold(["none"]); return; }
     setHousehold((prev) => {
       const without = prev.filter((f) => f !== "none");
       return without.includes(flag) ? without.filter((f) => f !== flag) : [...without, flag];
@@ -270,8 +251,11 @@ const GreenGrantsPage = () => {
     return false;
   };
 
-  const advance = () => {
-    if (canAdvance()) setStep(step + 1);
+  const advance = () => { if (canAdvance()) setStep(step + 1); };
+
+  const scrollToChecker = () => {
+    setStep(0);
+    setTimeout(() => checkerRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
   };
 
   const cardClass = (isActive: boolean) =>
@@ -285,185 +269,181 @@ const GreenGrantsPage = () => {
     <div className="min-h-screen" style={{ backgroundColor: "hsl(var(--deep))" }}>
       <Navbar />
 
-      {/* Hero */}
-      <section className="pt-32 pb-12 px-6">
+      {/* SECTION 1 — HERO */}
+      <section className="pt-28 pb-16 px-6 bg-navy">
         <div className="max-w-3xl mx-auto text-center">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="w-8 h-[2px] bg-teal" />
-            <span className="font-mono text-xs text-teal uppercase tracking-widest">Green Funding Checker</span>
-            <div className="w-8 h-[2px] bg-teal" />
-          </div>
-          <h1 className="font-heading text-cream text-[44px] md:text-[64px] leading-[0.9] mb-4">
-            FIND OUT WHAT <span className="text-teal">HELP</span> YOU COULD GET
+          <span className="font-mono text-xs text-[#16A34A] uppercase tracking-widest mb-4 block">🌿 Green Energy Grants</span>
+          <h1 className="font-heading text-cream text-[40px] sm:text-[52px] md:text-[60px] leading-[0.95] tracking-wide mb-5">
+            COULD YOU GET HELP FUNDING YOUR HOME IMPROVEMENTS?
           </h1>
-          <p className="font-body text-cream/50 text-lg max-w-xl mx-auto leading-relaxed">
-            Government schemes are funding thousands of pounds of energy improvements for UK homeowners. Answer 4 questions to see what you may qualify for.
+          <p className="font-body text-cream/60 text-sm md:text-base max-w-2xl mx-auto leading-relaxed mb-8">
+            Government schemes are currently funding thousands of pounds of energy upgrades for eligible UK homeowners. Answer 4 quick questions to see what you may qualify for. Free. No commitment.
+          </p>
+          <button
+            onClick={scrollToChecker}
+            className="inline-block bg-[#16A34A] text-white font-mono text-sm px-8 py-3.5 rounded-xl hover:bg-[#15803D] transition-colors shadow-lg shadow-[#16A34A]/20"
+          >
+            Check My Eligibility →
+          </button>
+        </div>
+      </section>
+
+      {/* SECTION 2 — SCHEME OVERVIEW */}
+      <section className="py-16 px-6" style={{ backgroundColor: "hsl(var(--deep))" }}>
+        <div className="max-w-3xl mx-auto">
+          <h2 className="font-heading text-cream text-3xl md:text-4xl tracking-wide text-center mb-8">
+            SCHEMES CURRENTLY AVAILABLE
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+            {SCHEME_OVERVIEW.map((s) => (
+              <div key={s.title} className={`${s.bg} rounded-xl p-6 text-white`}>
+                <h3 className="font-heading text-2xl tracking-wide mb-1">{s.title}</h3>
+                <p className="font-mono text-sm opacity-90">{s.desc}</p>
+              </div>
+            ))}
+          </div>
+          <p className="text-center font-mono text-sm text-cream/40">
+            Scroll down to find out which apply to you →
           </p>
         </div>
       </section>
 
-      {/* The Checker */}
-      <section className="px-6 pb-24">
+      {/* SECTION 3 — THE 4-STEP CHECKER */}
+      <section className="px-6 pb-24" ref={checkerRef}>
         <div className="max-w-2xl mx-auto">
-          {!showResults && <StepIndicator current={step} total={4} />}
+          {step >= 0 && !showResults && (
+            <>
+              <StepIndicator current={step} total={4} />
 
-          {/* Step 1 — Property type */}
-          {step === 0 && (
-            <div>
-              <h2 className="font-heading text-cream text-2xl mb-6">What type of property do you live in?</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {PROPERTY_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.value}
-                    onClick={() => setProperty(opt.value)}
-                    className={cardClass(property === opt.value)}
-                  >
-                    <span className="text-xl mr-3">{opt.emoji}</span>
-                    <span className="font-body text-sm">{opt.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Step 2 — Ownership */}
-          {step === 1 && (
-            <div>
-              <h2 className="font-heading text-cream text-2xl mb-6">Do you own or rent your home?</h2>
-              <div className="grid grid-cols-1 gap-3">
-                {OWNERSHIP_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.value}
-                    onClick={() => setOwnership(opt.value)}
-                    className={cardClass(ownership === opt.value)}
-                  >
-                    <span className="font-body text-sm">{opt.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Step 3 — EPC */}
-          {step === 2 && (
-            <div>
-              <h2 className="font-heading text-cream text-2xl mb-6">What is your home's current EPC energy rating?</h2>
-              <div className="grid grid-cols-1 gap-3">
-                {EPC_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.value}
-                    onClick={() => setEpc(opt.value)}
-                    className={cardClass(epc === opt.value)}
-                  >
-                    <div>
-                      <span className="font-body text-sm font-medium">{opt.label}</span>
-                      {opt.sub && <span className="font-body text-xs text-cream/40 ml-2">{opt.sub}</span>}
-                    </div>
-                  </button>
-                ))}
-              </div>
-              {epc === "unknown" && (
-                <div className="mt-4 flex items-start gap-3 bg-teal/10 border border-teal/20 rounded-xl px-5 py-4">
-                  <AlertCircle className="w-5 h-5 text-teal flex-shrink-0 mt-0.5" />
-                  <p className="font-body text-sm text-cream/70">
-                    You can find your EPC rating for free at{" "}
-                    <a
-                      href="https://www.gov.uk/find-energy-certificate"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-teal underline underline-offset-2"
-                    >
-                      epcregister.com <ExternalLink className="inline w-3 h-3" />
-                    </a>{" "}
-                    or we can match you with a local EPC assessor.
-                  </p>
+              {/* Step 1 — Property type */}
+              {step === 0 && (
+                <div>
+                  <h2 className="font-heading text-cream text-2xl mb-6">What type of property do you live in?</h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {PROPERTY_OPTIONS.map((opt) => (
+                      <button key={opt.value} onClick={() => setProperty(opt.value)} className={cardClass(property === opt.value)}>
+                        <span className="text-xl mr-3">{opt.emoji}</span>
+                        <span className="font-body text-sm">{opt.label}</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               )}
-            </div>
-          )}
 
-          {/* Step 4 — Household */}
-          {step === 3 && (
-            <div>
-              <h2 className="font-heading text-cream text-2xl mb-6">Which of these best describes your household?</h2>
-              <p className="font-mono text-xs text-cream/40 uppercase tracking-widest mb-4">Select all that apply</p>
-              <div className="grid grid-cols-1 gap-3">
-                {HOUSEHOLD_OPTIONS.map((opt) => {
-                  const isActive = household.includes(opt.value);
-                  return (
-                    <button
-                      key={opt.value}
-                      onClick={() => toggleHousehold(opt.value)}
-                      className={cardClass(isActive)}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                            isActive ? "bg-teal border-teal" : "border-cream/30"
-                          }`}
-                        >
-                          {isActive && <CheckCircle2 className="w-3.5 h-3.5 text-cream" />}
-                        </div>
+              {/* Step 2 — Ownership */}
+              {step === 1 && (
+                <div>
+                  <h2 className="font-heading text-cream text-2xl mb-6">Do you own or rent your home?</h2>
+                  <div className="grid grid-cols-1 gap-3">
+                    {OWNERSHIP_OPTIONS.map((opt) => (
+                      <button key={opt.value} onClick={() => setOwnership(opt.value)} className={cardClass(ownership === opt.value)}>
+                        <span className="text-xl mr-3">{opt.emoji}</span>
                         <span className="font-body text-sm">{opt.label}</span>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Navigation buttons */}
-          {!showResults && (
-            <div className="flex items-center justify-between mt-8">
-              {step > 0 ? (
-                <button
-                  onClick={() => setStep(step - 1)}
-                  className="flex items-center gap-2 font-mono text-sm text-cream/50 hover:text-cream transition-colors"
-                >
-                  <ChevronLeft className="w-4 h-4" /> Back
-                </button>
-              ) : (
-                <div />
+                      </button>
+                    ))}
+                  </div>
+                </div>
               )}
-              <button
-                onClick={advance}
-                disabled={!canAdvance()}
-                className="bg-teal text-cream font-mono text-sm px-8 py-3 rounded-xl hover:bg-teal-hover transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-              >
-                {step === 3 ? "See My Results" : "Next →"}
-              </button>
-            </div>
+
+              {/* Step 3 — EPC */}
+              {step === 2 && (
+                <div>
+                  <h2 className="font-heading text-cream text-2xl mb-6">What is your home's current EPC energy rating?</h2>
+                  <p className="font-body text-cream/50 text-sm mb-5">
+                    Your EPC (Energy Performance Certificate) rates your home from A (most efficient) to G (least efficient).
+                  </p>
+                  <div className="grid grid-cols-1 gap-3">
+                    {EPC_OPTIONS.map((opt) => (
+                      <button key={opt.value} onClick={() => setEpc(opt.value)} className={cardClass(epc === opt.value)}>
+                        <span className="text-lg mr-3">{opt.color}</span>
+                        <span className="font-body text-sm font-medium">{opt.label}</span>
+                        {opt.sub && <span className="font-body text-xs text-cream/40 ml-2">— {opt.sub}</span>}
+                      </button>
+                    ))}
+                  </div>
+                  {epc === "unknown" && (
+                    <div className="mt-4 flex items-start gap-3 bg-teal/10 border border-teal/20 rounded-xl px-5 py-4">
+                      <AlertCircle className="w-5 h-5 text-teal flex-shrink-0 mt-0.5" />
+                      <p className="font-body text-sm text-cream/70">
+                        You can find your EPC rating free at{" "}
+                        <a href="https://www.gov.uk/find-energy-certificate" target="_blank" rel="noopener noreferrer" className="text-teal underline underline-offset-2">
+                          epcregister.com <ExternalLink className="inline w-3 h-3" />
+                        </a>{" "}
+                        — just enter your postcode. Or we can match you with a local EPC Assessor who will assess your home for a small fee.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Step 4 — Household */}
+              {step === 3 && (
+                <div>
+                  <h2 className="font-heading text-cream text-2xl mb-6">Which of these describe your household?</h2>
+                  <p className="font-mono text-xs text-cream/40 uppercase tracking-widest mb-4">Select all that apply</p>
+                  <div className="grid grid-cols-1 gap-3">
+                    {HOUSEHOLD_OPTIONS.map((opt) => {
+                      const isActive = household.includes(opt.value);
+                      return (
+                        <button key={opt.value} onClick={() => toggleHousehold(opt.value)} className={cardClass(isActive)}>
+                          <div className="flex items-center gap-3">
+                            <div className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+                              isActive ? "bg-teal border-teal" : "border-cream/30"
+                            }`}>
+                              {isActive && <CheckCircle2 className="w-3.5 h-3.5 text-cream" />}
+                            </div>
+                            <span className="text-lg">{opt.emoji}</span>
+                            <span className="font-body text-sm">{opt.label}</span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Navigation buttons */}
+              <div className="flex items-center justify-between mt-8">
+                {step > 0 ? (
+                  <button onClick={() => setStep(step - 1)} className="flex items-center gap-2 font-mono text-sm text-cream/50 hover:text-cream transition-colors">
+                    <ChevronLeft className="w-4 h-4" /> Back
+                  </button>
+                ) : <div />}
+                <button onClick={advance} disabled={!canAdvance()}
+                  className="bg-teal text-cream font-mono text-sm px-8 py-3 rounded-xl hover:bg-teal-hover transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
+                  {step === 3 ? "See My Results →" : "Next →"}
+                </button>
+              </div>
+            </>
           )}
 
-          {/* Results */}
+          {/* SECTION 4 — RESULTS */}
           {showResults && (
             <div className="space-y-6">
               <div className="flex items-center gap-3 mb-2">
-                <Leaf className="w-5 h-5 text-green-500" />
-                <p className="font-mono text-xs text-green-500 uppercase tracking-widest">
-                  {schemes.length} scheme{schemes.length !== 1 ? "s" : ""} found
+                <Leaf className="w-5 h-5 text-[#16A34A]" />
+                <p className="font-mono text-xs text-[#16A34A] uppercase tracking-widest">
+                  {schemes.length} scheme{schemes.length !== 1 ? "s" : ""} found for you
                 </p>
               </div>
 
-              {schemes.map((s) => (
-                <SchemeCard key={s.id} scheme={s} />
-              ))}
+              {schemes.map((s) => <SchemeCard key={s.id} scheme={s} />)}
 
               {/* Disclaimer */}
               <div className="bg-cream/[0.03] border border-cream/10 rounded-xl px-6 py-5">
-                <p className="font-body text-cream/50 text-sm leading-relaxed">
-                  <strong className="text-cream/70">These results are a guide only</strong> — a certified installer will confirm your exact eligibility during a free site assessment. ProGrafter signposts available schemes but does not provide financial or energy advice.
+                <p className="font-body text-cream/50 text-xs leading-relaxed">
+                  These results are a guide based on the information you provided. Your exact eligibility will be confirmed by a certified installer during a free assessment. ProGrafter provides information only — not financial advice. For official guidance visit{" "}
+                  <a href="https://www.gov.uk" target="_blank" rel="noopener noreferrer" className="text-teal underline">gov.uk</a>.
                 </p>
               </div>
 
-              {/* CTA */}
+              {/* Main CTA */}
               <div className="text-center pt-4">
                 <Link
                   to={`/post-a-job?green=1&schemes=${schemeIds.join(",")}`}
-                  className="inline-block bg-green-500 text-white font-mono text-sm py-4 px-10 rounded-xl hover:bg-green-600 transition-colors tracking-wider uppercase shadow-lg shadow-green-500/20"
+                  className="inline-block bg-[#16A34A] text-white font-mono text-sm py-4 px-10 rounded-xl hover:bg-[#15803D] transition-colors tracking-wider uppercase shadow-lg shadow-[#16A34A]/20"
                 >
-                  Match Me With a Certified Local Installer →
+                  Match Me With a Certified Local Installer — Free →
                 </Link>
               </div>
 
