@@ -30,6 +30,14 @@ interface VariationsPanelProps {
 
 const COMMISSION_RATE = 0.0375;
 
+const REASON_OPTIONS = [
+  "Client request",
+  "Unforeseen site condition",
+  "Design change",
+  "Compliance requirement",
+  "Other",
+];
+
 const VariationsPanel = ({ variations, userRole, userId, jobId, onRefresh }: VariationsPanelProps) => {
   const [showModal, setShowModal] = useState(false);
   const [varForm, setVarForm] = useState({
@@ -147,6 +155,7 @@ const VariationsPanel = ({ variations, userRole, userId, jobId, onRefresh }: Var
                     </Badge>
                   </div>
                   <p className="font-mono text-xs text-secondary-text mt-1 line-clamp-2">{v.description}</p>
+                  {v.reason && <p className="font-mono text-[10px] text-secondary-text mt-1 italic">Reason: {v.reason}</p>}
                   <div className="flex flex-wrap gap-3 mt-2 font-mono text-[10px] text-secondary-text">
                     <span>£{totalCost.toLocaleString()}</span>
                     <span>{v.programme_impact_days}d impact</span>
@@ -169,8 +178,22 @@ const VariationsPanel = ({ variations, userRole, userId, jobId, onRefresh }: Var
                 placeholder="Variation title" className="w-full border border-navy/10 rounded-xl px-4 py-2.5 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-teal/30" />
               <textarea value={varForm.description} onChange={(e) => setVarForm({ ...varForm, description: e.target.value })}
                 placeholder="Description…" className="w-full border border-navy/10 rounded-xl px-4 py-2.5 font-mono text-sm resize-none h-20 focus:outline-none focus:ring-2 focus:ring-teal/30" />
-              <textarea value={varForm.reason} onChange={(e) => setVarForm({ ...varForm, reason: e.target.value })}
-                placeholder="Reason for variation…" className="w-full border border-navy/10 rounded-xl px-4 py-2.5 font-mono text-sm resize-none h-16 focus:outline-none focus:ring-2 focus:ring-teal/30" />
+              
+              {/* Reason dropdown */}
+              <div>
+                <label className="font-mono text-[10px] text-secondary-text uppercase">Reason for Variation</label>
+                <select
+                  value={varForm.reason}
+                  onChange={(e) => setVarForm({ ...varForm, reason: e.target.value })}
+                  className="w-full border border-navy/10 rounded-xl px-4 py-2.5 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-teal/30 bg-white"
+                >
+                  <option value="">Select reason…</option>
+                  {REASON_OPTIONS.map((r) => (
+                    <option key={r} value={r}>{r}</option>
+                  ))}
+                </select>
+              </div>
+
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="font-mono text-[10px] text-secondary-text uppercase">Materials (£)</label>
@@ -183,6 +206,14 @@ const VariationsPanel = ({ variations, userRole, userId, jobId, onRefresh }: Var
                     className="w-full border border-navy/10 rounded-xl px-4 py-2 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-teal/30" />
                 </div>
               </div>
+              
+              {/* Auto-calculated total */}
+              {(varForm.materials_cost || varForm.labour_cost) && (
+                <div className="bg-cream/60 rounded-xl px-4 py-2 font-mono text-xs text-navy">
+                  Total: £{((Number(varForm.materials_cost) || 0) + (Number(varForm.labour_cost) || 0)).toLocaleString()}
+                </div>
+              )}
+
               <div>
                 <label className="font-mono text-[10px] text-secondary-text uppercase">Programme Impact (days)</label>
                 <input type="number" value={varForm.programme_impact_days} onChange={(e) => setVarForm({ ...varForm, programme_impact_days: e.target.value })}
