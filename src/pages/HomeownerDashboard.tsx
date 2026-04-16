@@ -91,6 +91,19 @@ const HomeownerDashboard = () => {
     setActiveProject(active || null);
   };
 
+  const handleSelectTier = async (quoteId: string, tier: string, price: number) => {
+    const { error } = await supabase
+      .from("quotes")
+      .update({ selected_tier: tier, amount: price } as any)
+      .eq("id", quoteId);
+    if (error) {
+      toast.error("Failed to select tier");
+    } else {
+      toast.success(`${tier.charAt(0).toUpperCase() + tier.slice(1)} tier selected`);
+      loadData();
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background flex">
       <HomeownerSidebar
