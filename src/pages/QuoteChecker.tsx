@@ -178,7 +178,7 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
         <Button
           onClick={handleSubmit}
           disabled={isSubmitting || !file || !projectType || !email || description.length < 30}
-          className="w-full h-12 bg-teal text-white font-mono text-sm rounded-xl hover:bg-teal-hover transition-colors shadow-lg shadow-teal/20"
+          className="w-full h-12 bg-teal text-white font-mono text-sm rounded-xl hover:bg-teal-hover transition-colors shadow-lg shadow-teal/20 disabled:bg-muted disabled:text-muted-foreground disabled:shadow-none disabled:opacity-60"
         >
           {isSubmitting ? (
             <span className="flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" />Preparing checkout...</span>
