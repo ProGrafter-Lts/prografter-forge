@@ -187,7 +187,7 @@ const HomeownerDashboard = () => {
                 </div>
               )}
 
-              <QuotesReceived quotes={quotes} />
+              <QuotesReceived quotes={quotes} onSelectTier={handleSelectTier} />
               <MyJobs jobs={jobs} />
               <RecentSiteUpdates updates={siteUpdates} />
             </>
