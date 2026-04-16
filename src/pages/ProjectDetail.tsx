@@ -23,6 +23,7 @@ interface Stage {
   planned_start: string | null; planned_end: string | null;
   actual_start: string | null; actual_end: string | null;
   status: string; payment_amount: number; payment_status: string;
+  homeowner_confirmed?: boolean; homeowner_confirmed_at?: string | null;
 }
 interface StageUpdate {
   id: string; stage_id: string; trade_id: string; update_text: string;
@@ -49,6 +50,10 @@ interface Contract {
   contract_text: string; agreed_price: number; payment_schedule: any;
   status: string; homeowner_signed_at: string | null; trade_signed_at: string | null;
 }
+interface SubAssignment {
+  id: string; stage_id: string; external_sub_name: string | null;
+  external_sub_phone: string | null; status: string;
+}
 
 type UserRole = "trade" | "homeowner" | null;
 
@@ -63,12 +68,13 @@ const ProjectDetail = () => {
   const [variations, setVariations] = useState<Variation[]>([]);
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [contract, setContract] = useState<Contract | null>(null);
+  const [subAssignments, setSubAssignments] = useState<SubAssignment[]>([]);
 
   const [userRole, setUserRole] = useState<UserRole>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [tradeName, setTradeName] = useState("—");
   const [tradeVerified, setTradeVerified] = useState(false);
-  const [tradeRating] = useState(4.8); // placeholder
+  const [tradeRating] = useState(4.8);
   const [homeownerName, setHomeownerName] = useState("—");
   const [msgText, setMsgText] = useState("");
   const [subTradeStageId, setSubTradeStageId] = useState<string | null>(null);
@@ -122,6 +128,10 @@ const ProjectDetail = () => {
       const stageIds = stageData.map((s: any) => s.id);
       const { data: upData } = await supabase.from("stage_updates").select("*").in("stage_id", stageIds).order("created_at");
       if (upData) setUpdates(upData as StageUpdate[]);
+
+      // Load sub-trade assignments
+      const { data: subData } = await supabase.from("sub_trade_assignments").select("id, stage_id, external_sub_name, external_sub_phone, status").eq("job_id", id!);
+      if (subData) setSubAssignments(subData as SubAssignment[]);
     }
 
     const { data: msgData } = await supabase.from("project_messages").select("*").eq("job_id", id!).order("created_at");
@@ -143,6 +153,17 @@ const ProjectDetail = () => {
   const progress = totalStages > 0 ? Math.round((completedStages / totalStages) * 100) : 0;
   const contractValue = contract ? Number(contract.agreed_price) : stages.reduce((sum, s) => sum + Number(s.payment_amount || 0), 0);
 
+  // Estimate total days from planned dates
+  const estimatedDays = (() => {
+    if (stages.length === 0) return undefined;
+    const firstStart = stages[0]?.planned_start;
+    const lastEnd = stages[stages.length - 1]?.planned_end;
+    if (firstStart && lastEnd) {
+      return Math.max(1, Math.ceil((new Date(lastEnd).getTime() - new Date(firstStart).getTime()) / 86400000));
+    }
+    return undefined;
+  })();
+
   const sendMessage = async () => {
     if (!msgText.trim() || !userId || !userRole || !id) return;
     const { error } = await supabase.from("project_messages").insert({
@@ -154,7 +175,6 @@ const ProjectDetail = () => {
 
   const releasePayment = async (stageId: string) => {
     toast.success("Payment release requested. This will be processed shortly.");
-    // In production this would trigger Stripe escrow release
   };
 
   if (!job) {
@@ -181,6 +201,7 @@ const ProjectDetail = () => {
           homeownerName={homeownerName}
           contractValue={contractValue}
           progress={progress}
+          estimatedDays={estimatedDays}
         />
 
         {/* Variation alerts */}
@@ -199,6 +220,7 @@ const ProjectDetail = () => {
             <StageTimeline
               stages={stages}
               updates={updates}
+              subAssignments={subAssignments}
               userRole={userRole}
               userId={userId}
               onRefresh={loadAll}

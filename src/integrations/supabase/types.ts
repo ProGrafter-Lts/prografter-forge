@@ -522,6 +522,8 @@ export type Database = {
           actual_end: string | null
           actual_start: string | null
           created_at: string
+          homeowner_confirmed: boolean
+          homeowner_confirmed_at: string | null
           id: string
           job_id: string
           payment_amount: number | null
@@ -537,6 +539,8 @@ export type Database = {
           actual_end?: string | null
           actual_start?: string | null
           created_at?: string
+          homeowner_confirmed?: boolean
+          homeowner_confirmed_at?: string | null
           id?: string
           job_id: string
           payment_amount?: number | null
@@ -552,6 +556,8 @@ export type Database = {
           actual_end?: string | null
           actual_start?: string | null
           created_at?: string
+          homeowner_confirmed?: boolean
+          homeowner_confirmed_at?: string | null
           id?: string
           job_id?: string
           payment_amount?: number | null
