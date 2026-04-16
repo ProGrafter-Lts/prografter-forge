@@ -17,11 +17,14 @@ import { Upload, FileText, Loader2, ShieldCheck, AlertTriangle } from "lucide-re
 import { useSearchParams } from "react-router-dom";
 
 const PROJECT_TYPES = [
-  "Extension",
+  "Rear Extension",
   "Loft Conversion",
-  "Rewire",
+  "Full Rewire",
   "Bathroom",
   "Kitchen",
+  "Boiler/Heating Replacement",
+  "New Build",
+  "Roofing",
   "Other",
 ];
 
