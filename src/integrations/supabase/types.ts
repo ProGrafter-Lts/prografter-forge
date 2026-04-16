@@ -398,6 +398,7 @@ export type Database = {
       }
       planning_alerts: {
         Row: {
+          actioned: boolean
           address: string
           application_ref: string
           application_type: string
@@ -407,10 +408,14 @@ export type Database = {
           distance_miles: number | null
           id: string
           letter_generated: boolean
+          local_authority: string | null
+          planning_portal_url: string | null
           postcode: string
           trade_id: string
+          viewed: boolean
         }
         Insert: {
+          actioned?: boolean
           address: string
           application_ref: string
           application_type: string
@@ -420,10 +425,14 @@ export type Database = {
           distance_miles?: number | null
           id?: string
           letter_generated?: boolean
+          local_authority?: string | null
+          planning_portal_url?: string | null
           postcode: string
           trade_id: string
+          viewed?: boolean
         }
         Update: {
+          actioned?: boolean
           address?: string
           application_ref?: string
           application_type?: string
@@ -433,8 +442,11 @@ export type Database = {
           distance_miles?: number | null
           id?: string
           letter_generated?: boolean
+          local_authority?: string | null
+          planning_portal_url?: string | null
           postcode?: string
           trade_id?: string
+          viewed?: boolean
         }
         Relationships: [
           {
