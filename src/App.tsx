@@ -18,6 +18,7 @@ import QuoteChecker from "./pages/QuoteChecker.tsx";
 import GreenGrants from "./pages/GreenGrants.tsx";
 import PlanningAlertsPage from "./pages/PlanningAlerts.tsx";
 import HomeownerManual from "./pages/HomeownerManual.tsx";
+import PWAInstallBanner from "./components/PWAInstallBanner.tsx";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <PWAInstallBanner />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/privacy" element={<Privacy />} />
