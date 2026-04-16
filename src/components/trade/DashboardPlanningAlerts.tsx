@@ -5,13 +5,14 @@ import {
   Bell,
   MapPin,
   FileText,
-  Check,
   Loader2,
-  Copy,
   ChevronRight,
   Calendar,
   Building2,
+  ExternalLink,
+  Sparkles,
 } from "lucide-react";
+import OutreachLetterModal from "./OutreachLetterModal";
 
 interface PlanningAlert {
   id: string;
@@ -23,6 +24,10 @@ interface PlanningAlert {
   distance_miles: number | null;
   approved_date: string | null;
   letter_generated: boolean;
+  local_authority: string | null;
+  viewed: boolean;
+  actioned: boolean;
+  planning_portal_url: string | null;
 }
 
 interface TradeProfile {
@@ -33,26 +38,14 @@ interface TradeProfile {
   phone: string;
 }
 
-function generateOutreachLetter(trade: TradeProfile, address: string): string {
-  return `Dear Homeowner at ${address},
-
-I noticed your recent planning approval and wanted to make contact before your project starts.
-
-My name is ${trade.name} and I specialise in ${trade.trade_type} in your area. I am verified and insured through ProGrafter — the UK's commission-only trades marketplace.
-
-I would be delighted to provide a free, no-obligation quote. All work is managed through ProGrafter with daily photo updates and full project documentation.
-
-${trade.name} | ${trade.phone} | prografter.co.uk`;
-}
+const LETTER_TIERS = ["pro", "ewi", "national"];
 
 const DashboardPlanningAlerts = ({ trade }: { trade: TradeProfile }) => {
   const navigate = useNavigate();
   const [alerts, setAlerts] = useState<PlanningAlert[]>([]);
   const [subscription, setSubscription] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [generatingLetter, setGeneratingLetter] = useState<string | null>(null);
-  const [letterGenerated, setLetterGenerated] = useState<Record<string, string>>({});
-  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [letterModal, setLetterModal] = useState<PlanningAlert | null>(null);
 
   useEffect(() => {
     loadData();
@@ -75,14 +68,18 @@ const DashboardPlanningAlerts = ({ trade }: { trade: TradeProfile }) => {
     ]);
 
     if (subRes.data) setSubscription(subRes.data);
-    if (alertsRes.data) setAlerts(alertsRes.data);
+    if (alertsRes.data) setAlerts(alertsRes.data as PlanningAlert[]);
     setLoading(false);
   };
 
-  const handleGenerateLetter = async (alert: PlanningAlert) => {
-    setGeneratingLetter(alert.id);
-    const letter = generateOutreachLetter(trade, alert.address);
+  const markViewed = async (alertId: string) => {
+    await supabase
+      .from("planning_alerts")
+      .update({ viewed: true } as any)
+      .eq("id", alertId);
+  };
 
+  const handleLetterSaved = async (alert: PlanningAlert, letter: string) => {
     await supabase.from("letters_sent").insert({
       trade_id: trade.id,
       application_reference: alert.application_ref,
@@ -92,21 +89,13 @@ const DashboardPlanningAlerts = ({ trade }: { trade: TradeProfile }) => {
 
     await supabase
       .from("planning_alerts")
-      .update({ letter_generated: true })
+      .update({ letter_generated: true, actioned: true } as any)
       .eq("id", alert.id);
 
-    setLetterGenerated((prev) => ({ ...prev, [alert.id]: letter }));
-    setGeneratingLetter(null);
+    setAlerts(prev => prev.map(a => a.id === alert.id ? { ...a, letter_generated: true, actioned: true } : a));
   };
 
-  const handleCopyLetter = (alertId: string) => {
-    const letter = letterGenerated[alertId];
-    if (letter) {
-      navigator.clipboard.writeText(letter);
-      setCopiedId(alertId);
-      setTimeout(() => setCopiedId(null), 2000);
-    }
-  };
+  const canGenerateLetter = subscription && LETTER_TIERS.includes(subscription.tier);
 
   // Not subscribed — show CTA
   if (!loading && !subscription) {
@@ -138,7 +127,6 @@ const DashboardPlanningAlerts = ({ trade }: { trade: TradeProfile }) => {
     );
   }
 
-  // Subscribed — show alerts
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -162,10 +150,11 @@ const DashboardPlanningAlerts = ({ trade }: { trade: TradeProfile }) => {
           <div
             key={alert.id}
             className="bg-card rounded-2xl p-5 border border-border shadow-sm"
+            onMouseEnter={() => !alert.viewed && markViewed(alert.id)}
           >
             <div className="flex items-start justify-between mb-3">
               <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
+                <div className="flex items-center gap-2 mb-1 flex-wrap">
                   <Building2 className="w-3.5 h-3.5 text-secondary" />
                   <span className="font-mono text-xs text-secondary font-semibold">
                     {alert.application_ref}
@@ -173,17 +162,33 @@ const DashboardPlanningAlerts = ({ trade }: { trade: TradeProfile }) => {
                   <span className="bg-secondary/10 text-secondary font-mono text-[10px] px-2 py-0.5 rounded-full">
                     {alert.application_type}
                   </span>
+                  {!alert.viewed && (
+                    <span className="bg-destructive text-white font-mono text-[10px] px-2 py-0.5 rounded-full">
+                      New
+                    </span>
+                  )}
+                  {alert.actioned && (
+                    <span className="bg-secondary/20 text-secondary font-mono text-[10px] px-2 py-0.5 rounded-full">
+                      Actioned
+                    </span>
+                  )}
                 </div>
                 <h4 className="font-heading text-primary text-sm">{alert.address}</h4>
                 {alert.description && (
-                  <p className="font-mono text-xs text-muted-foreground mt-1">
+                  <p className="font-mono text-xs text-muted-foreground mt-1 line-clamp-3">
                     {alert.description}
                   </p>
                 )}
               </div>
             </div>
 
-            <div className="flex items-center gap-4 mb-3">
+            <div className="flex items-center gap-4 mb-3 flex-wrap">
+              {alert.local_authority && (
+                <span className="flex items-center gap-1 font-mono text-[10px] text-muted-foreground">
+                  <Building2 className="w-3 h-3" />
+                  {alert.local_authority}
+                </span>
+              )}
               {alert.distance_miles != null && (
                 <span className="flex items-center gap-1 font-mono text-[10px] text-muted-foreground">
                   <MapPin className="w-3 h-3" />
@@ -193,50 +198,58 @@ const DashboardPlanningAlerts = ({ trade }: { trade: TradeProfile }) => {
               {alert.approved_date && (
                 <span className="flex items-center gap-1 font-mono text-[10px] text-muted-foreground">
                   <Calendar className="w-3 h-3" />
-                  Approved {new Date(alert.approved_date).toLocaleDateString("en-GB")}
+                  Decision {new Date(alert.approved_date).toLocaleDateString("en-GB")}
                 </span>
               )}
             </div>
 
-            {letterGenerated[alert.id] ? (
-              <div className="mt-3 space-y-3">
-                <div className="bg-background rounded-xl p-4 border border-border">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-                      Generated Letter
-                    </span>
-                    <button
-                      onClick={() => handleCopyLetter(alert.id)}
-                      className="flex items-center gap-1 font-mono text-[10px] text-secondary hover:text-secondary/80 transition-colors"
-                    >
-                      {copiedId === alert.id ? (
-                        <><Check className="w-3 h-3" /> Copied</>
-                      ) : (
-                        <><Copy className="w-3 h-3" /> Copy</>
-                      )}
-                    </button>
-                  </div>
-                  <pre className="font-mono text-xs text-foreground whitespace-pre-wrap leading-relaxed">
-                    {letterGenerated[alert.id]}
-                  </pre>
-                </div>
-              </div>
-            ) : (
-              <button
-                onClick={() => handleGenerateLetter(alert)}
-                disabled={generatingLetter === alert.id}
-                className="flex items-center gap-2 bg-secondary text-white font-mono text-xs px-4 py-2 rounded-xl hover:bg-secondary/90 transition-colors disabled:opacity-50"
-              >
-                {generatingLetter === alert.id ? (
-                  <Loader2 className="w-3 h-3 animate-spin" />
-                ) : (
+            <div className="flex items-center gap-3 flex-wrap">
+              {canGenerateLetter && !alert.letter_generated && (
+                <button
+                  onClick={() => setLetterModal(alert)}
+                  className="flex items-center gap-2 bg-secondary text-white font-mono text-xs px-4 py-2 rounded-xl hover:bg-secondary/90 transition-colors"
+                >
                   <FileText className="w-3 h-3" />
-                )}
-                Generate Outreach Letter
-              </button>
-            )}
+                  Generate Letter →
+                </button>
+              )}
+              {alert.letter_generated && (
+                <span className="flex items-center gap-1 font-mono text-[10px] text-secondary">
+                  <Sparkles className="w-3 h-3" />
+                  Letter generated
+                </span>
+              )}
+              {alert.planning_portal_url && (
+                <a
+                  href={alert.planning_portal_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 font-mono text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <ExternalLink className="w-3 h-3" />
+                  View on Planning Portal →
+                </a>
+              )}
+            </div>
           </div>
         ))
+      )}
+
+      {/* Outreach letter modal */}
+      {letterModal && (
+        <OutreachLetterModal
+          open={!!letterModal}
+          onClose={() => setLetterModal(null)}
+          tradeName={trade.name}
+          companyName={trade.company_name}
+          tradeType={trade.trade_type}
+          phone={trade.phone}
+          address={letterModal.address}
+          onSave={(letter) => {
+            handleLetterSaved(letterModal, letter);
+            setLetterModal(null);
+          }}
+        />
       )}
     </div>
   );
