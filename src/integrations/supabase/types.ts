@@ -191,6 +191,128 @@ export type Database = {
         }
         Relationships: []
       }
+      green_project_data: {
+        Row: {
+          created_at: string
+          epc_after: string | null
+          epc_after_ref: string | null
+          epc_after_url: string | null
+          epc_before: string | null
+          epc_before_ref: string | null
+          epc_before_url: string | null
+          grant_reference: string | null
+          grant_scheme: string | null
+          grant_value: number | null
+          hp_cylinder_size: string | null
+          hp_flow_temp: string | null
+          hp_model: string | null
+          hp_output_kw: number | null
+          hp_refrigerant: string | null
+          hp_scop: number | null
+          id: string
+          installer_claim_ref: string | null
+          insulation_bba_cert: string | null
+          insulation_product: string | null
+          insulation_thickness_mm: number | null
+          insulation_u_value: number | null
+          job_id: string
+          mcs_cert_number: string | null
+          mcs_cert_url: string | null
+          mcs_install_date: string | null
+          solar_battery: string | null
+          solar_expected_yield: number | null
+          solar_inverter: string | null
+          solar_panel_count: number | null
+          solar_panels_model: string | null
+          solar_total_kwp: number | null
+          system_specification: string | null
+          system_type: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          epc_after?: string | null
+          epc_after_ref?: string | null
+          epc_after_url?: string | null
+          epc_before?: string | null
+          epc_before_ref?: string | null
+          epc_before_url?: string | null
+          grant_reference?: string | null
+          grant_scheme?: string | null
+          grant_value?: number | null
+          hp_cylinder_size?: string | null
+          hp_flow_temp?: string | null
+          hp_model?: string | null
+          hp_output_kw?: number | null
+          hp_refrigerant?: string | null
+          hp_scop?: number | null
+          id?: string
+          installer_claim_ref?: string | null
+          insulation_bba_cert?: string | null
+          insulation_product?: string | null
+          insulation_thickness_mm?: number | null
+          insulation_u_value?: number | null
+          job_id: string
+          mcs_cert_number?: string | null
+          mcs_cert_url?: string | null
+          mcs_install_date?: string | null
+          solar_battery?: string | null
+          solar_expected_yield?: number | null
+          solar_inverter?: string | null
+          solar_panel_count?: number | null
+          solar_panels_model?: string | null
+          solar_total_kwp?: number | null
+          system_specification?: string | null
+          system_type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          epc_after?: string | null
+          epc_after_ref?: string | null
+          epc_after_url?: string | null
+          epc_before?: string | null
+          epc_before_ref?: string | null
+          epc_before_url?: string | null
+          grant_reference?: string | null
+          grant_scheme?: string | null
+          grant_value?: number | null
+          hp_cylinder_size?: string | null
+          hp_flow_temp?: string | null
+          hp_model?: string | null
+          hp_output_kw?: number | null
+          hp_refrigerant?: string | null
+          hp_scop?: number | null
+          id?: string
+          installer_claim_ref?: string | null
+          insulation_bba_cert?: string | null
+          insulation_product?: string | null
+          insulation_thickness_mm?: number | null
+          insulation_u_value?: number | null
+          job_id?: string
+          mcs_cert_number?: string | null
+          mcs_cert_url?: string | null
+          mcs_install_date?: string | null
+          solar_battery?: string | null
+          solar_expected_yield?: number | null
+          solar_inverter?: string | null
+          solar_panel_count?: number | null
+          solar_panels_model?: string | null
+          solar_total_kwp?: number | null
+          system_specification?: string | null
+          system_type?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "green_project_data_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       homeowners: {
         Row: {
           created_at: string
@@ -355,6 +477,94 @@ export type Database = {
         }
         Relationships: []
       }
+      manual_pro_purchases: {
+        Row: {
+          created_at: string
+          id: string
+          job_id: string
+          purchased_at: string
+          stripe_payment_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          job_id: string
+          purchased_at?: string
+          stripe_payment_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          job_id?: string
+          purchased_at?: string
+          stripe_payment_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manual_pro_purchases_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      materials_log: {
+        Row: {
+          batch_reference: string | null
+          category: string
+          colour_finish: string | null
+          created_at: string
+          id: string
+          job_id: string
+          manufacturer: string
+          product_name: string
+          quantity: string | null
+          specification: string | null
+          supplier: string | null
+          trade_id: string
+        }
+        Insert: {
+          batch_reference?: string | null
+          category?: string
+          colour_finish?: string | null
+          created_at?: string
+          id?: string
+          job_id: string
+          manufacturer?: string
+          product_name?: string
+          quantity?: string | null
+          specification?: string | null
+          supplier?: string | null
+          trade_id: string
+        }
+        Update: {
+          batch_reference?: string | null
+          category?: string
+          colour_finish?: string | null
+          created_at?: string
+          id?: string
+          job_id?: string
+          manufacturer?: string
+          product_name?: string
+          quantity?: string | null
+          specification?: string | null
+          supplier?: string | null
+          trade_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "materials_log_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       planning_alert_subs: {
         Row: {
           active: boolean
@@ -494,6 +704,50 @@ export type Database = {
         }
         Relationships: []
       }
+      project_certificates: {
+        Row: {
+          cert_type: string
+          created_at: string
+          document_name: string
+          file_url: string | null
+          id: string
+          issue_date: string | null
+          issuing_body: string | null
+          job_id: string
+          reference_number: string | null
+        }
+        Insert: {
+          cert_type?: string
+          created_at?: string
+          document_name?: string
+          file_url?: string | null
+          id?: string
+          issue_date?: string | null
+          issuing_body?: string | null
+          job_id: string
+          reference_number?: string | null
+        }
+        Update: {
+          cert_type?: string
+          created_at?: string
+          document_name?: string
+          file_url?: string | null
+          id?: string
+          issue_date?: string | null
+          issuing_body?: string | null
+          job_id?: string
+          reference_number?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_certificates_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_messages: {
         Row: {
           created_at: string
@@ -584,6 +838,53 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "project_stages_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_warranties: {
+        Row: {
+          claim_contact: string | null
+          coverage: string | null
+          created_at: string
+          expiry_date: string | null
+          id: string
+          item: string
+          job_id: string
+          manufacturer: string
+          trade_id: string
+          warranty_period_months: number
+        }
+        Insert: {
+          claim_contact?: string | null
+          coverage?: string | null
+          created_at?: string
+          expiry_date?: string | null
+          id?: string
+          item?: string
+          job_id: string
+          manufacturer?: string
+          trade_id: string
+          warranty_period_months?: number
+        }
+        Update: {
+          claim_contact?: string | null
+          coverage?: string | null
+          created_at?: string
+          expiry_date?: string | null
+          id?: string
+          item?: string
+          job_id?: string
+          manufacturer?: string
+          trade_id?: string
+          warranty_period_months?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_warranties_job_id_fkey"
             columns: ["job_id"]
             isOneToOne: false
             referencedRelation: "jobs"

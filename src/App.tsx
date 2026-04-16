@@ -17,6 +17,7 @@ import NotFound from "./pages/NotFound.tsx";
 import QuoteChecker from "./pages/QuoteChecker.tsx";
 import GreenGrants from "./pages/GreenGrants.tsx";
 import PlanningAlertsPage from "./pages/PlanningAlerts.tsx";
+import HomeownerManual from "./pages/HomeownerManual.tsx";
 
 const queryClient = new QueryClient();
 
@@ -64,6 +65,14 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <ProjectDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/manual/:id"
+            element={
+              <ProtectedRoute>
+                <HomeownerManual />
               </ProtectedRoute>
             }
           />
