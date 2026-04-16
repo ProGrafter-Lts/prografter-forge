@@ -24,7 +24,7 @@ const steps = [
 const HomeownersHowItWorks = () => {
   return (
     <section className="bg-cream py-24 px-6">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-[1800px] mx-auto">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-8 h-[2px] bg-teal" />
           <span className="font-mono text-xs text-teal uppercase tracking-widest">For Homeowners</span>
