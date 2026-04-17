@@ -1,6 +1,7 @@
 import { useState, FormEvent, ChangeEvent, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Link, useSearchParams } from "react-router-dom";
+import SEO from "@/components/SEO";
 import { isGreenTrade } from "@/lib/greenTrades";
 
 const ALL_JOB_TYPES = [
@@ -201,6 +202,11 @@ const PostAJob = () => {
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: "hsl(var(--deep))" }}>
+      <SEO
+        title="Post a Job Free — ProGrafter | Get Quotes from Verified Trades"
+        description="Post your home improvement job free on ProGrafter. Receive quotes from verified, insured local tradespeople within 24 hours. Full project management included."
+        path="/post-a-job"
+      />
       <header className="py-6 px-6">
         <Link to="/" className="font-heading text-2xl tracking-wider">
           <span className="text-cream">Pro</span>

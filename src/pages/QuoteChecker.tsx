@@ -13,6 +13,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import SEO from "@/components/SEO";
 import { Upload, FileText, Loader2, ShieldCheck, AlertTriangle } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 
@@ -327,6 +328,11 @@ const QuoteChecker = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="AI Quote Checker — ProGrafter | Check Any Building Quote for £49"
+        description="Upload any building quote. Our AI checks it against a 43-point checklist and identifies missing items before you sign. Report delivered within 2 hours. £49."
+        path="/quote-checker"
+      />
       <Navbar />
       <div className="pt-24 pb-16 px-6">
         <div className="max-w-2xl mx-auto">

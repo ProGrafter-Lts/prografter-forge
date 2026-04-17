@@ -1,6 +1,7 @@
 import { useState, FormEvent, ChangeEvent, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
+import SEO from "@/components/SEO";
 import { format, differenceInDays } from "date-fns";
 import { CalendarIcon, Leaf } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -194,6 +195,11 @@ const TradeRegisterNew = () => {
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: "hsl(var(--deep))" }}>
+      <SEO
+        title="Register as a Trade — ProGrafter | Free to Join"
+        description="Join ProGrafter free. Pay zero monthly fees. 7.5% commission only when a job completes, capped at £900 per job. Verified, insured trades only."
+        path="/register/trade"
+      />
       <header className="py-6 px-6">
         <Link to="/" className="font-heading text-2xl tracking-wider">
           <span className="text-cream">Pro</span>

@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
+import SEO from "@/components/SEO";
 import Footer from "@/components/Footer";
 import { Leaf, CheckCircle2, HelpCircle, ChevronLeft, AlertCircle, ExternalLink } from "lucide-react";
 
@@ -267,6 +268,11 @@ const GreenGrantsPage = () => {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "hsl(var(--deep))" }}>
+      <SEO
+        title="Green Grants Eligibility Checker — ProGrafter | Free"
+        description="Find out if you qualify for ECO4, Boiler Upgrade Scheme, or Great British Insulation Scheme funding. Free eligibility check. Matched with certified local installers."
+        path="/green"
+      />
       <Navbar />
 
       {/* SECTION 1 — HERO */}

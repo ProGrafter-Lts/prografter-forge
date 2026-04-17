@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import SEO from "@/components/SEO";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -43,6 +44,11 @@ const Login = () => {
 
   return (
     <div className="min-h-screen bg-cream flex items-center justify-center px-4">
+      <SEO
+        title="Sign In — ProGrafter"
+        description="Sign in to your ProGrafter account to manage your projects, quotes, and messages."
+        path="/login"
+      />
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <a href="/" className="font-heading text-[32px] leading-none tracking-wide">
