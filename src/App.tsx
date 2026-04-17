@@ -9,6 +9,7 @@ import TradeRegister from "./pages/TradeRegister.tsx";
 import TradeRegisterNew from "./pages/TradeRegisterNew.tsx";
 import PostAJob from "./pages/PostAJob.tsx";
 import Login from "./pages/Login.tsx";
+import ResetPassword from "./pages/ResetPassword.tsx";
 import TradeDashboard from "./pages/TradeDashboard.tsx";
 import TradeSettings from "./pages/TradeSettings.tsx";
 import HomeownerDashboard from "./pages/HomeownerDashboard.tsx";
@@ -41,6 +42,7 @@ const App = () => (
           <Route path="/quote-checker" element={<QuoteChecker />} />
           <Route path="/green" element={<GreenGrants />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/unsubscribe" element={<Unsubscribe />} />
           <Route path="/contact" element={<Contact />} />
           <Route
