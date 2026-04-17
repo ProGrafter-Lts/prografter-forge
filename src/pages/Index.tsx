@@ -4,6 +4,7 @@ import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import Ticker from "@/components/Ticker";
 import HowItWorks from "@/components/HowItWorks";
+import OldWayContrast from "@/components/OldWayContrast";
 import GreenEnergySection from "@/components/GreenEnergySection";
 import ContrastSection from "@/components/ContrastSection";
 import FeaturesGrid from "@/components/FeaturesGrid";
@@ -44,6 +45,7 @@ const Index = () => {
       <Hero />
       <Ticker />
       <HowItWorks />
+      <OldWayContrast />
       <GreenEnergySection />
       <ContrastSection />
       <FeaturesGrid />
