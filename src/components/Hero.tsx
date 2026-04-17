@@ -58,13 +58,26 @@ const Hero = () => {
               href="#signup"
               className="inline-block bg-teal text-cream font-mono text-sm px-8 py-3 rounded-xl hover:bg-teal-hover transition-colors"
             >
-              Get Early Access
+              Register as a Trade
             </a>
             <a
               href="/green"
               className="inline-block bg-green-600 text-white font-mono text-sm px-8 py-3 rounded-xl hover:bg-green-700 transition-colors shadow-lg shadow-green-600/20"
             >
               🌿 Find Out If You Qualify →
+            </a>
+          </div>
+
+          {/* Homeowner path */}
+          <div className="mt-8 pt-6 border-t border-cream/10 flex flex-wrap items-center gap-x-4 gap-y-3">
+            <span className="font-mono text-xs text-secondary-text uppercase tracking-widest">
+              Homeowner planning a project?
+            </span>
+            <a
+              href="/post-a-job"
+              className="inline-block bg-transparent border-2 border-teal text-teal font-mono text-sm px-6 py-2.5 rounded-xl hover:bg-teal hover:text-cream transition-colors"
+            >
+              Post a Job Free →
             </a>
           </div>
         </div>
