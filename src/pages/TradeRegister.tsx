@@ -63,8 +63,15 @@ const TradeRegister = () => {
 
     // Upload insurance cert if provided
     if (file) {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setError("You must be signed in to upload a certificate.");
+        setLoading(false);
+        return;
+      }
+
       const fileExt = file.name.split(".").pop();
-      const filePath = `${crypto.randomUUID()}.${fileExt}`;
+      const filePath = `${user.id}/${crypto.randomUUID()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from("insurance-certs")
