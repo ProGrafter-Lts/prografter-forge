@@ -66,6 +66,7 @@ const TradeRegisterNew = () => {
   // Step 3
   const [file, setFile] = useState<File | null>(null);
   const [insuranceExpiry, setInsuranceExpiry] = useState<Date | undefined>();
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   const insuranceExpiryStatus = useMemo(() => {
     if (!insuranceExpiry) return null;
