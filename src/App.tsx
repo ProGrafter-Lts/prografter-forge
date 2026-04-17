@@ -20,6 +20,7 @@ import GreenGrants from "./pages/GreenGrants.tsx";
 import PlanningAlertsPage from "./pages/PlanningAlerts.tsx";
 import HomeownerManual from "./pages/HomeownerManual.tsx";
 import Unsubscribe from "./pages/Unsubscribe.tsx";
+import Contact from "./pages/Contact.tsx";
 import PWAInstallBanner from "./components/PWAInstallBanner.tsx";
 
 const queryClient = new QueryClient();
@@ -41,6 +42,7 @@ const App = () => (
           <Route path="/green" element={<GreenGrants />} />
           <Route path="/login" element={<Login />} />
           <Route path="/unsubscribe" element={<Unsubscribe />} />
+          <Route path="/contact" element={<Contact />} />
           <Route
             path="/planning-alerts"
             element={
