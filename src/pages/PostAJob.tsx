@@ -111,8 +111,14 @@ const PostAJob = () => {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError("");
+
+    if (!acceptedTerms) {
+      setError("You must accept the Terms of Service to register.");
+      return;
+    }
+
+    setLoading(true);
 
     // 1. Create auth user
     const { data: authData, error: authError } = await supabase.auth.signUp({
