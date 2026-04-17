@@ -13,6 +13,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import SEO from "@/components/SEO";
 import { Upload, FileText, Loader2, ShieldCheck, AlertTriangle } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 
