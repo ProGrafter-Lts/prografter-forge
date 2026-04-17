@@ -52,6 +52,7 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
   const [email, setEmail] = useState("");
   const [postcode, setPostcode] = useState("");
   const [description, setDescription] = useState("");
+  const [website, setWebsite] = useState(""); // honeypot — must stay empty
   const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -91,10 +92,10 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
         .single();
       if (insertError) throw insertError;
 
-      // Create Stripe checkout session
+      // Create Stripe checkout session (passes honeypot through)
       const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke(
         "create-quote-checkout",
-        { body: { quoteCheckId: record.id, email } }
+        { body: { quoteCheckId: record.id, email, website } }
       );
       if (checkoutError) throw checkoutError;
 
