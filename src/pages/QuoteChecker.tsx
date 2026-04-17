@@ -52,6 +52,7 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
   const [email, setEmail] = useState("");
   const [postcode, setPostcode] = useState("");
   const [description, setDescription] = useState("");
+  const [website, setWebsite] = useState(""); // honeypot — must stay empty
   const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -91,10 +92,10 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
         .single();
       if (insertError) throw insertError;
 
-      // Create Stripe checkout session
+      // Create Stripe checkout session (passes honeypot through)
       const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke(
         "create-quote-checkout",
-        { body: { quoteCheckId: record.id, email } }
+        { body: { quoteCheckId: record.id, email, website } }
       );
       if (checkoutError) throw checkoutError;
 
@@ -178,6 +179,23 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
           <Label className="font-mono text-sm text-navy">Email Address *</Label>
           <Input type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="font-mono" />
           <p className="font-mono text-xs text-muted-foreground">Your report will be delivered here.</p>
+        </div>
+
+        {/* Honeypot — hidden from real users, bots will fill it */}
+        <div
+          aria-hidden="true"
+          style={{ position: "absolute", left: "-10000px", top: "auto", width: "1px", height: "1px", overflow: "hidden" }}
+        >
+          <label htmlFor="website">Website (leave blank)</label>
+          <input
+            id="website"
+            name="website"
+            type="text"
+            tabIndex={-1}
+            autoComplete="off"
+            value={website}
+            onChange={(e) => setWebsite(e.target.value)}
+          />
         </div>
 
         <Button
