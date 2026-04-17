@@ -22,6 +22,7 @@ import PlanningAlertsPage from "./pages/PlanningAlerts.tsx";
 import HomeownerManual from "./pages/HomeownerManual.tsx";
 import Unsubscribe from "./pages/Unsubscribe.tsx";
 import Contact from "./pages/Contact.tsx";
+import About from "./pages/About.tsx";
 import PWAInstallBanner from "./components/PWAInstallBanner.tsx";
 
 const queryClient = new QueryClient();
@@ -45,6 +46,7 @@ const App = () => (
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/unsubscribe" element={<Unsubscribe />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/about" element={<About />} />
           <Route
             path="/planning-alerts"
             element={
