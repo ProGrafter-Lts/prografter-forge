@@ -1,3 +1,6 @@
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+
 const stats = [
   { value: "£0", label: "Monthly Fee" },
   { value: "7.5%", label: "Commission" },
@@ -5,6 +8,17 @@ const stats = [
 ];
 
 const Hero = () => {
+  const [tradeCount, setTradeCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    supabase
+      .from("trades")
+      .select("id", { count: "exact", head: true })
+      .then(({ count }) => {
+        if (typeof count === "number") setTradeCount(count);
+      });
+  }, []);
+
   return (
     <section className="relative min-h-screen bg-deep flex items-center overflow-hidden">
       {/* Ghost GRAFT text */}
@@ -21,6 +35,15 @@ const Hero = () => {
           <div className="flex items-center gap-3 mb-8">
             <div className="w-8 h-[2px] bg-teal" />
             <span className="font-mono text-xs text-teal uppercase tracking-widest">For Tradespeople</span>
+          </div>
+          <div className="inline-flex items-center gap-2 mb-6 px-3 py-1.5 rounded-full bg-teal/10 border border-teal/30">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-teal opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-teal" />
+            </span>
+            <span className="font-mono text-[11px] text-cream uppercase tracking-wider">
+              Now live across the UK{tradeCount !== null ? ` — ${tradeCount} verified ${tradeCount === 1 ? "trade" : "trades"} registered` : ""}
+            </span>
           </div>
           <h1 className="font-heading text-cream text-[56px] craft:text-[80px] leading-[0.95] mb-6">
             Built for<br />
