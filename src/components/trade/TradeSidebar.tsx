@@ -7,6 +7,7 @@ import {
   Bell,
   PoundSterling,
   UserCircle,
+  Settings,
   LogOut,
 } from "lucide-react";
 
@@ -17,6 +18,7 @@ const NAV_ITEMS = [
   { label: "Planning Alerts", icon: Bell, id: "alerts" },
   { label: "Earnings", icon: PoundSterling, id: "earnings" },
   { label: "My Profile", icon: UserCircle, id: "profile" },
+  { label: "Settings", icon: Settings, id: "settings" },
 ];
 
 interface TradeSidebarProps {
@@ -64,6 +66,8 @@ const TradeSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen }: 
               onClick={() => {
                 if (item.id === "alerts") {
                   navigate("/planning-alerts");
+                } else if (item.id === "settings") {
+                  navigate("/dashboard/trade/settings");
                 } else {
                   setActiveNav(item.id);
                 }
