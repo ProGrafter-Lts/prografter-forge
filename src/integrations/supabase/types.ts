@@ -1135,6 +1135,7 @@ export type Database = {
       trades: {
         Row: {
           bio: string | null
+          calendar_token: string
           ciga_registered: boolean
           company_name: string
           created_at: string
@@ -1160,6 +1161,7 @@ export type Database = {
         }
         Insert: {
           bio?: string | null
+          calendar_token?: string
           ciga_registered?: boolean
           company_name: string
           created_at?: string
@@ -1185,6 +1187,7 @@ export type Database = {
         }
         Update: {
           bio?: string | null
+          calendar_token?: string
           ciga_registered?: boolean
           company_name?: string
           created_at?: string

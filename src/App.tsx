@@ -10,6 +10,7 @@ import TradeRegisterNew from "./pages/TradeRegisterNew.tsx";
 import PostAJob from "./pages/PostAJob.tsx";
 import Login from "./pages/Login.tsx";
 import TradeDashboard from "./pages/TradeDashboard.tsx";
+import TradeSettings from "./pages/TradeSettings.tsx";
 import HomeownerDashboard from "./pages/HomeownerDashboard.tsx";
 import ProjectDetail from "./pages/ProjectDetail.tsx";
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
@@ -53,6 +54,14 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <TradeDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/trade/settings"
+            element={
+              <ProtectedRoute>
+                <TradeSettings />
               </ProtectedRoute>
             }
           />

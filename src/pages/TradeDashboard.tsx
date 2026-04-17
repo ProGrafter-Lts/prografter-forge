@@ -11,6 +11,7 @@ import JobMatchesList from "@/components/trade/JobMatchesList";
 import ActiveProjectsList from "@/components/trade/ActiveProjectsList";
 import QuotesList from "@/components/trade/QuotesList";
 import LiveMarginWidget from "@/components/trade/LiveMarginWidget";
+import CalendarConnect from "@/components/trade/CalendarConnect";
 
 interface TradeProfile {
   name: string;
@@ -147,6 +148,8 @@ const TradeDashboard = () => {
             activeProjectCount={activeProjects.length}
             rating={rating}
           />
+
+          <CalendarConnect variant="compact" />
 
           <JobMatchesList matches={matches} />
           <ActiveProjectsList projects={activeProjects} />
