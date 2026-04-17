@@ -9,6 +9,7 @@ const Footer = () => {
           </a>
 
           <div className="flex gap-6">
+            <a href="/about" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">About</a>
             <a href="/privacy" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">Privacy</a>
             <a href="/terms" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">Terms</a>
             <a href="/contact" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">Contact</a>
