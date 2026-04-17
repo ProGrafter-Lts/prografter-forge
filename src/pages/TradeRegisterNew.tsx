@@ -99,9 +99,14 @@ const TradeRegisterNew = () => {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError("");
 
+    if (!acceptedTerms) {
+      setError("You must accept the Terms of Service to register.");
+      return;
+    }
+
+    setLoading(true);
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email: email.trim(),
       password,
