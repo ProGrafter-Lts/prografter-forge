@@ -19,15 +19,21 @@ const SignUpSection = () => {
     setLoading(true);
     setError("");
 
+    const cleanName = name.trim();
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanPostcode = postcode.trim();
+
+    const signupId = crypto.randomUUID();
     const { error: dbError } = await supabase.from("early_signups").insert({
-      name: name.trim(),
-      email: email.trim().toLowerCase(),
-      postcode: postcode.trim(),
+      id: signupId,
+      name: cleanName,
+      email: cleanEmail,
+      postcode: cleanPostcode,
       user_type: userType,
     });
 
-    setLoading(false);
     if (dbError) {
+      setLoading(false);
       // Postgres unique violation
       if ((dbError as { code?: string }).code === "23505") {
         setError("You're already on the waitlist for this option. We'll be in touch!");
@@ -35,9 +41,34 @@ const SignUpSection = () => {
         setError("Something went wrong. Please try again.");
         console.error(dbError);
       }
-    } else {
-      setSuccess(true);
+      return;
     }
+
+    // Fire-and-forget notification + welcome emails (don't block UX on failures)
+    void supabase.functions.invoke("send-transactional-email", {
+      body: {
+        templateName: "waitlist-admin-notification",
+        idempotencyKey: `waitlist-admin-${signupId}`,
+        templateData: {
+          name: cleanName,
+          email: cleanEmail,
+          postcode: cleanPostcode,
+          userType: userType,
+        },
+      },
+    }).catch((err) => console.error("admin notification failed", err));
+
+    void supabase.functions.invoke("send-transactional-email", {
+      body: {
+        templateName: "waitlist-welcome",
+        recipientEmail: cleanEmail,
+        idempotencyKey: `waitlist-welcome-${signupId}`,
+        templateData: { name: cleanName },
+      },
+    }).catch((err) => console.error("welcome email failed", err));
+
+    setLoading(false);
+    setSuccess(true);
   };
 
   return (
