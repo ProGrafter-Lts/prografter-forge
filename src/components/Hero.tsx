@@ -29,7 +29,7 @@ const Hero = () => {
       {/* Diagonal teal line */}
       <div className="hidden craft:block absolute top-0 bottom-0 w-[3px] bg-teal" style={{ left: "62%", transform: "skewX(-4deg)" }} />
 
-      <div className="max-w-7xl mx-auto px-6 w-full grid craft:grid-cols-[1fr_0.8fr] gap-12 items-center pt-24 pb-16">
+      <div className="max-w-7xl mx-auto px-6 w-full grid craft:grid-cols-[1fr_0.8fr] gap-12 items-center pt-24 pb-16 craft:pb-16 pb-32">
         {/* Left column */}
         <div>
           <div className="flex items-center gap-3 mb-8">
@@ -80,6 +80,16 @@ const Hero = () => {
               Post a Job Free →
             </a>
           </div>
+
+          {/* Mobile stats — inline (below homeowner CTA) */}
+          <div className="craft:hidden mt-8 grid grid-cols-3 gap-3">
+            {stats.map((stat) => (
+              <div key={stat.label} className="bg-navy/50 backdrop-blur-sm border border-teal/20 rounded-xl px-3 py-3 text-center">
+                <div className="font-heading text-teal text-xl">{stat.value}</div>
+                <div className="font-mono text-[10px] text-secondary-text uppercase">{stat.label}</div>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Right column — stat cards + rotating circles */}
@@ -108,15 +118,6 @@ const Hero = () => {
         </div>
       </div>
 
-      {/* Mobile stats */}
-      <div className="craft:hidden absolute bottom-8 left-6 right-6 flex gap-3">
-        {stats.map((stat) => (
-          <div key={stat.label} className="flex-1 bg-navy/50 backdrop-blur-sm border border-teal/20 rounded-xl px-3 py-3 text-center">
-            <div className="font-heading text-teal text-xl">{stat.value}</div>
-            <div className="font-mono text-[10px] text-secondary-text uppercase">{stat.label}</div>
-          </div>
-        ))}
-      </div>
     </section>
   );
 };
