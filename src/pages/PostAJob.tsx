@@ -90,6 +90,7 @@ const PostAJob = () => {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   const inputClass =
     "w-full bg-cream/5 border border-cream/10 text-cream placeholder-cream/40 font-body text-sm rounded-xl px-4 py-3 focus:border-teal focus:outline-none transition-colors";
@@ -110,8 +111,14 @@ const PostAJob = () => {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError("");
+
+    if (!acceptedTerms) {
+      setError("You must accept the Terms of Service to register.");
+      return;
+    }
+
+    setLoading(true);
 
     // 1. Create auth user
     const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -515,6 +522,22 @@ const PostAJob = () => {
                       </p>
                     )}
                   </div>
+
+                  {/* Terms acceptance */}
+                  <label className="flex items-start gap-3 mt-6 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={acceptedTerms}
+                      onChange={(e) => { setAcceptedTerms(e.target.checked); if (e.target.checked) setError(""); }}
+                      className="mt-1 w-4 h-4 rounded border-cream/20 bg-cream/5 accent-teal cursor-pointer flex-shrink-0"
+                    />
+                    <span className="font-body text-cream/70 text-sm leading-relaxed">
+                      I have read and agree to ProGrafter's{" "}
+                      <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-teal hover:underline">Terms of Service</a>
+                      {" "}and{" "}
+                      <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-teal hover:underline">Privacy Policy</a>.
+                    </span>
+                  </label>
 
                   {error && (
                     <p className="text-red-400 font-mono text-xs mt-4">{error}</p>
