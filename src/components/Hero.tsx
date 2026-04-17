@@ -36,6 +36,15 @@ const Hero = () => {
             <div className="w-8 h-[2px] bg-teal" />
             <span className="font-mono text-xs text-teal uppercase tracking-widest">For Tradespeople</span>
           </div>
+          <div className="inline-flex items-center gap-2 mb-6 px-3 py-1.5 rounded-full bg-teal/10 border border-teal/30">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-teal opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-teal" />
+            </span>
+            <span className="font-mono text-[11px] text-cream uppercase tracking-wider">
+              Now live across the UK{tradeCount !== null ? ` — ${tradeCount} verified ${tradeCount === 1 ? "trade" : "trades"} registered` : ""}
+            </span>
+          </div>
           <h1 className="font-heading text-cream text-[56px] craft:text-[80px] leading-[0.95] mb-6">
             Built for<br />
             <span className="text-teal">Proper</span><br />
