@@ -83,13 +83,13 @@ const SignUpSection = () => {
         <div className="fade-up">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-8 h-[2px] bg-teal" />
-            <span className="font-mono text-xs text-teal uppercase tracking-widest">Join the Waitlist</span>
+            <span className="font-mono text-xs text-teal uppercase tracking-widest">Register Free</span>
           </div>
           <h2 className="font-heading text-cream text-[48px] craft:text-[64px] leading-none mb-4">
-            Get In<br /><span className="text-teal">Early.</span>
+            Live Across<br /><span className="text-teal">The UK.</span>
           </h2>
           <p className="font-body text-secondary-text text-base font-light max-w-sm">
-            Be the first to know when ProGrafter launches in your area. No spam, just updates that matter.
+            ProGrafter is live across the UK. Register free today — no monthly fees, no spam, just verified job leads.
           </p>
         </div>
 
@@ -98,7 +98,7 @@ const SignUpSection = () => {
           {success ? (
             <div className="bg-teal/10 border border-teal/30 rounded-xl p-8 text-center">
               <h3 className="font-heading text-teal text-3xl mb-2">You're In.</h3>
-              <p className="font-body text-cream/70 text-sm">We'll be in touch when we launch near you.</p>
+              <p className="font-body text-cream/70 text-sm">Welcome aboard. Check your inbox to get started.</p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
