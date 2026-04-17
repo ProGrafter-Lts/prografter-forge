@@ -898,6 +898,7 @@ export type Database = {
           description: string
           email: string
           id: string
+          lookup_token: string
           pdf_url: string
           postcode: string
           project_type: string
@@ -911,6 +912,7 @@ export type Database = {
           description?: string
           email: string
           id?: string
+          lookup_token?: string
           pdf_url: string
           postcode?: string
           project_type: string
@@ -924,6 +926,7 @@ export type Database = {
           description?: string
           email?: string
           id?: string
+          lookup_token?: string
           pdf_url?: string
           postcode?: string
           project_type?: string
