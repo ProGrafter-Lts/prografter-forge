@@ -139,6 +139,39 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Defence-in-depth: never call Claude unless Stripe payment is confirmed.
+    // verify-quote-payment is meant to be the only caller, but we re-verify
+    // here so a stray invocation can't burn AI credits.
+    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
+    if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not configured");
+    if (!record.stripe_payment_id) {
+      return new Response(
+        JSON.stringify({ error: "Payment not verified for this quote check" }),
+        {
+          status: 402,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
+    }
+    const { default: Stripe } = await import("https://esm.sh/stripe@18.5.0");
+    const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
+    let paid = false;
+    try {
+      const intent = await stripe.paymentIntents.retrieve(record.stripe_payment_id);
+      paid = intent.status === "succeeded";
+    } catch (e) {
+      console.error("analyse-quote: Stripe verification failed", e);
+    }
+    if (!paid) {
+      return new Response(
+        JSON.stringify({ error: "Stripe payment not in 'succeeded' state" }),
+        {
+          status: 402,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
+    }
+
     // Download the PDF from storage
     const { data: pdfData, error: downloadError } = await supabase.storage
       .from("quote-pdfs")
