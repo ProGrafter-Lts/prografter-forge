@@ -141,10 +141,9 @@ const TradeRegisterNew = () => {
         return;
       }
 
-      const { data: urlData } = supabase.storage
-        .from("insurance-certs")
-        .getPublicUrl(filePath);
-      insuranceCertUrl = urlData.publicUrl;
+      // Store the storage path (not a public URL). The bucket is private;
+      // admins generate signed URLs on demand for verification.
+      insuranceCertUrl = filePath;
     }
 
     const tradeData: Record<string, unknown> = {
