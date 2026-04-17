@@ -12,7 +12,7 @@ const features = [
   {
     num: "03",
     title: "AI Quote Checker",
-    desc: "Upload any quote and our AI reviews it against a 40-point checklist before you commit.",
+    desc: "Upload any quote and our AI reviews it against a 43-point checklist before you commit.",
   },
   {
     num: "04",
