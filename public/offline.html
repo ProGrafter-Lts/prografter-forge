@@ -80,6 +80,24 @@
         margin-bottom: 18px;
       }
     </style>
+    <script>
+      (function () {
+        async function recoverIfOnline() {
+          if (!navigator.onLine || !("serviceWorker" in navigator)) return;
+
+          try {
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            await Promise.all(registrations.map((registration) => registration.unregister()));
+          } catch {
+          }
+
+          window.location.replace("/");
+        }
+
+        window.addEventListener("online", recoverIfOnline);
+        window.addEventListener("pageshow", recoverIfOnline);
+      })();
+    </script>
   </head>
   <body>
     <main class="card">
