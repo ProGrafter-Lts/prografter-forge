@@ -15,3 +15,5 @@ project_id = "xryinqaxjclcmhebdcex"
     verify_jwt = false
   [functions.ics-feed]
     verify_jwt = false
+  [functions.read-quote-check]
+    verify_jwt = false
