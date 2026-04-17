@@ -1,3 +1,6 @@
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+
 const stats = [
   { value: "£0", label: "Monthly Fee" },
   { value: "7.5%", label: "Commission" },
@@ -5,6 +8,17 @@ const stats = [
 ];
 
 const Hero = () => {
+  const [tradeCount, setTradeCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    supabase
+      .from("trades")
+      .select("id", { count: "exact", head: true })
+      .then(({ count }) => {
+        if (typeof count === "number") setTradeCount(count);
+      });
+  }, []);
+
   return (
     <section className="relative min-h-screen bg-deep flex items-center overflow-hidden">
       {/* Ghost GRAFT text */}
