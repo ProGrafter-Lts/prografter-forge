@@ -1,14 +1,33 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import SEO from "@/components/SEO";
 
 const Login = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+
+  // Forgot password modal state
+  const [showForgot, setShowForgot] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotLoading, setForgotLoading] = useState(false);
+  const [forgotError, setForgotError] = useState("");
+  const [forgotSent, setForgotSent] = useState(false);
+
+  useEffect(() => {
+    if (searchParams.get("reset") === "success") {
+      setSuccessMessage("Password updated — please sign in");
+      // Clean the param from the URL
+      const next = new URLSearchParams(searchParams);
+      next.delete("reset");
+      setSearchParams(next, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,6 +61,32 @@ const Login = () => {
     setLoading(false);
   };
 
+  const openForgot = () => {
+    setForgotEmail(email);
+    setForgotError("");
+    setForgotSent(false);
+    setShowForgot(true);
+  };
+
+  const handleForgotSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setForgotError("");
+    setForgotLoading(true);
+
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+
+    if (resetError) {
+      setForgotError(resetError.message);
+      setForgotLoading(false);
+      return;
+    }
+
+    setForgotSent(true);
+    setForgotLoading(false);
+  };
+
   return (
     <div className="min-h-screen bg-cream flex items-center justify-center px-4">
       <SEO
@@ -60,6 +105,11 @@ const Login = () => {
 
         <div className="bg-white rounded-2xl p-8 shadow-lg border border-navy/10">
           <form onSubmit={handleLogin} className="space-y-5">
+            {successMessage && (
+              <div className="bg-teal/10 border border-teal/30 text-teal px-4 py-3 rounded-xl text-sm font-mono">
+                {successMessage}
+              </div>
+            )}
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm font-mono">
                 {error}
@@ -88,6 +138,15 @@ const Login = () => {
                 className="w-full px-4 py-3 rounded-xl border border-navy/20 bg-cream/50 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-teal/40 focus:border-teal"
                 placeholder="••••••••"
               />
+              <div className="flex justify-end mt-1.5">
+                <button
+                  type="button"
+                  onClick={openForgot}
+                  className="font-mono text-xs text-teal no-underline hover:underline"
+                >
+                  Forgot your password?
+                </button>
+              </div>
             </div>
 
             <button
@@ -111,6 +170,77 @@ const Login = () => {
           </div>
         </div>
       </div>
+
+      {showForgot && (
+        <div
+          className="fixed inset-0 bg-navy/60 backdrop-blur-sm z-50 flex items-center justify-center px-4"
+          onClick={() => !forgotLoading && setShowForgot(false)}
+        >
+          <div
+            className="bg-cream rounded-2xl p-8 w-full max-w-md border border-navy/10 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="font-heading text-2xl text-navy mb-1 tracking-wide">RESET YOUR PASSWORD</h2>
+            <p className="font-mono text-xs text-secondary-text mb-5">
+              Enter your account email and we'll send you a reset link.
+            </p>
+
+            {forgotSent ? (
+              <div className="space-y-5">
+                <div className="bg-teal/10 border border-teal/30 text-navy px-4 py-3 rounded-xl text-sm font-mono">
+                  If an account exists for <strong>{forgotEmail}</strong>, a password reset link is on its way. Check your inbox (and spam folder).
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowForgot(false)}
+                  className="w-full py-3 bg-navy text-cream font-mono text-sm rounded-xl hover:bg-navy/90 transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleForgotSubmit} className="space-y-5">
+                {forgotError && (
+                  <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm font-mono">
+                    {forgotError}
+                  </div>
+                )}
+
+                <div>
+                  <label className="block font-mono text-sm text-navy mb-1.5">Email</label>
+                  <input
+                    type="email"
+                    value={forgotEmail}
+                    onChange={(e) => setForgotEmail(e.target.value)}
+                    required
+                    autoFocus
+                    className="w-full px-4 py-3 rounded-xl border border-navy/20 bg-white font-mono text-sm focus:outline-none focus:ring-2 focus:ring-teal/40 focus:border-teal"
+                    placeholder="you@example.com"
+                  />
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowForgot(false)}
+                    disabled={forgotLoading}
+                    className="flex-1 py-3 bg-transparent border border-navy/20 text-navy font-mono text-sm rounded-xl hover:bg-navy/5 transition-colors disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={forgotLoading}
+                    className="flex-1 py-3 bg-teal text-cream font-mono text-sm rounded-xl hover:bg-teal-hover transition-colors disabled:opacity-50 shadow-lg shadow-teal/20"
+                  >
+                    {forgotLoading ? "Sending..." : "Send Reset Link"}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
