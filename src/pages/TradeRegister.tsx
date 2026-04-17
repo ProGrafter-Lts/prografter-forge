@@ -84,11 +84,9 @@ const TradeRegister = () => {
         return;
       }
 
-      const { data: urlData } = supabase.storage
-        .from("insurance-certs")
-        .getPublicUrl(filePath);
-
-      insuranceCertUrl = urlData.publicUrl;
+      // Store the storage path (not a public URL). Signed URLs are generated
+      // on demand when an admin needs to view the certificate.
+      insuranceCertUrl = filePath;
     }
 
     const { error: dbError } = await supabase.from("trades").insert({
