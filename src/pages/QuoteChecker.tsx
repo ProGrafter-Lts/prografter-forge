@@ -181,6 +181,23 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
           <p className="font-mono text-xs text-muted-foreground">Your report will be delivered here.</p>
         </div>
 
+        {/* Honeypot — hidden from real users, bots will fill it */}
+        <div
+          aria-hidden="true"
+          style={{ position: "absolute", left: "-10000px", top: "auto", width: "1px", height: "1px", overflow: "hidden" }}
+        >
+          <label htmlFor="website">Website (leave blank)</label>
+          <input
+            id="website"
+            name="website"
+            type="text"
+            tabIndex={-1}
+            autoComplete="off"
+            value={website}
+            onChange={(e) => setWebsite(e.target.value)}
+          />
+        </div>
+
         <Button
           onClick={handleSubmit}
           disabled={isSubmitting || !file || !projectType || !email || description.length < 30}
