@@ -16,6 +16,7 @@ import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import { Upload, FileText, Loader2, ShieldCheck, AlertTriangle } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
+import DOMPurify from "dompurify";
 
 const PROJECT_TYPES = [
   "Rear Extension",
@@ -45,7 +46,7 @@ const DisclaimerBanner = () => (
   </div>
 );
 
-const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: string) => void }) => {
+const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: string, lookupToken: string) => void }) => {
   const [file, setFile] = useState<File | null>(null);
   const [projectType, setProjectType] = useState("");
   const [email, setEmail] = useState("");
@@ -86,7 +87,7 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
       const { data: record, error: insertError } = await supabase
         .from("quote_checks")
         .insert({ email, project_type: projectType, postcode, description, pdf_url: fileName })
-        .select()
+        .select("id, lookup_token")
         .single();
       if (insertError) throw insertError;
 
@@ -98,8 +99,11 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
       if (checkoutError) throw checkoutError;
 
       if (checkoutData?.url) {
-        // Store quote ID for when they return
-        localStorage.setItem("pendingQuoteCheck", JSON.stringify({ id: record.id, email }));
+        // Store quote ID + lookup token for when they return
+        localStorage.setItem(
+          "pendingQuoteCheck",
+          JSON.stringify({ id: record.id, email, lookupToken: (record as any).lookup_token }),
+        );
         window.location.href = checkoutData.url;
       } else {
         throw new Error("No checkout URL returned");
@@ -195,7 +199,15 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
   );
 };
 
-const QuoteCheckerResult = ({ quoteCheckId, email }: { quoteCheckId: string; email: string }) => {
+const QuoteCheckerResult = ({
+  quoteCheckId,
+  email,
+  lookupToken,
+}: {
+  quoteCheckId: string;
+  email: string;
+  lookupToken: string;
+}) => {
   const [reportHtml, setReportHtml] = useState<string | null>(null);
   const [status, setStatus] = useState<string>("pending");
 
@@ -203,12 +215,10 @@ const QuoteCheckerResult = ({ quoteCheckId, email }: { quoteCheckId: string; ema
     let cancelled = false;
     const poll = async () => {
       while (!cancelled) {
-        const { data } = await supabase
-          .from("quote_checks")
-          .select("status, report_html")
-          .eq("id", quoteCheckId)
-          .single();
-        if (data && !cancelled) {
+        const { data, error } = await supabase.functions.invoke("read-quote-check", {
+          body: { quoteCheckId, lookupToken },
+        });
+        if (!cancelled && !error && data) {
           setStatus(data.status);
           if (data.status === "complete" && data.report_html) {
             setReportHtml(data.report_html);
@@ -221,7 +231,7 @@ const QuoteCheckerResult = ({ quoteCheckId, email }: { quoteCheckId: string; ema
     };
     poll();
     return () => { cancelled = true; };
-  }, [quoteCheckId]);
+  }, [quoteCheckId, lookupToken]);
 
   if (status === "error") {
     return (
@@ -243,6 +253,12 @@ const QuoteCheckerResult = ({ quoteCheckId, email }: { quoteCheckId: string; ema
     );
   }
 
+  const sanitizedHtml = DOMPurify.sanitize(reportHtml, {
+    USE_PROFILES: { html: true },
+    FORBID_TAGS: ["script", "style", "iframe", "object", "embed", "form", "input"],
+    FORBID_ATTR: ["onerror", "onload", "onclick", "onmouseover", "onfocus", "onblur", "onchange", "onsubmit"],
+  });
+
   return (
     <div className="space-y-6">
       <div className="text-center">
@@ -256,7 +272,7 @@ const QuoteCheckerResult = ({ quoteCheckId, email }: { quoteCheckId: string; ema
           [&_h2]:font-heading [&_h2]:text-navy [&_h2]:text-lg [&_h2]:mt-6
           [&_h3]:font-heading [&_h3]:text-navy [&_h3]:text-base
           [&_table]:w-full [&_th]:text-left [&_th]:p-2 [&_td]:p-2 [&_tr]:border-b [&_tr]:border-border"
-        dangerouslySetInnerHTML={{ __html: reportHtml }}
+        dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
       />
       <DisclaimerBanner />
     </div>
@@ -264,7 +280,7 @@ const QuoteCheckerResult = ({ quoteCheckId, email }: { quoteCheckId: string; ema
 };
 
 const QuoteChecker = () => {
-  const [result, setResult] = useState<{ id: string; email: string } | null>(null);
+  const [result, setResult] = useState<{ id: string; email: string; lookupToken: string } | null>(null);
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const [verifying, setVerifying] = useState(false);
@@ -292,9 +308,20 @@ const QuoteChecker = () => {
           if (error) throw error;
           if (data?.paid) {
             const stored = localStorage.getItem("pendingQuoteCheck");
-            const email = stored ? JSON.parse(stored).email : "";
+            const parsed = stored ? JSON.parse(stored) : {};
+            const email = parsed.email || "";
+            const lookupToken = parsed.lookupToken || "";
             localStorage.removeItem("pendingQuoteCheck");
-            setResult({ id: quoteId, email });
+            if (!lookupToken) {
+              toast({
+                title: "Session expired",
+                description: "We couldn't find your secure access token. Please check your email for the report link.",
+                variant: "destructive",
+              });
+              window.history.replaceState({}, "", "/quote-checker");
+              return;
+            }
+            setResult({ id: quoteId, email, lookupToken });
             window.history.replaceState({}, "", "/quote-checker");
           } else {
             toast({ title: "Payment not confirmed", description: "Please try again.", variant: "destructive" });
@@ -348,9 +375,9 @@ const QuoteChecker = () => {
           </div>
 
           {result ? (
-            <QuoteCheckerResult quoteCheckId={result.id} email={result.email} />
+            <QuoteCheckerResult quoteCheckId={result.id} email={result.email} lookupToken={result.lookupToken} />
           ) : (
-            <QuoteCheckerForm onSubmitted={(id, email) => setResult({ id, email })} />
+            <QuoteCheckerForm onSubmitted={(id, email, lookupToken) => setResult({ id, email, lookupToken })} />
           )}
         </div>
       </div>
