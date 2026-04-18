@@ -1,4 +1,5 @@
 import { Clock, Image } from "lucide-react";
+import JobPhoto from "@/components/JobPhoto";
 
 interface StageUpdate {
   id: string;
@@ -48,9 +49,9 @@ const RecentSiteUpdates = ({ updates }: { updates: StageUpdate[] }) => {
                   {(u.photo_urls?.length ?? 0) > 0 && (
                     <div className="flex items-center gap-1">
                       {u.photo_urls!.slice(0, 2).map((url, i) => (
-                        <img
+                        <JobPhoto
                           key={i}
-                          src={url}
+                          source={url}
                           alt="Update"
                           className="w-10 h-10 rounded-lg object-cover border border-border"
                         />

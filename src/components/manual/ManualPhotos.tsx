@@ -1,4 +1,5 @@
 import { Camera, Lock } from "lucide-react";
+import JobPhoto from "@/components/JobPhoto";
 
 interface Props {
   stages: any[];
@@ -42,8 +43,8 @@ const ManualPhotos = ({ stages, stageUpdates, isPro, onUpgrade }: Props) => {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
             {visiblePhotos.map((photo, i) => (
               <div key={i} className="rounded-xl overflow-hidden border border-border">
-                <img
-                  src={photo.url}
+                <JobPhoto
+                  source={photo.url}
                   alt={`${photo.stageName} - ${photo.date}`}
                   className="w-full h-32 object-cover"
                   loading="lazy"

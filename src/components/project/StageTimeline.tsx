@@ -3,6 +3,8 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, Circle, Image, Upload, X, Users, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import JobPhoto from "@/components/JobPhoto";
+import { getJobPhotoSignedUrl } from "@/lib/jobPhotos";
 
 interface Stage {
   id: string;
@@ -95,8 +97,8 @@ const StageTimeline = ({ stages, updates, subAssignments = [], userRole, userId,
         const path = `updates/${activeStage.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
         const { error } = await supabase.storage.from("job-photos").upload(path, file);
         if (!error) {
-          const { data } = supabase.storage.from("job-photos").getPublicUrl(path);
-          photoUrls.push(data.publicUrl);
+          // Bucket is private — store the path and resolve to signed URLs at render time
+          photoUrls.push(path);
         }
       }
     }
@@ -225,7 +227,7 @@ const StageTimeline = ({ stages, updates, subAssignments = [], userRole, userId,
                               {stageUpdates.length > 0 && stageUpdates[stageUpdates.length - 1]?.photo_urls?.length > 0 && (
                                 <div className="flex flex-wrap gap-1 mt-2">
                                   {stageUpdates[stageUpdates.length - 1].photo_urls.slice(0, 4).map((url, i) => (
-                                    <img key={i} src={url} alt="" className="w-10 h-10 rounded object-cover border border-navy/10" />
+                                    <JobPhoto key={i} source={url} alt="" className="w-10 h-10 rounded object-cover border border-navy/10" />
                                   ))}
                                 </div>
                               )}
@@ -311,9 +313,12 @@ const StageTimeline = ({ stages, updates, subAssignments = [], userRole, userId,
                               {u.photo_urls?.length > 0 && (
                                 <div className="flex flex-wrap gap-2 mt-2">
                                   {u.photo_urls.map((url, i) => (
-                                    <button key={i} onClick={() => setExpandedPhoto(url)}
+                                    <button key={i} onClick={async () => {
+                                      const signed = await getJobPhotoSignedUrl(url);
+                                      if (signed) setExpandedPhoto(signed);
+                                    }}
                                       className="w-14 h-14 rounded-lg overflow-hidden border border-navy/10 hover:ring-2 hover:ring-teal/30 transition-all">
-                                      <img src={url} alt="" className="w-full h-full object-cover" />
+                                      <JobPhoto source={url} alt="" className="w-full h-full object-cover" />
                                     </button>
                                   ))}
                                 </div>

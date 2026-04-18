@@ -164,8 +164,9 @@ const PostAJob = () => {
       const path = `${userId}/${crypto.randomUUID()}.${ext}`;
       const { error: upErr } = await supabase.storage.from("job-photos").upload(path, photo);
       if (!upErr) {
-        const { data: urlData } = supabase.storage.from("job-photos").getPublicUrl(path);
-        photoUrls.push(urlData.publicUrl);
+        // Store the bucket path; the bucket is private and consumers resolve to
+        // short-lived signed URLs via src/lib/jobPhotos.ts
+        photoUrls.push(path);
       }
     }
 
