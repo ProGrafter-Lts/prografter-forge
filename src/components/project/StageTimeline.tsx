@@ -95,8 +95,8 @@ const StageTimeline = ({ stages, updates, subAssignments = [], userRole, userId,
         const path = `updates/${activeStage.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
         const { error } = await supabase.storage.from("job-photos").upload(path, file);
         if (!error) {
-          const { data } = supabase.storage.from("job-photos").getPublicUrl(path);
-          photoUrls.push(data.publicUrl);
+          // Bucket is private — store the path and resolve to signed URLs at render time
+          photoUrls.push(path);
         }
       }
     }
