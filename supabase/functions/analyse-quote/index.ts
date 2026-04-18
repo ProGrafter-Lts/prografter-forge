@@ -256,7 +256,7 @@ Deno.serve(async (req) => {
       }
     } catch { /* best effort */ }
 
-    return new Response(JSON.stringify({ error: err.message }), {
+    return new Response(JSON.stringify({ error: "An unexpected error occurred while analysing the quote." }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
