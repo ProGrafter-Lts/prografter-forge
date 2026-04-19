@@ -83,9 +83,12 @@ const Chatbot = () => {
     return () => sub.subscription.unsubscribe();
   }, []);
 
-  // Seed opening message when chat opens
+  // Seed opening message when chat opens.
+  // Wait for auth to resolve: if authed, also wait for the profile fetch
+  // before seeding so we can greet by name and pick the right opener.
   useEffect(() => {
     if (!open || messages.length > 0) return;
+    if (isAuthed && !profile) return; // profile still loading
     if (isAuthed && profile) {
       const firstName = (profile.full_name || "").split(" ")[0] || "there";
       const opener =
