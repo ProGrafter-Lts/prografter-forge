@@ -57,6 +57,7 @@ const Chatbot = () => {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [isAuthed, setIsAuthed] = useState(false);
+  const [authReady, setAuthReady] = useState(false);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [preLoginUserType, setPreLoginUserType] = useState<"trade" | "homeowner" | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
