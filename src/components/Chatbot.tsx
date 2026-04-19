@@ -57,6 +57,7 @@ const Chatbot = () => {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [isAuthed, setIsAuthed] = useState(false);
+  const [authReady, setAuthReady] = useState(false);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [preLoginUserType, setPreLoginUserType] = useState<"trade" | "homeowner" | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -67,6 +68,7 @@ const Chatbot = () => {
       if (!session?.user) {
         setIsAuthed(false);
         setProfile(null);
+        setAuthReady(true);
         return;
       }
       setIsAuthed(true);
@@ -75,7 +77,8 @@ const Chatbot = () => {
         .select("user_type, full_name")
         .eq("user_id", session.user.id)
         .maybeSingle();
-      if (data) setProfile(data as Profile);
+      setProfile((data as Profile) ?? null);
+      setAuthReady(true);
     };
 
     supabase.auth.getSession().then(({ data }) => init(data.session));
@@ -83,26 +86,38 @@ const Chatbot = () => {
     return () => sub.subscription.unsubscribe();
   }, []);
 
-  // Seed opening message when chat opens
+  // Seed opening message when chat opens. We wait briefly for auth to
+  // resolve so we can greet the user by name; if the auth check is slow
+  // we fall back to the guest opener after 800ms so the panel is never blank.
   useEffect(() => {
     if (!open || messages.length > 0) return;
-    if (isAuthed && profile) {
-      const firstName = (profile.full_name || "").split(" ")[0] || "there";
-      const opener =
-        profile.user_type === "homeowner"
-          ? `Hi ${firstName} 👋 I can help you with your project or answer any questions about how ProGrafter works.`
-          : `Hi ${firstName} 👋 Need help with anything on ProGrafter? I can walk you through any part of the platform.`;
-      setMessages([{ role: "assistant", content: opener }]);
-    } else {
-      setMessages([
-        {
-          role: "assistant",
-          content:
-            "Hi 👋 I'm the ProGrafter assistant.\n\nAre you a trade or a homeowner? I can answer questions about how ProGrafter works, what it costs, and how to get started.",
-        },
-      ]);
+
+    const seed = () => {
+      if (isAuthed && profile) {
+        const firstName = (profile.full_name || "").split(" ")[0] || "there";
+        const opener =
+          profile.user_type === "homeowner"
+            ? `Hi ${firstName} 👋 I can help you with your project or answer any questions about how ProGrafter works.`
+            : `Hi ${firstName} 👋 Need help with anything on ProGrafter? I can walk you through any part of the platform.`;
+        setMessages([{ role: "assistant", content: opener }]);
+      } else {
+        setMessages([
+          {
+            role: "assistant",
+            content:
+              "Hi 👋 I'm the ProGrafter assistant.\n\nAre you a trade or a homeowner? I can answer questions about how ProGrafter works, what it costs, and how to get started.",
+          },
+        ]);
+      }
+    };
+
+    if (authReady) {
+      seed();
+      return;
     }
-  }, [open, isAuthed, profile, messages.length]);
+    const t = setTimeout(seed, 800);
+    return () => clearTimeout(t);
+  }, [open, authReady, isAuthed, profile, messages.length]);
 
   // Autoscroll
   useEffect(() => {
@@ -158,16 +173,18 @@ const Chatbot = () => {
     }
   };
 
+  // Treat "authed but no profile row" as a guest for chip purposes.
+  const isGuest = !isAuthed || !profile;
   // Determine which suggested chips to show
-  const showTypePicker = !isAuthed && messages.length === 1 && !preLoginUserType;
+  const showTypePicker = isGuest && messages.length === 1 && !preLoginUserType;
   let suggested: string[] = [];
-  if (!isAuthed && preLoginUserType === "trade" && messages.length <= 2) {
+  if (isGuest && preLoginUserType === "trade" && messages.length <= 3) {
     suggested = PRE_LOGIN_TRADE_QUESTIONS;
-  } else if (!isAuthed && preLoginUserType === "homeowner" && messages.length <= 2) {
+  } else if (isGuest && preLoginUserType === "homeowner" && messages.length <= 3) {
     suggested = PRE_LOGIN_HOMEOWNER_QUESTIONS;
-  } else if (isAuthed && profile?.user_type === "trade" && messages.length === 1) {
+  } else if (!isGuest && profile?.user_type === "trade" && messages.length === 1) {
     suggested = TRADE_QUESTIONS;
-  } else if (isAuthed && profile?.user_type === "homeowner" && messages.length === 1) {
+  } else if (!isGuest && profile?.user_type === "homeowner" && messages.length === 1) {
     suggested = HOMEOWNER_QUESTIONS;
   }
 
