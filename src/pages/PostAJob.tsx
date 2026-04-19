@@ -257,7 +257,7 @@ const PostAJob = () => {
               <div
                 key={s}
                 className={`h-1 flex-1 rounded-full transition-colors ${
-                  s <= step ? "bg-teal" : "bg-cream/10"
+                  s <= Math.floor(step) ? "bg-teal" : "bg-cream/10"
                 }`}
               />
             ))}
