@@ -86,12 +86,11 @@ const Chatbot = () => {
     return () => sub.subscription.unsubscribe();
   }, []);
 
-  // Seed opening message when chat opens.
-  // Wait for auth to resolve: if authed, also wait for the profile fetch
-  // before seeding so we can greet by name and pick the right opener.
+  // Seed opening message when chat opens. Wait for auth check to resolve
+  // so we don't show the guest opener to a logged-in user (or vice versa).
   useEffect(() => {
     if (!open || messages.length > 0) return;
-    if (isAuthed && !profile) return; // profile still loading
+    if (!authReady) return;
     if (isAuthed && profile) {
       const firstName = (profile.full_name || "").split(" ")[0] || "there";
       const opener =
@@ -100,6 +99,7 @@ const Chatbot = () => {
           : `Hi ${firstName} 👋 Need help with anything on ProGrafter? I can walk you through any part of the platform.`;
       setMessages([{ role: "assistant", content: opener }]);
     } else {
+      // Either signed-out, or signed-in without a profile row — treat as guest.
       setMessages([
         {
           role: "assistant",
@@ -108,7 +108,7 @@ const Chatbot = () => {
         },
       ]);
     }
-  }, [open, isAuthed, profile, messages.length]);
+  }, [open, authReady, isAuthed, profile, messages.length]);
 
   // Autoscroll
   useEffect(() => {
