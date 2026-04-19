@@ -51,7 +51,7 @@ const BUDGETS = [
   "£50k+",
 ] as const;
 
-type Step = 1 | 2 | 3 | 4;
+type Step = 1 | 2 | 3 | 3.5 | 4;
 
 const PostAJob = () => {
   const [searchParams] = useSearchParams();
@@ -84,6 +84,10 @@ const PostAJob = () => {
   const [address, setAddress] = useState("");
   const [postcode, setPostcode] = useState("");
   const [budget, setBudget] = useState("");
+
+  // Step 3b — Optional Funds Verification
+  const [fundsDoc, setFundsDoc] = useState<File | null>(null);
+  const [fundsDocError, setFundsDocError] = useState("");
 
   // Step 4
   const [name, setName] = useState("");
