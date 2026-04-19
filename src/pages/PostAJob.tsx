@@ -266,7 +266,7 @@ const PostAJob = () => {
           <div className="flex items-center gap-3 mb-4">
             <div className="w-8 h-[2px] bg-teal" />
             <span className="font-mono text-xs text-teal uppercase tracking-widest">
-              Step {step} of 4
+              {step === 3.5 ? "Optional Step" : `Step ${step} of 4`}
             </span>
           </div>
 
