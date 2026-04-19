@@ -86,28 +86,37 @@ const Chatbot = () => {
     return () => sub.subscription.unsubscribe();
   }, []);
 
-  // Seed opening message when chat opens. Wait for auth check to resolve
-  // so we don't show the guest opener to a logged-in user (or vice versa).
+  // Seed opening message when chat opens. We wait briefly for auth to
+  // resolve so we can greet the user by name; if the auth check is slow
+  // we fall back to the guest opener after 800ms so the panel is never blank.
   useEffect(() => {
     if (!open || messages.length > 0) return;
-    if (!authReady) return;
-    if (isAuthed && profile) {
-      const firstName = (profile.full_name || "").split(" ")[0] || "there";
-      const opener =
-        profile.user_type === "homeowner"
-          ? `Hi ${firstName} 👋 I can help you with your project or answer any questions about how ProGrafter works.`
-          : `Hi ${firstName} 👋 Need help with anything on ProGrafter? I can walk you through any part of the platform.`;
-      setMessages([{ role: "assistant", content: opener }]);
-    } else {
-      // Either signed-out, or signed-in without a profile row — treat as guest.
-      setMessages([
-        {
-          role: "assistant",
-          content:
-            "Hi 👋 I'm the ProGrafter assistant.\n\nAre you a trade or a homeowner? I can answer questions about how ProGrafter works, what it costs, and how to get started.",
-        },
-      ]);
+
+    const seed = () => {
+      if (isAuthed && profile) {
+        const firstName = (profile.full_name || "").split(" ")[0] || "there";
+        const opener =
+          profile.user_type === "homeowner"
+            ? `Hi ${firstName} 👋 I can help you with your project or answer any questions about how ProGrafter works.`
+            : `Hi ${firstName} 👋 Need help with anything on ProGrafter? I can walk you through any part of the platform.`;
+        setMessages([{ role: "assistant", content: opener }]);
+      } else {
+        setMessages([
+          {
+            role: "assistant",
+            content:
+              "Hi 👋 I'm the ProGrafter assistant.\n\nAre you a trade or a homeowner? I can answer questions about how ProGrafter works, what it costs, and how to get started.",
+          },
+        ]);
+      }
+    };
+
+    if (authReady) {
+      seed();
+      return;
     }
+    const t = setTimeout(seed, 800);
+    return () => clearTimeout(t);
   }, [open, authReady, isAuthed, profile, messages.length]);
 
   // Autoscroll
