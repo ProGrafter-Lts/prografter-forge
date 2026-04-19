@@ -65,7 +65,7 @@ const TradeDashboard = () => {
     const [matchRes, quoteRes, projectRes, stagePaymentRes] = await Promise.all([
       supabase
         .from("job_matches")
-        .select("id, estimated_value, notified_at, status, jobs(title, job_type, postcode, description)")
+        .select("id, estimated_value, notified_at, status, jobs(title, job_type, postcode, description, funds_verified)")
         .eq("trade_id", tradeData.id)
         .eq("status", "notified")
         .order("notified_at", { ascending: false })

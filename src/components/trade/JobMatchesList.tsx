@@ -1,4 +1,5 @@
-import { Briefcase, MapPin, Clock, ChevronRight } from "lucide-react";
+import { useState } from "react";
+import { Briefcase, MapPin, Clock, ChevronRight, ShieldCheck } from "lucide-react";
 
 interface JobMatch {
   id: string;
@@ -10,6 +11,7 @@ interface JobMatch {
     job_type: string;
     postcode: string;
     description: string;
+    funds_verified?: boolean | null;
   } | null;
 }
 
@@ -21,60 +23,88 @@ const timeAgo = (dateStr: string) => {
   return `${Math.floor(hours / 24)}d ago`;
 };
 
-const JobMatchesList = ({ matches }: { matches: JobMatch[] }) => (
-  <section>
-    <div className="flex items-center justify-between mb-4">
-      <h2 className="font-heading text-primary text-2xl">New Job Matches</h2>
-      <span className="bg-secondary/10 text-secondary font-mono text-xs px-3 py-1 rounded-full">
-        {matches.length} new
-      </span>
-    </div>
+const JobMatchesList = ({ matches }: { matches: JobMatch[] }) => {
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const visible = verifiedOnly ? matches.filter((m) => m.jobs?.funds_verified) : matches;
 
-    {matches.length === 0 ? (
-      <div className="bg-card rounded-2xl p-8 border border-primary/10 text-center">
-        <Briefcase className="w-10 h-10 text-primary/20 mx-auto mb-3" />
-        <p className="font-mono text-sm text-muted-foreground">
-          No new job matches yet. We'll notify you when relevant jobs appear in your area.
-        </p>
+  return (
+    <section>
+      <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
+        <h2 className="font-heading text-primary text-2xl">New Job Matches</h2>
+        <div className="flex items-center gap-3">
+          <label className="flex items-center gap-2 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={verifiedOnly}
+              onChange={(e) => setVerifiedOnly(e.target.checked)}
+              className="w-3.5 h-3.5 accent-secondary cursor-pointer"
+            />
+            <span className="font-mono text-[11px] text-muted-foreground uppercase tracking-wide">
+              Funds Verified only
+            </span>
+          </label>
+          <span className="bg-secondary/10 text-secondary font-mono text-xs px-3 py-1 rounded-full">
+            {visible.length} new
+          </span>
+        </div>
       </div>
-    ) : (
-      <div className="space-y-3">
-        {matches.map((match) => (
-          <div key={match.id} className="bg-card rounded-2xl p-5 border border-primary/10 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <h3 className="font-heading text-primary text-lg">
-                  {match.jobs?.title || match.jobs?.job_type || "Job"}
-                </h3>
-                <div className="flex items-center gap-3 mt-1">
-                  <span className="flex items-center gap-1 font-mono text-xs text-muted-foreground">
-                    <MapPin className="w-3 h-3" />
-                    {match.jobs?.postcode}
-                  </span>
-                  {match.estimated_value && (
-                    <span className="font-mono text-xs text-secondary font-semibold">
-                      Est. {match.estimated_value}
+
+      {visible.length === 0 ? (
+        <div className="bg-card rounded-2xl p-8 border border-primary/10 text-center">
+          <Briefcase className="w-10 h-10 text-primary/20 mx-auto mb-3" />
+          <p className="font-mono text-sm text-muted-foreground">
+            {verifiedOnly
+              ? "No funds-verified job matches right now."
+              : "No new job matches yet. We'll notify you when relevant jobs appear in your area."}
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {visible.map((match) => (
+            <div key={match.id} className="bg-card rounded-2xl p-5 border border-primary/10 shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="font-heading text-primary text-lg">
+                      {match.jobs?.title || match.jobs?.job_type || "Job"}
+                    </h3>
+                    {match.jobs?.funds_verified && (
+                      <span className="inline-flex items-center gap-1 bg-secondary/10 text-secondary font-mono text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full">
+                        <ShieldCheck className="w-3 h-3" />
+                        Funds Verified
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-3 mt-1">
+                    <span className="flex items-center gap-1 font-mono text-xs text-muted-foreground">
+                      <MapPin className="w-3 h-3" />
+                      {match.jobs?.postcode}
                     </span>
-                  )}
-                  <span className="flex items-center gap-1 font-mono text-xs text-muted-foreground">
-                    <Clock className="w-3 h-3" />
-                    {timeAgo(match.notified_at)}
-                  </span>
+                    {match.estimated_value && (
+                      <span className="font-mono text-xs text-secondary font-semibold">
+                        Est. {match.estimated_value}
+                      </span>
+                    )}
+                    <span className="flex items-center gap-1 font-mono text-xs text-muted-foreground">
+                      <Clock className="w-3 h-3" />
+                      {timeAgo(match.notified_at)}
+                    </span>
+                  </div>
+                  <p className="font-mono text-xs text-muted-foreground mt-2 line-clamp-2">
+                    {match.jobs?.description}
+                  </p>
                 </div>
-                <p className="font-mono text-xs text-muted-foreground mt-2 line-clamp-2">
-                  {match.jobs?.description}
-                </p>
+                <button className="flex items-center gap-1 bg-secondary text-secondary-foreground font-mono text-xs px-4 py-2 rounded-xl hover:opacity-90 transition-opacity whitespace-nowrap ml-4 shadow-sm">
+                  View & Quote
+                  <ChevronRight className="w-3 h-3" />
+                </button>
               </div>
-              <button className="flex items-center gap-1 bg-secondary text-secondary-foreground font-mono text-xs px-4 py-2 rounded-xl hover:opacity-90 transition-opacity whitespace-nowrap ml-4 shadow-sm">
-                View & Quote
-                <ChevronRight className="w-3 h-3" />
-              </button>
             </div>
-          </div>
-        ))}
-      </div>
-    )}
-  </section>
-);
+          ))}
+        </div>
+      )}
+    </section>
+  );
+};
 
 export default JobMatchesList;

@@ -51,7 +51,7 @@ const BUDGETS = [
   "£50k+",
 ] as const;
 
-type Step = 1 | 2 | 3 | 4;
+type Step = 1 | 2 | 3 | 3.5 | 4;
 
 const PostAJob = () => {
   const [searchParams] = useSearchParams();
@@ -84,6 +84,10 @@ const PostAJob = () => {
   const [address, setAddress] = useState("");
   const [postcode, setPostcode] = useState("");
   const [budget, setBudget] = useState("");
+
+  // Step 3b — Optional Funds Verification
+  const [fundsDoc, setFundsDoc] = useState<File | null>(null);
+  const [fundsDocError, setFundsDocError] = useState("");
 
   // Step 4
   const [name, setName] = useState("");
@@ -171,7 +175,7 @@ const PostAJob = () => {
     }
 
     // 4. Insert job
-    const { error: jobError } = await supabase.from("jobs").insert({
+    const { data: jobData, error: jobError } = await supabase.from("jobs").insert({
       homeowner_id: homeownerData.id,
       title: jobType,
       job_type: jobType,
@@ -182,13 +186,36 @@ const PostAJob = () => {
       photo_urls: photoUrls,
       status: "open",
       is_green_job: isGreenTrade(jobType),
-    });
+    }).select("id").single();
 
-    setLoading(false);
-    if (jobError) {
+    if (jobError || !jobData) {
       console.error(jobError);
       setError("Account created but job posting failed. Contact support.");
+      setLoading(false);
+      setSuccess(true);
+      return;
     }
+
+    // 5. Optional funds verification document upload
+    if (fundsDoc) {
+      const ext = fundsDoc.name.split(".").pop();
+      const path = `${userId}/${jobData.id}/${crypto.randomUUID()}.${ext}`;
+      const { error: fundsUpErr } = await supabase.storage
+        .from("funds-verification")
+        .upload(path, fundsDoc);
+      if (!fundsUpErr) {
+        await supabase.from("funds_verification").insert({
+          job_id: jobData.id,
+          homeowner_id: homeownerData.id,
+          document_path: path,
+          status: "pending",
+        });
+      } else {
+        console.error("Funds doc upload failed", fundsUpErr);
+      }
+    }
+
+    setLoading(false);
     setSuccess(true);
   };
 
@@ -201,7 +228,7 @@ const PostAJob = () => {
     phone.trim().length > 0 &&
     password.length >= 8;
 
-  const stepTitles: Record<Step, { white: string; teal: string }> = {
+  const stepTitles: Record<Exclude<Step, 3.5>, { white: string; teal: string }> = {
     1: { white: isGreenFlow ? "Find a Certified" : "What Do You", teal: isGreenFlow ? "Green Energy Installer" : "Need Done?" },
     2: { white: "Tell Us", teal: "More." },
     3: { white: "Where's The", teal: "Job?" },
@@ -230,7 +257,7 @@ const PostAJob = () => {
               <div
                 key={s}
                 className={`h-1 flex-1 rounded-full transition-colors ${
-                  s <= step ? "bg-teal" : "bg-cream/10"
+                  s <= Math.floor(step) ? "bg-teal" : "bg-cream/10"
                 }`}
               />
             ))}
@@ -239,7 +266,7 @@ const PostAJob = () => {
           <div className="flex items-center gap-3 mb-4">
             <div className="w-8 h-[2px] bg-teal" />
             <span className="font-mono text-xs text-teal uppercase tracking-widest">
-              Step {step} of 4
+              {step === 3.5 ? "Optional Step" : `Step ${step} of 4`}
             </span>
           </div>
 
@@ -454,7 +481,133 @@ const PostAJob = () => {
                     <button
                       type="button"
                       disabled={!canStep3}
+                      onClick={() => setStep(3.5)}
+                      className="flex-1 bg-teal text-cream font-mono text-sm py-3 rounded-xl hover:bg-teal-hover transition-colors disabled:opacity-40"
+                    >
+                      Continue
+                    </button>
+                  </div>
+                </>
+              )}
+
+              {/* STEP 3b — OPTIONAL Funds Verification */}
+              {step === 3.5 && (
+                <>
+                  <span className="inline-block bg-cream/10 text-cream/60 font-mono text-[10px] uppercase tracking-widest px-2 py-1 rounded mb-3">
+                    Optional Step
+                  </span>
+                  <h2 className="font-heading text-cream text-[36px] leading-none mb-3">
+                    Build Trust <span className="text-teal">With Trades.</span>
+                  </h2>
+                  <p className="font-mono text-xs text-teal uppercase tracking-widest mb-3">
+                    Optional — Verify Your Funds
+                  </p>
+                  <p className="font-body text-cream/70 text-sm leading-relaxed mb-6">
+                    Trades working on large projects often want confidence that funds are in
+                    place before committing their time and team. Verifying your funds is
+                    completely optional — but jobs with a Funds Verified badge receive
+                    significantly more quotes and from higher-quality trades.
+                  </p>
+                  <p className="font-body text-cream/50 text-xs leading-relaxed mb-6">
+                    Your financial documents are encrypted, stored privately, and never shown
+                    to trades or ProGrafter staff. We only display a verification badge on
+                    your job posting.
+                  </p>
+
+                  {/* OPTION A — Document upload card */}
+                  <div className="rounded-xl border-l-4 border-teal bg-cream/5 border border-cream/10 p-5 mb-4">
+                    <div className="flex items-start gap-3 mb-3">
+                      <svg className="w-6 h-6 text-teal flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                      </svg>
+                      <div>
+                        <h3 className="font-heading text-cream text-xl leading-tight">Upload a Funds Document</h3>
+                        <p className="font-body text-cream/60 text-xs mt-1">Receive a Funds Verified badge on your job</p>
+                      </div>
+                    </div>
+                    <p className="font-body text-cream/70 text-sm mb-3">Upload any of the following:</p>
+                    <ul className="font-body text-cream/60 text-xs space-y-1 mb-4 list-disc list-inside">
+                      <li>Mortgage offer letter (redact personal details if preferred)</li>
+                      <li>Solicitor letter confirming funds held</li>
+                      <li>Bank statement showing sufficient balance (account number and sort code can be obscured)</li>
+                      <li>Financial advisor confirmation letter</li>
+                    </ul>
+
+                    {fundsDoc ? (
+                      <div className="flex items-center justify-between bg-teal/10 border border-teal/30 rounded-lg px-3 py-2 mb-3">
+                        <span className="font-mono text-xs text-teal truncate">✓ {fundsDoc.name}</span>
+                        <button
+                          type="button"
+                          onClick={() => { setFundsDoc(null); setFundsDocError(""); }}
+                          className="font-mono text-xs text-cream/60 hover:text-cream ml-3"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ) : (
+                      <label className="block cursor-pointer">
+                        <div className="border-2 border-dashed border-teal/40 hover:border-teal/70 rounded-xl p-5 text-center transition-colors">
+                          <p className="font-mono text-teal text-sm">Click to upload document</p>
+                          <p className="font-body text-cream/40 text-xs mt-1">PDF or image, max 10 MB</p>
+                        </div>
+                        <input
+                          type="file"
+                          accept=".pdf,.jpg,.jpeg,.png"
+                          onChange={(e) => {
+                            const f = e.target.files?.[0];
+                            if (!f) return;
+                            if (f.size > 10 * 1024 * 1024) {
+                              setFundsDocError("File exceeds 10 MB limit.");
+                              return;
+                            }
+                            setFundsDocError("");
+                            setFundsDoc(f);
+                          }}
+                          className="hidden"
+                        />
+                      </label>
+                    )}
+                    {fundsDocError && (
+                      <p className="font-mono text-xs text-red-400 mt-2">{fundsDocError}</p>
+                    )}
+
+                    <p className="font-body text-cream/40 text-[11px] leading-relaxed mt-4 border-t border-cream/10 pt-3">
+                      Your document is encrypted in transit and at rest. It is stored on
+                      ProGrafter's secure servers and is accessible only to ProGrafter's
+                      verification team. It will never be shared with trades, third parties,
+                      or used for any purpose other than issuing your verification badge.
+                      You may request deletion at any time by emailing hello@prografter.co.uk.
+                      Processed under GDPR Article 6(1)(a) — your explicit consent.
+                    </p>
+                  </div>
+
+                  {/* OPTION B — Skip card */}
+                  <div className="rounded-xl border-l-4 border-cream/20 bg-cream/5 border border-cream/10 p-5 mb-6">
+                    <h3 className="font-heading text-cream/70 text-lg leading-tight mb-1">Skip for now</h3>
+                    <p className="font-body text-cream/50 text-xs">
+                      Skip this step — I'll verify later if needed.
+                    </p>
+                  </div>
+
+                  <div className="flex gap-4 mt-8">
+                    <button
+                      type="button"
+                      onClick={() => setStep(3)}
+                      className="flex-1 border border-cream/20 text-cream font-mono text-sm py-3 rounded-xl hover:bg-cream/5 transition-colors"
+                    >
+                      Back
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setFundsDoc(null); setFundsDocError(""); setStep(4); }}
+                      className="flex-1 border border-cream/30 text-cream/70 font-mono text-sm py-3 rounded-xl hover:bg-cream/5 transition-colors"
+                    >
+                      Skip
+                    </button>
+                    <button
+                      type="button"
                       onClick={() => setStep(4)}
+                      disabled={!fundsDoc}
                       className="flex-1 bg-teal text-cream font-mono text-sm py-3 rounded-xl hover:bg-teal-hover transition-colors disabled:opacity-40"
                     >
                       Continue
@@ -547,7 +700,7 @@ const PostAJob = () => {
                   <div className="flex gap-4 mt-8">
                     <button
                       type="button"
-                      onClick={() => setStep(3)}
+                      onClick={() => setStep(3.5)}
                       className="flex-1 border border-cream/20 text-cream font-mono text-sm py-3 rounded-xl hover:bg-cream/5 transition-colors"
                     >
                       Back
