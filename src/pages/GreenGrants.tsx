@@ -4,6 +4,7 @@ import Navbar from "@/components/Navbar";
 import SEO from "@/components/SEO";
 import Footer from "@/components/Footer";
 import { Leaf, CheckCircle2, HelpCircle, ChevronLeft, AlertCircle, ExternalLink } from "lucide-react";
+import GreenSchemesBreakdown from "@/components/GreenSchemesBreakdown";
 
 /* ─── Types ─── */
 type PropertyType = "detached" | "semi" | "mid-terrace" | "end-terrace" | "ground-flat" | "upper-flat" | "bungalow";
@@ -294,25 +295,8 @@ const GreenGrantsPage = () => {
         </div>
       </section>
 
-      {/* SECTION 2 — SCHEME OVERVIEW */}
-      <section className="py-16 px-6" style={{ backgroundColor: "hsl(var(--deep))" }}>
-        <div className="max-w-3xl mx-auto">
-          <h2 className="font-heading text-cream text-3xl md:text-4xl tracking-wide text-center mb-8">
-            SCHEMES CURRENTLY AVAILABLE
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-            {SCHEME_OVERVIEW.map((s) => (
-              <div key={s.title} className={`${s.bg} rounded-xl p-6 text-white`}>
-                <h3 className="font-heading text-2xl tracking-wide mb-1">{s.title}</h3>
-                <p className="font-mono text-sm opacity-90">{s.desc}</p>
-              </div>
-            ))}
-          </div>
-          <p className="text-center font-mono text-sm text-cream/40">
-            Scroll down to find out which apply to you →
-          </p>
-        </div>
-      </section>
+      {/* SECTION 2 — DETAILED SCHEMES BREAKDOWN */}
+      <GreenSchemesBreakdown />
 
       {/* SECTION 3 — THE 4-STEP CHECKER */}
       <section className="px-6 pb-24" ref={checkerRef}>
