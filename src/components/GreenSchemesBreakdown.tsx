@@ -156,7 +156,7 @@ const badgeStyles: Record<Scheme["badge"], { border: string; chip: string; accen
 
 const GreenSchemesBreakdown = () => {
   return (
-    <section className="py-20 px-6" style={{ backgroundColor: "hsl(var(--cream))" }}>
+    <section className="py-20 px-6 bg-cream">
       <div className="max-w-6xl mx-auto">
         {/* Heading */}
         <div className="text-center mb-12">
