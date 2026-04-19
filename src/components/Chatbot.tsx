@@ -68,6 +68,7 @@ const Chatbot = () => {
       if (!session?.user) {
         setIsAuthed(false);
         setProfile(null);
+        setAuthReady(true);
         return;
       }
       setIsAuthed(true);
@@ -76,7 +77,8 @@ const Chatbot = () => {
         .select("user_type, full_name")
         .eq("user_id", session.user.id)
         .maybeSingle();
-      if (data) setProfile(data as Profile);
+      setProfile((data as Profile) ?? null);
+      setAuthReady(true);
     };
 
     supabase.auth.getSession().then(({ data }) => init(data.session));
