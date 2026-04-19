@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      chatbot_usage: {
+        Row: {
+          created_at: string
+          id: string
+          identifier: string
+          message_count: number
+          updated_at: string
+          usage_date: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          identifier: string
+          message_count?: number
+          updated_at?: string
+          usage_date?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          identifier?: string
+          message_count?: number
+          updated_at?: string
+          usage_date?: string
+        }
+        Relationships: []
+      }
       contracts: {
         Row: {
           agreed_price: number

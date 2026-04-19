@@ -24,6 +24,7 @@ import Unsubscribe from "./pages/Unsubscribe.tsx";
 import Contact from "./pages/Contact.tsx";
 import About from "./pages/About.tsx";
 import PWAInstallBanner from "./components/PWAInstallBanner.tsx";
+import Chatbot from "./components/Chatbot.tsx";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <PWAInstallBanner />
+        <Chatbot />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/privacy" element={<Privacy />} />
