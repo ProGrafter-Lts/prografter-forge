@@ -44,12 +44,6 @@ const HOUSEHOLD_OPTIONS: { value: HouseholdFlag; label: string; emoji: string }[
   { value: "none", label: "None of these apply to us", emoji: "✖️" },
 ];
 
-const SCHEME_OVERVIEW = [
-  { title: "ECO4", desc: "Up to £18,000 fully funded for eligible households", bg: "bg-[#16A34A]" },
-  { title: "Boiler Upgrade Scheme", desc: "£7,500 towards a heat pump", bg: "bg-teal" },
-  { title: "Great British Insulation Scheme", desc: "Up to £10,000 for insulation", bg: "bg-navy" },
-  { title: "0% VAT on Energy Saving Materials", desc: "20% saving on all installations", bg: "bg-deep" },
-];
 
 /* ─── Scheme definitions ─── */
 interface Scheme {
