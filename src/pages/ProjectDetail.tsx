@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import GreenCertificatePack from "@/components/GreenCertificatePack";
 import ProjectHeader from "@/components/project/ProjectHeader";
@@ -16,7 +16,7 @@ import SubTradeModal from "@/components/project/SubTradeModal";
 interface Job {
   id: string; title: string | null; job_type: string; status: string; stage: string;
   description: string; postcode: string; budget: string | null; created_at: string;
-  homeowner_id: string | null; is_green_job: boolean;
+  homeowner_id: string | null; is_green_job: boolean; funds_verified?: boolean | null;
 }
 interface Stage {
   id: string; job_id: string; stage_name: string; stage_order: number;
@@ -203,6 +203,22 @@ const ProjectDetail = () => {
           progress={progress}
           estimatedDays={estimatedDays}
         />
+
+        {/* Funds Verified panel — only shown to trades when verified */}
+        {userRole === "trade" && job.funds_verified && (
+          <div className="bg-secondary/10 border border-secondary/30 rounded-2xl p-4 flex items-start gap-3">
+            <ShieldCheck className="w-5 h-5 text-secondary flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="font-mono text-xs text-secondary uppercase tracking-wide mb-1">
+                ✓ Funds Verified
+              </p>
+              <p className="font-body text-sm text-primary">
+                This homeowner has verified their funds are in place for this project.
+                Documentation held securely by ProGrafter.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Variation alerts */}
         <VariationsPanel
