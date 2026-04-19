@@ -175,7 +175,7 @@ const PostAJob = () => {
     }
 
     // 4. Insert job
-    const { error: jobError } = await supabase.from("jobs").insert({
+    const { data: jobData, error: jobError } = await supabase.from("jobs").insert({
       homeowner_id: homeownerData.id,
       title: jobType,
       job_type: jobType,
@@ -186,13 +186,36 @@ const PostAJob = () => {
       photo_urls: photoUrls,
       status: "open",
       is_green_job: isGreenTrade(jobType),
-    });
+    }).select("id").single();
 
-    setLoading(false);
-    if (jobError) {
+    if (jobError || !jobData) {
       console.error(jobError);
       setError("Account created but job posting failed. Contact support.");
+      setLoading(false);
+      setSuccess(true);
+      return;
     }
+
+    // 5. Optional funds verification document upload
+    if (fundsDoc) {
+      const ext = fundsDoc.name.split(".").pop();
+      const path = `${userId}/${jobData.id}/${crypto.randomUUID()}.${ext}`;
+      const { error: fundsUpErr } = await supabase.storage
+        .from("funds-verification")
+        .upload(path, fundsDoc);
+      if (!fundsUpErr) {
+        await supabase.from("funds_verification").insert({
+          job_id: jobData.id,
+          homeowner_id: homeownerData.id,
+          document_path: path,
+          status: "pending",
+        });
+      } else {
+        console.error("Funds doc upload failed", fundsUpErr);
+      }
+    }
+
+    setLoading(false);
     setSuccess(true);
   };
 
@@ -205,7 +228,7 @@ const PostAJob = () => {
     phone.trim().length > 0 &&
     password.length >= 8;
 
-  const stepTitles: Record<Step, { white: string; teal: string }> = {
+  const stepTitles: Record<Exclude<Step, 3.5>, { white: string; teal: string }> = {
     1: { white: isGreenFlow ? "Find a Certified" : "What Do You", teal: isGreenFlow ? "Green Energy Installer" : "Need Done?" },
     2: { white: "Tell Us", teal: "More." },
     3: { white: "Where's The", teal: "Job?" },
