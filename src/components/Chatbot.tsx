@@ -164,16 +164,18 @@ const Chatbot = () => {
     }
   };
 
+  // Treat "authed but no profile row" as a guest for chip purposes.
+  const isGuest = !isAuthed || !profile;
   // Determine which suggested chips to show
-  const showTypePicker = !isAuthed && messages.length === 1 && !preLoginUserType;
+  const showTypePicker = isGuest && messages.length === 1 && !preLoginUserType;
   let suggested: string[] = [];
-  if (!isAuthed && preLoginUserType === "trade" && messages.length <= 2) {
+  if (isGuest && preLoginUserType === "trade" && messages.length <= 3) {
     suggested = PRE_LOGIN_TRADE_QUESTIONS;
-  } else if (!isAuthed && preLoginUserType === "homeowner" && messages.length <= 2) {
+  } else if (isGuest && preLoginUserType === "homeowner" && messages.length <= 3) {
     suggested = PRE_LOGIN_HOMEOWNER_QUESTIONS;
-  } else if (isAuthed && profile?.user_type === "trade" && messages.length === 1) {
+  } else if (!isGuest && profile?.user_type === "trade" && messages.length === 1) {
     suggested = TRADE_QUESTIONS;
-  } else if (isAuthed && profile?.user_type === "homeowner" && messages.length === 1) {
+  } else if (!isGuest && profile?.user_type === "homeowner" && messages.length === 1) {
     suggested = HOMEOWNER_QUESTIONS;
   }
 
