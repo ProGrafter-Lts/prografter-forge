@@ -218,6 +218,51 @@ export type Database = {
         }
         Relationships: []
       }
+      funds_verification: {
+        Row: {
+          created_at: string
+          document_path: string
+          homeowner_id: string | null
+          id: string
+          job_id: string | null
+          reviewed_at: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          document_path: string
+          homeowner_id?: string | null
+          id?: string
+          job_id?: string | null
+          reviewed_at?: string | null
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          document_path?: string
+          homeowner_id?: string | null
+          id?: string
+          job_id?: string | null
+          reviewed_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "funds_verification_homeowner_id_fkey"
+            columns: ["homeowner_id"]
+            isOneToOne: false
+            referencedRelation: "homeowners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "funds_verification_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       green_project_data: {
         Row: {
           created_at: string
@@ -419,6 +464,9 @@ export type Database = {
           created_at: string
           deposit_paid: boolean
           description: string
+          funds_verification_type: string | null
+          funds_verified: boolean
+          funds_verified_at: string | null
           homeowner_id: string | null
           id: string
           is_green_job: boolean
@@ -436,6 +484,9 @@ export type Database = {
           created_at?: string
           deposit_paid?: boolean
           description: string
+          funds_verification_type?: string | null
+          funds_verified?: boolean
+          funds_verified_at?: string | null
           homeowner_id?: string | null
           id?: string
           is_green_job?: boolean
@@ -453,6 +504,9 @@ export type Database = {
           created_at?: string
           deposit_paid?: boolean
           description?: string
+          funds_verification_type?: string | null
+          funds_verified?: boolean
+          funds_verified_at?: string | null
           homeowner_id?: string | null
           id?: string
           is_green_job?: boolean
