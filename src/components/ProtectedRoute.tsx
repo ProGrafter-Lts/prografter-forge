@@ -12,16 +12,26 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const [authenticated, setAuthenticated] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
+
+    // Subscribe first — but DON'T redirect on the initial null state.
+    // Only react to explicit SIGNED_OUT events here.
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (!session) {
+      if (!isMounted) return;
+      if (event === "SIGNED_OUT") {
+        setAuthenticated(false);
         navigate("/login", { replace: true });
-      } else {
-        setAuthenticated(true);
+        return;
       }
-      setLoading(false);
+      if (session) {
+        setAuthenticated(true);
+        setLoading(false);
+      }
     });
 
+    // Then resolve the persisted session. This is the source of truth on mount.
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!isMounted) return;
       if (!session) {
         navigate("/login", { replace: true });
       } else {
@@ -30,7 +40,10 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, [navigate]);
 
   if (loading) {
