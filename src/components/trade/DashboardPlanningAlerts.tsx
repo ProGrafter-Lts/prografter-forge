@@ -47,11 +47,42 @@ const DashboardPlanningAlerts = ({ trade }: { trade: TradeProfile }) => {
   const [alerts, setAlerts] = useState<PlanningAlert[]>([]);
   const [subscription, setSubscription] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [letterModal, setLetterModal] = useState<PlanningAlert | null>(null);
 
   useEffect(() => {
     loadData();
   }, [trade.id]);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+      const anon = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      const res = await fetch(
+        `https://${projectId}.supabase.co/functions/v1/process-planning-alerts?trade_id=${trade.id}`,
+        {
+          method: "POST",
+          headers: { Authorization: `Bearer ${anon}`, apikey: anon },
+        },
+      );
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error ?? "Refresh failed");
+      toast({
+        title: "Planning feed refreshed",
+        description: `${json.inserted ?? 0} new application(s) found in your area.`,
+      });
+      await loadData();
+    } catch (e: any) {
+      toast({
+        title: "Refresh failed",
+        description: e?.message ?? "Please try again shortly.",
+        variant: "destructive",
+      });
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   const loadData = async () => {
     const [subRes, alertsRes] = await Promise.all([
