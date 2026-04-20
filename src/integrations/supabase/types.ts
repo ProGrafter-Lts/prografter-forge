@@ -390,6 +390,7 @@ export type Database = {
           created_at: string
           email: string
           id: string
+          is_test: boolean
           name: string
           phone: string
           user_id: string
@@ -398,6 +399,7 @@ export type Database = {
           created_at?: string
           email: string
           id?: string
+          is_test?: boolean
           name: string
           phone: string
           user_id: string
@@ -406,6 +408,7 @@ export type Database = {
           created_at?: string
           email?: string
           id?: string
+          is_test?: boolean
           name?: string
           phone?: string
           user_id?: string
@@ -417,6 +420,7 @@ export type Database = {
           created_at: string
           estimated_value: string | null
           id: string
+          is_test: boolean
           job_id: string
           notified_at: string
           status: string
@@ -426,6 +430,7 @@ export type Database = {
           created_at?: string
           estimated_value?: string | null
           id?: string
+          is_test?: boolean
           job_id: string
           notified_at?: string
           status?: string
@@ -435,6 +440,7 @@ export type Database = {
           created_at?: string
           estimated_value?: string | null
           id?: string
+          is_test?: boolean
           job_id?: string
           notified_at?: string
           status?: string
@@ -470,6 +476,7 @@ export type Database = {
           homeowner_id: string | null
           id: string
           is_green_job: boolean
+          is_test: boolean
           job_type: string
           photo_urls: string[] | null
           postcode: string
@@ -490,6 +497,7 @@ export type Database = {
           homeowner_id?: string | null
           id?: string
           is_green_job?: boolean
+          is_test?: boolean
           job_type: string
           photo_urls?: string[] | null
           postcode: string
@@ -510,6 +518,7 @@ export type Database = {
           homeowner_id?: string | null
           id?: string
           is_green_job?: boolean
+          is_test?: boolean
           job_type?: string
           photo_urls?: string[] | null
           postcode?: string
@@ -755,6 +764,7 @@ export type Database = {
           email: string
           full_name: string
           id: string
+          is_test: boolean
           phone: string
           postcode: string
           updated_at: string
@@ -766,6 +776,7 @@ export type Database = {
           email: string
           full_name: string
           id?: string
+          is_test?: boolean
           phone: string
           postcode: string
           updated_at?: string
@@ -777,6 +788,7 @@ export type Database = {
           email?: string
           full_name?: string
           id?: string
+          is_test?: boolean
           phone?: string
           postcode?: string
           updated_at?: string
@@ -1025,6 +1037,7 @@ export type Database = {
           budget_price: number | null
           created_at: string
           id: string
+          is_test: boolean
           job_id: string
           message: string | null
           premium_description: string | null
@@ -1043,6 +1056,7 @@ export type Database = {
           budget_price?: number | null
           created_at?: string
           id?: string
+          is_test?: boolean
           job_id: string
           message?: string | null
           premium_description?: string | null
@@ -1061,6 +1075,7 @@ export type Database = {
           budget_price?: number | null
           created_at?: string
           id?: string
+          is_test?: boolean
           job_id?: string
           message?: string | null
           premium_description?: string | null
@@ -1229,6 +1244,7 @@ export type Database = {
           inca_certified: boolean
           insurance_cert_url: string | null
           is_green_trade: boolean
+          is_test: boolean
           mcs_number: string | null
           mcs_verified: boolean
           name: string
@@ -1257,6 +1273,7 @@ export type Database = {
           inca_certified?: boolean
           insurance_cert_url?: string | null
           is_green_trade?: boolean
+          is_test?: boolean
           mcs_number?: string | null
           mcs_verified?: boolean
           name: string
@@ -1285,6 +1302,7 @@ export type Database = {
           inca_certified?: boolean
           insurance_cert_url?: string | null
           is_green_trade?: boolean
+          is_test?: boolean
           mcs_number?: string | null
           mcs_verified?: boolean
           name?: string
