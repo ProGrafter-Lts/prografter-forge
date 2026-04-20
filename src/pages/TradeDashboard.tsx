@@ -12,6 +12,7 @@ import ActiveProjectsList from "@/components/trade/ActiveProjectsList";
 import QuotesList from "@/components/trade/QuotesList";
 import LiveMarginWidget from "@/components/trade/LiveMarginWidget";
 import CalendarConnect from "@/components/trade/CalendarConnect";
+import TradeProfileSection from "@/components/trade/TradeProfileSection";
 
 interface TradeProfile {
   name: string;
@@ -142,6 +143,12 @@ const TradeDashboard = () => {
 
           {trade && <GreenSpecialistBanner show={trade.is_green_trade} />}
 
+          {activeNav === "profile" && trade && (
+            <TradeProfileSection tradeId={trade.id} />
+          )}
+
+          {activeNav !== "profile" && (
+          <>
           <StatsRow
             jobsWon={completedCount}
             earningsThisMonth={marginData.totalReceived}
@@ -164,6 +171,8 @@ const TradeDashboard = () => {
           {trade && trade.is_green_trade && <CertificationsSection trade={trade} />}
 
           <QuotesList quotes={quotes} />
+          </>
+          )}
         </div>
       </main>
     </div>
