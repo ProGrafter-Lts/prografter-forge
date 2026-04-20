@@ -1230,6 +1230,7 @@ export type Database = {
           insurance_cert_url: string | null
           is_green_trade: boolean
           mcs_number: string | null
+          mcs_verified: boolean
           name: string
           ozev_approved: boolean
           pas_2030_accredited: boolean
@@ -1238,6 +1239,7 @@ export type Database = {
           postcode: string
           trade_type: string
           trustmark_number: string | null
+          trustmark_verified: boolean
           user_id: string | null
           verified: boolean
           website: string | null
@@ -1256,6 +1258,7 @@ export type Database = {
           insurance_cert_url?: string | null
           is_green_trade?: boolean
           mcs_number?: string | null
+          mcs_verified?: boolean
           name: string
           ozev_approved?: boolean
           pas_2030_accredited?: boolean
@@ -1264,6 +1267,7 @@ export type Database = {
           postcode: string
           trade_type: string
           trustmark_number?: string | null
+          trustmark_verified?: boolean
           user_id?: string | null
           verified?: boolean
           website?: string | null
@@ -1282,6 +1286,7 @@ export type Database = {
           insurance_cert_url?: string | null
           is_green_trade?: boolean
           mcs_number?: string | null
+          mcs_verified?: boolean
           name?: string
           ozev_approved?: boolean
           pas_2030_accredited?: boolean
@@ -1290,6 +1295,7 @@ export type Database = {
           postcode?: string
           trade_type?: string
           trustmark_number?: string | null
+          trustmark_verified?: boolean
           user_id?: string | null
           verified?: boolean
           website?: string | null
