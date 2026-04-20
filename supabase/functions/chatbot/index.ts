@@ -243,7 +243,11 @@ Deno.serve(async (req: Request) => {
     let systemPrompt = BASE_PROMPT;
     if (isAuthed && userType === "trade") {
       systemPrompt += TRADE_GUIDE;
-      if (firstName) systemPrompt += `\nThe user's first name is ${firstName}.`;
+      const fn = firstName || "the user";
+      const tradeType = tradeContext?.trade_type || "general trade";
+      const activeProjects = tradeContext?.active_projects ?? 0;
+      const pendingQuotes = tradeContext?.pending_quotes ?? 0;
+      systemPrompt += `\n\nUSER CONTEXT:\nThe user is ${fn}, a verified trade on ProGrafter. Their trade type is ${tradeType}. They currently have ${activeProjects} active project${activeProjects === 1 ? "" : "s"} and ${pendingQuotes} pending quote${pendingQuotes === 1 ? "" : "s"}. Guide them through the platform practically and specifically. When explaining how to do something always give the exact steps: which page to go to, which button to click, what to fill in.`;
     } else if (isAuthed && userType === "homeowner") {
       systemPrompt += HOMEOWNER_GUIDE;
       if (firstName) systemPrompt += `\nThe user's first name is ${firstName}.`;
