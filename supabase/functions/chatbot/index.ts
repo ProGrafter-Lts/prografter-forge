@@ -174,6 +174,11 @@ Deno.serve(async (req: Request) => {
     const userType: string | null = body?.userType ?? null;
     const firstName: string | null = body?.firstName ?? null;
     const isAuthed: boolean = !!body?.isAuthenticated;
+    const tradeContext: {
+      trade_type?: string | null;
+      active_projects?: number;
+      pending_quotes?: number;
+    } | null = body?.tradeContext ?? null;
 
     if (messages.length === 0 || messages.length > 12) {
       return new Response(JSON.stringify({ error: "Invalid messages payload" }), {
