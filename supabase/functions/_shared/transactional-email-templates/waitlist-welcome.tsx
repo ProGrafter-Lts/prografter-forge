@@ -23,6 +23,9 @@ const WaitlistWelcomeEmail = ({ name }: WaitlistWelcomeProps) => (
     <Preview>You're on the {SITE_NAME} waitlist</Preview>
     <Body style={main}>
       <Container style={container}>
+        <Section style={header}>
+          <Text style={logo}>Pro<span style={{ color: '#0D9488' }}>Grafter</span></Text>
+        </Section>
         <Heading style={h1}>
           {name ? `Welcome, ${name}.` : `You're in.`}
         </Heading>
