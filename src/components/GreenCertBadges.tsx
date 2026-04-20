@@ -1,10 +1,11 @@
-import { Leaf, ShieldCheck, AlertTriangle, ExternalLink } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Leaf, ShieldCheck, AlertTriangle, ExternalLink, BadgeCheck } from "lucide-react";
 
 interface TradeGreenData {
   is_green_trade: boolean;
   mcs_number?: string | null;
+  mcs_verified?: boolean;
   trustmark_number?: string | null;
+  trustmark_verified?: boolean;
   pas_2030_accredited: boolean;
   pas_2035_coordinator: boolean;
   ozev_approved: boolean;
@@ -14,24 +15,14 @@ interface TradeGreenData {
   green_cert_expiry?: string | null;
 }
 
-const CERT_BADGES = [
-  { key: "mcs_number", label: "MCS Certified", desc: "Microgeneration Certification Scheme — required for solar PV and heat pump grant work", type: "text" },
-  { key: "trustmark_number", label: "TrustMark Registered", desc: "Government-endorsed quality scheme", type: "text" },
-  { key: "pas_2030_accredited", label: "PAS 2030 Accredited", desc: "Energy efficiency installation standard", type: "bool" },
-  { key: "pas_2035_coordinator", label: "PAS 2035 Retrofit Coordinator", desc: "Whole-house retrofit qualification", type: "bool" },
-  { key: "ozev_approved", label: "OZEV Approved", desc: "Office for Zero Emission Vehicles approved installer", type: "bool" },
-  { key: "fgas_registered", label: "F-Gas Registered", desc: "Fluorinated gas handling — heat pump qualified", type: "bool" },
-  { key: "inca_certified", label: "INCA Certified", desc: "Insulated Render and Cladding Association", type: "bool" },
-  { key: "ciga_registered", label: "CIGA Registered", desc: "Cavity Insulation Guarantee Agency", type: "bool" },
-] as const;
+type ExpiryState = "ok" | "soon" | "expired";
 
-function getExpiryStatus(expiry: string | null | undefined): { label: string; color: string } | null {
-  if (!expiry) return null;
-  const diff = new Date(expiry).getTime() - Date.now();
-  const days = diff / 86400000;
-  if (days < 0) return { label: "Certification renewal required", color: "text-red-600 bg-red-50 border-red-200" };
-  if (days <= 30) return { label: "Certification renewing soon", color: "text-amber-700 bg-amber-50 border-amber-200" };
-  return { label: `Expires ${new Date(expiry).toLocaleDateString("en-GB")}`, color: "text-secondary-text bg-white border-navy/10" };
+function getExpiryState(expiry: string | null | undefined): ExpiryState {
+  if (!expiry) return "ok";
+  const days = (new Date(expiry).getTime() - Date.now()) / 86400000;
+  if (days < 0) return "expired";
+  if (days <= 30) return "soon";
+  return "ok";
 }
 
 export const GreenSpecialistBanner = ({ show }: { show: boolean }) => {
@@ -39,20 +30,169 @@ export const GreenSpecialistBanner = ({ show }: { show: boolean }) => {
   return (
     <div className="bg-[#16A34A] text-white rounded-2xl px-5 py-3 flex items-center gap-3 font-mono text-sm">
       <Leaf className="w-5 h-5 shrink-0" />
-      <span className="font-semibold tracking-wide uppercase text-xs">Renewable & Energy Efficiency Specialist</span>
+      <span className="font-semibold tracking-wide uppercase text-xs">
+        Renewable & Energy Efficiency Specialist
+      </span>
     </div>
   );
 };
 
+interface CertCardProps {
+  title: string;
+  subtitle: string;
+  detail?: React.ReactNode;
+  verified?: boolean;
+}
+
+const CertCard = ({ title, subtitle, detail, verified }: CertCardProps) => (
+  <div className="flex items-start gap-3 p-3 rounded-xl bg-green-50 border border-green-100">
+    <div className="shrink-0 mt-0.5 h-6 w-6 rounded-full bg-[#16A34A] text-white flex items-center justify-center text-xs font-bold">
+      ✓
+    </div>
+    <div className="flex-1 min-w-0">
+      <div className="flex items-center gap-2 flex-wrap">
+        <p className="font-mono text-sm font-semibold text-navy uppercase tracking-wide">
+          {title}
+        </p>
+        {verified && (
+          <span className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider text-[#16A34A] bg-white border border-[#16A34A]/30 px-1.5 py-0.5 rounded-full">
+            <BadgeCheck className="w-3 h-3" /> Verified
+          </span>
+        )}
+      </div>
+      <p className="font-mono text-xs text-secondary-text mt-0.5">{subtitle}</p>
+      {detail && <div className="font-mono text-xs text-[#16A34A] mt-1">{detail}</div>}
+    </div>
+  </div>
+);
+
 export const CertificationsSection = ({ trade }: { trade: TradeGreenData }) => {
-  const activeCerts = CERT_BADGES.filter((c) => {
-    if (c.type === "text") return !!(trade as any)[c.key];
-    return (trade as any)[c.key] === true;
-  });
+  const expiry = getExpiryState(trade.green_cert_expiry);
+  // If expired, hide all green certification badges from public view per spec.
+  const hideAll = expiry === "expired";
 
-  if (activeCerts.length === 0) return null;
+  const cards: React.ReactNode[] = [];
 
-  const expiry = getExpiryStatus(trade.green_cert_expiry);
+  if (!hideAll && trade.mcs_number) {
+    cards.push(
+      <CertCard
+        key="mcs"
+        title="MCS Certified"
+        subtitle="Microgeneration Certification Scheme"
+        verified={!!trade.mcs_verified}
+        detail={
+          <span className="flex items-center gap-1 flex-wrap">
+            <span>MCS No: {trade.mcs_number}</span>
+            <span className="text-secondary-text">·</span>
+            <span className="text-secondary-text">Verify at</span>
+            <a
+              href="https://mcscertified.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline inline-flex items-center gap-0.5"
+            >
+              mcscertified.com <ExternalLink className="w-3 h-3" />
+            </a>
+          </span>
+        }
+      />,
+    );
+  }
+
+  if (!hideAll && trade.trustmark_number) {
+    cards.push(
+      <CertCard
+        key="trustmark"
+        title="TrustMark Registered"
+        subtitle="Government Endorsed Quality"
+        verified={!!trade.trustmark_verified}
+        detail={
+          <span className="flex items-center gap-1 flex-wrap">
+            <span>TrustMark No: {trade.trustmark_number}</span>
+            <span className="text-secondary-text">·</span>
+            <span className="text-secondary-text">Verify at</span>
+            <a
+              href="https://www.trustmark.org.uk"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline inline-flex items-center gap-0.5"
+            >
+              trustmark.org.uk <ExternalLink className="w-3 h-3" />
+            </a>
+          </span>
+        }
+      />,
+    );
+  }
+
+  if (!hideAll && trade.pas_2030_accredited) {
+    cards.push(
+      <CertCard
+        key="pas2030"
+        title="PAS 2030 Accredited"
+        subtitle="Energy Efficiency Standard"
+        detail="Required for ECO4 and GBIS funded work"
+      />,
+    );
+  }
+
+  if (!hideAll && trade.pas_2035_coordinator) {
+    cards.push(
+      <CertCard
+        key="pas2035"
+        title="PAS 2035 Coordinator"
+        subtitle="Whole-House Retrofit Qualification"
+        detail="Mandatory for ECO4 whole-house assessments"
+      />,
+    );
+  }
+
+  if (!hideAll && trade.ozev_approved) {
+    cards.push(
+      <CertCard
+        key="ozev"
+        title="OZEV Approved"
+        subtitle="Office for Zero Emission Vehicles"
+        detail="Approved EV chargepoint installer"
+      />,
+    );
+  }
+
+  if (!hideAll && trade.fgas_registered) {
+    cards.push(
+      <CertCard
+        key="fgas"
+        title="F-Gas Registered"
+        subtitle="Fluorinated Gas Handling"
+        detail="Required for heat pump installation"
+      />,
+    );
+  }
+
+  if (!hideAll && trade.inca_certified) {
+    cards.push(
+      <CertCard
+        key="inca"
+        title="INCA Certified"
+        subtitle="Insulated Render & Cladding Association"
+        detail="EWI installation quality standard"
+      />,
+    );
+  }
+
+  if (!hideAll && trade.ciga_registered) {
+    cards.push(
+      <CertCard
+        key="ciga"
+        title="CIGA Registered"
+        subtitle="Cavity Insulation Guarantee Agency"
+        detail="25-year CIGA backed guarantee"
+      />,
+    );
+  }
+
+  // Nothing to show and nothing to warn about
+  if (cards.length === 0 && expiry === "ok") return null;
 
   return (
     <section className="bg-white rounded-2xl p-5 border border-navy/10 shadow-sm">
@@ -61,32 +201,26 @@ export const CertificationsSection = ({ trade }: { trade: TradeGreenData }) => {
         Certifications & Accreditations
       </h3>
 
-      <div className="space-y-3">
-        {activeCerts.map((cert) => (
-          <div key={cert.key} className="flex items-start gap-3 p-3 rounded-xl bg-green-50 border border-green-100">
-            <Badge className="bg-[#16A34A] text-white border-0 shrink-0 mt-0.5">✓</Badge>
-            <div>
-              <p className="font-mono text-sm font-semibold text-navy">{cert.label}</p>
-              <p className="font-mono text-xs text-secondary-text">{cert.desc}</p>
-              {cert.key === "mcs_number" && trade.mcs_number && (
-                <p className="font-mono text-xs text-[#16A34A] mt-1 flex items-center gap-1">
-                  MCS Number: {trade.mcs_number} — verifiable at <a href="https://mcscertified.com" target="_blank" rel="noopener noreferrer" className="underline inline-flex items-center gap-0.5">mcscertified.com <ExternalLink className="w-3 h-3" /></a>
-                </p>
-              )}
-              {cert.key === "trustmark_number" && trade.trustmark_number && (
-                <p className="font-mono text-xs text-[#16A34A] mt-1 flex items-center gap-1">
-                  TrustMark No: {trade.trustmark_number} — verifiable at <a href="https://www.trustmark.org.uk" target="_blank" rel="noopener noreferrer" className="underline inline-flex items-center gap-0.5">trustmark.org.uk <ExternalLink className="w-3 h-3" /></a>
-                </p>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
+      {cards.length > 0 ? (
+        <div className="space-y-3">{cards}</div>
+      ) : (
+        <p className="font-mono text-xs text-secondary-text">
+          Certifications are currently hidden because the renewal date has passed.
+        </p>
+      )}
 
-      {expiry && (
-        <div className={`mt-4 flex items-center gap-2 px-3 py-2 rounded-xl border font-mono text-xs ${expiry.color}`}>
+      {expiry === "soon" && (
+        <div className="mt-4 flex items-center gap-2 px-3 py-2 rounded-xl border font-mono text-xs text-amber-700 bg-amber-50 border-amber-200">
           <AlertTriangle className="w-4 h-4 shrink-0" />
-          {expiry.label}
+          Renewing soon — your certification expires on{" "}
+          {new Date(trade.green_cert_expiry!).toLocaleDateString("en-GB")}.
+        </div>
+      )}
+
+      {expiry === "expired" && (
+        <div className="mt-4 flex items-center gap-2 px-3 py-2 rounded-xl border font-mono text-xs text-red-700 bg-red-50 border-red-200">
+          <AlertTriangle className="w-4 h-4 shrink-0" />
+          Renewal required — green certification badges are hidden from public view until you update your certificates.
         </div>
       )}
     </section>
