@@ -375,7 +375,7 @@ const QuoteChecker = () => {
     <div className="min-h-screen bg-background">
       <SEO
         title="AI Quote Checker — ProGrafter | Check Any Building Quote for £49"
-        description="Upload any building quote. Our AI checks it against a 43-point checklist and identifies missing items before you sign. Report delivered within 2 hours. £49."
+        description="Upload any building quote. Our AI checks it against a 43-point checklist and identifies missing items before you sign. Report delivered to your inbox within 2 minutes. £49."
         path="/quote-checker"
       />
       <Navbar />
@@ -388,7 +388,7 @@ const QuoteChecker = () => {
             </div>
             <h1 className="font-heading text-4xl md:text-5xl text-navy mb-3">AI Quote Checker</h1>
             <p className="text-muted-foreground font-mono text-sm max-w-md mx-auto leading-relaxed">
-              Upload any building quote. Our AI checks it against a 43-point checklist and tells you exactly what's missing. Report in your inbox within 2 hours. <span className="font-semibold text-navy">£49.</span>
+              Upload any building quote. Our AI checks it against a 43-point checklist and tells you exactly what's missing. Report in your inbox within 2 minutes. <span className="font-semibold text-navy">£49.</span>
             </p>
           </div>
 
