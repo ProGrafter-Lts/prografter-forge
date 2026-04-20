@@ -37,7 +37,7 @@ HOMEOWNERS:
 - Project tracking: daily photo updates from the trade
 - Variations: any changes agreed digitally in writing
 - Homeowner Manual: auto-generated document at completion containing all certificates, warranties, materials, photos
-- Quote Checker: AI analysis of any building quote — £49, checks 43 points, delivered within 2 hours
+- Quote Checker: AI analysis of any building quote — £49, checks 43 points, delivered within 2 minutes
 - Green grants: ECO4 (up to £18,000), Boiler Upgrade Scheme (£7,500), GBIS (£10,000), 0% VAT on energy work, HUG2 (£10,000), EV Chargepoint Grant (£350)
 - Post a job at: prografter.co.uk/post-a-job
 
