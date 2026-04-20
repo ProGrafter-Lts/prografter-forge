@@ -57,33 +57,35 @@ export const template = {
   previewData: { name: 'Jane' },
 } satisfies TemplateEntry
 
-const main = {
-  backgroundColor: '#ffffff',
-  fontFamily:
-    '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif',
-}
-const container = { padding: '32px 24px', maxWidth: '560px' }
+const main = { backgroundColor: '#ffffff', fontFamily: "'DM Sans', Arial, sans-serif" }
+const container = { padding: '20px 25px', maxWidth: '560px', margin: '0 auto' }
+const header = { borderBottom: '3px solid #0D9488', paddingBottom: '16px', marginBottom: '24px' }
+const logo = { fontSize: '28px', fontFamily: "'Bebas Neue', Arial, sans-serif", letterSpacing: '0.02em', margin: '0', color: '#1B3A4B' }
 const h1 = {
-  fontSize: '28px',
-  fontWeight: 'bold',
-  color: '#0a2540',
+  fontSize: '26px',
+  fontWeight: 'bold' as const,
+  color: '#1B3A4B',
   margin: '0 0 20px',
   lineHeight: '1.2',
+  fontFamily: "'Bebas Neue', Arial, sans-serif",
+  letterSpacing: '0.02em',
 }
-const text = { fontSize: '15px', color: '#444', lineHeight: '1.6', margin: '0 0 20px' }
+const text = { fontSize: '14px', color: '#2E2E2E', lineHeight: '1.6', margin: '0 0 20px' }
 const card = {
-  backgroundColor: '#f6f9fc',
+  backgroundColor: '#F5F0E8',
+  borderLeft: '3px solid #0D9488',
   borderRadius: '8px',
   padding: '20px 24px',
   margin: '24px 0',
 }
 const cardHeading = {
-  fontSize: '14px',
-  fontWeight: 'bold',
-  color: '#0a2540',
+  fontSize: '13px',
+  fontWeight: 'bold' as const,
+  color: '#1B3A4B',
   margin: '0 0 8px',
   textTransform: 'uppercase' as const,
-  letterSpacing: '0.5px',
+  letterSpacing: '0.08em',
+  fontFamily: "'Bebas Neue', Arial, sans-serif",
 }
-const cardText = { fontSize: '14px', color: '#333', lineHeight: '1.8', margin: '0' }
-const signoff = { fontSize: '15px', color: '#0a2540', margin: '32px 0 0', fontWeight: 600 }
+const cardText = { fontSize: '14px', color: '#2E2E2E', lineHeight: '1.8', margin: '0' }
+const signoff = { fontSize: '14px', color: '#1B3A4B', margin: '32px 0 0 0', fontWeight: 600, borderTop: '1px solid #E5E7EB', paddingTop: '16px' }
