@@ -13,6 +13,12 @@ interface Profile {
   full_name: string;
 }
 
+interface TradeContext {
+  trade_type: string | null;
+  activeProjectCount: number;
+  pendingQuoteCount: number;
+}
+
 const PRE_LOGIN_TRADE_QUESTIONS = [
   "How much does ProGrafter cost?",
   "How do I register?",
@@ -33,13 +39,21 @@ const PRE_LOGIN_HOMEOWNER_QUESTIONS = [
   "Do I qualify for a green grant?",
 ];
 
-const TRADE_QUESTIONS = [
-  "How do I quote on a job?",
-  "How do I submit a daily update?",
+const TRADE_QUESTIONS_NO_PROJECTS = [
+  "How do I find jobs to quote on?",
+  "How does my profile get verified?",
+  "How do I submit a quote?",
+  "How does payment work?",
+  "How do I set my working radius?",
+];
+
+const TRADE_QUESTIONS_ACTIVE = [
+  "How do I submit today's site update?",
   "How do I raise a variation?",
   "How do I request a stage payment?",
-  "How does job matching work?",
-  "When will I start seeing job matches?",
+  "How do I message the homeowner?",
+  "How do I mark a stage complete?",
+  "How do I add a sub-contractor?",
 ];
 
 const HOMEOWNER_QUESTIONS = [
@@ -59,25 +73,60 @@ const Chatbot = () => {
   const [isAuthed, setIsAuthed] = useState(false);
   const [authReady, setAuthReady] = useState(false);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [tradeContext, setTradeContext] = useState<TradeContext | null>(null);
   const [preLoginUserType, setPreLoginUserType] = useState<"trade" | "homeowner" | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Auth + profile
+  // Auth + profile + trade context
   useEffect(() => {
     const init = async (session: Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"]) => {
       if (!session?.user) {
         setIsAuthed(false);
         setProfile(null);
+        setTradeContext(null);
         setAuthReady(true);
         return;
       }
       setIsAuthed(true);
-      const { data } = await supabase
+      const { data: prof } = await supabase
         .from("profiles")
         .select("user_type, full_name")
         .eq("user_id", session.user.id)
         .maybeSingle();
-      setProfile((data as Profile) ?? null);
+      setProfile((prof as Profile) ?? null);
+
+      // If trade, load extra context for personalised chips + system prompt
+      if (prof?.user_type === "trade") {
+        const { data: trade } = await supabase
+          .from("trades")
+          .select("id, trade_type")
+          .eq("user_id", session.user.id)
+          .maybeSingle();
+
+        if (trade?.id) {
+          const [{ count: activeCount }, { count: quoteCount }] = await Promise.all([
+            supabase
+              .from("job_matches")
+              .select("id", { count: "exact", head: true })
+              .eq("trade_id", trade.id)
+              .in("status", ["accepted", "in_progress"]),
+            supabase
+              .from("quotes")
+              .select("id", { count: "exact", head: true })
+              .eq("trade_id", trade.id)
+              .eq("status", "pending"),
+          ]);
+          setTradeContext({
+            trade_type: trade.trade_type ?? null,
+            activeProjectCount: activeCount ?? 0,
+            pendingQuoteCount: quoteCount ?? 0,
+          });
+        } else {
+          setTradeContext({ trade_type: null, activeProjectCount: 0, pendingQuoteCount: 0 });
+        }
+      } else {
+        setTradeContext(null);
+      }
       setAuthReady(true);
     };
 
@@ -86,9 +135,7 @@ const Chatbot = () => {
     return () => sub.subscription.unsubscribe();
   }, []);
 
-  // Seed opening message when chat opens. We wait briefly for auth to
-  // resolve so we can greet the user by name; if the auth check is slow
-  // we fall back to the guest opener after 800ms so the panel is never blank.
+  // Seed opening message when chat opens.
   useEffect(() => {
     if (!open || messages.length > 0) return;
 
@@ -97,8 +144,8 @@ const Chatbot = () => {
         const firstName = (profile.full_name || "").split(" ")[0] || "there";
         const opener =
           profile.user_type === "homeowner"
-            ? `Hi ${firstName} 👋 I can help you with your project or answer any questions about how ProGrafter works.`
-            : `Hi ${firstName} 👋 Need help with anything on ProGrafter? I can walk you through any part of the platform.`;
+            ? `Hi ${firstName} 👋 I'm your ProGrafter guide. What do you need help with today?`
+            : `Hi ${firstName} 👋 I'm your ProGrafter guide. What do you need help with today?`;
         setMessages([{ role: "assistant", content: opener }]);
       } else {
         setMessages([
@@ -141,11 +188,17 @@ const Chatbot = () => {
           isAuthenticated: isAuthed,
           userType: isAuthed ? profile?.user_type : preLoginUserType,
           firstName,
+          tradeContext: tradeContext
+            ? {
+                trade_type: tradeContext.trade_type,
+                active_projects: tradeContext.activeProjectCount,
+                pending_quotes: tradeContext.pendingQuoteCount,
+              }
+            : null,
         },
       });
 
       if (error) {
-        // supabase-js throws FunctionsHttpError but still returns context
         const ctx = (error as { context?: Response }).context;
         let msg = "Sorry — I had trouble responding. Please try again or email hello@prografter.co.uk.";
         if (ctx) {
@@ -183,7 +236,10 @@ const Chatbot = () => {
   } else if (isGuest && preLoginUserType === "homeowner" && messages.length <= 3) {
     suggested = PRE_LOGIN_HOMEOWNER_QUESTIONS;
   } else if (!isGuest && profile?.user_type === "trade" && messages.length === 1) {
-    suggested = TRADE_QUESTIONS;
+    suggested =
+      (tradeContext?.activeProjectCount ?? 0) > 0
+        ? TRADE_QUESTIONS_ACTIVE
+        : TRADE_QUESTIONS_NO_PROJECTS;
   } else if (!isGuest && profile?.user_type === "homeowner" && messages.length === 1) {
     suggested = HOMEOWNER_QUESTIONS;
   }
@@ -204,7 +260,7 @@ const Chatbot = () => {
         <button
           onClick={() => setOpen(true)}
           aria-label="Open ProGrafter chat assistant"
-          className="fixed bottom-5 right-5 z-[60] h-[55px] w-[55px] rounded-full bg-[#0D9488] text-white shadow-lg hover:bg-[#0B7F74] transition-colors flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-[#0D9488] focus:ring-offset-2"
+          className="fixed bottom-20 right-5 sm:bottom-5 z-[70] h-[55px] w-[55px] rounded-full bg-[#0D9488] text-white shadow-lg hover:bg-[#0B7F74] transition-colors flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-[#0D9488] focus:ring-offset-2"
         >
           <MessageCircle className="h-6 w-6" strokeWidth={2.2} />
         </button>
@@ -213,7 +269,7 @@ const Chatbot = () => {
       {/* Chat panel */}
       {open && (
         <div
-          className="fixed z-[60] bg-white shadow-2xl border border-black/10 flex flex-col
+          className="fixed z-[70] bg-white shadow-2xl border border-black/10 flex flex-col
                      inset-0 sm:inset-auto sm:bottom-5 sm:right-5
                      sm:w-[340px] sm:h-[520px] sm:rounded-lg overflow-hidden"
           role="dialog"
