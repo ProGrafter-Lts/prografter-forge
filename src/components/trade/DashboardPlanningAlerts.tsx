@@ -167,9 +167,23 @@ const DashboardPlanningAlerts = ({ trade }: { trade: TradeProfile }) => {
           <Bell className="w-5 h-5 text-secondary" />
           <h2 className="font-heading text-primary text-xl">Today's Planning Alerts</h2>
         </div>
-        <span className="bg-secondary/10 text-secondary font-mono text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider">
-          {subscription.tier}
-        </span>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="flex items-center gap-1.5 bg-card border border-border text-primary font-mono text-[10px] px-3 py-1.5 rounded-full hover:bg-muted transition-colors disabled:opacity-60"
+          >
+            {refreshing ? (
+              <Loader2 className="w-3 h-3 animate-spin" />
+            ) : (
+              <RefreshCw className="w-3 h-3" />
+            )}
+            {refreshing ? "Refreshing…" : "Refresh now"}
+          </button>
+          <span className="bg-secondary/10 text-secondary font-mono text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider">
+            {subscription.tier}
+          </span>
+        </div>
       </div>
 
       {alerts.length === 0 ? (
