@@ -2,9 +2,25 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { UserCircle, BadgeCheck, Save } from "lucide-react";
+import { GreenSpecialistBanner, CertificationsSection } from "@/components/GreenCertBadges";
 
 interface TradeProfileSectionProps {
   tradeId: string;
+}
+
+interface GreenData {
+  is_green_trade: boolean;
+  mcs_number: string | null;
+  mcs_verified: boolean;
+  trustmark_number: string | null;
+  trustmark_verified: boolean;
+  pas_2030_accredited: boolean;
+  pas_2035_coordinator: boolean;
+  ozev_approved: boolean;
+  fgas_registered: boolean;
+  ciga_registered: boolean;
+  inca_certified: boolean;
+  green_cert_expiry: string | null;
 }
 
 const TradeProfileSection = ({ tradeId }: TradeProfileSectionProps) => {
@@ -22,6 +38,7 @@ const TradeProfileSection = ({ tradeId }: TradeProfileSectionProps) => {
     years_experience: 0,
   });
   const [verified, setVerified] = useState(false);
+  const [green, setGreen] = useState<GreenData | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -30,7 +47,9 @@ const TradeProfileSection = ({ tradeId }: TradeProfileSectionProps) => {
 
       const { data, error } = await supabase
         .from("trades")
-        .select("name, company_name, phone, postcode, trade_type, bio, website, years_experience, verified")
+        .select(
+          "name, company_name, phone, postcode, trade_type, bio, website, years_experience, verified, is_green_trade, mcs_number, mcs_verified, trustmark_number, trustmark_verified, pas_2030_accredited, pas_2035_coordinator, ozev_approved, fgas_registered, ciga_registered, inca_certified, green_cert_expiry",
+        )
         .eq("id", tradeId)
         .single();
 
@@ -48,6 +67,20 @@ const TradeProfileSection = ({ tradeId }: TradeProfileSectionProps) => {
           years_experience: data.years_experience || 0,
         });
         setVerified(data.verified);
+        setGreen({
+          is_green_trade: data.is_green_trade,
+          mcs_number: data.mcs_number,
+          mcs_verified: data.mcs_verified,
+          trustmark_number: data.trustmark_number,
+          trustmark_verified: data.trustmark_verified,
+          pas_2030_accredited: data.pas_2030_accredited,
+          pas_2035_coordinator: data.pas_2035_coordinator,
+          ozev_approved: data.ozev_approved,
+          fgas_registered: data.fgas_registered,
+          ciga_registered: data.ciga_registered,
+          inca_certified: data.inca_certified,
+          green_cert_expiry: data.green_cert_expiry,
+        });
       }
       setLoading(false);
     };
@@ -95,6 +128,9 @@ const TradeProfileSection = ({ tradeId }: TradeProfileSectionProps) => {
           </span>
         )}
       </div>
+
+      {green?.is_green_trade && <GreenSpecialistBanner show />}
+      {green?.is_green_trade && <CertificationsSection trade={green} />}
 
       <div className="bg-card rounded-2xl p-6 border border-border space-y-5">
         <div className="grid md:grid-cols-2 gap-4">
