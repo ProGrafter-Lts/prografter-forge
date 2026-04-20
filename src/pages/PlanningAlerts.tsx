@@ -114,33 +114,52 @@ const PlanningAlerts = () => {
   const [tradeType, setTradeType] = useState<string>("");
 
   useEffect(() => {
-    checkExistingSub();
-  }, []);
+    let cancelled = false;
 
-  const checkExistingSub = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { navigate("/login"); return; }
+    const init = async () => {
+      // Wait for the session to be restored from storage before deciding
+      // to redirect. Without this, a fresh route mount can race and bounce
+      // the user back to /login even though they're signed in.
+      const { data: { session } } = await supabase.auth.getSession();
+      if (cancelled) return;
 
-    const { data: trade } = await supabase
-      .from("trades")
-      .select("id, trade_type")
-      .eq("user_id", user.id)
-      .single();
+      if (!session?.user) {
+        navigate("/login");
+        return;
+      }
 
-    if (!trade) { navigate("/login"); return; }
-    setTradeId(trade.id);
-    setTradeType(trade.trade_type);
-    setSelectedTypes([trade.trade_type]);
+      const { data: trade } = await supabase
+        .from("trades")
+        .select("id, trade_type")
+        .eq("user_id", session.user.id)
+        .maybeSingle();
 
-    const { data: sub } = await supabase
-      .from("planning_alert_subs")
-      .select("*")
-      .eq("trade_id", trade.id)
-      .eq("active", true)
-      .maybeSingle();
+      if (cancelled) return;
 
-    if (sub) setActiveSub(sub);
-  };
+      if (!trade) {
+        // Logged in but no trade profile — send to trade registration,
+        // not /login (which would falsely look like a logout).
+        navigate("/register/trade");
+        return;
+      }
+
+      setTradeId(trade.id);
+      setTradeType(trade.trade_type);
+      setSelectedTypes([trade.trade_type]);
+
+      const { data: sub } = await supabase
+        .from("planning_alert_subs")
+        .select("*")
+        .eq("trade_id", trade.id)
+        .eq("active", true)
+        .maybeSingle();
+
+      if (!cancelled && sub) setActiveSub(sub);
+    };
+
+    init();
+    return () => { cancelled = true; };
+  }, [navigate]);
 
   const toggleType = (type: string) => {
     setSelectedTypes(prev =>
