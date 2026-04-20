@@ -12,6 +12,7 @@ import VariationAlert from "@/components/homeowner/VariationAlert";
 import GreenCertificatePack from "@/components/GreenCertificatePack";
 import { isGreenTrade } from "@/lib/greenTrades";
 import { BookOpen, Leaf } from "lucide-react";
+import HomeownerProfileSection from "@/components/homeowner/HomeownerProfileSection";
 
 const HomeownerDashboard = () => {
   const navigate = useNavigate();
@@ -165,8 +166,11 @@ const HomeownerDashboard = () => {
             </section>
           )}
 
+          {/* Profile tab */}
+          {activeNav === "profile" && <HomeownerProfileSection />}
+
           {/* Main overview content */}
-          {activeNav !== "manual" && activeNav !== "grants" && (
+          {activeNav !== "manual" && activeNav !== "grants" && activeNav !== "profile" && (
             <>
               <VariationAlert variations={variations} />
 
