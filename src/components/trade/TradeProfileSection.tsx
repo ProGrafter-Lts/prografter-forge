@@ -129,6 +129,9 @@ const TradeProfileSection = ({ tradeId }: TradeProfileSectionProps) => {
         )}
       </div>
 
+      {green?.is_green_trade && <GreenSpecialistBanner show />}
+      {green?.is_green_trade && <CertificationsSection trade={green} />}
+
       <div className="bg-card rounded-2xl p-6 border border-border space-y-5">
         <div className="grid md:grid-cols-2 gap-4">
           <Field label="Email" value={email} readOnly />
