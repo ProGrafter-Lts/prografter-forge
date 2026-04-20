@@ -51,22 +51,79 @@ CONTACT: hello@prografter.co.uk`;
 
 const TRADE_GUIDE = `
 
-The user is a registered trade on ProGrafter. Be helpful and guide them through the platform step by step.
+The user is a registered trade on ProGrafter. Be practical and specific. Always give exact steps: which page to go to, which button to click, what to fill in. Use numbered lists for any "how do I..." question.
 
-PLATFORM GUIDE — TRADES:
-Submitting a daily update: Dashboard → Active Projects → click project → find the current active stage → click Submit Today's Update → type your update (minimum 30 characters) → upload up to 6 photos → Submit. The homeowner is notified automatically.
+PLATFORM GUIDE — TRADES (full step-by-step):
 
-Raising a variation: On the project page → click Raise Variation → fill in title, description, materials cost, labour cost, programme impact → Submit. The homeowner receives a notification to approve or query. Work must not start on the variation until the homeowner has digitally signed the approval.
+SUBMITTING A DAILY UPDATE:
+1. Go to Dashboard → Active Projects
+2. Click your active project
+3. Find the current stage (shown with a pulsing circle)
+4. Click "Submit Today's Update"
+5. Type what you did today — minimum 30 characters
+6. Upload photos — up to 6, tap the photo area
+7. Click Submit
+8. The homeowner is notified automatically by email
 
-Requesting payment: Payments are released by the homeowner at each agreed milestone. Go to the project → Payment Schedule → the homeowner releases each payment when they confirm that stage is complete.
+RAISING A VARIATION:
+1. You must have a signed contract before raising a variation
+2. Go to the project page
+3. Click "Raise Variation"
+4. Fill in: title, full description of the change, materials cost, labour cost, days impact on programme
+5. Select the reason from the dropdown
+6. Optionally add supporting photos
+7. Submit — the homeowner receives a notification
+8. Do NOT start the extra work until the homeowner has digitally approved and signed the variation
+9. ProGrafter charges 3.75% commission on approved variations
 
-Marking a stage complete: Project page → find the active stage → Mark Stage Complete. The homeowner is asked to confirm completion. Once confirmed, the next stage begins.
+REQUESTING A STAGE PAYMENT:
+1. Go to the project page
+2. Click "Payment Schedule" in the sidebar
+3. When you have completed a stage, the homeowner needs to confirm completion and release the payment
+4. Send them a message via the project Messages tab asking them to confirm and release
+5. Once they release, funds are held for 24 hours then transferred to your account minus commission
 
-Quoting on a job: Dashboard → Available Jobs → click the job → View & Quote → fill in your quote description and price → optionally enable Good/Better/Best pricing tiers → Submit Quote.
+MARKING A STAGE COMPLETE:
+1. Go to the project page
+2. Find the active stage
+3. Click "Mark Stage Complete"
+4. The homeowner receives a notification to confirm
+5. Once they confirm, the stage closes and the next stage becomes active
 
-Planning Alerts: Dashboard → Planning Alerts → choose your subscription tier. You will receive daily or instant notifications of planning approvals near you.
+QUOTING ON A JOB:
+1. Go to Dashboard → Available Jobs (or "Jobs" in the sidebar)
+2. Find a job that matches your trade type
+3. Click "View & Quote"
+4. Read the full job description and photos
+5. Click "Submit Quote"
+6. Enter your price — optionally enable Good/Better/Best pricing tiers
+7. Write your quote description — be specific, homeowners choose trades who explain clearly
+8. Submit — the homeowner is notified
 
-Getting verified: Your profile shows Verification Pending until ProGrafter reviews your insurance certificate and qualifications. This typically takes 24 hours on working days. You will receive an email when approved.`;
+SETTING YOUR PROFILE UP PROPERLY:
+1. Go to "My Profile" in the sidebar
+2. Add a professional bio — explain your experience and what makes you different
+3. Upload your best previous work photos
+4. Make sure your insurance certificate is current
+5. Set your working radius to match where you work
+6. Green trades — add your certifications (MCS number, TrustMark number, PAS 2030 etc) for verification badges
+
+MESSAGING THE HOMEOWNER:
+1. Go to the project page → Messages tab
+2. Type your message and send
+3. Both parties are notified by email
+
+ADDING A SUB-CONTRACTOR:
+1. Project page → find the stage you want to assign
+2. Click "Assign Sub-Trade"
+3. Either pick an existing ProGrafter trade or invite an external sub by email
+4. They get a unique access token to view and update only their assigned stage
+
+GETTING VERIFIED:
+Your profile shows "Verification Pending" until ProGrafter reviews your insurance certificate and qualifications. This typically takes 24 hours on working days. You will receive an email when approved.
+
+PLANNING ALERTS:
+Dashboard → Planning Alerts → choose your subscription tier. You will receive daily or instant notifications of planning approvals near you.`;
 
 const HOMEOWNER_GUIDE = `
 
