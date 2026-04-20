@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 import {
   Bell,
   MapPin,
@@ -11,6 +12,7 @@ import {
   Building2,
   ExternalLink,
   Sparkles,
+  RefreshCw,
 } from "lucide-react";
 import OutreachLetterModal from "./OutreachLetterModal";
 
@@ -45,11 +47,42 @@ const DashboardPlanningAlerts = ({ trade }: { trade: TradeProfile }) => {
   const [alerts, setAlerts] = useState<PlanningAlert[]>([]);
   const [subscription, setSubscription] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [letterModal, setLetterModal] = useState<PlanningAlert | null>(null);
 
   useEffect(() => {
     loadData();
   }, [trade.id]);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+      const anon = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      const res = await fetch(
+        `https://${projectId}.supabase.co/functions/v1/process-planning-alerts?trade_id=${trade.id}`,
+        {
+          method: "POST",
+          headers: { Authorization: `Bearer ${anon}`, apikey: anon },
+        },
+      );
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error ?? "Refresh failed");
+      toast({
+        title: "Planning feed refreshed",
+        description: `${json.inserted ?? 0} new application(s) found in your area.`,
+      });
+      await loadData();
+    } catch (e: any) {
+      toast({
+        title: "Refresh failed",
+        description: e?.message ?? "Please try again shortly.",
+        variant: "destructive",
+      });
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   const loadData = async () => {
     const [subRes, alertsRes] = await Promise.all([
@@ -134,9 +167,23 @@ const DashboardPlanningAlerts = ({ trade }: { trade: TradeProfile }) => {
           <Bell className="w-5 h-5 text-secondary" />
           <h2 className="font-heading text-primary text-xl">Today's Planning Alerts</h2>
         </div>
-        <span className="bg-secondary/10 text-secondary font-mono text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider">
-          {subscription.tier}
-        </span>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="flex items-center gap-1.5 bg-card border border-border text-primary font-mono text-[10px] px-3 py-1.5 rounded-full hover:bg-muted transition-colors disabled:opacity-60"
+          >
+            {refreshing ? (
+              <Loader2 className="w-3 h-3 animate-spin" />
+            ) : (
+              <RefreshCw className="w-3 h-3" />
+            )}
+            {refreshing ? "Refreshing…" : "Refresh now"}
+          </button>
+          <span className="bg-secondary/10 text-secondary font-mono text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider">
+            {subscription.tier}
+          </span>
+        </div>
       </div>
 
       {alerts.length === 0 ? (

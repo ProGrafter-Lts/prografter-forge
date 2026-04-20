@@ -17,3 +17,5 @@ project_id = "xryinqaxjclcmhebdcex"
     verify_jwt = false
   [functions.read-quote-check]
     verify_jwt = false
+  [functions.process-planning-alerts]
+    verify_jwt = false
