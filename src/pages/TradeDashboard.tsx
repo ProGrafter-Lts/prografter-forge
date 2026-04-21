@@ -96,7 +96,6 @@ const TradeDashboard = () => {
         return;
       }
       setTrade(tradeData);
-      setLoading(false);
 
       const [matchRes, quoteRes, contractRes] = await Promise.all([
         supabase
@@ -156,12 +155,12 @@ const TradeDashboard = () => {
             .in("job_id", projectJobIds)
         : { data: [] };
 
-      setMatches(
-        rawMatches.map((match: any) => ({
-          ...match,
-          jobs: matchedJobsById.get(match.job_id) ?? null,
-        })),
-      );
+      const hydratedMatches = rawMatches.map((match: any) => ({
+        ...match,
+        jobs: matchedJobsById.get(match.job_id) ?? null,
+      }));
+
+      setMatches(hydratedMatches);
       setQuotes(allQuotes.filter((quote: any) => quote.status === "pending"));
       setActiveProjects(contractJobs);
 
@@ -172,6 +171,12 @@ const TradeDashboard = () => {
       const totalCosts = Math.round(totalQuoted * 0.65);
 
       setMarginData({ totalQuoted, totalCosts, totalReceived });
+
+      if (hydratedMatches.length === 0 && !matchRes.error) {
+        window.setTimeout(() => {
+          void loadDashboardData(userId);
+        }, 1200);
+      }
     } finally {
       setLoading(false);
     }
