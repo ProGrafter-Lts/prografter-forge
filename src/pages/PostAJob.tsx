@@ -1,8 +1,9 @@
-import { useState, FormEvent, ChangeEvent, useMemo } from "react";
+import { useState, FormEvent, ChangeEvent, useMemo, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Link, useSearchParams } from "react-router-dom";
 import SEO from "@/components/SEO";
 import { isGreenTrade } from "@/lib/greenTrades";
+import { Specialism, fetchSpecialisms } from "@/lib/specialisms";
 
 const ALL_JOB_TYPES = [
   { label: "Extension", icon: "🏗️", green: false },
@@ -84,6 +85,12 @@ const PostAJob = () => {
   const [address, setAddress] = useState("");
   const [postcode, setPostcode] = useState("");
   const [budget, setBudget] = useState("");
+  const [specialismId, setSpecialismId] = useState<string>("");
+  const [specialisms, setSpecialisms] = useState<Specialism[]>([]);
+
+  useEffect(() => {
+    fetchSpecialisms().then(setSpecialisms).catch(() => setSpecialisms([]));
+  }, []);
 
   // Step 3b — Optional Funds Verification
   const [fundsDoc, setFundsDoc] = useState<File | null>(null);
@@ -186,7 +193,8 @@ const PostAJob = () => {
       photo_urls: photoUrls,
       status: "open",
       is_green_job: isGreenTrade(jobType),
-    }).select("id").single();
+      specialism_id: specialismId || null,
+    } as any).select("id").single();
 
     if (jobError || !jobData) {
       console.error(jobError);
@@ -468,6 +476,23 @@ const PostAJob = () => {
                           ))}
                         </select>
                       </div>
+                    </div>
+                    <div>
+                      <label className={labelClass}>Project type (optional)</label>
+                      <select
+                        value={specialismId}
+                        onChange={(e) => setSpecialismId(e.target.value)}
+                        className={`${inputClass} appearance-none`}
+                        style={{ backgroundColor: "hsl(var(--deep))" }}
+                      >
+                        <option value="">e.g. Full bathroom renovation, Kitchen install — leave blank if not sure</option>
+                        {specialisms.map((s) => (
+                          <option key={s.id} value={s.id}>{s.name}</option>
+                        ))}
+                      </select>
+                      <p className="font-mono text-[10px] text-cream/40 mt-1">
+                        Helps us match you with trades who specialise in this work.
+                      </p>
                     </div>
                   </div>
                   <div className="flex gap-4 mt-8">

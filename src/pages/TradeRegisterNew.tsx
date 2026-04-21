@@ -15,6 +15,8 @@ import {
   showCiga,
   showInca,
 } from "@/lib/greenTrades";
+import SpecialismsPicker from "@/components/SpecialismsPicker";
+import { saveTradeSpecialisms } from "@/lib/specialisms";
 
 const GENERAL_TRADE_TYPES = [
   "Electrician",
@@ -31,7 +33,7 @@ const GENERAL_TRADE_TYPES = [
   "Other",
 ] as const;
 
-type Step = 1 | 2 | "green" | 3;
+type Step = 1 | 2 | "specialisms" | "green" | 3;
 
 const TradeRegisterNew = () => {
   const [step, setStep] = useState<Step>(1);
@@ -68,6 +70,10 @@ const TradeRegisterNew = () => {
   const [insuranceExpiry, setInsuranceExpiry] = useState<Date | undefined>();
   const [acceptedTerms, setAcceptedTerms] = useState(false);
 
+  // Specialisms (multi-select with one optional primary)
+  const [specialismIds, setSpecialismIds] = useState<string[]>([]);
+  const [primarySpecialismId, setPrimarySpecialismId] = useState<string | null>(null);
+
   const insuranceExpiryStatus = useMemo(() => {
     if (!insuranceExpiry) return null;
     const daysUntil = differenceInDays(insuranceExpiry, new Date());
@@ -84,8 +90,14 @@ const TradeRegisterNew = () => {
 
   const isGreen = isGreenTrade(tradeType);
 
-  const totalSteps = isGreen ? 4 : 3;
-  const stepNumber = step === 1 ? 1 : step === 2 ? 2 : step === "green" ? 3 : isGreen ? 4 : 3;
+  // Steps: 1 Account → 2 Trade → Specialisms → (optional Green) → Insurance
+  const totalSteps = isGreen ? 5 : 4;
+  const stepNumber =
+    step === 1 ? 1
+    : step === 2 ? 2
+    : step === "specialisms" ? 3
+    : step === "green" ? 4
+    : isGreen ? 5 : 4;
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0];
@@ -157,6 +169,7 @@ const TradeRegisterNew = () => {
       insurance_cert_url: insuranceCertUrl,
       user_id: authData.user.id,
       is_green_trade: isGreen,
+      specialisms_prompt_seen: true,
     };
 
     if (isGreen) {
@@ -171,13 +184,30 @@ const TradeRegisterNew = () => {
       tradeData.green_cert_expiry = greenCertExpiry ? format(greenCertExpiry, "yyyy-MM-dd") : null;
     }
 
-    const { error: dbError } = await supabase.from("trades").insert(tradeData as any);
+    const { data: tradeRow, error: dbError } = await supabase
+      .from("trades")
+      .insert(tradeData as any)
+      .select("id")
+      .single();
 
-    setLoading(false);
-    if (dbError) {
+    if (dbError || !tradeRow) {
+      setLoading(false);
       console.error(dbError);
       setError("Account created but trade details failed to save. Please contact support.");
+      setSuccess(true);
+      return;
     }
+
+    // Save specialism selection (best-effort — onboarding still succeeds if this fails)
+    if (specialismIds.length > 0) {
+      try {
+        await saveTradeSpecialisms(tradeRow.id, specialismIds, primarySpecialismId);
+      } catch (specErr) {
+        console.error("Failed to save specialisms during signup", specErr);
+      }
+    }
+
+    setLoading(false);
     setSuccess(true);
   };
 
@@ -191,11 +221,12 @@ const TradeRegisterNew = () => {
   const canProceedStep2 = tradeType.length > 0 && companyName.trim().length > 0;
 
   const handleStep2Continue = () => {
-    if (isGreen) {
-      setStep("green");
-    } else {
-      setStep(3);
-    }
+    setStep("specialisms");
+  };
+
+  const handleSpecialismsContinue = () => {
+    if (isGreen) setStep("green");
+    else setStep(3);
   };
 
   return (
@@ -350,7 +381,38 @@ const TradeRegisterNew = () => {
                 </>
               )}
 
-              {/* GREEN CERTIFICATIONS STEP */}
+              {/* SPECIALISMS STEP */}
+              {step === "specialisms" && (
+                <>
+                  <h2 className="font-heading text-cream text-[40px] leading-none mb-2">
+                    What do you <span className="text-teal">specialise in?</span>
+                  </h2>
+                  <p className="font-body text-cream/50 text-sm mb-6">
+                    Pick the project types you take on so the right jobs come your way.
+                    Optional — leave blank if you'd rather skip.
+                  </p>
+                  <SpecialismsPicker
+                    tradeType={tradeType}
+                    selected={specialismIds}
+                    primaryId={primarySpecialismId}
+                    onChange={(sel, primary) => {
+                      setSpecialismIds(sel);
+                      setPrimarySpecialismId(primary);
+                    }}
+                    max={8}
+                    variant="dark"
+                  />
+                  <div className="flex gap-4 mt-8">
+                    <button type="button" onClick={() => setStep(2)} className="flex-1 border border-cream/20 text-cream font-mono text-sm py-3 rounded-xl hover:bg-cream/5 transition-colors">
+                      Back
+                    </button>
+                    <button type="button" onClick={handleSpecialismsContinue} className="flex-1 bg-teal text-cream font-mono text-sm py-3 rounded-xl hover:bg-teal-hover transition-colors">
+                      Continue
+                    </button>
+                  </div>
+                </>
+              )}
+
               {step === "green" && (
                 <>
                   <h2 className="font-heading text-cream text-[40px] leading-none mb-2">
@@ -440,7 +502,7 @@ const TradeRegisterNew = () => {
                   </div>
 
                   <div className="flex gap-4 mt-8">
-                    <button type="button" onClick={() => setStep(2)} className="flex-1 border border-cream/20 text-cream font-mono text-sm py-3 rounded-xl hover:bg-cream/5 transition-colors">
+                    <button type="button" onClick={() => setStep("specialisms")} className="flex-1 border border-cream/20 text-cream font-mono text-sm py-3 rounded-xl hover:bg-cream/5 transition-colors">
                       Back
                     </button>
                     <button type="button" onClick={() => setStep(3)} className="flex-1 bg-teal text-cream font-mono text-sm py-3 rounded-xl hover:bg-teal-hover transition-colors">
@@ -533,7 +595,7 @@ const TradeRegisterNew = () => {
                   {error && <p className="text-red-400 font-mono text-xs mt-4">{error}</p>}
 
                   <div className="flex gap-4 mt-8">
-                    <button type="button" onClick={() => setStep(isGreen ? "green" : 2)} className="flex-1 border border-cream/20 text-cream font-mono text-sm py-3 rounded-xl hover:bg-cream/5 transition-colors">
+                    <button type="button" onClick={() => setStep(isGreen ? "green" : "specialisms")} className="flex-1 border border-cream/20 text-cream font-mono text-sm py-3 rounded-xl hover:bg-cream/5 transition-colors">
                       Back
                     </button>
                     <button type="submit" disabled={loading} className="flex-1 bg-teal text-cream font-mono text-sm py-3 rounded-xl hover:bg-teal-hover transition-colors disabled:opacity-50">

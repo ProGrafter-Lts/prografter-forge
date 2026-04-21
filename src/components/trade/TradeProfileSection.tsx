@@ -1,8 +1,15 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { UserCircle, BadgeCheck, Save } from "lucide-react";
+import { UserCircle, BadgeCheck, Save, Sparkles } from "lucide-react";
 import { GreenSpecialistBanner, CertificationsSection } from "@/components/GreenCertBadges";
+import SpecialismsPicker from "@/components/SpecialismsPicker";
+import {
+  Specialism,
+  fetchSpecialisms,
+  fetchTradeSpecialisms,
+  saveTradeSpecialisms,
+} from "@/lib/specialisms";
 
 interface TradeProfileSectionProps {
   tradeId: string;
@@ -39,6 +46,10 @@ const TradeProfileSection = ({ tradeId }: TradeProfileSectionProps) => {
   });
   const [verified, setVerified] = useState(false);
   const [green, setGreen] = useState<GreenData | null>(null);
+  const [allSpecialisms, setAllSpecialisms] = useState<Specialism[]>([]);
+  const [selectedSpecialisms, setSelectedSpecialisms] = useState<string[]>([]);
+  const [primarySpecialism, setPrimarySpecialism] = useState<string | null>(null);
+  const [specialismsDirty, setSpecialismsDirty] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -82,10 +93,40 @@ const TradeProfileSection = ({ tradeId }: TradeProfileSectionProps) => {
           green_cert_expiry: data.green_cert_expiry,
         });
       }
+
+      // Load specialisms catalogue + this trade's selection in parallel
+      try {
+        const [allSpec, mySpec] = await Promise.all([
+          fetchSpecialisms(),
+          fetchTradeSpecialisms(tradeId),
+        ]);
+        setAllSpecialisms(allSpec);
+        setSelectedSpecialisms(mySpec.map((r) => r.specialism_id));
+        const primary = mySpec.find((r) => r.is_primary);
+        setPrimarySpecialism(primary?.specialism_id ?? null);
+      } catch (specErr) {
+        console.error("Failed to load specialisms", specErr);
+      }
+
       setLoading(false);
     };
     load();
   }, [tradeId]);
+
+  const handleSaveSpecialisms = async () => {
+    try {
+      await saveTradeSpecialisms(tradeId, selectedSpecialisms, primarySpecialism);
+      await supabase
+        .from("trades")
+        .update({ specialisms_prompt_seen: true } as any)
+        .eq("id", tradeId);
+      setSpecialismsDirty(false);
+      toast.success("Specialisms updated");
+    } catch (e) {
+      console.error(e);
+      toast.error("Failed to save specialisms");
+    }
+  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -194,6 +235,47 @@ const TradeProfileSection = ({ tradeId }: TradeProfileSectionProps) => {
           >
             <Save className="w-4 h-4" />
             {saving ? "Saving…" : "Save changes"}
+          </button>
+        </div>
+      </div>
+
+      {/* Specialisms */}
+      <div className="bg-card rounded-2xl p-6 border border-border space-y-5">
+        <div className="flex items-center gap-3">
+          <div className="bg-secondary text-secondary-foreground rounded-xl p-2.5">
+            <Sparkles className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="font-heading text-primary text-xl">Specialisms</h3>
+            <p className="font-mono text-xs text-muted-foreground mt-0.5">
+              What kind of projects do you take on?
+            </p>
+          </div>
+        </div>
+        {allSpecialisms.length === 0 ? (
+          <p className="font-mono text-xs text-muted-foreground">No specialisms available.</p>
+        ) : (
+          <SpecialismsPicker
+            tradeType={form.trade_type}
+            selected={selectedSpecialisms}
+            primaryId={primarySpecialism}
+            onChange={(sel, pri) => {
+              setSelectedSpecialisms(sel);
+              setPrimarySpecialism(pri);
+              setSpecialismsDirty(true);
+            }}
+            max={8}
+            variant="light"
+          />
+        )}
+        <div className="flex justify-end pt-2">
+          <button
+            onClick={handleSaveSpecialisms}
+            disabled={!specialismsDirty}
+            className="flex items-center gap-2 bg-primary text-primary-foreground font-mono text-sm px-5 py-2.5 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-40"
+          >
+            <Save className="w-4 h-4" />
+            Save specialisms
           </button>
         </div>
       </div>

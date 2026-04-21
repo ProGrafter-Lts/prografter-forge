@@ -13,6 +13,7 @@ import QuotesList from "@/components/trade/QuotesList";
 import LiveMarginWidget from "@/components/trade/LiveMarginWidget";
 import CalendarConnect from "@/components/trade/CalendarConnect";
 import TradeProfileSection from "@/components/trade/TradeProfileSection";
+import AddSpecialismsBanner from "@/components/trade/AddSpecialismsBanner";
 
 interface TradeProfile {
   name: string;
@@ -31,6 +32,7 @@ interface TradeProfile {
   ciga_registered: boolean;
   inca_certified: boolean;
   green_cert_expiry: string | null;
+  specialisms_prompt_seen: boolean;
 }
 
 const TradeDashboard = () => {
@@ -55,7 +57,7 @@ const TradeDashboard = () => {
 
     const { data: tradeData } = await supabase
       .from("trades")
-      .select("id, name, company_name, verified, trade_type, phone, is_green_trade, mcs_number, trustmark_number, pas_2030_accredited, pas_2035_coordinator, ozev_approved, fgas_registered, ciga_registered, inca_certified, green_cert_expiry")
+      .select("id, name, company_name, verified, trade_type, phone, is_green_trade, mcs_number, trustmark_number, pas_2030_accredited, pas_2035_coordinator, ozev_approved, fgas_registered, ciga_registered, inca_certified, green_cert_expiry, specialisms_prompt_seen")
       .eq("user_id", user.id)
       .single();
 
@@ -149,6 +151,13 @@ const TradeDashboard = () => {
 
           {activeNav !== "profile" && (
           <>
+          {trade && (
+            <AddSpecialismsBanner
+              tradeId={trade.id}
+              promptSeen={trade.specialisms_prompt_seen}
+              onAdd={() => setActiveNav("profile")}
+            />
+          )}
           <StatsRow
             jobsWon={completedCount}
             earningsThisMonth={marginData.totalReceived}
