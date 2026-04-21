@@ -665,6 +665,57 @@ export type Database = {
           },
         ]
       }
+      planning_alert_shortlist: {
+        Row: {
+          contact_status: Database["public"]["Enums"]["shortlist_contact_status"]
+          created_at: string
+          id: string
+          last_status_change_at: string
+          next_action_date: string | null
+          note: string | null
+          planning_alert_id: string
+          trade_id: string
+          updated_at: string
+        }
+        Insert: {
+          contact_status?: Database["public"]["Enums"]["shortlist_contact_status"]
+          created_at?: string
+          id?: string
+          last_status_change_at?: string
+          next_action_date?: string | null
+          note?: string | null
+          planning_alert_id: string
+          trade_id: string
+          updated_at?: string
+        }
+        Update: {
+          contact_status?: Database["public"]["Enums"]["shortlist_contact_status"]
+          created_at?: string
+          id?: string
+          last_status_change_at?: string
+          next_action_date?: string | null
+          note?: string | null
+          planning_alert_id?: string
+          trade_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "planning_alert_shortlist_planning_alert_id_fkey"
+            columns: ["planning_alert_id"]
+            isOneToOne: false
+            referencedRelation: "planning_alerts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "planning_alert_shortlist_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "trades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       planning_alert_subs: {
         Row: {
           active: boolean
@@ -1697,6 +1748,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
+      shortlist_contact_status: "todo" | "contacted" | "quoted" | "won" | "dead"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1825,6 +1877,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "user"],
+      shortlist_contact_status: ["todo", "contacted", "quoted", "won", "dead"],
     },
   },
 } as const

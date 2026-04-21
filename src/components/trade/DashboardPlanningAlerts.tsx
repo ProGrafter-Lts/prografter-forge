@@ -15,6 +15,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import OutreachLetterModal from "./OutreachLetterModal";
+import ShortlistStatusControl, { ShortlistStatus } from "./ShortlistStatusControl";
 
 interface PlanningAlert {
   id: string;
@@ -42,10 +43,18 @@ interface TradeProfile {
 
 const LETTER_TIERS = ["pro", "ewi", "national"];
 
+interface ShortlistRow {
+  id: string;
+  planning_alert_id: string;
+  contact_status: ShortlistStatus;
+  note: string | null;
+}
+
 const DashboardPlanningAlerts = ({ trade }: { trade: TradeProfile }) => {
   const navigate = useNavigate();
   const [alerts, setAlerts] = useState<PlanningAlert[]>([]);
   const [subscription, setSubscription] = useState<any>(null);
+  const [shortlist, setShortlist] = useState<Record<string, ShortlistRow>>({});
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [letterModal, setLetterModal] = useState<PlanningAlert | null>(null);
@@ -87,7 +96,7 @@ const DashboardPlanningAlerts = ({ trade }: { trade: TradeProfile }) => {
   };
 
   const loadData = async () => {
-    const [subRes, alertsRes] = await Promise.all([
+    const [subRes, alertsRes, shortlistRes] = await Promise.all([
       supabase
         .from("planning_alert_subs")
         .select("*")
@@ -100,10 +109,21 @@ const DashboardPlanningAlerts = ({ trade }: { trade: TradeProfile }) => {
         .eq("trade_id", trade.id)
         .order("created_at", { ascending: false })
         .limit(10),
+      supabase
+        .from("planning_alert_shortlist")
+        .select("id, planning_alert_id, contact_status, note")
+        .eq("trade_id", trade.id),
     ]);
 
     if (subRes.data) setSubscription(subRes.data);
     if (alertsRes.data) setAlerts(alertsRes.data as PlanningAlert[]);
+    if (shortlistRes.data) {
+      const map: Record<string, ShortlistRow> = {};
+      for (const r of shortlistRes.data as ShortlistRow[]) {
+        map[r.planning_alert_id] = r;
+      }
+      setShortlist(map);
+    }
     setLoading(false);
   };
 
@@ -315,6 +335,14 @@ const DashboardPlanningAlerts = ({ trade }: { trade: TradeProfile }) => {
                   View on Planning Portal →
                 </a>
               )}
+            </div>
+
+            <div className="mt-3 pt-3 border-t border-border">
+              <ShortlistStatusControl
+                tradeId={trade.id}
+                planningAlertId={alert.id}
+                initial={shortlist[alert.id] ?? null}
+              />
             </div>
           </div>
         ))
