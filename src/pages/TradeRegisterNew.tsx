@@ -381,7 +381,38 @@ const TradeRegisterNew = () => {
                 </>
               )}
 
-              {/* GREEN CERTIFICATIONS STEP */}
+              {/* SPECIALISMS STEP */}
+              {step === "specialisms" && (
+                <>
+                  <h2 className="font-heading text-cream text-[40px] leading-none mb-2">
+                    What do you <span className="text-teal">specialise in?</span>
+                  </h2>
+                  <p className="font-body text-cream/50 text-sm mb-6">
+                    Pick the project types you take on so the right jobs come your way.
+                    Optional — leave blank if you'd rather skip.
+                  </p>
+                  <SpecialismsPicker
+                    tradeType={tradeType}
+                    selected={specialismIds}
+                    primaryId={primarySpecialismId}
+                    onChange={(sel, primary) => {
+                      setSpecialismIds(sel);
+                      setPrimarySpecialismId(primary);
+                    }}
+                    max={8}
+                    variant="dark"
+                  />
+                  <div className="flex gap-4 mt-8">
+                    <button type="button" onClick={() => setStep(2)} className="flex-1 border border-cream/20 text-cream font-mono text-sm py-3 rounded-xl hover:bg-cream/5 transition-colors">
+                      Back
+                    </button>
+                    <button type="button" onClick={handleSpecialismsContinue} className="flex-1 bg-teal text-cream font-mono text-sm py-3 rounded-xl hover:bg-teal-hover transition-colors">
+                      Continue
+                    </button>
+                  </div>
+                </>
+              )}
+
               {step === "green" && (
                 <>
                   <h2 className="font-heading text-cream text-[40px] leading-none mb-2">
