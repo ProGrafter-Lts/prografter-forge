@@ -4,13 +4,13 @@ import { lazy, Suspense } from "react";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import Index from "./pages/Index.tsx";
-import Login from "./pages/Login.tsx";
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
 import PWAInstallBanner from "./components/PWAInstallBanner.tsx";
 import Chatbot from "./components/Chatbot.tsx";
 
 // Lazy-load every non-landing route so the initial bundle stays small
+const Index = lazy(() => import("./pages/Index.tsx"));
+const Login = lazy(() => import("./pages/Login.tsx"));
 const Terms = lazy(() => import("./pages/Terms.tsx"));
 const Privacy = lazy(() => import("./pages/Privacy.tsx"));
 const TradeRegister = lazy(() => import("./pages/TradeRegister.tsx"));
