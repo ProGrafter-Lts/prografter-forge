@@ -111,6 +111,7 @@ const TradeRegisterNew = () => {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (loading) return;
     setError("");
 
     if (!acceptedTerms) {
@@ -148,8 +149,8 @@ const TradeRegisterNew = () => {
 
       if (uploadError) {
         setError("Account created but certificate upload failed. You can upload it later.");
-        setLoading(false);
-        setSuccess(true);
+      setLoading(false);
+      setSuccess(true);
         return;
       }
 
@@ -598,7 +599,7 @@ const TradeRegisterNew = () => {
                     <button type="button" onClick={() => setStep(isGreen ? "green" : "specialisms")} className="flex-1 border border-cream/20 text-cream font-mono text-sm py-3 rounded-xl hover:bg-cream/5 transition-colors">
                       Back
                     </button>
-                    <button type="submit" disabled={loading} className="flex-1 bg-teal text-cream font-mono text-sm py-3 rounded-xl hover:bg-teal-hover transition-colors disabled:opacity-50">
+                    <button type="submit" disabled={loading} aria-busy={loading} className="flex-1 bg-teal text-cream font-mono text-sm py-3 rounded-xl hover:bg-teal-hover transition-colors disabled:opacity-50">
                       {loading ? "Submitting..." : "Register"}
                     </button>
                   </div>
