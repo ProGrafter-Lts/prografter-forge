@@ -169,6 +169,7 @@ const TradeRegisterNew = () => {
       insurance_cert_url: insuranceCertUrl,
       user_id: authData.user.id,
       is_green_trade: isGreen,
+      specialisms_prompt_seen: true,
     };
 
     if (isGreen) {
@@ -183,13 +184,30 @@ const TradeRegisterNew = () => {
       tradeData.green_cert_expiry = greenCertExpiry ? format(greenCertExpiry, "yyyy-MM-dd") : null;
     }
 
-    const { error: dbError } = await supabase.from("trades").insert(tradeData as any);
+    const { data: tradeRow, error: dbError } = await supabase
+      .from("trades")
+      .insert(tradeData as any)
+      .select("id")
+      .single();
 
-    setLoading(false);
-    if (dbError) {
+    if (dbError || !tradeRow) {
+      setLoading(false);
       console.error(dbError);
       setError("Account created but trade details failed to save. Please contact support.");
+      setSuccess(true);
+      return;
     }
+
+    // Save specialism selection (best-effort — onboarding still succeeds if this fails)
+    if (specialismIds.length > 0) {
+      try {
+        await saveTradeSpecialisms(tradeRow.id, specialismIds, primarySpecialismId);
+      } catch (specErr) {
+        console.error("Failed to save specialisms during signup", specErr);
+      }
+    }
+
+    setLoading(false);
     setSuccess(true);
   };
 
