@@ -15,6 +15,8 @@ import {
   showCiga,
   showInca,
 } from "@/lib/greenTrades";
+import SpecialismsPicker from "@/components/SpecialismsPicker";
+import { saveTradeSpecialisms } from "@/lib/specialisms";
 
 const GENERAL_TRADE_TYPES = [
   "Electrician",
@@ -31,7 +33,7 @@ const GENERAL_TRADE_TYPES = [
   "Other",
 ] as const;
 
-type Step = 1 | 2 | "green" | 3;
+type Step = 1 | 2 | "specialisms" | "green" | 3;
 
 const TradeRegisterNew = () => {
   const [step, setStep] = useState<Step>(1);
