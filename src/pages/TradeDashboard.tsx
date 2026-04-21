@@ -48,6 +48,7 @@ const TradeDashboard = () => {
 
   useEffect(() => {
     let isMounted = true;
+    let lastLoadedUserId: string | null = null;
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!isMounted) return;
@@ -56,6 +57,7 @@ const TradeDashboard = () => {
         return;
       }
 
+      lastLoadedUserId = session.user.id;
       void loadDashboardData(session.user.id);
     });
 
@@ -63,6 +65,7 @@ const TradeDashboard = () => {
       if (!isMounted) return;
 
       if (!session?.user) {
+        lastLoadedUserId = null;
         setTrade(null);
         setMatches([]);
         setQuotes([]);
@@ -72,6 +75,10 @@ const TradeDashboard = () => {
         return;
       }
 
+      // Only reload when the signed-in user actually changes.
+      // Token refreshes fire this listener but should not reset loading state.
+      if (session.user.id === lastLoadedUserId) return;
+      lastLoadedUserId = session.user.id;
       void loadDashboardData(session.user.id);
     });
 
