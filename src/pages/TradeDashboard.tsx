@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { BadgeCheck } from "lucide-react";
 import { GreenSpecialistBanner, CertificationsSection } from "@/components/GreenCertBadges";
@@ -36,7 +35,6 @@ interface TradeProfile {
 }
 
 const TradeDashboard = () => {
-  const navigate = useNavigate();
   const [trade, setTrade] = useState<TradeProfile | null>(null);
   const [matches, setMatches] = useState<any[]>([]);
   const [quotes, setQuotes] = useState<any[]>([]);
@@ -103,7 +101,7 @@ const TradeDashboard = () => {
       const [matchRes, quoteRes, contractRes] = await Promise.all([
         supabase
           .from("job_matches")
-          .select("id, estimated_value, notified_at, status, jobs(title, job_type, postcode, description, funds_verified)")
+          .select("id, job_id, estimated_value, notified_at, status")
           .eq("trade_id", tradeData.id)
           .eq("status", "notified")
           .order("notified_at", { ascending: false })
@@ -118,6 +116,26 @@ const TradeDashboard = () => {
           .select("job_id, jobs(id, title, job_type, postcode, stage)")
           .eq("trade_id", tradeData.id),
       ]);
+
+      if (matchRes.error) console.error("Failed to load job matches", matchRes.error);
+      if (quoteRes.error) console.error("Failed to load quotes", quoteRes.error);
+      if (contractRes.error) console.error("Failed to load active contracts", contractRes.error);
+
+      const rawMatches = matchRes.data || [];
+      const matchedJobIds = Array.from(new Set(rawMatches.map((match: any) => match.job_id).filter(Boolean)));
+
+      const matchedJobsRes = matchedJobIds.length
+        ? await supabase
+            .from("jobs")
+            .select("id, title, job_type, postcode, description, funds_verified")
+            .in("id", matchedJobIds)
+        : { data: [], error: null };
+
+      if (matchedJobsRes.error) console.error("Failed to load job details for matches", matchedJobsRes.error);
+
+      const matchedJobsById = new Map(
+        (matchedJobsRes.data || []).map((job: any) => [job.id, job]),
+      );
 
       const allQuotes = quoteRes.data || [];
       const activeStages = ["scheduled", "in_progress", "review"];
@@ -138,7 +156,12 @@ const TradeDashboard = () => {
             .in("job_id", projectJobIds)
         : { data: [] };
 
-      if (matchRes.data) setMatches(matchRes.data);
+      setMatches(
+        rawMatches.map((match: any) => ({
+          ...match,
+          jobs: matchedJobsById.get(match.job_id) ?? null,
+        })),
+      );
       setQuotes(allQuotes.filter((quote: any) => quote.status === "pending"));
       setActiveProjects(contractJobs);
 
