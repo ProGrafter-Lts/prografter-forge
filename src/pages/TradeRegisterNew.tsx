@@ -70,6 +70,10 @@ const TradeRegisterNew = () => {
   const [insuranceExpiry, setInsuranceExpiry] = useState<Date | undefined>();
   const [acceptedTerms, setAcceptedTerms] = useState(false);
 
+  // Specialisms (multi-select with one optional primary)
+  const [specialismIds, setSpecialismIds] = useState<string[]>([]);
+  const [primarySpecialismId, setPrimarySpecialismId] = useState<string | null>(null);
+
   const insuranceExpiryStatus = useMemo(() => {
     if (!insuranceExpiry) return null;
     const daysUntil = differenceInDays(insuranceExpiry, new Date());
@@ -86,8 +90,14 @@ const TradeRegisterNew = () => {
 
   const isGreen = isGreenTrade(tradeType);
 
-  const totalSteps = isGreen ? 4 : 3;
-  const stepNumber = step === 1 ? 1 : step === 2 ? 2 : step === "green" ? 3 : isGreen ? 4 : 3;
+  // Steps: 1 Account → 2 Trade → Specialisms → (optional Green) → Insurance
+  const totalSteps = isGreen ? 5 : 4;
+  const stepNumber =
+    step === 1 ? 1
+    : step === 2 ? 2
+    : step === "specialisms" ? 3
+    : step === "green" ? 4
+    : isGreen ? 5 : 4;
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0];
@@ -193,11 +203,12 @@ const TradeRegisterNew = () => {
   const canProceedStep2 = tradeType.length > 0 && companyName.trim().length > 0;
 
   const handleStep2Continue = () => {
-    if (isGreen) {
-      setStep("green");
-    } else {
-      setStep(3);
-    }
+    setStep("specialisms");
+  };
+
+  const handleSpecialismsContinue = () => {
+    if (isGreen) setStep("green");
+    else setStep(3);
   };
 
   return (
