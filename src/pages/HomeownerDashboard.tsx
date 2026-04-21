@@ -102,6 +102,14 @@ const HomeownerDashboard = () => {
     }
   };
 
+  const quoteCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    quotes.forEach((q: any) => {
+      counts[q.job_id] = (counts[q.job_id] ?? 0) + 1;
+    });
+    return counts;
+  }, [quotes]);
+
   return (
     <div className="min-h-screen bg-background flex">
       <HomeownerSidebar
