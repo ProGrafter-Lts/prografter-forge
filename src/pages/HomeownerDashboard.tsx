@@ -1,10 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { FolderKanban } from "lucide-react";
 import HomeownerSidebar from "@/components/homeowner/HomeownerSidebar";
-import ActiveProjectHero from "@/components/homeowner/ActiveProjectHero";
+import ActiveProjectsSection from "@/components/homeowner/ActiveProjectsSection";
 import QuotesReceived from "@/components/homeowner/QuotesReceived";
 import MyJobs from "@/components/homeowner/MyJobs";
 import RecentSiteUpdates from "@/components/homeowner/RecentSiteUpdates";
