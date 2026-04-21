@@ -149,14 +149,14 @@ const ContractPanel = ({ jobId, jobType, quotes, contract, userRole, userId, tra
   };
 
   // Quote acceptance for homeowner (no contract yet)
-  if (userRole === "homeowner" && !contract && pendingQuotes.length > 0) {
+  if (userRole === "homeowner" && !contract && actionableQuotes.length > 0) {
     return (
       <section>
         <h2 className="font-heading text-navy text-2xl mb-4 flex items-center gap-2">
           <FileText className="w-5 h-5" /> Quotes & Contract
         </h2>
         <div className="space-y-3">
-          {pendingQuotes.map((q) => (
+          {actionableQuotes.map((q) => (
             <div key={q.id} className="bg-white rounded-2xl p-5 border border-navy/10 shadow-sm">
               <div className="flex items-center justify-between">
                 <p className="font-heading text-teal text-xl">£{Number(q.amount).toLocaleString()}</p>
