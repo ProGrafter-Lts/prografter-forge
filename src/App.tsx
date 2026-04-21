@@ -15,6 +15,7 @@ import TradeDashboard from "./pages/TradeDashboard.tsx";
 import TradeSettings from "./pages/TradeSettings.tsx";
 import HomeownerDashboard from "./pages/HomeownerDashboard.tsx";
 import ProjectDetail from "./pages/ProjectDetail.tsx";
+import CompareQuotes from "./pages/CompareQuotes.tsx";
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import QuoteChecker from "./pages/QuoteChecker.tsx";
@@ -88,6 +89,14 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <ProjectDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/project/:id/compare"
+            element={
+              <ProtectedRoute>
+                <CompareQuotes />
               </ProtectedRoute>
             }
           />
