@@ -49,23 +49,54 @@ const TradeDashboard = () => {
   const [marginData, setMarginData] = useState({ totalQuoted: 0, totalCosts: 0, totalReceived: 0 });
 
   useEffect(() => {
-    loadDashboardData();
+    let isMounted = true;
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!isMounted) return;
+      if (!session?.user) {
+        setLoading(false);
+        return;
+      }
+
+      void loadDashboardData(session.user.id);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!isMounted) return;
+
+      if (!session?.user) {
+        setTrade(null);
+        setMatches([]);
+        setQuotes([]);
+        setActiveProjects([]);
+        setMarginData({ totalQuoted: 0, totalCosts: 0, totalReceived: 0 });
+        setLoading(false);
+        return;
+      }
+
+      void loadDashboardData(session.user.id);
+    });
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
-  const loadDashboardData = async () => {
+  const loadDashboardData = async (userId: string) => {
     setLoading(true);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
       const { data: tradeData } = await supabase
         .from("trades")
         .select("id, name, company_name, verified, trade_type, phone, is_green_trade, mcs_number, trustmark_number, pas_2030_accredited, pas_2035_coordinator, ozev_approved, fgas_registered, ciga_registered, inca_certified, green_cert_expiry, specialisms_prompt_seen")
-        .eq("user_id", user.id)
-        .single();
+        .eq("user_id", userId)
+        .maybeSingle();
 
-      if (!tradeData) return;
+      if (!tradeData) {
+        setTrade(null);
+        return;
+      }
       setTrade(tradeData);
       setLoading(false);
 
