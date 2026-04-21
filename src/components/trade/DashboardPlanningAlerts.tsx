@@ -54,13 +54,13 @@ const DashboardPlanningAlerts = ({ trade }: { trade: TradeProfile }) => {
     loadData();
   }, [trade.id]);
 
-  const handleRefresh = async () => {
+  const handleRefresh = async (days: number = 90) => {
     setRefreshing(true);
     try {
       const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
       const anon = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
       const res = await fetch(
-        `https://${projectId}.supabase.co/functions/v1/process-planning-alerts?trade_id=${trade.id}`,
+        `https://${projectId}.supabase.co/functions/v1/process-planning-alerts?trade_id=${trade.id}&days=${days}`,
         {
           method: "POST",
           headers: { Authorization: `Bearer ${anon}`, apikey: anon },
@@ -68,9 +68,11 @@ const DashboardPlanningAlerts = ({ trade }: { trade: TradeProfile }) => {
       );
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error ?? "Refresh failed");
+      const label =
+        days >= 365 ? "last 12 months" : days >= 180 ? "last 6 months" : "last 3 months";
       toast({
         title: "Planning feed refreshed",
-        description: `${json.inserted ?? 0} new application(s) found in your area.`,
+        description: `${json.inserted ?? 0} new application(s) found in your area (${label}).`,
       });
       await loadData();
     } catch (e: any) {
@@ -162,14 +164,14 @@ const DashboardPlanningAlerts = ({ trade }: { trade: TradeProfile }) => {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <Bell className="w-5 h-5 text-secondary" />
-          <h2 className="font-heading text-primary text-xl">Today's Planning Alerts</h2>
+          <h2 className="font-heading text-primary text-xl">Recent Planning Alerts</h2>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <button
-            onClick={handleRefresh}
+            onClick={() => handleRefresh(90)}
             disabled={refreshing}
             className="flex items-center gap-1.5 bg-card border border-border text-primary font-mono text-[10px] px-3 py-1.5 rounded-full hover:bg-muted transition-colors disabled:opacity-60"
           >
@@ -178,7 +180,23 @@ const DashboardPlanningAlerts = ({ trade }: { trade: TradeProfile }) => {
             ) : (
               <RefreshCw className="w-3 h-3" />
             )}
-            {refreshing ? "Refreshing…" : "Refresh now"}
+            {refreshing ? "Refreshing…" : "Refresh (3 mo)"}
+          </button>
+          <button
+            onClick={() => handleRefresh(180)}
+            disabled={refreshing}
+            className="flex items-center gap-1.5 bg-card border border-border text-primary font-mono text-[10px] px-3 py-1.5 rounded-full hover:bg-muted transition-colors disabled:opacity-60"
+            title="Search the last 6 months"
+          >
+            6 mo
+          </button>
+          <button
+            onClick={() => handleRefresh(365)}
+            disabled={refreshing}
+            className="flex items-center gap-1.5 bg-card border border-border text-primary font-mono text-[10px] px-3 py-1.5 rounded-full hover:bg-muted transition-colors disabled:opacity-60"
+            title="Search the last 12 months"
+          >
+            12 mo
           </button>
           <span className="bg-secondary/10 text-secondary font-mono text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider">
             {subscription.tier}
@@ -187,10 +205,30 @@ const DashboardPlanningAlerts = ({ trade }: { trade: TradeProfile }) => {
       </div>
 
       {alerts.length === 0 ? (
-        <div className="rounded-2xl border border-border p-6 text-center">
-          <p className="font-mono text-xs text-muted-foreground">
-            No new alerts today. We scan daily at 6am and will notify you when matching applications are found.
+        <div className="rounded-2xl border border-border p-6 text-center space-y-3">
+          <p className="font-sans text-sm text-foreground">
+            No planning alerts in your area yet.
           </p>
+          <p className="font-sans text-xs text-muted-foreground">
+            Many councils only publish weekly. Try widening the lookback to 6 or 12 months
+            to surface approved applications you may have missed — these are still warm leads.
+          </p>
+          <div className="flex items-center justify-center gap-2 pt-1 flex-wrap">
+            <button
+              onClick={() => handleRefresh(180)}
+              disabled={refreshing}
+              className="font-mono text-[10px] bg-secondary text-white px-3 py-1.5 rounded-full hover:bg-secondary/90 transition-colors disabled:opacity-60"
+            >
+              Search last 6 months
+            </button>
+            <button
+              onClick={() => handleRefresh(365)}
+              disabled={refreshing}
+              className="font-mono text-[10px] bg-card border border-border text-primary px-3 py-1.5 rounded-full hover:bg-muted transition-colors disabled:opacity-60"
+            >
+              Search last 12 months
+            </button>
+          </div>
         </div>
       ) : (
         alerts.map((alert) => (
