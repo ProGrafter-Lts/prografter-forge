@@ -594,7 +594,7 @@ const TradeRegisterNew = () => {
                   {error && <p className="text-red-400 font-mono text-xs mt-4">{error}</p>}
 
                   <div className="flex gap-4 mt-8">
-                    <button type="button" onClick={() => setStep(isGreen ? "green" : 2)} className="flex-1 border border-cream/20 text-cream font-mono text-sm py-3 rounded-xl hover:bg-cream/5 transition-colors">
+                    <button type="button" onClick={() => setStep(isGreen ? "green" : "specialisms")} className="flex-1 border border-cream/20 text-cream font-mono text-sm py-3 rounded-xl hover:bg-cream/5 transition-colors">
                       Back
                     </button>
                     <button type="submit" disabled={loading} className="flex-1 bg-teal text-cream font-mono text-sm py-3 rounded-xl hover:bg-teal-hover transition-colors disabled:opacity-50">
