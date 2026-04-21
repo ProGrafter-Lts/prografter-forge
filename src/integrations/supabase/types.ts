@@ -1115,6 +1115,130 @@ export type Database = {
           },
         ]
       }
+      review_followups: {
+        Row: {
+          body: string
+          created_at: string
+          homeowner_id: string
+          id: string
+          is_test: boolean
+          review_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          homeowner_id: string
+          id?: string
+          is_test?: boolean
+          review_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          homeowner_id?: string
+          id?: string
+          is_test?: boolean
+          review_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_followups_homeowner_id_fkey"
+            columns: ["homeowner_id"]
+            isOneToOne: false
+            referencedRelation: "homeowners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "review_followups_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reviews: {
+        Row: {
+          body: string | null
+          communication_rating: number | null
+          created_at: string
+          headline: string | null
+          homeowner_id: string
+          id: string
+          is_test: boolean
+          job_id: string
+          quality_rating: number | null
+          rating: number
+          timeliness_rating: number | null
+          trade_id: string
+          trade_responded_at: string | null
+          trade_response: string | null
+          updated_at: string
+          value_rating: number | null
+          would_recommend: boolean | null
+        }
+        Insert: {
+          body?: string | null
+          communication_rating?: number | null
+          created_at?: string
+          headline?: string | null
+          homeowner_id: string
+          id?: string
+          is_test?: boolean
+          job_id: string
+          quality_rating?: number | null
+          rating: number
+          timeliness_rating?: number | null
+          trade_id: string
+          trade_responded_at?: string | null
+          trade_response?: string | null
+          updated_at?: string
+          value_rating?: number | null
+          would_recommend?: boolean | null
+        }
+        Update: {
+          body?: string | null
+          communication_rating?: number | null
+          created_at?: string
+          headline?: string | null
+          homeowner_id?: string
+          id?: string
+          is_test?: boolean
+          job_id?: string
+          quality_rating?: number | null
+          rating?: number
+          timeliness_rating?: number | null
+          trade_id?: string
+          trade_responded_at?: string | null
+          trade_response?: string | null
+          updated_at?: string
+          value_rating?: number | null
+          would_recommend?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_homeowner_id_fkey"
+            columns: ["homeowner_id"]
+            isOneToOne: false
+            referencedRelation: "homeowners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "trades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       specialisms: {
         Row: {
           applicable_trades: string[]
@@ -1318,10 +1442,12 @@ export type Database = {
       }
       trades: {
         Row: {
+          avg_rating: number | null
           bio: string | null
           calendar_token: string
           ciga_registered: boolean
           company_name: string
+          completed_jobs_count: number
           created_at: string
           fgas_registered: boolean
           green_cert_expiry: string | null
@@ -1338,7 +1464,10 @@ export type Database = {
           pas_2035_coordinator: boolean
           phone: string
           postcode: string
+          review_count: number
           specialisms_prompt_seen: boolean
+          tier: string
+          tier_updated_at: string | null
           trade_type: string
           trustmark_number: string | null
           trustmark_verified: boolean
@@ -1348,10 +1477,12 @@ export type Database = {
           years_experience: number | null
         }
         Insert: {
+          avg_rating?: number | null
           bio?: string | null
           calendar_token?: string
           ciga_registered?: boolean
           company_name: string
+          completed_jobs_count?: number
           created_at?: string
           fgas_registered?: boolean
           green_cert_expiry?: string | null
@@ -1368,7 +1499,10 @@ export type Database = {
           pas_2035_coordinator?: boolean
           phone: string
           postcode: string
+          review_count?: number
           specialisms_prompt_seen?: boolean
+          tier?: string
+          tier_updated_at?: string | null
           trade_type: string
           trustmark_number?: string | null
           trustmark_verified?: boolean
@@ -1378,10 +1512,12 @@ export type Database = {
           years_experience?: number | null
         }
         Update: {
+          avg_rating?: number | null
           bio?: string | null
           calendar_token?: string
           ciga_registered?: boolean
           company_name?: string
+          completed_jobs_count?: number
           created_at?: string
           fgas_registered?: boolean
           green_cert_expiry?: string | null
@@ -1398,7 +1534,10 @@ export type Database = {
           pas_2035_coordinator?: boolean
           phone?: string
           postcode?: string
+          review_count?: number
           specialisms_prompt_seen?: boolean
+          tier?: string
+          tier_updated_at?: string | null
           trade_type?: string
           trustmark_number?: string | null
           trustmark_verified?: boolean
@@ -1533,6 +1672,7 @@ export type Database = {
           read_ct: number
         }[]
       }
+      recompute_trade_stats: { Args: { _trade_id: string }; Returns: undefined }
       trade_can_access_homeowner: {
         Args: { _homeowner_id: string; _user_id: string }
         Returns: boolean
