@@ -20,7 +20,7 @@ const HomeownerDashboard = () => {
   const [quotes, setQuotes] = useState<any[]>([]);
   const [variations, setVariations] = useState<any[]>([]);
   const [siteUpdates, setSiteUpdates] = useState<any[]>([]);
-  const [activeProject, setActiveProject] = useState<any>(null);
+  
   const [activeNav, setActiveNav] = useState("overview");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -50,7 +50,7 @@ const HomeownerDashboard = () => {
         .order("created_at", { ascending: false }),
       supabase
         .from("quotes")
-        .select("id, amount, message, status, created_at, trade_id, job_id, tier_enabled, budget_price, budget_description, standard_price, standard_description, premium_price, premium_description, selected_tier, trades(name, company_name, verified), jobs(title, job_type)")
+        .select("id, amount, message, status, created_at, trade_id, job_id, ai_verdict, ai_verdict_summary, tier_enabled, budget_price, budget_description, standard_price, standard_description, premium_price, premium_description, selected_tier, trades(name, company_name, verified, review_count, avg_rating, tier), jobs(title, job_type)")
         .order("created_at", { ascending: false }),
       supabase
         .from("variations")
@@ -86,9 +86,7 @@ const HomeownerDashboard = () => {
     }));
     setSiteUpdates(mappedUpdates);
 
-    // Find active project
-    const active = jobData.find((j: any) => ["scheduled", "in_progress", "review"].includes(j.stage));
-    setActiveProject(active || null);
+    // Active projects now derived from jobs in render via ActiveProjectsSection
   };
 
   const handleSelectTier = async (quoteId: string, tier: string, price: number) => {
