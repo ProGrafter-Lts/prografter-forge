@@ -502,9 +502,8 @@ const TradeRegisterNew = () => {
                   </div>
 
                   <div className="flex gap-4 mt-8">
-                    <button type="button" onClick={() => setStep(2)} className="flex-1 border border-cream/20 text-cream font-mono text-sm py-3 rounded-xl hover:bg-cream/5 transition-colors">
-                      Back
-                    </button>
+                    <button type="button" onClick={() => setStep("specialisms")} className="flex-1 border border-cream/20 text-cream font-mono text-sm py-3 rounded-xl hover:bg-cream/5 transition-colors">
+
                     <button type="button" onClick={() => setStep(3)} className="flex-1 bg-teal text-cream font-mono text-sm py-3 rounded-xl hover:bg-teal-hover transition-colors">
                       Continue
                     </button>
