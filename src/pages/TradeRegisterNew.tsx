@@ -2,7 +2,7 @@ import { lazy, Suspense, useState, FormEvent, ChangeEvent, useMemo } from "react
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import SEO from "@/components/SEO";
-import { differenceInDays } from "date-fns";
+import { format, differenceInDays } from "date-fns";
 import { Leaf } from "lucide-react";
 import {
   RENEWABLE_TRADE_TYPES,
@@ -221,6 +221,8 @@ const TradeRegisterNew = () => {
   const canProceedStep2 = tradeType.length > 0 && companyName.trim().length > 0;
 
   const handleStep2Continue = () => {
+    void import("@/components/SpecialismsPicker");
+    void import("@/components/trade/TradeDateField");
     setStep("specialisms");
   };
 
@@ -391,17 +393,19 @@ const TradeRegisterNew = () => {
                     Pick the project types you take on so the right jobs come your way.
                     Optional — leave blank if you'd rather skip.
                   </p>
-                  <SpecialismsPicker
-                    tradeType={tradeType}
-                    selected={specialismIds}
-                    primaryId={primarySpecialismId}
-                    onChange={(sel, primary) => {
-                      setSpecialismIds(sel);
-                      setPrimarySpecialismId(primary);
-                    }}
-                    max={8}
-                    variant="dark"
-                  />
+                  <Suspense fallback={<p className="font-mono text-xs text-cream/40">Loading specialisms…</p>}>
+                    <SpecialismsPicker
+                      tradeType={tradeType}
+                      selected={specialismIds}
+                      primaryId={primarySpecialismId}
+                      onChange={(sel, primary) => {
+                        setSpecialismIds(sel);
+                        setPrimarySpecialismId(primary);
+                      }}
+                      max={8}
+                      variant="dark"
+                    />
+                  </Suspense>
                   <div className="flex gap-4 mt-8">
                     <button type="button" onClick={() => setStep(2)} className="flex-1 border border-cream/20 text-cream font-mono text-sm py-3 rounded-xl hover:bg-cream/5 transition-colors">
                       Back
@@ -474,30 +478,16 @@ const TradeRegisterNew = () => {
 
                     <div>
                       <label className={labelClass}>Certification Expiry Date</label>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <button
-                            type="button"
-                            className={cn(
-                              inputClass,
-                              "flex items-center justify-between text-left",
-                              !greenCertExpiry && "text-cream/40"
-                            )}
-                          >
-                            {greenCertExpiry ? format(greenCertExpiry, "dd MMM yyyy") : "Select expiry date"}
-                            <CalendarIcon className="w-4 h-4 text-cream/40" />
-                          </button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0 bg-navy border-cream/10" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={greenCertExpiry}
-                            onSelect={setGreenCertExpiry}
-                            disabled={(date) => date < new Date()}
-                            className={cn("p-3 pointer-events-auto")}
-                          />
-                        </PopoverContent>
-                      </Popover>
+                      <Suspense fallback={<div className={`${inputClass} text-cream/40`}>Loading date picker…</div>}>
+                        <TradeDateField
+                          value={greenCertExpiry}
+                          onChange={setGreenCertExpiry}
+                          placeholder="Select expiry date"
+                          inputClassName={inputClass}
+                          popoverClassName="bg-navy border-cream/10"
+                          disabled={(date) => date < new Date()}
+                        />
+                      </Suspense>
                     </div>
                   </div>
 
@@ -541,29 +531,15 @@ const TradeRegisterNew = () => {
                   {/* Insurance Expiry Date */}
                   <div className="mt-6">
                     <label className={labelClass}>Insurance Expiry Date</label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <button
-                          type="button"
-                          className={cn(
-                            inputClass,
-                            "flex items-center justify-between text-left",
-                            !insuranceExpiry && "text-cream/40"
-                          )}
-                        >
-                          {insuranceExpiry ? format(insuranceExpiry, "dd MMM yyyy") : "Select expiry date"}
-                          <CalendarIcon className="w-4 h-4 text-cream/40" />
-                        </button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0 bg-navy border-cream/10" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={insuranceExpiry}
-                          onSelect={setInsuranceExpiry}
-                          className={cn("p-3 pointer-events-auto")}
-                        />
-                      </PopoverContent>
-                    </Popover>
+                    <Suspense fallback={<div className={`${inputClass} text-cream/40`}>Loading date picker…</div>}>
+                      <TradeDateField
+                        value={insuranceExpiry}
+                        onChange={setInsuranceExpiry}
+                        placeholder="Select expiry date"
+                        inputClassName={inputClass}
+                        popoverClassName="bg-navy border-cream/10"
+                      />
+                    </Suspense>
                     {insuranceExpiryStatus === "expired" && (
                       <p className="font-mono text-xs text-red-400 mt-1.5 flex items-center gap-1">
                         ⚠ Your insurance has expired. Please renew before registering.
