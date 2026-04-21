@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index.tsx";
+import Terms from "./pages/Terms.tsx";
 import Privacy from "./pages/Privacy.tsx";
 import TradeRegister from "./pages/TradeRegister.tsx";
 import TradeRegisterNew from "./pages/TradeRegisterNew.tsx";
@@ -38,6 +39,7 @@ const App = () => (
         <Chatbot />
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/terms" element={<Terms />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/register" element={<TradeRegister />} />
           <Route path="/register/trade" element={<TradeRegisterNew />} />
