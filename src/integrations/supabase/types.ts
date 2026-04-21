@@ -480,6 +480,7 @@ export type Database = {
           job_type: string
           photo_urls: string[] | null
           postcode: string
+          specialism_id: string | null
           stage: string
           status: string
           stripe_payment_id: string | null
@@ -501,6 +502,7 @@ export type Database = {
           job_type: string
           photo_urls?: string[] | null
           postcode: string
+          specialism_id?: string | null
           stage?: string
           status?: string
           stripe_payment_id?: string | null
@@ -522,6 +524,7 @@ export type Database = {
           job_type?: string
           photo_urls?: string[] | null
           postcode?: string
+          specialism_id?: string | null
           stage?: string
           status?: string
           stripe_payment_id?: string | null
@@ -533,6 +536,13 @@ export type Database = {
             columns: ["homeowner_id"]
             isOneToOne: false
             referencedRelation: "homeowners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "jobs_specialism_id_fkey"
+            columns: ["specialism_id"]
+            isOneToOne: false
+            referencedRelation: "specialisms"
             referencedColumns: ["id"]
           },
         ]
@@ -1105,6 +1115,45 @@ export type Database = {
           },
         ]
       }
+      specialisms: {
+        Row: {
+          applicable_trades: string[]
+          created_at: string
+          description: string
+          icon: string | null
+          id: string
+          is_active: boolean
+          name: string
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          applicable_trades?: string[]
+          created_at?: string
+          description?: string
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          applicable_trades?: string[]
+          created_at?: string
+          description?: string
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       stage_updates: {
         Row: {
           created_at: string
@@ -1231,6 +1280,42 @@ export type Database = {
         }
         Relationships: []
       }
+      trade_specialisms: {
+        Row: {
+          created_at: string
+          is_primary: boolean
+          specialism_id: string
+          trade_id: string
+        }
+        Insert: {
+          created_at?: string
+          is_primary?: boolean
+          specialism_id: string
+          trade_id: string
+        }
+        Update: {
+          created_at?: string
+          is_primary?: boolean
+          specialism_id?: string
+          trade_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trade_specialisms_specialism_id_fkey"
+            columns: ["specialism_id"]
+            isOneToOne: false
+            referencedRelation: "specialisms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trade_specialisms_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "trades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trades: {
         Row: {
           bio: string | null
@@ -1253,6 +1338,7 @@ export type Database = {
           pas_2035_coordinator: boolean
           phone: string
           postcode: string
+          specialisms_prompt_seen: boolean
           trade_type: string
           trustmark_number: string | null
           trustmark_verified: boolean
@@ -1282,6 +1368,7 @@ export type Database = {
           pas_2035_coordinator?: boolean
           phone: string
           postcode: string
+          specialisms_prompt_seen?: boolean
           trade_type: string
           trustmark_number?: string | null
           trustmark_verified?: boolean
@@ -1311,6 +1398,7 @@ export type Database = {
           pas_2035_coordinator?: boolean
           phone?: string
           postcode?: string
+          specialisms_prompt_seen?: boolean
           trade_type?: string
           trustmark_number?: string | null
           trustmark_verified?: boolean
