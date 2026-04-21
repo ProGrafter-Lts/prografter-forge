@@ -93,10 +93,40 @@ const TradeProfileSection = ({ tradeId }: TradeProfileSectionProps) => {
           green_cert_expiry: data.green_cert_expiry,
         });
       }
+
+      // Load specialisms catalogue + this trade's selection in parallel
+      try {
+        const [allSpec, mySpec] = await Promise.all([
+          fetchSpecialisms(),
+          fetchTradeSpecialisms(tradeId),
+        ]);
+        setAllSpecialisms(allSpec);
+        setSelectedSpecialisms(mySpec.map((r) => r.specialism_id));
+        const primary = mySpec.find((r) => r.is_primary);
+        setPrimarySpecialism(primary?.specialism_id ?? null);
+      } catch (specErr) {
+        console.error("Failed to load specialisms", specErr);
+      }
+
       setLoading(false);
     };
     load();
   }, [tradeId]);
+
+  const handleSaveSpecialisms = async () => {
+    try {
+      await saveTradeSpecialisms(tradeId, selectedSpecialisms, primarySpecialism);
+      await supabase
+        .from("trades")
+        .update({ specialisms_prompt_seen: true } as any)
+        .eq("id", tradeId);
+      setSpecialismsDirty(false);
+      toast.success("Specialisms updated");
+    } catch (e) {
+      console.error(e);
+      toast.error("Failed to save specialisms");
+    }
+  };
 
   const handleSave = async () => {
     setSaving(true);
