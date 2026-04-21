@@ -1,8 +1,15 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { UserCircle, BadgeCheck, Save } from "lucide-react";
+import { UserCircle, BadgeCheck, Save, Sparkles } from "lucide-react";
 import { GreenSpecialistBanner, CertificationsSection } from "@/components/GreenCertBadges";
+import SpecialismsPicker from "@/components/SpecialismsPicker";
+import {
+  Specialism,
+  fetchSpecialisms,
+  fetchTradeSpecialisms,
+  saveTradeSpecialisms,
+} from "@/lib/specialisms";
 
 interface TradeProfileSectionProps {
   tradeId: string;
@@ -39,6 +46,10 @@ const TradeProfileSection = ({ tradeId }: TradeProfileSectionProps) => {
   });
   const [verified, setVerified] = useState(false);
   const [green, setGreen] = useState<GreenData | null>(null);
+  const [allSpecialisms, setAllSpecialisms] = useState<Specialism[]>([]);
+  const [selectedSpecialisms, setSelectedSpecialisms] = useState<string[]>([]);
+  const [primarySpecialism, setPrimarySpecialism] = useState<string | null>(null);
+  const [specialismsDirty, setSpecialismsDirty] = useState(false);
 
   useEffect(() => {
     const load = async () => {
