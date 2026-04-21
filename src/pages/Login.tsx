@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import SEO from "@/components/SEO";
@@ -18,6 +18,25 @@ const Login = () => {
   const [forgotLoading, setForgotLoading] = useState(false);
   const [forgotError, setForgotError] = useState("");
   const [forgotSent, setForgotSent] = useState(false);
+  const hasRedirectedRef = useRef(false);
+
+  const getDashboardPath = (userType?: string | null) =>
+    userType === "trade" ? "/dashboard/trade" : "/dashboard/homeowner";
+
+  const redirectToDashboard = (userType?: string | null) => {
+    const nextPath = getDashboardPath(userType);
+
+    if (hasRedirectedRef.current) return;
+    hasRedirectedRef.current = true;
+
+    navigate(nextPath, { replace: true });
+
+    window.setTimeout(() => {
+      if (window.location.pathname === "/login") {
+        window.location.replace(nextPath);
+      }
+    }, 75);
+  };
 
   useEffect(() => {
     if (searchParams.get("reset") === "success") {
@@ -29,9 +48,36 @@ const Login = () => {
     }
   }, [searchParams, setSearchParams]);
 
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session?.user) {
+        const metadataUserType =
+          typeof session.user.user_metadata?.user_type === "string"
+            ? session.user.user_metadata.user_type
+            : null;
+
+        redirectToDashboard(metadataUserType);
+      }
+    });
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        const metadataUserType =
+          typeof session.user.user_metadata?.user_type === "string"
+            ? session.user.user_metadata.user_type
+            : null;
+
+        redirectToDashboard(metadataUserType);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    hasRedirectedRef.current = false;
     setLoading(true);
 
     try {
@@ -56,27 +102,23 @@ const Login = () => {
           ? signedInUser.user_metadata.user_type
           : null;
 
-      let resolvedUserType = metadataUserType;
-
-      if (!resolvedUserType) {
-        const { data: profile, error: profileError } = await supabase
-          .from("profiles")
-          .select("user_type")
-          .eq("user_id", signedInUser.id)
-          .maybeSingle();
-
-        if (profileError) {
-          setError(profileError.message);
-          return;
-        }
-
-        resolvedUserType = profile?.user_type ?? null;
+      if (metadataUserType) {
+        redirectToDashboard(metadataUserType);
+        return;
       }
 
-      navigate(
-        resolvedUserType === "trade" ? "/dashboard/trade" : "/dashboard/homeowner",
-        { replace: true }
-      );
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("user_type")
+        .eq("user_id", signedInUser.id)
+        .maybeSingle();
+
+      if (profileError) {
+        setError(profileError.message);
+        return;
+      }
+
+      redirectToDashboard(profile?.user_type ?? null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to sign in right now.");
     } finally {
