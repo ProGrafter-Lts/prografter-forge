@@ -1,12 +1,9 @@
-import { useState, FormEvent, ChangeEvent, useMemo } from "react";
+import { lazy, Suspense, useState, FormEvent, ChangeEvent, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import SEO from "@/components/SEO";
-import { format, differenceInDays } from "date-fns";
-import { CalendarIcon, Leaf } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { differenceInDays } from "date-fns";
+import { Leaf } from "lucide-react";
 import {
   RENEWABLE_TRADE_TYPES,
   isGreenTrade,
@@ -15,8 +12,10 @@ import {
   showCiga,
   showInca,
 } from "@/lib/greenTrades";
-import SpecialismsPicker from "@/components/SpecialismsPicker";
 import { saveTradeSpecialisms } from "@/lib/specialisms";
+
+const SpecialismsPicker = lazy(() => import("@/components/SpecialismsPicker"));
+const TradeDateField = lazy(() => import("@/components/trade/TradeDateField"));
 
 const GENERAL_TRADE_TYPES = [
   "Electrician",
