@@ -81,7 +81,11 @@ const ContractPanel = ({ jobId, jobType, quotes, contract, userRole, userId, tra
   const [showViewContract, setShowViewContract] = useState(false);
   const [signing, setSigning] = useState(false);
 
-  const pendingQuotes = quotes.filter((q) => q.status === "pending");
+  // Show pending quotes AND any "accepted" quotes that don't yet have a contract
+  // (so the homeowner can sign even if a previous attempt failed mid-flow)
+  const actionableQuotes = quotes.filter(
+    (q) => q.status === "pending" || (q.status === "accepted" && !contract)
+  );
 
   const acceptQuote = async (quote: Quote) => {
     setShowContract(true);
