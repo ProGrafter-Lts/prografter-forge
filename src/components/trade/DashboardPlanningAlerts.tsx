@@ -96,7 +96,7 @@ const DashboardPlanningAlerts = ({ trade }: { trade: TradeProfile }) => {
   };
 
   const loadData = async () => {
-    const [subRes, alertsRes] = await Promise.all([
+    const [subRes, alertsRes, shortlistRes] = await Promise.all([
       supabase
         .from("planning_alert_subs")
         .select("*")
@@ -109,10 +109,21 @@ const DashboardPlanningAlerts = ({ trade }: { trade: TradeProfile }) => {
         .eq("trade_id", trade.id)
         .order("created_at", { ascending: false })
         .limit(10),
+      supabase
+        .from("planning_alert_shortlist")
+        .select("id, planning_alert_id, contact_status, note")
+        .eq("trade_id", trade.id),
     ]);
 
     if (subRes.data) setSubscription(subRes.data);
     if (alertsRes.data) setAlerts(alertsRes.data as PlanningAlert[]);
+    if (shortlistRes.data) {
+      const map: Record<string, ShortlistRow> = {};
+      for (const r of shortlistRes.data as ShortlistRow[]) {
+        map[r.planning_alert_id] = r;
+      }
+      setShortlist(map);
+    }
     setLoading(false);
   };
 
