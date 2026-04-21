@@ -477,6 +477,23 @@ const PostAJob = () => {
                         </select>
                       </div>
                     </div>
+                    <div>
+                      <label className={labelClass}>Project type (optional)</label>
+                      <select
+                        value={specialismId}
+                        onChange={(e) => setSpecialismId(e.target.value)}
+                        className={`${inputClass} appearance-none`}
+                        style={{ backgroundColor: "hsl(var(--deep))" }}
+                      >
+                        <option value="">e.g. Full bathroom renovation, Kitchen install — leave blank if not sure</option>
+                        {specialisms.map((s) => (
+                          <option key={s.id} value={s.id}>{s.name}</option>
+                        ))}
+                      </select>
+                      <p className="font-mono text-[10px] text-cream/40 mt-1">
+                        Helps us match you with trades who specialise in this work.
+                      </p>
+                    </div>
                   </div>
                   <div className="flex gap-4 mt-8">
                     <button
