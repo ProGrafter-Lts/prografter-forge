@@ -1167,14 +1167,14 @@ export type Database = {
           id: string
           is_test: boolean
           job_id: string
-          quality_rating: number | null
           rating: number
-          timeliness_rating: number | null
+          reliability_rating: number | null
           trade_id: string
           trade_responded_at: string | null
           trade_response: string | null
           updated_at: string
           value_rating: number | null
+          workmanship_rating: number | null
           would_recommend: boolean | null
         }
         Insert: {
@@ -1186,14 +1186,14 @@ export type Database = {
           id?: string
           is_test?: boolean
           job_id: string
-          quality_rating?: number | null
           rating: number
-          timeliness_rating?: number | null
+          reliability_rating?: number | null
           trade_id: string
           trade_responded_at?: string | null
           trade_response?: string | null
           updated_at?: string
           value_rating?: number | null
+          workmanship_rating?: number | null
           would_recommend?: boolean | null
         }
         Update: {
@@ -1205,14 +1205,14 @@ export type Database = {
           id?: string
           is_test?: boolean
           job_id?: string
-          quality_rating?: number | null
           rating?: number
-          timeliness_rating?: number | null
+          reliability_rating?: number | null
           trade_id?: string
           trade_responded_at?: string | null
           trade_response?: string | null
           updated_at?: string
           value_rating?: number | null
+          workmanship_rating?: number | null
           would_recommend?: boolean | null
         }
         Relationships: [
