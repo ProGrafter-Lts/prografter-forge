@@ -238,6 +238,47 @@ const TradeProfileSection = ({ tradeId }: TradeProfileSectionProps) => {
           </button>
         </div>
       </div>
+
+      {/* Specialisms */}
+      <div className="bg-card rounded-2xl p-6 border border-border space-y-5">
+        <div className="flex items-center gap-3">
+          <div className="bg-secondary text-secondary-foreground rounded-xl p-2.5">
+            <Sparkles className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="font-heading text-primary text-xl">Specialisms</h3>
+            <p className="font-mono text-xs text-muted-foreground mt-0.5">
+              What kind of projects do you take on?
+            </p>
+          </div>
+        </div>
+        {allSpecialisms.length === 0 ? (
+          <p className="font-mono text-xs text-muted-foreground">No specialisms available.</p>
+        ) : (
+          <SpecialismsPicker
+            tradeType={form.trade_type}
+            selected={selectedSpecialisms}
+            primaryId={primarySpecialism}
+            onChange={(sel, pri) => {
+              setSelectedSpecialisms(sel);
+              setPrimarySpecialism(pri);
+              setSpecialismsDirty(true);
+            }}
+            max={8}
+            variant="light"
+          />
+        )}
+        <div className="flex justify-end pt-2">
+          <button
+            onClick={handleSaveSpecialisms}
+            disabled={!specialismsDirty}
+            className="flex items-center gap-2 bg-primary text-primary-foreground font-mono text-sm px-5 py-2.5 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-40"
+          >
+            <Save className="w-4 h-4" />
+            Save specialisms
+          </button>
+        </div>
+      </div>
     </section>
   );
 };

@@ -1,8 +1,9 @@
-import { useState, FormEvent, ChangeEvent, useMemo } from "react";
+import { useState, FormEvent, ChangeEvent, useMemo, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Link, useSearchParams } from "react-router-dom";
 import SEO from "@/components/SEO";
 import { isGreenTrade } from "@/lib/greenTrades";
+import { Specialism, fetchSpecialisms } from "@/lib/specialisms";
 
 const ALL_JOB_TYPES = [
   { label: "Extension", icon: "🏗️", green: false },
@@ -84,6 +85,12 @@ const PostAJob = () => {
   const [address, setAddress] = useState("");
   const [postcode, setPostcode] = useState("");
   const [budget, setBudget] = useState("");
+  const [specialismId, setSpecialismId] = useState<string>("");
+  const [specialisms, setSpecialisms] = useState<Specialism[]>([]);
+
+  useEffect(() => {
+    fetchSpecialisms().then(setSpecialisms).catch(() => setSpecialisms([]));
+  }, []);
 
   // Step 3b — Optional Funds Verification
   const [fundsDoc, setFundsDoc] = useState<File | null>(null);
