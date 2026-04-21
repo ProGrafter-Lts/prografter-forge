@@ -202,15 +202,26 @@ Deno.serve(async (req: Request) => {
       }
     }
 
-    // Identify caller for rate limiting
+    // Identify caller for rate limiting AND derive verified auth status
     const supabase = createClient(SUPABASE_URL, SERVICE_KEY);
     let identifier: string | null = null;
+    let isAuthed = false;
+    let userType: string | null = null;
 
     const authHeader = req.headers.get("Authorization");
     if (authHeader?.startsWith("Bearer ")) {
       const token = authHeader.replace("Bearer ", "");
       const { data: userData } = await supabase.auth.getUser(token);
-      if (userData?.user?.id) identifier = `user:${userData.user.id}`;
+      if (userData?.user?.id) {
+        identifier = `user:${userData.user.id}`;
+        isAuthed = true;
+        const { data: prof } = await supabase
+          .from("profiles")
+          .select("user_type")
+          .eq("user_id", userData.user.id)
+          .maybeSingle();
+        userType = prof?.user_type ?? null;
+      }
     }
     if (!identifier) {
       const ip =
