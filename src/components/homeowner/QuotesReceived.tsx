@@ -1,11 +1,16 @@
-import { BadgeCheck, Star, SearchCheck } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { BadgeCheck, SearchCheck, Shield, ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { getVerdictTheme, type AiVerdict } from "@/lib/quoteVerdict";
 
 interface Quote {
   id: string;
   amount: number;
   message: string | null;
   status: string;
+  job_id: string;
+  ai_verdict?: AiVerdict;
+  ai_verdict_summary?: string | null;
   tier_enabled?: boolean;
   budget_price?: number | null;
   budget_description?: string | null;
@@ -14,7 +19,14 @@ interface Quote {
   premium_price?: number | null;
   premium_description?: string | null;
   selected_tier?: string | null;
-  trades: { name: string; company_name: string; verified: boolean } | null;
+  trades: {
+    name: string;
+    company_name: string;
+    verified: boolean;
+    review_count?: number;
+    avg_rating?: number | null;
+    tier?: string | null;
+  } | null;
   jobs: { title: string | null; job_type: string } | null;
 }
 
@@ -23,64 +35,51 @@ interface QuotesReceivedProps {
   onSelectTier?: (quoteId: string, tier: string, price: number) => void;
 }
 
-const TierCard = ({
+const TIER_LABELS: Record<string, string> = {
+  bronze: "Bronze",
+  silver: "Silver",
+  gold: "Gold",
+  unverified: "Unverified",
+};
+
+const RatingDisplay = ({
+  reviewCount,
+  avgRating,
   tier,
-  label,
-  price,
-  description,
-  highlighted,
-  badgeText,
-  selected,
-  onSelect,
 }: {
-  tier: string;
-  label: string;
-  price: number | null | undefined;
-  description: string | null | undefined;
-  highlighted?: boolean;
-  badgeText?: string;
-  selected: boolean;
-  onSelect: () => void;
-}) => (
-  <div
-    className={`rounded-xl p-4 border-2 flex flex-col justify-between ${
-      highlighted
-        ? "border-secondary bg-secondary/5"
-        : "border-border bg-card"
-    } ${selected ? "ring-2 ring-secondary ring-offset-2" : ""}`}
-  >
-    <div>
-      <div className="flex items-center justify-between mb-2">
-        <h4 className="font-heading text-xs text-primary uppercase tracking-wider">{label}</h4>
-        {badgeText && (
-          <Badge className="bg-secondary text-secondary-foreground font-mono text-[9px]">
-            {badgeText}
+  reviewCount?: number;
+  avgRating?: number | null;
+  tier?: string | null;
+}) => {
+  if (!reviewCount || reviewCount === 0) {
+    return (
+      <div className="flex items-center gap-2 mt-1">
+        {tier && tier !== "unverified" && (
+          <Badge variant="outline" className="text-[10px] font-mono">
+            {TIER_LABELS[tier] ?? tier}
           </Badge>
         )}
+        <span className="font-mono text-[10px] text-muted-foreground italic">
+          Awaiting first review
+        </span>
       </div>
-      <p className="font-heading text-secondary text-2xl mb-2">
-        £{Number(price || 0).toLocaleString()}
-      </p>
-      {description && (
-        <p className="font-mono text-[10px] text-muted-foreground leading-relaxed">
-          {description}
-        </p>
-      )}
+    );
+  }
+  return (
+    <div className="flex items-center gap-1 mt-1">
+      <span className="font-mono text-xs text-primary font-medium">
+        {Number(avgRating).toFixed(1)}
+      </span>
+      <span className="font-mono text-[10px] text-muted-foreground">
+        ({reviewCount} review{reviewCount === 1 ? "" : "s"})
+      </span>
     </div>
-    <button
-      onClick={onSelect}
-      className={`mt-3 w-full font-mono text-xs py-2 rounded-lg transition-colors ${
-        selected
-          ? "bg-secondary text-secondary-foreground"
-          : "border border-secondary text-secondary hover:bg-secondary/10"
-      }`}
-    >
-      {selected ? `✓ ${label} Selected` : `Choose ${label}`}
-    </button>
-  </div>
-);
+  );
+};
 
-const QuotesReceived = ({ quotes, onSelectTier }: QuotesReceivedProps) => {
+const QuotesReceived = ({ quotes }: QuotesReceivedProps) => {
+  const navigate = useNavigate();
+
   if (quotes.length === 0) {
     return (
       <section>
@@ -95,88 +94,115 @@ const QuotesReceived = ({ quotes, onSelectTier }: QuotesReceivedProps) => {
     );
   }
 
+  // Group quotes by job for compare button
+  const byJob = quotes.reduce<Record<string, Quote[]>>((acc, q) => {
+    (acc[q.job_id] ||= []).push(q);
+    return acc;
+  }, {});
+  const compareableJobIds = Object.entries(byJob)
+    .filter(([, qs]) => qs.length >= 2)
+    .map(([jobId]) => jobId);
+
   return (
     <section>
-      <h2 className="font-heading text-primary text-2xl mb-4">Quotes Received</h2>
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+        <h2 className="font-heading text-primary text-2xl">Quotes Received</h2>
+        {compareableJobIds.length > 0 && (
+          <button
+            onClick={() => navigate(`/project/${compareableJobIds[0]}/compare`)}
+            className="bg-secondary text-secondary-foreground font-mono text-sm px-4 py-2 rounded-xl hover:opacity-90 transition-opacity shadow-sm inline-flex items-center gap-2"
+          >
+            Compare All Quotes <ArrowRight className="w-4 h-4" />
+          </button>
+        )}
+      </div>
+
       <div className="space-y-4">
-        {quotes.map((q) => (
-          <div key={q.id} className="bg-card rounded-2xl p-5 border border-border shadow-sm">
-            {/* Trade info header */}
-            <div className="flex items-start justify-between mb-3">
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="font-heading text-primary text-lg">
-                    {q.trades?.name || "Trade"}
-                  </h3>
-                  {q.trades?.verified && <BadgeCheck className="w-4 h-4 text-secondary" />}
-                </div>
-                <p className="font-mono text-xs text-muted-foreground">
-                  {q.trades?.company_name} · {q.jobs?.title || q.jobs?.job_type}
-                </p>
-                <div className="flex items-center gap-1 mt-1">
-                  {[1, 2, 3, 4, 5].map((s) => (
-                    <Star key={s} className="w-3 h-3 text-yellow-400 fill-yellow-400" />
-                  ))}
-                  <span className="font-mono text-[10px] text-muted-foreground ml-1">(New)</span>
-                </div>
+        {quotes.map((q) => {
+          const theme = getVerdictTheme(q.ai_verdict);
+          const VIcon = theme.icon;
+          const company = q.trades?.company_name || q.trades?.name || "Tradesperson";
+
+          return (
+            <div
+              key={q.id}
+              className={`bg-card rounded-2xl p-5 border border-border shadow-sm ${theme.borderClass}`}
+            >
+              {/* Verdict banner */}
+              <div className="flex items-center gap-2 mb-3">
+                <Badge className={`${theme.badgeClass} font-mono text-[10px] inline-flex items-center gap-1`}>
+                  <VIcon className={`w-3 h-3 ${theme.iconClass}`} />
+                  {theme.label}
+                </Badge>
+                <span className="font-mono text-[10px] text-muted-foreground hidden sm:inline">
+                  {theme.description}
+                </span>
               </div>
-              {!q.tier_enabled && (
-                <div className="text-right">
+
+              {q.ai_verdict_summary && (
+                <p className="font-mono text-[11px] text-muted-foreground mb-3 leading-relaxed">
+                  {q.ai_verdict_summary}
+                </p>
+              )}
+
+              {/* Trade header */}
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="font-heading text-primary text-lg truncate">
+                      {company}
+                    </h3>
+                    {q.trades?.verified && (
+                      <span title="Identity verified" className="inline-flex items-center gap-1 text-secondary text-[10px] font-mono">
+                        <BadgeCheck className="w-4 h-4" /> Verified
+                      </span>
+                    )}
+                  </div>
+                  {q.trades?.name && q.trades.name !== company && (
+                    <p className="font-mono text-[11px] text-muted-foreground">
+                      {q.trades.name}
+                    </p>
+                  )}
+                  <RatingDisplay
+                    reviewCount={q.trades?.review_count}
+                    avgRating={q.trades?.avg_rating}
+                    tier={q.trades?.tier}
+                  />
+                </div>
+                <div className="text-right shrink-0">
                   <p className="font-heading text-secondary text-2xl">
                     £{Number(q.amount).toLocaleString()}
                   </p>
-                  {q.status === "pending" && (
-                    <button className="bg-secondary text-secondary-foreground font-mono text-xs px-4 py-2 rounded-xl hover:opacity-90 transition-opacity shadow-sm whitespace-nowrap mt-1">
-                      Accept Quote
-                    </button>
-                  )}
+                  <p className="font-mono text-[10px] text-muted-foreground">inc VAT</p>
+                </div>
+              </div>
+
+              {q.message && (
+                <p className="font-mono text-xs text-muted-foreground mt-3 line-clamp-3 whitespace-pre-line">
+                  {q.message}
+                </p>
+              )}
+
+              <div className="flex flex-wrap items-center gap-2 mt-4">
+                <button
+                  onClick={() => navigate(`/project/${q.job_id}/compare`)}
+                  className="font-mono text-xs text-secondary hover:underline"
+                >
+                  Compare with other quotes →
+                </button>
+              </div>
+
+              {q.ai_verdict === "high_risk" && (
+                <div className="mt-3 bg-rose-50 border border-rose-200 rounded-lg p-3 flex items-start gap-2">
+                  <Shield className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                  <p className="font-mono text-[11px] text-rose-800">
+                    <strong>Part P warning:</strong> Self-certification by non-registered installers is not lawful. Notifiable electrical work must be Part P–certified or building-control notified.
+                  </p>
                 </div>
               )}
             </div>
-
-            {q.message && (
-              <p className="font-mono text-xs text-muted-foreground mb-3">
-                {q.message}
-              </p>
-            )}
-
-            {/* Tier columns */}
-            {q.tier_enabled && (
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-2">
-                <TierCard
-                  tier="budget"
-                  label="Budget"
-                  price={q.budget_price}
-                  description={q.budget_description}
-                  selected={q.selected_tier === "budget"}
-                  onSelect={() => onSelectTier?.(q.id, "budget", Number(q.budget_price))}
-                />
-                <TierCard
-                  tier="standard"
-                  label="Standard"
-                  price={q.standard_price}
-                  description={q.standard_description}
-                  highlighted
-                  badgeText="Most Popular"
-                  selected={q.selected_tier === "standard"}
-                  onSelect={() => onSelectTier?.(q.id, "standard", Number(q.standard_price))}
-                />
-                <TierCard
-                  tier="premium"
-                  label="Premium"
-                  price={q.premium_price}
-                  description={q.premium_description}
-                  selected={q.selected_tier === "premium"}
-                  onSelect={() => onSelectTier?.(q.id, "premium", Number(q.premium_price))}
-                />
-              </div>
-            )}
-
-            <button className="font-mono text-[10px] text-secondary hover:underline mt-2">
-              View Profile
-            </button>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </section>
   );
