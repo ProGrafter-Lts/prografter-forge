@@ -102,6 +102,14 @@ const TradeDashboard = () => {
 
       if (!tradeData) {
         setTrade(null);
+        // Signed-in user has no trade record — likely a homeowner.
+        // Send them to the homeowner dashboard so they don't sit on a blank trade screen.
+        const { data: homeownerRow } = await supabase
+          .from("homeowners")
+          .select("id")
+          .eq("user_id", userId)
+          .maybeSingle();
+        navigate(homeownerRow ? "/homeowner-dashboard" : "/trade-register", { replace: true });
         return;
       }
       setTrade(tradeData);
