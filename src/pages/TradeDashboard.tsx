@@ -36,6 +36,7 @@ interface TradeProfile {
 }
 
 const TradeDashboard = () => {
+  const navigate = useNavigate();
   const [trade, setTrade] = useState<TradeProfile | null>(null);
   const [matches, setMatches] = useState<any[]>([]);
   const [quotes, setQuotes] = useState<any[]>([]);
