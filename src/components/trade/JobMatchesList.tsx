@@ -1,12 +1,15 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Briefcase, MapPin, Clock, ChevronRight, ShieldCheck } from "lucide-react";
 
 interface JobMatch {
   id: string;
+  job_id?: string;
   estimated_value: string | null;
   notified_at: string;
   status: string;
   jobs: {
+    id?: string;
     title: string | null;
     job_type: string;
     postcode: string;
@@ -24,6 +27,7 @@ const timeAgo = (dateStr: string) => {
 };
 
 const JobMatchesList = ({ matches }: { matches: JobMatch[] }) => {
+  const navigate = useNavigate();
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const visible = verifiedOnly ? matches.filter((m) => m.jobs?.funds_verified) : matches;
 
@@ -94,7 +98,13 @@ const JobMatchesList = ({ matches }: { matches: JobMatch[] }) => {
                     {match.jobs?.description}
                   </p>
                 </div>
-                <button className="flex items-center gap-1 bg-secondary text-secondary-foreground font-mono text-xs px-4 py-2 rounded-xl hover:opacity-90 transition-opacity whitespace-nowrap ml-4 shadow-sm">
+                <button
+                  onClick={() => {
+                    const jobId = match.jobs?.id || match.job_id;
+                    if (jobId) navigate(`/project/${jobId}`);
+                  }}
+                  className="flex items-center gap-1 bg-secondary text-secondary-foreground font-mono text-xs px-4 py-2 rounded-xl hover:opacity-90 transition-opacity whitespace-nowrap ml-4 shadow-sm cursor-pointer"
+                >
                   View & Quote
                   <ChevronRight className="w-3 h-3" />
                 </button>
