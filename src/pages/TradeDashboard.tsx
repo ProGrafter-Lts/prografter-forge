@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { BadgeCheck } from "lucide-react";
 import { GreenSpecialistBanner, CertificationsSection } from "@/components/GreenCertBadges";
@@ -35,6 +36,7 @@ interface TradeProfile {
 }
 
 const TradeDashboard = () => {
+  const navigate = useNavigate();
   const [trade, setTrade] = useState<TradeProfile | null>(null);
   const [matches, setMatches] = useState<any[]>([]);
   const [quotes, setQuotes] = useState<any[]>([]);
@@ -48,6 +50,7 @@ const TradeDashboard = () => {
 
   useEffect(() => {
     let isMounted = true;
+    let lastLoadedUserId: string | null = null;
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!isMounted) return;
@@ -56,6 +59,7 @@ const TradeDashboard = () => {
         return;
       }
 
+      lastLoadedUserId = session.user.id;
       void loadDashboardData(session.user.id);
     });
 
@@ -63,6 +67,7 @@ const TradeDashboard = () => {
       if (!isMounted) return;
 
       if (!session?.user) {
+        lastLoadedUserId = null;
         setTrade(null);
         setMatches([]);
         setQuotes([]);
@@ -72,6 +77,10 @@ const TradeDashboard = () => {
         return;
       }
 
+      // Only reload when the signed-in user actually changes.
+      // Token refreshes fire this listener but should not reset loading state.
+      if (session.user.id === lastLoadedUserId) return;
+      lastLoadedUserId = session.user.id;
       void loadDashboardData(session.user.id);
     });
 
@@ -93,6 +102,14 @@ const TradeDashboard = () => {
 
       if (!tradeData) {
         setTrade(null);
+        // Signed-in user has no trade record — likely a homeowner.
+        // Send them to the homeowner dashboard so they don't sit on a blank trade screen.
+        const { data: homeownerRow } = await supabase
+          .from("homeowners")
+          .select("id")
+          .eq("user_id", userId)
+          .maybeSingle();
+        navigate(homeownerRow ? "/homeowner-dashboard" : "/trade-register", { replace: true });
         return;
       }
       setTrade(tradeData);
