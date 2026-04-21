@@ -171,22 +171,7 @@ const HomeownerDashboard = () => {
             <>
               <VariationAlert variations={variations} />
 
-              {activeProject ? (
-                <ActiveProjectHero project={activeProject} />
-              ) : (
-                <div className="bg-card rounded-2xl p-8 border border-border text-center">
-                  <FolderKanban className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
-                  <p className="font-mono text-sm text-muted-foreground">
-                    No active projects yet. Post a job to get started!
-                  </p>
-                  <a
-                    href="/post-a-job"
-                    className="inline-block mt-4 bg-secondary text-secondary-foreground font-mono text-sm px-6 py-2.5 rounded-xl hover:opacity-90 transition-opacity shadow-sm"
-                  >
-                    Post a Job
-                  </a>
-                </div>
-              )}
+              <ActiveProjectsSection jobs={jobs} quoteCounts={quoteCounts} />
 
               <QuotesReceived quotes={quotes} onSelectTier={handleSelectTier} />
               <MyJobs jobs={jobs} />
