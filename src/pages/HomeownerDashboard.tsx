@@ -41,39 +41,45 @@ const HomeownerDashboard = () => {
     if (!ho) return;
     setHomeownerName(ho.name);
 
-    // Parallel fetches
-    const [jobRes, quoteRes, variationRes, updatesRes] = await Promise.all([
-      supabase
-        .from("jobs")
-        .select("id, title, job_type, postcode, status, stage, description, created_at, photo_urls")
-        .eq("homeowner_id", ho.id)
-        .order("created_at", { ascending: false }),
+    // Fetch jobs first so we can scope subsequent queries server-side
+    const { data: jobData } = await supabase
+      .from("jobs")
+      .select("id, title, job_type, postcode, status, stage, description, created_at, photo_urls")
+      .eq("homeowner_id", ho.id)
+      .order("created_at", { ascending: false });
+
+    const jobs = jobData || [];
+    setJobs(jobs);
+    const jobIds = jobs.map((j: any) => j.id);
+
+    if (jobIds.length === 0) {
+      setQuotes([]);
+      setVariations([]);
+      setSiteUpdates([]);
+      return;
+    }
+
+    // Now fetch quotes/variations/updates scoped to this homeowner's jobs only
+    const [quoteRes, variationRes, updatesRes] = await Promise.all([
       supabase
         .from("quotes")
         .select("id, amount, message, status, created_at, trade_id, job_id, ai_verdict, ai_verdict_summary, tier_enabled, budget_price, budget_description, standard_price, standard_description, premium_price, premium_description, selected_tier, trades(name, company_name, verified, review_count, avg_rating, tier), jobs(title, job_type)")
+        .in("job_id", jobIds)
         .order("created_at", { ascending: false }),
       supabase
         .from("variations")
         .select("id, title, description, materials_cost, labour_cost, programme_impact_days, status, job_id")
-        .eq("status", "pending"),
+        .eq("status", "pending")
+        .in("job_id", jobIds),
       supabase
         .from("stage_updates")
-        .select("id, update_text, created_at, photo_urls, stage_id, trade_id, trades(name), project_stages(stage_name)")
+        .select("id, update_text, created_at, photo_urls, stage_id, trade_id, trades(name), project_stages(stage_name, job_id)")
         .order("created_at", { ascending: false })
         .limit(3),
     ]);
 
-    const jobData = jobRes.data || [];
-    setJobs(jobData);
-
-    // Filter quotes to only this homeowner's jobs
-    const jobIds = new Set(jobData.map((j: any) => j.id));
-    const homeownerQuotes = (quoteRes.data || []).filter((q: any) => jobIds.has(q.job_id));
-    setQuotes(homeownerQuotes);
-
-    // Filter variations to this homeowner's jobs
-    const homeownerVariations = (variationRes.data || []).filter((v: any) => jobIds.has(v.job_id));
-    setVariations(homeownerVariations);
+    setQuotes(quoteRes.data || []);
+    setVariations(variationRes.data || []);
 
     // Map site updates
     const mappedUpdates = (updatesRes.data || []).map((u: any) => ({
