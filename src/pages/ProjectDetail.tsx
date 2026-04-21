@@ -11,6 +11,7 @@ import PaymentSchedule from "@/components/project/PaymentSchedule";
 import VariationsPanel from "@/components/project/VariationsPanel";
 import ContractPanel from "@/components/project/ContractPanel";
 import SubTradeModal from "@/components/project/SubTradeModal";
+import QuoteSubmitForm from "@/components/trade/QuoteSubmitForm";
 
 // Types
 interface Job {
