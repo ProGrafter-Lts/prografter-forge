@@ -11,6 +11,7 @@ import PaymentSchedule from "@/components/project/PaymentSchedule";
 import VariationsPanel from "@/components/project/VariationsPanel";
 import ContractPanel from "@/components/project/ContractPanel";
 import SubTradeModal from "@/components/project/SubTradeModal";
+import QuoteSubmitForm from "@/components/trade/QuoteSubmitForm";
 
 // Types
 interface Job {
@@ -260,6 +261,15 @@ const ProjectDetail = () => {
 
           {/* Right column */}
           <div className="space-y-8">
+            {/* Trade quote submission — only when this trade hasn't quoted yet */}
+            {userRole === "trade" && userId && !contract && !quotes.some((q) => q.trade_id === userId) && (
+              <QuoteSubmitForm
+                jobId={id!}
+                tradeId={userId}
+                onQuoteSubmitted={loadAll}
+              />
+            )}
+
             {/* 3 — Contract */}
             <ContractPanel
               jobId={id!}
