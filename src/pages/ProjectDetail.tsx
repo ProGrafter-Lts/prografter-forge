@@ -261,6 +261,15 @@ const ProjectDetail = () => {
 
           {/* Right column */}
           <div className="space-y-8">
+            {/* Trade quote submission — only when this trade hasn't quoted yet */}
+            {userRole === "trade" && userId && !contract && !quotes.some((q) => q.trade_id === userId) && (
+              <QuoteSubmitForm
+                jobId={id!}
+                tradeId={userId}
+                onQuoteSubmitted={loadAll}
+              />
+            )}
+
             {/* 3 — Contract */}
             <ContractPanel
               jobId={id!}
