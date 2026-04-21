@@ -193,7 +193,8 @@ const PostAJob = () => {
       photo_urls: photoUrls,
       status: "open",
       is_green_job: isGreenTrade(jobType),
-    }).select("id").single();
+      specialism_id: specialismId || null,
+    } as any).select("id").single();
 
     if (jobError || !jobData) {
       console.error(jobError);
