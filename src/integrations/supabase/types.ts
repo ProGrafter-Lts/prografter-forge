@@ -1533,6 +1533,18 @@ export type Database = {
           read_ct: number
         }[]
       }
+      trade_can_access_homeowner: {
+        Args: { _homeowner_id: string; _user_id: string }
+        Returns: boolean
+      }
+      trade_can_access_job: {
+        Args: { _job_id: string; _user_id: string }
+        Returns: boolean
+      }
+      user_owns_homeowner: {
+        Args: { _homeowner_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
