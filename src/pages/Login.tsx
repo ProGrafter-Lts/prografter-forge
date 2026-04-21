@@ -34,31 +34,54 @@ const Login = () => {
     setError("");
     setLoading(true);
 
-    const { data, error: authError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    if (authError) {
-      setError(authError.message);
+      if (authError) {
+        setError(authError.message);
+        return;
+      }
+
+      const signedInUser = data.user;
+      if (!signedInUser) {
+        setError("Sign-in succeeded, but no user session was returned.");
+        return;
+      }
+
+      const metadataUserType =
+        typeof signedInUser.user_metadata?.user_type === "string"
+          ? signedInUser.user_metadata.user_type
+          : null;
+
+      let resolvedUserType = metadataUserType;
+
+      if (!resolvedUserType) {
+        const { data: profile, error: profileError } = await supabase
+          .from("profiles")
+          .select("user_type")
+          .eq("user_id", signedInUser.id)
+          .maybeSingle();
+
+        if (profileError) {
+          setError(profileError.message);
+          return;
+        }
+
+        resolvedUserType = profile?.user_type ?? null;
+      }
+
+      navigate(
+        resolvedUserType === "trade" ? "/dashboard/trade" : "/dashboard/homeowner",
+        { replace: true }
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to sign in right now.");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    // Check user type and redirect
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("user_type")
-      .eq("user_id", data.user.id)
-      .single();
-
-    if (profile?.user_type === "trade") {
-      navigate("/dashboard/trade");
-    } else {
-      navigate("/dashboard/homeowner");
-    }
-
-    setLoading(false);
   };
 
   const openForgot = () => {
