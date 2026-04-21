@@ -336,6 +336,14 @@ const DashboardPlanningAlerts = ({ trade }: { trade: TradeProfile }) => {
                 </a>
               )}
             </div>
+
+            <div className="mt-3 pt-3 border-t border-border">
+              <ShortlistStatusControl
+                tradeId={trade.id}
+                planningAlertId={alert.id}
+                initial={shortlist[alert.id] ?? null}
+              />
+            </div>
           </div>
         ))
       )}
