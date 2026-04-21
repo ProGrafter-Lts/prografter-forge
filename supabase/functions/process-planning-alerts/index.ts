@@ -88,13 +88,15 @@ async function fetchPlanItApplications(
   lat: number,
   lng: number,
   radiusMiles: number,
+  recentDays: number,
 ): Promise<PlanItRecord[]> {
   // PlanIt areasearch — open API, lat/lng + krad (km radius), recent apps.
   // See https://www.planit.org.uk/api/
   const krad = Math.min(50, Math.max(1, radiusMiles / MILES_PER_KM));
+  const recent = Math.min(730, Math.max(1, Math.floor(recentDays)));
   const url =
     `https://www.planit.org.uk/api/applics/json?lat=${lat}&lng=${lng}` +
-    `&krad=${krad.toFixed(2)}&recent=14&pg_sz=100`;
+    `&krad=${krad.toFixed(2)}&recent=${recent}&pg_sz=400&sort=-start_date`;
   try {
     const res = await fetch(url, {
       headers: { "User-Agent": "ProGrafter-PlanningAlerts/1.0" },
@@ -154,6 +156,7 @@ function isRelevant(record: PlanItRecord, tradeType: string): boolean {
 async function processSub(
   supabase: ReturnType<typeof createClient>,
   sub: Sub,
+  recentDays: number,
 ): Promise<{ inserted: number; reason?: string }> {
   if (!sub.trades?.postcode) {
     return { inserted: 0, reason: "no postcode on trade" };
@@ -165,6 +168,7 @@ async function processSub(
     geo.lat,
     geo.lng,
     sub.radius_miles,
+    recentDays,
   );
   if (!records.length) return { inserted: 0, reason: "no records returned" };
 
@@ -232,8 +236,13 @@ serve(async (req) => {
     );
 
     // Optional: ?trade_id=<uuid> to refresh just one trade (used by manual button)
+    // Optional: ?days=N to widen lookback window (default 90, max 730).
+    //   - cron runs nightly with default 90 to catch anything filed in the last 3 months
+    //   - manual "Refresh" button can pass days=180 or 365 for a deeper backfill
     const url = new URL(req.url);
     const onlyTradeId = url.searchParams.get("trade_id");
+    const daysParam = url.searchParams.get("days");
+    const recentDays = daysParam ? Math.min(730, Math.max(1, parseInt(daysParam, 10) || 90)) : 90;
 
     let query = supabase
       .from("planning_alert_subs")
@@ -245,7 +254,7 @@ serve(async (req) => {
     if (subErr) throw subErr;
 
     console.log(
-      `[PLANNING-ALERTS] Processing ${subs?.length ?? 0} subscription(s)` +
+      `[PLANNING-ALERTS] Processing ${subs?.length ?? 0} subscription(s) lookback=${recentDays}d` +
         (onlyTradeId ? ` (trade ${onlyTradeId})` : ""),
     );
 
@@ -253,7 +262,7 @@ serve(async (req) => {
     let totalInserted = 0;
 
     for (const sub of (subs ?? []) as Sub[]) {
-      const r = await processSub(supabase, sub);
+      const r = await processSub(supabase, sub, recentDays);
       results[sub.trade_id] = r;
       totalInserted += r.inserted;
       console.log(
@@ -266,6 +275,7 @@ serve(async (req) => {
       JSON.stringify({
         processed: subs?.length ?? 0,
         inserted: totalInserted,
+        lookback_days: recentDays,
         results,
       }),
       {
