@@ -67,6 +67,7 @@ const TradeDashboard = () => {
 
       if (!tradeData) return;
       setTrade(tradeData);
+      setLoading(false);
 
       const [matchRes, quoteRes, contractRes] = await Promise.all([
         supabase
