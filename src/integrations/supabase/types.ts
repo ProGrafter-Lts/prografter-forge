@@ -1042,6 +1042,9 @@ export type Database = {
       }
       quotes: {
         Row: {
+          ai_verdict: string | null
+          ai_verdict_at: string | null
+          ai_verdict_summary: string | null
           amount: number
           budget_description: string | null
           budget_price: number | null
@@ -1061,6 +1064,9 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          ai_verdict?: string | null
+          ai_verdict_at?: string | null
+          ai_verdict_summary?: string | null
           amount: number
           budget_description?: string | null
           budget_price?: number | null
@@ -1080,6 +1086,9 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          ai_verdict?: string | null
+          ai_verdict_at?: string | null
+          ai_verdict_summary?: string | null
           amount?: number
           budget_description?: string | null
           budget_price?: number | null

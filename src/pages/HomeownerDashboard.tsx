@@ -1,10 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { FolderKanban } from "lucide-react";
 import HomeownerSidebar from "@/components/homeowner/HomeownerSidebar";
-import ActiveProjectHero from "@/components/homeowner/ActiveProjectHero";
+import ActiveProjectsSection from "@/components/homeowner/ActiveProjectsSection";
 import QuotesReceived from "@/components/homeowner/QuotesReceived";
 import MyJobs from "@/components/homeowner/MyJobs";
 import RecentSiteUpdates from "@/components/homeowner/RecentSiteUpdates";
@@ -21,7 +20,7 @@ const HomeownerDashboard = () => {
   const [quotes, setQuotes] = useState<any[]>([]);
   const [variations, setVariations] = useState<any[]>([]);
   const [siteUpdates, setSiteUpdates] = useState<any[]>([]);
-  const [activeProject, setActiveProject] = useState<any>(null);
+  
   const [activeNav, setActiveNav] = useState("overview");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -51,7 +50,7 @@ const HomeownerDashboard = () => {
         .order("created_at", { ascending: false }),
       supabase
         .from("quotes")
-        .select("id, amount, message, status, created_at, trade_id, job_id, tier_enabled, budget_price, budget_description, standard_price, standard_description, premium_price, premium_description, selected_tier, trades(name, company_name, verified), jobs(title, job_type)")
+        .select("id, amount, message, status, created_at, trade_id, job_id, ai_verdict, ai_verdict_summary, tier_enabled, budget_price, budget_description, standard_price, standard_description, premium_price, premium_description, selected_tier, trades(name, company_name, verified, review_count, avg_rating, tier), jobs(title, job_type)")
         .order("created_at", { ascending: false }),
       supabase
         .from("variations")
@@ -87,9 +86,7 @@ const HomeownerDashboard = () => {
     }));
     setSiteUpdates(mappedUpdates);
 
-    // Find active project
-    const active = jobData.find((j: any) => ["scheduled", "in_progress", "review"].includes(j.stage));
-    setActiveProject(active || null);
+    // Active projects now derived from jobs in render via ActiveProjectsSection
   };
 
   const handleSelectTier = async (quoteId: string, tier: string, price: number) => {
@@ -104,6 +101,14 @@ const HomeownerDashboard = () => {
       loadData();
     }
   };
+
+  const quoteCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    quotes.forEach((q: any) => {
+      counts[q.job_id] = (counts[q.job_id] ?? 0) + 1;
+    });
+    return counts;
+  }, [quotes]);
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -174,22 +179,7 @@ const HomeownerDashboard = () => {
             <>
               <VariationAlert variations={variations} />
 
-              {activeProject ? (
-                <ActiveProjectHero project={activeProject} />
-              ) : (
-                <div className="bg-card rounded-2xl p-8 border border-border text-center">
-                  <FolderKanban className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
-                  <p className="font-mono text-sm text-muted-foreground">
-                    No active projects yet. Post a job to get started!
-                  </p>
-                  <a
-                    href="/post-a-job"
-                    className="inline-block mt-4 bg-secondary text-secondary-foreground font-mono text-sm px-6 py-2.5 rounded-xl hover:opacity-90 transition-opacity shadow-sm"
-                  >
-                    Post a Job
-                  </a>
-                </div>
-              )}
+              <ActiveProjectsSection jobs={jobs} quoteCounts={quoteCounts} />
 
               <QuotesReceived quotes={quotes} onSelectTier={handleSelectTier} />
               <MyJobs jobs={jobs} />
