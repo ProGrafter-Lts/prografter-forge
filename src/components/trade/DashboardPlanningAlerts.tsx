@@ -43,10 +43,18 @@ interface TradeProfile {
 
 const LETTER_TIERS = ["pro", "ewi", "national"];
 
+interface ShortlistRow {
+  id: string;
+  planning_alert_id: string;
+  contact_status: ShortlistStatus;
+  note: string | null;
+}
+
 const DashboardPlanningAlerts = ({ trade }: { trade: TradeProfile }) => {
   const navigate = useNavigate();
   const [alerts, setAlerts] = useState<PlanningAlert[]>([]);
   const [subscription, setSubscription] = useState<any>(null);
+  const [shortlist, setShortlist] = useState<Record<string, ShortlistRow>>({});
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [letterModal, setLetterModal] = useState<PlanningAlert | null>(null);
