@@ -1,0 +1,161 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { ArrowRight, Loader2 } from "lucide-react";
+import type { ShortlistStatus } from "./ShortlistStatusControl";
+
+interface Props {
+  tradeId: string;
+}
+
+type Counts = Record<"todo" | "contacted" | "quoted" | "won", number>;
+
+const CARD_DEFS: {
+  key: keyof Counts;
+  label: string;
+  subtitle: string;
+  tone: string;
+}[] = [
+  {
+    key: "todo",
+    label: "To Contact",
+    subtitle: "Haven't reached out yet",
+    tone: "bg-muted/40 text-foreground border-border",
+  },
+  {
+    key: "contacted",
+    label: "Waiting for Reply",
+    subtitle: "Reached out, awaiting response",
+    tone: "bg-amber-500/10 text-amber-700 border-amber-500/30",
+  },
+  {
+    key: "quoted",
+    label: "Quoted",
+    subtitle: "Quote submitted, pending decision",
+    tone: "bg-primary/10 text-primary border-primary/30",
+  },
+  {
+    key: "won",
+    label: "Won",
+    subtitle: "Converted in last 90 days",
+    tone: "bg-emerald-500/10 text-emerald-700 border-emerald-500/30",
+  },
+];
+
+const PipelineSection = ({ tradeId }: Props) => {
+  const navigate = useNavigate();
+  const [counts, setCounts] = useState<Counts>({ todo: 0, contacted: 0, quoted: 0, won: 0 });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      setLoading(true);
+      const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
+      const { data, error } = await supabase
+        .from("planning_alert_shortlist")
+        .select("contact_status, last_status_change_at")
+        .eq("trade_id", tradeId);
+
+      if (cancelled) return;
+      if (error) {
+        console.error("Failed to load pipeline counts", error);
+        setLoading(false);
+        return;
+      }
+
+      const next: Counts = { todo: 0, contacted: 0, quoted: 0, won: 0 };
+      for (const r of data ?? []) {
+        const status = r.contact_status as ShortlistStatus;
+        if (status === "todo" || status === "contacted" || status === "quoted") {
+          next[status] += 1;
+        } else if (status === "won") {
+          if (r.last_status_change_at && r.last_status_change_at >= ninetyDaysAgo) {
+            next.won += 1;
+          }
+        }
+      }
+      setCounts(next);
+      setLoading(false);
+    };
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [tradeId]);
+
+  const totalLeads = counts.todo + counts.contacted + counts.quoted + counts.won;
+
+  return (
+    <section aria-labelledby="pipeline-heading" className="space-y-3">
+      <div>
+        <h2
+          id="pipeline-heading"
+          className="font-heading text-primary text-xl uppercase tracking-wider"
+        >
+          Your Pipeline
+        </h2>
+        <p className="font-mono text-xs text-muted-foreground mt-1">
+          Leads you're working on
+        </p>
+      </div>
+
+      {loading ? (
+        <div className="rounded-2xl border border-border p-6 flex items-center justify-center">
+          <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+        </div>
+      ) : totalLeads === 0 ? (
+        <div className="rounded-2xl border-2 border-dashed border-border p-6 text-center space-y-3">
+          <p className="font-sans text-sm text-foreground">
+            No leads in your pipeline yet — check Planning Alerts to get started
+          </p>
+          <button
+            onClick={() => navigate("/planning-alerts")}
+            className="inline-flex items-center gap-2 bg-secondary text-white font-mono text-xs px-4 py-2 rounded-xl hover:bg-secondary/90 transition-colors"
+          >
+            View Planning Alerts
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {CARD_DEFS.map((card) => {
+            const value = counts[card.key];
+            const isZero = value === 0;
+            return (
+              <button
+                key={card.key}
+                type="button"
+                onClick={() =>
+                  navigate(
+                    `/planning-alerts?pipeline=${encodeURIComponent(card.key)}`,
+                  )
+                }
+                className={`text-left rounded-2xl border p-4 transition-all hover:shadow-sm hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-ring ${card.tone} ${
+                  isZero ? "opacity-70" : ""
+                }`}
+                aria-label={`${value} ${card.label} leads. ${card.subtitle}. Click to filter.`}
+              >
+                <div
+                  className={`font-heading text-3xl md:text-4xl leading-none ${
+                    isZero ? "text-muted-foreground" : ""
+                  }`}
+                >
+                  {value}
+                </div>
+                <div className="mt-2 font-mono text-[11px] uppercase tracking-wider">
+                  {card.label}
+                </div>
+                <div className="mt-1 font-sans text-[11px] text-muted-foreground leading-snug">
+                  {card.subtitle}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </section>
+  );
+};
+
+export default PipelineSection;
