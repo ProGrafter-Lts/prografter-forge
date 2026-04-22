@@ -276,9 +276,9 @@ const TradeDashboard = () => {
 
           <CalendarConnect variant="compact" />
 
-          <JobMatchesList matches={matches} />
-
           {trade && <PipelineSection tradeId={trade.id} />}
+
+          <JobMatchesList matches={matches} />
 
           <ActiveProjectsList projects={activeProjects} />
 
