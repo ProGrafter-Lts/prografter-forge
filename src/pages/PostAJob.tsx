@@ -187,7 +187,7 @@ const PostAJob = () => {
       description: description.trim(),
       address: address.trim(),
       postcode: postcode.trim(),
-      budget,
+      budget: `£${Number(budgetMin).toLocaleString()} – £${Number(budgetMax).toLocaleString()}`,
       photo_urls: photoUrls,
       status: "open",
       is_green_job: isGreenTrade(jobType),
@@ -227,10 +227,34 @@ const PostAJob = () => {
 
   const canStep1 = jobType.length > 0;
   const canStep2 = description.trim().length >= 50;
-  const canStep3 = address.trim().length > 0 && postcode.trim().length > 0 && budget.length > 0;
+
+  const postcodeValid = UK_POSTCODE_REGEX.test(postcode.trim());
+  const minNum = budgetMin === "" ? NaN : Number(budgetMin);
+  const maxNum = budgetMax === "" ? NaN : Number(budgetMax);
+  const budgetValid =
+    Number.isFinite(minNum) &&
+    Number.isFinite(maxNum) &&
+    Number.isInteger(minNum) &&
+    Number.isInteger(maxNum) &&
+    minNum >= 0 &&
+    maxNum >= 0 &&
+    maxNum >= minNum;
+  const canStep3 = address.trim().length > 0 && postcodeValid && budgetValid;
+
+  const trimmedName = name.trim();
+  const trimmedEmail = email.trim();
+  const nameLooksLikeEmail = trimmedName.includes("@");
+  const emailValid = EMAIL_REGEX.test(trimmedEmail);
+  const nameEmailDistinct =
+    trimmedName.length > 0 &&
+    trimmedEmail.length > 0 &&
+    trimmedName.toLowerCase() !== trimmedEmail.toLowerCase();
+
   const canStep4 =
-    name.trim().length > 0 &&
-    email.trim().length > 0 &&
+    trimmedName.length > 0 &&
+    !nameLooksLikeEmail &&
+    emailValid &&
+    nameEmailDistinct &&
     phone.trim().length > 0 &&
     password.length >= 8;
 
