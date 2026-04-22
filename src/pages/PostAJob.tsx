@@ -471,33 +471,56 @@ const PostAJob = () => {
                         className={`${inputClass} resize-none`}
                       />
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className={labelClass}>Postcode *</label>
+                    <div>
+                      <label className={labelClass}>Postcode *</label>
+                      <input
+                        type="text"
+                        value={postcode}
+                        onChange={(e) => setPostcode(e.target.value.toUpperCase())}
+                        placeholder="SW1A 1AA"
+                        required
+                        className={inputClass}
+                      />
+                      {postcode.trim().length > 0 && !postcodeValid && (
+                        <p className="font-mono text-xs text-red-400 mt-1">
+                          Enter a valid UK postcode (e.g. SW1A 1AA).
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      <label className={labelClass}>Budget range (£) *</label>
+                      <div className="grid grid-cols-2 gap-3">
                         <input
-                          type="text"
-                          value={postcode}
-                          onChange={(e) => setPostcode(e.target.value)}
-                          placeholder="SW1A 1AA"
+                          type="number"
+                          inputMode="numeric"
+                          min={0}
+                          step={1}
+                          value={budgetMin}
+                          onChange={(e) => setBudgetMin(e.target.value)}
+                          placeholder="Min e.g. 5000"
+                          required
+                          className={inputClass}
+                        />
+                        <input
+                          type="number"
+                          inputMode="numeric"
+                          min={0}
+                          step={1}
+                          value={budgetMax}
+                          onChange={(e) => setBudgetMax(e.target.value)}
+                          placeholder="Max e.g. 10000"
                           required
                           className={inputClass}
                         />
                       </div>
-                      <div>
-                        <label className={labelClass}>Budget *</label>
-                        <select
-                          value={budget}
-                          onChange={(e) => setBudget(e.target.value)}
-                          required
-                          className={`${inputClass} appearance-none`}
-                          style={{ backgroundColor: "hsl(var(--deep))" }}
-                        >
-                          <option value="">Select budget</option>
-                          {BUDGETS.map((b) => (
-                            <option key={b} value={b}>{b}</option>
-                          ))}
-                        </select>
-                      </div>
+                      {(budgetMin !== "" || budgetMax !== "") && !budgetValid && (
+                        <p className="font-mono text-xs text-red-400 mt-1">
+                          Enter whole numbers, both required, max ≥ min.
+                        </p>
+                      )}
+                      <p className="font-mono text-[10px] text-cream/40 mt-1">
+                        Whole pounds only. Used to match you with appropriate trades.
+                      </p>
                     </div>
                     <div>
                       <label className={labelClass}>Project type (optional)</label>
