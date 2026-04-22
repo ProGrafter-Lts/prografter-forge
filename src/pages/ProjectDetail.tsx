@@ -63,6 +63,9 @@ const ProjectDetail = () => {
   const navigate = useNavigate();
 
   const [job, setJob] = useState<Job | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [projectError, setProjectError] = useState<string | null>(null);
+  const [authUserId, setAuthUserId] = useState<string | null>(null);
   const [stages, setStages] = useState<Stage[]>([]);
   const [updates, setUpdates] = useState<StageUpdate[]>([]);
   const [messages, setMessages] = useState<ProjectMessage[]>([]);
@@ -80,7 +83,44 @@ const ProjectDetail = () => {
   const [msgText, setMsgText] = useState("");
   const [subTradeStageId, setSubTradeStageId] = useState<string | null>(null);
 
-  useEffect(() => { if (id) loadAll(); }, [id]);
+  useEffect(() => {
+    if (!id) return;
+
+    setProjectError(null);
+    setLoading(true);
+    setJob(null);
+    setStages([]);
+    setUpdates([]);
+    setMessages([]);
+    setVariations([]);
+    setQuotes([]);
+    setContract(null);
+    setSubAssignments([]);
+
+    void loadProjectData();
+
+    let isMounted = true;
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!isMounted || !session?.user?.id) return;
+      setAuthUserId(session.user.id);
+      void loadViewerContext(session.user.id);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!isMounted) return;
+      const nextUserId = session?.user?.id ?? null;
+      setAuthUserId(nextUserId);
+      if (nextUserId) {
+        void loadViewerContext(nextUserId);
+      }
+    });
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
+  }, [id]);
 
   // Realtime messages
   useEffect(() => {
@@ -93,36 +133,38 @@ const ProjectDetail = () => {
     return () => { supabase.removeChannel(channel); };
   }, [id]);
 
-  const loadAll = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { data: tradeData } = await supabase.from("trades").select("id, name, verified").eq("user_id", user.id).maybeSingle();
-    const { data: hoData } = await supabase.from("homeowners").select("id, name").eq("user_id", user.id).maybeSingle();
-
-    if (tradeData) { setUserRole("trade"); setUserId(tradeData.id); }
-    else if (hoData) { setUserRole("homeowner"); setUserId(hoData.id); }
-
-    const { data: jobData } = await supabase.from("jobs").select("*").eq("id", id!).single();
-    if (!jobData) return;
+  const loadProjectData = async () => {
+    setProjectError(null);
+    const { data: jobData, error: jobError } = await supabase.from("jobs").select("*").eq("id", id!).maybeSingle();
+    if (jobError || !jobData) {
+      console.error("Failed to load project", jobError);
+      setProjectError("We couldn't load this project yet.");
+      setLoading(false);
+      return;
+    }
     setJob(jobData as Job);
+    setLoading(false);
 
-    if (hoData) setHomeownerName(hoData.name);
-    if (jobData.homeowner_id && !hoData) {
+    if (jobData.homeowner_id) {
       const { data: ho2 } = await supabase.from("homeowners").select("name").eq("id", jobData.homeowner_id).maybeSingle();
       if (ho2) setHomeownerName(ho2.name);
     }
 
     const { data: matchData } = await supabase.from("job_matches").select("trade_id").eq("job_id", id!).limit(1);
     if (matchData && matchData.length > 0) {
-      if (tradeData) { setTradeName(tradeData.name); setTradeVerified(tradeData.verified); }
-      else {
-        const { data: t2 } = await supabase.from("trades").select("name, verified").eq("id", matchData[0].trade_id).maybeSingle();
-        if (t2) { setTradeName(t2.name); setTradeVerified(t2.verified); }
-      }
+      const { data: t2 } = await supabase.from("trades").select("name, verified").eq("id", matchData[0].trade_id).maybeSingle();
+      if (t2) { setTradeName(t2.name); setTradeVerified(t2.verified); }
     }
 
-    const { data: stageData } = await supabase.from("project_stages").select("*").eq("job_id", id!).order("stage_order");
+    const [stageRes, msgRes, varRes, quoteRes, contractRes] = await Promise.allSettled([
+      supabase.from("project_stages").select("*").eq("job_id", id!).order("stage_order"),
+      supabase.from("project_messages").select("*").eq("job_id", id!).order("created_at"),
+      supabase.from("variations").select("*").eq("job_id", id!).order("created_at", { ascending: false }),
+      supabase.from("quotes").select("*").eq("job_id", id!),
+      supabase.from("contracts").select("*").eq("job_id", id!).maybeSingle(),
+    ]);
+
+    const stageData = stageRes.status === "fulfilled" ? stageRes.value.data : null;
     if (stageData) setStages(stageData as Stage[]);
 
     if (stageData && stageData.length > 0) {
@@ -135,17 +177,36 @@ const ProjectDetail = () => {
       if (subData) setSubAssignments(subData as SubAssignment[]);
     }
 
-    const { data: msgData } = await supabase.from("project_messages").select("*").eq("job_id", id!).order("created_at");
+    const msgData = msgRes.status === "fulfilled" ? msgRes.value.data : null;
     if (msgData) setMessages(msgData as ProjectMessage[]);
 
-    const { data: varData } = await supabase.from("variations").select("*").eq("job_id", id!).order("created_at", { ascending: false });
+    const varData = varRes.status === "fulfilled" ? varRes.value.data : null;
     if (varData) setVariations(varData as Variation[]);
 
-    const { data: quoteData } = await supabase.from("quotes").select("*").eq("job_id", id!);
+    const quoteData = quoteRes.status === "fulfilled" ? quoteRes.value.data : null;
     if (quoteData) setQuotes(quoteData as Quote[]);
 
-    const { data: contractData } = await supabase.from("contracts").select("*").eq("job_id", id!).maybeSingle();
+    const contractData = contractRes.status === "fulfilled" ? contractRes.value.data : null;
     if (contractData) setContract(contractData as Contract);
+  };
+
+  const loadViewerContext = async (nextAuthUserId: string) => {
+    const { data: tradeData } = await supabase.from("trades").select("id, name, verified").eq("user_id", nextAuthUserId).maybeSingle();
+    const { data: hoData } = await supabase.from("homeowners").select("id, name").eq("user_id", nextAuthUserId).maybeSingle();
+
+    if (tradeData) {
+      setUserRole("trade");
+      setUserId(tradeData.id);
+      setTradeName(tradeData.name);
+      setTradeVerified(tradeData.verified);
+      return;
+    }
+
+    if (hoData) {
+      setUserRole("homeowner");
+      setUserId(hoData.id);
+      setHomeownerName(hoData.name);
+    }
   };
 
   // Computed
@@ -178,10 +239,25 @@ const ProjectDetail = () => {
     toast.success("Payment release requested. This will be processed shortly.");
   };
 
-  if (!job) {
+  const refreshProject = () => {
+    void loadProjectData();
+    if (authUserId) {
+      void loadViewerContext(authUserId);
+    }
+  };
+
+  if (loading) {
     return (
       <div className="min-h-screen bg-cream flex items-center justify-center">
         <p className="font-mono text-sm text-secondary-text">Loading project…</p>
+      </div>
+    );
+  }
+
+  if (!job || projectError) {
+    return (
+      <div className="min-h-screen bg-cream flex items-center justify-center px-6 text-center">
+        <p className="font-mono text-sm text-secondary-text">{projectError || "This project could not be loaded."}</p>
       </div>
     );
   }
@@ -227,7 +303,7 @@ const ProjectDetail = () => {
           userRole={userRole}
           userId={userId}
           jobId={id!}
-          onRefresh={loadAll}
+          onRefresh={refreshProject}
         />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -240,7 +316,7 @@ const ProjectDetail = () => {
               subAssignments={subAssignments}
               userRole={userRole}
               userId={userId}
-              onRefresh={loadAll}
+              onRefresh={refreshProject}
               onAssignSub={userRole === "trade" ? (stageId) => setSubTradeStageId(stageId) : undefined}
             />
 
@@ -266,7 +342,7 @@ const ProjectDetail = () => {
               <QuoteSubmitForm
                 jobId={id!}
                 tradeId={userId}
-                onQuoteSubmitted={loadAll}
+                onQuoteSubmitted={refreshProject}
               />
             )}
 
@@ -280,7 +356,7 @@ const ProjectDetail = () => {
               userId={userId}
               tradeName={tradeName}
               homeownerName={homeownerName}
-              onRefresh={loadAll}
+              onRefresh={refreshProject}
             />
 
             {/* 6 — Payment Schedule */}
@@ -301,7 +377,7 @@ const ProjectDetail = () => {
           jobId={id!}
           mainTradeId={userId}
           onClose={() => setSubTradeStageId(null)}
-          onRefresh={loadAll}
+          onRefresh={refreshProject}
         />
       )}
     </div>
