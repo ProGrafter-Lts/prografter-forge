@@ -65,6 +65,7 @@ const ProjectDetail = () => {
   const [job, setJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
   const [projectError, setProjectError] = useState<string | null>(null);
+  const [authUserId, setAuthUserId] = useState<string | null>(null);
   const [stages, setStages] = useState<Stage[]>([]);
   const [updates, setUpdates] = useState<StageUpdate[]>([]);
   const [messages, setMessages] = useState<ProjectMessage[]>([]);
@@ -93,11 +94,13 @@ const ProjectDetail = () => {
       lastResolvedUserId = authUserId;
 
       if (!authUserId) {
+        setAuthUserId(null);
         setProjectError("Please sign in to view this project.");
         setLoading(false);
         return;
       }
 
+      setAuthUserId(authUserId);
       await loadAll(authUserId);
     };
 
@@ -224,6 +227,11 @@ const ProjectDetail = () => {
     toast.success("Payment release requested. This will be processed shortly.");
   };
 
+  const refreshProject = () => {
+    if (!authUserId) return;
+    void loadAll(authUserId);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-cream flex items-center justify-center">
@@ -281,7 +289,7 @@ const ProjectDetail = () => {
           userRole={userRole}
           userId={userId}
           jobId={id!}
-          onRefresh={loadAll}
+          onRefresh={refreshProject}
         />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -294,7 +302,7 @@ const ProjectDetail = () => {
               subAssignments={subAssignments}
               userRole={userRole}
               userId={userId}
-              onRefresh={loadAll}
+              onRefresh={refreshProject}
               onAssignSub={userRole === "trade" ? (stageId) => setSubTradeStageId(stageId) : undefined}
             />
 
@@ -320,7 +328,7 @@ const ProjectDetail = () => {
               <QuoteSubmitForm
                 jobId={id!}
                 tradeId={userId}
-                onQuoteSubmitted={loadAll}
+                onQuoteSubmitted={refreshProject}
               />
             )}
 
@@ -334,7 +342,7 @@ const ProjectDetail = () => {
               userId={userId}
               tradeName={tradeName}
               homeownerName={homeownerName}
-              onRefresh={loadAll}
+              onRefresh={refreshProject}
             />
 
             {/* 6 — Payment Schedule */}
@@ -355,7 +363,7 @@ const ProjectDetail = () => {
           jobId={id!}
           mainTradeId={userId}
           onClose={() => setSubTradeStageId(null)}
-          onRefresh={loadAll}
+          onRefresh={refreshProject}
         />
       )}
     </div>
