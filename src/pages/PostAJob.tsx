@@ -80,7 +80,8 @@ const PostAJob = () => {
   // Step 3
   const [address, setAddress] = useState("");
   const [postcode, setPostcode] = useState("");
-  const [budget, setBudget] = useState("");
+  const [budgetMin, setBudgetMin] = useState("");
+  const [budgetMax, setBudgetMax] = useState("");
   const [specialismId, setSpecialismId] = useState<string>("");
   const [specialisms, setSpecialisms] = useState<Specialism[]>([]);
 
@@ -98,6 +99,7 @@ const PostAJob = () => {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [step4Touched, setStep4Touched] = useState(false);
 
   const inputClass =
     "w-full bg-cream/5 border border-cream/10 text-cream placeholder-cream/40 font-body text-sm rounded-xl px-4 py-3 focus:border-teal focus:outline-none transition-colors";
