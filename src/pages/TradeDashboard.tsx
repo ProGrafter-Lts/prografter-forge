@@ -34,6 +34,10 @@ interface TradeProfile {
   inca_certified: boolean;
   green_cert_expiry: string | null;
   specialisms_prompt_seen: boolean;
+  completed_jobs_count: number;
+  review_count: number;
+  avg_rating: number | null;
+  tier: string | null;
 }
 
 const TradeDashboard = () => {
@@ -94,7 +98,7 @@ const TradeDashboard = () => {
     try {
       const { data: tradeData, error: tradeError } = await supabase
         .from("trades")
-        .select("id, name, company_name, verified, trade_type, phone, is_green_trade, mcs_number, trustmark_number, pas_2030_accredited, pas_2035_coordinator, ozev_approved, fgas_registered, ciga_registered, inca_certified, green_cert_expiry, specialisms_prompt_seen")
+        .select("id, name, company_name, verified, trade_type, phone, is_green_trade, mcs_number, trustmark_number, pas_2030_accredited, pas_2035_coordinator, ozev_approved, fgas_registered, ciga_registered, inca_certified, green_cert_expiry, specialisms_prompt_seen, completed_jobs_count, review_count, avg_rating, tier")
         .eq("user_id", userId)
         .maybeSingle();
 
@@ -203,8 +207,8 @@ const TradeDashboard = () => {
     }
   };
 
-  const completedCount = 0;
-  const rating = 0;
+  const completedCount = trade?.completed_jobs_count ?? 0;
+  const rating = trade?.avg_rating ? Number(trade.avg_rating) : 0;
 
   return (
     <div className="min-h-screen bg-background flex">

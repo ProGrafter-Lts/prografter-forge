@@ -44,13 +44,9 @@ const SCHEME_TRADE_MAP: Record<string, string[]> = {
   epc: ["EPC Assessor"],
 };
 
-const BUDGETS = [
-  "Under £1k",
-  "£1k – £5k",
-  "£5k – £15k",
-  "£15k – £50k",
-  "£50k+",
-] as const;
+// UK postcode regex (covers standard formats: A9 9AA, A9A 9AA, A99 9AA, AA9 9AA, AA9A 9AA, AA99 9AA)
+const UK_POSTCODE_REGEX = /^[A-Z]{1,2}[0-9][A-Z0-9]?\s?[0-9][A-Z]{2}$/i;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 type Step = 1 | 2 | 3 | 3.5 | 4;
 
@@ -84,7 +80,8 @@ const PostAJob = () => {
   // Step 3
   const [address, setAddress] = useState("");
   const [postcode, setPostcode] = useState("");
-  const [budget, setBudget] = useState("");
+  const [budgetMin, setBudgetMin] = useState("");
+  const [budgetMax, setBudgetMax] = useState("");
   const [specialismId, setSpecialismId] = useState<string>("");
   const [specialisms, setSpecialisms] = useState<Specialism[]>([]);
 
@@ -102,6 +99,7 @@ const PostAJob = () => {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [step4Touched, setStep4Touched] = useState(false);
 
   const inputClass =
     "w-full bg-cream/5 border border-cream/10 text-cream placeholder-cream/40 font-body text-sm rounded-xl px-4 py-3 focus:border-teal focus:outline-none transition-colors";
@@ -189,7 +187,7 @@ const PostAJob = () => {
       description: description.trim(),
       address: address.trim(),
       postcode: postcode.trim(),
-      budget,
+      budget: `£${Number(budgetMin).toLocaleString()} – £${Number(budgetMax).toLocaleString()}`,
       photo_urls: photoUrls,
       status: "open",
       is_green_job: isGreenTrade(jobType),
@@ -229,10 +227,34 @@ const PostAJob = () => {
 
   const canStep1 = jobType.length > 0;
   const canStep2 = description.trim().length >= 50;
-  const canStep3 = address.trim().length > 0 && postcode.trim().length > 0 && budget.length > 0;
+
+  const postcodeValid = UK_POSTCODE_REGEX.test(postcode.trim());
+  const minNum = budgetMin === "" ? NaN : Number(budgetMin);
+  const maxNum = budgetMax === "" ? NaN : Number(budgetMax);
+  const budgetValid =
+    Number.isFinite(minNum) &&
+    Number.isFinite(maxNum) &&
+    Number.isInteger(minNum) &&
+    Number.isInteger(maxNum) &&
+    minNum >= 0 &&
+    maxNum >= 0 &&
+    maxNum >= minNum;
+  const canStep3 = address.trim().length > 0 && postcodeValid && budgetValid;
+
+  const trimmedName = name.trim();
+  const trimmedEmail = email.trim();
+  const nameLooksLikeEmail = trimmedName.includes("@");
+  const emailValid = EMAIL_REGEX.test(trimmedEmail);
+  const nameEmailDistinct =
+    trimmedName.length > 0 &&
+    trimmedEmail.length > 0 &&
+    trimmedName.toLowerCase() !== trimmedEmail.toLowerCase();
+
   const canStep4 =
-    name.trim().length > 0 &&
-    email.trim().length > 0 &&
+    trimmedName.length > 0 &&
+    !nameLooksLikeEmail &&
+    emailValid &&
+    nameEmailDistinct &&
     phone.trim().length > 0 &&
     password.length >= 8;
 
@@ -357,10 +379,12 @@ const PostAJob = () => {
                       />
                       <p
                         className={`text-right font-mono text-xs mt-1 ${
-                          description.trim().length < 50 ? "text-cream/30" : "text-teal/60"
+                          description.trim().length < 50 ? "text-red-400" : "text-teal/70"
                         }`}
                       >
-                        {description.trim().length} / 50 min
+                        {description.trim().length < 50
+                          ? `Minimum 50 characters — ${50 - description.trim().length} more to go`
+                          : `${description.trim().length} characters · minimum met ✓`}
                       </p>
                     </div>
 
@@ -449,33 +473,56 @@ const PostAJob = () => {
                         className={`${inputClass} resize-none`}
                       />
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className={labelClass}>Postcode *</label>
+                    <div>
+                      <label className={labelClass}>Postcode *</label>
+                      <input
+                        type="text"
+                        value={postcode}
+                        onChange={(e) => setPostcode(e.target.value.toUpperCase())}
+                        placeholder="SW1A 1AA"
+                        required
+                        className={inputClass}
+                      />
+                      {postcode.trim().length > 0 && !postcodeValid && (
+                        <p className="font-mono text-xs text-red-400 mt-1">
+                          Enter a valid UK postcode (e.g. SW1A 1AA).
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      <label className={labelClass}>Budget range (£) *</label>
+                      <div className="grid grid-cols-2 gap-3">
                         <input
-                          type="text"
-                          value={postcode}
-                          onChange={(e) => setPostcode(e.target.value)}
-                          placeholder="SW1A 1AA"
+                          type="number"
+                          inputMode="numeric"
+                          min={0}
+                          step={1}
+                          value={budgetMin}
+                          onChange={(e) => setBudgetMin(e.target.value)}
+                          placeholder="Min e.g. 5000"
+                          required
+                          className={inputClass}
+                        />
+                        <input
+                          type="number"
+                          inputMode="numeric"
+                          min={0}
+                          step={1}
+                          value={budgetMax}
+                          onChange={(e) => setBudgetMax(e.target.value)}
+                          placeholder="Max e.g. 10000"
                           required
                           className={inputClass}
                         />
                       </div>
-                      <div>
-                        <label className={labelClass}>Budget *</label>
-                        <select
-                          value={budget}
-                          onChange={(e) => setBudget(e.target.value)}
-                          required
-                          className={`${inputClass} appearance-none`}
-                          style={{ backgroundColor: "hsl(var(--deep))" }}
-                        >
-                          <option value="">Select budget</option>
-                          {BUDGETS.map((b) => (
-                            <option key={b} value={b}>{b}</option>
-                          ))}
-                        </select>
-                      </div>
+                      {(budgetMin !== "" || budgetMax !== "") && !budgetValid && (
+                        <p className="font-mono text-xs text-red-400 mt-1">
+                          Enter whole numbers, both required, max ≥ min.
+                        </p>
+                      )}
+                      <p className="font-mono text-[10px] text-cream/40 mt-1">
+                        Whole pounds only. Used to match you with appropriate trades.
+                      </p>
                     </div>
                     <div>
                       <label className={labelClass}>Project type (optional)</label>
@@ -654,10 +701,26 @@ const PostAJob = () => {
                         type="text"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
+                        onBlur={() => setStep4Touched(true)}
                         placeholder="Jane Smith"
-                        required
+                        autoComplete="name"
                         className={inputClass}
                       />
+                      {step4Touched && trimmedName.length === 0 && (
+                        <p className="font-mono text-xs text-red-400 mt-1">Please enter your name.</p>
+                      )}
+                      {nameLooksLikeEmail && (
+                        <p className="font-mono text-xs text-red-400 mt-1">
+                          Name can't contain "@". Use your real name (e.g. Jane Smith).
+                        </p>
+                      )}
+                      {trimmedName.length > 0 &&
+                        trimmedEmail.length > 0 &&
+                        trimmedName.toLowerCase() === trimmedEmail.toLowerCase() && (
+                          <p className="font-mono text-xs text-red-400 mt-1">
+                            Name and email must be different.
+                          </p>
+                        )}
                     </div>
                     <div>
                       <label className={labelClass}>Email *</label>
@@ -665,10 +728,21 @@ const PostAJob = () => {
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
+                        onBlur={() => setStep4Touched(true)}
                         placeholder="jane@example.com"
-                        required
+                        autoComplete="email"
                         className={inputClass}
                       />
+                      {step4Touched && trimmedEmail.length > 0 && !emailValid && (
+                        <p className="font-mono text-xs text-red-400 mt-1">
+                          Enter a valid email address.
+                        </p>
+                      )}
+                      {step4Touched && trimmedEmail.length === 0 && (
+                        <p className="font-mono text-xs text-red-400 mt-1">
+                          Please enter your email.
+                        </p>
+                      )}
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
