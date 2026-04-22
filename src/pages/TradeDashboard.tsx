@@ -14,6 +14,7 @@ import LiveMarginWidget from "@/components/trade/LiveMarginWidget";
 import CalendarConnect from "@/components/trade/CalendarConnect";
 import TradeProfileSection from "@/components/trade/TradeProfileSection";
 import AddSpecialismsBanner from "@/components/trade/AddSpecialismsBanner";
+import PipelineSection from "@/components/trade/PipelineSection";
 
 interface TradeProfile {
   name: string;
@@ -257,6 +258,9 @@ const TradeDashboard = () => {
           <CalendarConnect variant="compact" />
 
           <JobMatchesList matches={matches} />
+
+          {trade && <PipelineSection tradeId={trade.id} />}
+
           <ActiveProjectsList projects={activeProjects} />
 
           <LiveMarginWidget

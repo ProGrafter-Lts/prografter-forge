@@ -720,6 +720,7 @@ export type Database = {
         Row: {
           active: boolean
           created_at: string
+          hide_dismissed_leads: boolean
           id: string
           radius_miles: number
           stripe_subscription_id: string | null
@@ -730,6 +731,7 @@ export type Database = {
         Insert: {
           active?: boolean
           created_at?: string
+          hide_dismissed_leads?: boolean
           id?: string
           radius_miles?: number
           stripe_subscription_id?: string | null
@@ -740,6 +742,7 @@ export type Database = {
         Update: {
           active?: boolean
           created_at?: string
+          hide_dismissed_leads?: boolean
           id?: string
           radius_miles?: number
           stripe_subscription_id?: string | null
@@ -761,6 +764,7 @@ export type Database = {
         Row: {
           actioned: boolean
           address: string
+          applicant_phone: string | null
           application_ref: string
           application_type: string
           approved_date: string | null
@@ -778,6 +782,7 @@ export type Database = {
         Insert: {
           actioned?: boolean
           address: string
+          applicant_phone?: string | null
           application_ref: string
           application_type: string
           approved_date?: string | null
@@ -795,6 +800,7 @@ export type Database = {
         Update: {
           actioned?: boolean
           address?: string
+          applicant_phone?: string | null
           application_ref?: string
           application_type?: string
           approved_date?: string | null
