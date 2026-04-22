@@ -14,6 +14,7 @@ const Hero = () => {
     supabase
       .from("trades")
       .select("id", { count: "exact", head: true })
+      .eq("verified", true)
       .then(({ count }) => {
         if (typeof count === "number") setTradeCount(count);
       });
