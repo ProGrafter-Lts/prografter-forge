@@ -63,6 +63,8 @@ const ProjectDetail = () => {
   const navigate = useNavigate();
 
   const [job, setJob] = useState<Job | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [projectError, setProjectError] = useState<string | null>(null);
   const [stages, setStages] = useState<Stage[]>([]);
   const [updates, setUpdates] = useState<StageUpdate[]>([]);
   const [messages, setMessages] = useState<ProjectMessage[]>([]);
@@ -80,7 +82,41 @@ const ProjectDetail = () => {
   const [msgText, setMsgText] = useState("");
   const [subTradeStageId, setSubTradeStageId] = useState<string | null>(null);
 
-  useEffect(() => { if (id) loadAll(); }, [id]);
+  useEffect(() => {
+    if (!id) return;
+
+    let isMounted = true;
+    let lastResolvedUserId: string | null | undefined;
+
+    const loadForUser = async (authUserId: string | null) => {
+      if (!isMounted || lastResolvedUserId === authUserId) return;
+      lastResolvedUserId = authUserId;
+
+      if (!authUserId) {
+        setProjectError("Please sign in to view this project.");
+        setLoading(false);
+        return;
+      }
+
+      await loadAll(authUserId);
+    };
+
+    setProjectError(null);
+    setLoading(true);
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      void loadForUser(session?.user?.id ?? null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      void loadForUser(session?.user?.id ?? null);
+    });
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
+  }, [id]);
 
   // Realtime messages
   useEffect(() => {
@@ -93,18 +129,26 @@ const ProjectDetail = () => {
     return () => { supabase.removeChannel(channel); };
   }, [id]);
 
-  const loadAll = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+  const loadAll = async (authUserId: string) => {
+    setProjectError(null);
 
-    const { data: tradeData } = await supabase.from("trades").select("id, name, verified").eq("user_id", user.id).maybeSingle();
-    const { data: hoData } = await supabase.from("homeowners").select("id, name").eq("user_id", user.id).maybeSingle();
+    if (!job) {
+      setLoading(true);
+    }
+
+    const { data: tradeData } = await supabase.from("trades").select("id, name, verified").eq("user_id", authUserId).maybeSingle();
+    const { data: hoData } = await supabase.from("homeowners").select("id, name").eq("user_id", authUserId).maybeSingle();
 
     if (tradeData) { setUserRole("trade"); setUserId(tradeData.id); }
     else if (hoData) { setUserRole("homeowner"); setUserId(hoData.id); }
 
-    const { data: jobData } = await supabase.from("jobs").select("*").eq("id", id!).single();
-    if (!jobData) return;
+    const { data: jobData, error: jobError } = await supabase.from("jobs").select("*").eq("id", id!).maybeSingle();
+    if (jobError || !jobData) {
+      console.error("Failed to load project", jobError);
+      setProjectError("We couldn't load this project yet.");
+      setLoading(false);
+      return;
+    }
     setJob(jobData as Job);
 
     if (hoData) setHomeownerName(hoData.name);
@@ -146,6 +190,8 @@ const ProjectDetail = () => {
 
     const { data: contractData } = await supabase.from("contracts").select("*").eq("job_id", id!).maybeSingle();
     if (contractData) setContract(contractData as Contract);
+
+    setLoading(false);
   };
 
   // Computed
@@ -178,10 +224,18 @@ const ProjectDetail = () => {
     toast.success("Payment release requested. This will be processed shortly.");
   };
 
-  if (!job) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-cream flex items-center justify-center">
         <p className="font-mono text-sm text-secondary-text">Loading project…</p>
+      </div>
+    );
+  }
+
+  if (!job || projectError) {
+    return (
+      <div className="min-h-screen bg-cream flex items-center justify-center px-6 text-center">
+        <p className="font-mono text-sm text-secondary-text">{projectError || "This project could not be loaded."}</p>
       </div>
     );
   }
