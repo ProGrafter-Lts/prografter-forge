@@ -118,7 +118,7 @@ const TradeDashboard = () => {
           .select("id")
           .eq("user_id", userId)
           .maybeSingle();
-        navigate(homeownerRow ? "/homeowner-dashboard" : "/trade-register", { replace: true });
+        navigate(homeownerRow ? "/dashboard/homeowner" : "/register/trade", { replace: true });
         return;
       }
       setTrade(tradeData);
