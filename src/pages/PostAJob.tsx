@@ -379,10 +379,12 @@ const PostAJob = () => {
                       />
                       <p
                         className={`text-right font-mono text-xs mt-1 ${
-                          description.trim().length < 50 ? "text-cream/30" : "text-teal/60"
+                          description.trim().length < 50 ? "text-red-400" : "text-teal/70"
                         }`}
                       >
-                        {description.trim().length} / 50 min
+                        {description.trim().length < 50
+                          ? `Minimum 50 characters — ${50 - description.trim().length} more to go`
+                          : `${description.trim().length} characters · minimum met ✓`}
                       </p>
                     </div>
 
@@ -699,10 +701,26 @@ const PostAJob = () => {
                         type="text"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
+                        onBlur={() => setStep4Touched(true)}
                         placeholder="Jane Smith"
-                        required
+                        autoComplete="name"
                         className={inputClass}
                       />
+                      {step4Touched && trimmedName.length === 0 && (
+                        <p className="font-mono text-xs text-red-400 mt-1">Please enter your name.</p>
+                      )}
+                      {nameLooksLikeEmail && (
+                        <p className="font-mono text-xs text-red-400 mt-1">
+                          Name can't contain "@". Use your real name (e.g. Jane Smith).
+                        </p>
+                      )}
+                      {trimmedName.length > 0 &&
+                        trimmedEmail.length > 0 &&
+                        trimmedName.toLowerCase() === trimmedEmail.toLowerCase() && (
+                          <p className="font-mono text-xs text-red-400 mt-1">
+                            Name and email must be different.
+                          </p>
+                        )}
                     </div>
                     <div>
                       <label className={labelClass}>Email *</label>
@@ -710,10 +728,21 @@ const PostAJob = () => {
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
+                        onBlur={() => setStep4Touched(true)}
                         placeholder="jane@example.com"
-                        required
+                        autoComplete="email"
                         className={inputClass}
                       />
+                      {step4Touched && trimmedEmail.length > 0 && !emailValid && (
+                        <p className="font-mono text-xs text-red-400 mt-1">
+                          Enter a valid email address.
+                        </p>
+                      )}
+                      {step4Touched && trimmedEmail.length === 0 && (
+                        <p className="font-mono text-xs text-red-400 mt-1">
+                          Please enter your email.
+                        </p>
+                      )}
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
