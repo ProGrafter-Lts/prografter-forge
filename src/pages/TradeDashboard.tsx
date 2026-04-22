@@ -114,6 +114,8 @@ const TradeDashboard = () => {
         return;
       }
       setTrade(tradeData);
+      // Render the shell immediately — secondary data fills in below.
+      setLoading(false);
 
       const [matchRes, quoteRes, contractRes] = await Promise.all([
         supabase
