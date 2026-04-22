@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowRight, Loader2 } from "lucide-react";
+import { AlertCircle, ArrowRight, RefreshCw } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { ShortlistStatus } from "./ShortlistStatusControl";
 
 interface Props {
@@ -46,63 +47,125 @@ const PipelineSection = ({ tradeId }: Props) => {
   const navigate = useNavigate();
   const [counts, setCounts] = useState<Counts>({ todo: 0, contacted: 0, quoted: 0, won: 0 });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
+
+    // Race the query against a 6s timeout so the section never hangs.
+    const queryPromise = supabase
+      .from("planning_alert_shortlist")
+      .select("contact_status, last_status_change_at")
+      .eq("trade_id", tradeId);
+
+    const timeoutPromise = new Promise<{ data: null; error: { message: string } }>((resolve) =>
+      window.setTimeout(
+        () => resolve({ data: null, error: { message: "Pipeline lookup timed out" } }),
+        6000,
+      ),
+    );
+
+    const { data, error: queryError } = (await Promise.race([
+      queryPromise,
+      timeoutPromise,
+    ])) as { data: { contact_status: string; last_status_change_at: string | null }[] | null; error: { message: string } | null };
+
+    if (queryError) {
+      console.error("Failed to load pipeline counts", queryError);
+      setError(queryError.message ?? "Couldn't load pipeline");
+      setLoading(false);
+      return;
+    }
+
+    const next: Counts = { todo: 0, contacted: 0, quoted: 0, won: 0 };
+    for (const r of data ?? []) {
+      const status = r.contact_status as ShortlistStatus;
+      if (status === "todo" || status === "contacted" || status === "quoted") {
+        next[status] += 1;
+      } else if (status === "won") {
+        if (r.last_status_change_at && r.last_status_change_at >= ninetyDaysAgo) {
+          next.won += 1;
+        }
+      }
+    }
+    setCounts(next);
+    setLoading(false);
+  }, [tradeId]);
 
   useEffect(() => {
     let cancelled = false;
-    const load = async () => {
-      setLoading(true);
-      const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
-      const { data, error } = await supabase
-        .from("planning_alert_shortlist")
-        .select("contact_status, last_status_change_at")
-        .eq("trade_id", tradeId);
-
+    void (async () => {
+      await load();
       if (cancelled) return;
-      if (error) {
-        console.error("Failed to load pipeline counts", error);
-        setLoading(false);
-        return;
-      }
-
-      const next: Counts = { todo: 0, contacted: 0, quoted: 0, won: 0 };
-      for (const r of data ?? []) {
-        const status = r.contact_status as ShortlistStatus;
-        if (status === "todo" || status === "contacted" || status === "quoted") {
-          next[status] += 1;
-        } else if (status === "won") {
-          if (r.last_status_change_at && r.last_status_change_at >= ninetyDaysAgo) {
-            next.won += 1;
-          }
-        }
-      }
-      setCounts(next);
-      setLoading(false);
-    };
-    load();
+    })();
     return () => {
       cancelled = true;
     };
-  }, [tradeId]);
+  }, [load]);
 
   const totalLeads = counts.todo + counts.contacted + counts.quoted + counts.won;
 
+  const header = (
+    <div>
+      <h2
+        id="pipeline-heading"
+        className="font-heading text-primary text-xl uppercase tracking-wider"
+      >
+        Your Pipeline
+      </h2>
+      <p className="font-mono text-xs text-muted-foreground mt-1">
+        Leads you're working on
+      </p>
+    </div>
+  );
+
   return (
     <section aria-labelledby="pipeline-heading" className="space-y-3">
-      <div>
-        <h2
-          id="pipeline-heading"
-          className="font-heading text-primary text-xl uppercase tracking-wider"
-        >
-          Your Pipeline
-        </h2>
-        <p className="font-mono text-xs text-muted-foreground mt-1">
-          Leads you're working on
-        </p>
-      </div>
+      {header}
 
       {loading ? (
-        <div className="rounded-2xl border border-border p-6 flex items-center justify-center">
-          <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+        <div
+          className="grid grid-cols-2 md:grid-cols-4 gap-3"
+          aria-label="Loading pipeline counts"
+          aria-busy="true"
+        >
+          {CARD_DEFS.map((card) => (
+            <div
+              key={card.key}
+              className="rounded-2xl border border-border bg-muted/20 p-4 space-y-2"
+            >
+              <Skeleton className="h-9 w-12" />
+              <Skeleton className="h-3 w-20" />
+              <Skeleton className="h-3 w-28" />
+            </div>
+          ))}
+        </div>
+      ) : error ? (
+        <div
+          role="alert"
+          className="rounded-2xl border border-destructive/40 bg-destructive/5 p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+        >
+          <div className="flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
+            <div>
+              <p className="font-sans text-sm text-foreground">
+                Couldn't load your pipeline right now.
+              </p>
+              <p className="font-mono text-xs text-muted-foreground mt-1">
+                {error}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => void load()}
+            className="inline-flex items-center gap-2 bg-secondary text-white font-mono text-xs px-4 py-2 rounded-xl hover:bg-secondary/90 transition-colors self-start sm:self-auto"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+            Retry
+          </button>
         </div>
       ) : totalLeads === 0 ? (
         <div className="rounded-2xl border-2 border-dashed border-border p-6 text-center space-y-3">
