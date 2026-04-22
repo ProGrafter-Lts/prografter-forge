@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowRight, Loader2 } from "lucide-react";
+import { AlertCircle, ArrowRight, RefreshCw } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { ShortlistStatus } from "./ShortlistStatusControl";
 
 interface Props {
