@@ -73,6 +73,7 @@ const ProjectDetail = () => {
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [contract, setContract] = useState<Contract | null>(null);
   const [subAssignments, setSubAssignments] = useState<SubAssignment[]>([]);
+  const [viewerContextReady, setViewerContextReady] = useState(false);
 
   const [userRole, setUserRole] = useState<UserRole>(null);
   const [userId, setUserId] = useState<string | null>(null);
@@ -97,23 +98,30 @@ const ProjectDetail = () => {
     setContract(null);
     setSubAssignments([]);
 
-    void loadProjectData();
-
     let isMounted = true;
 
+    const handleSession = (nextUserId: string | null) => {
+      if (!isMounted) return;
+
+      setAuthUserId(nextUserId);
+
+      if (!nextUserId) {
+        setViewerContextReady(false);
+        setLoading(false);
+        setProjectError("We couldn't verify access to this project.");
+        return;
+      }
+
+      setViewerContextReady(true);
+      void Promise.all([loadViewerContext(nextUserId), loadProjectData()]);
+    };
+
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!isMounted || !session?.user?.id) return;
-      setAuthUserId(session.user.id);
-      void loadViewerContext(session.user.id);
+      handleSession(session?.user?.id ?? null);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!isMounted) return;
-      const nextUserId = session?.user?.id ?? null;
-      setAuthUserId(nextUserId);
-      if (nextUserId) {
-        void loadViewerContext(nextUserId);
-      }
+      handleSession(session?.user?.id ?? null);
     });
 
     return () => {
@@ -135,6 +143,7 @@ const ProjectDetail = () => {
 
   const loadProjectData = async () => {
     setProjectError(null);
+    setLoading(true);
     const { data: jobData, error: jobError } = await supabase.from("jobs").select("*").eq("id", id!).maybeSingle();
     if (jobError || !jobData) {
       console.error("Failed to load project", jobError);
@@ -191,6 +200,8 @@ const ProjectDetail = () => {
   };
 
   const loadViewerContext = async (nextAuthUserId: string) => {
+    setUserRole(null);
+    setUserId(null);
     const { data: tradeData } = await supabase.from("trades").select("id, name, verified").eq("user_id", nextAuthUserId).maybeSingle();
     const { data: hoData } = await supabase.from("homeowners").select("id, name").eq("user_id", nextAuthUserId).maybeSingle();
 
@@ -246,7 +257,7 @@ const ProjectDetail = () => {
     }
   };
 
-  if (loading) {
+  if (loading || !viewerContextReady) {
     return (
       <div className="min-h-screen bg-cream flex items-center justify-center">
         <p className="font-mono text-sm text-secondary-text">Loading project…</p>

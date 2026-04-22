@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { BadgeCheck } from "lucide-react";
@@ -45,30 +45,20 @@ const TradeDashboard = () => {
   const [activeNav, setActiveNav] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const lastLoadedUserIdRef = useRef<string | null>(null);
 
   // Margin data - derived from quotes and project stages
   const [marginData, setMarginData] = useState({ totalQuoted: 0, totalCosts: 0, totalReceived: 0 });
 
   useEffect(() => {
     let isMounted = true;
-    let lastLoadedUserId: string | null = null;
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!isMounted) return;
-      if (!session?.user) {
-        setLoading(false);
-        return;
-      }
-
-      lastLoadedUserId = session.user.id;
-      void loadDashboardData(session.user.id);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const handleSession = (session: Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"]) => {
       if (!isMounted) return;
 
       if (!session?.user) {
-        lastLoadedUserId = null;
+        lastLoadedUserIdRef.current = null;
+        setLoadError(null);
         setTrade(null);
         setMatches([]);
         setQuotes([]);
@@ -78,11 +68,17 @@ const TradeDashboard = () => {
         return;
       }
 
-      // Only reload when the signed-in user actually changes.
-      // Token refreshes fire this listener but should not reset loading state.
-      if (session.user.id === lastLoadedUserId) return;
-      lastLoadedUserId = session.user.id;
+      if (session.user.id === lastLoadedUserIdRef.current) return;
+      lastLoadedUserIdRef.current = session.user.id;
       void loadDashboardData(session.user.id);
+    };
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      handleSession(session);
+    });
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      handleSession(session);
     });
 
     return () => {
@@ -93,25 +89,18 @@ const TradeDashboard = () => {
 
   const loadDashboardData = async (userId: string) => {
     setLoading(true);
+    setLoadError(null);
 
     try {
-      const tradeLookup = supabase
+      const { data: tradeData, error: tradeError } = await supabase
         .from("trades")
         .select("id, name, company_name, verified, trade_type, phone, is_green_trade, mcs_number, trustmark_number, pas_2030_accredited, pas_2035_coordinator, ozev_approved, fgas_registered, ciga_registered, inca_certified, green_cert_expiry, specialisms_prompt_seen")
         .eq("user_id", userId)
         .maybeSingle();
 
-      const tradeLookupTimeout = new Promise<never>((_, reject) => {
-        window.setTimeout(() => reject(new Error("Trade profile lookup timed out")), 4000);
-      });
-
-      const { data: tradeData, error: tradeError } = await Promise.race([
-        tradeLookup,
-        tradeLookupTimeout,
-      ]);
-
       if (tradeError) {
         console.error("Failed to load trade profile", tradeError);
+        setLoadError("We couldn't load your trade dashboard right now.");
         setLoading(false);
         return;
       }
@@ -208,6 +197,7 @@ const TradeDashboard = () => {
       setMarginData({ totalQuoted, totalCosts, totalReceived });
     } catch (error) {
       console.error("Trade dashboard bootstrap failed", error);
+      setLoadError(error instanceof Error ? error.message : "We couldn't load your trade dashboard right now.");
     } finally {
       setLoading(false);
     }
@@ -230,6 +220,10 @@ const TradeDashboard = () => {
           {loading && !trade ? (
             <div className="min-h-[40vh] flex items-center justify-center font-mono text-sm text-muted-foreground">
               Loading dashboard…
+            </div>
+          ) : loadError && !trade ? (
+            <div className="min-h-[40vh] flex items-center justify-center px-6 text-center font-mono text-sm text-muted-foreground">
+              {loadError}
             </div>
           ) : (
             <>
