@@ -44,13 +44,9 @@ const SCHEME_TRADE_MAP: Record<string, string[]> = {
   epc: ["EPC Assessor"],
 };
 
-const BUDGETS = [
-  "Under £1k",
-  "£1k – £5k",
-  "£5k – £15k",
-  "£15k – £50k",
-  "£50k+",
-] as const;
+// UK postcode regex (covers standard formats: A9 9AA, A9A 9AA, A99 9AA, AA9 9AA, AA9A 9AA, AA99 9AA)
+const UK_POSTCODE_REGEX = /^[A-Z]{1,2}[0-9][A-Z0-9]?\s?[0-9][A-Z]{2}$/i;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 type Step = 1 | 2 | 3 | 3.5 | 4;
 

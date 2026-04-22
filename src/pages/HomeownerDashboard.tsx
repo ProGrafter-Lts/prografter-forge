@@ -187,7 +187,7 @@ const HomeownerDashboard = () => {
 
               <ActiveProjectsSection jobs={jobs} quoteCounts={quoteCounts} />
 
-              <QuotesReceived quotes={quotes} onSelectTier={handleSelectTier} />
+              <QuotesReceived quotes={quotes} onSelectTier={handleSelectTier} onQuoteAccepted={loadData} />
               <MyJobs jobs={jobs} />
               <RecentSiteUpdates updates={siteUpdates} />
             </>
