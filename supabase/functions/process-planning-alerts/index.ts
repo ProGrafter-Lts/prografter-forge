@@ -1,9 +1,15 @@
 // Fetches live UK planning applications from PlanIt (planit.org.uk) for every
 // active planning_alert_subs row and inserts deduped matches into planning_alerts.
 //
-// Data sources (both free, no API key):
-//   - postcodes.io  -> geocode trade postcode to lat/lng
-//   - planit.org.uk -> recent planning applications near a lat/lng
+// PlanIt's lat/lng/krad endpoint currently times out for almost any radius
+// ("Timeout (45s) from data source"), so we instead:
+//   1. Geocode trade postcode -> lat/lng + home admin_district (postcodes.io)
+//   2. Discover all admin_districts within radius_miles by sampling concentric
+//      rings of points and reverse-geocoding each (postcodes.io)
+//   3. Query PlanIt by `auth=<district>` for each district (fast, ~2s)
+//   4. Filter results client-side by exact distance from trade lat/lng
+//
+// Both data sources are free, no API key.
 
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
@@ -39,35 +45,32 @@ interface PlanItRecord {
   start_date?: string;
   decided_date?: string;
   url?: string;
+  link?: string;
   area_name?: string;
-  location?: { lat?: number; lng?: number } | null;
+  location?: { coordinates?: [number, number]; lat?: number; lng?: number } | null;
   lat?: number;
   lng?: number;
-  distance?: number; // some payloads include km distance
 }
 
 const MILES_PER_KM = 0.621371;
+const KM_PER_MILE = 1.60934;
 
 // Haversine distance in miles
 function distanceMiles(
-  lat1: number,
-  lng1: number,
-  lat2: number,
-  lng2: number,
+  lat1: number, lng1: number, lat2: number, lng2: number,
 ): number {
   const toRad = (d: number) => (d * Math.PI) / 180;
-  const R = 3958.8; // miles
+  const R = 3958.8;
   const dLat = toRad(lat2 - lat1);
   const dLng = toRad(lng2 - lng1);
-  const a =
-    Math.sin(dLat / 2) ** 2 +
+  const a = Math.sin(dLat / 2) ** 2 +
     Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
   return 2 * R * Math.asin(Math.sqrt(a));
 }
 
-async function geocodePostcode(
-  postcode: string,
-): Promise<{ lat: number; lng: number } | null> {
+interface Geo { lat: number; lng: number; district: string | null }
+
+async function geocodePostcode(postcode: string): Promise<Geo | null> {
   try {
     const cleaned = postcode.replace(/\s+/g, "").toUpperCase();
     const res = await fetch(
@@ -77,48 +80,117 @@ async function geocodePostcode(
     const json = await res.json();
     const r = json?.result;
     if (!r?.latitude || !r?.longitude) return null;
-    return { lat: r.latitude, lng: r.longitude };
+    return {
+      lat: r.latitude,
+      lng: r.longitude,
+      district: r.admin_district ?? null,
+    };
   } catch (e) {
     console.error("[GEOCODE] failed for", postcode, e);
     return null;
   }
 }
 
-async function fetchPlanItApplications(
-  lat: number,
-  lng: number,
+// Reverse-geocode a single point to its admin_district
+async function reverseDistrict(lat: number, lng: number): Promise<string | null> {
+  try {
+    const url =
+      `https://api.postcodes.io/postcodes?lon=${lng}&lat=${lat}&radius=10000&limit=1`;
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const json = await res.json();
+    return json?.result?.[0]?.admin_district ?? null;
+  } catch {
+    return null;
+  }
+}
+
+// Sample concentric rings around (lat0, lng0) and collect unique admin_districts
+// covering a circle of radiusMiles.
+async function discoverDistricts(
+  lat0: number,
+  lng0: number,
   radiusMiles: number,
+  homeDistrict: string | null,
+): Promise<string[]> {
+  const districts = new Set<string>();
+  if (homeDistrict) districts.add(homeDistrict);
+
+  // Choose ring radii — denser near home, sparser further out.
+  const rings: number[] = [];
+  const step = Math.max(8, Math.round(radiusMiles / 6));
+  for (let r = step; r <= radiusMiles; r += step) rings.push(r);
+  if (rings[rings.length - 1] !== radiusMiles) rings.push(radiusMiles);
+
+  const tasks: Promise<string | null>[] = [];
+  for (const ringMiles of rings) {
+    const nPoints = Math.max(8, Math.min(24, Math.round(ringMiles * 0.8)));
+    for (let i = 0; i < nPoints; i++) {
+      const angle = (2 * Math.PI * i) / nPoints;
+      const dLat = (ringMiles * Math.cos(angle)) / 69;
+      const dLng =
+        (ringMiles * Math.sin(angle)) /
+        (69 * Math.cos((lat0 * Math.PI) / 180));
+      tasks.push(reverseDistrict(lat0 + dLat, lng0 + dLng));
+    }
+  }
+
+  // Run in parallel chunks of 20 to avoid hammering postcodes.io
+  const CHUNK = 20;
+  for (let i = 0; i < tasks.length; i += CHUNK) {
+    const slice = tasks.slice(i, i + CHUNK);
+    const results = await Promise.all(slice);
+    for (const d of results) if (d) districts.add(d);
+  }
+  return [...districts];
+}
+
+async function fetchPlanItForAuthority(
+  authority: string,
   recentDays: number,
 ): Promise<PlanItRecord[]> {
-  // PlanIt areasearch — open API, lat/lng + krad (km radius), recent apps.
-  // See https://www.planit.org.uk/api/
-  const krad = Math.min(50, Math.max(1, radiusMiles / MILES_PER_KM));
   const recent = Math.min(730, Math.max(1, Math.floor(recentDays)));
+  // No `sort=` — that's what was triggering PlanIt's data-source timeouts.
   const url =
-    `https://www.planit.org.uk/api/applics/json?lat=${lat}&lng=${lng}` +
-    `&krad=${krad.toFixed(2)}&recent=${recent}&pg_sz=400&sort=-start_date`;
+    `https://www.planit.org.uk/api/applics/json` +
+    `?auth=${encodeURIComponent(authority)}&recent=${recent}&pg_sz=400`;
   try {
     const res = await fetch(url, {
       headers: { "User-Agent": "ProGrafter-PlanningAlerts/1.0" },
     });
     if (!res.ok) {
-      console.error("[PLANIT] HTTP", res.status, await res.text());
+      const body = await res.text();
+      console.error(`[PLANIT] ${authority} HTTP ${res.status}: ${body.slice(0, 200)}`);
       return [];
     }
     const json = await res.json();
     return (json?.records ?? []) as PlanItRecord[];
   } catch (e) {
-    console.error("[PLANIT] fetch failed", e);
+    console.error(`[PLANIT] ${authority} fetch failed:`, e);
     return [];
   }
 }
 
-// Filter applications by trade type relevance. Keep it loose — we'd rather show
-// a few extra than miss good leads. Returns true if the application looks
-// relevant to the given trade_type.
+function recordLatLng(r: PlanItRecord): { lat: number; lng: number } | null {
+  // PlanIt usually returns location.coordinates as [lng, lat] (GeoJSON order)
+  const coords = r.location?.coordinates;
+  if (Array.isArray(coords) && coords.length === 2) {
+    return { lng: coords[0], lat: coords[1] };
+  }
+  if (r.location?.lat != null && r.location?.lng != null) {
+    return { lat: r.location.lat, lng: r.location.lng };
+  }
+  if (r.lat != null && r.lng != null) {
+    return { lat: r.lat, lng: r.lng };
+  }
+  return null;
+}
+
+// Loose trade-type relevance filter — better to over-include than miss leads.
 function isRelevant(record: PlanItRecord, tradeType: string): boolean {
-  const desc = `${record.description ?? ""} ${record.app_type ?? ""}`.toLowerCase();
-  if (!desc.trim()) return true; // no text -> don't filter out
+  const desc =
+    `${record.description ?? ""} ${record.app_type ?? ""}`.toLowerCase();
+  if (!desc.trim()) return true;
   const t = tradeType.toLowerCase();
 
   const keywordMap: Record<string, string[]> = {
@@ -145,11 +217,8 @@ function isRelevant(record: PlanItRecord, tradeType: string): boolean {
   };
 
   for (const [key, kws] of Object.entries(keywordMap)) {
-    if (t.includes(key)) {
-      return kws.some((kw) => desc.includes(kw));
-    }
+    if (t.includes(key)) return kws.some((kw) => desc.includes(kw));
   }
-  // Unknown trade type -> don't filter
   return true;
 }
 
@@ -157,70 +226,106 @@ async function processSub(
   supabase: ReturnType<typeof createClient>,
   sub: Sub,
   recentDays: number,
-): Promise<{ inserted: number; reason?: string }> {
-  if (!sub.trades?.postcode) {
-    return { inserted: 0, reason: "no postcode on trade" };
-  }
+): Promise<{ inserted: number; reason?: string; districts?: number; fetched?: number }> {
+  if (!sub.trades?.postcode) return { inserted: 0, reason: "no postcode on trade" };
+
   const geo = await geocodePostcode(sub.trades.postcode);
   if (!geo) return { inserted: 0, reason: "geocode failed" };
 
-  const records = await fetchPlanItApplications(
-    geo.lat,
-    geo.lng,
-    sub.radius_miles,
-    recentDays,
+  const districts = await discoverDistricts(
+    geo.lat, geo.lng, sub.radius_miles, geo.district,
   );
-  if (!records.length) return { inserted: 0, reason: "no records returned" };
+  console.log(
+    `[PLANNING-ALERTS] trade=${sub.trade_id} postcode=${sub.trades.postcode} ` +
+      `home=${geo.district} radius=${sub.radius_miles}mi districts=${districts.length}`,
+  );
+  if (!districts.length) return { inserted: 0, reason: "no districts discovered" };
+
+  // Fetch PlanIt for each authority in parallel chunks
+  const allRecords: PlanItRecord[] = [];
+  const CHUNK = 5;
+  for (let i = 0; i < districts.length; i += CHUNK) {
+    const slice = districts.slice(i, i + CHUNK);
+    const batches = await Promise.all(
+      slice.map((d) => fetchPlanItForAuthority(d, recentDays)),
+    );
+    for (const b of batches) allRecords.push(...b);
+  }
+  console.log(
+    `[PLANNING-ALERTS] trade=${sub.trade_id} fetched ${allRecords.length} raw records`,
+  );
+
+  if (!allRecords.length) {
+    return { inserted: 0, reason: "no records returned", districts: districts.length, fetched: 0 };
+  }
+
+  // Filter by exact distance (trade radius)
+  const inRadius = allRecords
+    .map((r) => {
+      const ll = recordLatLng(r);
+      const dist = ll
+        ? distanceMiles(geo.lat, geo.lng, ll.lat, ll.lng)
+        : null;
+      return { r, dist };
+    })
+    .filter(({ dist }) => dist != null && dist <= sub.radius_miles);
 
   // Existing refs for this trade — dedupe before inserting
-  const refs = records.map((r) => r.uid ?? r.reference ?? "").filter(Boolean);
-  const { data: existing } = await supabase
-    .from("planning_alerts")
-    .select("application_ref")
-    .eq("trade_id", sub.trade_id)
-    .in("application_ref", refs);
-  const existingSet = new Set(
-    (existing ?? []).map((e: any) => e.application_ref),
-  );
+  const refs = inRadius
+    .map(({ r }) => r.uid ?? r.reference ?? "")
+    .filter(Boolean);
+  const existingSet = new Set<string>();
+  if (refs.length) {
+    // chunk IN clauses to keep request size sane
+    const CHUNK_REF = 200;
+    for (let i = 0; i < refs.length; i += CHUNK_REF) {
+      const slice = refs.slice(i, i + CHUNK_REF);
+      const { data: existing } = await supabase
+        .from("planning_alerts")
+        .select("application_ref")
+        .eq("trade_id", sub.trade_id)
+        .in("application_ref", slice);
+      for (const e of (existing ?? []) as { application_ref: string }[]) {
+        existingSet.add(e.application_ref);
+      }
+    }
+  }
 
   const tradeType = sub.trades.trade_type ?? "";
-  const rows = records
-    .filter((r) => {
+  const rows = inRadius
+    .filter(({ r }) => {
       const ref = r.uid ?? r.reference;
       if (!ref || existingSet.has(ref)) return false;
       return isRelevant(r, tradeType);
     })
-    .map((r) => {
-      const recLat = r.location?.lat ?? r.lat;
-      const recLng = r.location?.lng ?? r.lng;
-      const dist =
-        recLat != null && recLng != null
-          ? distanceMiles(geo.lat, geo.lng, recLat, recLng)
-          : r.distance != null
-          ? r.distance * MILES_PER_KM
-          : null;
-      return {
-        trade_id: sub.trade_id,
-        application_ref: r.uid ?? r.reference!,
-        address: r.address ?? r.name ?? "Address not provided",
-        postcode: r.postcode ?? "",
-        application_type: r.app_type ?? "Planning Application",
-        description: r.description ?? null,
-        distance_miles: dist != null ? Number(dist.toFixed(2)) : null,
-        approved_date: r.decided_date ?? r.start_date ?? null,
-        local_authority: r.area_name ?? null,
-        planning_portal_url: r.url ?? null,
-      };
-    });
+    .map(({ r, dist }) => ({
+      trade_id: sub.trade_id,
+      application_ref: r.uid ?? r.reference!,
+      address: r.address ?? r.name ?? "Address not provided",
+      postcode: r.postcode ?? "",
+      application_type: r.app_type ?? "Planning Application",
+      description: r.description ?? null,
+      distance_miles: dist != null ? Number(dist.toFixed(2)) : null,
+      approved_date: r.decided_date ?? r.start_date ?? null,
+      local_authority: r.area_name ?? null,
+      planning_portal_url: r.url ?? r.link ?? null,
+    }));
 
-  if (!rows.length) return { inserted: 0, reason: "all duplicates or filtered" };
+  if (!rows.length) {
+    return {
+      inserted: 0,
+      reason: `0 of ${inRadius.length} in-radius records were new+relevant`,
+      districts: districts.length,
+      fetched: allRecords.length,
+    };
+  }
 
   const { error } = await supabase.from("planning_alerts").insert(rows);
   if (error) {
     console.error("[INSERT] failed for trade", sub.trade_id, error);
-    return { inserted: 0, reason: error.message };
+    return { inserted: 0, reason: error.message, districts: districts.length, fetched: allRecords.length };
   }
-  return { inserted: rows.length };
+  return { inserted: rows.length, districts: districts.length, fetched: allRecords.length };
 }
 
 serve(async (req) => {
@@ -235,14 +340,12 @@ serve(async (req) => {
       { auth: { persistSession: false } },
     );
 
-    // Optional: ?trade_id=<uuid> to refresh just one trade (used by manual button)
-    // Optional: ?days=N to widen lookback window (default 90, max 730).
-    //   - cron runs nightly with default 90 to catch anything filed in the last 3 months
-    //   - manual "Refresh" button can pass days=180 or 365 for a deeper backfill
     const url = new URL(req.url);
     const onlyTradeId = url.searchParams.get("trade_id");
     const daysParam = url.searchParams.get("days");
-    const recentDays = daysParam ? Math.min(730, Math.max(1, parseInt(daysParam, 10) || 90)) : 90;
+    const recentDays = daysParam
+      ? Math.min(730, Math.max(1, parseInt(daysParam, 10) || 90))
+      : 90;
 
     let query = supabase
       .from("planning_alert_subs")
@@ -258,7 +361,7 @@ serve(async (req) => {
         (onlyTradeId ? ` (trade ${onlyTradeId})` : ""),
     );
 
-    const results: Record<string, { inserted: number; reason?: string }> = {};
+    const results: Record<string, { inserted: number; reason?: string; districts?: number; fetched?: number }> = {};
     let totalInserted = 0;
 
     for (const sub of (subs ?? []) as Sub[]) {
@@ -267,6 +370,8 @@ serve(async (req) => {
       totalInserted += r.inserted;
       console.log(
         `[PLANNING-ALERTS] trade=${sub.trade_id} inserted=${r.inserted}` +
+          (r.districts ? ` districts=${r.districts}` : "") +
+          (r.fetched != null ? ` fetched=${r.fetched}` : "") +
           (r.reason ? ` reason="${r.reason}"` : ""),
       );
     }
