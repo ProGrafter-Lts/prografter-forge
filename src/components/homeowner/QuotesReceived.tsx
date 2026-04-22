@@ -1,7 +1,20 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { BadgeCheck, SearchCheck, Shield, ArrowRight } from "lucide-react";
+import { BadgeCheck, SearchCheck, Shield, ArrowRight, Check, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { getVerdictTheme, type AiVerdict } from "@/lib/quoteVerdict";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Quote {
   id: string;
@@ -33,6 +46,7 @@ interface Quote {
 interface QuotesReceivedProps {
   quotes: Quote[];
   onSelectTier?: (quoteId: string, tier: string, price: number) => void;
+  onQuoteAccepted?: () => void;
 }
 
 const TIER_LABELS: Record<string, string> = {
@@ -77,8 +91,55 @@ const RatingDisplay = ({
   );
 };
 
-const QuotesReceived = ({ quotes }: QuotesReceivedProps) => {
+const QuotesReceived = ({ quotes, onQuoteAccepted }: QuotesReceivedProps) => {
   const navigate = useNavigate();
+  const [pendingAccept, setPendingAccept] = useState<Quote | null>(null);
+  const [accepting, setAccepting] = useState(false);
+
+  const handleAccept = async () => {
+    if (!pendingAccept) return;
+    setAccepting(true);
+
+    const acceptedTradeName =
+      pendingAccept.trades?.company_name || pendingAccept.trades?.name || "The tradesperson";
+
+    // 1. Mark all sibling quotes on this job as declined
+    const siblingIds = quotes
+      .filter(
+        (q) =>
+          q.job_id === pendingAccept.job_id &&
+          q.id !== pendingAccept.id &&
+          q.status === "pending",
+      )
+      .map((q) => q.id);
+
+    if (siblingIds.length > 0) {
+      const { error: declineErr } = await supabase
+        .from("quotes")
+        .update({ status: "declined" })
+        .in("id", siblingIds);
+      if (declineErr) {
+        console.error("Failed to auto-decline sibling quotes", declineErr);
+      }
+    }
+
+    // 2. Accept the chosen quote
+    const { error: acceptErr } = await supabase
+      .from("quotes")
+      .update({ status: "accepted" })
+      .eq("id", pendingAccept.id);
+
+    setAccepting(false);
+
+    if (acceptErr) {
+      toast.error("Couldn't accept quote — please try again.");
+      return;
+    }
+
+    toast.success(`Quote accepted. ${acceptedTradeName} will be in touch.`);
+    setPendingAccept(null);
+    onQuoteAccepted?.();
+  };
 
   if (quotes.length === 0) {
     return (
@@ -103,6 +164,10 @@ const QuotesReceived = ({ quotes }: QuotesReceivedProps) => {
     .filter(([, qs]) => qs.length >= 2)
     .map(([jobId]) => jobId);
 
+  // A job has an accepted quote if any quote on it is 'accepted'
+  const jobHasAccepted = (jobId: string) =>
+    (byJob[jobId] || []).some((q) => q.status === "accepted");
+
   return (
     <section>
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
@@ -122,18 +187,34 @@ const QuotesReceived = ({ quotes }: QuotesReceivedProps) => {
           const theme = getVerdictTheme(q.ai_verdict);
           const VIcon = theme.icon;
           const company = q.trades?.company_name || q.trades?.name || "Tradesperson";
+          const jobAccepted = jobHasAccepted(q.job_id);
+          const isAccepted = q.status === "accepted";
+          const isDeclined = q.status === "declined";
+          const isPending = q.status === "pending";
 
           return (
             <div
               key={q.id}
-              className={`bg-card rounded-2xl p-5 border border-border shadow-sm ${theme.borderClass}`}
+              className={`bg-card rounded-2xl p-5 border border-border shadow-sm ${theme.borderClass} ${
+                isDeclined ? "opacity-60" : ""
+              }`}
             >
-              {/* Verdict banner */}
-              <div className="flex items-center gap-2 mb-3">
+              {/* Status banner */}
+              <div className="flex items-center gap-2 mb-3 flex-wrap">
                 <Badge className={`${theme.badgeClass} font-mono text-[10px] inline-flex items-center gap-1`}>
                   <VIcon className={`w-3 h-3 ${theme.iconClass}`} />
                   {theme.label}
                 </Badge>
+                {isAccepted && (
+                  <Badge className="bg-green-100 text-green-700 font-mono text-[10px]">
+                    Accepted
+                  </Badge>
+                )}
+                {isDeclined && (
+                  <Badge variant="outline" className="font-mono text-[10px]">
+                    Declined
+                  </Badge>
+                )}
                 <span className="font-mono text-[10px] text-muted-foreground hidden sm:inline">
                   {theme.description}
                 </span>
@@ -183,13 +264,42 @@ const QuotesReceived = ({ quotes }: QuotesReceivedProps) => {
                 </p>
               )}
 
+              {isAccepted && (
+                <div className="mt-4 bg-green-50 border border-green-200 rounded-lg p-3">
+                  <p className="font-mono text-xs text-green-800">
+                    Quote accepted. {company} will be in touch to arrange next steps.
+                  </p>
+                </div>
+              )}
+
               <div className="flex flex-wrap items-center gap-2 mt-4">
+                {isPending && !jobAccepted && (
+                  <button
+                    onClick={() => setPendingAccept(q)}
+                    className="bg-secondary text-secondary-foreground font-mono text-xs px-4 py-2 rounded-xl hover:opacity-90 transition-opacity shadow-sm inline-flex items-center gap-2"
+                  >
+                    <Check className="w-3.5 h-3.5" /> Accept Quote
+                  </button>
+                )}
+                {isPending && jobAccepted && (
+                  <span className="font-mono text-[11px] text-muted-foreground italic">
+                    Another quote already accepted on this job
+                  </span>
+                )}
                 <button
-                  onClick={() => navigate(`/project/${q.job_id}/compare`)}
+                  onClick={() => navigate(`/project/${q.job_id}`)}
                   className="font-mono text-xs text-secondary hover:underline"
                 >
-                  Compare with other quotes →
+                  View project →
                 </button>
+                {(byJob[q.job_id]?.length ?? 0) >= 2 && (
+                  <button
+                    onClick={() => navigate(`/project/${q.job_id}/compare`)}
+                    className="font-mono text-xs text-secondary hover:underline"
+                  >
+                    Compare with other quotes →
+                  </button>
+                )}
               </div>
 
               {q.ai_verdict === "high_risk" && (
@@ -204,6 +314,44 @@ const QuotesReceived = ({ quotes }: QuotesReceivedProps) => {
           );
         })}
       </div>
+
+      <AlertDialog
+        open={pendingAccept !== null}
+        onOpenChange={(open) => !open && setPendingAccept(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Accept this quote?</AlertDialogTitle>
+            <AlertDialogDescription>
+              You're accepting{" "}
+              <strong>
+                {pendingAccept?.trades?.company_name || pendingAccept?.trades?.name || "this trade"}
+              </strong>{" "}
+              at <strong>£{Number(pendingAccept?.amount || 0).toLocaleString()}</strong>.
+              All other pending quotes on this job will be automatically declined.
+              You can sign the contract from the project page next.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={accepting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                void handleAccept();
+              }}
+              disabled={accepting}
+            >
+              {accepting ? (
+                <span className="inline-flex items-center gap-2">
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" /> Accepting…
+                </span>
+              ) : (
+                "Yes, accept quote"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </section>
   );
 };
