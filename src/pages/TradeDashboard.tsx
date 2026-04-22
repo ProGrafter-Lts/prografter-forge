@@ -95,11 +95,26 @@ const TradeDashboard = () => {
     setLoading(true);
 
     try {
-      const { data: tradeData } = await supabase
+      const tradeLookup = supabase
         .from("trades")
         .select("id, name, company_name, verified, trade_type, phone, is_green_trade, mcs_number, trustmark_number, pas_2030_accredited, pas_2035_coordinator, ozev_approved, fgas_registered, ciga_registered, inca_certified, green_cert_expiry, specialisms_prompt_seen")
         .eq("user_id", userId)
         .maybeSingle();
+
+      const tradeLookupTimeout = new Promise<never>((_, reject) => {
+        window.setTimeout(() => reject(new Error("Trade profile lookup timed out")), 4000);
+      });
+
+      const { data: tradeData, error: tradeError } = await Promise.race([
+        tradeLookup,
+        tradeLookupTimeout,
+      ]);
+
+      if (tradeError) {
+        console.error("Failed to load trade profile", tradeError);
+        setLoading(false);
+        return;
+      }
 
       if (!tradeData) {
         setTrade(null);
@@ -191,6 +206,8 @@ const TradeDashboard = () => {
       const totalCosts = Math.round(totalQuoted * 0.65);
 
       setMarginData({ totalQuoted, totalCosts, totalReceived });
+    } catch (error) {
+      console.error("Trade dashboard bootstrap failed", error);
     } finally {
       setLoading(false);
     }
