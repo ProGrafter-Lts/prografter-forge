@@ -61,17 +61,15 @@ const TradeDashboard = () => {
 
   useEffect(() => {
     let isMounted = true;
-    const handleSession = (session: Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"]) => {
+
+    const handleSession = (
+      session: Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"],
+    ) => {
       if (!isMounted) return;
 
       if (!session?.user) {
         lastLoadedUserIdRef.current = null;
-        setLoadError(null);
         setTrade(null);
-        setMatches([]);
-        setQuotes([]);
-        setActiveProjects([]);
-        setMarginData({ totalQuoted: 0, totalCosts: 0, totalReceived: 0 });
         setLoading(false);
         return;
       }
@@ -81,11 +79,21 @@ const TradeDashboard = () => {
       void loadDashboardData(session.user.id);
     };
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      handleSession(session);
-    });
+    // Source of truth on mount.
+    supabase.auth
+      .getSession()
+      .then(({ data: { session } }) => handleSession(session))
+      .catch((err) => {
+        console.error("TradeDashboard getSession failed", err);
+        if (isMounted) {
+          setLoadError("We couldn't verify your session. Please sign in again.");
+          setLoading(false);
+        }
+      });
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    // React to subsequent auth changes only.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "INITIAL_SESSION") return; // already handled by getSession
       handleSession(session);
     });
 
