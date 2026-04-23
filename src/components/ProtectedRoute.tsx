@@ -8,45 +8,65 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const [authenticated, setAuthenticated] = useState(false);
+  const [status, setStatus] = useState<"loading" | "authenticated" | "unauthenticated">("loading");
 
   useEffect(() => {
     let isMounted = true;
 
-    // Subscribe first — but DON'T redirect on the initial null state.
-    // Only react to explicit SIGNED_OUT events here.
+    const resolve = (hasSession: boolean) => {
+      if (!isMounted) return;
+      if (hasSession) {
+        setStatus("authenticated");
+      } else {
+        setStatus("unauthenticated");
+        navigate("/login", { replace: true });
+      }
+    };
+
+    // Source of truth on mount — resolves from localStorage immediately.
+    supabase.auth
+      .getSession()
+      .then(({ data: { session } }) => resolve(!!session))
+      .catch((err) => {
+        console.error("ProtectedRoute getSession failed", err);
+        resolve(false);
+      });
+
+    // React to subsequent sign-out events.
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (!isMounted) return;
-      if (event === "SIGNED_OUT") {
-        setAuthenticated(false);
+      if (event === "SIGNED_OUT" || (!session && event !== "INITIAL_SESSION")) {
+        setStatus("unauthenticated");
         navigate("/login", { replace: true });
         return;
       }
       if (session) {
-        setAuthenticated(true);
-        setLoading(false);
+        setStatus("authenticated");
       }
     });
 
-    // Then resolve the persisted session. This is the source of truth on mount.
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    // Safety net: if for any reason getSession never resolves (network/race),
+    // fall back to unauthenticated after 5s instead of an infinite spinner.
+    const safetyTimeout = window.setTimeout(() => {
       if (!isMounted) return;
-      if (!session) {
-        navigate("/login", { replace: true });
-      } else {
-        setAuthenticated(true);
-      }
-      setLoading(false);
-    });
+      setStatus((current) => {
+        if (current === "loading") {
+          console.warn("ProtectedRoute: auth check timed out, redirecting to login");
+          navigate("/login", { replace: true });
+          return "unauthenticated";
+        }
+        return current;
+      });
+    }, 5000);
 
     return () => {
       isMounted = false;
       subscription.unsubscribe();
+      window.clearTimeout(safetyTimeout);
     };
   }, [navigate]);
 
-  if (loading) {
+  if (status === "loading") {
     return (
       <div className="min-h-screen bg-cream flex items-center justify-center">
         <div className="font-mono text-sm text-secondary-text">Loading...</div>
@@ -54,7 +74,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     );
   }
 
-  return authenticated ? <>{children}</> : null;
+  return status === "authenticated" ? <>{children}</> : null;
 };
 
 export default ProtectedRoute;
