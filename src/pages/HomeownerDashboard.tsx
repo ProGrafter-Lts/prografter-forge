@@ -10,7 +10,7 @@ import RecentSiteUpdates from "@/components/homeowner/RecentSiteUpdates";
 import VariationAlert from "@/components/homeowner/VariationAlert";
 import GreenCertificatePack from "@/components/GreenCertificatePack";
 import { isGreenTrade } from "@/lib/greenTrades";
-import { BookOpen, Leaf } from "lucide-react";
+import { BookOpen, Leaf, FolderKanban, SearchCheck, ArrowRight } from "lucide-react";
 import HomeownerProfileSection from "@/components/homeowner/HomeownerProfileSection";
 
 const HomeownerDashboard = () => {
@@ -180,8 +180,60 @@ const HomeownerDashboard = () => {
           {/* Profile tab */}
           {activeNav === "profile" && <HomeownerProfileSection />}
 
+          {/* My Projects tab */}
+          {activeNav === "projects" && (
+            <section className="space-y-6">
+              <div>
+                <h2 className="font-heading text-primary text-2xl flex items-center gap-2">
+                  <FolderKanban className="w-5 h-5" /> My Projects
+                </h2>
+                <p className="font-mono text-xs text-muted-foreground mt-1">
+                  Every project you've posted, in flight or completed.
+                </p>
+              </div>
+              <ActiveProjectsSection jobs={jobs} quoteCounts={quoteCounts} />
+              <MyJobs jobs={jobs} />
+            </section>
+          )}
+
+          {/* Quote Checker tab */}
+          {activeNav === "quotes" && (
+            <section className="space-y-6">
+              <div>
+                <h2 className="font-heading text-primary text-2xl flex items-center gap-2">
+                  <SearchCheck className="w-5 h-5" /> Quotes &amp; Quote Checker
+                </h2>
+                <p className="font-mono text-xs text-muted-foreground mt-1">
+                  Compare quotes you've received and run AI checks on outside quotes.
+                </p>
+              </div>
+
+              <div className="bg-card rounded-2xl p-6 border border-border shadow-sm flex items-start justify-between gap-4 flex-wrap">
+                <div className="max-w-lg">
+                  <h3 className="font-heading text-primary text-lg">Got a quote from outside Prografter?</h3>
+                  <p className="font-mono text-xs text-muted-foreground mt-1">
+                    Upload any builder's quote and our AI will flag missing line items, compare it to fair-market rates and produce a homeowner-friendly verdict.
+                  </p>
+                </div>
+                <a
+                  href="/quote-checker"
+                  className="inline-flex items-center gap-1.5 bg-secondary text-secondary-foreground font-mono text-xs px-4 py-2 rounded-xl hover:opacity-90 transition-opacity shadow-sm whitespace-nowrap"
+                >
+                  Run Quote Checker
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </a>
+              </div>
+
+              <QuotesReceived
+                quotes={quotes}
+                onSelectTier={handleSelectTier}
+                onQuoteAccepted={loadData}
+              />
+            </section>
+          )}
+
           {/* Main overview content */}
-          {activeNav !== "manual" && activeNav !== "grants" && activeNav !== "profile" && (
+          {activeNav === "overview" && (
             <>
               <VariationAlert variations={variations} />
 

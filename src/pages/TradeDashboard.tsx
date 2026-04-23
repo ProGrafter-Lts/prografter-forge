@@ -15,6 +15,9 @@ import CalendarConnect from "@/components/trade/CalendarConnect";
 import TradeProfileSection from "@/components/trade/TradeProfileSection";
 import AddSpecialismsBanner from "@/components/trade/AddSpecialismsBanner";
 import PipelineSection from "@/components/trade/PipelineSection";
+import AvailableJobsView from "@/components/trade/AvailableJobsView";
+import ActiveProjectsView from "@/components/trade/ActiveProjectsView";
+import EarningsView from "@/components/trade/EarningsView";
 
 interface TradeProfile {
   name: string;
@@ -271,7 +274,23 @@ const TradeDashboard = () => {
             <TradeProfileSection tradeId={trade.id} />
           )}
 
-          {activeNav !== "profile" && (
+          {activeNav === "jobs" && trade && (
+            <AvailableJobsView tradeId={trade.id} />
+          )}
+
+          {activeNav === "projects" && trade && (
+            <ActiveProjectsView tradeId={trade.id} />
+          )}
+
+          {activeNav === "earnings" && trade && (
+            <EarningsView
+              tradeId={trade.id}
+              totalReceived={marginData.totalReceived}
+              totalQuoted={marginData.totalQuoted}
+            />
+          )}
+
+          {activeNav === "dashboard" && (
           <>
           {trade && (
             <AddSpecialismsBanner
