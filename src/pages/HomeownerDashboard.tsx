@@ -318,6 +318,8 @@ const HomeownerDashboard = () => {
               <RecentSiteUpdates updates={siteUpdates} />
             </>
           )}
+          </>
+          )}
         </div>
       </main>
     </div>
