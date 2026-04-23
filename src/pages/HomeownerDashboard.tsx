@@ -146,8 +146,17 @@ const HomeownerDashboard = () => {
       stage_name: u.project_stages?.stage_name,
     }));
     setSiteUpdates(mappedUpdates);
+    } catch (err) {
+      console.error("Homeowner dashboard bootstrap failed", err);
+      setLoadError(err instanceof Error ? err.message : "We couldn't load your dashboard right now.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    // Active projects now derived from jobs in render via ActiveProjectsSection
+  const reloadCurrentSession = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) void loadData(user.id);
   };
 
   const handleSelectTier = async (quoteId: string, tier: string, price: number) => {
