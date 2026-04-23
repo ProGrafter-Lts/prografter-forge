@@ -1,0 +1,79 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+
+/**
+ * Pre-check for registration / setup pages.
+ *
+ * If the signed-in user already has a row in the relevant profile table
+ * (`trades` or `homeowners`), they're routed straight to that dashboard
+ * instead of being shown the setup form again.
+ *
+ * Returns `checking = true` while we resolve the session + profile state,
+ * so the page can render a loading shell instead of flashing the form.
+ */
+export function useSetupRedirect(role: "trade" | "homeowner") {
+  const navigate = useNavigate();
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const check = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (cancelled) return;
+
+      // Not signed in — let the page render so the user can sign up / post.
+      if (!session?.user) {
+        setChecking(false);
+        return;
+      }
+
+      const userId = session.user.id;
+
+      const [tradeRes, homeownerRes] = await Promise.all([
+        supabase.from("trades").select("id").eq("user_id", userId).maybeSingle(),
+        supabase.from("homeowners").select("id").eq("user_id", userId).maybeSingle(),
+      ]);
+
+      if (cancelled) return;
+
+      if (role === "trade" && tradeRes.data) {
+        navigate("/dashboard/trade", { replace: true });
+        return;
+      }
+
+      if (role === "homeowner" && homeownerRes.data) {
+        navigate("/dashboard/homeowner", { replace: true });
+        return;
+      }
+
+      // Signed in as the *other* role — bounce them to their own dashboard
+      // rather than letting them create a duplicate profile in this one.
+      if (role === "trade" && homeownerRes.data) {
+        navigate("/dashboard/homeowner", { replace: true });
+        return;
+      }
+      if (role === "homeowner" && tradeRes.data) {
+        navigate("/dashboard/trade", { replace: true });
+        return;
+      }
+
+      setChecking(false);
+    };
+
+    void check();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [navigate, role]);
+
+  return checking;
+}
+
+export const SetupRedirectLoader = () => (
+  <div className="min-h-screen bg-cream flex items-center justify-center">
+    <div className="font-mono text-sm text-secondary-text">Loading…</div>
+  </div>
+);
