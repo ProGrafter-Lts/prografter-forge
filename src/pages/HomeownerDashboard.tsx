@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -20,26 +20,81 @@ const HomeownerDashboard = () => {
   const [quotes, setQuotes] = useState<any[]>([]);
   const [variations, setVariations] = useState<any[]>([]);
   const [siteUpdates, setSiteUpdates] = useState<any[]>([]);
-  
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const lastLoadedUserIdRef = useRef<string | null>(null);
+
   const [activeNav, setActiveNav] = useState("overview");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
-    loadData();
+    let isMounted = true;
+
+    const handleSession = (
+      session: Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"],
+    ) => {
+      if (!isMounted) return;
+      if (!session?.user) {
+        lastLoadedUserIdRef.current = null;
+        setLoading(false);
+        return;
+      }
+      if (session.user.id === lastLoadedUserIdRef.current) return;
+      lastLoadedUserIdRef.current = session.user.id;
+      void loadData(session.user.id);
+    };
+
+    supabase.auth
+      .getSession()
+      .then(({ data: { session } }) => handleSession(session))
+      .catch((err) => {
+        console.error("HomeownerDashboard getSession failed", err);
+        if (isMounted) {
+          setLoadError("We couldn't verify your session. Please sign in again.");
+          setLoading(false);
+        }
+      });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "INITIAL_SESSION") return;
+      handleSession(session);
+    });
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
-  const loadData = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { data: ho } = await supabase
+  const loadData = async (userId: string) => {
+    setLoading(true);
+    setLoadError(null);
+    try {
+    const { data: ho, error: hoError } = await supabase
       .from("homeowners")
       .select("id, name")
-      .eq("user_id", user.id)
-      .single();
+      .eq("user_id", userId)
+      .maybeSingle();
 
-    if (!ho) return;
+    if (hoError) {
+      console.error("Failed to load homeowner profile", hoError);
+      setLoadError("We couldn't load your dashboard right now.");
+      setLoading(false);
+      return;
+    }
+
+    if (!ho) {
+      // Signed-in user has no homeowner record — likely a trade.
+      const { data: tradeRow } = await supabase
+        .from("trades")
+        .select("id")
+        .eq("user_id", userId)
+        .maybeSingle();
+      navigate(tradeRow ? "/dashboard/trade" : "/post-a-job", { replace: true });
+      return;
+    }
     setHomeownerName(ho.name);
+    setLoading(false);
 
     // Fetch jobs first so we can scope subsequent queries server-side
     const { data: jobData } = await supabase
