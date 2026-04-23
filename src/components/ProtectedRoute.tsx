@@ -25,6 +25,8 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
       }
     };
 
+    const resolveAuthenticated = () => resolve(true);
+
     // Primary source of truth: onAuthStateChange fires INITIAL_SESSION on mount
     // with the current session (or null) — this is more reliable than getSession()
     // which can hang if the auth client is mid-initialisation.
@@ -37,13 +39,14 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
       }
 
       if (event === "SIGNED_OUT") {
+        resolved = true;
         setStatus("unauthenticated");
         navigate("/login", { replace: true });
         return;
       }
 
       if (session) {
-        setStatus("authenticated");
+        resolveAuthenticated();
       }
     });
 
