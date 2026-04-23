@@ -191,6 +191,16 @@ const HomeownerDashboard = () => {
 
       <main className="flex-1 p-4 md:p-8 overflow-auto">
         <div className="max-w-5xl mx-auto space-y-8">
+          {loading && !homeownerName ? (
+            <div className="min-h-[40vh] flex items-center justify-center font-mono text-sm text-muted-foreground">
+              Loading dashboard…
+            </div>
+          ) : loadError && !homeownerName ? (
+            <div className="min-h-[40vh] flex items-center justify-center px-6 text-center font-mono text-sm text-muted-foreground">
+              {loadError}
+            </div>
+          ) : (
+          <>
           <div className="pt-10 md:pt-0">
             <h1 className="font-heading text-primary text-3xl md:text-4xl">
               Welcome back, {homeownerName || "Homeowner"}
