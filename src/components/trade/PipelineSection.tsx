@@ -191,7 +191,7 @@ const PipelineSection = ({ tradeId }: Props) => {
                 type="button"
                 onClick={() =>
                   navigate(
-                    `/planning-alerts?pipeline=${encodeURIComponent(card.key)}`,
+                    `/dashboard/trade?pipeline=${encodeURIComponent(card.key)}#planning-alerts-list`,
                   )
                 }
                 className={`text-left rounded-2xl border p-4 transition-all hover:shadow-sm hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-ring ${card.tone} ${
