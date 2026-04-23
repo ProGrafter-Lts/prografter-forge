@@ -4,6 +4,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import SEO from "@/components/SEO";
 import { isGreenTrade } from "@/lib/greenTrades";
 import { Specialism, fetchSpecialisms } from "@/lib/specialisms";
+import { useSetupRedirect, SetupRedirectLoader } from "@/hooks/useSetupRedirect";
 
 const ALL_JOB_TYPES = [
   { label: "Extension", icon: "🏗️", green: false },
