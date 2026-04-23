@@ -25,6 +25,20 @@ const Login = () => {
   const getDashboardPath = (userType?: string | null) =>
     userType === "trade" ? "/dashboard/trade" : "/dashboard/homeowner";
 
+  const waitForSessionPersistence = async (expectedUserId: string) => {
+    for (let attempt = 0; attempt < 10; attempt += 1) {
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (session?.user?.id === expectedUserId) {
+        return true;
+      }
+
+      await new Promise((resolve) => window.setTimeout(resolve, 120));
+    }
+
+    return false;
+  };
+
   const redirectToDashboard = (userType?: string | null) => {
     const nextPath = getDashboardPath(userType);
 
@@ -32,12 +46,6 @@ const Login = () => {
     hasRedirectedRef.current = true;
 
     navigate(nextPath, { replace: true });
-
-    window.setTimeout(() => {
-      if (window.location.pathname === "/login") {
-        window.location.replace(nextPath);
-      }
-    }, 75);
   };
 
   useEffect(() => {
@@ -88,6 +96,12 @@ const Login = () => {
         typeof signedInUser.user_metadata?.user_type === "string"
           ? signedInUser.user_metadata.user_type
           : null;
+
+      const sessionPersisted = await waitForSessionPersistence(signedInUser.id);
+      if (!sessionPersisted) {
+        setError("We signed you in, but your session is taking too long to initialise. Please try once more.");
+        return;
+      }
 
       if (metadataUserType) {
         redirectToDashboard(metadataUserType);
