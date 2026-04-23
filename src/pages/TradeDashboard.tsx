@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { BadgeCheck } from "lucide-react";
 import { GreenSpecialistBanner, CertificationsSection } from "@/components/GreenCertBadges";
@@ -42,6 +42,7 @@ interface TradeProfile {
 
 const TradeDashboard = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [trade, setTrade] = useState<TradeProfile | null>(null);
   const [matches, setMatches] = useState<any[]>([]);
   const [quotes, setQuotes] = useState<any[]>([]);
@@ -209,6 +210,20 @@ const TradeDashboard = () => {
 
   const completedCount = trade?.completed_jobs_count ?? 0;
   const rating = trade?.avg_rating ? Number(trade.avg_rating) : 0;
+  const pipelineFilter = searchParams.get("pipeline");
+
+  useEffect(() => {
+    if (!pipelineFilter) return;
+    setActiveNav("dashboard");
+    const jumpToPipeline = window.setTimeout(() => {
+      document.getElementById("planning-alerts-list")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 120);
+
+    return () => window.clearTimeout(jumpToPipeline);
+  }, [pipelineFilter]);
 
   return (
     <div className="min-h-screen bg-background flex">
