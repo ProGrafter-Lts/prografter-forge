@@ -30,6 +30,10 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     );
   }
 
+  if (bypassActive && !user) {
+    return <>{children}</>;
+  }
+
   return user ? <>{children}</> : null;
 };
 
