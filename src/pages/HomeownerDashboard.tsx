@@ -168,7 +168,7 @@ const HomeownerDashboard = () => {
       toast.error("Failed to select tier");
     } else {
       toast.success(`${tier.charAt(0).toUpperCase() + tier.slice(1)} tier selected`);
-      loadData();
+      reloadCurrentSession();
     }
   };
 
@@ -291,7 +291,7 @@ const HomeownerDashboard = () => {
               <QuotesReceived
                 quotes={quotes}
                 onSelectTier={handleSelectTier}
-                onQuoteAccepted={loadData}
+                onQuoteAccepted={reloadCurrentSession}
               />
             </section>
           )}
@@ -303,7 +303,7 @@ const HomeownerDashboard = () => {
 
               <ActiveProjectsSection jobs={jobs} quoteCounts={quoteCounts} />
 
-              <QuotesReceived quotes={quotes} onSelectTier={handleSelectTier} onQuoteAccepted={loadData} />
+              <QuotesReceived quotes={quotes} onSelectTier={handleSelectTier} onQuoteAccepted={reloadCurrentSession} />
               <MyJobs jobs={jobs} />
               <RecentSiteUpdates updates={siteUpdates} />
             </>
