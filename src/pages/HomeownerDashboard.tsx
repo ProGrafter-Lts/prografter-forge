@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -20,26 +20,81 @@ const HomeownerDashboard = () => {
   const [quotes, setQuotes] = useState<any[]>([]);
   const [variations, setVariations] = useState<any[]>([]);
   const [siteUpdates, setSiteUpdates] = useState<any[]>([]);
-  
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const lastLoadedUserIdRef = useRef<string | null>(null);
+
   const [activeNav, setActiveNav] = useState("overview");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
-    loadData();
+    let isMounted = true;
+
+    const handleSession = (
+      session: Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"],
+    ) => {
+      if (!isMounted) return;
+      if (!session?.user) {
+        lastLoadedUserIdRef.current = null;
+        setLoading(false);
+        return;
+      }
+      if (session.user.id === lastLoadedUserIdRef.current) return;
+      lastLoadedUserIdRef.current = session.user.id;
+      void loadData(session.user.id);
+    };
+
+    supabase.auth
+      .getSession()
+      .then(({ data: { session } }) => handleSession(session))
+      .catch((err) => {
+        console.error("HomeownerDashboard getSession failed", err);
+        if (isMounted) {
+          setLoadError("We couldn't verify your session. Please sign in again.");
+          setLoading(false);
+        }
+      });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "INITIAL_SESSION") return;
+      handleSession(session);
+    });
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
-  const loadData = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { data: ho } = await supabase
+  const loadData = async (userId: string) => {
+    setLoading(true);
+    setLoadError(null);
+    try {
+    const { data: ho, error: hoError } = await supabase
       .from("homeowners")
       .select("id, name")
-      .eq("user_id", user.id)
-      .single();
+      .eq("user_id", userId)
+      .maybeSingle();
 
-    if (!ho) return;
+    if (hoError) {
+      console.error("Failed to load homeowner profile", hoError);
+      setLoadError("We couldn't load your dashboard right now.");
+      setLoading(false);
+      return;
+    }
+
+    if (!ho) {
+      // Signed-in user has no homeowner record — likely a trade.
+      const { data: tradeRow } = await supabase
+        .from("trades")
+        .select("id")
+        .eq("user_id", userId)
+        .maybeSingle();
+      navigate(tradeRow ? "/dashboard/trade" : "/post-a-job", { replace: true });
+      return;
+    }
     setHomeownerName(ho.name);
+    setLoading(false);
 
     // Fetch jobs first so we can scope subsequent queries server-side
     const { data: jobData } = await supabase
@@ -91,8 +146,17 @@ const HomeownerDashboard = () => {
       stage_name: u.project_stages?.stage_name,
     }));
     setSiteUpdates(mappedUpdates);
+    } catch (err) {
+      console.error("Homeowner dashboard bootstrap failed", err);
+      setLoadError(err instanceof Error ? err.message : "We couldn't load your dashboard right now.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    // Active projects now derived from jobs in render via ActiveProjectsSection
+  const reloadCurrentSession = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) void loadData(user.id);
   };
 
   const handleSelectTier = async (quoteId: string, tier: string, price: number) => {
@@ -104,7 +168,7 @@ const HomeownerDashboard = () => {
       toast.error("Failed to select tier");
     } else {
       toast.success(`${tier.charAt(0).toUpperCase() + tier.slice(1)} tier selected`);
-      loadData();
+      reloadCurrentSession();
     }
   };
 
@@ -127,6 +191,16 @@ const HomeownerDashboard = () => {
 
       <main className="flex-1 p-4 md:p-8 overflow-auto">
         <div className="max-w-5xl mx-auto space-y-8">
+          {loading && !homeownerName ? (
+            <div className="min-h-[40vh] flex items-center justify-center font-mono text-sm text-muted-foreground">
+              Loading dashboard…
+            </div>
+          ) : loadError && !homeownerName ? (
+            <div className="min-h-[40vh] flex items-center justify-center px-6 text-center font-mono text-sm text-muted-foreground">
+              {loadError}
+            </div>
+          ) : (
+          <>
           <div className="pt-10 md:pt-0">
             <h1 className="font-heading text-primary text-3xl md:text-4xl">
               Welcome back, {homeownerName || "Homeowner"}
@@ -227,7 +301,7 @@ const HomeownerDashboard = () => {
               <QuotesReceived
                 quotes={quotes}
                 onSelectTier={handleSelectTier}
-                onQuoteAccepted={loadData}
+                onQuoteAccepted={reloadCurrentSession}
               />
             </section>
           )}
@@ -239,10 +313,12 @@ const HomeownerDashboard = () => {
 
               <ActiveProjectsSection jobs={jobs} quoteCounts={quoteCounts} />
 
-              <QuotesReceived quotes={quotes} onSelectTier={handleSelectTier} onQuoteAccepted={loadData} />
+              <QuotesReceived quotes={quotes} onSelectTier={handleSelectTier} onQuoteAccepted={reloadCurrentSession} />
               <MyJobs jobs={jobs} />
               <RecentSiteUpdates updates={siteUpdates} />
             </>
+          )}
+          </>
           )}
         </div>
       </main>
