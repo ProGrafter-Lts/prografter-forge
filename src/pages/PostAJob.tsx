@@ -51,6 +51,7 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 type Step = 1 | 2 | 3 | 3.5 | 4;
 
 const PostAJob = () => {
+  const checkingExisting = useSetupRedirect("homeowner");
   const [searchParams] = useSearchParams();
   const isGreenFlow = searchParams.get("green") === "1";
   const schemeParam = searchParams.get("schemes") || "";
@@ -264,6 +265,8 @@ const PostAJob = () => {
     3: { white: "Where's The", teal: "Job?" },
     4: { white: "Your", teal: "Details." },
   };
+
+  if (checkingExisting) return <SetupRedirectLoader />;
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: "hsl(var(--deep))" }}>
