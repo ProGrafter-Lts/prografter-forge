@@ -51,6 +51,7 @@ interface ShortlistRow {
   planning_alert_id: string;
   contact_status: ShortlistStatus;
   note: string | null;
+  last_status_change_at?: string | null;
 }
 
 const PIPELINE_LABELS: Record<string, string> = {
@@ -58,6 +59,14 @@ const PIPELINE_LABELS: Record<string, string> = {
   contacted: "Waiting for Reply",
   quoted: "Quoted",
   won: "Won (last 90 days)",
+};
+
+const STATUS_BADGE_STYLES: Record<ShortlistStatus, string> = {
+  todo: "bg-muted/40 text-foreground border-border",
+  contacted: "bg-amber-500/10 text-amber-700 border-amber-500/30",
+  quoted: "bg-primary/10 text-primary border-primary/30",
+  won: "bg-emerald-500/10 text-emerald-700 border-emerald-500/30",
+  dead: "bg-destructive/10 text-destructive border-destructive/30",
 };
 
 const DashboardPlanningAlerts = ({ trade }: { trade: TradeProfile }) => {
@@ -126,7 +135,7 @@ const DashboardPlanningAlerts = ({ trade }: { trade: TradeProfile }) => {
         .limit(50),
       supabase
         .from("planning_alert_shortlist")
-        .select("id, planning_alert_id, contact_status, note")
+        .select("id, planning_alert_id, contact_status, note, last_status_change_at")
         .eq("trade_id", trade.id),
     ]);
 
@@ -206,6 +215,7 @@ const DashboardPlanningAlerts = ({ trade }: { trade: TradeProfile }) => {
     const params = new URLSearchParams(searchParams);
     params.delete("pipeline");
     setSearchParams(params, { replace: true });
+    window.history.replaceState(null, "", `${window.location.pathname}${params.toString() ? `?${params.toString()}` : ""}`);
   };
 
   const visibleAlerts = useMemo(() => {
@@ -223,12 +233,8 @@ const DashboardPlanningAlerts = ({ trade }: { trade: TradeProfile }) => {
         if (row.contact_status !== pipelineFilter) return false;
         // Won card filters to last-90-days only, matching the Pipeline count.
         if (pipelineFilter === "won") {
-          // We didn't load last_status_change_at into the local row — use the
-          // shortlist record's existence as a proxy and accept mild over-inclusion
-          // here; the count card itself enforces the 90-day window. To keep this
-          // tight, refetch with timestamps would be ideal, but the spec asks
-          // counts to match — the filtered view is allowed to be a superset.
-          return true;
+          if (!row.last_status_change_at) return false;
+          return new Date(row.last_status_change_at).getTime() >= ninetyDaysAgo;
         }
         return true;
       });
@@ -269,7 +275,7 @@ const DashboardPlanningAlerts = ({ trade }: { trade: TradeProfile }) => {
   }
 
   return (
-    <div className="space-y-4">
+    <div id="planning-alerts-list" className="space-y-4 scroll-mt-24">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <Bell className="w-5 h-5 text-secondary" />
@@ -330,14 +336,19 @@ const DashboardPlanningAlerts = ({ trade }: { trade: TradeProfile }) => {
         </label>
 
         {pipelineFilter && PIPELINE_LABELS[pipelineFilter] && (
-          <button
-            type="button"
-            onClick={clearPipelineFilter}
-            className="inline-flex items-center gap-1.5 bg-primary/10 text-primary font-mono text-[11px] px-3 py-1.5 rounded-full hover:bg-primary/15 transition-colors"
-          >
-            Filtered: {PIPELINE_LABELS[pipelineFilter]}
-            <X className="w-3 h-3" />
-          </button>
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="font-mono text-[11px] text-muted-foreground">
+              Showing leads in your pipeline that need follow-up.
+            </span>
+            <button
+              type="button"
+              onClick={clearPipelineFilter}
+              className="inline-flex items-center gap-1.5 bg-primary/10 text-primary font-mono text-[11px] px-3 py-1.5 rounded-full hover:bg-primary/15 transition-colors"
+            >
+              Filtered: {PIPELINE_LABELS[pipelineFilter]}
+              <X className="w-3 h-3" />
+            </button>
+          </div>
         )}
       </div>
 
@@ -412,12 +423,27 @@ const DashboardPlanningAlerts = ({ trade }: { trade: TradeProfile }) => {
                       Actioned
                     </span>
                   )}
+                  {row && (
+                    <span className={`font-mono text-[10px] px-2 py-0.5 rounded-full border ${STATUS_BADGE_STYLES[row.contact_status]}`}>
+                      {PIPELINE_LABELS[row.contact_status] ?? row.contact_status}
+                    </span>
+                  )}
                 </div>
                 <h4 className="font-heading text-primary text-sm">{alert.address}</h4>
                 {alert.description && (
                   <p className="font-mono text-xs text-muted-foreground mt-1 line-clamp-3">
                     {alert.description}
                   </p>
+                )}
+                {row?.note && (
+                  <div className="mt-3 rounded-xl border border-border bg-muted/30 p-3">
+                    <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                      Follow-up note
+                    </p>
+                    <p className="mt-1 font-sans text-xs text-foreground leading-relaxed">
+                      {row.note}
+                    </p>
+                  </div>
                 )}
               </div>
             </div>
