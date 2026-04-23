@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useTradeAccess } from "@/hooks/useTradeAccess";
 import {
   Bell,
   Zap,
@@ -104,6 +105,9 @@ const TRADE_TYPES = [
 
 const PlanningAlerts = () => {
   const navigate = useNavigate();
+  const { isReady: tradeReady, loading: tradeLoading, trade, error: tradeError } = useTradeAccess({
+    redirectToSetup: true,
+  });
   const [step, setStep] = useState(1);
   const [selectedTier, setSelectedTier] = useState<string | null>(null);
   const [radius, setRadius] = useState(10);
@@ -116,37 +120,21 @@ const PlanningAlerts = () => {
   useEffect(() => {
     let cancelled = false;
 
-    const init = async () => {
-      // Wait for the session to be restored from storage before deciding
-      // to redirect. Without this, a fresh route mount can race and bounce
-      // the user back to /login even though they're signed in.
-      const { data: { session } } = await supabase.auth.getSession();
-      if (cancelled) return;
-
-      if (!session?.user) {
-        navigate("/login");
-        return;
+    if (!trade) {
+      if (tradeReady && !tradeLoading) {
+        setTradeId(null);
+        setTradeType("");
       }
+      return () => {
+        cancelled = true;
+      };
+    }
 
-      const { data: trade } = await supabase
-        .from("trades")
-        .select("id, trade_type")
-        .eq("user_id", session.user.id)
-        .maybeSingle();
+    setTradeId(trade.id);
+    setTradeType(trade.trade_type);
+    setSelectedTypes((prev) => (prev.length ? prev : [trade.trade_type]));
 
-      if (cancelled) return;
-
-      if (!trade) {
-        // Logged in but no trade profile — send to trade registration,
-        // not /login (which would falsely look like a logout).
-        navigate("/register/trade");
-        return;
-      }
-
-      setTradeId(trade.id);
-      setTradeType(trade.trade_type);
-      setSelectedTypes([trade.trade_type]);
-
+    const loadSubscription = async () => {
       const { data: sub } = await supabase
         .from("planning_alert_subs")
         .select("*")
@@ -157,9 +145,12 @@ const PlanningAlerts = () => {
       if (!cancelled && sub) setActiveSub(sub);
     };
 
-    init();
-    return () => { cancelled = true; };
-  }, [navigate]);
+    void loadSubscription();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [trade, tradeLoading, tradeReady]);
 
   const toggleType = (type: string) => {
     setSelectedTypes(prev =>
@@ -194,6 +185,22 @@ const PlanningAlerts = () => {
   };
 
   const tier = TIERS.find(t => t.id === selectedTier);
+
+  if (!tradeReady || tradeLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="font-mono text-sm text-muted-foreground">Loading planning alerts…</div>
+      </div>
+    );
+  }
+
+  if (tradeError) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center px-6 text-center">
+        <div className="font-mono text-sm text-muted-foreground">{tradeError}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">

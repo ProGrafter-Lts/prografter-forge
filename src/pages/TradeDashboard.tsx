@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { BadgeCheck } from "lucide-react";
@@ -18,7 +18,7 @@ import PipelineSection from "@/components/trade/PipelineSection";
 import AvailableJobsView from "@/components/trade/AvailableJobsView";
 import ActiveProjectsView from "@/components/trade/ActiveProjectsView";
 import EarningsView from "@/components/trade/EarningsView";
-import { useAuthReady } from "@/hooks/useAuthReady";
+import { useTradeAccess } from "@/hooks/useTradeAccess";
 
 interface TradeProfile {
   name: string;
@@ -47,7 +47,9 @@ interface TradeProfile {
 const TradeDashboard = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { isReady, user } = useAuthReady();
+  const { isReady, loading: tradeAccessLoading, trade: tradeAccess, error: tradeAccessError } = useTradeAccess({
+    redirectToSetup: false,
+  });
   const [trade, setTrade] = useState<TradeProfile | null>(null);
   const [matches, setMatches] = useState<any[]>([]);
   const [quotes, setQuotes] = useState<any[]>([]);
@@ -56,27 +58,27 @@ const TradeDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const lastLoadedUserIdRef = useRef<string | null>(null);
-
   // Margin data - derived from quotes and project stages
   const [marginData, setMarginData] = useState({ totalQuoted: 0, totalCosts: 0, totalReceived: 0 });
 
   useEffect(() => {
     if (!isReady) return;
 
-    if (!user) {
-      lastLoadedUserIdRef.current = null;
+    if (!tradeAccess) {
       setTrade(null);
+      setLoading(tradeAccessLoading);
+      return;
+    }
+
+    if (trade?.id === tradeAccess.id && !loadError) {
       setLoading(false);
       return;
     }
 
-    if (user.id === lastLoadedUserIdRef.current) return;
-    lastLoadedUserIdRef.current = user.id;
-    void loadDashboardData(user.id);
-  }, [isReady, user]);
+    void loadDashboardData(tradeAccess.id);
+  }, [isReady, tradeAccess, tradeAccessLoading]);
 
-  const loadDashboardData = async (userId: string) => {
+  const loadDashboardData = async (tradeId: string) => {
     setLoading(true);
     setLoadError(null);
 
@@ -84,7 +86,7 @@ const TradeDashboard = () => {
       const { data: tradeData, error: tradeError } = await supabase
         .from("trades")
         .select("id, name, company_name, verified, trade_type, phone, is_green_trade, mcs_number, trustmark_number, pas_2030_accredited, pas_2035_coordinator, ozev_approved, fgas_registered, ciga_registered, inca_certified, green_cert_expiry, specialisms_prompt_seen, completed_jobs_count, review_count, avg_rating, tier")
-        .eq("user_id", userId)
+        .eq("id", tradeId)
         .maybeSingle();
 
       if (tradeError) {
@@ -96,14 +98,8 @@ const TradeDashboard = () => {
 
       if (!tradeData) {
         setTrade(null);
-        // Signed-in user has no trade record — likely a homeowner.
-        // Send them to the homeowner dashboard so they don't sit on a blank trade screen.
-        const { data: homeownerRow } = await supabase
-          .from("homeowners")
-          .select("id")
-          .eq("user_id", userId)
-          .maybeSingle();
-        navigate(homeownerRow ? "/dashboard/homeowner" : "/register/trade", { replace: true });
+        setLoadError("We couldn't find your trade profile.");
+        navigate("/register/trade", { replace: true });
         return;
       }
       setTrade(tradeData);
@@ -220,7 +216,15 @@ const TradeDashboard = () => {
 
       <main className="flex-1 p-4 md:p-8 overflow-auto">
         <div className="max-w-5xl mx-auto space-y-8">
-          {loading && !trade ? (
+          {!isReady || tradeAccessLoading ? (
+            <div className="min-h-[40vh] flex items-center justify-center font-mono text-sm text-muted-foreground">
+              Loading dashboard…
+            </div>
+          ) : tradeAccessError && !trade ? (
+            <div className="min-h-[40vh] flex items-center justify-center px-6 text-center font-mono text-sm text-muted-foreground">
+              {tradeAccessError}
+            </div>
+          ) : loading && !trade ? (
             <div className="min-h-[40vh] flex items-center justify-center font-mono text-sm text-muted-foreground">
               Loading dashboard…
             </div>
