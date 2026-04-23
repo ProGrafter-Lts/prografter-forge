@@ -1,6 +1,7 @@
 import { useState, FormEvent, ChangeEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
+import { useSetupRedirect, SetupRedirectLoader } from "@/hooks/useSetupRedirect";
 
 const TRADE_TYPES = [
   "Plumber",
@@ -20,6 +21,7 @@ const TRADE_TYPES = [
 type Step = 1 | 2 | 3;
 
 const TradeRegister = () => {
+  const checkingExisting = useSetupRedirect("trade");
   const [step, setStep] = useState<Step>(1);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -112,6 +114,8 @@ const TradeRegister = () => {
 
   const canProceedStep1 = name && tradeType && companyName && phone && postcode;
   const canProceedStep2 = true; // Step 2 fields are optional
+
+  if (checkingExisting) return <SetupRedirectLoader />;
 
   return (
     <div className="min-h-screen bg-deep flex flex-col">

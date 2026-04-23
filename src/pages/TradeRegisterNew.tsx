@@ -13,6 +13,7 @@ import {
   showInca,
 } from "@/lib/greenTrades";
 import { saveTradeSpecialisms } from "@/lib/specialisms";
+import { useSetupRedirect, SetupRedirectLoader } from "@/hooks/useSetupRedirect";
 
 const SpecialismsPicker = lazy(() => import("@/components/SpecialismsPicker"));
 const TradeDateField = lazy(() => import("@/components/trade/TradeDateField"));
@@ -35,6 +36,7 @@ const GENERAL_TRADE_TYPES = [
 type Step = 1 | 2 | "specialisms" | "green" | 3;
 
 const TradeRegisterNew = () => {
+  const checkingExisting = useSetupRedirect("trade");
   const [step, setStep] = useState<Step>(1);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -230,6 +232,8 @@ const TradeRegisterNew = () => {
     if (isGreen) setStep("green");
     else setStep(3);
   };
+
+  if (checkingExisting) return <SetupRedirectLoader />;
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: "hsl(var(--deep))" }}>
