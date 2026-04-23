@@ -215,7 +215,6 @@ const DashboardPlanningAlerts = ({ trade }: { trade: TradeProfile }) => {
     const params = new URLSearchParams(searchParams);
     params.delete("pipeline");
     setSearchParams(params, { replace: true });
-    window.history.replaceState(null, "", `${window.location.pathname}${params.toString() ? `?${params.toString()}` : ""}`);
   };
 
   const visibleAlerts = useMemo(() => {
