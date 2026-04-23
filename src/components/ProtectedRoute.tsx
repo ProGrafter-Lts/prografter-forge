@@ -12,9 +12,11 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
   useEffect(() => {
     let isMounted = true;
+    let resolved = false;
 
     const resolve = (hasSession: boolean) => {
-      if (!isMounted) return;
+      if (!isMounted || resolved) return;
+      resolved = true;
       if (hasSession) {
         setStatus("authenticated");
       } else {
@@ -23,7 +25,29 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
       }
     };
 
-    // Source of truth on mount — resolves from localStorage immediately.
+    // Primary source of truth: onAuthStateChange fires INITIAL_SESSION on mount
+    // with the current session (or null) — this is more reliable than getSession()
+    // which can hang if the auth client is mid-initialisation.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!isMounted) return;
+
+      if (event === "INITIAL_SESSION") {
+        resolve(!!session);
+        return;
+      }
+
+      if (event === "SIGNED_OUT") {
+        setStatus("unauthenticated");
+        navigate("/login", { replace: true });
+        return;
+      }
+
+      if (session) {
+        setStatus("authenticated");
+      }
+    });
+
+    // Backup: also call getSession() — whichever resolves first wins.
     supabase.auth
       .getSession()
       .then(({ data: { session } }) => resolve(!!session))
@@ -32,32 +56,12 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
         resolve(false);
       });
 
-    // React to subsequent sign-out events.
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (!isMounted) return;
-      if (event === "SIGNED_OUT" || (!session && event !== "INITIAL_SESSION")) {
-        setStatus("unauthenticated");
-        navigate("/login", { replace: true });
-        return;
-      }
-      if (session) {
-        setStatus("authenticated");
-      }
-    });
-
-    // Safety net: if for any reason getSession never resolves (network/race),
-    // fall back to unauthenticated after 5s instead of an infinite spinner.
+    // Safety net: 8s timeout
     const safetyTimeout = window.setTimeout(() => {
-      if (!isMounted) return;
-      setStatus((current) => {
-        if (current === "loading") {
-          console.warn("ProtectedRoute: auth check timed out, redirecting to login");
-          navigate("/login", { replace: true });
-          return "unauthenticated";
-        }
-        return current;
-      });
-    }, 5000);
+      if (!isMounted || resolved) return;
+      console.warn("ProtectedRoute: auth check timed out, redirecting to login");
+      resolve(false);
+    }, 8000);
 
     return () => {
       isMounted = false;
