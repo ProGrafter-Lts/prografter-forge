@@ -15,6 +15,9 @@ import CalendarConnect from "@/components/trade/CalendarConnect";
 import TradeProfileSection from "@/components/trade/TradeProfileSection";
 import AddSpecialismsBanner from "@/components/trade/AddSpecialismsBanner";
 import PipelineSection from "@/components/trade/PipelineSection";
+import AvailableJobsView from "@/components/trade/AvailableJobsView";
+import ActiveProjectsView from "@/components/trade/ActiveProjectsView";
+import EarningsView from "@/components/trade/EarningsView";
 
 interface TradeProfile {
   name: string;
