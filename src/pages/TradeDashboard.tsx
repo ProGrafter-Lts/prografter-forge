@@ -18,6 +18,7 @@ import PipelineSection from "@/components/trade/PipelineSection";
 import AvailableJobsView from "@/components/trade/AvailableJobsView";
 import ActiveProjectsView from "@/components/trade/ActiveProjectsView";
 import EarningsView from "@/components/trade/EarningsView";
+import { useAuthReady } from "@/hooks/useAuthReady";
 
 interface TradeProfile {
   name: string;
@@ -46,6 +47,7 @@ interface TradeProfile {
 const TradeDashboard = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { isReady, user } = useAuthReady();
   const [trade, setTrade] = useState<TradeProfile | null>(null);
   const [matches, setMatches] = useState<any[]>([]);
   const [quotes, setQuotes] = useState<any[]>([]);
@@ -60,48 +62,19 @@ const TradeDashboard = () => {
   const [marginData, setMarginData] = useState({ totalQuoted: 0, totalCosts: 0, totalReceived: 0 });
 
   useEffect(() => {
-    let isMounted = true;
+    if (!isReady) return;
 
-    const handleSession = (
-      session: Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"],
-    ) => {
-      if (!isMounted) return;
+    if (!user) {
+      lastLoadedUserIdRef.current = null;
+      setTrade(null);
+      setLoading(false);
+      return;
+    }
 
-      if (!session?.user) {
-        lastLoadedUserIdRef.current = null;
-        setTrade(null);
-        setLoading(false);
-        return;
-      }
-
-      if (session.user.id === lastLoadedUserIdRef.current) return;
-      lastLoadedUserIdRef.current = session.user.id;
-      void loadDashboardData(session.user.id);
-    };
-
-    // Source of truth on mount.
-    supabase.auth
-      .getSession()
-      .then(({ data: { session } }) => handleSession(session))
-      .catch((err) => {
-        console.error("TradeDashboard getSession failed", err);
-        if (isMounted) {
-          setLoadError("We couldn't verify your session. Please sign in again.");
-          setLoading(false);
-        }
-      });
-
-    // React to subsequent auth changes only.
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "INITIAL_SESSION") return; // already handled by getSession
-      handleSession(session);
-    });
-
-    return () => {
-      isMounted = false;
-      subscription.unsubscribe();
-    };
-  }, []);
+    if (user.id === lastLoadedUserIdRef.current) return;
+    lastLoadedUserIdRef.current = user.id;
+    void loadDashboardData(user.id);
+  }, [isReady, user]);
 
   const loadDashboardData = async (userId: string) => {
     setLoading(true);
