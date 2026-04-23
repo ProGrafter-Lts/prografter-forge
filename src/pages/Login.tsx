@@ -45,7 +45,12 @@ const Login = () => {
     if (hasRedirectedRef.current) return;
     hasRedirectedRef.current = true;
 
-    navigate(nextPath, { replace: true });
+    navigate(nextPath, {
+      replace: true,
+      state: {
+        authBypassUntil: Date.now() + 15_000,
+      },
+    });
   };
 
   useEffect(() => {
