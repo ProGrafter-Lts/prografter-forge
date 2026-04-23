@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import SEO from "@/components/SEO";
+import { useAuthReady } from "@/hooks/useAuthReady";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -19,6 +20,7 @@ const Login = () => {
   const [forgotError, setForgotError] = useState("");
   const [forgotSent, setForgotSent] = useState(false);
   const hasRedirectedRef = useRef(false);
+  const { isReady, user } = useAuthReady();
 
   const getDashboardPath = (userType?: string | null) =>
     userType === "trade" ? "/dashboard/trade" : "/dashboard/homeowner";
@@ -49,30 +51,15 @@ const Login = () => {
   }, [searchParams, setSearchParams]);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session?.user) {
-        const metadataUserType =
-          typeof session.user.user_metadata?.user_type === "string"
-            ? session.user.user_metadata.user_type
-            : null;
+    if (!isReady || !user) return;
 
-        redirectToDashboard(metadataUserType);
-      }
-    });
+    const metadataUserType =
+      typeof user.user_metadata?.user_type === "string"
+        ? user.user_metadata.user_type
+        : null;
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        const metadataUserType =
-          typeof session.user.user_metadata?.user_type === "string"
-            ? session.user.user_metadata.user_type
-            : null;
-
-        redirectToDashboard(metadataUserType);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [navigate]);
+    redirectToDashboard(metadataUserType);
+  }, [isReady, user, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
