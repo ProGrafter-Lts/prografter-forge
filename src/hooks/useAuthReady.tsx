@@ -17,6 +17,7 @@ export function useAuthReady(): AuthReadyState {
 
   useEffect(() => {
     let isMounted = true;
+    let resolvedInitialState = false;
 
     const applySession = (session: Session | null, ready = true) => {
       if (!isMounted) return;
@@ -28,17 +29,42 @@ export function useAuthReady(): AuthReadyState {
       });
     };
 
-    void supabase.auth
-      .getSession()
-      .then(({ data: { session } }) => applySession(session, true))
-      .catch((error) => {
-        console.error("useAuthReady getSession failed", error);
-        applySession(null, true);
-      });
+    const resolveInitialState = (session: Session | null) => {
+      resolvedInitialState = true;
+      applySession(session, true);
+    };
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "INITIAL_SESSION") {
+        resolveInitialState(session);
+        return;
+      }
+
       applySession(session, true);
     });
+
+    void supabase.auth
+      .getSession()
+      .then(({ data: { session } }) => {
+        if (session) {
+          resolveInitialState(session);
+          return;
+        }
+
+        window.setTimeout(() => {
+          if (!resolvedInitialState) {
+            resolveInitialState(null);
+          }
+        }, 400);
+      })
+      .catch((error) => {
+        console.error("useAuthReady getSession failed", error);
+        window.setTimeout(() => {
+          if (!resolvedInitialState) {
+            resolveInitialState(null);
+          }
+        }, 400);
+      });
 
     return () => {
       isMounted = false;
