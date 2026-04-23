@@ -10,7 +10,7 @@ import RecentSiteUpdates from "@/components/homeowner/RecentSiteUpdates";
 import VariationAlert from "@/components/homeowner/VariationAlert";
 import GreenCertificatePack from "@/components/GreenCertificatePack";
 import { isGreenTrade } from "@/lib/greenTrades";
-import { BookOpen, Leaf } from "lucide-react";
+import { BookOpen, Leaf, FolderKanban, SearchCheck, ArrowRight } from "lucide-react";
 import HomeownerProfileSection from "@/components/homeowner/HomeownerProfileSection";
 
 const HomeownerDashboard = () => {
