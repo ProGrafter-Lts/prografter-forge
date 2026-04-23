@@ -274,7 +274,23 @@ const TradeDashboard = () => {
             <TradeProfileSection tradeId={trade.id} />
           )}
 
-          {activeNav !== "profile" && (
+          {activeNav === "jobs" && trade && (
+            <AvailableJobsView tradeId={trade.id} />
+          )}
+
+          {activeNav === "projects" && trade && (
+            <ActiveProjectsView tradeId={trade.id} />
+          )}
+
+          {activeNav === "earnings" && trade && (
+            <EarningsView
+              tradeId={trade.id}
+              totalReceived={marginData.totalReceived}
+              totalQuoted={marginData.totalQuoted}
+            />
+          )}
+
+          {activeNav === "dashboard" && (
           <>
           {trade && (
             <AddSpecialismsBanner
