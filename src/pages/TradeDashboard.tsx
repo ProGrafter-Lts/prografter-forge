@@ -65,6 +65,12 @@ const TradeDashboard = () => {
     if (!isReady) return;
 
     if (!tradeAccess) {
+      if (tradeAccessError) {
+        setTrade(null);
+        setLoading(false);
+        return;
+      }
+
       setTrade(null);
       setLoading(tradeAccessLoading);
       return;
@@ -76,7 +82,7 @@ const TradeDashboard = () => {
     }
 
     void loadDashboardData(tradeAccess.id);
-  }, [isReady, tradeAccess, tradeAccessLoading]);
+  }, [isReady, tradeAccess, tradeAccessError, tradeAccessLoading]);
 
   const loadDashboardData = async (tradeId: string) => {
     setLoading(true);
