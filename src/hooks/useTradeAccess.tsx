@@ -38,44 +38,55 @@ export function useTradeAccess(options?: { redirectToSetup?: boolean }): TradeAc
     setState((current) => ({ ...current, isReady: true, loading: true, error: null }));
 
     const loadTrade = async () => {
-      const lookupPromise = supabase
-        .from("trades")
-        .select("id, trade_type")
-        .eq("user_id", user.id)
-        .maybeSingle();
+      try {
+        const lookupPromise = supabase
+          .from("trades")
+          .select("id, trade_type")
+          .eq("user_id", user.id)
+          .maybeSingle();
 
-      const timeoutPromise = new Promise<{ data: null; error: { message: string } }>((resolve) => {
-        window.setTimeout(() => {
-          resolve({ data: null, error: { message: "Trade profile lookup timed out" } });
-        }, TRADE_LOOKUP_TIMEOUT_MS);
-      });
+        const timeoutPromise = new Promise<never>((_, reject) => {
+          window.setTimeout(() => {
+            reject(new Error("Trade profile lookup timed out"));
+          }, TRADE_LOOKUP_TIMEOUT_MS);
+        });
 
-      const result = (await Promise.race([lookupPromise, timeoutPromise])) as {
-        data: { id: string; trade_type: string } | null;
-        error: { message: string } | null;
-      };
+        const result = (await Promise.race([lookupPromise, timeoutPromise])) as {
+          data: { id: string; trade_type: string } | null;
+          error: { message: string } | null;
+        };
 
-      if (cancelled) return;
+        if (cancelled) return;
 
-      if (result.error) {
+        if (result.error) {
+          setState({
+            isReady: true,
+            loading: false,
+            trade: null,
+            error: result.error.message ?? "Couldn't load your trade profile.",
+          });
+          return;
+        }
+
+        if (!result.data) {
+          setState({ isReady: true, loading: false, trade: null, error: null });
+          if (options?.redirectToSetup) {
+            navigate("/register/trade", { replace: true });
+          }
+          return;
+        }
+
+        setState({ isReady: true, loading: false, trade: result.data, error: null });
+      } catch (error) {
+        if (cancelled) return;
+
         setState({
           isReady: true,
           loading: false,
           trade: null,
-          error: result.error.message ?? "Couldn't load your trade profile.",
+          error: error instanceof Error ? error.message : "Couldn't load your trade profile.",
         });
-        return;
       }
-
-      if (!result.data) {
-        setState({ isReady: true, loading: false, trade: null, error: null });
-        if (options?.redirectToSetup) {
-          navigate("/register/trade", { replace: true });
-        }
-        return;
-      }
-
-      setState({ isReady: true, loading: false, trade: result.data, error: null });
     };
 
     void loadTrade();
