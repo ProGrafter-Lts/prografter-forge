@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuthReady } from "@/hooks/useAuthReady";
 
 /**
  * Pre-check for registration / setup pages.
@@ -15,21 +16,21 @@ import { supabase } from "@/integrations/supabase/client";
 export function useSetupRedirect(role: "trade" | "homeowner") {
   const navigate = useNavigate();
   const [checking, setChecking] = useState(true);
+  const { isReady, user } = useAuthReady();
 
   useEffect(() => {
     let cancelled = false;
 
     const check = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (cancelled) return;
+      if (!isReady) return;
 
       // Not signed in — let the page render so the user can sign up / post.
-      if (!session?.user) {
+      if (!user) {
         setChecking(false);
         return;
       }
 
-      const userId = session.user.id;
+      const userId = user.id;
 
       const [tradeRes, homeownerRes] = await Promise.all([
         supabase.from("trades").select("id").eq("user_id", userId).maybeSingle(),
@@ -67,7 +68,7 @@ export function useSetupRedirect(role: "trade" | "homeowner") {
     return () => {
       cancelled = true;
     };
-  }, [navigate, role]);
+  }, [isReady, navigate, role, user]);
 
   return checking;
 }
