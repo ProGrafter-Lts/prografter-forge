@@ -12,9 +12,11 @@ import GreenCertificatePack from "@/components/GreenCertificatePack";
 import { isGreenTrade } from "@/lib/greenTrades";
 import { BookOpen, Leaf, FolderKanban, SearchCheck, ArrowRight } from "lucide-react";
 import HomeownerProfileSection from "@/components/homeowner/HomeownerProfileSection";
+import { useAuthReady } from "@/hooks/useAuthReady";
 
 const HomeownerDashboard = () => {
   const navigate = useNavigate();
+  const { isReady, user } = useAuthReady();
   const [homeownerName, setHomeownerName] = useState("");
   const [jobs, setJobs] = useState<any[]>([]);
   const [quotes, setQuotes] = useState<any[]>([]);
@@ -28,43 +30,25 @@ const HomeownerDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
-    let isMounted = true;
+    if (!isReady) return;
 
-    const handleSession = (
-      session: Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"],
-    ) => {
-      if (!isMounted) return;
-      if (!session?.user) {
-        lastLoadedUserIdRef.current = null;
-        setLoading(false);
-        return;
-      }
-      if (session.user.id === lastLoadedUserIdRef.current) return;
-      lastLoadedUserIdRef.current = session.user.id;
-      void loadData(session.user.id);
-    };
+    if (!user) {
+      lastLoadedUserIdRef.current = null;
+      setHomeownerName("");
+      setJobs([]);
+      setQuotes([]);
+      setVariations([]);
+      setSiteUpdates([]);
+      setLoadError(null);
+      setLoading(false);
+      return;
+    }
 
-    supabase.auth
-      .getSession()
-      .then(({ data: { session } }) => handleSession(session))
-      .catch((err) => {
-        console.error("HomeownerDashboard getSession failed", err);
-        if (isMounted) {
-          setLoadError("We couldn't verify your session. Please sign in again.");
-          setLoading(false);
-        }
-      });
+    if (user.id === lastLoadedUserIdRef.current) return;
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "INITIAL_SESSION") return;
-      handleSession(session);
-    });
-
-    return () => {
-      isMounted = false;
-      subscription.unsubscribe();
-    };
-  }, []);
+    lastLoadedUserIdRef.current = user.id;
+    void loadData(user.id);
+  }, [isReady, user]);
 
   const loadData = async (userId: string) => {
     setLoading(true);

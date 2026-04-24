@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthReady } from "@/hooks/useAuthReady";
 
+const SETUP_LOOKUP_TIMEOUT_MS = 6000;
+
 /**
  * Pre-check for registration / setup pages.
  *
@@ -32,35 +34,50 @@ export function useSetupRedirect(role: "trade" | "homeowner") {
 
       const userId = user.id;
 
-      const [tradeRes, homeownerRes] = await Promise.all([
-        supabase.from("trades").select("id").eq("user_id", userId).maybeSingle(),
-        supabase.from("homeowners").select("id").eq("user_id", userId).maybeSingle(),
-      ]);
+      try {
+        const lookupPromise = Promise.all([
+          supabase.from("trades").select("id").eq("user_id", userId).maybeSingle(),
+          supabase.from("homeowners").select("id").eq("user_id", userId).maybeSingle(),
+        ]);
 
-      if (cancelled) return;
+        const timeoutPromise = new Promise<never>((_, reject) => {
+          window.setTimeout(() => {
+            reject(new Error("Profile lookup timed out"));
+          }, SETUP_LOOKUP_TIMEOUT_MS);
+        });
 
-      if (role === "trade" && tradeRes.data) {
-        navigate("/dashboard/trade", { replace: true });
-        return;
+        const [tradeRes, homeownerRes] = await Promise.race([lookupPromise, timeoutPromise]);
+
+        if (cancelled) return;
+
+        if (role === "trade" && tradeRes.data) {
+          navigate("/dashboard/trade", { replace: true });
+          return;
+        }
+
+        if (role === "homeowner" && homeownerRes.data) {
+          navigate("/dashboard/homeowner", { replace: true });
+          return;
+        }
+
+        // Signed in as the *other* role — bounce them to their own dashboard
+        // rather than letting them create a duplicate profile in this one.
+        if (role === "trade" && homeownerRes.data) {
+          navigate("/dashboard/homeowner", { replace: true });
+          return;
+        }
+        if (role === "homeowner" && tradeRes.data) {
+          navigate("/dashboard/trade", { replace: true });
+          return;
+        }
+
+        setChecking(false);
+      } catch (error) {
+        console.error("useSetupRedirect profile lookup failed", error);
+        if (!cancelled) {
+          setChecking(false);
+        }
       }
-
-      if (role === "homeowner" && homeownerRes.data) {
-        navigate("/dashboard/homeowner", { replace: true });
-        return;
-      }
-
-      // Signed in as the *other* role — bounce them to their own dashboard
-      // rather than letting them create a duplicate profile in this one.
-      if (role === "trade" && homeownerRes.data) {
-        navigate("/dashboard/homeowner", { replace: true });
-        return;
-      }
-      if (role === "homeowner" && tradeRes.data) {
-        navigate("/dashboard/trade", { replace: true });
-        return;
-      }
-
-      setChecking(false);
     };
 
     void check();
