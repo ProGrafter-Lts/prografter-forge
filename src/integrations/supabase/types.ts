@@ -80,6 +80,13 @@ export type Database = {
             referencedRelation: "contracts"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "contract_events_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts_compat"
+            referencedColumns: ["id"]
+          },
         ]
       }
       contract_templates: {
@@ -194,6 +201,13 @@ export type Database = {
             columns: ["contract_id"]
             isOneToOne: false
             referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contract_variations_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts_compat"
             referencedColumns: ["id"]
           },
         ]
@@ -1985,7 +1999,24 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      contracts_compat: {
+        Row: {
+          agreed_price: number | null
+          contract_text: string | null
+          created_at: string | null
+          homeowner_id: string | null
+          homeowner_signed_at: string | null
+          id: string | null
+          job_id: string | null
+          payment_schedule: Json | null
+          quote_id: string | null
+          status: string | null
+          trade_id: string | null
+          trade_signed_at: string | null
+          updated_at: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       accept_practical_completion: {
