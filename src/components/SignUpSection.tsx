@@ -1,11 +1,18 @@
 import { useState, FormEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
+const WAITLIST_USER_TYPES = [
+  { value: "trade", label: "Tradesperson" },
+  { value: "homeowner", label: "Homeowner" },
+] as const;
+
+const normalizePostcode = (value: string) => value.trim().replace(/\s+/g, " ").toUpperCase();
+
 const SignUpSection = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [postcode, setPostcode] = useState("");
-  const [userType, setUserType] = useState("tradesperson");
+  const [userType, setUserType] = useState<(typeof WAITLIST_USER_TYPES)[number]["value"]>("trade");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
@@ -21,7 +28,13 @@ const SignUpSection = () => {
 
     const cleanName = name.trim();
     const cleanEmail = email.trim().toLowerCase();
-    const cleanPostcode = postcode.trim();
+    const cleanPostcode = normalizePostcode(postcode);
+
+    if (!WAITLIST_USER_TYPES.some((option) => option.value === userType)) {
+      setLoading(false);
+      setError("Please choose a valid account type.");
+      return;
+    }
 
     const signupId = crypto.randomUUID();
     const { error: dbError } = await supabase.from("early_signups").insert({
@@ -130,12 +143,14 @@ const SignUpSection = () => {
               />
               <select
                 value={userType}
-                onChange={(e) => setUserType(e.target.value)}
+                onChange={(e) => setUserType(e.target.value as (typeof WAITLIST_USER_TYPES)[number]["value"])}
                 className="w-full bg-cream/5 border border-cream/10 text-cream font-body text-sm rounded-xl px-4 py-3 focus:border-teal focus:outline-none transition-colors appearance-none"
               >
-                <option value="tradesperson" className="bg-deep">Tradesperson</option>
-                <option value="homeowner" className="bg-deep">Homeowner</option>
-                <option value="both" className="bg-deep">Both</option>
+                {WAITLIST_USER_TYPES.map((option) => (
+                  <option key={option.value} value={option.value} className="bg-deep">
+                    {option.label}
+                  </option>
+                ))}
               </select>
               {error && <p className="text-red-400 font-mono text-xs">{error}</p>}
               <button
