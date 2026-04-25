@@ -41,7 +41,303 @@ export type Database = {
         }
         Relationships: []
       }
+      contract_events: {
+        Row: {
+          actor_ip: unknown
+          actor_role: string | null
+          actor_user_id: string | null
+          contract_id: string
+          created_at: string
+          event_type: string
+          id: string
+          payload: Json
+        }
+        Insert: {
+          actor_ip?: unknown
+          actor_role?: string | null
+          actor_user_id?: string | null
+          contract_id: string
+          created_at?: string
+          event_type: string
+          id?: string
+          payload?: Json
+        }
+        Update: {
+          actor_ip?: unknown
+          actor_role?: string | null
+          actor_user_id?: string | null
+          contract_id?: string
+          created_at?: string
+          event_type?: string
+          id?: string
+          payload?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contract_events_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contract_events_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts_compat"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contract_templates: {
+        Row: {
+          created_at: string
+          drafted_by: string | null
+          effective_from: string | null
+          guidance_notes: Json
+          id: string
+          legal_text: string
+          plain_english_summary: string
+          status: string
+          superseded_at: string | null
+          updated_at: string
+          version: string
+        }
+        Insert: {
+          created_at?: string
+          drafted_by?: string | null
+          effective_from?: string | null
+          guidance_notes?: Json
+          id?: string
+          legal_text: string
+          plain_english_summary: string
+          status?: string
+          superseded_at?: string | null
+          updated_at?: string
+          version: string
+        }
+        Update: {
+          created_at?: string
+          drafted_by?: string | null
+          effective_from?: string | null
+          guidance_notes?: Json
+          id?: string
+          legal_text?: string
+          plain_english_summary?: string
+          status?: string
+          superseded_at?: string | null
+          updated_at?: string
+          version?: string
+        }
+        Relationships: []
+      }
+      contract_variations: {
+        Row: {
+          activated_at: string | null
+          contract_id: string
+          cost_change_pence: number
+          created_at: string
+          description: string
+          homeowner_signature_hash: string | null
+          homeowner_signed_at: string | null
+          id: string
+          programme_impact_days: number
+          proposed_by: string
+          reason: string | null
+          rejected_at: string | null
+          rejection_reason: string | null
+          sequence: number
+          status: string
+          title: string
+          trade_signature_hash: string | null
+          trade_signed_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          activated_at?: string | null
+          contract_id: string
+          cost_change_pence?: number
+          created_at?: string
+          description: string
+          homeowner_signature_hash?: string | null
+          homeowner_signed_at?: string | null
+          id?: string
+          programme_impact_days?: number
+          proposed_by: string
+          reason?: string | null
+          rejected_at?: string | null
+          rejection_reason?: string | null
+          sequence: number
+          status?: string
+          title: string
+          trade_signature_hash?: string | null
+          trade_signed_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          activated_at?: string | null
+          contract_id?: string
+          cost_change_pence?: number
+          created_at?: string
+          description?: string
+          homeowner_signature_hash?: string | null
+          homeowner_signed_at?: string | null
+          id?: string
+          programme_impact_days?: number
+          proposed_by?: string
+          reason?: string | null
+          rejected_at?: string | null
+          rejection_reason?: string | null
+          sequence?: number
+          status?: string
+          title?: string
+          trade_signature_hash?: string | null
+          trade_signed_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contract_variations_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contract_variations_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts_compat"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contracts: {
+        Row: {
+          activated_at: string | null
+          applicable_standards: string[] | null
+          closed_at: string | null
+          completed_at: string | null
+          created_at: string
+          defects_period_ends_at: string | null
+          estimated_completion_date: string | null
+          estimated_start_date: string | null
+          homeowner_bespoke_terms: string | null
+          homeowner_id: string
+          homeowner_signature_hash: string | null
+          homeowner_signature_ip: unknown
+          homeowner_signed_at: string | null
+          homeowner_snapshot: Json
+          id: string
+          job_id: string
+          materials_specification: Json | null
+          payment_milestones: Json
+          property_address: Json
+          quote_id: string
+          required_certificates: string[] | null
+          scope_of_works: string
+          status: string
+          template_id: string
+          terminated_at: string | null
+          termination_reason: string | null
+          total_value_excl_vat_pence: number
+          total_value_incl_vat_pence: number
+          trade_bespoke_terms: string | null
+          trade_id: string
+          trade_signature_hash: string | null
+          trade_signature_ip: unknown
+          trade_signed_at: string | null
+          trade_snapshot: Json
+          updated_at: string
+          vat_rate_basis_points: number
+        }
+        Insert: {
+          activated_at?: string | null
+          applicable_standards?: string[] | null
+          closed_at?: string | null
+          completed_at?: string | null
+          created_at?: string
+          defects_period_ends_at?: string | null
+          estimated_completion_date?: string | null
+          estimated_start_date?: string | null
+          homeowner_bespoke_terms?: string | null
+          homeowner_id: string
+          homeowner_signature_hash?: string | null
+          homeowner_signature_ip?: unknown
+          homeowner_signed_at?: string | null
+          homeowner_snapshot: Json
+          id?: string
+          job_id: string
+          materials_specification?: Json | null
+          payment_milestones?: Json
+          property_address: Json
+          quote_id: string
+          required_certificates?: string[] | null
+          scope_of_works: string
+          status?: string
+          template_id: string
+          terminated_at?: string | null
+          termination_reason?: string | null
+          total_value_excl_vat_pence: number
+          total_value_incl_vat_pence: number
+          trade_bespoke_terms?: string | null
+          trade_id: string
+          trade_signature_hash?: string | null
+          trade_signature_ip?: unknown
+          trade_signed_at?: string | null
+          trade_snapshot: Json
+          updated_at?: string
+          vat_rate_basis_points?: number
+        }
+        Update: {
+          activated_at?: string | null
+          applicable_standards?: string[] | null
+          closed_at?: string | null
+          completed_at?: string | null
+          created_at?: string
+          defects_period_ends_at?: string | null
+          estimated_completion_date?: string | null
+          estimated_start_date?: string | null
+          homeowner_bespoke_terms?: string | null
+          homeowner_id?: string
+          homeowner_signature_hash?: string | null
+          homeowner_signature_ip?: unknown
+          homeowner_signed_at?: string | null
+          homeowner_snapshot?: Json
+          id?: string
+          job_id?: string
+          materials_specification?: Json | null
+          payment_milestones?: Json
+          property_address?: Json
+          quote_id?: string
+          required_certificates?: string[] | null
+          scope_of_works?: string
+          status?: string
+          template_id?: string
+          terminated_at?: string | null
+          termination_reason?: string | null
+          total_value_excl_vat_pence?: number
+          total_value_incl_vat_pence?: number
+          trade_bespoke_terms?: string | null
+          trade_id?: string
+          trade_signature_hash?: string | null
+          trade_signature_ip?: unknown
+          trade_signed_at?: string | null
+          trade_snapshot?: Json
+          updated_at?: string
+          vat_rate_basis_points?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contracts_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "contract_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contracts_legacy: {
         Row: {
           agreed_price: number
           contract_text: string
@@ -1703,9 +1999,34 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      contracts_compat: {
+        Row: {
+          agreed_price: number | null
+          contract_text: string | null
+          created_at: string | null
+          homeowner_id: string | null
+          homeowner_signed_at: string | null
+          id: string | null
+          job_id: string | null
+          payment_schedule: Json | null
+          quote_id: string | null
+          status: string | null
+          trade_id: string | null
+          trade_signed_at: string | null
+          updated_at: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      accept_practical_completion: {
+        Args: { _contract_id: string }
+        Returns: undefined
+      }
+      add_bespoke_terms: {
+        Args: { _contract_id: string; _terms: string }
+        Returns: undefined
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -1714,12 +2035,24 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      generate_contract_for_quote: {
+        Args: { _quote_id: string }
+        Returns: string
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      log_contract_event: {
+        Args: { _contract_id: string; _event_type: string; _payload?: Json }
+        Returns: undefined
+      }
+      mark_practical_completion: {
+        Args: { _contract_id: string }
+        Returns: undefined
       }
       move_to_dlq: {
         Args: {
@@ -1730,6 +2063,17 @@ export type Database = {
         }
         Returns: number
       }
+      propose_variation: {
+        Args: {
+          _contract_id: string
+          _cost_change_pence: number
+          _description: string
+          _programme_impact_days: number
+          _reason: string
+          _title: string
+        }
+        Returns: string
+      }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
         Returns: {
@@ -1739,6 +2083,19 @@ export type Database = {
         }[]
       }
       recompute_trade_stats: { Args: { _trade_id: string }; Returns: undefined }
+      sign_contract: {
+        Args: { _contract_id: string; _ip?: unknown; _signature_hash: string }
+        Returns: Json
+      }
+      sign_variation: {
+        Args: {
+          _accept?: boolean
+          _rejection_reason?: string
+          _signature_hash: string
+          _variation_id: string
+        }
+        Returns: Json
+      }
       trade_can_access_homeowner: {
         Args: { _homeowner_id: string; _user_id: string }
         Returns: boolean
