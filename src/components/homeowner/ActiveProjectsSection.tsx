@@ -39,9 +39,7 @@ const timeAgo = (dateStr: string) => {
 const ActiveProjectsSection = ({ jobs, quoteCounts }: Props) => {
   const navigate = useNavigate();
 
-  const activeJobs = jobs.filter(
-    (j) => !EXCLUDED_STATUSES.has(j.status) && ACTIVE_STAGES.has(j.stage),
-  );
+  const activeJobs = jobs.filter(isActiveJob);
 
   if (activeJobs.length === 0) {
     return (
