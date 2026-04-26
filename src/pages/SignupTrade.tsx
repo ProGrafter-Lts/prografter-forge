@@ -451,11 +451,10 @@ const SignupTrade = () => {
                     <label className={labelClass}>Specialisms (optional)</label>
                     <Suspense fallback={<div className="text-cream/60 text-sm font-body py-3">Loading specialisms…</div>}>
                       <SpecialismsPicker
-                        primaryTradeType={tradeType}
-                        selectedIds={specialismIds}
-                        onChange={setSpecialismIds}
+                        tradeType={tradeType}
+                        selected={specialismIds}
                         primaryId={primarySpecialismId}
-                        onPrimaryChange={setPrimarySpecialismId}
+                        onChange={(sel, pid) => { setSpecialismIds(sel); setPrimarySpecialismId(pid); }}
                       />
                     </Suspense>
                   </div>
@@ -483,7 +482,7 @@ const SignupTrade = () => {
                     <div>
                       <label className={labelClass}>Cert Expiry</label>
                       <Suspense fallback={null}>
-                        <TradeDateField value={greenCertExpiry} onChange={setGreenCertExpiry} />
+                        <TradeDateField value={greenCertExpiry} onChange={setGreenCertExpiry} placeholder="Select expiry date" inputClassName={inputClass} />
                       </Suspense>
                     </div>
                   </div>
@@ -521,7 +520,7 @@ const SignupTrade = () => {
                   <div className="mt-3">
                     <label className={labelClass}>Expiry Date *</label>
                     <Suspense fallback={null}>
-                      <TradeDateField value={insuranceExpiry} onChange={setInsuranceExpiry} />
+                      <TradeDateField value={insuranceExpiry} onChange={setInsuranceExpiry} placeholder="Select expiry date" inputClassName={inputClass} />
                     </Suspense>
                     {insuranceStatus === "expired" && <p className="mt-1 text-xs text-red-400">⚠ Insurance has expired</p>}
                     {insuranceStatus === "expiring" && <p className="mt-1 text-xs text-yellow-400">⚠ Expires within 30 days</p>}
