@@ -16,21 +16,52 @@ interface ProjectHeaderProps {
   tradeRating: number;
   homeownerName: string;
   contractValue: number;
+  /** 0–100 — derived from completed stages on the parent page. */
   progress: number;
-  estimatedDays?: number;
+  /** Project start (e.g. earliest stage planned_start, or contract activation). */
+  startDate?: string | null;
+  /** Project end (latest stage planned_end). */
+  endDate?: string | null;
 }
 
 const STATUS_BADGE: Record<string, string> = {
   open: "bg-teal/10 text-teal",
   matched: "bg-blue-100 text-blue-700",
   active: "bg-amber-100 text-amber-700",
+  in_progress: "bg-amber-100 text-amber-700",
   complete: "bg-green-100 text-green-700",
+  completed: "bg-green-100 text-green-700",
 };
 
-const daysSince = (d: string) => Math.floor((Date.now() - new Date(d).getTime()) / 86400000);
+const dayDiff = (a: Date, b: Date) =>
+  Math.floor((a.getTime() - b.getTime()) / 86400000);
 
-const ProjectHeader = ({ job, tradeName, tradeVerified, tradeRating, homeownerName, contractValue, progress, estimatedDays }: ProjectHeaderProps) => {
-  const currentDay = daysSince(job.created_at);
+const computeSchedule = (start?: string | null, end?: string | null) => {
+  if (!start || !end) return null;
+  const s = new Date(start);
+  const e = new Date(end);
+  if (Number.isNaN(s.getTime()) || Number.isNaN(e.getTime())) return null;
+  const total = Math.max(1, dayDiff(e, s) + 1);
+  const elapsed = Math.max(0, dayDiff(new Date(), s) + 1);
+  if (elapsed > total) {
+    return { current: total, total, overdue: true };
+  }
+  return { current: elapsed, total, overdue: false };
+};
+
+const ProjectHeader = ({
+  job,
+  tradeName,
+  tradeVerified,
+  tradeRating,
+  homeownerName,
+  contractValue,
+  progress,
+  startDate,
+  endDate,
+}: ProjectHeaderProps) => {
+  const schedule = computeSchedule(startDate, endDate);
+  const statusLabel = job.status.replace(/_/g, " ");
 
   return (
     <div className="bg-white rounded-2xl p-6 border border-navy/10 shadow-sm">
@@ -52,15 +83,21 @@ const ProjectHeader = ({ job, tradeName, tradeVerified, tradeRating, homeownerNa
             </span>
             <span>·</span>
             <span>Homeowner: <span className="text-navy font-semibold">{homeownerName}</span></span>
-            <span>·</span>
-            <span className="flex items-center gap-1">
-              <Clock className="w-3 h-3" /> Day {currentDay}{estimatedDays ? ` of ~${estimatedDays}` : ""}
-            </span>
+            {schedule && (
+              <>
+                <span>·</span>
+                <span className="flex items-center gap-1">
+                  <Clock className="w-3 h-3" />
+                  Day {schedule.current} of {schedule.total}
+                  {schedule.overdue && <span className="text-rose-600 font-semibold ml-1">— overdue</span>}
+                </span>
+              </>
+            )}
           </div>
         </div>
         <div className="flex items-center gap-3">
           <Badge className={STATUS_BADGE[job.status] || "bg-navy/10 text-navy"}>
-            {job.status.charAt(0).toUpperCase() + job.status.slice(1)}
+            {statusLabel.charAt(0).toUpperCase() + statusLabel.slice(1)}
           </Badge>
           {contractValue > 0 && (
             <span className="font-heading text-teal text-2xl">£{contractValue.toLocaleString()}</span>
