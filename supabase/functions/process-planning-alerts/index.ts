@@ -223,7 +223,8 @@ function isRelevant(record: PlanItRecord, tradeType: string): boolean {
 }
 
 async function processSub(
-  supabase: ReturnType<typeof createClient>,
+  // deno-lint-ignore no-explicit-any
+  supabase: any,
   sub: Sub,
   recentDays: number,
 ): Promise<{ inserted: number; reason?: string; districts?: number; fetched?: number }> {
