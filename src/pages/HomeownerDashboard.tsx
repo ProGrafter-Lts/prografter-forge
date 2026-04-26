@@ -9,7 +9,9 @@ import MyJobs from "@/components/homeowner/MyJobs";
 import RecentSiteUpdates from "@/components/homeowner/RecentSiteUpdates";
 import VariationAlert from "@/components/homeowner/VariationAlert";
 import GreenCertificatePack from "@/components/GreenCertificatePack";
+import GreenSchemesBreakdown from "@/components/GreenSchemesBreakdown";
 import { isGreenTrade } from "@/lib/greenTrades";
+import { isActiveJob } from "@/lib/activeProjects";
 import { BookOpen, Leaf, FolderKanban, SearchCheck, ArrowRight } from "lucide-react";
 import HomeownerProfileSection from "@/components/homeowner/HomeownerProfileSection";
 import { useAuthReady } from "@/hooks/useAuthReady";
@@ -194,43 +196,65 @@ const HomeownerDashboard = () => {
             </p>
           </div>
 
-          {/* Homeowner Manual tab */}
+          {/* Homeowner Manual tab — show when there's any active project, list green ones individually */}
           {activeNav === "manual" && (
             <section className="space-y-6">
               <h2 className="font-heading text-primary text-2xl flex items-center gap-2">
                 <BookOpen className="w-5 h-5" /> Homeowner Manual
               </h2>
-              {jobs.filter((j) => isGreenTrade(j.job_type)).length > 0 ? (
-                jobs.filter((j) => isGreenTrade(j.job_type)).map((j) => (
-                  <div key={j.id} className="space-y-4">
-                    <h3 className="font-heading text-primary text-lg flex items-center gap-2">
-                      <Leaf className="w-4 h-4 text-green-500" />
-                      {j.title || j.job_type}
-                    </h3>
-                    <GreenCertificatePack jobType={j.job_type} isComplete={j.stage === "completed"} />
+              {(() => {
+                const activeJobs = jobs.filter(isActiveJob);
+                if (activeJobs.length === 0) {
+                  return (
+                    <div className="bg-card rounded-2xl p-8 border border-border text-center">
+                      <BookOpen className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
+                      <p className="font-mono text-sm text-muted-foreground">
+                        Your Homeowner Manual will be available once a project is active.
+                      </p>
+                    </div>
+                  );
+                }
+                return (
+                  <div className="space-y-4">
+                    {activeJobs.map((j) => (
+                      <a
+                        key={j.id}
+                        href={`/manual/${j.id}`}
+                        className="block bg-card rounded-2xl p-5 border border-border hover:border-secondary/40 hover:shadow-sm transition-all"
+                      >
+                        <div className="flex items-center justify-between gap-3">
+                          <div>
+                            <h3 className="font-heading text-primary text-lg flex items-center gap-2">
+                              {isGreenTrade(j.job_type) && <Leaf className="w-4 h-4 text-green-500" />}
+                              {j.title || j.job_type}
+                            </h3>
+                            <p className="font-mono text-xs text-muted-foreground mt-1">
+                              Open the live manual for this project →
+                            </p>
+                          </div>
+                          <ArrowRight className="w-4 h-4 text-muted-foreground" />
+                        </div>
+                        {isGreenTrade(j.job_type) && (
+                          <div className="mt-4">
+                            <GreenCertificatePack jobType={j.job_type} isComplete={j.stage === "completed"} />
+                          </div>
+                        )}
+                      </a>
+                    ))}
                   </div>
-                ))
-              ) : (
-                <div className="bg-card rounded-2xl p-8 border border-border text-center">
-                  <BookOpen className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
-                  <p className="font-mono text-sm text-muted-foreground">
-                    Your Homeowner Manual will be available once a project is active.
-                  </p>
-                </div>
-              )}
+                );
+              })()}
             </section>
           )}
 
-          {/* Green Grants tab */}
+          {/* Green Grants tab — embedded scheme cards (no longer a dead-end link) */}
           {activeNav === "grants" && (
             <section>
               <h2 className="font-heading text-primary text-2xl mb-4 flex items-center gap-2">
                 <Leaf className="w-5 h-5 text-green-500" /> Green Grants
               </h2>
-              <div className="bg-card rounded-2xl p-8 border border-border text-center">
-                <p className="font-mono text-sm text-muted-foreground">
-                  Visit the <a href="/green" className="text-secondary hover:underline">Green Grants page</a> to explore available funding.
-                </p>
+              <div className="-mx-4 md:-mx-8 -mt-2">
+                <GreenSchemesBreakdown />
               </div>
             </section>
           )}
