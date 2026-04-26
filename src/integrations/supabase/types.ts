@@ -757,6 +757,13 @@ export type Database = {
             referencedRelation: "trades"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "job_matches_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "trades_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       jobs: {
@@ -1010,6 +1017,13 @@ export type Database = {
             referencedRelation: "trades"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "planning_alert_shortlist_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "trades_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       planning_alert_subs: {
@@ -1052,6 +1066,13 @@ export type Database = {
             columns: ["trade_id"]
             isOneToOne: false
             referencedRelation: "trades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "planning_alert_subs_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "trades_public"
             referencedColumns: ["id"]
           },
         ]
@@ -1117,6 +1138,13 @@ export type Database = {
             columns: ["trade_id"]
             isOneToOne: false
             referencedRelation: "trades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "planning_alerts_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "trades_public"
             referencedColumns: ["id"]
           },
         ]
@@ -1475,6 +1503,13 @@ export type Database = {
             referencedRelation: "trades"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "quotes_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "trades_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       review_followups: {
@@ -1599,6 +1634,13 @@ export type Database = {
             referencedRelation: "trades"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "reviews_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "trades_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       specialisms: {
@@ -1678,6 +1720,13 @@ export type Database = {
             columns: ["trade_id"]
             isOneToOne: false
             referencedRelation: "trades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stage_updates_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "trades_public"
             referencedColumns: ["id"]
           },
         ]
@@ -1798,6 +1847,13 @@ export type Database = {
             columns: ["trade_id"]
             isOneToOne: false
             referencedRelation: "trades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trade_specialisms_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "trades_public"
             referencedColumns: ["id"]
           },
         ]
@@ -1995,6 +2051,13 @@ export type Database = {
             referencedRelation: "trades"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "variations_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "trades_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
     }
@@ -2014,6 +2077,60 @@ export type Database = {
           trade_id: string | null
           trade_signed_at: string | null
           updated_at: string | null
+        }
+        Relationships: []
+      }
+      trades_public: {
+        Row: {
+          avg_rating: number | null
+          bio: string | null
+          company_name: string | null
+          completed_jobs_count: number | null
+          id: string | null
+          is_green_trade: boolean | null
+          mcs_verified: boolean | null
+          name: string | null
+          review_count: number | null
+          tier: string | null
+          trade_type: string | null
+          trustmark_verified: boolean | null
+          verified: boolean | null
+          website: string | null
+          years_experience: number | null
+        }
+        Insert: {
+          avg_rating?: number | null
+          bio?: string | null
+          company_name?: string | null
+          completed_jobs_count?: number | null
+          id?: string | null
+          is_green_trade?: boolean | null
+          mcs_verified?: boolean | null
+          name?: string | null
+          review_count?: number | null
+          tier?: string | null
+          trade_type?: string | null
+          trustmark_verified?: boolean | null
+          verified?: boolean | null
+          website?: string | null
+          years_experience?: number | null
+        }
+        Update: {
+          avg_rating?: number | null
+          bio?: string | null
+          company_name?: string | null
+          completed_jobs_count?: number | null
+          id?: string | null
+          is_green_trade?: boolean | null
+          mcs_verified?: boolean | null
+          name?: string | null
+          review_count?: number | null
+          tier?: string | null
+          trade_type?: string | null
+          trustmark_verified?: boolean | null
+          verified?: boolean | null
+          website?: string | null
+          years_experience?: number | null
         }
         Relationships: []
       }
@@ -2044,6 +2161,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      homeowner_has_relationship_with_trade: {
+        Args: { _trade_id: string; _user_id: string }
         Returns: boolean
       }
       log_contract_event: {
