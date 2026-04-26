@@ -365,7 +365,7 @@ serve(async (req) => {
     const results: Record<string, { inserted: number; reason?: string; districts?: number; fetched?: number }> = {};
     let totalInserted = 0;
 
-    for (const sub of (subs ?? []) as Sub[]) {
+    for (const sub of (subs ?? []) as unknown as Sub[]) {
       const r = await processSub(supabase, sub, recentDays);
       results[sub.trade_id] = r;
       totalInserted += r.inserted;
