@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { FolderKanban, MapPin, Clock, FileText, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { isActiveJob } from "@/lib/activeProjects";
 
 interface Job {
   id: string;
@@ -17,15 +18,7 @@ interface Props {
   quoteCounts: Record<string, number>;
 }
 
-// Pre-completion states that should appear in Active Projects
-const ACTIVE_STAGES = new Set([
-  "enquiry",
-  "quoting",
-  "scheduled",
-  "in_progress",
-  "review",
-]);
-const EXCLUDED_STATUSES = new Set(["completed", "cancelled", "draft"]);
+// Active stages handled centrally in src/lib/activeProjects.ts
 
 const STATUS_BADGE: Record<string, { label: string; className: string }> = {
   awaiting_quotes: { label: "Awaiting Quotes", className: "bg-amber-100 text-amber-800" },
