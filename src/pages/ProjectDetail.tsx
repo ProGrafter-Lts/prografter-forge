@@ -161,8 +161,15 @@ const ProjectDetail = () => {
 
     const { data: matchData } = await supabase.from("job_matches").select("trade_id").eq("job_id", id!).limit(1);
     if (matchData && matchData.length > 0) {
-      const { data: t2 } = await supabase.from("trades").select("name, verified").eq("id", matchData[0].trade_id).maybeSingle();
-      if (t2) { setTradeName(t2.name); setTradeVerified(t2.verified); }
+      const { data: t2 } = await supabase
+        .from("trades_public")
+        .select("name, company_name, verified, avg_rating")
+        .eq("id", matchData[0].trade_id)
+        .maybeSingle();
+      if (t2) {
+        setTradeName(t2.company_name || t2.name);
+        setTradeVerified(!!t2.verified);
+      }
     }
 
     const [stageRes, msgRes, varRes, quoteRes, contractRes] = await Promise.allSettled([
