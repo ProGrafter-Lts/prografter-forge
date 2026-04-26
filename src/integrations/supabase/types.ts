@@ -1888,6 +1888,51 @@ export type Database = {
           },
         ]
       }
+      trade_verification_documents: {
+        Row: {
+          doc_type: string
+          expiry_date: string | null
+          file_path: string
+          id: string
+          original_filename: string | null
+          trade_id: string
+          uploaded_at: string
+        }
+        Insert: {
+          doc_type: string
+          expiry_date?: string | null
+          file_path: string
+          id?: string
+          original_filename?: string | null
+          trade_id: string
+          uploaded_at?: string
+        }
+        Update: {
+          doc_type?: string
+          expiry_date?: string | null
+          file_path?: string
+          id?: string
+          original_filename?: string | null
+          trade_id?: string
+          uploaded_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trade_verification_documents_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "trades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trade_verification_documents_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "trades_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trades: {
         Row: {
           avg_rating: number | null
@@ -1902,6 +1947,7 @@ export type Database = {
           id: string
           inca_certified: boolean
           insurance_cert_url: string | null
+          insurance_expiry: string | null
           is_green_trade: boolean
           is_test: boolean
           mcs_number: string | null
@@ -1916,6 +1962,7 @@ export type Database = {
           rejection_reason: string | null
           review_count: number
           specialisms_prompt_seen: boolean
+          submitted_for_review_at: string | null
           tier: string
           tier_updated_at: string | null
           trade_type: string
@@ -1941,6 +1988,7 @@ export type Database = {
           id?: string
           inca_certified?: boolean
           insurance_cert_url?: string | null
+          insurance_expiry?: string | null
           is_green_trade?: boolean
           is_test?: boolean
           mcs_number?: string | null
@@ -1955,6 +2003,7 @@ export type Database = {
           rejection_reason?: string | null
           review_count?: number
           specialisms_prompt_seen?: boolean
+          submitted_for_review_at?: string | null
           tier?: string
           tier_updated_at?: string | null
           trade_type: string
@@ -1980,6 +2029,7 @@ export type Database = {
           id?: string
           inca_certified?: boolean
           insurance_cert_url?: string | null
+          insurance_expiry?: string | null
           is_green_trade?: boolean
           is_test?: boolean
           mcs_number?: string | null
@@ -1994,6 +2044,7 @@ export type Database = {
           rejection_reason?: string | null
           review_count?: number
           specialisms_prompt_seen?: boolean
+          submitted_for_review_at?: string | null
           tier?: string
           tier_updated_at?: string | null
           trade_type?: string
