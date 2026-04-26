@@ -43,6 +43,7 @@ interface TradeProfile {
   review_count: number;
   avg_rating: number | null;
   tier: string | null;
+  verification_status: string | null;
 }
 
 const TradeDashboard = () => {
@@ -92,7 +93,7 @@ const TradeDashboard = () => {
     try {
       const { data: tradeData, error: tradeError } = await supabase
         .from("trades")
-        .select("id, name, company_name, verified, trade_type, phone, is_green_trade, mcs_number, trustmark_number, pas_2030_accredited, pas_2035_coordinator, ozev_approved, fgas_registered, ciga_registered, inca_certified, green_cert_expiry, specialisms_prompt_seen, completed_jobs_count, review_count, avg_rating, tier")
+        .select("id, name, company_name, verified, trade_type, phone, is_green_trade, mcs_number, trustmark_number, pas_2030_accredited, pas_2035_coordinator, ozev_approved, fgas_registered, ciga_registered, inca_certified, green_cert_expiry, specialisms_prompt_seen, completed_jobs_count, review_count, avg_rating, tier, verification_status")
         .eq("id", tradeId)
         .maybeSingle();
 
@@ -106,7 +107,7 @@ const TradeDashboard = () => {
       if (!tradeData) {
         setTrade(null);
         setLoadError("We couldn't find your trade profile.");
-        navigate("/register/trade", { replace: true });
+        navigate("/signup/trade", { replace: true });
         return;
       }
       setTrade(tradeData);
@@ -240,6 +241,30 @@ const TradeDashboard = () => {
             </div>
           ) : (
             <>
+          {/* Verification banner */}
+          {trade?.verification_status && trade.verification_status !== "approved" && (
+            <div className={`mt-10 md:mt-0 p-4 rounded-xl border font-body text-sm ${
+              trade.verification_status === "info_requested"
+                ? "bg-yellow-50 border-yellow-300 text-yellow-900"
+                : trade.verification_status === "rejected"
+                ? "bg-red-50 border-red-300 text-red-900"
+                : "bg-blue-50 border-blue-300 text-blue-900"
+            }`}>
+              <div className="flex items-center justify-between gap-4 flex-wrap">
+                <div>
+                  <p className="font-mono text-xs uppercase tracking-widest mb-1">Verification {trade.verification_status.replace("_"," ")}</p>
+                  <p>
+                    {trade.verification_status === "pending" && "Your application is being reviewed. We typically respond within 1 business day."}
+                    {trade.verification_status === "info_requested" && "We need a little more info before we can verify you."}
+                    {trade.verification_status === "rejected" && "Your application wasn't approved. See details on the status page."}
+                  </p>
+                </div>
+                <a href="/signup/trade/under-review" className="inline-block bg-primary text-primary-foreground font-mono text-xs px-4 py-2 rounded-lg hover:opacity-90 transition-opacity">
+                  View status
+                </a>
+              </div>
+            </div>
+          )}
           {/* Welcome header */}
           <div className="flex items-center gap-3 pt-10 md:pt-0">
             <div>

@@ -14,7 +14,8 @@ const Login = lazy(() => import("./pages/Login.tsx"));
 const Terms = lazy(() => import("./pages/Terms.tsx"));
 const Privacy = lazy(() => import("./pages/Privacy.tsx"));
 const TradeRegister = lazy(() => import("./pages/TradeRegister.tsx"));
-const TradeRegisterNew = lazy(() => import("./pages/TradeRegisterNew.tsx"));
+const SignupTrade = lazy(() => import("./pages/SignupTrade.tsx"));
+const SignupTradeUnderReview = lazy(() => import("./pages/SignupTradeUnderReview.tsx"));
 const PostAJob = lazy(() => import("./pages/PostAJob.tsx"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword.tsx"));
 const TradeDashboard = lazy(() => import("./pages/TradeDashboard.tsx"));
@@ -64,7 +65,7 @@ const App = () => (
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/register" element={<TradeRegister />} />
-            <Route path="/register/trade" element={<TradeRegisterNew />} />
+            <Route path="/register/trade" element={<SignupTradeRedirect />} />
             <Route path="/post-a-job" element={<PostAJob />} />
             <Route path="/quote-checker" element={<QuoteChecker />} />
             <Route path="/green" element={<GreenGrants />} />
@@ -132,7 +133,8 @@ const App = () => (
             <Route path="/signup/homeowner" element={<SignupHomeowner />} />
             <Route path="/signup/homeowner/next" element={<SignupHomeownerNext />} />
             <Route path="/signup/homeowner/check-email" element={<SignupCheckEmail />} />
-            <Route path="/signup/trade" element={<SignupTradeRedirect />} />
+            <Route path="/signup/trade" element={<SignupTrade />} />
+            <Route path="/signup/trade/under-review" element={<ProtectedRoute><SignupTradeUnderReview /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
