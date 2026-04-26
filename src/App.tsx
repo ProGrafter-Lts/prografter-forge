@@ -30,6 +30,10 @@ const HomeownerManual = lazy(() => import("./pages/HomeownerManual.tsx"));
 const Unsubscribe = lazy(() => import("./pages/Unsubscribe.tsx"));
 const Contact = lazy(() => import("./pages/Contact.tsx"));
 const About = lazy(() => import("./pages/About.tsx"));
+const SignupHomeowner = lazy(() => import("./pages/SignupHomeowner.tsx"));
+const SignupHomeownerNext = lazy(() => import("./pages/SignupHomeownerNext.tsx"));
+const SignupCheckEmail = lazy(() => import("./pages/SignupCheckEmail.tsx"));
+const SignupTradeRedirect = lazy(() => import("./pages/SignupTradeRedirect.tsx"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -125,6 +129,10 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            <Route path="/signup/homeowner" element={<SignupHomeowner />} />
+            <Route path="/signup/homeowner/next" element={<SignupHomeownerNext />} />
+            <Route path="/signup/homeowner/check-email" element={<SignupCheckEmail />} />
+            <Route path="/signup/trade" element={<SignupTradeRedirect />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

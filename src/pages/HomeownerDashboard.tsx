@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import HomeownerSidebar from "@/components/homeowner/HomeownerSidebar";
 import ActiveProjectsSection from "@/components/homeowner/ActiveProjectsSection";
+import WelcomeBanner from "@/components/homeowner/WelcomeBanner";
 import QuotesReceived from "@/components/homeowner/QuotesReceived";
 import MyJobs from "@/components/homeowner/MyJobs";
 import RecentSiteUpdates from "@/components/homeowner/RecentSiteUpdates";
@@ -195,6 +196,8 @@ const HomeownerDashboard = () => {
               Your home projects at a glance
             </p>
           </div>
+
+          <WelcomeBanner hasProjects={jobs.length > 0} />
 
           {/* Homeowner Manual tab — show when there's any active project, list green ones individually */}
           {activeNav === "manual" && (
