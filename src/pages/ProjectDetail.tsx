@@ -229,19 +229,22 @@ const ProjectDetail = () => {
 
   // Computed
   const totalStages = stages.length;
-  const completedStages = stages.filter((s) => s.status === "complete").length;
+  const completedStages = stages.filter(
+    (s) => s.status === "completed" || s.status === "complete",
+  ).length;
   const progress = totalStages > 0 ? Math.round((completedStages / totalStages) * 100) : 0;
   const contractValue = contract ? Number(contract.agreed_price) : stages.reduce((sum, s) => sum + Number(s.payment_amount || 0), 0);
 
-  // Estimate total days from planned dates
-  const estimatedDays = (() => {
-    if (stages.length === 0) return undefined;
-    const firstStart = stages[0]?.planned_start;
-    const lastEnd = stages[stages.length - 1]?.planned_end;
-    if (firstStart && lastEnd) {
-      return Math.max(1, Math.ceil((new Date(lastEnd).getTime() - new Date(firstStart).getTime()) / 86400000));
-    }
-    return undefined;
+  // Project schedule — earliest planned_start, latest planned_end across all stages.
+  const projectStart = (() => {
+    const dates = stages.map((s) => s.planned_start).filter(Boolean) as string[];
+    if (dates.length === 0) return null;
+    return dates.reduce((a, b) => (a < b ? a : b));
+  })();
+  const projectEnd = (() => {
+    const dates = stages.map((s) => s.planned_end).filter(Boolean) as string[];
+    if (dates.length === 0) return null;
+    return dates.reduce((a, b) => (a > b ? a : b));
   })();
 
   const sendMessage = async () => {
@@ -296,7 +299,8 @@ const ProjectDetail = () => {
           homeownerName={homeownerName}
           contractValue={contractValue}
           progress={progress}
-          estimatedDays={estimatedDays}
+          startDate={projectStart}
+          endDate={projectEnd}
         />
 
         {/* Funds Verified panel — only shown to trades when verified */}
