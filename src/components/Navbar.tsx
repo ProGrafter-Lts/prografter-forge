@@ -23,13 +23,13 @@ const Navbar = () => {
           <a href="/green" className="font-mono text-sm text-[#16A34A] hover:text-[#15803D] transition-colors flex items-center gap-1">🌿 Green Grants</a>
           <a href="/login" className="font-mono text-sm text-body-text hover:text-teal transition-colors">Login</a>
           <a
-            href="/register/trade"
+            href="/signup/trade"
             className="border border-teal text-teal font-mono text-sm px-5 py-2 rounded-xl hover:bg-teal hover:text-cream transition-colors"
           >
-            Register as a Trade
+            Join as a Trade
           </a>
           <a
-            href="/post-a-job"
+            href="/signup/homeowner"
             className="bg-teal text-cream font-mono text-sm px-5 py-2.5 rounded-xl hover:bg-teal-hover transition-colors shadow-lg shadow-teal/20"
           >
             Post a Job
@@ -59,8 +59,8 @@ const Navbar = () => {
           <a href="/quote-checker" className="font-mono text-sm text-body-text" onClick={() => setMenuOpen(false)}>Quote Checker</a>
           <a href="/green" className="font-mono text-sm text-[#16A34A] flex items-center gap-1" onClick={() => setMenuOpen(false)}>🌿 Green Grants</a>
           <a href="/login" className="font-mono text-sm text-body-text" onClick={() => setMenuOpen(false)}>Login</a>
-          <a href="/register/trade" className="border border-teal text-teal font-mono text-sm px-5 py-2 rounded-xl text-center" onClick={() => setMenuOpen(false)}>Register as a Trade</a>
-          <a href="/post-a-job" className="bg-teal text-cream font-mono text-sm px-5 py-2.5 rounded-xl text-center shadow-lg shadow-teal/20" onClick={() => setMenuOpen(false)}>Post a Job</a>
+          <a href="/signup/trade" className="border border-teal text-teal font-mono text-sm px-5 py-2 rounded-xl text-center" onClick={() => setMenuOpen(false)}>Join as a Trade</a>
+          <a href="/signup/homeowner" className="bg-teal text-cream font-mono text-sm px-5 py-2.5 rounded-xl text-center shadow-lg shadow-teal/20" onClick={() => setMenuOpen(false)}>Post a Job</a>
         </div>
       )}
     </nav>
