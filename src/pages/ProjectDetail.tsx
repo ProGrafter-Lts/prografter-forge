@@ -170,7 +170,7 @@ const ProjectDetail = () => {
       supabase.from("project_messages").select("*").eq("job_id", id!).order("created_at"),
       supabase.from("variations").select("*").eq("job_id", id!).order("created_at", { ascending: false }),
       supabase.from("quotes").select("*").eq("job_id", id!),
-      supabase.from("contracts").select("*").eq("job_id", id!).maybeSingle(),
+      supabase.from("contracts_compat").select("*").eq("job_id", id!).maybeSingle(),
     ]);
 
     const stageData = stageRes.status === "fulfilled" ? stageRes.value.data : null;
@@ -196,7 +196,7 @@ const ProjectDetail = () => {
     if (quoteData) setQuotes(quoteData as Quote[]);
 
     const contractData = contractRes.status === "fulfilled" ? contractRes.value.data : null;
-    if (contractData) setContract(contractData as Contract);
+    if (contractData) setContract(contractData as unknown as Contract);
   };
 
   const loadViewerContext = async (nextAuthUserId: string) => {
