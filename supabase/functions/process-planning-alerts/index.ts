@@ -12,7 +12,7 @@
 // Both data sources are free, no API key.
 
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import { createClient } from "npm:@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -223,7 +223,8 @@ function isRelevant(record: PlanItRecord, tradeType: string): boolean {
 }
 
 async function processSub(
-  supabase: ReturnType<typeof createClient>,
+  // deno-lint-ignore no-explicit-any
+  supabase: any,
   sub: Sub,
   recentDays: number,
 ): Promise<{ inserted: number; reason?: string; districts?: number; fetched?: number }> {
@@ -364,7 +365,7 @@ serve(async (req) => {
     const results: Record<string, { inserted: number; reason?: string; districts?: number; fetched?: number }> = {};
     let totalInserted = 0;
 
-    for (const sub of (subs ?? []) as Sub[]) {
+    for (const sub of (subs ?? []) as unknown as Sub[]) {
       const r = await processSub(supabase, sub, recentDays);
       results[sub.trade_id] = r;
       totalInserted += r.inserted;
