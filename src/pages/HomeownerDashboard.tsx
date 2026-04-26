@@ -126,7 +126,7 @@ const HomeownerDashboard = () => {
       update_text: u.update_text,
       created_at: u.created_at,
       photo_urls: u.photo_urls,
-      trade_name: u.trades?.name,
+      trade_name: u.trades_public?.name,
       stage_name: u.project_stages?.stage_name,
     }));
     setSiteUpdates(mappedUpdates);
