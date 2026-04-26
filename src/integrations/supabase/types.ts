@@ -41,6 +41,36 @@ export type Database = {
         }
         Relationships: []
       }
+      consents_log: {
+        Row: {
+          consent_type: string
+          consented: boolean
+          created_at: string
+          id: string
+          ip_address: unknown
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          consent_type: string
+          consented: boolean
+          created_at?: string
+          id?: string
+          ip_address?: unknown
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          consent_type?: string
+          consented?: boolean
+          created_at?: string
+          id?: string
+          ip_address?: unknown
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       contract_events: {
         Row: {
           actor_ip: unknown
@@ -1882,6 +1912,8 @@ export type Database = {
           pas_2035_coordinator: boolean
           phone: string
           postcode: string
+          rejected_at: string | null
+          rejection_reason: string | null
           review_count: number
           specialisms_prompt_seen: boolean
           tier: string
@@ -1890,6 +1922,8 @@ export type Database = {
           trustmark_number: string | null
           trustmark_verified: boolean
           user_id: string | null
+          verification_notes: string | null
+          verification_status: string
           verified: boolean
           website: string | null
           years_experience: number | null
@@ -1917,6 +1951,8 @@ export type Database = {
           pas_2035_coordinator?: boolean
           phone: string
           postcode: string
+          rejected_at?: string | null
+          rejection_reason?: string | null
           review_count?: number
           specialisms_prompt_seen?: boolean
           tier?: string
@@ -1925,6 +1961,8 @@ export type Database = {
           trustmark_number?: string | null
           trustmark_verified?: boolean
           user_id?: string | null
+          verification_notes?: string | null
+          verification_status?: string
           verified?: boolean
           website?: string | null
           years_experience?: number | null
@@ -1952,6 +1990,8 @@ export type Database = {
           pas_2035_coordinator?: boolean
           phone?: string
           postcode?: string
+          rejected_at?: string | null
+          rejection_reason?: string | null
           review_count?: number
           specialisms_prompt_seen?: boolean
           tier?: string
@@ -1960,6 +2000,8 @@ export type Database = {
           trustmark_number?: string | null
           trustmark_verified?: boolean
           user_id?: string | null
+          verification_notes?: string | null
+          verification_status?: string
           verified?: boolean
           website?: string | null
           years_experience?: number | null
