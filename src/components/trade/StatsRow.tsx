@@ -9,7 +9,7 @@ interface StatsRowProps {
 
 const StatsRow = ({ jobsWon, earningsThisMonth, activeProjectCount, rating }: StatsRowProps) => {
   const stats = [
-    { label: "Jobs Won", value: jobsWon, icon: TrendingUp, color: "text-secondary" },
+    { label: "Total Jobs Won", value: jobsWon, icon: TrendingUp, color: "text-secondary" },
     { label: "Earnings This Month", value: `£${earningsThisMonth.toLocaleString()}`, icon: PoundSterling, color: "text-secondary" },
     { label: "Active Projects", value: activeProjectCount, icon: FolderKanban, color: "text-primary" },
     { label: "Rating", value: rating > 0 ? `${rating}/5` : "N/A", icon: Star, color: "text-yellow-500" },

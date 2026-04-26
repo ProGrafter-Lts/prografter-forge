@@ -19,6 +19,7 @@ import AvailableJobsView from "@/components/trade/AvailableJobsView";
 import ActiveProjectsView from "@/components/trade/ActiveProjectsView";
 import EarningsView from "@/components/trade/EarningsView";
 import { useTradeAccess } from "@/hooks/useTradeAccess";
+import { isContractedActiveJob } from "@/lib/activeProjects";
 
 interface TradeProfile {
   name: string;
@@ -152,12 +153,11 @@ const TradeDashboard = () => {
       );
 
       const allQuotes = quoteRes.data || [];
-      const activeStages = ["scheduled", "in_progress", "review"];
       const contractJobs = Array.from(
         new Map(
           (contractRes.data || [])
             .map((contract: any) => contract.jobs)
-            .filter((job: any) => job && activeStages.includes(job.stage))
+            .filter((job: any) => job && isContractedActiveJob(job))
             .map((job: any) => [job.id, job]),
         ).values(),
       ).slice(0, 10);
