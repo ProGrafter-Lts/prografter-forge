@@ -126,21 +126,25 @@ const ContractPanel = ({ jobId, jobType, quotes, contract, userRole, userId, tra
         else toast.success("Contract fully signed! Project is now active.");
       }
     } else {
+      // New flow: generate the contract server-side via RPC.
+      // The RPC accepts the quote, snapshots parties, and creates the contract row.
       await supabase.from("quotes").update({ status: "accepted" }).eq("id", quote.id);
 
-      const { error } = await supabase.from("contracts").insert({
-        job_id: jobId,
-        quote_id: quote.id,
-        trade_id: quote.trade_id,
-        homeowner_id: userId,
-        contract_text: contractText,
-        agreed_price: amount,
-        payment_schedule: paymentSchedule,
-        status: "homeowner_signed",
-        homeowner_signed_at: new Date().toISOString(),
+      const { data: newContractId, error } = await supabase.rpc("generate_contract_for_quote", {
+        _quote_id: quote.id,
       });
-      if (error) toast.error("Failed to create contract");
-      else toast.success("Contract signed! Trade will be notified to countersign.");
+      if (error || !newContractId) {
+        toast.error(error?.message || "Failed to create contract");
+      } else {
+        // Sign as homeowner via RPC (placeholder hash until full signing UI ships)
+        const placeholderHash = `legacy-${userId}-${Date.now()}`.padEnd(32, "x");
+        const { error: signErr } = await supabase.rpc("sign_contract", {
+          _contract_id: newContractId as string,
+          _signature_hash: placeholderHash,
+        });
+        if (signErr) toast.error(signErr.message);
+        else toast.success("Contract signed! Trade will be notified to countersign.");
+      }
     }
 
     setSigning(false);
