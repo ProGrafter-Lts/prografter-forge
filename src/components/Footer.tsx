@@ -21,7 +21,7 @@ const Footer = () => {
         {/* UK Companies Act 2006 — required business communication disclosure */}
         <div className="border-t border-cream/5 pt-4">
           <p className="font-mono text-[11px] leading-relaxed text-secondary-text/80 text-center max-w-4xl mx-auto">
-            ProGrafter Ltd · Registered in England and Wales · Companies House: [NUMBER] · [REGISTERED ADDRESS] · ICO Registration: [ICO REF] ·{" "}
+            ProGrafter Ltd · Registered in England and Wales · Company number 17124130 · 66 Paul Street, London, EC2A 4NA · ICO Registration: ZC114018 ·{" "}
             <a href="mailto:hello@prografter.co.uk" className="hover:text-teal transition-colors">hello@prografter.co.uk</a>
           </p>
         </div>

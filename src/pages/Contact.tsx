@@ -292,21 +292,21 @@ const Contact = () => {
                     Companies House
                   </dt>
                   <dd className="text-cream">
-                    [NUMBER — add when certificate received]
+                    17124130
                   </dd>
                 </div>
                 <div>
                   <dt className="text-secondary-text uppercase tracking-wider text-xs mb-1">
                     Registered Address
                   </dt>
-                  <dd className="text-cream">[add when confirmed]</dd>
+                  <dd className="text-cream">66 Paul Street, London, EC2A 4NA</dd>
                 </div>
                 <div>
                   <dt className="text-secondary-text uppercase tracking-wider text-xs mb-1">
                     ICO Registration
                   </dt>
                   <dd className="text-cream">
-                    [your ICO reference number]
+                    ZC114018
                   </dd>
                 </div>
                 <div className="craft:col-span-2">
