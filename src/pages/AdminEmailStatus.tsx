@@ -133,7 +133,7 @@ const AdminEmailStatus = () => {
 
   return (
     <div className="min-h-screen bg-cream">
-      <SEO title="Email Status — Admin" path="/admin/email-status" />
+      <SEO title="Email Status — Admin" description="Admin monitor for transactional and auth email pipelines." path="/admin/email-status" />
       <header className="border-b border-navy/10 bg-white">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link to="/" className="font-heading text-2xl text-navy">

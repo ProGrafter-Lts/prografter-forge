@@ -56,13 +56,28 @@ const AdminVerifications = () => {
     const { data, error } = await supabase
       .from("trades")
       .select(
-        "id,user_id,name,email,company_name,trade_type,postcode,phone,verification_status,verified,submitted_for_review_at,created_at,insurance_expiry"
+        "id,user_id,name,company_name,trade_type,postcode,phone,verification_status,verified,submitted_for_review_at,created_at,insurance_expiry"
       )
       .eq("verification_status", filter)
       .order("submitted_for_review_at", { ascending: true, nullsFirst: false })
       .limit(100);
     if (error) toast.error("Failed to load trades");
-    setTrades((data as PendingTrade[]) || []);
+    const baseRows = (data as Omit<PendingTrade, "email">[]) || [];
+    // Email lives on profiles, not trades — look up in batch.
+    const userIds = baseRows.map((r) => r.user_id).filter(Boolean) as string[];
+    let emailMap: Record<string, string> = {};
+    if (userIds.length > 0) {
+      const { data: profs } = await supabase
+        .from("profiles")
+        .select("user_id,email")
+        .in("user_id", userIds);
+      for (const p of (profs as { user_id: string; email: string }[]) || []) {
+        emailMap[p.user_id] = p.email;
+      }
+    }
+    setTrades(
+      baseRows.map((r) => ({ ...r, email: r.user_id ? emailMap[r.user_id] || null : null }))
+    );
     setLoading(false);
   };
 
@@ -190,7 +205,7 @@ const AdminVerifications = () => {
 
   return (
     <div className="min-h-screen bg-cream">
-      <SEO title="Trade Verifications — Admin" path="/admin/verifications" />
+      <SEO title="Trade Verifications — Admin" description="Admin review of pending trade verification applications." path="/admin/verifications" />
       <header className="border-b border-navy/10 bg-white">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link to="/" className="font-heading text-2xl text-navy">
