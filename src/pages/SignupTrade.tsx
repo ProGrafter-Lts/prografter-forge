@@ -151,6 +151,23 @@ const SignupTrade = () => {
         } catch { /* non-blocking */ }
       }
 
+      // Welcome email (best-effort — failure must not block signup)
+      if (userId) {
+        try {
+          const firstName = fullName.trim().split(/\s+/)[0] || "";
+          await supabase.functions.invoke("send-transactional-email", {
+            body: {
+              templateName: "trade-welcome",
+              recipientEmail: email.trim(),
+              idempotencyKey: `trade-welcome-${userId}`,
+              templateData: { firstName },
+            },
+          });
+        } catch (e) {
+          console.warn("trade-welcome email failed (non-blocking)", e);
+        }
+      }
+
       // If session not established (email confirmations on), we need to wait
       // until they verify before they can upload docs. Stash form data and
       // route to check-email page. Otherwise advance to step 2.
