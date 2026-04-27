@@ -111,6 +111,23 @@ const SignupHomeowner = () => {
         }
       }
 
+      // Welcome email (best-effort — failure must not block signup)
+      if (userId) {
+        try {
+          const firstName = form.fullName.trim().split(/\s+/)[0] || "";
+          await supabase.functions.invoke("send-transactional-email", {
+            body: {
+              templateName: "homeowner-welcome",
+              recipientEmail: form.email,
+              idempotencyKey: `homeowner-welcome-${userId}`,
+              templateData: { firstName },
+            },
+          });
+        } catch (e) {
+          console.warn("homeowner-welcome email failed (non-blocking)", e);
+        }
+      }
+
       // If a session was returned (auto-confirm on), go to next-step page.
       // Otherwise show check-inbox.
       if (signUpData.session) {
