@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { MessageCircle, X, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuthReady } from "@/hooks/useAuthReady";
 
 type Role = "user" | "assistant";
 interface ChatMsg {
@@ -66,6 +67,7 @@ const HOMEOWNER_QUESTIONS = [
 ];
 
 const Chatbot = () => {
+  const { isReady: sessionReady, session } = useAuthReady();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [input, setInput] = useState("");
@@ -79,7 +81,11 @@ const Chatbot = () => {
 
   // Auth + profile + trade context
   useEffect(() => {
-    const init = async (session: Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"]) => {
+    let cancelled = false;
+
+    const init = async () => {
+      if (!sessionReady) return;
+
       if (!session?.user) {
         setIsAuthed(false);
         setProfile(null);
@@ -87,12 +93,16 @@ const Chatbot = () => {
         setAuthReady(true);
         return;
       }
+
       setIsAuthed(true);
       const { data: prof } = await supabase
         .from("profiles")
         .select("user_type, full_name")
         .eq("user_id", session.user.id)
         .maybeSingle();
+
+      if (cancelled) return;
+
       setProfile((prof as Profile) ?? null);
 
       // If trade, load extra context for personalised chips + system prompt
@@ -130,10 +140,12 @@ const Chatbot = () => {
       setAuthReady(true);
     };
 
-    supabase.auth.getSession().then(({ data }) => init(data.session));
-    const { data: sub } = supabase.auth.onAuthStateChange((_evt, session) => init(session));
-    return () => sub.subscription.unsubscribe();
-  }, []);
+    void init();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [sessionReady, session]);
 
   // Seed opening message when chat opens.
   useEffect(() => {

@@ -18,6 +18,7 @@ let authState: AuthReadyState = {
 
 let authBootstrapped = false;
 let initialStateResolved = false;
+let recoverInFlight = false;
 let retryTimer: number | null = null;
 const listeners = new Set<(state: AuthReadyState) => void>();
 
@@ -71,6 +72,9 @@ const resolveInitialState = (session: Session | null) => {
 
 const recoverSession = async (attempt = 0) => {
   if (initialStateResolved) return;
+  if (recoverInFlight) return;
+
+  recoverInFlight = true;
 
   try {
     const {
@@ -110,6 +114,8 @@ const recoverSession = async (attempt = 0) => {
     retryTimer = window.setTimeout(() => {
       void recoverSession(attempt + 1);
     }, retryDelaysMs[attempt + 1]);
+  } finally {
+    recoverInFlight = false;
   }
 };
 
@@ -141,7 +147,8 @@ const bootstrapAuthReady = () => {
     setAuthState(null, true);
   });
 
-  void recoverSession();
+  // INITIAL_SESSION will trigger the first recovery pass; avoid a duplicate
+  // getSession call that can contend for the auth storage lock during login.
 };
 
 export function useAuthReady(): AuthReadyState {
