@@ -62,16 +62,18 @@ const TradeRegister = () => {
     setError("");
 
     let insuranceCertUrl: string | null = null;
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      setError("You must be signed in to create a trade profile.");
+      setLoading(false);
+      return;
+    }
 
     // Upload insurance cert if provided
     if (file) {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        setError("You must be signed in to upload a certificate.");
-        setLoading(false);
-        return;
-      }
-
       const fileExt = file.name.split(".").pop();
       const filePath = `${user.id}/${crypto.randomUUID()}.${fileExt}`;
 
@@ -92,6 +94,7 @@ const TradeRegister = () => {
     }
 
     const { error: dbError } = await supabase.from("trades").insert({
+      user_id: user.id,
       name: name.trim(),
       trade_type: tradeType,
       company_name: companyName.trim(),
