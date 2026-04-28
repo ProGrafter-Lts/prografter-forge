@@ -1968,7 +1968,7 @@ export type Database = {
           trade_type: string
           trustmark_number: string | null
           trustmark_verified: boolean
-          user_id: string | null
+          user_id: string
           verification_notes: string | null
           verification_status: string
           verified: boolean
@@ -2009,7 +2009,7 @@ export type Database = {
           trade_type: string
           trustmark_number?: string | null
           trustmark_verified?: boolean
-          user_id?: string | null
+          user_id: string
           verification_notes?: string | null
           verification_status?: string
           verified?: boolean
@@ -2050,7 +2050,7 @@ export type Database = {
           trade_type?: string
           trustmark_number?: string | null
           trustmark_verified?: boolean
-          user_id?: string | null
+          user_id?: string
           verification_notes?: string | null
           verification_status?: string
           verified?: boolean
