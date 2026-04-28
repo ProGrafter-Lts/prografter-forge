@@ -139,6 +139,15 @@ const bootstrapAuthReady = () => {
       return;
     }
 
+    if (event === "TOKEN_REFRESHED") {
+      // Token refresh emitted with null session – re-fetch instead of nuking auth.
+      void (async () => {
+        const { data } = await supabase.auth.getSession();
+        setAuthState(data.session ?? null, true);
+      })();
+      return;
+    }
+
     if (!initialStateResolved && event === "SIGNED_OUT") {
       void recoverSession();
       return;
@@ -146,9 +155,6 @@ const bootstrapAuthReady = () => {
 
     setAuthState(null, true);
   });
-
-  // INITIAL_SESSION will trigger the first recovery pass; avoid a duplicate
-  // getSession call that can contend for the auth storage lock during login.
 };
 
 export function useAuthReady(): AuthReadyState {
