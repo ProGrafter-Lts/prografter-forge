@@ -10,8 +10,6 @@ interface TradeAccessState {
   error: string | null;
 }
 
-const TRADE_LOOKUP_TIMEOUT_MS = 6000;
-
 export function useTradeAccess(options?: { redirectToSetup?: boolean }): TradeAccessState {
   const navigate = useNavigate();
   const { isReady: authReady, user } = useAuthReady();
@@ -39,22 +37,11 @@ export function useTradeAccess(options?: { redirectToSetup?: boolean }): TradeAc
 
     const loadTrade = async () => {
       try {
-        const lookupPromise = supabase
+        const result = await supabase
           .from("trades")
           .select("id, trade_type")
           .eq("user_id", user.id)
           .maybeSingle();
-
-        const timeoutPromise = new Promise<never>((_, reject) => {
-          window.setTimeout(() => {
-            reject(new Error("Trade profile lookup timed out"));
-          }, TRADE_LOOKUP_TIMEOUT_MS);
-        });
-
-        const result = (await Promise.race([lookupPromise, timeoutPromise])) as {
-          data: { id: string; trade_type: string } | null;
-          error: { message: string } | null;
-        };
 
         if (cancelled) return;
 
