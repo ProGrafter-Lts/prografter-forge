@@ -81,7 +81,7 @@ export function useTradeAccess(options?: { redirectToSetup?: boolean }): TradeAc
     return () => {
       cancelled = true;
     };
-  }, [authReady, navigate, options?.redirectToSetup, user]);
+  }, [authReady, navigate, options?.redirectToSetup, user?.id]);
 
   return state;
 }
