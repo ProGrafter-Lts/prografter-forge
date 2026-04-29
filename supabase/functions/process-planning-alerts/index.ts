@@ -293,10 +293,24 @@ async function processSub(
   }
 
   const tradeType = sub.trades.trade_type ?? "";
+  // Exclude non-substantive application types — trades only want full applications,
+  // not condition discharges, amendments, tree works, ads, heritage, telecoms.
+  const EXCLUDED_APP_TYPES = new Set([
+    "conditions",
+    "amendment",
+    "amendments",
+    "trees",
+    "advertising",
+    "heritage",
+    "telecoms",
+    "other",
+  ]);
   const rows = inRadius
     .filter(({ r }) => {
       const ref = r.uid ?? r.reference;
       if (!ref || existingSet.has(ref)) return false;
+      const appType = (r.app_type ?? "").trim().toLowerCase();
+      if (EXCLUDED_APP_TYPES.has(appType)) return false;
       return isRelevant(r, tradeType);
     })
     .map(({ r, dist }) => ({
