@@ -253,7 +253,11 @@ const PlanningAlerts = () => {
               <button
                 onClick={async () => {
                   if (!tradeId) return;
-                  if (!confirm("Cancel your planning alerts subscription? You'll stop receiving alerts immediately.")) return;
+                  if (!confirm(
+                    "Cancel your planning alerts subscription?\n\n" +
+                    "This is a monthly subscription. Cancelling now will take effect at the END of your current billing period — for example, if you signed up on 31 March 2026, your access continues until 30 April 2026.\n\n" +
+                    "Until that date you'll keep receiving every lead included in your current plan. After that date you'll receive no further planning alerts unless you resubscribe."
+                  )) return;
                   setLoading(true);
                   try {
                     const { error } = await supabase
@@ -265,7 +269,11 @@ const PlanningAlerts = () => {
                     setActiveSub(null);
                     setSelectedTier(null);
                     setStep(1);
-                    toast({ title: "Subscription cancelled", description: "You will no longer receive planning alerts." });
+                    toast({
+                      title: "Subscription cancelled",
+                      description:
+                        "You'll continue to receive your planning alerts until the end of your current billing period, then they'll stop.",
+                    });
                   } catch (err: any) {
                     toast({ title: "Error", description: err.message, variant: "destructive" });
                   } finally {
