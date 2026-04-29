@@ -299,7 +299,6 @@ async function processSub(
     "conditions",
     "amendment",
     "amendments",
-    "trees",
     "advertising",
     "heritage",
     "telecoms",
