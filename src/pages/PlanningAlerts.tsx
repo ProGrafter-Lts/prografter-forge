@@ -227,15 +227,56 @@ const PlanningAlerts = () => {
 
         {/* Active subscription banner */}
         {activeSub && step !== 5 && (
-          <div className="bg-secondary/10 border border-secondary/30 rounded-2xl p-5 mb-8 flex items-center gap-3">
-            <Check className="w-5 h-5 text-secondary" />
-            <div>
-              <span className="font-heading text-primary">
-                Active: {TIERS.find(t => t.id === activeSub.tier)?.name}
-              </span>
-              <span className="font-mono text-xs text-muted-foreground ml-2">
-                {activeSub.radius_miles < 999 ? `${activeSub.radius_miles} mile radius` : "Nationwide"}
-              </span>
+          <div className="bg-secondary/10 border border-secondary/30 rounded-2xl p-5 mb-8 flex flex-col sm:flex-row sm:items-center gap-3">
+            <div className="flex items-center gap-3 flex-1">
+              <Check className="w-5 h-5 text-secondary shrink-0" />
+              <div>
+                <span className="font-heading text-primary">
+                  Active: {TIERS.find(t => t.id === activeSub.tier)?.name}
+                </span>
+                <span className="font-mono text-xs text-muted-foreground ml-2">
+                  {activeSub.radius_miles < 999 ? `${activeSub.radius_miles} mile radius` : "Nationwide"}
+                </span>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  setActiveSub(null);
+                  setSelectedTier(null);
+                  setStep(1);
+                }}
+                className="font-mono text-xs px-3 py-2 rounded-lg border border-secondary/40 text-secondary hover:bg-secondary/10 transition-colors"
+              >
+                Change plan
+              </button>
+              <button
+                onClick={async () => {
+                  if (!tradeId) return;
+                  if (!confirm("Cancel your planning alerts subscription? You'll stop receiving alerts immediately.")) return;
+                  setLoading(true);
+                  try {
+                    const { error } = await supabase
+                      .from("planning_alert_subs")
+                      .update({ active: false })
+                      .eq("trade_id", tradeId)
+                      .eq("active", true);
+                    if (error) throw error;
+                    setActiveSub(null);
+                    setSelectedTier(null);
+                    setStep(1);
+                    toast({ title: "Subscription cancelled", description: "You will no longer receive planning alerts." });
+                  } catch (err: any) {
+                    toast({ title: "Error", description: err.message, variant: "destructive" });
+                  } finally {
+                    setLoading(false);
+                  }
+                }}
+                disabled={loading}
+                className="font-mono text-xs px-3 py-2 rounded-lg border border-destructive/40 text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-50"
+              >
+                Cancel subscription
+              </button>
             </div>
           </div>
         )}
