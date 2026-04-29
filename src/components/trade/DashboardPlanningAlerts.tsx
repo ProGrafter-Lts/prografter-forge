@@ -144,14 +144,36 @@ const DashboardPlanningAlerts = ({ trade }: { trade: TradeProfile }) => {
       // Honour saved preference; default ON if missing.
       setHideDismissed((subRes.data as any).hide_dismissed_leads ?? true);
     }
-    if (alertsRes.data) setAlerts(alertsRes.data as PlanningAlert[]);
-    if (shortlistRes.data) {
-      const map: Record<string, ShortlistRow> = {};
-      for (const r of shortlistRes.data as ShortlistRow[]) {
-        map[r.planning_alert_id] = r;
+
+    let alertsList = (alertsRes.data ?? []) as PlanningAlert[];
+    const shortlistRows = (shortlistRes.data ?? []) as ShortlistRow[];
+
+    // Ensure any shortlisted alerts (todo/contacted/quoted/won) are included
+    // even if they fall outside the 50-most-recent window. Otherwise pipeline
+    // filters can land on an empty list.
+    const presentIds = new Set(alertsList.map((a) => a.id));
+    const missingIds = shortlistRows
+      .map((r) => r.planning_alert_id)
+      .filter((id) => !presentIds.has(id));
+
+    if (missingIds.length > 0) {
+      const { data: extra } = await supabase
+        .from("planning_alerts")
+        .select("*")
+        .eq("trade_id", trade.id)
+        .in("id", missingIds);
+      if (extra && extra.length > 0) {
+        alertsList = [...alertsList, ...(extra as PlanningAlert[])];
       }
-      setShortlist(map);
     }
+
+    setAlerts(alertsList);
+
+    const map: Record<string, ShortlistRow> = {};
+    for (const r of shortlistRows) {
+      map[r.planning_alert_id] = r;
+    }
+    setShortlist(map);
     setLoading(false);
   };
 
