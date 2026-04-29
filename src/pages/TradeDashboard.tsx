@@ -198,6 +198,20 @@ const TradeDashboard = () => {
   const completedCount = trade?.completed_jobs_count ?? 0;
   const rating = trade?.avg_rating ? Number(trade.avg_rating) : 0;
   const pipelineFilter = searchParams.get("pipeline");
+  const viewFilter = searchParams.get("view");
+
+  useEffect(() => {
+    const validViews = ["dashboard", "jobs", "projects", "earnings", "profile"];
+
+    if (viewFilter && validViews.includes(viewFilter)) {
+      setActiveNav(viewFilter);
+      return;
+    }
+
+    if (!viewFilter && activeNav !== "dashboard") {
+      setActiveNav("dashboard");
+    }
+  }, [activeNav, viewFilter]);
 
   useEffect(() => {
     if (!pipelineFilter) return;
