@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import {
   LayoutDashboard,
@@ -30,10 +30,34 @@ interface TradeSidebarProps {
 
 const TradeSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen }: TradeSidebarProps) => {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const currentView = new URLSearchParams(location.search).get("view");
+  const routeActiveNav = location.pathname.startsWith("/dashboard/trade/settings")
+    ? "settings"
+    : location.pathname.startsWith("/planning-alerts")
+      ? "alerts"
+      : currentView || activeNav;
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate("/login");
+  };
+
+  const handleNavClick = (id: string) => {
+    setActiveNav(id);
+
+    if (id === "alerts") {
+      navigate("/planning-alerts");
+    } else if (id === "settings") {
+      navigate("/dashboard/trade/settings");
+    } else if (id === "dashboard") {
+      navigate("/dashboard/trade");
+    } else {
+      navigate(`/dashboard/trade?view=${id}`);
+    }
+
+    setSidebarOpen(false);
   };
 
   return (
@@ -63,18 +87,9 @@ const TradeSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen }: 
           {NAV_ITEMS.map((item) => (
             <button
               key={item.id}
-              onClick={() => {
-                if (item.id === "alerts") {
-                  navigate("/planning-alerts");
-                } else if (item.id === "settings") {
-                  navigate("/dashboard/trade/settings");
-                } else {
-                  setActiveNav(item.id);
-                }
-                setSidebarOpen(false);
-              }}
+              onClick={() => handleNavClick(item.id)}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-mono text-sm transition-colors ${
-                activeNav === item.id
+                routeActiveNav === item.id
                   ? "bg-secondary/20 text-secondary"
                   : "text-primary-foreground/60 hover:text-primary-foreground hover:bg-white/5"
               }`}
