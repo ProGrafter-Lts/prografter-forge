@@ -19,6 +19,10 @@ function generateLetter(
   phone: string,
   address: string
 ): string {
+  const showCompany =
+    companyName &&
+    companyName.trim().toLowerCase() !== (tradeName ?? "").trim().toLowerCase();
+
   return `Dear Homeowner,
 
 I noticed your recent planning approval for works at ${address} and wanted to make contact before your project gets underway.
@@ -30,8 +34,7 @@ I specialise in exactly the type of work your planning permission covers and wou
 Please feel free to call me on ${phone} or visit my profile at prografter.co.uk to see my previous work and reviews.
 
 Kind regards,
-${tradeName}
-${companyName}
+${tradeName}${showCompany ? `\n${companyName}` : ""}
 ${phone}
 prografter.co.uk`;
 }
