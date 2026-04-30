@@ -17,6 +17,7 @@ import { template as tradeWelcome } from './trade-welcome.tsx'
 import { template as tradeVerificationSubmitted } from './trade-verification-submitted.tsx'
 import { template as tradeVerified } from './trade-verified.tsx'
 import { template as tradeVerificationQuery } from './trade-verification-query.tsx'
+import { template as finishTradeRegistration } from './finish-trade-registration.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'waitlist-admin-notification': waitlistAdminNotification,
@@ -27,4 +28,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'trade-verification-submitted': tradeVerificationSubmitted,
   'trade-verified': tradeVerified,
   'trade-verification-query': tradeVerificationQuery,
+  'finish-trade-registration': finishTradeRegistration,
 }
