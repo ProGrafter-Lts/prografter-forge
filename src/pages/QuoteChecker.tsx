@@ -105,7 +105,12 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
           "pendingQuoteCheck",
           JSON.stringify({ id: record.id, email, lookupToken: (record as any).lookup_token }),
         );
-        window.location.href = checkoutData.url;
+        // Use top-level navigation so the redirect works inside iframes (e.g. Lovable preview)
+        if (window.top && window.top !== window.self) {
+          window.top.location.href = checkoutData.url;
+        } else {
+          window.location.href = checkoutData.url;
+        }
       } else {
         throw new Error("No checkout URL returned");
       }
