@@ -37,6 +37,8 @@ const SignupCheckEmail = lazy(() => import("./pages/SignupCheckEmail.tsx"));
 const SignupTradeRedirect = lazy(() => import("./pages/SignupTradeRedirect.tsx"));
 const AdminVerifications = lazy(() => import("./pages/AdminVerifications.tsx"));
 const AdminEmailStatus = lazy(() => import("./pages/AdminEmailStatus.tsx"));
+const CheckatradeAlternative = lazy(() => import("./pages/CheckatradeAlternative.tsx"));
+const IsCheckatradeWorthIt = lazy(() => import("./pages/IsCheckatradeWorthIt.tsx"));
 import AdminRoute from "./components/AdminRoute.tsx";
 
 const queryClient = new QueryClient({
@@ -77,6 +79,8 @@ const App = () => (
             <Route path="/unsubscribe" element={<Unsubscribe />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/about" element={<About />} />
+            <Route path="/checkatrade-alternative" element={<CheckatradeAlternative />} />
+            <Route path="/is-checkatrade-worth-it" element={<IsCheckatradeWorthIt />} />
             <Route
               path="/planning-alerts"
               element={
