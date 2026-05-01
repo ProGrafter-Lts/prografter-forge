@@ -16,6 +16,10 @@ interface Job {
 interface Props {
   jobs: Job[];
   quoteCounts: Record<string, number>;
+  /** Optional pre-filtered active jobs from the server RPC. When provided this is
+   *  used as the authoritative list; otherwise we fall back to client-side
+   *  derivation via isActiveJob. */
+  activeJobs?: Job[];
 }
 
 // Active stages handled centrally in src/lib/activeProjects.ts
@@ -36,10 +40,10 @@ const timeAgo = (dateStr: string) => {
   return new Date(dateStr).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
 };
 
-const ActiveProjectsSection = ({ jobs, quoteCounts }: Props) => {
+const ActiveProjectsSection = ({ jobs, quoteCounts, activeJobs: activeJobsProp }: Props) => {
   const navigate = useNavigate();
 
-  const activeJobs = jobs.filter(isActiveJob);
+  const activeJobs = activeJobsProp ?? jobs.filter(isActiveJob);
 
   if (activeJobs.length === 0) {
     return (
