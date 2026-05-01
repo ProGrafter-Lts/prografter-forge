@@ -22,6 +22,10 @@ const HomeownerDashboard = () => {
   const { isReady, user } = useAuthReady();
   const [homeownerName, setHomeownerName] = useState("");
   const [jobs, setJobs] = useState<any[]>([]);
+  /** Server-side authoritative list of jobs that are "active" for this user.
+   *  Populated by the active_projects_for_user RPC. Used by Overview, My Projects,
+   *  and Manual gating so all three views always agree. */
+  const [activeJobIds, setActiveJobIds] = useState<Set<string>>(new Set());
   const [quotes, setQuotes] = useState<any[]>([]);
   const [variations, setVariations] = useState<any[]>([]);
   const [siteUpdates, setSiteUpdates] = useState<any[]>([]);
