@@ -23,7 +23,6 @@ import { corsHeaders } from 'npm:@supabase/supabase-js@2.95.0/cors'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-const DISPATCH_TOKEN = Deno.env.get('CONTRACT_DISPATCH_TOKEN') ?? ''
 
 interface DispatchPayload {
   contract_id: string
@@ -58,9 +57,12 @@ const firstName = (full: string | null | undefined): string | undefined => {
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
 
-  // Auth: shared secret header
-  const provided = req.headers.get('x-dispatch-token') ?? ''
-  if (!DISPATCH_TOKEN || provided !== DISPATCH_TOKEN) {
+  // Auth: only the service role (used by the DB trigger via pg_net) may call this.
+  // verify_jwt is off; we authenticate the bearer token in code against the
+  // service-role key.
+  const authHeader = req.headers.get('authorization') ?? ''
+  const bearer = authHeader.replace(/^Bearer\s+/i, '')
+  if (!SERVICE_KEY || bearer !== SERVICE_KEY) {
     return new Response(JSON.stringify({ error: 'unauthorized' }), {
       status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
