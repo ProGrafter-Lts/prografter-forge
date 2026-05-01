@@ -22,6 +22,10 @@ const HomeownerDashboard = () => {
   const { isReady, user } = useAuthReady();
   const [homeownerName, setHomeownerName] = useState("");
   const [jobs, setJobs] = useState<any[]>([]);
+  /** Server-side authoritative list of jobs that are "active" for this user.
+   *  Populated by the active_projects_for_user RPC. Used by Overview, My Projects,
+   *  and Manual gating so all three views always agree. */
+  const [activeJobIds, setActiveJobIds] = useState<Set<string>>(new Set());
   const [quotes, setQuotes] = useState<any[]>([]);
   const [variations, setVariations] = useState<any[]>([]);
   const [siteUpdates, setSiteUpdates] = useState<any[]>([]);
@@ -93,6 +97,12 @@ const HomeownerDashboard = () => {
     const jobs = jobData || [];
     setJobs(jobs);
     const jobIds = jobs.map((j: any) => j.id);
+
+    // Authoritative active-projects list — single source of truth shared by
+    // Overview, My Projects and Manual gating.
+    const { data: activeRows, error: activeErr } = await supabase.rpc("active_projects_for_user", { _user_id: userId });
+    if (activeErr) console.warn("active_projects_for_user RPC failed", activeErr);
+    setActiveJobIds(new Set((activeRows || []).map((r: any) => r.id)));
 
     if (jobIds.length === 0) {
       setQuotes([]);
@@ -167,6 +177,15 @@ const HomeownerDashboard = () => {
     return counts;
   }, [quotes]);
 
+  /** Authoritative active-jobs list. Prefers the server RPC's set when populated;
+   *  falls back to the client helper if the RPC hasn't returned (offline / first paint). */
+  const activeJobs = useMemo(() => {
+    if (activeJobIds.size > 0) {
+      return jobs.filter((j: any) => activeJobIds.has(j.id));
+    }
+    return jobs.filter(isActiveJob);
+  }, [jobs, activeJobIds]);
+
   return (
     <div className="min-h-screen bg-background flex">
       <HomeownerSidebar
@@ -206,7 +225,6 @@ const HomeownerDashboard = () => {
                 <BookOpen className="w-5 h-5" /> Homeowner Manual
               </h2>
               {(() => {
-                const activeJobs = jobs.filter(isActiveJob);
                 if (activeJobs.length === 0) {
                   return (
                     <div className="bg-card rounded-2xl p-8 border border-border text-center">
@@ -276,7 +294,7 @@ const HomeownerDashboard = () => {
                   Every project you've posted, in flight or completed.
                 </p>
               </div>
-              <ActiveProjectsSection jobs={jobs} quoteCounts={quoteCounts} />
+              <ActiveProjectsSection jobs={jobs} quoteCounts={quoteCounts} activeJobs={activeJobs} />
               <MyJobs jobs={jobs} />
             </section>
           )}
@@ -322,7 +340,7 @@ const HomeownerDashboard = () => {
             <>
               <VariationAlert variations={variations} />
 
-              <ActiveProjectsSection jobs={jobs} quoteCounts={quoteCounts} />
+              <ActiveProjectsSection jobs={jobs} quoteCounts={quoteCounts} activeJobs={activeJobs} />
 
               <QuotesReceived quotes={quotes} onSelectTier={handleSelectTier} onQuoteAccepted={reloadCurrentSession} />
               <MyJobs jobs={jobs} />
