@@ -2233,6 +2233,25 @@ export type Database = {
         Args: { _contract_id: string }
         Returns: undefined
       }
+      active_projects_for_user: {
+        Args: { _user_id: string }
+        Returns: {
+          address: string
+          contract_id: string
+          contract_status: string
+          created_at: string
+          homeowner_id: string
+          id: string
+          is_green_job: boolean
+          job_type: string
+          postcode: string
+          role: string
+          stage: string
+          status: string
+          title: string
+          trade_id: string
+        }[]
+      }
       add_bespoke_terms: {
         Args: { _contract_id: string; _terms: string }
         Returns: undefined
@@ -2248,6 +2267,26 @@ export type Database = {
       generate_contract_for_quote: {
         Args: { _quote_id: string }
         Returns: string
+      }
+      get_trade_for_job: {
+        Args: { _job_id: string }
+        Returns: {
+          avg_rating: number
+          bio: string
+          company_name: string
+          completed_jobs_count: number
+          id: string
+          is_green_trade: boolean
+          mcs_verified: boolean
+          name: string
+          review_count: number
+          tier: string
+          trade_type: string
+          trustmark_verified: boolean
+          verified: boolean
+          website: string
+          years_experience: number
+        }[]
       }
       has_role: {
         Args: {
