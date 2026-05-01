@@ -98,6 +98,12 @@ const HomeownerDashboard = () => {
     setJobs(jobs);
     const jobIds = jobs.map((j: any) => j.id);
 
+    // Authoritative active-projects list — single source of truth shared by
+    // Overview, My Projects and Manual gating.
+    const { data: activeRows, error: activeErr } = await supabase.rpc("active_projects_for_user", { _user_id: userId });
+    if (activeErr) console.warn("active_projects_for_user RPC failed", activeErr);
+    setActiveJobIds(new Set((activeRows || []).map((r: any) => r.id)));
+
     if (jobIds.length === 0) {
       setQuotes([]);
       setVariations([]);
