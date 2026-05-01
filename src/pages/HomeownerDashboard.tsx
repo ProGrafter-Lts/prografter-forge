@@ -177,6 +177,15 @@ const HomeownerDashboard = () => {
     return counts;
   }, [quotes]);
 
+  /** Authoritative active-jobs list. Prefers the server RPC's set when populated;
+   *  falls back to the client helper if the RPC hasn't returned (offline / first paint). */
+  const activeJobs = useMemo(() => {
+    if (activeJobIds.size > 0) {
+      return jobs.filter((j: any) => activeJobIds.has(j.id));
+    }
+    return jobs.filter(isActiveJob);
+  }, [jobs, activeJobIds]);
+
   return (
     <div className="min-h-screen bg-background flex">
       <HomeownerSidebar
@@ -216,7 +225,6 @@ const HomeownerDashboard = () => {
                 <BookOpen className="w-5 h-5" /> Homeowner Manual
               </h2>
               {(() => {
-                const activeJobs = jobs.filter(isActiveJob);
                 if (activeJobs.length === 0) {
                   return (
                     <div className="bg-card rounded-2xl p-8 border border-border text-center">
