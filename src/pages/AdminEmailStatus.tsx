@@ -17,14 +17,14 @@ const EMAIL_CATALOG: { name: string; category: "auth" | "onboarding" | "contract
   { name: "trade-verification-submitted", category: "onboarding" },
   { name: "trade-verified",               category: "onboarding" },
   { name: "trade-verification-query",     category: "onboarding" },
-  // Contract (templates not yet built — shown as not configured)
-  { name: "contract_generated",           category: "contract" },
-  { name: "contract_awaiting_signature",  category: "contract" },
-  { name: "contract_activated",           category: "contract" },
-  { name: "variation_proposed",           category: "contract" },
-  { name: "variation_approved",           category: "contract" },
-  { name: "completion_marked",            category: "contract" },
-  { name: "completion_accepted",          category: "contract" },
+  // Contract lifecycle (kebab-case to match the transactional template registry)
+  { name: "contract-generated",           category: "contract" },
+  { name: "contract-awaiting-signature",  category: "contract" },
+  { name: "contract-activated",           category: "contract" },
+  { name: "variation-proposed",           category: "contract" },
+  { name: "variation-approved",           category: "contract" },
+  { name: "completion-marked",            category: "contract" },
+  { name: "completion-accepted",          category: "contract" },
 ];
 
 // Templates that ARE registered in the transactional email registry. Anything
@@ -39,6 +39,14 @@ const REGISTERED_TEMPLATES = new Set([
   "waitlist-welcome",
   "waitlist-admin-notification",
   "contact-message",
+  // Contract lifecycle (kebab-case template names registered in registry.ts)
+  "contract-generated",
+  "contract-awaiting-signature",
+  "contract-activated",
+  "variation-proposed",
+  "variation-approved",
+  "completion-marked",
+  "completion-accepted",
 ]);
 
 interface LogRow {
