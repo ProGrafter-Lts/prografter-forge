@@ -29,12 +29,28 @@ const JobPhoto = ({ source, placeholder, alt = "", className, ...rest }: JobPhot
   }, [source]);
 
   if (failed) {
-    return <div className={className} aria-label="Photo unavailable">{placeholder ?? null}</div>;
+    return (
+      <div
+        className={`${className ?? ""} bg-muted/40 flex items-center justify-center text-[10px] text-muted-foreground`}
+        role="img"
+        aria-label={alt || "Photo unavailable"}
+      >
+        {placeholder ?? "—"}
+      </div>
+    );
   }
   if (!url) {
-    return <div className={`${className ?? ""} bg-muted animate-pulse`}>{placeholder ?? null}</div>;
+    return <div className={`${className ?? ""} bg-muted animate-pulse`} aria-hidden="true">{placeholder ?? null}</div>;
   }
-  return <img src={url} alt={alt} className={className} {...rest} />;
+  return (
+    <img
+      src={url}
+      alt={alt}
+      className={className}
+      onError={() => setFailed(true)}
+      {...rest}
+    />
+  );
 };
 
 export default JobPhoto;
