@@ -18,6 +18,13 @@ import { template as tradeVerificationSubmitted } from './trade-verification-sub
 import { template as tradeVerified } from './trade-verified.tsx'
 import { template as tradeVerificationQuery } from './trade-verification-query.tsx'
 import { template as finishTradeRegistration } from './finish-trade-registration.tsx'
+import { template as contractGenerated } from './contract-generated.tsx'
+import { template as contractAwaitingSignature } from './contract-awaiting-signature.tsx'
+import { template as contractActivated } from './contract-activated.tsx'
+import { template as variationProposed } from './variation-proposed.tsx'
+import { template as variationApproved } from './variation-approved.tsx'
+import { template as completionMarked } from './completion-marked.tsx'
+import { template as completionAccepted } from './completion-accepted.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'waitlist-admin-notification': waitlistAdminNotification,
@@ -29,4 +36,12 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'trade-verified': tradeVerified,
   'trade-verification-query': tradeVerificationQuery,
   'finish-trade-registration': finishTradeRegistration,
+  // Contract lifecycle (7)
+  'contract-generated': contractGenerated,
+  'contract-awaiting-signature': contractAwaitingSignature,
+  'contract-activated': contractActivated,
+  'variation-proposed': variationProposed,
+  'variation-approved': variationApproved,
+  'completion-marked': completionMarked,
+  'completion-accepted': completionAccepted,
 }
