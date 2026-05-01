@@ -54,31 +54,31 @@ const Hero = () => {
           <p className="font-body text-secondary-text text-lg max-w-md mb-8 font-light">
             No monthly fees. No hidden costs. Just a fair commission on the work you win — capped at £900 per job.
           </p>
-          <div className="flex flex-wrap gap-3">
+
+          {/* Two equally-weighted primary CTAs — one for each audience */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg">
             <a
-              href="/signup/trade"
-              className="inline-block bg-teal text-cream font-mono text-sm px-8 py-3 rounded-xl hover:bg-teal-hover transition-colors"
+              href="/signup/homeowner"
+              className="inline-flex items-center justify-center bg-cream text-deep font-mono text-sm px-6 py-3.5 rounded-xl hover:bg-cream/90 transition-colors text-center"
             >
-              Join as a Trade →
+              Post a Job — I'm a Homeowner →
             </a>
             <a
-              href="/green"
-              className="inline-block bg-green-600 text-white font-mono text-sm px-8 py-3 rounded-xl hover:bg-green-700 transition-colors shadow-lg shadow-green-600/20"
+              href="/signup/trade"
+              className="inline-flex items-center justify-center bg-teal text-cream font-mono text-sm px-6 py-3.5 rounded-xl hover:bg-teal-hover transition-colors text-center"
             >
-              🌿 Green Grants
+              Join as a Trade — Find Work →
             </a>
           </div>
 
-          {/* Homeowner path — equally prominent above the fold */}
-          <div className="mt-8 pt-6 border-t border-cream/10 flex flex-wrap items-center gap-x-4 gap-y-3">
-            <span className="font-mono text-xs text-secondary-text uppercase tracking-widest">
-              Planning a home project?
-            </span>
-            <a
-              href="/signup/homeowner"
-              className="inline-block bg-cream text-deep font-mono text-sm px-6 py-2.5 rounded-xl hover:bg-cream/90 transition-colors"
-            >
-              Post a Job Free →
+          {/* Tertiary link — green grants & sign-in */}
+          <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-xs text-secondary-text">
+            <a href="/green" className="hover:text-teal transition-colors">
+              🌿 Green grants
+            </a>
+            <span className="text-cream/20">·</span>
+            <a href="/login" className="hover:text-teal transition-colors">
+              Already have an account? Sign in
             </a>
           </div>
 
