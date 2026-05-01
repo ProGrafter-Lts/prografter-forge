@@ -294,7 +294,7 @@ const HomeownerDashboard = () => {
                   Every project you've posted, in flight or completed.
                 </p>
               </div>
-              <ActiveProjectsSection jobs={jobs} quoteCounts={quoteCounts} />
+              <ActiveProjectsSection jobs={jobs} quoteCounts={quoteCounts} activeJobs={activeJobs} />
               <MyJobs jobs={jobs} />
             </section>
           )}
@@ -340,7 +340,7 @@ const HomeownerDashboard = () => {
             <>
               <VariationAlert variations={variations} />
 
-              <ActiveProjectsSection jobs={jobs} quoteCounts={quoteCounts} />
+              <ActiveProjectsSection jobs={jobs} quoteCounts={quoteCounts} activeJobs={activeJobs} />
 
               <QuotesReceived quotes={quotes} onSelectTier={handleSelectTier} onQuoteAccepted={reloadCurrentSession} />
               <MyJobs jobs={jobs} />
