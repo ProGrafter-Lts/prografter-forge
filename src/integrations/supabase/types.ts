@@ -264,6 +264,7 @@ export type Database = {
           payment_milestones: Json
           property_address: Json
           quote_id: string
+          reference: string | null
           required_certificates: string[] | null
           scope_of_works: string
           status: string
@@ -302,6 +303,7 @@ export type Database = {
           payment_milestones?: Json
           property_address: Json
           quote_id: string
+          reference?: string | null
           required_certificates?: string[] | null
           scope_of_works: string
           status?: string
@@ -340,6 +342,7 @@ export type Database = {
           payment_milestones?: Json
           property_address?: Json
           quote_id?: string
+          reference?: string | null
           required_certificates?: string[] | null
           scope_of_works?: string
           status?: string
@@ -2268,6 +2271,7 @@ export type Database = {
         Args: { _quote_id: string }
         Returns: string
       }
+      generate_contract_reference: { Args: never; Returns: string }
       get_trade_for_job: {
         Args: { _job_id: string }
         Returns: {
@@ -2298,6 +2302,15 @@ export type Database = {
       homeowner_has_relationship_with_trade: {
         Args: { _trade_id: string; _user_id: string }
         Returns: boolean
+      }
+      log_contract_email_sent: {
+        Args: {
+          _contract_id: string
+          _email_type: string
+          _recipient_email: string
+          _recipient_role: string
+        }
+        Returns: undefined
       }
       log_contract_event: {
         Args: { _contract_id: string; _event_type: string; _payload?: Json }
