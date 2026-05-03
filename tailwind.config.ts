@@ -31,8 +31,8 @@ export default {
           DEFAULT: "#0D9488",
           hover: "#14B8A8",
         },
-        "body-text": "#2D2D2D",
-        "secondary-text": "#6B7280",
+        "body-text": "#1F2937",
+        "secondary-text": "#4B5563",
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",

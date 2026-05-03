@@ -48,7 +48,7 @@ const WhyDifferent = () => {
           </div>
 
           {/* ProGrafter */}
-          <div className="fade-up">
+          <div className="fade-up rounded-xl border-2 border-teal/60 p-6 bg-teal/[0.04]">
             <h3 className="font-heading text-teal text-2xl mb-6">ProGrafter</h3>
             <div className="space-y-4">
               {comparisons.map((c, i) => (
