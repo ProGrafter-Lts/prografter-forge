@@ -81,14 +81,7 @@ const App = () => (
             <Route path="/about" element={<About />} />
             <Route path="/checkatrade-alternative" element={<CheckatradeAlternative />} />
             <Route path="/is-checkatrade-worth-it" element={<IsCheckatradeWorthIt />} />
-            <Route
-              path="/planning-alerts"
-              element={
-                <ProtectedRoute>
-                  <PlanningAlertsPage />
-                </ProtectedRoute>
-              }
-            />
+            <Route path="/planning-alerts" element={<PlanningAlertsPage />} />
             <Route
               path="/dashboard/trade"
               element={
