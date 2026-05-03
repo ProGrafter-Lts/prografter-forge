@@ -3,5 +3,8 @@ Allow: /
 Disallow: /dashboard/
 Disallow: /project/
 Disallow: /api/
+Disallow: /login
+Disallow: /register/trade
+Disallow: /signup/
 
 Sitemap: https://prografter.co.uk/sitemap.xml
