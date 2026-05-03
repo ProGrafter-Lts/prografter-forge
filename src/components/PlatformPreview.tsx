@@ -243,6 +243,10 @@ const PlatformPreview = () => {
             </TabsTrigger>
           </TabsList>
 
+          <p className="font-body italic text-[12px] text-cream/50 mb-8 -mt-4">
+            Example dashboard — figures are illustrative until the platform reaches verified launch numbers
+          </p>
+
           <TabsContent value="trades">
             <div className="grid grid-cols-1 craft:grid-cols-3 gap-8 justify-items-center">
               <PhoneFrame label="Your dashboard — stats, earnings, and new job matches at a glance.">
