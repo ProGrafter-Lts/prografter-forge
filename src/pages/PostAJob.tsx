@@ -2,6 +2,7 @@ import { useState, FormEvent, ChangeEvent, useMemo, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Link, useSearchParams } from "react-router-dom";
 import SEO from "@/components/SEO";
+import { buildServiceJsonLd } from "@/lib/seoSchemas";
 import { isGreenTrade } from "@/lib/greenTrades";
 import { Specialism, fetchSpecialisms } from "@/lib/specialisms";
 import { useSetupRedirect, SetupRedirectLoader } from "@/hooks/useSetupRedirect";

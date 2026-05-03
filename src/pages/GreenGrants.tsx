@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import SEO from "@/components/SEO";
+import { buildServiceJsonLd } from "@/lib/seoSchemas";
 import Footer from "@/components/Footer";
 import { Leaf, CheckCircle2, HelpCircle, ChevronLeft, AlertCircle, ExternalLink } from "lucide-react";
 import GreenSchemesBreakdown from "@/components/GreenSchemesBreakdown";

@@ -5,6 +5,7 @@ import { z } from "zod";
 import { Leaf } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import SEO from "@/components/SEO";
+import { buildServiceJsonLd } from "@/lib/seoSchemas";
 import {
   RENEWABLE_TRADE_TYPES,
   isGreenTrade,

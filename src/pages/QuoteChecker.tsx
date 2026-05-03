@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
+import { buildServiceJsonLd } from "@/lib/seoSchemas";
 import { Upload, FileText, Loader2, ShieldCheck, AlertTriangle } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import DOMPurify from "dompurify";
