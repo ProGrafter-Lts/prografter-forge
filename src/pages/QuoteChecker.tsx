@@ -380,7 +380,7 @@ const QuoteChecker = () => {
     <div className="min-h-screen bg-background">
       <SEO
         title="AI Quote Checker — ProGrafter | Check Any Building Quote for £49"
-        description="Upload any building quote. Our AI checks it against a 43-point checklist and identifies missing items before you sign. Report delivered to your inbox within 2 minutes. £49."
+        description="Upload any building quote and our AI checks it against industry benchmarks. £49 one-off, no signup required."
         path="/quote-checker"
       />
       <Navbar />

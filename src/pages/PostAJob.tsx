@@ -273,7 +273,7 @@ const PostAJob = () => {
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: "hsl(var(--deep))" }}>
       <SEO
         title="Post a Job Free — ProGrafter | Get Quotes from Verified Trades"
-        description="Post your home improvement job free on ProGrafter. Receive quotes from verified, insured local tradespeople within 24 hours. Full project management included."
+        description="Post your project free in 4 steps. Get quotes from verified UK trades. No middleman, no monthly fees."
         path="/post-a-job"
       />
       <header className="py-6 px-6">

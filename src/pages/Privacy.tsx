@@ -9,7 +9,7 @@ const Privacy = () => {
     <div className="min-h-screen bg-cream">
       <SEO
         title="Privacy Policy — ProGrafter"
-        description="Read ProGrafter's current placeholder Privacy Policy, including data use, sharing, retention, and your rights."
+        description="How ProGrafter Ltd collects, stores and uses your data. Last updated April 2026."
         path="/privacy"
       />
       <Navbar />

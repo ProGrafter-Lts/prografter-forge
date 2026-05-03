@@ -265,7 +265,7 @@ const GreenGrantsPage = () => {
     <div className="min-h-screen" style={{ backgroundColor: "hsl(var(--deep))" }}>
       <SEO
         title="Green Grants Eligibility Checker — ProGrafter | Free"
-        description="Find out if you qualify for ECO4, Boiler Upgrade Scheme, or Great British Insulation Scheme funding. Free eligibility check. Matched with certified local installers."
+        description="Check your eligibility for ECO4, BUS heat pump grants, and GBIS insulation funding — free, instant result."
         path="/green"
       />
       <Navbar />
