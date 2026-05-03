@@ -6,58 +6,67 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Check, X, ArrowRight } from "lucide-react";
 
-const frustrations = [
-  { title: "Monthly fee regardless of work", body: "You pay every single month — even when the phone goes quiet. Many trades report £40–£100+ per month before a single lead lands." },
-  { title: "Pay-per-lead on top of membership", body: "On top of the membership, you're often charged again to contact homeowners — and the same lead can be sold to multiple trades." },
-  { title: "Quiet months still cost money", body: "December, January, holiday weeks — the fee doesn't pause. Cash flow takes a beating during the slow periods." },
-  { title: "Lead quality and tyre-kickers", body: "Trades complain about price-shoppers, fake postcodes and jobs that vanish after a quote — yet the credit is already gone." },
-  { title: "Locked-in contracts", body: "Annual commitments, awkward cancellation processes and rolling renewals make it hard to walk away cleanly." },
-  { title: "No project tools after the lead", body: "Once you've paid for the introduction, you're on your own — no quoting, no project management, no documentation." },
-];
-
-const steps = [
-  { num: "01", title: "Register free", body: "Create your trade profile, upload insurance and ID. Zero cost, zero monthly fee." },
-  { num: "02", title: "Get matched to local jobs", body: "Homeowners post projects in your area and trade. We surface the ones that fit your specialisms." },
-  { num: "03", title: "Quote and win the work", body: "Use the built-in quoting and project tools. Homeowners see your profile, reviews and verifications." },
-  { num: "04", title: "Pay only when paid", body: "7.5% commission on completed work — nothing up front, nothing if the job doesn't go ahead." },
+const ctTiers = [
+  { tier: "Approved", price: "£30/mo", note: "Listing only — leads still cost extra." },
+  { tier: "Medium 5-mile", price: "£299/mo", note: "Before you've earned a single penny." },
+  { tier: "Medium 50-mile", price: "£1,429/mo", note: "£17,148 a year, fixed cost." },
+  { tier: "Large 50-mile", price: "£1,959/mo", note: "£23,508 a year — that's a small van's worth." },
 ];
 
 const comparisonRows = [
-  { label: "Monthly fee", pg: "£0", ct: "£40–£100+", rp: "Subscription tiers" },
-  { label: "How you pay", pg: "7.5% commission on completed jobs", ct: "Monthly fee + per-lead credits", rp: "Per-lead credits" },
-  { label: "Average cost per job", pg: "Only on completion", ct: "£25–£70 per lead (often shared)", rp: "£15–£60 per lead (often shared)" },
-  { label: "Project management tools", pg: "Built in — stages, payments, messaging", ct: "No", rp: "No" },
-  { label: "Homeowner documentation", pg: "Digital home manual, certificates, photos", ct: "No", rp: "No" },
-  { label: "Planning intelligence", pg: "Live local planning alerts", ct: "No", rp: "No" },
-  { label: "Cancel anytime", pg: "Yes — no contract", ct: "Annual contract typical", rp: "Subscription cancel rules" },
+  { feature: "Monthly fee", pg: "£0", ct: "£30 – £1,959" },
+  { feature: "Cost per lead", pg: "£0 — leads are free", ct: "Often shared with up to 5 trades; credits on top of the membership" },
+  { feature: "Commission", pg: "7.5% on completed jobs only", ct: "None — but you've already paid the membership" },
+  { feature: "Lead exclusivity", pg: "Job-led — homeowner picks who quotes", ct: "Shared with multiple trades" },
+  { feature: "Variation sign-off", pg: "Built-in homeowner approval flow", ct: "No tooling — handled off-platform" },
+  { feature: "Verification process", pg: "ID + insurance + qualification check before going live", ct: "ID and document checks, paid tier" },
+  { feature: "Cap on charges", pg: "£900 maximum per job, ever", ct: "No cap — fees scale with tier and lead spend" },
 ];
 
 const faqs = [
-  { q: "Is ProGrafter free?", a: "Yes — registering and using ProGrafter is completely free for trades. There are no monthly fees, no per-lead charges and no annual contracts. We only earn when you do." },
-  { q: "How does commission work?", a: "When a job completes through the platform, ProGrafter takes a flat 7.5% commission on the agreed job value. If the job doesn't go ahead, you pay nothing." },
-  { q: "What trades can join?", a: "Builders, electricians, plumbers, roofers, carpenters, plasterers, decorators, landscapers, heating engineers, tilers and many more. All trades go through ID and insurance verification before going live." },
-  { q: "Is it available nationwide?", a: "Yes — ProGrafter is available across the UK. Job volume varies by region, but planning intelligence and homeowner sign-ups cover England, Scotland, Wales and Northern Ireland." },
+  { q: "Is ProGrafter actually free?", a: "Yes. Registering, building your profile, getting verified and quoting are all free. There's no monthly fee, no credit packs and no annual contract. We only earn when you complete a job through the platform." },
+  { q: "How do I get verified?", a: "Upload photo ID, your public liability insurance certificate and any trade-specific qualifications (Gas Safe, NICEIC, etc.). Our team reviews submissions and you'll typically be live within one working day." },
+  { q: "What if I don't get any jobs?", a: "You pay nothing. There is no minimum spend, no \"visibility\" upgrade and no penalty for quiet months. Quoting is free, and 7.5% only applies to jobs that actually complete." },
+  { q: "How is commission calculated?", a: "7.5% of the agreed job value, capped at £900 per job. So a £3,000 kitchen costs £225; a £20,000 extension is capped at £900 — never more, regardless of job size." },
+  { q: "What happens with variations?", a: "Variations go through an in-platform approval flow: you log the change, the homeowner approves, and the agreed value updates. Commission is calculated on the final, signed-off value — no awkward conversations after the fact." },
 ];
 
-const CheckatradeAlternative = () => {
-  const faqJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: faqs.map((f) => ({
-      "@type": "Question",
-      name: f.q,
-      acceptedAnswer: { "@type": "Answer", text: f.a },
-    })),
-  };
+const articleJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  headline: "The Checkatrade Alternative That Doesn't Charge You To Find Work",
+  description: "ProGrafter is the UK Checkatrade alternative — no monthly fees, 7.5% commission only when a job completes, capped at £900 per job.",
+  author: { "@type": "Person", name: "Lee Palfreeman" },
+  publisher: {
+    "@type": "Organization",
+    name: "ProGrafter Ltd",
+    logo: { "@type": "ImageObject", url: "https://prografter.co.uk/favicon.ico" },
+  },
+  datePublished: "2026-05-03",
+  dateModified: "2026-05-03",
+  mainEntityOfPage: "https://prografter.co.uk/checkatrade-alternative",
+};
 
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqs.map((f) => ({
+    "@type": "Question",
+    name: f.q,
+    acceptedAnswer: { "@type": "Answer", text: f.a },
+  })),
+};
+
+const CheckatradeAlternative = () => {
   return (
     <div className="min-h-screen bg-deep">
       <SEO
-        title="Best Checkatrade Alternative for UK Trades in 2026 — ProGrafter"
-        description="ProGrafter charges zero monthly fees to trades — 7.5% commission only when a job completes. See why thousands of UK trades are choosing ProGrafter over Checkatrade."
+        title="Checkatrade Alternative for UK Trades | Pay Only When You Win Work — ProGrafter"
+        description="Tired of paying £299–£1,959/month to Checkatrade before you've earned a penny? ProGrafter is the UK alternative — no monthly fees, 7.5% commission only when a job completes."
         path="/checkatrade-alternative"
       />
       <Helmet>
+        <script type="application/ld+json">{JSON.stringify(articleJsonLd)}</script>
         <script type="application/ld+json">{JSON.stringify(faqJsonLd)}</script>
       </Helmet>
       <Navbar />
@@ -67,6 +76,7 @@ const CheckatradeAlternative = () => {
         <span
           className="absolute -bottom-8 right-0 font-heading text-[160px] craft:text-[280px] text-cream select-none pointer-events-none leading-none"
           style={{ opacity: 0.03 }}
+          aria-hidden
         >
           SWITCH
         </span>
@@ -75,108 +85,161 @@ const CheckatradeAlternative = () => {
             <div className="w-8 h-[2px] bg-teal" />
             <span className="font-mono text-xs text-teal uppercase tracking-widest">Checkatrade Alternative</span>
           </div>
-          <h1 className="font-heading text-cream text-[44px] craft:text-[88px] leading-[0.95] max-w-4xl">
-            The Checkatrade<br />
-            alternative trades<br />
-            <span className="text-teal">are switching to.</span>
+          <h1 className="font-heading text-cream text-[40px] craft:text-[80px] leading-[0.95] max-w-4xl">
+            The Checkatrade alternative that<br />
+            <span className="text-teal">doesn't charge you to find work.</span>
           </h1>
-          <p className="font-mono text-cream/70 mt-8 max-w-2xl text-base">
-            Zero monthly fees. No per-lead credits. No annual contract. You only pay when a job completes — 7.5% commission, that's it.
+          <p className="font-body text-cream/70 mt-8 max-w-2xl text-lg font-light">
+            Checkatrade can cost up to <strong className="text-cream">£1,959 a month</strong> before a single homeowner picks up the phone. ProGrafter is £0 to join, and 7.5% only when a job completes — capped at £900.
           </p>
           <div className="mt-10 flex flex-wrap gap-4">
             <Button asChild size="lg" className="bg-teal hover:bg-teal/90 text-deep font-mono uppercase tracking-wider">
               <Link to="/register/trade">
-                Register Free — No Monthly Fees <ArrowRight className="ml-1" />
+                Register as a Trade Free <ArrowRight className="ml-1" />
               </Link>
+            </Button>
+            <Button asChild size="lg" variant="outline" className="border-cream/20 text-cream hover:bg-cream/10 font-mono uppercase tracking-wider">
+              <Link to="/#pricing">See the numbers</Link>
             </Button>
           </div>
         </div>
       </section>
 
-      {/* Why trades are leaving Checkatrade */}
+      {/* Problem with Checkatrade pricing */}
       <section className="px-6 py-20 border-t border-cream/10">
         <div className="max-w-6xl mx-auto">
-          <div className="flex items-center gap-3 mb-6">
-            <span className="font-mono text-xs text-teal uppercase tracking-widest">01 / The Problem</span>
-          </div>
-          <h2 className="font-heading text-cream text-[36px] craft:text-[64px] leading-[1] mb-12 max-w-3xl">
-            Why trades are<br />leaving Checkatrade.
+          <span className="font-mono text-xs text-teal uppercase tracking-widest">01 / The Problem</span>
+          <h2 className="font-heading text-cream text-[36px] craft:text-[64px] leading-[1] mt-3 mb-8 max-w-3xl">
+            You're paying<br />
+            <span className="text-teal">before</span> you earn.
           </h2>
-          <ul className="grid md:grid-cols-2 gap-6">
-            {frustrations.map((f) => (
-              <li key={f.title} className="border border-cream/10 p-6 bg-cream/[0.02]">
-                <div className="flex gap-3 items-start">
-                  <X className="text-destructive shrink-0 mt-1" />
-                  <div>
-                    <h3 className="font-heading text-cream text-2xl mb-2">{f.title}</h3>
-                    <p className="font-mono text-cream/60 text-sm leading-relaxed">{f.body}</p>
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
-
-      {/* How ProGrafter works */}
-      <section className="px-6 py-20 border-t border-cream/10">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex items-center gap-3 mb-6">
-            <span className="font-mono text-xs text-teal uppercase tracking-widest">02 / The Fix</span>
+          <div className="prose prose-invert max-w-3xl mb-12">
+            <p className="font-body text-cream/70 text-lg leading-relaxed">
+              Checkatrade has four main paid tiers, and the headline numbers are eye-watering. The cheapest tier doesn't get you much — and the busy ones cost more per month than most trades take home in a quiet week.
+            </p>
           </div>
-          <h2 className="font-heading text-cream text-[36px] craft:text-[64px] leading-[1] mb-12 max-w-3xl">
-            How ProGrafter<br />works.
-          </h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {steps.map((s) => (
-              <div key={s.num} className="border border-cream/10 p-6 bg-cream/[0.02]">
-                <div className="font-heading text-teal text-5xl mb-4">{s.num}</div>
-                <h3 className="font-heading text-cream text-2xl mb-3">{s.title}</h3>
-                <p className="font-mono text-cream/60 text-sm leading-relaxed">{s.body}</p>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {ctTiers.map((t) => (
+              <div key={t.tier} className="border border-cream/10 p-6 bg-cream/[0.02]">
+                <p className="font-mono text-[10px] text-cream/50 uppercase tracking-wider mb-2">{t.tier}</p>
+                <p className="font-heading text-cream text-3xl mb-3">{t.price}</p>
+                <p className="font-mono text-cream/60 text-xs leading-relaxed">{t.note}</p>
               </div>
             ))}
           </div>
+          <p className="font-mono text-cream/40 text-xs mt-6">
+            Pricing as published by Checkatrade in 2026; varies by region and tier.
+          </p>
+        </div>
+      </section>
+
+      {/* The ProGrafter model */}
+      <section className="px-6 py-20 border-t border-cream/10">
+        <div className="max-w-6xl mx-auto">
+          <span className="font-mono text-xs text-teal uppercase tracking-widest">02 / The Fix</span>
+          <h2 className="font-heading text-cream text-[36px] craft:text-[64px] leading-[1] mt-3 mb-8 max-w-3xl">
+            The ProGrafter model.
+          </h2>
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="border border-cream/10 p-6 bg-cream/[0.02]">
+              <p className="font-heading text-teal text-5xl mb-4">£0</p>
+              <h3 className="font-heading text-cream text-xl mb-2">to join</h3>
+              <p className="font-mono text-cream/60 text-sm leading-relaxed">No subscription, no credit packs, no upfront spend. Register, get verified, start quoting.</p>
+            </div>
+            <div className="border border-cream/10 p-6 bg-cream/[0.02]">
+              <p className="font-heading text-teal text-5xl mb-4">7.5%</p>
+              <h3 className="font-heading text-cream text-xl mb-2">on completion only</h3>
+              <p className="font-mono text-cream/60 text-sm leading-relaxed">A single, transparent commission charged only when the homeowner signs the job off as complete.</p>
+            </div>
+            <div className="border border-cream/10 p-6 bg-cream/[0.02]">
+              <p className="font-heading text-teal text-5xl mb-4">£900</p>
+              <h3 className="font-heading text-cream text-xl mb-2">cap per job</h3>
+              <p className="font-mono text-cream/60 text-sm leading-relaxed">Win a £30,000 extension and you still pay £900 — not 7.5% of the lot. Big jobs reward the trade, not the platform.</p>
+            </div>
+          </div>
+          <p className="font-body text-cream/70 mt-10 max-w-3xl text-lg leading-relaxed">
+            Want to see how that maps to a real job? <Link to="/quote-checker" className="text-teal underline">Try the free Quote Checker</Link> or read the <Link to="/#pricing" className="text-teal underline">Honest Numbers section</Link>.
+          </p>
         </div>
       </section>
 
       {/* Comparison table */}
       <section className="px-6 py-20 border-t border-cream/10">
         <div className="max-w-6xl mx-auto">
-          <div className="flex items-center gap-3 mb-6">
-            <span className="font-mono text-xs text-teal uppercase tracking-widest">03 / Side By Side</span>
-          </div>
-          <h2 className="font-heading text-cream text-[36px] craft:text-[64px] leading-[1] mb-12 max-w-3xl">
-            ProGrafter vs<br />Checkatrade vs<br />Rated People.
+          <span className="font-mono text-xs text-teal uppercase tracking-widest">03 / Side By Side</span>
+          <h2 className="font-heading text-cream text-[36px] craft:text-[64px] leading-[1] mt-3 mb-12 max-w-3xl">
+            Checkatrade vs<br />ProGrafter.
           </h2>
           <div className="overflow-x-auto border border-cream/10">
             <table className="w-full font-mono text-sm">
               <thead>
                 <tr className="bg-cream/[0.04] text-cream uppercase tracking-wider text-xs">
-                  <th className="text-left p-4 w-1/4">Feature</th>
+                  <th className="text-left p-4 w-1/3">Feature</th>
                   <th className="text-left p-4 text-teal">ProGrafter</th>
                   <th className="text-left p-4">Checkatrade</th>
-                  <th className="text-left p-4">Rated People</th>
                 </tr>
               </thead>
               <tbody>
                 {comparisonRows.map((r, i) => (
-                  <tr key={r.label} className={i % 2 === 0 ? "bg-cream/[0.01]" : ""}>
-                    <td className="p-4 text-cream font-medium align-top">{r.label}</td>
+                  <tr key={r.feature} className={i % 2 === 0 ? "bg-cream/[0.01]" : ""}>
+                    <td className="p-4 text-cream font-medium align-top">{r.feature}</td>
                     <td className="p-4 text-cream/90 align-top">
                       <span className="inline-flex items-start gap-2">
                         <Check className="text-teal shrink-0 mt-0.5 h-4 w-4" />
                         {r.pg}
                       </span>
                     </td>
-                    <td className="p-4 text-cream/60 align-top">{r.ct}</td>
-                    <td className="p-4 text-cream/60 align-top">{r.rp}</td>
+                    <td className="p-4 text-cream/60 align-top">
+                      <span className="inline-flex items-start gap-2">
+                        <X className="text-destructive shrink-0 mt-0.5 h-4 w-4" />
+                        {r.ct}
+                      </span>
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-          <p className="font-mono text-cream/40 text-xs mt-4">
-            Comparison based on publicly available pricing and trade-reported figures as of 2026. Competitor pricing may vary by region and tier.
+        </div>
+      </section>
+
+      {/* Founder context */}
+      <section className="px-6 py-20 border-t border-cream/10">
+        <div className="max-w-3xl mx-auto">
+          <span className="font-mono text-xs text-teal uppercase tracking-widest">04 / Why I Built It</span>
+          <h2 className="font-heading text-cream text-[36px] craft:text-[64px] leading-[1] mt-3 mb-8">
+            "I lost money on lead-gen platforms, so I built this."
+          </h2>
+          <div className="font-body text-cream/70 text-lg space-y-5 leading-relaxed">
+            <p>
+              I'm Lee, an electrician 20 years in. Like a lot of trades, I tried Checkatrade, MyBuilder and Rated People — and watched the membership and credit fees stack up while the leads were sold to four other people in the group chat before I'd even read them.
+            </p>
+            <p>
+              ProGrafter is the platform I wished existed when I was on the tools: free to join, fair commission on completion, real homeowner verification, and a cap so the platform never eats more than its share of a big job.
+            </p>
+          </div>
+          <Link to="/about" className="inline-flex items-center gap-2 mt-8 font-mono text-sm text-teal hover:text-teal-hover">
+            Read the full breakdown on the About page <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="px-6 py-20 border-t border-cream/10">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="font-heading text-cream text-[36px] craft:text-[64px] leading-[1] mb-6">
+            Stop paying<br />for <span className="text-teal">silence.</span>
+          </h2>
+          <p className="font-body text-cream/70 max-w-xl mx-auto mb-10 text-lg">
+            Free to register. Free to quote. 7.5% on completion only — capped at £900.
+          </p>
+          <Button asChild size="lg" className="bg-teal hover:bg-teal/90 text-deep font-mono uppercase tracking-wider">
+            <Link to="/register/trade">
+              Register as a Trade Free <ArrowRight className="ml-1" />
+            </Link>
+          </Button>
+          <p className="font-mono text-cream/40 text-xs mt-6">
+            Doing green work? See <Link to="/green" className="text-teal underline">green grants &amp; certified trades</Link>.
           </p>
         </div>
       </section>
@@ -184,40 +247,21 @@ const CheckatradeAlternative = () => {
       {/* FAQ */}
       <section className="px-6 py-20 border-t border-cream/10">
         <div className="max-w-4xl mx-auto">
-          <div className="flex items-center gap-3 mb-6">
-            <span className="font-mono text-xs text-teal uppercase tracking-widest">04 / FAQ</span>
-          </div>
-          <h2 className="font-heading text-cream text-[36px] craft:text-[64px] leading-[1] mb-12">
+          <span className="font-mono text-xs text-teal uppercase tracking-widest">05 / FAQ</span>
+          <h2 className="font-heading text-cream text-[36px] craft:text-[64px] leading-[1] mt-3 mb-12">
             Quick answers.
           </h2>
           <div className="space-y-4">
             {faqs.map((f) => (
               <details key={f.q} className="group border border-cream/10 bg-cream/[0.02] p-6">
-                <summary className="cursor-pointer list-none flex justify-between items-center font-heading text-cream text-xl">
+                <summary className="cursor-pointer list-none flex justify-between items-center font-heading text-cream text-xl gap-4">
                   {f.q}
                   <span className="text-teal font-mono text-2xl group-open:rotate-45 transition-transform">+</span>
                 </summary>
-                <p className="font-mono text-cream/70 text-sm leading-relaxed mt-4">{f.a}</p>
+                <p className="font-body text-cream/70 text-base leading-relaxed mt-4">{f.a}</p>
               </details>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="px-6 py-24 border-t border-cream/10">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="font-heading text-cream text-[36px] craft:text-[72px] leading-[1] mb-6">
-            Stop paying<br />for <span className="text-teal">silence.</span>
-          </h2>
-          <p className="font-mono text-cream/60 max-w-xl mx-auto mb-10">
-            No monthly fee. No per-lead credits. No contract. You only pay when you get paid.
-          </p>
-          <Button asChild size="lg" className="bg-teal hover:bg-teal/90 text-deep font-mono uppercase tracking-wider">
-            <Link to="/register/trade">
-              Register Free — No Monthly Fees <ArrowRight className="ml-1" />
-            </Link>
-          </Button>
         </div>
       </section>
 
