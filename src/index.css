@@ -62,11 +62,69 @@ body::before {
   body {
     @apply bg-background text-foreground;
     font-family: 'DM Sans', sans-serif;
+    color: #1F2937;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Bebas Neue', sans-serif;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.04em;
+    font-weight: 400;
   }
+  h1 { line-height: 1.05; letter-spacing: 0.04em; }
+  h2 { line-height: 1.10; letter-spacing: 0.04em; }
+  h3 { letter-spacing: 0.03em; }
+}
+
+/* === Visual hierarchy: paragraph readability === */
+@layer components {
+  section p {
+    max-width: 680px;
+  }
+  section .max-w-2xl p,
+  section .max-w-3xl p,
+  section .max-w-4xl p,
+  section .max-w-md p,
+  section .max-w-sm p,
+  section .max-w-lg p {
+    max-width: 100%;
+  }
+}
+
+/* === Section background contrast overrides === */
+/* On dark sections (deep / navy), soften secondary text and lift body text */
+.bg-deep .text-secondary-text,
+.bg-navy .text-secondary-text,
+section[class*="bg-deep"] .text-secondary-text,
+section[class*="bg-navy"] .text-secondary-text {
+  color: rgba(255, 255, 255, 0.70);
+}
+.bg-deep .text-body-text,
+.bg-navy .text-body-text {
+  color: rgba(255, 255, 255, 0.92);
+}
+/* On light sections, give muted text proper contrast (#4B5563) */
+.bg-cream .text-secondary-text,
+.bg-card .text-secondary-text,
+.bg-background .text-secondary-text,
+.bg-white .text-secondary-text {
+  color: #4B5563;
+}
+.bg-cream h1, .bg-cream h2, .bg-cream h3,
+.bg-card h1, .bg-card h2, .bg-card h3,
+.bg-background h1, .bg-background h2, .bg-background h3,
+.bg-white h1, .bg-white h2, .bg-white h3 {
+  color: #1B3A5C;
+}
+
+/* === Card polish === */
+.bg-cream .rounded-xl,
+.bg-card .rounded-xl,
+.bg-background .rounded-xl {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.bg-cream .rounded-xl:hover,
+.bg-card .rounded-xl:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px -12px rgba(27, 58, 92, 0.18);
 }
 
 /* Ticker animation */
