@@ -9,7 +9,7 @@ const Terms = () => {
     <div className="min-h-screen bg-cream">
       <SEO
         title="Terms of Service — ProGrafter"
-        description="Read ProGrafter's current placeholder Terms of Service covering accounts, fees, payments, liability, and governing law."
+        description="ProGrafter Ltd terms of use for tradespeople and homeowners."
         path="/terms"
       />
       <Navbar />

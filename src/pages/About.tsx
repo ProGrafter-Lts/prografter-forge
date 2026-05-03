@@ -1,6 +1,7 @@
 import SEO from "@/components/SEO";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { localBusinessJsonLd } from "@/lib/seoSchemas";
 
 const myBuilderLeads = [
   { month: "Month 1", leads: 3, cost: "£105", won: "0" },
@@ -32,8 +33,9 @@ const About = () => {
     <div className="min-h-screen bg-deep">
       <SEO
         title="About ProGrafter — Built by a Qualified Electrician for Trades & Homeowners"
-        description="ProGrafter was founded by Lee Palfreeman after 20 years as a qualified electrician. A commission-only marketplace built to give trades and homeowners a fair deal."
+        description="ProGrafter was founded by Lee Palfreeman, a qualified electrician of 20 years, after losing 18 leads and £625 to a competing platform without winning a single job."
         path="/about"
+        jsonLd={localBusinessJsonLd}
       />
       <Navbar />
 

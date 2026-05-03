@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import SEO from "@/components/SEO";
+import { buildServiceJsonLd } from "@/lib/seoSchemas";
 import Footer from "@/components/Footer";
 import { Leaf, CheckCircle2, HelpCircle, ChevronLeft, AlertCircle, ExternalLink } from "lucide-react";
 import GreenSchemesBreakdown from "@/components/GreenSchemesBreakdown";
@@ -265,8 +266,15 @@ const GreenGrantsPage = () => {
     <div className="min-h-screen" style={{ backgroundColor: "hsl(var(--deep))" }}>
       <SEO
         title="Green Grants Eligibility Checker — ProGrafter | Free"
-        description="Find out if you qualify for ECO4, Boiler Upgrade Scheme, or Great British Insulation Scheme funding. Free eligibility check. Matched with certified local installers."
+        description="Check your eligibility for ECO4, BUS heat pump grants, and GBIS insulation funding — free, instant result."
         path="/green"
+        jsonLd={buildServiceJsonLd({
+          name: "Green Grants Eligibility Checker",
+          description: "Free instant eligibility check for ECO4, Boiler Upgrade Scheme and GBIS funding.",
+          url: "https://prografter.co.uk/green",
+          serviceType: "Energy grant eligibility assessment",
+          price: "0.00",
+        })}
       />
       <Navbar />
 

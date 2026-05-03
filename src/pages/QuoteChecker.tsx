@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
+import { buildServiceJsonLd } from "@/lib/seoSchemas";
 import { Upload, FileText, Loader2, ShieldCheck, AlertTriangle } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import DOMPurify from "dompurify";
@@ -380,8 +381,15 @@ const QuoteChecker = () => {
     <div className="min-h-screen bg-background">
       <SEO
         title="AI Quote Checker — ProGrafter | Check Any Building Quote for £49"
-        description="Upload any building quote. Our AI checks it against a 43-point checklist and identifies missing items before you sign. Report delivered to your inbox within 2 minutes. £49."
+        description="Upload any building quote and our AI checks it against industry benchmarks. £49 one-off, no signup required."
         path="/quote-checker"
+        jsonLd={buildServiceJsonLd({
+          name: "AI Quote Checker",
+          description: "AI-powered review of any UK building quote against a 43-point checklist.",
+          url: "https://prografter.co.uk/quote-checker",
+          serviceType: "Construction quote review",
+          price: "49.00",
+        })}
       />
       <Navbar />
       <div className="pt-24 pb-16 px-6">

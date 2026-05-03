@@ -2,6 +2,7 @@ import { useState, FormEvent, ChangeEvent, useMemo, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Link, useSearchParams } from "react-router-dom";
 import SEO from "@/components/SEO";
+import { buildServiceJsonLd } from "@/lib/seoSchemas";
 import { isGreenTrade } from "@/lib/greenTrades";
 import { Specialism, fetchSpecialisms } from "@/lib/specialisms";
 import { useSetupRedirect, SetupRedirectLoader } from "@/hooks/useSetupRedirect";
@@ -273,8 +274,15 @@ const PostAJob = () => {
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: "hsl(var(--deep))" }}>
       <SEO
         title="Post a Job Free — ProGrafter | Get Quotes from Verified Trades"
-        description="Post your home improvement job free on ProGrafter. Receive quotes from verified, insured local tradespeople within 24 hours. Full project management included."
+        description="Post your project free in 4 steps. Get quotes from verified UK trades. No middleman, no monthly fees."
         path="/post-a-job"
+        jsonLd={buildServiceJsonLd({
+          name: "Post a Job",
+          description: "Post a home improvement job and receive quotes from verified UK trades.",
+          url: "https://prografter.co.uk/post-a-job",
+          serviceType: "Home improvement job posting",
+          price: "0.00",
+        })}
       />
       <header className="py-6 px-6">
         <Link to="/" className="font-heading text-2xl tracking-wider">

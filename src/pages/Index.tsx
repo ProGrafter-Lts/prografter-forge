@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import SEO from "@/components/SEO";
+import { localBusinessJsonLd, homepageFaqJsonLd } from "@/lib/seoSchemas";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import Ticker from "@/components/Ticker";
@@ -40,6 +41,7 @@ const Index = () => {
         title="ProGrafter — Commission-Only Trades Marketplace | Zero Monthly Fees"
         description="ProGrafter connects verified UK tradespeople with homeowners. Pay 7.5% only when a job completes — capped at £900. No monthly fees. Free to register. Free to post a job."
         path="/"
+        jsonLd={[localBusinessJsonLd, homepageFaqJsonLd]}
       />
       <Navbar />
       <Hero />
