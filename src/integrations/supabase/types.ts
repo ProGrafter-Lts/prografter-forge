@@ -1848,6 +1848,48 @@ export type Database = {
         }
         Relationships: []
       }
+      testimonials: {
+        Row: {
+          approved: boolean
+          author_first_name: string
+          author_photo_url: string | null
+          author_trade_or_role: string
+          contract_id: string | null
+          created_at: string
+          id: string
+          quote: string
+          rating: number | null
+          source: string | null
+          updated_at: string
+        }
+        Insert: {
+          approved?: boolean
+          author_first_name: string
+          author_photo_url?: string | null
+          author_trade_or_role: string
+          contract_id?: string | null
+          created_at?: string
+          id?: string
+          quote: string
+          rating?: number | null
+          source?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approved?: boolean
+          author_first_name?: string
+          author_photo_url?: string | null
+          author_trade_or_role?: string
+          contract_id?: string | null
+          created_at?: string
+          id?: string
+          quote?: string
+          rating?: number | null
+          source?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       trade_specialisms: {
         Row: {
           created_at: string
