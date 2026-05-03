@@ -32,7 +32,7 @@ export default {
           hover: "#14B8A8",
         },
         "body-text": "#1F2937",
-        "secondary-text": "#4B5563",
+        "secondary-text": "#6B7280",
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
