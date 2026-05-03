@@ -57,6 +57,7 @@ const Index = () => {
       <WhatYouGet />
       <WhyDifferent />
       <PlatformPreview />
+      <Testimonials />
       <SeeHowItWorks />
       <SignUpSection />
       <Footer />
