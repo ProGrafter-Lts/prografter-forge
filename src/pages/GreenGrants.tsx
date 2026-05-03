@@ -267,6 +267,13 @@ const GreenGrantsPage = () => {
         title="Green Grants Eligibility Checker — ProGrafter | Free"
         description="Check your eligibility for ECO4, BUS heat pump grants, and GBIS insulation funding — free, instant result."
         path="/green"
+        jsonLd={buildServiceJsonLd({
+          name: "Green Grants Eligibility Checker",
+          description: "Free instant eligibility check for ECO4, Boiler Upgrade Scheme and GBIS funding.",
+          url: "https://prografter.co.uk/green",
+          serviceType: "Energy grant eligibility assessment",
+          price: "0.00",
+        })}
       />
       <Navbar />
 

@@ -382,6 +382,13 @@ const QuoteChecker = () => {
         title="AI Quote Checker — ProGrafter | Check Any Building Quote for £49"
         description="Upload any building quote and our AI checks it against industry benchmarks. £49 one-off, no signup required."
         path="/quote-checker"
+        jsonLd={buildServiceJsonLd({
+          name: "AI Quote Checker",
+          description: "AI-powered review of any UK building quote against a 43-point checklist.",
+          url: "https://prografter.co.uk/quote-checker",
+          serviceType: "Construction quote review",
+          price: "49.00",
+        })}
       />
       <Navbar />
       <div className="pt-24 pb-16 px-6">

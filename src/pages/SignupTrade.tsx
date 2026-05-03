@@ -332,7 +332,15 @@ const SignupTrade = () => {
       <SEO
         title="Join as a Trade — ProGrafter"
         description="Apply to join ProGrafter. Verified, insured tradespeople only. Free to join — 7.5% commission only when a job completes."
-        path="/signup/trade"
+        path="/register/trade"
+        noindex
+        jsonLd={buildServiceJsonLd({
+          name: "Trade Registration",
+          description: "Free registration for verified UK tradespeople — pay 7.5% only when a job completes.",
+          url: "https://prografter.co.uk/register/trade",
+          serviceType: "Trade marketplace registration",
+          price: "0.00",
+        })}
       />
       <header className="py-6 px-6">
         <Link to="/" className="font-heading text-2xl tracking-wider">

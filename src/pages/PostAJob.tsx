@@ -275,6 +275,13 @@ const PostAJob = () => {
         title="Post a Job Free — ProGrafter | Get Quotes from Verified Trades"
         description="Post your project free in 4 steps. Get quotes from verified UK trades. No middleman, no monthly fees."
         path="/post-a-job"
+        jsonLd={buildServiceJsonLd({
+          name: "Post a Job",
+          description: "Post a home improvement job and receive quotes from verified UK trades.",
+          url: "https://prografter.co.uk/post-a-job",
+          serviceType: "Home improvement job posting",
+          price: "0.00",
+        })}
       />
       <header className="py-6 px-6">
         <Link to="/" className="font-heading text-2xl tracking-wider">
