@@ -70,7 +70,7 @@ const App = () => (
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/register" element={<TradeRegister />} />
-            <Route path="/register/trade" element={<SignupTradeRedirect />} />
+            <Route path="/register/trade" element={<SignupTrade />} />
             <Route path="/post-a-job" element={<PostAJob />} />
             <Route path="/quote-checker" element={<QuoteChecker />} />
             <Route path="/green" element={<GreenGrants />} />
@@ -81,14 +81,7 @@ const App = () => (
             <Route path="/about" element={<About />} />
             <Route path="/checkatrade-alternative" element={<CheckatradeAlternative />} />
             <Route path="/is-checkatrade-worth-it" element={<IsCheckatradeWorthIt />} />
-            <Route
-              path="/planning-alerts"
-              element={
-                <ProtectedRoute>
-                  <PlanningAlertsPage />
-                </ProtectedRoute>
-              }
-            />
+            <Route path="/planning-alerts" element={<PlanningAlertsPage />} />
             <Route
               path="/dashboard/trade"
               element={
@@ -140,7 +133,7 @@ const App = () => (
             <Route path="/signup/homeowner" element={<SignupHomeowner />} />
             <Route path="/signup/homeowner/next" element={<SignupHomeownerNext />} />
             <Route path="/signup/homeowner/check-email" element={<SignupCheckEmail />} />
-            <Route path="/signup/trade" element={<SignupTrade />} />
+            <Route path="/signup/trade" element={<SignupTradeRedirect />} />
             <Route path="/signup/trade/under-review" element={<ProtectedRoute><SignupTradeUnderReview /></ProtectedRoute>} />
             <Route path="/admin/verifications" element={<AdminRoute><AdminVerifications /></AdminRoute>} />
             <Route path="/admin/email-status" element={<AdminRoute><AdminEmailStatus /></AdminRoute>} />

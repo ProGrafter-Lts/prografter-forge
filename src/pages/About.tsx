@@ -13,7 +13,7 @@ const myBuilderLeads = [
 
 const featureComparison = [
   { feature: "Monthly fees", mybuilder: "£35+ per lead", prografter: "£0" },
-  { feature: "Pay only when you earn", mybuilder: "No", prografter: "Yes — 5% commission on completed work" },
+  { feature: "Pay only when you earn", mybuilder: "No", prografter: "Yes — 7.5% commission (capped at £900 per job)" },
   { feature: "Live project tracking", mybuilder: "No", prografter: "Yes — homeowners see daily updates" },
   { feature: "AI Quote Checker", mybuilder: "No", prografter: "Yes — 43-point review for £9" },
   { feature: "Green Grant matching", mybuilder: "No", prografter: "Yes — built in" },

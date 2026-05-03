@@ -43,7 +43,7 @@ const Hero = () => {
               <span className="relative inline-flex h-2 w-2 rounded-full bg-teal" />
             </span>
             <span className="font-mono text-[11px] text-cream uppercase tracking-wider">
-              Now live across the UK{tradeCount !== null ? ` — ${tradeCount} verified ${tradeCount === 1 ? "trade" : "trades"} registered` : ""}
+              Now live across the UK{tradeCount !== null && tradeCount >= 10 ? ` — ${tradeCount} verified trades registered` : ""}
             </span>
           </div>
           <h1 className="font-heading text-cream text-[56px] craft:text-[80px] leading-[0.95] mb-6">
@@ -64,7 +64,7 @@ const Hero = () => {
               Post a Job — I'm a Homeowner →
             </a>
             <a
-              href="/signup/trade"
+              href="/register/trade"
               className="inline-flex items-center justify-center bg-teal text-cream font-mono text-sm px-6 py-3.5 rounded-xl hover:bg-teal-hover transition-colors text-center"
             >
               Join as a Trade — Find Work →

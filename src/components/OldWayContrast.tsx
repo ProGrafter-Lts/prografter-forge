@@ -1,6 +1,6 @@
 const rows = [
   {
-    old: "Pay £300–£400/month whether work comes or not",
+    old: "Some platforms charge £299/month and up before you've earned a single penny — and yes, we're talking about Checkatrade. Their large 50-mile tier hits £1,959/month, or £23,508/year.",
     pro: "£0 until a job completes. Then 7.5%.",
   },
   {
