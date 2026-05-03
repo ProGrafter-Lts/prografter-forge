@@ -327,6 +327,18 @@ Deno.serve(async (req) => {
           defectsUntil,
         })),
       })
+      // Testimonial request — sent to homeowner only.
+      const submitUrl = `https://prografter.co.uk/share-your-experience?c=${contract_id}${
+        homeowner.name ? `&first=${encodeURIComponent(firstName(homeowner.name) ?? '')}` : ''
+      }`
+      results.push({
+        target: 'homeowner_testimonial',
+        ...(await sendEmail('testimonial-request', homeowner.email, 'homeowner', {
+          firstName: firstName(homeowner.name),
+          projectTitle,
+          submitUrl,
+        })),
+      })
       break
     }
     default:

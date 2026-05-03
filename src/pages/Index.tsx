@@ -14,6 +14,7 @@ import HomeownersHowItWorks from "@/components/HomeownersHowItWorks";
 import WhatYouGet from "@/components/WhatYouGet";
 import WhyDifferent from "@/components/WhyDifferent";
 import PlatformPreview from "@/components/PlatformPreview";
+import Testimonials from "@/components/Testimonials";
 import SeeHowItWorks from "@/components/SeeHowItWorks";
 import SignUpSection from "@/components/SignUpSection";
 import Footer from "@/components/Footer";
@@ -56,6 +57,7 @@ const Index = () => {
       <WhatYouGet />
       <WhyDifferent />
       <PlatformPreview />
+      <Testimonials />
       <SeeHowItWorks />
       <SignUpSection />
       <Footer />

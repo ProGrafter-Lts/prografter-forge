@@ -37,6 +37,8 @@ const SignupCheckEmail = lazy(() => import("./pages/SignupCheckEmail.tsx"));
 const SignupTradeRedirect = lazy(() => import("./pages/SignupTradeRedirect.tsx"));
 const AdminVerifications = lazy(() => import("./pages/AdminVerifications.tsx"));
 const AdminEmailStatus = lazy(() => import("./pages/AdminEmailStatus.tsx"));
+const AdminTestimonials = lazy(() => import("./pages/AdminTestimonials.tsx"));
+const SubmitTestimonial = lazy(() => import("./pages/SubmitTestimonial.tsx"));
 const CheckatradeAlternative = lazy(() => import("./pages/CheckatradeAlternative.tsx"));
 const IsCheckatradeWorthIt = lazy(() => import("./pages/IsCheckatradeWorthIt.tsx"));
 import AdminRoute from "./components/AdminRoute.tsx";
@@ -137,6 +139,8 @@ const App = () => (
             <Route path="/signup/trade/under-review" element={<ProtectedRoute><SignupTradeUnderReview /></ProtectedRoute>} />
             <Route path="/admin/verifications" element={<AdminRoute><AdminVerifications /></AdminRoute>} />
             <Route path="/admin/email-status" element={<AdminRoute><AdminEmailStatus /></AdminRoute>} />
+            <Route path="/admin/testimonials" element={<AdminRoute><AdminTestimonials /></AdminRoute>} />
+            <Route path="/share-your-experience" element={<SubmitTestimonial />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
