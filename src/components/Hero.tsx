@@ -21,7 +21,10 @@ const Hero = () => {
   }, []);
 
   return (
-    <section className="relative min-h-screen bg-deep flex items-center overflow-hidden">
+    <section
+      className="relative min-h-screen flex items-center overflow-hidden"
+      style={{ background: "linear-gradient(135deg, #1B3A5C 0%, #0F1F38 100%)" }}
+    >
       {/* Ghost GRAFT text */}
       <span className="absolute bottom-8 left-8 font-heading text-[120px] craft:text-[240px] text-cream select-none pointer-events-none leading-none" style={{ opacity: 0.03 }}>
         GRAFT
