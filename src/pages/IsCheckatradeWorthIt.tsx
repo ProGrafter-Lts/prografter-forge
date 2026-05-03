@@ -4,50 +4,48 @@ import SEO from "@/components/SEO";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Check, X } from "lucide-react";
 
-const costRows = [
-  { label: "Membership (typical)", value: "£40–£100 per month" },
-  { label: "Annual membership cost", value: "£480–£1,200 per year" },
-  { label: "Lead credits (typical)", value: "£25–£70 per lead, often shared" },
-  { label: "Average annual lead spend (active trade)", value: "£600–£2,000+" },
-  { label: "Realistic annual total", value: "£1,000 – £3,000+" },
+const tiers = [
+  { tier: "Approved", price: "£30/mo", annual: "£360/yr", note: "Listing only — leads still cost extra." },
+  { tier: "Medium 5-mile", price: "£299/mo", annual: "£3,588/yr", note: "Local visibility on the paid list." },
+  { tier: "Medium 50-mile", price: "£1,429/mo", annual: "£17,148/yr", note: "Regional coverage tier." },
+  { tier: "Large 50-mile", price: "£1,959/mo", annual: "£23,508/yr", note: "Top-of-list, regional reach." },
 ];
 
-const frustrations = [
-  "Leads being sold to multiple trades, so you're racing to the phone before the credit is even worth using.",
-  "Tyre-kickers and price-shoppers who never had any intention of going ahead — but the credit is already gone.",
-  "Charges continuing during quiet months, holidays and downturns, when no work is coming in.",
-  "Awkward cancellation experiences and contract terms that aren't obvious until you try to leave.",
-  "Profile visibility feeling tied to spend — slow down and you drop down the list.",
+const breakeven = [
+  { tier: "Approved (£30/mo)", jobs: "1 job/mo", maths: "£30 fee ÷ £400 average profit" },
+  { tier: "Medium 5-mile (£299/mo)", jobs: "~1 job/mo", maths: "£299 fee ÷ £400 average profit" },
+  { tier: "Medium 50-mile (£1,429/mo)", jobs: "~4 jobs/mo", maths: "£1,429 fee ÷ £400 average profit" },
+  { tier: "Large 50-mile (£1,959/mo)", jobs: "~5 jobs/mo", maths: "£1,959 fee ÷ £400 average profit" },
 ];
 
-const alternatives = [
-  { name: "MyBuilder / Rated People", body: "Similar pay-per-lead model. Cheaper entry, but the same shared-lead and tyre-kicker problems apply." },
-  { name: "Google + your own website", body: "No middleman fees, but you're paying in time and SEO spend. Works long term, slow to start." },
-  { name: "Word of mouth + Facebook groups", body: "Free, high-trust, but unpredictable — and it doesn't scale when you want to grow." },
-  { name: "ProGrafter", body: "No monthly fee. No per-lead credits. 7.5% commission only when a job completes. Built by a trade for trades." },
-];
+const articleJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  headline: "Is Checkatrade Worth It? An Honest Look At The Numbers",
+  description: "Is Checkatrade worth £299–£1,959/month for UK trades? An honest review by an electrician of 20 years, with real numbers, and the platform he built as the alternative.",
+  author: { "@type": "Person", name: "Lee Palfreeman" },
+  publisher: {
+    "@type": "Organization",
+    name: "ProGrafter Ltd",
+    logo: { "@type": "ImageObject", url: "https://prografter.co.uk/favicon.ico" },
+  },
+  datePublished: "2026-05-03",
+  dateModified: "2026-05-03",
+  mainEntityOfPage: "https://prografter.co.uk/is-checkatrade-worth-it",
+};
 
 const IsCheckatradeWorthIt = () => {
   return (
     <div className="min-h-screen bg-deep">
       <SEO
-        title="Is Checkatrade Worth It in 2026? Honest Trade Review"
-        description="An honest review of Checkatrade in 2026 from a founder who spent 20 years on the tools. Full cost breakdown, real frustrations and the alternatives worth considering."
+        title="Is Checkatrade Worth It in 2026? An Honest Trade Review — ProGrafter"
+        description="Is Checkatrade worth £299–£1,959/month for UK trades? An honest review by an electrician of 20 years, with real numbers, and the platform he built as the alternative."
         path="/is-checkatrade-worth-it"
       />
       <Helmet>
-        <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Article",
-            headline: "Is Checkatrade Worth It? An Honest Answer From a Trade",
-            author: { "@type": "Person", name: "Lee Palfreeman" },
-            datePublished: "2026-01-01",
-            publisher: { "@type": "Organization", name: "ProGrafter" },
-          })}
-        </script>
+        <script type="application/ld+json">{JSON.stringify(articleJsonLd)}</script>
       </Helmet>
       <Navbar />
 
@@ -56,148 +54,172 @@ const IsCheckatradeWorthIt = () => {
         <span
           className="absolute -bottom-8 right-0 font-heading text-[160px] craft:text-[280px] text-cream select-none pointer-events-none leading-none"
           style={{ opacity: 0.03 }}
+          aria-hidden
         >
           HONEST
         </span>
-        <div className="max-w-4xl mx-auto relative z-10">
+        <div className="max-w-5xl mx-auto relative z-10">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-8 h-[2px] bg-teal" />
-            <span className="font-mono text-xs text-teal uppercase tracking-widest">Honest Review · 2026</span>
+            <span className="font-mono text-xs text-teal uppercase tracking-widest">Honest Trade Review · 2026</span>
           </div>
-          <h1 className="font-heading text-cream text-[40px] craft:text-[80px] leading-[0.95]">
-            Is Checkatrade<br />worth it? An honest<br />
-            <span className="text-teal">answer from a trade.</span>
+          <h1 className="font-heading text-cream text-[40px] craft:text-[80px] leading-[0.95] max-w-4xl">
+            Is Checkatrade worth it?<br />
+            <span className="text-teal">An honest look at the numbers.</span>
           </h1>
-          <p className="font-mono text-cream/70 mt-8 max-w-2xl text-base">
-            I'm Lee. I spent 20 years as a qualified electrician before building ProGrafter. I've used the directories, paid the fees, and chased the bad leads. Here's a straight answer.
+          <p className="font-body text-cream/70 mt-8 max-w-2xl text-lg font-light">
+            <strong className="text-cream">Short answer:</strong> it depends on how much work you're winning. <strong className="text-cream">Long answer:</strong> below.
           </p>
         </div>
       </section>
 
-      {/* First-person intro */}
-      <section className="px-6 py-16 border-t border-cream/10">
-        <div className="max-w-3xl mx-auto space-y-6 font-mono text-cream/80 text-base leading-relaxed">
-          <p>
-            I'll start with the honest bit: Checkatrade <em>can</em> work. If you're brand new, in a busy area and you're sharp on the phone, you can win jobs from it. I've watched mates do exactly that.
-          </p>
-          <p>
-            But "can it work" is a different question to "is it worth it." Worth it means the maths stacks up after the fees, the quiet months, the shared leads and the tyre-kickers. That's the question I want to answer here — without the marketing, and without the comments-section rage either.
-          </p>
-        </div>
-      </section>
-
-      {/* Cost breakdown */}
+      {/* Pricing breakdown */}
       <section className="px-6 py-20 border-t border-cream/10">
-        <div className="max-w-5xl mx-auto">
-          <div className="flex items-center gap-3 mb-6">
-            <span className="font-mono text-xs text-teal uppercase tracking-widest">01 / The Real Cost</span>
-          </div>
-          <h2 className="font-heading text-cream text-[36px] craft:text-[64px] leading-[1] mb-10">
-            What you'll actually pay.
+        <div className="max-w-6xl mx-auto">
+          <span className="font-mono text-xs text-teal uppercase tracking-widest">01 / The Real Cost</span>
+          <h2 className="font-heading text-cream text-[36px] craft:text-[64px] leading-[1] mt-3 mb-8 max-w-3xl">
+            Checkatrade pricing<br />in 2026.
           </h2>
-          <div className="border border-cream/10">
+          <p className="font-body text-cream/70 max-w-3xl mb-10 text-lg leading-relaxed">
+            There are four main tiers. The cheapest gets you a listing; the most expensive is more than most trades' monthly take-home.
+          </p>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {tiers.map((t) => (
+              <div key={t.tier} className="border border-cream/10 p-6 bg-cream/[0.02]">
+                <p className="font-mono text-[10px] text-cream/50 uppercase tracking-wider mb-2">{t.tier}</p>
+                <p className="font-heading text-cream text-3xl">{t.price}</p>
+                <p className="font-mono text-cream/40 text-xs mt-1 mb-3">{t.annual}</p>
+                <p className="font-mono text-cream/60 text-xs leading-relaxed">{t.note}</p>
+              </div>
+            ))}
+          </div>
+          <p className="font-mono text-cream/40 text-xs mt-6">
+            Pricing as published by Checkatrade in 2026; varies by region and tier.
+          </p>
+        </div>
+      </section>
+
+      {/* Break-even maths */}
+      <section className="px-6 py-20 border-t border-cream/10">
+        <div className="max-w-6xl mx-auto">
+          <span className="font-mono text-xs text-teal uppercase tracking-widest">02 / Break-Even Maths</span>
+          <h2 className="font-heading text-cream text-[36px] craft:text-[64px] leading-[1] mt-3 mb-8 max-w-3xl">
+            How many jobs to<br />
+            <span className="text-teal">cover the fee?</span>
+          </h2>
+          <p className="font-body text-cream/70 max-w-3xl mb-10 text-lg leading-relaxed">
+            At an average <strong className="text-cream">£400 profit per job</strong>, here's the bare minimum you need to win every month just to <em>break even</em> on the membership — before you've made a penny in profit.
+          </p>
+          <div className="overflow-x-auto border border-cream/10">
             <table className="w-full font-mono text-sm">
+              <thead>
+                <tr className="bg-cream/[0.04] text-cream uppercase tracking-wider text-xs">
+                  <th className="text-left p-4">Tier</th>
+                  <th className="text-left p-4 text-teal">Jobs / month to break even</th>
+                  <th className="text-left p-4">Maths</th>
+                </tr>
+              </thead>
               <tbody>
-                {costRows.map((r, i) => (
-                  <tr key={r.label} className={i % 2 === 0 ? "bg-cream/[0.02]" : ""}>
-                    <td className="p-5 text-cream/70">{r.label}</td>
-                    <td className="p-5 text-cream font-medium text-right">{r.value}</td>
+                {breakeven.map((r, i) => (
+                  <tr key={r.tier} className={i % 2 === 0 ? "bg-cream/[0.01]" : ""}>
+                    <td className="p-4 text-cream font-medium align-top">{r.tier}</td>
+                    <td className="p-4 text-teal align-top">{r.jobs}</td>
+                    <td className="p-4 text-cream/60 align-top">{r.maths}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-          <p className="font-mono text-cream/50 text-xs mt-4">
-            Figures based on publicly reported trade spend. Your number depends on tier, region and how many leads you actually buy.
+          <p className="font-body text-cream/60 mt-6 text-sm leading-relaxed max-w-3xl">
+            And that's just the membership. Add lead credits, marketing time and quiet months — the real number is higher.
           </p>
         </div>
       </section>
 
-      {/* What you get */}
+      {/* Hidden costs */}
       <section className="px-6 py-20 border-t border-cream/10">
-        <div className="max-w-3xl mx-auto">
-          <div className="flex items-center gap-3 mb-6">
-            <span className="font-mono text-xs text-teal uppercase tracking-widest">02 / What You Get</span>
-          </div>
-          <h2 className="font-heading text-cream text-[36px] craft:text-[64px] leading-[1] mb-8">
-            What the money buys you.
+        <div className="max-w-6xl mx-auto">
+          <span className="font-mono text-xs text-teal uppercase tracking-widest">03 / Hidden Costs</span>
+          <h2 className="font-heading text-cream text-[36px] craft:text-[64px] leading-[1] mt-3 mb-8 max-w-3xl">
+            What the fee<br />doesn't tell you.
           </h2>
-          <div className="space-y-6 font-mono text-cream/80 text-base leading-relaxed">
-            <p>
-              For the membership, you get a profile, a logo to put on your van, and visibility on a directory the public recognise. That last bit is genuinely useful — Checkatrade has spent serious money making sure homeowners have heard of it.
-            </p>
-            <p>
-              For the lead credits, you get the homeowner's contact details and a chance to quote. What you don't get is exclusivity — the same job is normally offered to several trades. So the "cost per job" you actually win is usually a multiple of the headline lead price.
-            </p>
-            <p>
-              And once you've won the job? That's it. There's no quoting tool, no project tracker, no payment schedule, no homeowner documentation. You're back to WhatsApp and paper invoices like every other job.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Frustrations */}
-      <section className="px-6 py-20 border-t border-cream/10">
-        <div className="max-w-3xl mx-auto">
-          <div className="flex items-center gap-3 mb-6">
-            <span className="font-mono text-xs text-teal uppercase tracking-widest">03 / What Trades Actually Say</span>
-          </div>
-          <h2 className="font-heading text-cream text-[36px] craft:text-[64px] leading-[1] mb-8">
-            The recurring complaints.
-          </h2>
-          <p className="font-mono text-cream/60 text-sm mb-6">
-            Reading through Trustpilot, trade forums and the comments under any tradesperson video on YouTube, the same five themes come up again and again (paraphrased here, not quoted):
-          </p>
-          <ul className="space-y-4">
-            {frustrations.map((f, i) => (
-              <li key={i} className="border-l-2 border-teal pl-6 font-mono text-cream/80 text-base leading-relaxed">
-                {f}
-              </li>
-            ))}
+          <ul className="grid md:grid-cols-3 gap-6">
+            <li className="border border-cream/10 p-6 bg-cream/[0.02]">
+              <X className="text-destructive mb-3" />
+              <h3 className="font-heading text-cream text-xl mb-2">Leads shared with up to 5 trades</h3>
+              <p className="font-mono text-cream/60 text-sm leading-relaxed">You're racing four other trades to the phone. The credit cost is the same whether you win or not.</p>
+            </li>
+            <li className="border border-cream/10 p-6 bg-cream/[0.02]">
+              <X className="text-destructive mb-3" />
+              <h3 className="font-heading text-cream text-xl mb-2">No exclusivity</h3>
+              <p className="font-mono text-cream/60 text-sm leading-relaxed">Even high-tier subscribers don't get exclusive leads. You're paying for visibility, not the work itself.</p>
+            </li>
+            <li className="border border-cream/10 p-6 bg-cream/[0.02]">
+              <X className="text-destructive mb-3" />
+              <h3 className="font-heading text-cream text-xl mb-2">No completion guarantees</h3>
+              <p className="font-mono text-cream/60 text-sm leading-relaxed">Quotes that vanish, jobs that ghost, variations done off-platform. The fee is gone whether the work happens or not.</p>
+            </li>
           </ul>
         </div>
       </section>
 
-      {/* Alternatives */}
+      {/* MyBuilder story */}
       <section className="px-6 py-20 border-t border-cream/10">
-        <div className="max-w-5xl mx-auto">
-          <div className="flex items-center gap-3 mb-6">
-            <span className="font-mono text-xs text-teal uppercase tracking-widest">04 / Alternatives</span>
-          </div>
-          <h2 className="font-heading text-cream text-[36px] craft:text-[64px] leading-[1] mb-10">
-            What else is out there.
+        <div className="max-w-3xl mx-auto">
+          <span className="font-mono text-xs text-teal uppercase tracking-widest">04 / Real Numbers</span>
+          <h2 className="font-heading text-cream text-[36px] craft:text-[64px] leading-[1] mt-3 mb-8">
+            18 leads. £625 spent.<br />
+            <span className="text-teal">0 jobs won.</span>
           </h2>
-          <div className="grid md:grid-cols-2 gap-6">
-            {alternatives.map((a) => (
-              <div key={a.name} className="border border-cream/10 p-6 bg-cream/[0.02]">
-                <h3 className="font-heading text-cream text-2xl mb-3">{a.name}</h3>
-                <p className="font-mono text-cream/60 text-sm leading-relaxed">{a.body}</p>
-              </div>
-            ))}
+          <div className="font-body text-cream/70 text-lg space-y-5 leading-relaxed">
+            <p>
+              That's the founder's own MyBuilder run before ProGrafter existed — the kind of result that pushed this whole thing into being. Same shared-lead problem, same outcome.
+            </p>
+            <p>
+              The full story is on the About page, including the receipts and the moment the maths stopped making sense.
+            </p>
+          </div>
+          <Link to="/about" className="inline-flex items-center gap-2 mt-8 font-mono text-sm text-teal hover:text-teal-hover">
+            Read the full story on /about <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+      </section>
+
+      {/* Where it works / doesn't */}
+      <section className="px-6 py-20 border-t border-cream/10">
+        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-8">
+          <div className="border border-cream/10 p-8 bg-cream/[0.02]">
+            <Check className="text-teal mb-4" />
+            <h3 className="font-heading text-cream text-2xl mb-4">Where Checkatrade <span className="text-teal">does</span> work</h3>
+            <p className="font-body text-cream/70 leading-relaxed">
+              High-volume regional trades with consistent demand and the cash flow to absorb a four-figure monthly fee. If you're already winning 10+ jobs a month off it and the maths is comfortably in the black, fair play.
+            </p>
+          </div>
+          <div className="border border-cream/10 p-8 bg-cream/[0.02]">
+            <X className="text-destructive mb-4" />
+            <h3 className="font-heading text-cream text-2xl mb-4">Where it <span className="text-destructive">doesn't</span></h3>
+            <ul className="font-body text-cream/70 leading-relaxed space-y-2 list-disc pl-5">
+              <li>Solo trades who can't carry a £1,400+ monthly overhead.</li>
+              <li>Regional new entrants without an established pipeline.</li>
+              <li>Premium specialists whose value isn't a race-to-the-bottom price.</li>
+            </ul>
           </div>
         </div>
       </section>
 
-      {/* My take */}
+      {/* The alternative */}
       <section className="px-6 py-20 border-t border-cream/10">
         <div className="max-w-3xl mx-auto">
-          <div className="flex items-center gap-3 mb-6">
-            <span className="font-mono text-xs text-teal uppercase tracking-widest">05 / My Honest Take</span>
-          </div>
-          <h2 className="font-heading text-cream text-[36px] craft:text-[64px] leading-[1] mb-8">
-            So — is it worth it?
+          <span className="font-mono text-xs text-teal uppercase tracking-widest">05 / The Alternative</span>
+          <h2 className="font-heading text-cream text-[36px] craft:text-[64px] leading-[1] mt-3 mb-8">
+            ProGrafter, in one paragraph.
           </h2>
-          <div className="space-y-6 font-mono text-cream/80 text-base leading-relaxed">
-            <p>
-              If you're new, hungry, fast on the phone, and you live in a high-demand area: maybe, for a year. Treat it as a marketing budget, track every lead and cut it the second the maths stops working.
-            </p>
-            <p>
-              If you're an experienced trade with a half-decent reputation already: I genuinely don't think so. You're paying a flat fee every month for the privilege of being charged again to talk to homeowners — alongside three other trades pitching for the same job.
-            </p>
-            <p>
-              That's the exact reason I built ProGrafter. No monthly fee. No per-lead credits. We only get paid when you do — 7.5% on completed work. If a job doesn't go ahead, you've lost nothing but the time you'd have spent quoting anyway.
-            </p>
-          </div>
+          <p className="font-body text-cream/70 text-lg leading-relaxed mb-6">
+            Free to register. Free to quote. <strong className="text-cream">7.5% commission on completion only, capped at £900 per job.</strong> Built by an electrician of 20 years for trades who'd rather pay when the work lands than pay every month either way.
+          </p>
+          <p className="font-body text-cream/70 text-lg leading-relaxed">
+            See it laid out in <Link to="/#pricing" className="text-teal underline">Honest Numbers</Link>, sense-check a real quote with the <Link to="/quote-checker" className="text-teal underline">Quote Checker</Link>, or read the <Link to="/checkatrade-alternative" className="text-teal underline">side-by-side comparison</Link>.
+          </p>
         </div>
       </section>
 
@@ -205,14 +227,14 @@ const IsCheckatradeWorthIt = () => {
       <section className="px-6 py-24 border-t border-cream/10">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="font-heading text-cream text-[36px] craft:text-[72px] leading-[1] mb-6">
-            Try a platform that<br />charges <span className="text-teal">nothing</span><br />until you earn.
+            Register Free —<br /><span className="text-teal">No Monthly Fees.</span>
           </h2>
-          <p className="font-mono text-cream/60 max-w-xl mx-auto mb-10">
-            No membership. No credits. 7.5% commission only on completed jobs.
+          <p className="font-body text-cream/70 max-w-xl mx-auto mb-10 text-lg">
+            7.5% on completion only. Capped at £900. No subscription, no credits, no contract.
           </p>
           <Button asChild size="lg" className="bg-teal hover:bg-teal/90 text-deep font-mono uppercase tracking-wider">
             <Link to="/register/trade">
-              Register Free <ArrowRight className="ml-1" />
+              Register Free → No Monthly Fees <ArrowRight className="ml-1" />
             </Link>
           </Button>
         </div>
