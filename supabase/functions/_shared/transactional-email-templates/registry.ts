@@ -25,6 +25,7 @@ import { template as variationProposed } from './variation-proposed.tsx'
 import { template as variationApproved } from './variation-approved.tsx'
 import { template as completionMarked } from './completion-marked.tsx'
 import { template as completionAccepted } from './completion-accepted.tsx'
+import { template as testimonialRequest } from './testimonial-request.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'waitlist-admin-notification': waitlistAdminNotification,
@@ -44,4 +45,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'variation-approved': variationApproved,
   'completion-marked': completionMarked,
   'completion-accepted': completionAccepted,
+  'testimonial-request': testimonialRequest,
 }
