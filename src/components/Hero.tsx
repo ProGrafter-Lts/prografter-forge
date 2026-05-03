@@ -64,7 +64,7 @@ const Hero = () => {
               Post a Job — I'm a Homeowner →
             </a>
             <a
-              href="/signup/trade"
+              href="/register/trade"
               className="inline-flex items-center justify-center bg-teal text-cream font-mono text-sm px-6 py-3.5 rounded-xl hover:bg-teal-hover transition-colors text-center"
             >
               Join as a Trade — Find Work →
