@@ -70,7 +70,7 @@ const App = () => (
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/register" element={<TradeRegister />} />
-            <Route path="/register/trade" element={<SignupTradeRedirect />} />
+            <Route path="/register/trade" element={<SignupTrade />} />
             <Route path="/post-a-job" element={<PostAJob />} />
             <Route path="/quote-checker" element={<QuoteChecker />} />
             <Route path="/green" element={<GreenGrants />} />
