@@ -123,22 +123,26 @@ const QuotesReceived = ({ quotes, onQuoteAccepted }: QuotesReceivedProps) => {
       }
     }
 
-    // 2. Accept the chosen quote
-    const { error: acceptErr } = await supabase
-      .from("quotes")
-      .update({ status: "accepted" })
-      .eq("id", pendingAccept.id);
+    // 2. Generate the contract via SECURITY DEFINER RPC.
+    // The RPC marks the quote accepted, snapshots both parties, and creates
+    // the contract row in awaiting_signatures. We then route the homeowner
+    // straight to the contract page to review and sign.
+    const { data: contractId, error: rpcErr } = await supabase.rpc("generate_contract_for_quote", {
+      _quote_id: pendingAccept.id,
+    });
 
     setAccepting(false);
 
-    if (acceptErr) {
-      toast.error("Couldn't accept quote — please try again.");
+    if (rpcErr || !contractId) {
+      toast.error(rpcErr?.message || "Couldn't accept quote — please try again.");
       return;
     }
 
-    toast.success(`Quote accepted. ${acceptedTradeName} will be in touch.`);
+    toast.success(`Quote accepted. ${acceptedTradeName} will be in touch. Review and sign your contract now.`);
+    const targetJobId = pendingAccept.job_id;
     setPendingAccept(null);
     onQuoteAccepted?.();
+    navigate(`/project/${targetJobId}/contract`);
   };
 
   if (quotes.length === 0) {
