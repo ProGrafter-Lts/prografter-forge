@@ -264,6 +264,9 @@ export type Database = {
           homeowner_snapshot: Json
           id: string
           job_id: string
+          latest_pdf_generated_at: string | null
+          latest_pdf_hash: string | null
+          latest_pdf_path: string | null
           materials_specification: Json | null
           payment_milestones: Json
           property_address: Json
@@ -306,6 +309,9 @@ export type Database = {
           homeowner_snapshot: Json
           id?: string
           job_id: string
+          latest_pdf_generated_at?: string | null
+          latest_pdf_hash?: string | null
+          latest_pdf_path?: string | null
           materials_specification?: Json | null
           payment_milestones?: Json
           property_address: Json
@@ -348,6 +354,9 @@ export type Database = {
           homeowner_snapshot?: Json
           id?: string
           job_id?: string
+          latest_pdf_generated_at?: string | null
+          latest_pdf_hash?: string | null
+          latest_pdf_path?: string | null
           materials_specification?: Json | null
           payment_milestones?: Json
           property_address?: Json
@@ -2423,6 +2432,10 @@ export type Database = {
       }
       trade_can_access_job: {
         Args: { _job_id: string; _user_id: string }
+        Returns: boolean
+      }
+      user_is_contract_party: {
+        Args: { _contract_id: string; _user_id: string }
         Returns: boolean
       }
       user_owns_homeowner: {

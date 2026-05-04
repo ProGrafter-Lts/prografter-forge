@@ -21,3 +21,5 @@ project_id = "xryinqaxjclcmhebdcex"
     verify_jwt = false
   [functions.submit-testimonial]
     verify_jwt = false
+  [functions.contract-pdf-snapshot]
+    verify_jwt = false
