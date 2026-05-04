@@ -30,13 +30,13 @@ const Hero = () => {
         GRAFT
       </span>
 
-      {/* Diagonal teal line */}
-      <div className="hidden craft:block absolute top-0 bottom-0 w-[3px] bg-teal" style={{ left: "62%", transform: "skewX(-4deg)" }} />
+      {/* Vertical divider between trade & homeowner columns */}
+      <div className="hidden craft:block absolute top-24 bottom-24 w-px bg-teal/20" style={{ left: "60%" }} />
 
-      <div className="max-w-7xl mx-auto px-6 w-full grid craft:grid-cols-[1fr_0.8fr] gap-12 items-center pt-24 pb-16 craft:pb-16 pb-32">
-        {/* Left column */}
-        <div>
-          <div className="flex items-center gap-3 mb-8">
+      <div className="max-w-7xl mx-auto px-6 w-full grid craft:grid-cols-[60fr_40fr] gap-10 craft:gap-12 items-center pt-24 pb-16">
+        {/* Left column — TRADES */}
+        <div className="craft:pr-8">
+          <div className="flex items-center gap-3 mb-6">
             <div className="w-8 h-[2px] bg-teal" />
             <span className="font-mono text-xs text-teal uppercase tracking-widest">For Tradespeople</span>
           </div>
@@ -49,32 +49,23 @@ const Hero = () => {
               Now live across the UK{tradeCount !== null && tradeCount >= 10 ? ` — ${tradeCount} verified trades registered` : ""}
             </span>
           </div>
-          <h1 className="font-heading text-cream text-[56px] craft:text-[80px] leading-[0.95] mb-6">
+          <h1 className="font-heading text-cream text-[48px] craft:text-[72px] leading-[0.95] mb-6">
             Built for<br />
             <span className="text-teal">Proper</span><br />
             Grafters.
           </h1>
-          <p className="font-body text-secondary-text text-lg max-w-md mb-8 font-light">
+          <p className="font-body text-secondary-text text-base craft:text-lg max-w-md mb-6 font-light">
             No monthly fees. No hidden costs. Just a fair commission on the work you win — capped at £900 per job.
           </p>
 
-          {/* Two equally-weighted primary CTAs — one for each audience */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg">
-            <a
-              href="/signup/homeowner"
-              className="inline-flex items-center justify-center bg-cream text-deep font-mono text-sm px-6 py-3.5 rounded-xl hover:bg-cream/90 transition-colors text-center"
-            >
-              Post a Job — I'm a Homeowner →
-            </a>
-            <a
-              href="/register/trade"
-              className="inline-flex items-center justify-center bg-teal text-cream font-mono text-sm px-6 py-3.5 rounded-xl hover:bg-teal-hover transition-colors text-center"
-            >
-              Join as a Trade — Find Work →
-            </a>
-          </div>
+          <a
+            href="/register/trade"
+            className="inline-flex items-center justify-center bg-teal text-cream font-mono text-sm px-6 py-3.5 rounded-xl hover:bg-teal-hover transition-colors"
+          >
+            Join as a Trade — Find Work →
+          </a>
 
-          {/* Tertiary link — green grants & sign-in */}
+          {/* Tertiary links */}
           <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-xs text-secondary-text">
             <a href="/green" className="hover:text-teal transition-colors">
               🌿 Green grants
@@ -85,39 +76,39 @@ const Hero = () => {
             </a>
           </div>
 
-          {/* Mobile stats — inline (below homeowner CTA) */}
-          <div className="craft:hidden mt-8 grid grid-cols-3 gap-3">
+          {/* Stats — inline on all sizes for trade column */}
+          <div className="mt-8 grid grid-cols-3 gap-3 max-w-md">
             {stats.map((stat) => (
               <div key={stat.label} className="bg-navy/50 backdrop-blur-sm border border-teal/20 rounded-xl px-3 py-3 text-center">
-                <div className="font-heading text-teal text-xl">{stat.value}</div>
+                <div className="font-heading text-teal text-xl craft:text-2xl">{stat.value}</div>
                 <div className="font-mono text-[10px] text-secondary-text uppercase">{stat.label}</div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Right column — stat cards + rotating circles */}
-        <div className="hidden craft:flex relative justify-center items-center min-h-[400px]">
-          {/* Concentric circles */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="absolute w-[280px] h-[280px] rounded-full border border-teal/10 animate-spin-slow" />
-            <div className="absolute w-[360px] h-[360px] rounded-full border border-teal/5 animate-spin-slower" />
-            <div className="absolute w-[440px] h-[440px] rounded-full border border-teal/[0.03] animate-spin-slowest" />
-          </div>
-
-          {/* Floating stat cards */}
-          <div className="relative z-10 flex flex-col gap-4">
-            {stats.map((stat, i) => (
-              <div
-                key={stat.label}
-                className={`bg-navy/50 backdrop-blur-sm border border-teal/20 rounded-xl px-6 py-4 ${
-                  i === 0 ? "animate-float" : i === 1 ? "animate-float-delayed" : "animate-float-delayed-2"
-                }`}
-              >
-                <div className="font-heading text-teal text-3xl">{stat.value}</div>
-                <div className="font-mono text-xs text-secondary-text uppercase tracking-wider">{stat.label}</div>
-              </div>
-            ))}
+        {/* Right column — HOMEOWNERS */}
+        <div className="relative craft:pl-8">
+          <div className="bg-navy/40 backdrop-blur-sm border border-teal/20 rounded-2xl p-6 craft:p-7">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-8 h-[2px] bg-teal" />
+              <span className="font-mono text-[11px] text-teal uppercase tracking-widest">For Homeowners</span>
+            </div>
+            <h2 className="font-heading text-cream text-[32px] craft:text-[36px] leading-[1] mb-4">
+              Find a <span className="text-teal">Proper Grafter</span>
+            </h2>
+            <p className="font-body text-secondary-text text-[15px] mb-5 font-light">
+              Verified UK trades. Real timelines. Variations signed off in writing. No surprise bills.
+            </p>
+            <div className="font-mono text-[11px] text-cream/80 mb-6 leading-relaxed">
+              £0 to post · Verified trades · Stage payments protected
+            </div>
+            <a
+              href="/post-a-job"
+              className="inline-flex items-center justify-center w-full bg-teal text-cream font-mono text-sm px-6 py-3.5 rounded-xl hover:bg-teal-hover transition-colors"
+            >
+              Post a Job Free →
+            </a>
           </div>
         </div>
       </div>
