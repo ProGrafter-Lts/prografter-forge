@@ -128,6 +128,7 @@ export type Database = {
           id: string
           legal_text: string
           plain_english_summary: string
+          signing_enabled: boolean
           status: string
           superseded_at: string | null
           updated_at: string
@@ -141,6 +142,7 @@ export type Database = {
           id?: string
           legal_text: string
           plain_english_summary: string
+          signing_enabled?: boolean
           status?: string
           superseded_at?: string | null
           updated_at?: string
@@ -154,6 +156,7 @@ export type Database = {
           id?: string
           legal_text?: string
           plain_english_summary?: string
+          signing_enabled?: boolean
           status?: string
           superseded_at?: string | null
           updated_at?: string
@@ -252,6 +255,7 @@ export type Database = {
           defects_period_ends_at: string | null
           estimated_completion_date: string | null
           estimated_start_date: string | null
+          full_text_hash: string | null
           homeowner_bespoke_terms: string | null
           homeowner_id: string
           homeowner_signature_hash: string | null
@@ -265,10 +269,12 @@ export type Database = {
           property_address: Json
           quote_id: string
           reference: string | null
+          rendered_legal_text: string | null
           required_certificates: string[] | null
           scope_of_works: string
           status: string
           template_id: string
+          template_version: string | null
           terminated_at: string | null
           termination_reason: string | null
           total_value_excl_vat_pence: number
@@ -291,6 +297,7 @@ export type Database = {
           defects_period_ends_at?: string | null
           estimated_completion_date?: string | null
           estimated_start_date?: string | null
+          full_text_hash?: string | null
           homeowner_bespoke_terms?: string | null
           homeowner_id: string
           homeowner_signature_hash?: string | null
@@ -304,10 +311,12 @@ export type Database = {
           property_address: Json
           quote_id: string
           reference?: string | null
+          rendered_legal_text?: string | null
           required_certificates?: string[] | null
           scope_of_works: string
           status?: string
           template_id: string
+          template_version?: string | null
           terminated_at?: string | null
           termination_reason?: string | null
           total_value_excl_vat_pence: number
@@ -330,6 +339,7 @@ export type Database = {
           defects_period_ends_at?: string | null
           estimated_completion_date?: string | null
           estimated_start_date?: string | null
+          full_text_hash?: string | null
           homeowner_bespoke_terms?: string | null
           homeowner_id?: string
           homeowner_signature_hash?: string | null
@@ -343,10 +353,12 @@ export type Database = {
           property_address?: Json
           quote_id?: string
           reference?: string | null
+          rendered_legal_text?: string | null
           required_certificates?: string[] | null
           scope_of_works?: string
           status?: string
           template_id?: string
+          template_version?: string | null
           terminated_at?: string | null
           termination_reason?: string | null
           total_value_excl_vat_pence?: number
@@ -2301,6 +2313,7 @@ export type Database = {
         Args: { _contract_id: string; _terms: string }
         Returns: undefined
       }
+      compute_contract_hash: { Args: { _contract_id: string }; Returns: string }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -2415,6 +2428,10 @@ export type Database = {
       user_owns_homeowner: {
         Args: { _homeowner_id: string; _user_id: string }
         Returns: boolean
+      }
+      verify_contract_integrity: {
+        Args: { _contract_id: string }
+        Returns: Json
       }
     }
     Enums: {
