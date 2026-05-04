@@ -41,6 +41,7 @@ const AdminTestimonials = lazy(() => import("./pages/AdminTestimonials.tsx"));
 const SubmitTestimonial = lazy(() => import("./pages/SubmitTestimonial.tsx"));
 const CheckatradeAlternative = lazy(() => import("./pages/CheckatradeAlternative.tsx"));
 const IsCheckatradeWorthIt = lazy(() => import("./pages/IsCheckatradeWorthIt.tsx"));
+const ContractPage = lazy(() => import("./pages/ContractPage.tsx"));
 import AdminRoute from "./components/AdminRoute.tsx";
 
 const queryClient = new QueryClient({
@@ -121,6 +122,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <CompareQuotes />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/project/:id/contract"
+              element={
+                <ProtectedRoute>
+                  <ContractPage />
                 </ProtectedRoute>
               }
             />
