@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { ArrowLeft, FileText, ShieldAlert, Check, Clock, Loader2, Lock } from "lucide-react";
+import { ArrowLeft, FileText, ShieldAlert, Check, Clock, Loader2, Lock, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -34,6 +34,8 @@ interface ContractRow {
   homeowner_bespoke_terms: string | null;
   trade_bespoke_terms: string | null;
   activated_at: string | null;
+  latest_pdf_path: string | null;
+  latest_pdf_generated_at: string | null;
 }
 
 interface VariationRow {
@@ -291,6 +293,24 @@ const ContractPage = () => {
               <Badge className="bg-destructive text-destructive-foreground">
                 <ShieldAlert className="w-3 h-3 mr-1" /> Tamper detected
               </Badge>
+            )}
+            {contract.latest_pdf_path && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={async () => {
+                  const { data, error } = await supabase.storage
+                    .from("contracts")
+                    .createSignedUrl(contract.latest_pdf_path!, 60);
+                  if (error || !data?.signedUrl) {
+                    toast.error("Could not generate download link");
+                    return;
+                  }
+                  window.open(data.signedUrl, "_blank", "noopener");
+                }}
+              >
+                <Download className="w-3.5 h-3.5 mr-1.5" /> PDF
+              </Button>
             )}
           </div>
         </div>
