@@ -266,7 +266,7 @@ const ContractPage = () => {
       <SEO
         title={`Contract ${contract.reference ?? ""} — ProGrafter`}
         description="Review, sign and manage your construction contract on ProGrafter."
-        noIndex
+        noindex
       />
       <div className="max-w-4xl mx-auto px-4 py-6">
         <button
