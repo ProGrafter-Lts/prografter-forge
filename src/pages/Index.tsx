@@ -3,6 +3,7 @@ import SEO from "@/components/SEO";
 import { localBusinessJsonLd, homepageFaqJsonLd } from "@/lib/seoSchemas";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
+import AboutStoryBanner from "@/components/AboutStoryBanner";
 import Ticker from "@/components/Ticker";
 import HowItWorks from "@/components/HowItWorks";
 import OldWayContrast from "@/components/OldWayContrast";
@@ -46,6 +47,7 @@ const Index = () => {
       />
       <Navbar />
       <Hero />
+      <AboutStoryBanner />
       <Ticker />
       <HowItWorks />
       <OldWayContrast />
