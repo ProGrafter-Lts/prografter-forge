@@ -242,6 +242,21 @@ const QuoteSubmitForm = ({ jobId, tradeId, onQuoteSubmitted }: QuoteSubmitFormPr
         </div>
       )}
 
+      {/* Materials breakdown */}
+      <div className="border-t border-border pt-4 space-y-3">
+        <MaterialsBreakdown lines={materials} onChange={setMaterials} />
+
+        <div className="flex items-center justify-between py-2">
+          <div>
+            <p className="font-heading text-xs text-primary">Share materials with homeowner?</p>
+            <p className="font-mono text-[10px] text-muted-foreground">
+              Off by default — protects your pricing margin
+            </p>
+          </div>
+          <Switch checked={shareMaterials} onCheckedChange={setShareMaterials} />
+        </div>
+      </div>
+
       {/* Submit */}
       <button
         onClick={handleSubmit}
