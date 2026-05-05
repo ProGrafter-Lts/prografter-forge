@@ -226,3 +226,79 @@ section[class*="bg-navy"] textarea::placeholder {
   opacity: 1;
   transform: translateY(0);
 }
+
+/* === Dashboard dark theme (matches homepage Platform Preview) === */
+.dashboard-dark {
+  background-color: #0F1F38;
+  color: rgba(255, 255, 255, 0.92);
+}
+.dashboard-dark h1,
+.dashboard-dark h2,
+.dashboard-dark h3,
+.dashboard-dark h4,
+.dashboard-dark h5,
+.dashboard-dark h6 {
+  color: #FFFFFF;
+}
+.dashboard-dark p {
+  color: rgba(255, 255, 255, 0.92);
+}
+.dashboard-dark .font-mono {
+  color: rgba(255, 255, 255, 0.85);
+}
+/* Map common token utilities to dark equivalents inside dashboards */
+.dashboard-dark .text-primary,
+.dashboard-dark .text-foreground {
+  color: #FFFFFF;
+}
+.dashboard-dark .text-muted-foreground,
+.dashboard-dark .text-secondary-text {
+  color: rgba(255, 255, 255, 0.75);
+}
+.dashboard-dark .bg-card,
+.dashboard-dark .bg-background,
+.dashboard-dark .bg-white {
+  background-color: rgba(255, 255, 255, 0.04) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: rgba(255, 255, 255, 0.92);
+}
+.dashboard-dark .border-border,
+.dashboard-dark .border-primary\/10,
+.dashboard-dark .border-input {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+.dashboard-dark .shadow-sm,
+.dashboard-dark .shadow,
+.dashboard-dark .shadow-md {
+  box-shadow: none !important;
+}
+.dashboard-dark .bg-card:hover,
+.dashboard-dark .bg-background:hover {
+  border-color: rgba(13, 148, 136, 0.4) !important;
+}
+/* Inputs on dark dashboards */
+.dashboard-dark input,
+.dashboard-dark textarea,
+.dashboard-dark select {
+  background-color: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #FFFFFF;
+}
+.dashboard-dark input::placeholder,
+.dashboard-dark textarea::placeholder {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+/* Dashboard sidebar (navy) */
+.dashboard-sidebar {
+  background-color: #1B3A5C !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+.dashboard-sidebar a,
+.dashboard-sidebar button {
+  color: rgba(255, 255, 255, 0.75);
+}
+.dashboard-sidebar .nav-active {
+  background-color: rgba(13, 148, 136, 0.18);
+  color: #14B8A6;
+}
