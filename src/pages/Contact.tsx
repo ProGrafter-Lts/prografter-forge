@@ -98,13 +98,12 @@ const Contact = () => {
   };
 
   return (
-    <div className="min-h-screen bg-cream">
+    <AppShell>
       <SEO
         title="Contact ProGrafter | Get in Touch"
         description="Get in touch with the ProGrafter team. We respond to every enquiry within one working day."
         path="/contact"
       />
-      <Navbar />
 
       <main className="pt-24 pb-16">
         {/* Hero */}
@@ -334,8 +333,7 @@ const Contact = () => {
         </section>
       </main>
 
-      <Footer />
-    </div>
+    </AppShell>
   );
 };
 
