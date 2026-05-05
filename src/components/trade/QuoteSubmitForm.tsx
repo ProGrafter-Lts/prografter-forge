@@ -32,6 +32,8 @@ const QuoteSubmitForm = ({ jobId, tradeId, onQuoteSubmitted }: QuoteSubmitFormPr
   const [standardDesc, setStandardDesc] = useState("");
   const [premiumPrice, setPremiumPrice] = useState("");
   const [premiumDesc, setPremiumDesc] = useState("");
+  const [materials, setMaterials] = useState<MaterialLine[]>([emptyMaterialLine()]);
+  const [shareMaterials, setShareMaterials] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const canSubmit = tierEnabled
