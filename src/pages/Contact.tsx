@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { Mail, Copy, Check, Send } from "lucide-react";
 import { z } from "zod";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import AppShell from "@/components/AppShell";
 import SEO from "@/components/SEO";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";

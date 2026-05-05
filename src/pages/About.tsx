@@ -1,6 +1,5 @@
 import SEO from "@/components/SEO";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import AppShell from "@/components/AppShell";
 import { localBusinessJsonLd } from "@/lib/seoSchemas";
 
 const myBuilderLeads = [
