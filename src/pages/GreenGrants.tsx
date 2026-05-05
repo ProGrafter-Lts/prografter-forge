@@ -1,9 +1,8 @@
 import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
-import Navbar from "@/components/Navbar";
+import AppShell from "@/components/AppShell";
 import SEO from "@/components/SEO";
 import { buildServiceJsonLd } from "@/lib/seoSchemas";
-import Footer from "@/components/Footer";
 import { Leaf, CheckCircle2, HelpCircle, ChevronLeft, AlertCircle, ExternalLink } from "lucide-react";
 import GreenSchemesBreakdown from "@/components/GreenSchemesBreakdown";
 
@@ -263,7 +262,7 @@ const GreenGrantsPage = () => {
     }`;
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "hsl(var(--deep))" }}>
+    <AppShell>
       <SEO
         title="Green Grants Eligibility Checker — ProGrafter | Free"
         description="Check your eligibility for ECO4, BUS heat pump grants, and GBIS insulation funding — free, instant result."
@@ -276,7 +275,6 @@ const GreenGrantsPage = () => {
           price: "0.00",
         })}
       />
-      <Navbar />
 
       {/* SECTION 1 — HERO */}
       <section className="pt-28 pb-16 px-6 bg-navy">
@@ -453,8 +451,7 @@ const GreenGrantsPage = () => {
         </div>
       </section>
 
-      <Footer />
-    </div>
+    </AppShell>
   );
 };
 

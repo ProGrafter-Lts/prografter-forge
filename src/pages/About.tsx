@@ -1,6 +1,5 @@
 import SEO from "@/components/SEO";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import AppShell from "@/components/AppShell";
 import { localBusinessJsonLd } from "@/lib/seoSchemas";
 
 const myBuilderLeads = [
@@ -30,14 +29,13 @@ const beliefs = [
 
 const About = () => {
   return (
-    <div className="min-h-screen bg-deep">
+    <AppShell>
       <SEO
         title="About ProGrafter — Built by a Qualified Electrician for Trades & Homeowners"
         description="ProGrafter was founded by Lee Palfreeman, a qualified electrician of 20 years, after losing 18 leads and £625 to a competing platform without winning a single job."
         path="/about"
         jsonLd={localBusinessJsonLd}
       />
-      <Navbar />
 
       {/* Hero */}
       <section className="relative pt-32 pb-20 px-6 overflow-hidden">
@@ -279,8 +277,7 @@ const About = () => {
         </div>
       </section>
 
-      <Footer />
-    </div>
+    </AppShell>
   );
 };
 
