@@ -22,7 +22,7 @@ const Hero = () => {
 
   return (
     <section
-      className="relative min-h-screen flex items-center overflow-hidden"
+      className="relative min-h-screen flex items-center overflow-hidden bg-navy"
       style={{ background: "linear-gradient(135deg, #1B3A5C 0%, #0F1F38 100%)" }}
     >
       {/* Ghost GRAFT text */}
