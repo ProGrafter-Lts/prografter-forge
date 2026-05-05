@@ -90,16 +90,66 @@ body::before {
 }
 
 /* === Section background contrast overrides === */
-/* On dark sections (deep / navy), soften secondary text and lift body text */
+/* On dark sections (deep / navy), enforce WCAG AA contrast for all text */
 .bg-deep .text-secondary-text,
 .bg-navy .text-secondary-text,
 section[class*="bg-deep"] .text-secondary-text,
 section[class*="bg-navy"] .text-secondary-text {
-  color: rgba(255, 255, 255, 0.70);
+  color: rgba(255, 255, 255, 0.85);
 }
 .bg-deep .text-body-text,
-.bg-navy .text-body-text {
-  color: rgba(255, 255, 255, 0.92);
+.bg-navy .text-body-text,
+section[class*="bg-deep"] .text-body-text,
+section[class*="bg-navy"] .text-body-text {
+  color: rgba(255, 255, 255, 0.95);
+}
+.bg-deep p,
+.bg-navy p,
+section[class*="bg-deep"] p,
+section[class*="bg-navy"] p {
+  color: rgba(255, 255, 255, 0.95);
+}
+.bg-deep .font-mono,
+.bg-navy .font-mono,
+section[class*="bg-deep"] .font-mono,
+section[class*="bg-navy"] .font-mono {
+  color: rgba(255, 255, 255, 0.85);
+}
+/* Floor low-opacity white/cream text on dark backgrounds at 0.85 */
+.bg-deep [class*="text-cream/"],
+.bg-navy [class*="text-cream/"],
+.bg-deep [class*="text-white/"],
+.bg-navy [class*="text-white/"],
+section[class*="bg-deep"] [class*="text-cream/"],
+section[class*="bg-navy"] [class*="text-cream/"],
+section[class*="bg-deep"] [class*="text-white/"],
+section[class*="bg-navy"] [class*="text-white/"] {
+  color: rgba(255, 255, 255, 0.95);
+}
+/* Inline text links on dark backgrounds */
+.bg-deep a.inline-link,
+.bg-navy a.inline-link,
+section[class*="bg-deep"] a.inline-link,
+section[class*="bg-navy"] a.inline-link {
+  color: #0D9488;
+  text-decoration: underline;
+}
+.bg-deep a.inline-link:hover,
+.bg-navy a.inline-link:hover,
+section[class*="bg-deep"] a.inline-link:hover,
+section[class*="bg-navy"] a.inline-link:hover {
+  color: #14B8A6;
+}
+/* Placeholders on dark backgrounds */
+.bg-deep input::placeholder,
+.bg-navy input::placeholder,
+.bg-deep textarea::placeholder,
+.bg-navy textarea::placeholder,
+section[class*="bg-deep"] input::placeholder,
+section[class*="bg-navy"] input::placeholder,
+section[class*="bg-deep"] textarea::placeholder,
+section[class*="bg-navy"] textarea::placeholder {
+  color: rgba(255, 255, 255, 0.65);
 }
 /* On light sections, give muted text proper contrast (#4B5563) */
 .bg-cream .text-secondary-text,
