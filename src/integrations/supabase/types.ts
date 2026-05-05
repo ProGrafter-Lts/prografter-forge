@@ -1475,6 +1475,65 @@ export type Database = {
         }
         Relationships: []
       }
+      quote_materials: {
+        Row: {
+          brand: string | null
+          category: string | null
+          created_at: string
+          description: string
+          id: string
+          line_total_ex_vat: number | null
+          line_total_inc_vat: number | null
+          merchant_hint: string | null
+          model_or_spec: string | null
+          quantity: number
+          quote_id: string
+          unit: string
+          unit_price_ex_vat: number
+          vat_rate_pct: number
+        }
+        Insert: {
+          brand?: string | null
+          category?: string | null
+          created_at?: string
+          description: string
+          id?: string
+          line_total_ex_vat?: number | null
+          line_total_inc_vat?: number | null
+          merchant_hint?: string | null
+          model_or_spec?: string | null
+          quantity: number
+          quote_id: string
+          unit?: string
+          unit_price_ex_vat: number
+          vat_rate_pct?: number
+        }
+        Update: {
+          brand?: string | null
+          category?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          line_total_ex_vat?: number | null
+          line_total_inc_vat?: number | null
+          merchant_hint?: string | null
+          model_or_spec?: string | null
+          quantity?: number
+          quote_id?: string
+          unit?: string
+          unit_price_ex_vat?: number
+          vat_rate_pct?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quote_materials_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "quotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quotes: {
         Row: {
           ai_verdict: string | null
@@ -1491,6 +1550,7 @@ export type Database = {
           premium_description: string | null
           premium_price: number | null
           selected_tier: string | null
+          share_materials_with_homeowner: boolean
           standard_description: string | null
           standard_price: number | null
           status: string
@@ -1513,6 +1573,7 @@ export type Database = {
           premium_description?: string | null
           premium_price?: number | null
           selected_tier?: string | null
+          share_materials_with_homeowner?: boolean
           standard_description?: string | null
           standard_price?: number | null
           status?: string
@@ -1535,6 +1596,7 @@ export type Database = {
           premium_description?: string | null
           premium_price?: number | null
           selected_tier?: string | null
+          share_materials_with_homeowner?: boolean
           standard_description?: string | null
           standard_price?: number | null
           status?: string

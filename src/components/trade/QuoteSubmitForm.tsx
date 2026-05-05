@@ -5,6 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import MaterialsBreakdown, {
+  emptyMaterialLine,
+  type MaterialLine,
+} from "./MaterialsBreakdown";
 
 interface QuoteSubmitFormProps {
   jobId: string;
@@ -28,6 +32,8 @@ const QuoteSubmitForm = ({ jobId, tradeId, onQuoteSubmitted }: QuoteSubmitFormPr
   const [standardDesc, setStandardDesc] = useState("");
   const [premiumPrice, setPremiumPrice] = useState("");
   const [premiumDesc, setPremiumDesc] = useState("");
+  const [materials, setMaterials] = useState<MaterialLine[]>([emptyMaterialLine()]);
+  const [shareMaterials, setShareMaterials] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const canSubmit = tierEnabled
@@ -36,6 +42,28 @@ const QuoteSubmitForm = ({ jobId, tradeId, onQuoteSubmitted }: QuoteSubmitFormPr
 
   const handleSubmit = async () => {
     if (!canSubmit) return;
+
+    // Filter out blank rows; validate the rest
+    const filledMaterials = materials.filter(
+      (m) => m.description.trim() || m.quantity || m.unit_price_ex_vat,
+    );
+    for (const m of filledMaterials) {
+      if (m.description.trim().length < 3) {
+        toast.error("Each material line needs a description (min 3 characters)");
+        return;
+      }
+      const qty = parseFloat(m.quantity);
+      if (!Number.isFinite(qty) || qty <= 0) {
+        toast.error("Material quantity must be a positive number");
+        return;
+      }
+      const price = parseFloat(m.unit_price_ex_vat);
+      if (!Number.isFinite(price) || price < 0) {
+        toast.error("Material unit price must be 0 or greater");
+        return;
+      }
+    }
+
     setSubmitting(true);
 
     const baseAmount = tierEnabled ? Number(standardPrice) : Number(amount);
@@ -46,6 +74,7 @@ const QuoteSubmitForm = ({ jobId, tradeId, onQuoteSubmitted }: QuoteSubmitFormPr
       amount: baseAmount,
       message: message.trim(),
       tier_enabled: tierEnabled,
+      share_materials_with_homeowner: shareMaterials,
     };
 
     if (tierEnabled) {
@@ -57,14 +86,40 @@ const QuoteSubmitForm = ({ jobId, tradeId, onQuoteSubmitted }: QuoteSubmitFormPr
       insertData.premium_description = premiumDesc.trim() || null;
     }
 
-    const { error } = await supabase.from("quotes").insert(insertData);
+    const { data: quoteRow, error } = await supabase
+      .from("quotes")
+      .insert(insertData)
+      .select("id")
+      .single();
 
-    if (error) {
+    if (error || !quoteRow) {
       toast.error("Failed to submit quote");
-    } else {
-      toast.success("Quote submitted successfully!");
-      onQuoteSubmitted();
+      setSubmitting(false);
+      return;
     }
+
+    if (filledMaterials.length > 0) {
+      const rows = filledMaterials.map((m) => ({
+        quote_id: quoteRow.id,
+        description: m.description.trim(),
+        brand: m.brand.trim() || null,
+        model_or_spec: m.model_or_spec.trim() || null,
+        quantity: Number(m.quantity),
+        unit: m.unit,
+        unit_price_ex_vat: Number(m.unit_price_ex_vat),
+        vat_rate_pct: Number(m.vat_rate_pct) || 20,
+        category: m.category || null,
+        merchant_hint: m.merchant_hint?.trim() || null,
+      }));
+      const { error: matErr } = await supabase.from("quote_materials").insert(rows);
+      if (matErr) {
+        toast.error("Quote saved, but materials failed to save");
+        console.error(matErr);
+      }
+    }
+
+    toast.success("Quote submitted successfully!");
+    onQuoteSubmitted();
     setSubmitting(false);
   };
 
@@ -186,6 +241,21 @@ const QuoteSubmitForm = ({ jobId, tradeId, onQuoteSubmitted }: QuoteSubmitFormPr
           </div>
         </div>
       )}
+
+      {/* Materials breakdown */}
+      <div className="border-t border-border pt-4 space-y-3">
+        <MaterialsBreakdown lines={materials} onChange={setMaterials} />
+
+        <div className="flex items-center justify-between py-2">
+          <div>
+            <p className="font-heading text-xs text-primary">Share materials with homeowner?</p>
+            <p className="font-mono text-[10px] text-muted-foreground">
+              Off by default — protects your pricing margin
+            </p>
+          </div>
+          <Switch checked={shareMaterials} onCheckedChange={setShareMaterials} />
+        </div>
+      </div>
 
       {/* Submit */}
       <button
