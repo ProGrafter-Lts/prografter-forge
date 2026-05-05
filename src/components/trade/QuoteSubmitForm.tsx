@@ -42,6 +42,28 @@ const QuoteSubmitForm = ({ jobId, tradeId, onQuoteSubmitted }: QuoteSubmitFormPr
 
   const handleSubmit = async () => {
     if (!canSubmit) return;
+
+    // Filter out blank rows; validate the rest
+    const filledMaterials = materials.filter(
+      (m) => m.description.trim() || m.quantity || m.unit_price_ex_vat,
+    );
+    for (const m of filledMaterials) {
+      if (m.description.trim().length < 3) {
+        toast.error("Each material line needs a description (min 3 characters)");
+        return;
+      }
+      const qty = parseFloat(m.quantity);
+      if (!Number.isFinite(qty) || qty <= 0) {
+        toast.error("Material quantity must be a positive number");
+        return;
+      }
+      const price = parseFloat(m.unit_price_ex_vat);
+      if (!Number.isFinite(price) || price < 0) {
+        toast.error("Material unit price must be 0 or greater");
+        return;
+      }
+    }
+
     setSubmitting(true);
 
     const baseAmount = tierEnabled ? Number(standardPrice) : Number(amount);
@@ -52,6 +74,7 @@ const QuoteSubmitForm = ({ jobId, tradeId, onQuoteSubmitted }: QuoteSubmitFormPr
       amount: baseAmount,
       message: message.trim(),
       tier_enabled: tierEnabled,
+      share_materials_with_homeowner: shareMaterials,
     };
 
     if (tierEnabled) {
@@ -63,14 +86,40 @@ const QuoteSubmitForm = ({ jobId, tradeId, onQuoteSubmitted }: QuoteSubmitFormPr
       insertData.premium_description = premiumDesc.trim() || null;
     }
 
-    const { error } = await supabase.from("quotes").insert(insertData);
+    const { data: quoteRow, error } = await supabase
+      .from("quotes")
+      .insert(insertData)
+      .select("id")
+      .single();
 
-    if (error) {
+    if (error || !quoteRow) {
       toast.error("Failed to submit quote");
-    } else {
-      toast.success("Quote submitted successfully!");
-      onQuoteSubmitted();
+      setSubmitting(false);
+      return;
     }
+
+    if (filledMaterials.length > 0) {
+      const rows = filledMaterials.map((m) => ({
+        quote_id: quoteRow.id,
+        description: m.description.trim(),
+        brand: m.brand.trim() || null,
+        model_or_spec: m.model_or_spec.trim() || null,
+        quantity: Number(m.quantity),
+        unit: m.unit,
+        unit_price_ex_vat: Number(m.unit_price_ex_vat),
+        vat_rate_pct: Number(m.vat_rate_pct) || 20,
+        category: m.category || null,
+        merchant_hint: m.merchant_hint?.trim() || null,
+      }));
+      const { error: matErr } = await supabase.from("quote_materials").insert(rows);
+      if (matErr) {
+        toast.error("Quote saved, but materials failed to save");
+        console.error(matErr);
+      }
+    }
+
+    toast.success("Quote submitted successfully!");
+    onQuoteSubmitted();
     setSubmitting(false);
   };
 
