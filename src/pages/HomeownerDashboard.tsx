@@ -187,7 +187,7 @@ const HomeownerDashboard = () => {
   }, [jobs, activeJobIds]);
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen dashboard-dark flex">
       <HomeownerSidebar
         activeNav={activeNav}
         setActiveNav={setActiveNav}

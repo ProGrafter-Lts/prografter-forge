@@ -72,32 +72,35 @@ const TradeSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen }: 
 
       {/* Sidebar */}
       <aside
-        className={`fixed md:static inset-y-0 left-0 z-40 w-64 bg-primary flex flex-col transition-transform duration-300 ${
+        className={`dashboard-sidebar fixed md:static inset-y-0 left-0 z-40 w-64 flex flex-col transition-transform duration-300 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         }`}
       >
         <div className="p-6 border-b border-white/10">
           <a href="/" className="font-heading text-[24px] leading-none tracking-wide">
-            <span className="text-primary-foreground">Pro</span>
-            <span className="text-secondary">grafter</span>
+            <span className="text-white">Pro</span>
+            <span style={{ color: "#14B8A6" }}>grafter</span>
           </a>
         </div>
 
         <nav className="flex-1 p-4 space-y-1">
-          {NAV_ITEMS.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => handleNavClick(item.id)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-mono text-sm transition-colors ${
-                routeActiveNav === item.id
-                  ? "bg-secondary/20 text-secondary"
-                  : "text-primary-foreground/60 hover:text-primary-foreground hover:bg-white/5"
-              }`}
-            >
-              <item.icon className="w-4 h-4" />
-              {item.label}
-            </button>
-          ))}
+          {NAV_ITEMS.map((item) => {
+            const isActive = routeActiveNav === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => handleNavClick(item.id)}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-mono text-sm transition-colors"
+                style={{
+                  backgroundColor: isActive ? "rgba(13,148,136,0.18)" : "transparent",
+                  color: isActive ? "#14B8A6" : "rgba(255,255,255,0.75)",
+                }}
+              >
+                <item.icon className="w-4 h-4" />
+                {item.label}
+              </button>
+            );
+          })}
         </nav>
 
         <div className="p-4 border-t border-white/10">

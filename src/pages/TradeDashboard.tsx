@@ -227,7 +227,7 @@ const TradeDashboard = () => {
   }, [pipelineFilter]);
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen dashboard-dark flex">
       <TradeSidebar
         activeNav={activeNav}
         setActiveNav={setActiveNav}

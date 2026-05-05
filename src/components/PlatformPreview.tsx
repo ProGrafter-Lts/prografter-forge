@@ -243,8 +243,8 @@ const PlatformPreview = () => {
             </TabsTrigger>
           </TabsList>
 
-          <p className="font-body italic text-[12px] text-cream/50 mb-8 -mt-4">
-            Example dashboard — figures are illustrative until the platform reaches verified launch numbers
+          <p className="font-body italic text-[12px] text-cream/70 mb-8 -mt-4">
+            Real dashboard preview. Stats shown are illustrative until your first jobs flow through.
           </p>
 
           <TabsContent value="trades">
