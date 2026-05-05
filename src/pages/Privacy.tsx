@@ -1,18 +1,16 @@
 import SEO from "@/components/SEO";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import AppShell from "@/components/AppShell";
 
 const lastUpdated = "21 April 2026";
 
 const Privacy = () => {
   return (
-    <div className="min-h-screen bg-cream">
+    <AppShell>
       <SEO
         title="Privacy Policy — ProGrafter"
         description="How ProGrafter Ltd collects, stores and uses your data. Last updated April 2026."
         path="/privacy"
       />
-      <Navbar />
       <main className="px-6 pt-28 pb-16">
         <section className="mx-auto max-w-4xl rounded-2xl border border-navy/10 bg-white p-6 shadow-sm craft:p-10">
           <div className="mb-8 border-b border-navy/10 pb-6">
@@ -76,8 +74,7 @@ const Privacy = () => {
           </div>
         </section>
       </main>
-      <Footer />
-    </div>
+    </AppShell>
   );
 };
 
