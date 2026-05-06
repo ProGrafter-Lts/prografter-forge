@@ -19,12 +19,18 @@ const LegalReviewBanner = () => {
   if (dismissed) return null;
 
   return (
-    <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-4 flex items-start gap-3">
-      <Info className="w-4 h-4 text-amber-700 mt-0.5 shrink-0" />
-      <p className="font-mono text-xs text-amber-900 flex-1">
+    <div
+      className="rounded-xl px-4 py-3 mb-4 flex items-start gap-3"
+      style={{
+        backgroundColor: "rgba(251, 191, 36, 0.10)",
+        border: "1px solid rgba(251, 191, 36, 0.35)",
+      }}
+    >
+      <Info className="w-4 h-4 mt-0.5 shrink-0" style={{ color: "#FCD34D" }} />
+      <p className="font-mono text-xs flex-1" style={{ color: "#FDE68A" }}>
         Contract templates: under final legal review with our construction solicitor.
         Full signing functionality activates {LEGAL_REVIEW_ETA}.{" "}
-        <Link to="/legal-review" className="underline font-medium hover:text-amber-700">
+        <Link to="/legal-review" className="underline font-medium hover:opacity-80" style={{ color: "#FEF3C7" }}>
           Read more →
         </Link>
       </p>
@@ -34,7 +40,8 @@ const LegalReviewBanner = () => {
           setDismissed(true);
         }}
         aria-label="Dismiss notice"
-        className="text-amber-700 hover:text-amber-900 transition-colors shrink-0"
+        className="hover:opacity-80 transition-opacity shrink-0"
+        style={{ color: "#FCD34D" }}
       >
         <X className="w-4 h-4" />
       </button>

@@ -47,25 +47,35 @@ const AddSpecialismsBanner = ({ tradeId, promptSeen, onAdd }: AddSpecialismsBann
   if (promptSeen || hidden || hasSpecialisms !== false) return null;
 
   return (
-    <div className="relative bg-gradient-to-r from-primary/10 via-secondary/10 to-primary/10 border-2 border-primary/20 rounded-2xl p-5">
+    <div
+      className="relative rounded-2xl p-5"
+      style={{
+        backgroundColor: "rgba(13,148,136,0.10)",
+        border: "1px solid rgba(13,148,136,0.35)",
+      }}
+    >
       <button
         type="button"
         onClick={dismiss}
         aria-label="Dismiss"
-        className="absolute top-3 right-3 text-muted-foreground hover:text-foreground transition-colors"
+        className="absolute top-3 right-3 hover:opacity-80 transition-opacity"
+        style={{ color: "rgba(255,255,255,0.6)" }}
       >
         <X className="w-4 h-4" />
       </button>
 
       <div className="flex items-start gap-4 pr-8">
-        <div className="bg-primary text-primary-foreground rounded-xl p-2.5 flex-shrink-0">
+        <div
+          className="rounded-xl p-2.5 flex-shrink-0"
+          style={{ backgroundColor: "#0D9488", color: "#FFFFFF" }}
+        >
           <Sparkles className="w-5 h-5" />
         </div>
         <div className="flex-1">
-          <h3 className="font-heading text-primary text-lg leading-tight">
+          <h3 className="font-heading text-lg leading-tight" style={{ color: "#FFFFFF" }}>
             Tell homeowners what you specialise in
           </h3>
-          <p className="font-body text-sm text-muted-foreground mt-1 leading-relaxed">
+          <p className="font-body text-sm mt-1 leading-relaxed" style={{ color: "rgba(255,255,255,0.75)" }}>
             Add specialisms like Bathrooms, Kitchens or Loft Conversions so the right
             projects come your way. Takes about 30 seconds.
           </p>
@@ -73,14 +83,16 @@ const AddSpecialismsBanner = ({ tradeId, promptSeen, onAdd }: AddSpecialismsBann
             <button
               type="button"
               onClick={onAdd}
-              className="bg-primary text-primary-foreground font-mono text-xs uppercase tracking-wider px-4 py-2 rounded-xl hover:opacity-90 transition-opacity"
+              className="font-mono text-xs uppercase tracking-wider px-4 py-2 rounded-xl hover:opacity-90 transition-opacity"
+              style={{ backgroundColor: "#0D9488", color: "#FFFFFF" }}
             >
               Add specialisms
             </button>
             <button
               type="button"
               onClick={dismiss}
-              className="font-mono text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground px-3 py-2"
+              className="font-mono text-xs uppercase tracking-wider hover:opacity-80 px-3 py-2"
+              style={{ color: "rgba(255,255,255,0.65)" }}
             >
               Not now
             </button>
