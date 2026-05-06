@@ -33,7 +33,7 @@ const Hero = () => {
       {/* Vertical divider between trade & homeowner columns */}
       <div className="hidden craft:block absolute top-24 bottom-24 w-px bg-teal/20" style={{ left: "60%" }} />
 
-      <div className="max-w-7xl mx-auto px-6 w-full grid craft:grid-cols-[60fr_40fr] gap-10 craft:gap-12 items-center pt-24 pb-16">
+      <div className="max-w-7xl mx-auto px-6 w-full grid craft:grid-cols-[60fr_40fr] gap-10 craft:gap-12 items-start pt-24 pb-16">
         {/* Left column — TRADES */}
         <div className="craft:pr-8">
           <div className="flex items-center gap-3 mb-6">
@@ -88,7 +88,7 @@ const Hero = () => {
         </div>
 
         {/* Right column — HOMEOWNERS */}
-        <div className="relative craft:pl-8">
+        <div className="relative craft:pl-8 craft:mt-[210px]">
           <div
             className="bg-white rounded-[12px] p-6 craft:p-8"
             style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.12)" }}
