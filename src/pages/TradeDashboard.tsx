@@ -258,29 +258,41 @@ const TradeDashboard = () => {
             <>
           <LegalReviewBanner />
           {/* Verification banner */}
-          {trade?.verification_status && trade.verification_status !== "approved" && (
-            <div className={`mt-10 md:mt-0 p-4 rounded-xl border font-body text-sm ${
-              trade.verification_status === "info_requested"
-                ? "bg-yellow-50 border-yellow-300 text-yellow-900"
-                : trade.verification_status === "rejected"
-                ? "bg-red-50 border-red-300 text-red-900"
-                : "bg-blue-50 border-blue-300 text-blue-900"
-            }`}>
-              <div className="flex items-center justify-between gap-4 flex-wrap">
-                <div>
-                  <p className="font-mono text-xs uppercase tracking-widest mb-1">Verification {trade.verification_status.replace("_"," ")}</p>
-                  <p>
-                    {trade.verification_status === "pending" && "Your application is being reviewed. We typically respond within 1 business day."}
-                    {trade.verification_status === "info_requested" && "We need a little more info before we can verify you."}
-                    {trade.verification_status === "rejected" && "Your application wasn't approved. See details on the status page."}
-                  </p>
+          {trade?.verification_status && trade.verification_status !== "approved" && (() => {
+            const status = trade.verification_status;
+            const palette =
+              status === "info_requested"
+                ? { bg: "rgba(251,191,36,0.10)", border: "rgba(251,191,36,0.35)", accent: "#FCD34D", text: "#FDE68A" }
+                : status === "rejected"
+                ? { bg: "rgba(248,113,113,0.10)", border: "rgba(248,113,113,0.35)", accent: "#FCA5A5", text: "#FECACA" }
+                : { bg: "rgba(96,165,250,0.10)", border: "rgba(96,165,250,0.35)", accent: "#93C5FD", text: "#DBEAFE" };
+            return (
+              <div
+                className="mt-10 md:mt-0 p-4 rounded-xl font-body text-sm"
+                style={{ backgroundColor: palette.bg, border: `1px solid ${palette.border}`, color: palette.text }}
+              >
+                <div className="flex items-center justify-between gap-4 flex-wrap">
+                  <div>
+                    <p className="font-mono text-xs uppercase tracking-widest mb-1" style={{ color: palette.accent }}>
+                      Verification {status.replace("_"," ")}
+                    </p>
+                    <p>
+                      {status === "pending" && "Your application is being reviewed. We typically respond within 1 business day."}
+                      {status === "info_requested" && "We need a little more info before we can verify you."}
+                      {status === "rejected" && "Your application wasn't approved. See details on the status page."}
+                    </p>
+                  </div>
+                  <a
+                    href="/signup/trade/under-review"
+                    className="inline-block font-mono text-xs px-4 py-2 rounded-lg hover:opacity-90 transition-opacity"
+                    style={{ backgroundColor: palette.accent, color: "#0F2238" }}
+                  >
+                    View status
+                  </a>
                 </div>
-                <a href="/signup/trade/under-review" className="inline-block bg-primary text-primary-foreground font-mono text-xs px-4 py-2 rounded-lg hover:opacity-90 transition-opacity">
-                  View status
-                </a>
               </div>
-            </div>
-          )}
+            );
+          })()}
           {/* Welcome header */}
           <div className="flex items-center gap-3 pt-10 md:pt-0">
             <div>
