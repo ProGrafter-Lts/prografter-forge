@@ -380,3 +380,38 @@ section[class*="bg-navy"] textarea::placeholder {
   background-color: rgba(13, 148, 136, 0.18);
   color: #14B8A6;
 }
+
+/* Opt-out: light marketing sections embedded inside dashboards keep their original styling */
+.dashboard-dark .grants-light-section,
+.dashboard-dark .grants-light-section * {
+  color: revert !important;
+}
+.dashboard-dark .grants-light-section .bg-white,
+.dashboard-dark .grants-light-section .bg-cream,
+.dashboard-dark .grants-light-section .bg-card,
+.dashboard-dark .grants-light-section .bg-background {
+  background-color: revert !important;
+  border-color: revert !important;
+}
+.dashboard-dark .grants-light-section [class*="bg-amber-"],
+.dashboard-dark .grants-light-section [class*="bg-yellow-"],
+.dashboard-dark .grants-light-section [class*="bg-green-"],
+.dashboard-dark .grants-light-section [class*="bg-emerald-"],
+.dashboard-dark .grants-light-section [class*="bg-blue-"],
+.dashboard-dark .grants-light-section [class*="bg-sky-"],
+.dashboard-dark .grants-light-section [class*="bg-red-"],
+.dashboard-dark .grants-light-section [class*="bg-rose-"] {
+  background-color: revert !important;
+  border-color: revert !important;
+}
+.dashboard-dark .grants-light-section h1,
+.dashboard-dark .grants-light-section h2,
+.dashboard-dark .grants-light-section h3,
+.dashboard-dark .grants-light-section h4,
+.dashboard-dark .grants-light-section h5,
+.dashboard-dark .grants-light-section h6,
+.dashboard-dark .grants-light-section p,
+.dashboard-dark .grants-light-section li,
+.dashboard-dark .grants-light-section span {
+  color: revert !important;
+}
