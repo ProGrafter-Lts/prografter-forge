@@ -154,6 +154,12 @@ const HomeownerManual = () => {
       {/* Header */}
       <header className="bg-primary text-primary-foreground py-8 print:py-4">
         <div className="max-w-4xl mx-auto px-4">
+          <button
+            onClick={() => navigate("/dashboard/homeowner")}
+            className="print:hidden inline-flex items-center gap-1.5 font-mono text-xs text-primary-foreground/70 hover:text-primary-foreground transition-colors mb-4"
+          >
+            ← Back to Dashboard
+          </button>
           <div className="flex items-center justify-between">
             <div>
               <p className="font-mono text-[10px] uppercase tracking-wider text-primary-foreground/60 mb-1">
