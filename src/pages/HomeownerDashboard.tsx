@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import HomeownerSidebar from "@/components/homeowner/HomeownerSidebar";
 import ActiveProjectsSection from "@/components/homeowner/ActiveProjectsSection";
 import WelcomeBanner from "@/components/homeowner/WelcomeBanner";
+import LegalReviewBanner from "@/components/LegalReviewBanner";
 import QuotesReceived from "@/components/homeowner/QuotesReceived";
 import MyJobs from "@/components/homeowner/MyJobs";
 import RecentSiteUpdates from "@/components/homeowner/RecentSiteUpdates";
@@ -216,6 +217,7 @@ const HomeownerDashboard = () => {
             </p>
           </div>
 
+          <LegalReviewBanner />
           <WelcomeBanner hasProjects={jobs.length > 0} />
 
           {/* Homeowner Manual tab — show when there's any active project, list green ones individually */}
