@@ -40,7 +40,7 @@ const HomeownersHowItWorks = () => {
               className="relative bg-card p-8 rounded-xl fade-up"
               style={{ transitionDelay: `${i * 0.08}s` }}
             >
-              <span className="absolute top-4 right-6 font-heading text-[80px] leading-none text-navy/[0.05] select-none pointer-events-none">
+              <span className="absolute top-2 right-4 craft:top-4 craft:right-6 font-heading text-[48px] craft:text-[80px] leading-none text-navy/[0.05] select-none pointer-events-none">
                 {step.num}
               </span>
               <span className="font-mono text-xs text-teal tracking-widest mb-4 block">{step.num}</span>
