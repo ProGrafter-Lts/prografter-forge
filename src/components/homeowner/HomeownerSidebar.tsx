@@ -43,10 +43,10 @@ const HomeownerSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen
         <LayoutDashboard className="w-5 h-5" />
       </button>
 
-      <aside
-        className={`dashboard-sidebar fixed md:static inset-y-0 left-0 z-40 w-64 flex flex-col transition-transform duration-300 ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
-        }`}
+     <aside
+       className={`dashboard-sidebar fixed md:sticky md:top-0 inset-y-0 left-0 z-40 w-64 h-screen md:h-screen flex flex-col transition-transform duration-300 ${
+         sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+       }`}
       >
         <div className="p-6 border-b border-white/10">
           <a href="/" className="font-heading text-[24px] leading-none tracking-wide">
