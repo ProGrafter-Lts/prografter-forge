@@ -88,7 +88,7 @@ const Hero = () => {
         </div>
 
         {/* Right column — HOMEOWNERS */}
-        <div className="relative craft:pl-8 craft:mt-[210px]">
+        <div className="relative craft:pl-8 craft:mt-[245px]">
           <div
             className="bg-white rounded-[12px] p-6 craft:p-8"
             style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.12)" }}
