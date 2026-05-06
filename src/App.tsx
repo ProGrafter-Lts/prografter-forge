@@ -42,6 +42,7 @@ const SubmitTestimonial = lazy(() => import("./pages/SubmitTestimonial.tsx"));
 const CheckatradeAlternative = lazy(() => import("./pages/CheckatradeAlternative.tsx"));
 const IsCheckatradeWorthIt = lazy(() => import("./pages/IsCheckatradeWorthIt.tsx"));
 const ContractPage = lazy(() => import("./pages/ContractPage.tsx"));
+const LegalReview = lazy(() => import("./pages/LegalReview.tsx"));
 import AdminRoute from "./components/AdminRoute.tsx";
 
 const queryClient = new QueryClient({
@@ -150,6 +151,7 @@ const App = () => (
             <Route path="/admin/email-status" element={<AdminRoute><AdminEmailStatus /></AdminRoute>} />
             <Route path="/admin/testimonials" element={<AdminRoute><AdminTestimonials /></AdminRoute>} />
             <Route path="/share-your-experience" element={<SubmitTestimonial />} />
+            <Route path="/legal-review" element={<LegalReview />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
