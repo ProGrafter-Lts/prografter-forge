@@ -72,7 +72,7 @@ const TradeSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen }: 
 
       {/* Sidebar */}
       <aside
-        className={`dashboard-sidebar fixed md:static inset-y-0 left-0 z-40 w-64 flex flex-col transition-transform duration-300 ${
+        className={`dashboard-sidebar fixed md:sticky md:top-0 inset-y-0 left-0 z-40 w-64 h-screen md:h-screen flex flex-col transition-transform duration-300 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         }`}
       >
