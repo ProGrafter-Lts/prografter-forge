@@ -20,6 +20,7 @@ import ActiveProjectsView from "@/components/trade/ActiveProjectsView";
 import EarningsView from "@/components/trade/EarningsView";
 import { useTradeAccess } from "@/hooks/useTradeAccess";
 import { isContractedActiveJob } from "@/lib/activeProjects";
+import LegalReviewBanner from "@/components/LegalReviewBanner";
 
 interface TradeProfile {
   name: string;
@@ -255,6 +256,7 @@ const TradeDashboard = () => {
             </div>
           ) : (
             <>
+          <LegalReviewBanner />
           {/* Verification banner */}
           {trade?.verification_status && trade.verification_status !== "approved" && (
             <div className={`mt-10 md:mt-0 p-4 rounded-xl border font-body text-sm ${
