@@ -1,212 +1,389 @@
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { ArrowRight, BarChart3, Briefcase, Clock, Home, FileText, Camera } from "lucide-react";
+import {
+  ArrowRight,
+  LayoutDashboard,
+  Briefcase,
+  FolderKanban,
+  Bell,
+  PoundSterling,
+  UserCircle,
+  Settings,
+  TrendingUp,
+  Star,
+  Home,
+  SearchCheck,
+  BookOpen,
+  Leaf,
+  Camera,
+  FileText,
+  BadgeCheck,
+} from "lucide-react";
 
-const PhoneFrame = ({ children, label }: { children: React.ReactNode; label: string }) => (
-  <div className="flex flex-col items-center gap-3">
-    <div className="w-full max-w-[280px] bg-deep rounded-2xl overflow-hidden shadow-xl border border-white/10">
-      {/* Status bar */}
-      <div className="flex items-center justify-between px-4 py-2 bg-navy/80">
-        <span className="font-mono text-[10px] text-cream/50">9:41</span>
-        <div className="flex gap-1">
-          <div className="w-3 h-3 rounded-full bg-teal/40" />
-          <div className="w-3 h-3 rounded-full bg-teal/40" />
-          <div className="w-3 h-3 rounded-full bg-teal/40" />
+/* ── Browser-frame mockup matching the real logged-in dashboard ── */
+const BrowserFrame = ({
+  children,
+  caption,
+  sidebar,
+}: {
+  children: React.ReactNode;
+  caption: string;
+  sidebar: React.ReactNode;
+}) => (
+  <div className="flex flex-col gap-3">
+    <div
+      className="rounded-xl overflow-hidden border shadow-2xl"
+      style={{
+        backgroundColor: "#0F2238",
+        borderColor: "rgba(255,255,255,0.08)",
+      }}
+    >
+      {/* Title bar */}
+      <div
+        className="flex items-center gap-2 px-3 py-2 border-b"
+        style={{ backgroundColor: "#0B1A2C", borderColor: "rgba(255,255,255,0.06)" }}
+      >
+        <div className="flex gap-1.5">
+          <div className="w-2.5 h-2.5 rounded-full bg-[#FF5F57]" />
+          <div className="w-2.5 h-2.5 rounded-full bg-[#FEBC2E]" />
+          <div className="w-2.5 h-2.5 rounded-full bg-[#28C840]" />
+        </div>
+        <div
+          className="ml-3 px-2 py-0.5 rounded text-[9px] font-mono"
+          style={{ backgroundColor: "rgba(255,255,255,0.04)", color: "rgba(255,255,255,0.5)" }}
+        >
+          prografter.co.uk/dashboard
         </div>
       </div>
-      {/* Screen content */}
-      <div className="p-4 min-h-[340px]">{children}</div>
-    </div>
-    <p className="font-body text-secondary-text text-sm text-center">{label}</p>
-  </div>
-);
 
-/* ── TRADES SCREENS ── */
-const TradeDashboard = () => (
-  <div className="space-y-4">
-    <p className="font-heading text-cream text-lg">Dashboard</p>
-    <div className="grid grid-cols-3 gap-2">
-      {[
-        { label: "Jobs Won", val: "12" },
-        { label: "Quotes Out", val: "5" },
-        { label: "Earned", val: "£18.4k" },
-      ].map((s) => (
-        <div key={s.label} className="bg-navy/60 rounded-lg p-2 text-center">
-          <p className="font-heading text-teal text-lg">{s.val}</p>
-          <p className="font-mono text-[9px] text-cream/50 uppercase">{s.label}</p>
+      {/* App body: sidebar + content */}
+      <div className="flex min-h-[360px]">
+        {/* Sidebar */}
+        <div
+          className="w-[110px] shrink-0 py-4 px-2 border-r"
+          style={{ backgroundColor: "#1B3A5C", borderColor: "rgba(255,255,255,0.08)" }}
+        >
+          {sidebar}
         </div>
-      ))}
-    </div>
-    <div className="space-y-2 mt-2">
-      <p className="font-mono text-[10px] text-teal uppercase tracking-widest">New Matches</p>
-      {["Kitchen Refit — SE15", "Bathroom Tiling — SW4"].map((j) => (
-        <div key={j} className="flex items-center gap-2 bg-navy/40 rounded-lg p-3">
-          <Briefcase className="w-4 h-4 text-teal shrink-0" />
-          <span className="font-body text-cream text-xs">{j}</span>
-        </div>
-      ))}
-    </div>
-  </div>
-);
-
-const AvailableJobs = () => (
-  <div className="space-y-4">
-    <p className="font-heading text-cream text-lg">Available Jobs</p>
-    <div className="bg-navy/40 rounded-xl p-4 space-y-3 border border-teal/20">
-      <div className="flex justify-between items-start">
-        <div>
-          <p className="font-body text-cream text-sm font-medium">Full Kitchen Renovation</p>
-          <p className="font-mono text-[10px] text-cream/50">SE15 · Posted 2h ago</p>
-        </div>
-        <span className="font-mono text-[10px] bg-teal/20 text-teal px-2 py-0.5 rounded">£8-12k</span>
-      </div>
-      <p className="font-body text-cream/60 text-xs leading-relaxed">
-        Strip out and re-fit kitchen. New units, worktops, tiling, plumbing and electrics…
-      </p>
-      <button className="w-full bg-teal text-cream font-heading text-sm py-2 rounded-lg">
-        SUBMIT QUOTE →
-      </button>
-    </div>
-    <div className="bg-navy/40 rounded-xl p-4 border border-white/5">
-      <p className="font-body text-cream text-sm font-medium">Loft Conversion</p>
-      <p className="font-mono text-[10px] text-cream/50">SW11 · Posted 5h ago</p>
-    </div>
-  </div>
-);
-
-const LiveTimeline = () => (
-  <div className="space-y-4">
-    <p className="font-heading text-cream text-lg">Project Timeline</p>
-    <div className="space-y-0">
-      {[
-        { stage: "Strip Out", status: "done" },
-        { stage: "First Fix", status: "done" },
-        { stage: "Plastering", status: "active" },
-        { stage: "Second Fix", status: "upcoming" },
-        { stage: "Snag & Sign-off", status: "upcoming" },
-      ].map((s, i) => (
-        <div key={s.stage} className="flex gap-3 items-start">
-          <div className="flex flex-col items-center">
-            <div
-              className={`w-3 h-3 rounded-full border-2 ${
-                s.status === "done"
-                  ? "bg-teal border-teal"
-                  : s.status === "active"
-                  ? "bg-teal/30 border-teal animate-pulse"
-                  : "bg-transparent border-cream/20"
-              }`}
-            />
-            {i < 4 && (
-              <div
-                className={`w-[2px] h-8 ${
-                  s.status === "done" ? "bg-teal/60" : "bg-cream/10"
-                }`}
-              />
-            )}
-          </div>
-          <div className="pb-4">
-            <p
-              className={`font-body text-xs ${
-                s.status === "done"
-                  ? "text-cream/40 line-through"
-                  : s.status === "active"
-                  ? "text-teal font-medium"
-                  : "text-cream/30"
-              }`}
-            >
-              {s.stage}
-            </p>
-            {s.status === "active" && (
-              <p className="font-mono text-[9px] text-teal/70 mt-0.5">In progress · Day 3</p>
-            )}
-          </div>
-        </div>
-      ))}
-    </div>
-  </div>
-);
-
-/* ── HOMEOWNER SCREENS ── */
-const HomeownerDash = () => (
-  <div className="space-y-4">
-    <p className="font-heading text-cream text-lg">My Project</p>
-    <div className="bg-gradient-to-br from-teal/20 to-navy/60 rounded-xl p-4 border border-teal/20">
-      <p className="font-body text-cream text-sm font-medium">Kitchen Renovation</p>
-      <p className="font-mono text-[10px] text-cream/50 mt-1">Stage 3 of 5 · Plastering</p>
-      <div className="w-full bg-navy/60 rounded-full h-2 mt-3">
-        <div className="bg-teal h-2 rounded-full" style={{ width: "60%" }} />
-      </div>
-      <div className="flex justify-between mt-2">
-        <span className="font-mono text-[9px] text-cream/40">60% complete</span>
-        <span className="font-mono text-[9px] text-teal">On track</span>
+        {/* Main */}
+        <div className="flex-1 p-4 overflow-hidden">{children}</div>
       </div>
     </div>
-    <div className="flex gap-2">
-      {[
-        { icon: Clock, label: "Timeline" },
-        { icon: Camera, label: "Photos" },
-        { icon: FileText, label: "Manual" },
-      ].map((a) => (
-        <div key={a.label} className="flex-1 bg-navy/40 rounded-lg p-3 flex flex-col items-center gap-1">
-          <a.icon className="w-4 h-4 text-teal" />
-          <span className="font-mono text-[9px] text-cream/50">{a.label}</span>
+    <p className="font-body text-secondary-text text-sm text-center max-w-[320px] mx-auto">
+      {caption}
+    </p>
+  </div>
+);
+
+const SidebarNav = ({
+  items,
+  active,
+}: {
+  items: { icon: any; label: string }[];
+  active: string;
+}) => (
+  <div className="space-y-1">
+    {items.map((item) => {
+      const isActive = item.label === active;
+      return (
+        <div
+          key={item.label}
+          className="flex items-center gap-2 px-2 py-1.5 rounded-lg"
+          style={{
+            backgroundColor: isActive ? "rgba(13,148,136,0.18)" : "transparent",
+            color: isActive ? "#5EEAD4" : "rgba(255,255,255,0.65)",
+          }}
+        >
+          <item.icon className="w-3.5 h-3.5 shrink-0" />
+          <span className="font-mono text-[9px] uppercase tracking-wider truncate">
+            {item.label}
+          </span>
         </div>
-      ))}
+      );
+    })}
+  </div>
+);
+
+/* ── Stat tile matching StatsRow.tsx ── */
+const StatTile = ({
+  icon: Icon,
+  value,
+  label,
+  accent,
+}: {
+  icon: any;
+  value: string;
+  label: string;
+  accent?: boolean;
+}) => (
+  <div
+    className="rounded-xl p-3"
+    style={{
+      backgroundColor: accent ? "rgba(13,148,136,0.12)" : "rgba(255,255,255,0.04)",
+      border: accent
+        ? "1px solid rgba(13,148,136,0.30)"
+        : "1px solid rgba(255,255,255,0.08)",
+    }}
+  >
+    <Icon
+      className="w-3.5 h-3.5 mb-1.5"
+      style={{ color: accent ? "#0D9488" : "rgba(255,255,255,0.65)" }}
+    />
+    <p
+      className="font-heading"
+      style={{
+        fontSize: "20px",
+        lineHeight: 1.05,
+        color: accent ? "#5EEAD4" : "#FFFFFF",
+      }}
+    >
+      {value}
+    </p>
+    <p
+      className="font-mono uppercase mt-0.5"
+      style={{
+        fontSize: "8px",
+        letterSpacing: "0.1em",
+        color: "rgba(255,255,255,0.65)",
+      }}
+    >
+      {label}
+    </p>
+  </div>
+);
+
+/* ── TRADE DASHBOARD ── */
+const TRADE_NAV = [
+  { icon: LayoutDashboard, label: "Dashboard" },
+  { icon: Briefcase, label: "Jobs" },
+  { icon: FolderKanban, label: "Projects" },
+  { icon: Bell, label: "Alerts" },
+  { icon: PoundSterling, label: "Earnings" },
+  { icon: UserCircle, label: "Profile" },
+  { icon: Settings, label: "Settings" },
+];
+
+const TradeDashboardMockup = () => (
+  <div className="space-y-3">
+    <div>
+      <h4 className="font-heading text-white text-base leading-none">Welcome back, Tom</h4>
+      <p className="font-mono text-[9px] text-white/65 mt-1">Plumbing & Heating · SE15</p>
+    </div>
+    <div className="grid grid-cols-2 gap-2">
+      <StatTile icon={TrendingUp} value="12" label="Jobs Won" />
+      <StatTile icon={PoundSterling} value="£18.4k" label="This Month" accent />
+      <StatTile icon={FolderKanban} value="3" label="Active" />
+      <StatTile icon={Star} value="4.9/5" label="Rating" />
     </div>
   </div>
 );
 
-const ProjectTracker = () => (
-  <div className="space-y-4">
-    <p className="font-heading text-cream text-lg">Project Tracker</p>
+const TradeJobsMockup = () => (
+  <div className="space-y-2">
+    <h4 className="font-heading text-white text-base leading-none mb-3">Available Jobs</h4>
     {[
-      { stage: "Strip Out", date: "Mon 7 Apr", hasPhoto: true },
-      { stage: "First Fix", date: "Wed 9 Apr", hasPhoto: true },
-      { stage: "Plastering", date: "Today", hasPhoto: false, active: true },
-    ].map((s) => (
-      <div key={s.stage} className={`bg-navy/40 rounded-lg p-3 space-y-2 ${s.active ? "border border-teal/30" : ""}`}>
-        <div className="flex justify-between items-center">
-          <p className="font-body text-cream text-xs font-medium">{s.stage}</p>
-          <span className="font-mono text-[9px] text-cream/40">{s.date}</span>
-        </div>
-        {s.hasPhoto && (
-          <div className="flex gap-1">
-            <div className="w-12 h-10 rounded bg-navy/80 flex items-center justify-center">
-              <Camera className="w-3 h-3 text-cream/30" />
-            </div>
-            <div className="w-12 h-10 rounded bg-navy/80 flex items-center justify-center">
-              <Camera className="w-3 h-3 text-cream/30" />
-            </div>
+      { title: "Full Kitchen Renovation", loc: "SE15 · 2h ago", budget: "£8–12k", hot: true },
+      { title: "Bathroom Re-tile", loc: "SW4 · 5h ago", budget: "£2–3k" },
+      { title: "Loft Conversion", loc: "SW11 · 1d ago", budget: "£25k+" },
+    ].map((j) => (
+      <div
+        key={j.title}
+        className="rounded-lg p-2.5"
+        style={{
+          backgroundColor: "rgba(255,255,255,0.04)",
+          border: j.hot
+            ? "1px solid rgba(13,148,136,0.40)"
+            : "1px solid rgba(255,255,255,0.08)",
+        }}
+      >
+        <div className="flex justify-between items-start gap-2">
+          <div className="min-w-0">
+            <p className="font-body text-white text-[11px] font-medium truncate">{j.title}</p>
+            <p className="font-mono text-[8px] text-white/50 mt-0.5">{j.loc}</p>
           </div>
-        )}
-        {s.active && (
-          <p className="font-mono text-[9px] text-teal">Awaiting update…</p>
-        )}
+          <span
+            className="font-mono text-[8px] px-1.5 py-0.5 rounded shrink-0"
+            style={{ backgroundColor: "rgba(13,148,136,0.18)", color: "#5EEAD4" }}
+          >
+            {j.budget}
+          </span>
+        </div>
       </div>
     ))}
   </div>
 );
 
-const HomeownerManual = () => (
-  <div className="space-y-4">
-    <p className="font-heading text-cream text-lg">Project Manual</p>
-    <div className="bg-navy/40 rounded-xl p-4 border border-teal/20 space-y-3">
-      <div className="flex items-center gap-2">
-        <FileText className="w-5 h-5 text-teal" />
-        <div>
-          <p className="font-body text-cream text-xs font-medium">Kitchen Renovation</p>
-          <p className="font-mono text-[9px] text-cream/40">Completed 14 Apr 2026</p>
-        </div>
-      </div>
-      <div className="h-[1px] bg-cream/10" />
-      {["Materials & Suppliers", "Certificates & Warranties", "Photo Timeline", "Trade Contact Details"].map((item) => (
-        <div key={item} className="flex items-center gap-2">
-          <div className="w-1.5 h-1.5 rounded-full bg-teal" />
-          <span className="font-body text-cream/60 text-[11px]">{item}</span>
+const TradeEarningsMockup = () => (
+  <div className="space-y-3">
+    <h4 className="font-heading text-white text-base leading-none">Earnings</h4>
+    <div
+      className="rounded-xl p-3"
+      style={{
+        backgroundColor: "rgba(13,148,136,0.12)",
+        border: "1px solid rgba(13,148,136,0.30)",
+      }}
+    >
+      <p className="font-mono text-[8px] uppercase tracking-wider text-white/65">Year to date</p>
+      <p className="font-heading text-2xl mt-1" style={{ color: "#5EEAD4" }}>
+        £42,180
+      </p>
+      <p className="font-mono text-[9px] text-white/65 mt-0.5">+18% vs last year</p>
+    </div>
+    <div className="space-y-1.5">
+      {[
+        { stage: "Smith — Kitchen", amt: "£3,400", paid: true },
+        { stage: "Jones — Bathroom", amt: "£1,850", paid: true },
+        { stage: "Patel — En-suite", amt: "£2,200", paid: false },
+      ].map((p) => (
+        <div
+          key={p.stage}
+          className="flex justify-between items-center rounded-lg p-2"
+          style={{
+            backgroundColor: "rgba(255,255,255,0.04)",
+            border: "1px solid rgba(255,255,255,0.08)",
+          }}
+        >
+          <span className="font-body text-white text-[10px]">{p.stage}</span>
+          <div className="flex items-center gap-1.5">
+            <span className="font-heading text-white text-[11px]">{p.amt}</span>
+            {p.paid ? (
+              <BadgeCheck className="w-3 h-3" style={{ color: "#0D9488" }} />
+            ) : (
+              <span className="font-mono text-[8px] text-white/50">pending</span>
+            )}
+          </div>
         </div>
       ))}
-      <button className="w-full bg-teal/10 text-teal font-mono text-[10px] py-2 rounded-lg border border-teal/20 mt-2">
+    </div>
+  </div>
+);
+
+/* ── HOMEOWNER DASHBOARD ── */
+const HOMEOWNER_NAV = [
+  { icon: LayoutDashboard, label: "Overview" },
+  { icon: FolderKanban, label: "Projects" },
+  { icon: SearchCheck, label: "Quotes" },
+  { icon: Leaf, label: "Green Grants" },
+  { icon: BookOpen, label: "Manual" },
+  { icon: UserCircle, label: "Profile" },
+  { icon: Settings, label: "Settings" },
+];
+
+const HomeownerDashboardMockup = () => (
+  <div className="space-y-3">
+    <div>
+      <h4 className="font-heading text-white text-base leading-none">Welcome back, Sarah</h4>
+      <p className="font-mono text-[9px] text-white/65 mt-1">My Projects</p>
+    </div>
+    <div
+      className="rounded-xl p-3"
+      style={{
+        backgroundColor: "rgba(13,148,136,0.12)",
+        border: "1px solid rgba(13,148,136,0.30)",
+      }}
+    >
+      <div className="flex items-center justify-between mb-2">
+        <p className="font-body text-white text-[11px] font-medium">Kitchen Renovation</p>
+        <span className="font-mono text-[8px]" style={{ color: "#5EEAD4" }}>
+          On track
+        </span>
+      </div>
+      <p className="font-mono text-[8px] text-white/65 mb-2">Stage 3 of 5 · Plastering</p>
+      <div
+        className="w-full h-1.5 rounded-full overflow-hidden"
+        style={{ backgroundColor: "rgba(255,255,255,0.08)" }}
+      >
+        <div className="h-full rounded-full" style={{ width: "60%", backgroundColor: "#0D9488" }} />
+      </div>
+      <p className="font-mono text-[8px] text-white/50 mt-1.5">60% complete · Day 14</p>
+    </div>
+    <div className="grid grid-cols-2 gap-2">
+      <StatTile icon={SearchCheck} value="3" label="Quotes In" accent />
+      <StatTile icon={BookOpen} value="1" label="Manuals" />
+    </div>
+  </div>
+);
+
+const HomeownerQuotesMockup = () => (
+  <div className="space-y-2">
+    <h4 className="font-heading text-white text-base leading-none mb-3">Quotes Received</h4>
+    {[
+      { name: "Tom — Plumbing & Heating", price: "£9,200", verdict: "fair", rating: "4.9" },
+      { name: "Mike — KitchenWorks", price: "£11,800", verdict: "high", rating: "4.7" },
+      { name: "Sara — FitOut Ltd", price: "£8,950", verdict: "fair", rating: "5.0" },
+    ].map((q) => (
+      <div
+        key={q.name}
+        className="rounded-lg p-2.5"
+        style={{
+          backgroundColor: "rgba(255,255,255,0.04)",
+          border: "1px solid rgba(255,255,255,0.08)",
+        }}
+      >
+        <div className="flex justify-between items-start gap-2">
+          <div className="min-w-0">
+            <p className="font-body text-white text-[10px] font-medium truncate">{q.name}</p>
+            <div className="flex items-center gap-1 mt-0.5">
+              <Star className="w-2.5 h-2.5" style={{ color: "#5EEAD4" }} />
+              <span className="font-mono text-[8px] text-white/65">{q.rating}</span>
+            </div>
+          </div>
+          <div className="text-right shrink-0">
+            <p className="font-heading text-white text-[11px]">{q.price}</p>
+            <span
+              className="font-mono text-[7px] uppercase tracking-wider"
+              style={{ color: q.verdict === "fair" ? "#5EEAD4" : "rgba(255,200,100,0.9)" }}
+            >
+              {q.verdict}
+            </span>
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
+const HomeownerManualMockup = () => (
+  <div className="space-y-3">
+    <h4 className="font-heading text-white text-base leading-none">Project Manual</h4>
+    <div
+      className="rounded-xl p-3"
+      style={{
+        backgroundColor: "rgba(255,255,255,0.04)",
+        border: "1px solid rgba(13,148,136,0.30)",
+      }}
+    >
+      <div className="flex items-center gap-2 mb-2">
+        <BookOpen className="w-4 h-4" style={{ color: "#5EEAD4" }} />
+        <div className="min-w-0">
+          <p className="font-body text-white text-[11px] font-medium truncate">
+            Kitchen Renovation
+          </p>
+          <p className="font-mono text-[8px] text-white/50">Completed 14 Apr 2026</p>
+        </div>
+      </div>
+      <div className="space-y-1.5 mt-3">
+        {[
+          { icon: FileText, label: "Materials & Suppliers" },
+          { icon: BadgeCheck, label: "Certificates & Warranties" },
+          { icon: Camera, label: "Photo Timeline" },
+          { icon: UserCircle, label: "Trade Contact Details" },
+        ].map((item) => (
+          <div key={item.label} className="flex items-center gap-1.5">
+            <item.icon className="w-2.5 h-2.5" style={{ color: "#0D9488" }} />
+            <span className="font-body text-white/80 text-[9px]">{item.label}</span>
+          </div>
+        ))}
+      </div>
+      <div
+        className="mt-3 text-center font-mono text-[9px] py-1.5 rounded-lg"
+        style={{
+          backgroundColor: "rgba(13,148,136,0.18)",
+          color: "#5EEAD4",
+          border: "1px solid rgba(13,148,136,0.30)",
+        }}
+      >
         DOWNLOAD PDF
-      </button>
+      </div>
     </div>
   </div>
 );
@@ -218,7 +395,9 @@ const PlatformPreview = () => {
         {/* Eyebrow */}
         <div className="flex items-center gap-3 mb-4">
           <div className="w-8 h-[2px] bg-teal" />
-          <span className="font-mono text-xs text-teal uppercase tracking-widest">Platform Preview</span>
+          <span className="font-mono text-xs text-teal uppercase tracking-widest">
+            Platform Preview
+          </span>
         </div>
 
         {/* Heading */}
@@ -248,37 +427,58 @@ const PlatformPreview = () => {
           </p>
 
           <TabsContent value="trades">
-            <div className="grid grid-cols-1 craft:grid-cols-3 gap-8 justify-items-center">
-              <PhoneFrame label="Your dashboard — stats, earnings, and new job matches at a glance.">
-                <TradeDashboard />
-              </PhoneFrame>
-              <PhoneFrame label="Browse matched jobs near you and submit quotes directly.">
-                <AvailableJobs />
-              </PhoneFrame>
-              <PhoneFrame label="Live project timeline — update stages, log progress, get paid.">
-                <LiveTimeline />
-              </PhoneFrame>
+            <div className="grid grid-cols-1 craft:grid-cols-3 gap-8">
+              <BrowserFrame
+                caption="Your dashboard — stats, earnings, and new job matches at a glance."
+                sidebar={<SidebarNav items={TRADE_NAV} active="Dashboard" />}
+              >
+                <TradeDashboardMockup />
+              </BrowserFrame>
+              <BrowserFrame
+                caption="Browse matched jobs near you and submit quotes directly."
+                sidebar={<SidebarNav items={TRADE_NAV} active="Jobs" />}
+              >
+                <TradeJobsMockup />
+              </BrowserFrame>
+              <BrowserFrame
+                caption="Track every payment — commission, what you keep, paid status."
+                sidebar={<SidebarNav items={TRADE_NAV} active="Earnings" />}
+              >
+                <TradeEarningsMockup />
+              </BrowserFrame>
             </div>
           </TabsContent>
 
           <TabsContent value="homeowners">
-            <div className="grid grid-cols-1 craft:grid-cols-3 gap-8 justify-items-center">
-              <PhoneFrame label="See your active project status, progress bar, and quick links.">
-                <HomeownerDash />
-              </PhoneFrame>
-              <PhoneFrame label="Track every stage with daily photo updates from site.">
-                <ProjectTracker />
-              </PhoneFrame>
-              <PhoneFrame label="Your completed project manual — materials, certs, and warranties.">
-                <HomeownerManual />
-              </PhoneFrame>
+            <div className="grid grid-cols-1 craft:grid-cols-3 gap-8">
+              <BrowserFrame
+                caption="See your active project status, progress bar, and quick links."
+                sidebar={<SidebarNav items={HOMEOWNER_NAV} active="Overview" />}
+              >
+                <HomeownerDashboardMockup />
+              </BrowserFrame>
+              <BrowserFrame
+                caption="Compare quotes side-by-side with fairness scoring built in."
+                sidebar={<SidebarNav items={HOMEOWNER_NAV} active="Quotes" />}
+              >
+                <HomeownerQuotesMockup />
+              </BrowserFrame>
+              <BrowserFrame
+                caption="Your completed project manual — materials, certs, and warranties."
+                sidebar={<SidebarNav items={HOMEOWNER_NAV} active="Manual" />}
+              >
+                <HomeownerManualMockup />
+              </BrowserFrame>
             </div>
           </TabsContent>
         </Tabs>
 
         {/* CTA link */}
         <div className="mt-14 text-center fade-up">
-          <a href="#see-how-it-works" className="inline-flex items-center gap-2 font-mono text-sm text-teal hover:text-teal-hover transition-colors group">
+          <a
+            href="#see-how-it-works"
+            className="inline-flex items-center gap-2 font-mono text-sm text-teal hover:text-teal-hover transition-colors group"
+          >
             Full platform preview
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </a>
