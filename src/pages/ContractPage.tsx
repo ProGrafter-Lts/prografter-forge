@@ -336,13 +336,13 @@ const ContractPage = () => {
         )}
 
         <Tabs defaultValue="document" className="w-full">
-          <TabsList className="grid grid-cols-4 w-full">
-            <TabsTrigger value="document">Document</TabsTrigger>
-            <TabsTrigger value="bespoke">Bespoke Terms</TabsTrigger>
-            <TabsTrigger value="variations">
+          <TabsList className="grid grid-cols-4 w-full bg-card border border-border h-auto p-1">
+            <TabsTrigger value="document" className="text-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs sm:text-sm">Document</TabsTrigger>
+            <TabsTrigger value="bespoke" className="text-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs sm:text-sm">Bespoke</TabsTrigger>
+            <TabsTrigger value="variations" className="text-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs sm:text-sm">
               Variations{variations.length > 0 ? ` (${variations.length})` : ""}
             </TabsTrigger>
-            <TabsTrigger value="activity">Activity</TabsTrigger>
+            <TabsTrigger value="activity" className="text-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs sm:text-sm">Activity</TabsTrigger>
           </TabsList>
 
           {/* DOCUMENT */}
