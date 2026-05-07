@@ -367,6 +367,32 @@ section[class*="bg-navy"] textarea::placeholder {
 }
 
 
+/* Brighten teal "secondary" tokens on dark dashboards so badges/refs/pills
+   (e.g. planning application numbers, "Quote Checker", trade-type chips) are
+   crisp instead of low-contrast and appearing blurred. */
+.dashboard-dark .text-secondary {
+  color: #5EEAD4 !important;
+  text-shadow: 0 0 1px rgba(94, 234, 212, 0.25);
+}
+.dashboard-dark .bg-secondary\/10 {
+  background-color: rgba(94, 234, 212, 0.14) !important;
+}
+.dashboard-dark .bg-secondary\/20 {
+  background-color: rgba(94, 234, 212, 0.22) !important;
+}
+.dashboard-dark .border-secondary\/30,
+.dashboard-dark .border-secondary\/40 {
+  border-color: rgba(94, 234, 212, 0.4) !important;
+}
+/* "primary" inside dashboard cards is mapped to white above; ensure subtle
+   pill backgrounds based on primary stay legible. */
+.dashboard-dark .bg-primary\/10 {
+  background-color: rgba(255, 255, 255, 0.10) !important;
+}
+.dashboard-dark .bg-primary\/15 {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+}
+
 /* Dashboard sidebar (navy) */
 .dashboard-sidebar {
   background-color: #1B3A5C !important;
