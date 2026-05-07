@@ -372,7 +372,15 @@ section[class*="bg-navy"] textarea::placeholder {
    crisp instead of low-contrast and appearing blurred. */
 .dashboard-dark .text-secondary {
   color: #5EEAD4 !important;
-  text-shadow: 0 0 1px rgba(94, 234, 212, 0.25);
+  text-shadow: none !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-weight: 500;
+}
+.dashboard-dark .font-mono {
+  text-shadow: none !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 .dashboard-dark .bg-secondary\/10 {
   background-color: rgba(94, 234, 212, 0.14) !important;
