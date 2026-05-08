@@ -369,6 +369,9 @@ const TradeDashboard = () => {
           {trade && <DashboardPlanningAlerts trade={trade} />}
           {trade && trade.is_green_trade && <CertificationsSection trade={trade} />}
 
+          {trade && isFeatureEnabled("quickBuild") && (
+            <QuickBuildDraftsList tradeId={trade.id} />
+          )}
           <QuotesList quotes={quotes} />
           </>
           )}
