@@ -34,7 +34,7 @@ const draftTotal = (out: AIQuoteOutput) =>
     0,
   );
 
-const DraftPreviewContent = ({ draft, onConvert }: { draft: DraftRow; onConvert: () => void }) => {
+const DraftPreviewContent = ({ draft, onConvert, onClose }: { draft: DraftRow; onConvert: () => void; onClose: () => void }) => {
   const out = draft.final_output;
   const total = draftTotal(out);
   const buffer = out.variation_buffer_recommended_pence ?? 0;
