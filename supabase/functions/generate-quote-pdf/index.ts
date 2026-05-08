@@ -4,8 +4,13 @@
 // preview/download, plus a long-lived shareable accept link.
 //
 // deno-lint-ignore-file no-explicit-any
-import { corsHeaders } from "@supabase/supabase-js/cors";
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
+};
 import React from "npm:react@18.3.1";
 import {
   Document,
