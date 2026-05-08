@@ -1,157 +1,67 @@
-# Contract Data Model & Signing Flow — Reconciliation Plan
 
-_Plan-only. No code or migrations applied yet. Awaiting approval._
+# Professional Quote PDF — Schedule of Works
 
-## TL;DR
-
-About **70% of the spec is already implemented** in this project. The remaining work is focused on: tamper-evidence (`full_text_hash`), the 4-tab contract page UI with 3-checkbox signing, PDF export to storage, the `CONTRACT_TEMPLATE_APPROVED` feature flag, and reconciling a few naming gaps. **Replacing the existing tables would destroy a working dispatcher, RLS model, and SECURITY DEFINER functions.**
-
-Decisions confirmed by user:
-- **Project entity:** keep `contracts.job_id → jobs(id)`. Routes stay `/project/:id`.
-- **Template linkage:** keep `template_id UUID → contract_templates(id)`. Add `template_version` snapshot column for display/audit.
-- **Migration strategy:** ALTER existing tables; do not drop and recreate.
+This is a sizeable feature. To keep each step shippable and reviewable I'll deliver it in **four phases**. You can stop after any phase and the app stays functional.
 
 ---
 
-## Audit of current state vs spec
+## Phase 1 — Data foundations
 
-### Tables (all 4 exist, RLS enabled)
+Add the missing fields to the quote model and a place to store generated PDFs.
 
-| Spec column | Current state | Action |
-|---|---|---|
-| `contract_templates.version/status/legal_text/plain_english_summary/guidance_notes` | ✅ exists, has 1 active row `2026.04-placeholder` | none |
-| `contracts.project_id` | ❌ uses `job_id` (decision: keep) | none — frontend & spec language updated |
-| `contracts.template_version TEXT FK` | ❌ uses `template_id UUID FK` (decision: keep) | add `template_version TEXT` snapshot column (nullable, populated at generation) |
-| `contracts.contract_value_pence` | ❌ uses `total_value_incl_vat_pence` (+ excl + VAT bps) | none — current is richer, keep |
-| `contracts.scope_summary` | ❌ named `scope_of_works` | none — same field, different name |
-| `contracts.start_date_estimate` / `completion_date_estimate` | ❌ named `estimated_start_date` / `estimated_completion_date` | none — same fields |
-| `contracts.rendered_legal_text` | ❌ **MISSING** | **ADD** column (TEXT) |
-| `contracts.full_text_hash` | ❌ **MISSING** | **ADD** column (TEXT) |
-| `contracts` status check constraint | currently: `draft, pending_signatures, active, completed, terminated, closed` | spec also lists `awaiting_signatures` (rename `pending_signatures`) and `pending_completion_acceptance`. **Update CHECK constraint.** |
-| `contract_variations` columns | ✅ matches (uses `programme_impact_days` vs spec's `time_impact_days`) | minor — keep current name, document |
-| `contract_events` | ✅ matches spec, append-only RLS already in place | none |
+**Database (single migration)**
+- `quotes` — add `methodology` (text, max 600), `valid_until` (date, default `now() + 30 days`), `materials_spec` (jsonb — array of `{description, brand_model, sourced_by: 'trade'|'client'}`), `pdf_path` (text), `pdf_generated_at` (timestamptz), `view_count` (int, default 0), `last_viewed_at` (timestamptz), `accept_token` (uuid, default `gen_random_uuid()`, unique).
+- `trades` — add `business_logo_path`, `vat_registered` (bool), `vat_number`, `professional_indemnity_*` (insurer, policy, cover_pence, expiry).
+- New table `quote_pdf_events` — `quote_id`, `event_type` (`generated` | `downloaded` | `viewed` | `accept_clicked`), `actor_user_id` (nullable for anon homeowners), `ip`, `user_agent`, `created_at`. RLS: trade who owns the quote can read; insert via security-definer RPC only.
+- New storage bucket `quote-pdfs` (private) with RLS: trade owner + matched homeowner + valid `accept_token` (via signed URL) can read.
+- RPC `record_quote_pdf_event(_quote_id, _event_type)` — security definer, validates caller is party or token-holder.
 
-### RLS policies
+## Phase 2 — PDF renderer edge function
 
-- ✅ `contracts` SELECT: parties only (correct)
-- ⚠️ `contracts` UPDATE: currently allows any party — spec wants SECURITY DEFINER only. **Tighten** by removing the broad UPDATE policy and routing all writes through `sign_contract`, `mark_completed`, etc.
-- ✅ `contracts` INSERT/DELETE: already denied to clients (good)
-- ✅ `contract_events` INSERT/UPDATE/DELETE: already denied to clients
-- ✅ `contract_templates` policies match spec
+Server-side `@react-pdf/renderer` keeps fonts/layout consistent across browsers and avoids client bundle bloat.
 
-### Functions (already deployed)
+**Edge function** `generate-quote-pdf`
+- Input: `{ quote_id }`. Auth required; verifies caller owns the quote (trade) or holds a valid `accept_token`.
+- Pulls quote + trade + homeowner + line items + materials + milestones in one query.
+- Renders 7 pages (Cover, Schedule, Methodology & Timeline, Materials, Credentials, Terms & Payment, Acceptance) using `@react-pdf/renderer` with registered fonts: Bebas Neue (headings), DM Sans (body), DM Mono (numbers).
+- Brand: Navy `#1B3A5C`, Teal `#0D9488`. Page numbers, "Generated on prografter.co.uk" footer.
+- Uploads to `quote-pdfs/{quote_id}/ProGrafter_Quote_{ref}_{slug(business)}.pdf`, updates `quotes.pdf_path` + `pdf_generated_at`, logs `generated` event.
+- Returns signed URL (1h) for trade preview, plus a long-lived public-view URL gated by `accept_token`.
 
-| Spec | Current | Status |
-|---|---|---|
-| `generate_contract_for_quote(quote_id)` | ✅ exists | needs update: render `legal_text` with placeholders → store in new `rendered_legal_text`; populate `template_version` snapshot |
-| `sign_contract` | ✅ exists | needs update: compute & verify `full_text_hash`; on second signature, set status=`active`, set `activated_at`, write `activated` event |
-| `propose_variation` | ✅ exists | none |
-| `sign_variation` | ✅ exists | none |
-| `log_contract_event` | ✅ exists | none |
-| `dispatch_contract_event_email` (trigger) | ✅ exists | none |
-| Tamper verification function | ❌ **MISSING** | **ADD** `verify_contract_integrity(contract_id)` RPC that recomputes hash and writes a `tamper_detected` event on mismatch |
-| `mark_completion` / `accept_completion` lifecycle SECURITY DEFINER fns | ⚠️ unclear — `ContractPanel.tsx` may write directly | **ADD** if missing, then tighten UPDATE RLS |
+**Public view route** `/quote/:quoteId?token=…`
+- Edge function `view-quote-pdf` validates token, logs `viewed`, streams the PDF (or 302 to signed URL).
 
-### Edge functions
+## Phase 3 — Quote builder UI
 
-- ✅ `contract-email-dispatcher` exists and handles all 7 email events listed in the spec
-- ✅ All 7 email templates exist: `contract-generated`, `contract-awaiting-signature`, `contract-activated`, `variation-proposed`, `variation-approved`, `completion-marked`, `completion-accepted`
-- ❌ **No PDF export function.** Need new edge function `contract-pdf-snapshot` that renders contract → PDF → uploads to storage. Triggered by DB on state changes.
-- ❌ **No `contracts` storage bucket.** Need to create private bucket with RLS allowing parties to read their own contract PDFs.
+Additions to the existing quote-builder page (no rewrite):
+- New collapsible **"Methodology"** section (textarea, 600-char counter).
+- New **"Materials & Specifications"** repeater (description / brand-model / sourced-by toggle).
+- Logo upload to `trade-logos` bucket on the trade settings page (one-off; not per quote).
+- Two new actions next to existing **Send Quote**: **Generate PDF** (preview) and **Send as PDF** (sends email with PDF attached + accept link).
+- "Pending verification — see ProGrafter profile" placeholders render automatically on Page 5 if insurance fields are blank.
 
-### Frontend
+## Phase 4 — Email, analytics, polish
 
-- ⚠️ `src/components/project/ContractPanel.tsx` exists but uses **old shape** (legacy `contract_text`, `agreed_price`, `payment_schedule`) — likely points at `contracts_legacy`. Needs full rewrite as the 4-tab page.
-- ❌ No `/project/:id/contract` standalone route — currently embedded in ProjectDetail. Spec wants dedicated page. **Add route.**
-- ❌ No 3-checkbox signing UI
-- ❌ No `CONTRACT_TEMPLATE_APPROVED` feature flag
+- Wire `quote-sent` transactional email to attach the PDF and include the accept link.
+- Trade dashboard: small stat on each quote card — *"Viewed N times · last viewed {relative}"*, plus an "Accepted" badge when `accept_clicked` fires.
+- QA checklist: render a real test quote; verify in Chrome PDF viewer, Adobe Reader, iOS Safari; confirm file < 2 MB and text is selectable; print preview at A4.
 
 ---
 
-## Phase plan (approval gates between phases)
+## Technical notes
 
-### Phase 1 — Schema reconciliation & tamper-evidence (1 migration)
-
-1. `ALTER TABLE contracts` — add `rendered_legal_text TEXT`, `full_text_hash TEXT`, `template_version TEXT`.
-2. Update `contracts_status_check` to add `awaiting_signatures`, `pending_completion_acceptance`; map old `pending_signatures` → `awaiting_signatures` for any existing rows.
-3. Update `generate_contract_for_quote()`:
-   - Substitute all 16 placeholders into `legal_text` → write to `rendered_legal_text`
-   - Compute `full_text_hash = encode(digest(rendered_legal_text || layer2_json, 'sha256'), 'hex')`
-   - Snapshot `template_version` from the active template
-4. Update `sign_contract()`:
-   - Verify current `full_text_hash` matches recomputed hash before allowing signature; on mismatch, write `tamper_detected` event and raise.
-   - On second signature: set status=`active`, set `activated_at`, set jobs.stage='in_progress', write `activated` event (already present — just verify).
-5. Add `verify_contract_integrity(contract_id UUID)` RPC for the frontend to call on every contract page load.
-6. Tighten `contracts` UPDATE RLS: drop "Parties can update own contract" policy; all updates must go through SECURITY DEFINER functions (`sign_contract`, `mark_completion`, `accept_completion`, `update_bespoke_terms`).
-7. Add `update_bespoke_terms(contract_id, side, text)` SECURITY DEFINER fn — reverts contract to `draft` and clears any signatures (per spec: "saving causes contract to revert to draft").
-8. Add `mark_completion(contract_id)` and `accept_completion(contract_id)` SECURITY DEFINER fns if not already present, with permitted lifecycle transition checks.
-9. Seed/upgrade the placeholder template with the 7 section headings + Lorem Ipsum, version `placeholder-pre-launch`, status `active`, drafted_by `pre-launch-placeholder`.
-
-### Phase 2 — Feature flag + 4-tab contract page + signing UI
-
-10. Add `CONTRACT_TEMPLATE_APPROVED` flag. Implementation: a row in a new tiny `feature_flags` table, or simpler: a column on the active `contract_templates` row called `signing_enabled BOOLEAN DEFAULT FALSE`. Recommend the latter — keeps it tied to the template.
-11. New page `src/pages/ContractPage.tsx` at route `/project/:id/contract` with 4 tabs:
-    - **Plain English** — renders `contract_templates.plain_english_summary`
-    - **This Project** — renders Layer-2 snapshot data
-    - **Special Conditions** — own-side editable textarea, save calls `update_bespoke_terms`
-    - **Full Legal Terms** — renders `contracts.rendered_legal_text`
-12. On page load: call `verify_contract_integrity` RPC; if mismatch, render a red "tamper detected" banner, hide signing UI.
-13. Signing card (per party): 3 required checkboxes + Sign button.
-    - Button disabled while `signing_enabled=false`, tooltip: "Contract template under final legal review — signing will activate when approved."
-    - On click: client computes its part of the hash; calls `sign_contract` RPC with the 3 checkbox attestations and IP captured server-side.
-14. Update "Accept quote" CTA in `ContractPanel.tsx` (or its successor) to call `generate_contract_for_quote(quote_id)` and redirect to `/project/:id/contract`.
-15. Migrate `ContractPanel.tsx` away from the legacy `contracts_legacy` shape — it should either be deleted (replaced by the new page) or reduced to a "View contract" button that links to the new route.
-
-### Phase 3 — PDF export
-
-16. New edge function `contract-pdf-snapshot` (uses `@react-pdf/renderer` or HTML→PDF via Puppeteer-lite alternative; recommend `@react-pdf/renderer` for Deno compatibility). Renders all 4 tabs into one PDF.
-17. New private storage bucket `contracts` with RLS: parties to a contract can SELECT objects under `contracts/{contract_id}/`.
-18. DB trigger on `contract_events` insert: when `event_type IN ('generated','activated','variation_approved','completion_accepted','closed')`, `pg_net` calls the new edge function with `contract_id` + `event_type`. Function uploads to `contracts/{contract_id}/{event_type}_{timestamp}.pdf`.
-
-### Phase 4 — Variation flow polish & verification
-
-19. Confirm variations UI exists and is wired to `propose_variation` / `sign_variation` (it's already in `VariationsPanel.tsx`). Verify event emission on approve.
-20. Run all four verification scripts from the spec (E2E, tamper, RLS, feature flag) and capture screenshots/logs.
+- `@react-pdf/renderer` works in Deno edge functions via `npm:` import; fonts loaded from a public `quote-pdf-assets` bucket (one-time upload of Bebas Neue / DM Sans / DM Mono).
+- All pricing rendered from pence integers to avoid float drift.
+- Acceptance signatures stay on-platform — the PDF's "Accept" link routes to the existing contract-signing flow; the PDF itself is not a contract.
+- Re-generation on quote edit: bump a `version` int and regenerate; old PDFs remain in storage for audit.
 
 ---
 
-## Files that will change
+## What I need from you before starting
 
-**New:**
-- `supabase/migrations/<ts>_contracts_phase1_hash_and_lifecycle.sql`
-- `supabase/migrations/<ts>_contracts_phase2_signing_enabled_flag.sql`
-- `supabase/migrations/<ts>_contracts_phase3_pdf_storage_and_trigger.sql`
-- `src/pages/ContractPage.tsx`
-- `src/components/contract/PlainEnglishTab.tsx`
-- `src/components/contract/ProjectTab.tsx`
-- `src/components/contract/SpecialConditionsTab.tsx`
-- `src/components/contract/FullLegalTermsTab.tsx`
-- `src/components/contract/SigningCard.tsx`
-- `src/components/contract/TamperBanner.tsx`
-- `supabase/functions/contract-pdf-snapshot/index.ts`
+1. **Confirm phasing** — start with Phase 1 (DB migration) now, or change the order?
+2. **Insurance fields** — you already have `insurance_reference` on `trades`. Do you want me to expand it into structured fields (insurer / policy / cover / expiry) as part of Phase 1, or keep the single field and just print whatever's there?
+3. **Logo upload** — OK to add a `trade-logos` public bucket and a small uploader on the Trade Settings page?
+4. **Email attachment size** — happy with attaching the PDF directly (most quotes will be < 500 KB), or prefer a "Download your quote" link only?
 
-**Edited:**
-- `src/App.tsx` — add `/project/:id/contract` route
-- `src/components/project/ContractPanel.tsx` — replace inline contract UI with link to new page; rewire "Accept quote" to `generate_contract_for_quote`
-- `src/pages/ProjectDetail.tsx` — link to new contract route
-- `supabase/config.toml` — register `contract-pdf-snapshot` (verify_jwt = false; called by DB trigger with shared secret like the dispatcher)
-
-**Untouched (verified working):**
-- All 7 transactional email templates
-- `contract-email-dispatcher`
-- `contract_events` table & RLS
-- `contract_variations` table, RLS, and `propose_variation` / `sign_variation` functions
-- `dispatch_contract_event_email` trigger
-
----
-
-## Risks called out
-
-1. **Legacy `contracts_legacy` table still has data and a SELECT-for-admins policy.** Anything pointing at it must be migrated or deleted. `ContractPanel.tsx` references the legacy shape — confirm before deleting.
-2. **Tightening UPDATE RLS could break any code that currently writes to `contracts` directly.** I'll grep for direct writes before applying that policy change.
-3. **The placeholder template is currently `status='active'`.** The feature flag (`signing_enabled=false`) is what protects users — not template status. Need to be explicit about this in the migration.
-4. **PDF generation in Deno edge functions is non-trivial.** `@react-pdf/renderer` works but adds bundle size; alternatives include calling a hosted HTML→PDF service. Will confirm approach before Phase 3.
-
----
-
-## Awaiting your approval to proceed with Phase 1.
+Reply with answers (or just "go ahead with all defaults") and I'll start Phase 1.
