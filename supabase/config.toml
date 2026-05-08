@@ -23,3 +23,5 @@ project_id = "xryinqaxjclcmhebdcex"
     verify_jwt = false
   [functions.contract-pdf-snapshot]
     verify_jwt = false
+  [functions.generate-quote-pdf]
+    verify_jwt = true
