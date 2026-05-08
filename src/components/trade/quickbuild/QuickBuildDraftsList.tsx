@@ -314,7 +314,7 @@ const QuickBuildDraftsList = ({ tradeId }: { tradeId: string }) => {
           {previewDraft && <DraftPreviewContent draft={previewDraft} onConvert={() => {
             setPreviewDraft(null);
             openPicker(previewDraft.id);
-          }} />}
+          }} onClose={() => setPreviewDraft(null)} />}
         </DialogContent>
       </Dialog>
     </section>
