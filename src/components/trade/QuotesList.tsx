@@ -1,5 +1,6 @@
 import { PoundSterling, MapPin } from "lucide-react";
 import GenerateQuotePdfButton from "./GenerateQuotePdfButton";
+import { isFeatureEnabled } from "@/lib/featureFlags";
 
 interface Quote {
   id: string;
@@ -57,7 +58,7 @@ const QuotesList = ({ quotes }: { quotes: Quote[] }) => (
               <span className="bg-yellow-100 text-yellow-700 font-mono text-[10px] px-2 py-0.5 rounded-full">
                 Pending
               </span>
-              <GenerateQuotePdfButton quoteId={quote.id} />
+              {isFeatureEnabled("quotePdf") && <GenerateQuotePdfButton quoteId={quote.id} />}
             </div>
           </div>
         ))}
