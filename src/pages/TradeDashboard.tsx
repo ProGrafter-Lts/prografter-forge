@@ -366,12 +366,13 @@ const TradeDashboard = () => {
             totalReceived={marginData.totalReceived}
           />
 
-          {trade && <DashboardPlanningAlerts trade={trade} />}
-          {trade && trade.is_green_trade && <CertificationsSection trade={trade} />}
-
           {trade && isFeatureEnabled("quickBuild") && (
             <QuickBuildDraftsList tradeId={trade.id} />
           )}
+
+          {trade && <DashboardPlanningAlerts trade={trade} />}
+          {trade && trade.is_green_trade && <CertificationsSection trade={trade} />}
+
           <QuotesList quotes={quotes} />
           </>
           )}
