@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Sparkles, ChevronRight, Trash2, Loader2 } from "lucide-react";
+import { Sparkles, ChevronRight, Trash2, Loader2, Eye, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -10,6 +11,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import type { AIQuoteOutput } from "./QuickBuildReview";
 
@@ -32,11 +34,105 @@ const draftTotal = (out: AIQuoteOutput) =>
     0,
   );
 
+const DraftPreviewContent = ({ draft, onConvert, onClose }: { draft: DraftRow; onConvert: () => void; onClose: () => void }) => {
+  const out = draft.final_output;
+  const total = draftTotal(out);
+  const buffer = out.variation_buffer_recommended_pence ?? 0;
+  const grandTotal = total + buffer / 100;
+
+  return (
+    <>
+      <DialogHeader>
+        <DialogTitle className="flex items-center gap-2">
+          <Sparkles className="w-4 h-4 text-amber-600" />
+          QuickBuild draft preview
+        </DialogTitle>
+        <DialogDescription>
+          {draft.structured_input?.trade_type || "Draft quote"}
+          {draft.structured_input?.postcode ? ` · ${draft.structured_input.postcode}` : ""}
+        </DialogDescription>
+      </DialogHeader>
+
+      <div className="space-y-5 mt-2">
+        <Card className="p-4">
+          <h3 className="font-heading text-primary text-sm mb-3">Schedule of Works</h3>
+          <div className="space-y-2">
+            {out.line_items.map((li, i) => (
+              <div key={i} className="flex items-start justify-between gap-3 text-sm">
+                <div className="flex-1">
+                  <span className="font-medium text-primary">{li.category}</span>
+                  <span className="text-muted-foreground"> — {li.description}</span>
+                </div>
+                <div className="shrink-0 text-right font-mono text-xs text-muted-foreground">
+                  {li.quantity} {li.unit} × £{(li.estimated_unit_price / 100).toFixed(2)}
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-3 pt-3 border-t text-right text-sm">
+            <div className="text-muted-foreground">Subtotal £{total.toFixed(2)}</div>
+            {buffer > 0 && (
+              <div className="text-muted-foreground">+ Variation buffer £{(buffer / 100).toFixed(2)}</div>
+            )}
+            <div className="font-heading text-secondary text-lg mt-1">
+              Total £{grandTotal.toFixed(2)}
+            </div>
+          </div>
+        </Card>
+
+        <Card className="p-4">
+          <h3 className="font-heading text-primary text-sm mb-2">Methodology</h3>
+          <p className="text-sm text-muted-foreground whitespace-pre-line">{out.methodology}</p>
+        </Card>
+
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Card className="p-4">
+            <h3 className="font-heading text-primary text-sm mb-1">Timeline</h3>
+            <p className="text-sm text-muted-foreground">{out.timeline_days} working days</p>
+          </Card>
+          <Card className="p-4">
+            <h3 className="font-heading text-primary text-sm mb-1">Confidence</h3>
+            <p className="text-sm text-muted-foreground">{out.confidence_score}/100</p>
+          </Card>
+        </div>
+
+        {out.risk_flags.length > 0 && (
+          <Card className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <AlertTriangle className="w-4 h-4 text-amber-600" />
+              <h3 className="font-heading text-primary text-sm">Risk & compliance flags</h3>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {out.risk_flags.map((f) => (
+                <Badge key={f} variant="outline" className="text-xs">
+                  {f.replace(/_/g, " ")}
+                </Badge>
+              ))}
+            </div>
+          </Card>
+        )}
+
+        {out.notes_to_trade && (
+          <div className="rounded-md border-l-4 border-amber-500 bg-amber-50 p-3 text-sm text-amber-900">
+            <strong>AI note to trade:</strong> {out.notes_to_trade}
+          </div>
+        )}
+
+        <div className="flex justify-end gap-2 pt-2">
+          <Button variant="outline" onClick={onClose}>Close</Button>
+          <Button onClick={onConvert}>Convert to quote</Button>
+        </div>
+      </div>
+    </>
+  );
+};
+
 const QuickBuildDraftsList = ({ tradeId }: { tradeId: string }) => {
   const navigate = useNavigate();
   const [drafts, setDrafts] = useState<DraftRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [pickerDraftId, setPickerDraftId] = useState<string | null>(null);
+  const [previewDraft, setPreviewDraft] = useState<DraftRow | null>(null);
   const [matches, setMatches] = useState<JobMatch[]>([]);
   const [pickerLoading, setPickerLoading] = useState(false);
 
@@ -159,6 +255,9 @@ const QuickBuildDraftsList = ({ tradeId }: { tradeId: string }) => {
                 </p>
               </div>
               <div className="flex flex-col gap-2 shrink-0">
+                <Button size="sm" variant="outline" onClick={() => setPreviewDraft(d)}>
+                  <Eye className="w-3 h-3 mr-1" /> View
+                </Button>
                 <Button size="sm" onClick={() => openPicker(d.id)}>
                   Convert to quote <ChevronRight className="w-3 h-3" />
                 </Button>
@@ -206,6 +305,16 @@ const QuickBuildDraftsList = ({ tradeId }: { tradeId: string }) => {
               ))}
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Preview Draft Dialog */}
+      <Dialog open={!!previewDraft} onOpenChange={(o) => !o && setPreviewDraft(null)}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          {previewDraft && <DraftPreviewContent draft={previewDraft} onConvert={() => {
+            setPreviewDraft(null);
+            openPicker(previewDraft.id);
+          }} onClose={() => setPreviewDraft(null)} />}
         </DialogContent>
       </Dialog>
     </section>
