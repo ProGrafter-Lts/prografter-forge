@@ -21,6 +21,8 @@ import EarningsView from "@/components/trade/EarningsView";
 import { useTradeAccess } from "@/hooks/useTradeAccess";
 import { isContractedActiveJob } from "@/lib/activeProjects";
 import LegalReviewBanner from "@/components/LegalReviewBanner";
+import QuickBuildDraftsList from "@/components/trade/quickbuild/QuickBuildDraftsList";
+import { isFeatureEnabled } from "@/lib/featureFlags";
 
 interface TradeProfile {
   name: string;
