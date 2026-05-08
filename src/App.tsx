@@ -43,6 +43,7 @@ const CheckatradeAlternative = lazy(() => import("./pages/CheckatradeAlternative
 const IsCheckatradeWorthIt = lazy(() => import("./pages/IsCheckatradeWorthIt.tsx"));
 const ContractPage = lazy(() => import("./pages/ContractPage.tsx"));
 const LegalReview = lazy(() => import("./pages/LegalReview.tsx"));
+const QuickBuildPage = lazy(() => import("./pages/QuickBuildPage.tsx"));
 import AdminRoute from "./components/AdminRoute.tsx";
 
 const queryClient = new QueryClient({
