@@ -10,10 +10,19 @@ import MaterialsBreakdown, {
   type MaterialLine,
 } from "./MaterialsBreakdown";
 
+export interface QuickBuildPrefill {
+  generationId: string;
+  amount: string;
+  message: string;
+  workingDays?: number | null;
+  methodology?: string | null;
+}
+
 interface QuoteSubmitFormProps {
   jobId: string;
   tradeId: string;
   onQuoteSubmitted: () => void;
+  quickBuildPrefill?: QuickBuildPrefill | null;
 }
 
 const TIER_HINTS = {
