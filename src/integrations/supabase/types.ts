@@ -1430,6 +1430,57 @@ export type Database = {
           },
         ]
       }
+      quickbuild_generations: {
+        Row: {
+          actual_labour_days: number | null
+          actual_materials_pence: number | null
+          ai_output: Json
+          created_at: string
+          final_output: Json | null
+          id: string
+          photo_paths: string[]
+          quote_id: string | null
+          structured_input: Json
+          trade_user_id: string
+          transcript: string
+          updated_at: string
+          was_sent: boolean
+          won_lost: string | null
+        }
+        Insert: {
+          actual_labour_days?: number | null
+          actual_materials_pence?: number | null
+          ai_output?: Json
+          created_at?: string
+          final_output?: Json | null
+          id?: string
+          photo_paths?: string[]
+          quote_id?: string | null
+          structured_input?: Json
+          trade_user_id: string
+          transcript?: string
+          updated_at?: string
+          was_sent?: boolean
+          won_lost?: string | null
+        }
+        Update: {
+          actual_labour_days?: number | null
+          actual_materials_pence?: number | null
+          ai_output?: Json
+          created_at?: string
+          final_output?: Json | null
+          id?: string
+          photo_paths?: string[]
+          quote_id?: string | null
+          structured_input?: Json
+          trade_user_id?: string
+          transcript?: string
+          updated_at?: string
+          was_sent?: boolean
+          won_lost?: string | null
+        }
+        Relationships: []
+      }
       quote_checks: {
         Row: {
           created_at: string

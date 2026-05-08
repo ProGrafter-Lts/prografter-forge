@@ -43,6 +43,7 @@ const CheckatradeAlternative = lazy(() => import("./pages/CheckatradeAlternative
 const IsCheckatradeWorthIt = lazy(() => import("./pages/IsCheckatradeWorthIt.tsx"));
 const ContractPage = lazy(() => import("./pages/ContractPage.tsx"));
 const LegalReview = lazy(() => import("./pages/LegalReview.tsx"));
+const QuickBuildPage = lazy(() => import("./pages/QuickBuildPage.tsx"));
 import AdminRoute from "./components/AdminRoute.tsx";
 
 const queryClient = new QueryClient({
@@ -152,6 +153,14 @@ const App = () => (
             <Route path="/admin/testimonials" element={<AdminRoute><AdminTestimonials /></AdminRoute>} />
             <Route path="/share-your-experience" element={<SubmitTestimonial />} />
             <Route path="/legal-review" element={<LegalReview />} />
+            <Route
+              path="/quote-builder/quickbuild"
+              element={
+                <ProtectedRoute>
+                  <QuickBuildPage />
+                </ProtectedRoute>
+              }
+            />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
