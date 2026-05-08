@@ -136,6 +136,14 @@ const QuoteSubmitForm = ({ jobId, tradeId, onQuoteSubmitted, quickBuildPrefill }
       }
     }
 
+    // Link the QuickBuild draft to the new quote (Phase 2 training signal)
+    if (quickBuildPrefill?.generationId) {
+      await supabase
+        .from("quickbuild_generations")
+        .update({ quote_id: quoteRow.id, was_sent: true })
+        .eq("id", quickBuildPrefill.generationId);
+    }
+
     toast.success("Quote submitted successfully!");
     onQuoteSubmitted();
     setSubmitting(false);
