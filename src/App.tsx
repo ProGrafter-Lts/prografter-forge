@@ -153,6 +153,14 @@ const App = () => (
             <Route path="/admin/testimonials" element={<AdminRoute><AdminTestimonials /></AdminRoute>} />
             <Route path="/share-your-experience" element={<SubmitTestimonial />} />
             <Route path="/legal-review" element={<LegalReview />} />
+            <Route
+              path="/quote-builder/quickbuild"
+              element={
+                <ProtectedRoute>
+                  <QuickBuildPage />
+                </ProtectedRoute>
+              }
+            />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
