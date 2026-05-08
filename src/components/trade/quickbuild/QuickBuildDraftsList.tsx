@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Sparkles, ChevronRight, Trash2, Loader2 } from "lucide-react";
+import { Sparkles, ChevronRight, Trash2, Loader2, Eye, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -10,6 +11,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import type { AIQuoteOutput } from "./QuickBuildReview";
 
