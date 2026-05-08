@@ -1534,8 +1534,45 @@ export type Database = {
           },
         ]
       }
+      quote_pdf_events: {
+        Row: {
+          actor_role: string | null
+          actor_user_id: string | null
+          created_at: string
+          event_type: string
+          id: string
+          ip: unknown
+          metadata: Json
+          quote_id: string
+          user_agent: string | null
+        }
+        Insert: {
+          actor_role?: string | null
+          actor_user_id?: string | null
+          created_at?: string
+          event_type: string
+          id?: string
+          ip?: unknown
+          metadata?: Json
+          quote_id: string
+          user_agent?: string | null
+        }
+        Update: {
+          actor_role?: string | null
+          actor_user_id?: string | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          ip?: unknown
+          metadata?: Json
+          quote_id?: string
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       quotes: {
         Row: {
+          accept_token: string
           ai_verdict: string | null
           ai_verdict_at: string | null
           ai_verdict_summary: string | null
@@ -1543,12 +1580,21 @@ export type Database = {
           budget_description: string | null
           budget_price: number | null
           created_at: string
+          estimated_start_date: string | null
+          exclusions: string | null
           id: string
           is_test: boolean
           job_id: string
+          last_viewed_at: string | null
+          materials_spec: Json
           message: string | null
+          methodology: string | null
+          pdf_generated_at: string | null
+          pdf_path: string | null
+          pdf_version: number
           premium_description: string | null
           premium_price: number | null
+          reference: string | null
           selected_tier: string | null
           share_materials_with_homeowner: boolean
           standard_description: string | null
@@ -1557,8 +1603,13 @@ export type Database = {
           tier_enabled: boolean
           trade_id: string
           updated_at: string
+          valid_until: string | null
+          vat_registered: boolean
+          view_count: number
+          working_days: number | null
         }
         Insert: {
+          accept_token?: string
           ai_verdict?: string | null
           ai_verdict_at?: string | null
           ai_verdict_summary?: string | null
@@ -1566,12 +1617,21 @@ export type Database = {
           budget_description?: string | null
           budget_price?: number | null
           created_at?: string
+          estimated_start_date?: string | null
+          exclusions?: string | null
           id?: string
           is_test?: boolean
           job_id: string
+          last_viewed_at?: string | null
+          materials_spec?: Json
           message?: string | null
+          methodology?: string | null
+          pdf_generated_at?: string | null
+          pdf_path?: string | null
+          pdf_version?: number
           premium_description?: string | null
           premium_price?: number | null
+          reference?: string | null
           selected_tier?: string | null
           share_materials_with_homeowner?: boolean
           standard_description?: string | null
@@ -1580,8 +1640,13 @@ export type Database = {
           tier_enabled?: boolean
           trade_id: string
           updated_at?: string
+          valid_until?: string | null
+          vat_registered?: boolean
+          view_count?: number
+          working_days?: number | null
         }
         Update: {
+          accept_token?: string
           ai_verdict?: string | null
           ai_verdict_at?: string | null
           ai_verdict_summary?: string | null
@@ -1589,12 +1654,21 @@ export type Database = {
           budget_description?: string | null
           budget_price?: number | null
           created_at?: string
+          estimated_start_date?: string | null
+          exclusions?: string | null
           id?: string
           is_test?: boolean
           job_id?: string
+          last_viewed_at?: string | null
+          materials_spec?: Json
           message?: string | null
+          methodology?: string | null
+          pdf_generated_at?: string | null
+          pdf_path?: string | null
+          pdf_version?: number
           premium_description?: string | null
           premium_price?: number | null
+          reference?: string | null
           selected_tier?: string | null
           share_materials_with_homeowner?: boolean
           standard_description?: string | null
@@ -1603,6 +1677,10 @@ export type Database = {
           tier_enabled?: boolean
           trade_id?: string
           updated_at?: string
+          valid_until?: string | null
+          vat_registered?: boolean
+          view_count?: number
+          working_days?: number | null
         }
         Relationships: [
           {
@@ -2065,8 +2143,10 @@ export type Database = {
         Row: {
           avg_rating: number | null
           bio: string | null
+          business_logo_path: string | null
           calendar_token: string
           ciga_registered: boolean
+          companies_house_number: string | null
           company_name: string
           completed_jobs_count: number
           created_at: string
@@ -2086,6 +2166,14 @@ export type Database = {
           pas_2035_coordinator: boolean
           phone: string
           postcode: string
+          professional_indemnity_cover_pence: number | null
+          professional_indemnity_expiry: string | null
+          professional_indemnity_insurer: string | null
+          professional_indemnity_policy_number: string | null
+          public_liability_cover_pence: number | null
+          public_liability_expiry: string | null
+          public_liability_insurer: string | null
+          public_liability_policy_number: string | null
           rejected_at: string | null
           rejection_reason: string | null
           review_count: number
@@ -2097,17 +2185,22 @@ export type Database = {
           trustmark_number: string | null
           trustmark_verified: boolean
           user_id: string
+          vat_number: string | null
+          vat_registered: boolean
           verification_notes: string | null
           verification_status: string
           verified: boolean
+          verified_on_prografter_at: string | null
           website: string | null
           years_experience: number | null
         }
         Insert: {
           avg_rating?: number | null
           bio?: string | null
+          business_logo_path?: string | null
           calendar_token?: string
           ciga_registered?: boolean
+          companies_house_number?: string | null
           company_name: string
           completed_jobs_count?: number
           created_at?: string
@@ -2127,6 +2220,14 @@ export type Database = {
           pas_2035_coordinator?: boolean
           phone: string
           postcode: string
+          professional_indemnity_cover_pence?: number | null
+          professional_indemnity_expiry?: string | null
+          professional_indemnity_insurer?: string | null
+          professional_indemnity_policy_number?: string | null
+          public_liability_cover_pence?: number | null
+          public_liability_expiry?: string | null
+          public_liability_insurer?: string | null
+          public_liability_policy_number?: string | null
           rejected_at?: string | null
           rejection_reason?: string | null
           review_count?: number
@@ -2138,17 +2239,22 @@ export type Database = {
           trustmark_number?: string | null
           trustmark_verified?: boolean
           user_id: string
+          vat_number?: string | null
+          vat_registered?: boolean
           verification_notes?: string | null
           verification_status?: string
           verified?: boolean
+          verified_on_prografter_at?: string | null
           website?: string | null
           years_experience?: number | null
         }
         Update: {
           avg_rating?: number | null
           bio?: string | null
+          business_logo_path?: string | null
           calendar_token?: string
           ciga_registered?: boolean
+          companies_house_number?: string | null
           company_name?: string
           completed_jobs_count?: number
           created_at?: string
@@ -2168,6 +2274,14 @@ export type Database = {
           pas_2035_coordinator?: boolean
           phone?: string
           postcode?: string
+          professional_indemnity_cover_pence?: number | null
+          professional_indemnity_expiry?: string | null
+          professional_indemnity_insurer?: string | null
+          professional_indemnity_policy_number?: string | null
+          public_liability_cover_pence?: number | null
+          public_liability_expiry?: string | null
+          public_liability_insurer?: string | null
+          public_liability_policy_number?: string | null
           rejected_at?: string | null
           rejection_reason?: string | null
           review_count?: number
@@ -2179,9 +2293,12 @@ export type Database = {
           trustmark_number?: string | null
           trustmark_verified?: boolean
           user_id?: string
+          vat_number?: string | null
+          vat_registered?: boolean
           verification_notes?: string | null
           verification_status?: string
           verified?: boolean
+          verified_on_prografter_at?: string | null
           website?: string | null
           years_experience?: number | null
         }
@@ -2398,6 +2515,7 @@ export type Database = {
         Returns: string
       }
       generate_contract_reference: { Args: never; Returns: string }
+      generate_quote_reference: { Args: never; Returns: string }
       get_trade_for_job: {
         Args: { _job_id: string }
         Returns: {
@@ -2475,6 +2593,10 @@ export type Database = {
         }[]
       }
       recompute_trade_stats: { Args: { _trade_id: string }; Returns: undefined }
+      record_quote_pdf_event: {
+        Args: { _event_type: string; _metadata?: Json; _quote_id: string }
+        Returns: undefined
+      }
       sign_contract: {
         Args: { _contract_id: string; _ip?: unknown; _signature_hash: string }
         Returns: Json
