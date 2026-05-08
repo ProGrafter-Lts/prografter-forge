@@ -13,6 +13,7 @@ import ContractPanel from "@/components/project/ContractPanel";
 import SubTradeModal from "@/components/project/SubTradeModal";
 import QuoteSubmitForm from "@/components/trade/QuoteSubmitForm";
 import GenerateQuotePdfButton from "@/components/trade/GenerateQuotePdfButton";
+import { isFeatureEnabled } from "@/lib/featureFlags";
 
 // Types
 interface Job {
