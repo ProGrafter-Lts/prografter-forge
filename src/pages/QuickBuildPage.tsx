@@ -21,6 +21,17 @@ import {
   QuickBuildReview,
   type AIQuoteOutput,
 } from "@/components/trade/quickbuild/QuickBuildReview";
+import {
+  QUICKBUILD_SCENARIOS,
+  seedScenarioPhotos,
+} from "@/components/trade/quickbuild/quickBuildScenarios";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { FlaskConical } from "lucide-react";
 
 type Stage = "input" | "generating" | "review";
 
