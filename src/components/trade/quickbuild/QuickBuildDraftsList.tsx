@@ -39,6 +39,7 @@ const QuickBuildDraftsList = ({ tradeId }: { tradeId: string }) => {
   const [drafts, setDrafts] = useState<DraftRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [pickerDraftId, setPickerDraftId] = useState<string | null>(null);
+  const [previewDraft, setPreviewDraft] = useState<DraftRow | null>(null);
   const [matches, setMatches] = useState<JobMatch[]>([]);
   const [pickerLoading, setPickerLoading] = useState(false);
 
