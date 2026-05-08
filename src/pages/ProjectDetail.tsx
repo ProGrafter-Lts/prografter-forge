@@ -426,7 +426,16 @@ const ProjectDetail = () => {
               <QuoteSubmitForm
                 jobId={id!}
                 tradeId={userId}
-                onQuoteSubmitted={refreshProject}
+                quickBuildPrefill={qbPrefill}
+                onQuoteSubmitted={() => {
+                  if (qbDraftId) {
+                    const sp = new URLSearchParams(searchParams);
+                    sp.delete("qbDraft");
+                    setSearchParams(sp, { replace: true });
+                    setQbPrefill(null);
+                  }
+                  refreshProject();
+                }}
               />
             )}
 
