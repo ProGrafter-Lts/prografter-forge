@@ -152,11 +152,27 @@ const QuickBuildPage = () => {
           <h1 className="text-2xl font-bold">QuickBuild</h1>
           <QuickBuildBetaBadge />
         </div>
-        {remaining !== null && (
-          <span className="text-xs text-muted-foreground">
-            {remaining} generation{remaining === 1 ? "" : "s"} left today
-          </span>
-        )}
+        <div className="flex items-center gap-3">
+          {remaining !== null && (
+            <span className="text-xs text-muted-foreground">
+              {remaining} left today
+            </span>
+          )}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                <FlaskConical className="h-4 w-4" /> Load test scenario
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {QUICKBUILD_SCENARIOS.map((s) => (
+                <DropdownMenuItem key={s.id} onClick={() => loadScenario(s.id)}>
+                  {s.label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </header>
 
       {stage === "input" && (
