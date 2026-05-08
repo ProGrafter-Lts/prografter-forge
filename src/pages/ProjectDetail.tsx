@@ -12,6 +12,7 @@ import VariationsPanel from "@/components/project/VariationsPanel";
 import ContractPanel from "@/components/project/ContractPanel";
 import SubTradeModal from "@/components/project/SubTradeModal";
 import QuoteSubmitForm from "@/components/trade/QuoteSubmitForm";
+import GenerateQuotePdfButton from "@/components/trade/GenerateQuotePdfButton";
 
 // Types
 interface Job {
@@ -364,6 +365,23 @@ const ProjectDetail = () => {
                 onQuoteSubmitted={refreshProject}
               />
             )}
+
+            {/* Trade: download branded PDF of their submitted quote */}
+            {userRole === "trade" && userId && (() => {
+              const myQuote = quotes.find((q) => q.trade_id === userId);
+              if (!myQuote) return null;
+              return (
+                <div className="bg-card rounded-2xl p-4 border border-primary/10 flex items-center justify-between gap-3">
+                  <div>
+                    <p className="font-heading text-primary text-sm">Your quote PDF</p>
+                    <p className="font-mono text-xs text-muted-foreground">
+                      Branded Schedule of Works
+                    </p>
+                  </div>
+                  <GenerateQuotePdfButton quoteId={myQuote.id} />
+                </div>
+              );
+            })()}
 
             {/* 3 — Contract */}
             <ContractPanel
