@@ -13,6 +13,7 @@ import ContractPanel from "@/components/project/ContractPanel";
 import SubTradeModal from "@/components/project/SubTradeModal";
 import QuoteSubmitForm from "@/components/trade/QuoteSubmitForm";
 import GenerateQuotePdfButton from "@/components/trade/GenerateQuotePdfButton";
+import { isFeatureEnabled } from "@/lib/featureFlags";
 
 // Types
 interface Job {
@@ -367,7 +368,7 @@ const ProjectDetail = () => {
             )}
 
             {/* Trade: download branded PDF of their submitted quote */}
-            {userRole === "trade" && userId && (() => {
+            {isFeatureEnabled("quotePdf") && userRole === "trade" && userId && (() => {
               const myQuote = quotes.find((q) => q.trade_id === userId);
               if (!myQuote) return null;
               return (
