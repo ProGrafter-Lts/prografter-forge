@@ -125,6 +125,23 @@ const QuickBuildPage = () => {
     navigate("/dashboard/trade");
   };
 
+  const loadScenario = async (scenarioId: string) => {
+    if (!userId) return;
+    const sc = QUICKBUILD_SCENARIOS.find((s) => s.id === scenarioId);
+    if (!sc) return;
+    toast.info(`Loading test scenario: ${sc.label}…`);
+    setTranscript(sc.transcript);
+    setStructured(sc.structured);
+    try {
+      const seeded = await seedScenarioPhotos(userId, sc);
+      setPhotos((prev) => [...prev, ...seeded].slice(0, 8));
+      toast.success("Test scenario loaded — click Generate draft.");
+    } catch (e) {
+      console.error(e);
+      toast.error("Couldn't seed test photos (text + structured fields still loaded).");
+    }
+  };
+
   if (!isFeatureEnabled("quickBuild") || !userId) return null;
 
   return (
