@@ -2,11 +2,11 @@
 export const FEATURE_FLAGS = {
   // Professional Quote PDF (Schedule of Works). Backend + edge function are
   // live; UI entry points stay hidden until we're ready to ship.
-  quotePdf: false,
+  quotePdf: true,
   // QuickBuild MVP v0.5 — AI-assisted quote draft from voice + photos.
   // Edge function, table, and storage bucket are live; route + entry button
   // stay hidden until we're ready to ship.
-  quickBuild: false,
+  quickBuild: true,
 } as const;
 
 export type FeatureFlag = keyof typeof FEATURE_FLAGS;
