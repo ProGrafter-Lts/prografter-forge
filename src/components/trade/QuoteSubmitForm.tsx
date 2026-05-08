@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PoundSterling, Send } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
@@ -10,10 +10,19 @@ import MaterialsBreakdown, {
   type MaterialLine,
 } from "./MaterialsBreakdown";
 
+export interface QuickBuildPrefill {
+  generationId: string;
+  amount: string;
+  message: string;
+  workingDays?: number | null;
+  methodology?: string | null;
+}
+
 interface QuoteSubmitFormProps {
   jobId: string;
   tradeId: string;
   onQuoteSubmitted: () => void;
+  quickBuildPrefill?: QuickBuildPrefill | null;
 }
 
 const TIER_HINTS = {
@@ -22,7 +31,7 @@ const TIER_HINTS = {
   premium: "e.g. Premium branded materials, superior finish, extended warranties",
 };
 
-const QuoteSubmitForm = ({ jobId, tradeId, onQuoteSubmitted }: QuoteSubmitFormProps) => {
+const QuoteSubmitForm = ({ jobId, tradeId, onQuoteSubmitted, quickBuildPrefill }: QuoteSubmitFormProps) => {
   const [amount, setAmount] = useState("");
   const [message, setMessage] = useState("");
   const [tierEnabled, setTierEnabled] = useState(false);
@@ -35,6 +44,15 @@ const QuoteSubmitForm = ({ jobId, tradeId, onQuoteSubmitted }: QuoteSubmitFormPr
   const [materials, setMaterials] = useState<MaterialLine[]>([emptyMaterialLine()]);
   const [shareMaterials, setShareMaterials] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  // Apply QuickBuild draft prefill once when it arrives
+  useEffect(() => {
+    if (quickBuildPrefill) {
+      setAmount(quickBuildPrefill.amount);
+      setMessage(quickBuildPrefill.message);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [quickBuildPrefill?.generationId]);
 
   const canSubmit = tierEnabled
     ? budgetPrice && standardPrice && premiumPrice && message.trim().length >= 10
@@ -116,6 +134,14 @@ const QuoteSubmitForm = ({ jobId, tradeId, onQuoteSubmitted }: QuoteSubmitFormPr
         toast.error("Quote saved, but materials failed to save");
         console.error(matErr);
       }
+    }
+
+    // Link the QuickBuild draft to the new quote (Phase 2 training signal)
+    if (quickBuildPrefill?.generationId) {
+      await supabase
+        .from("quickbuild_generations")
+        .update({ quote_id: quoteRow.id, was_sent: true })
+        .eq("id", quickBuildPrefill.generationId);
     }
 
     toast.success("Quote submitted successfully!");

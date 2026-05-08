@@ -21,6 +21,8 @@ import EarningsView from "@/components/trade/EarningsView";
 import { useTradeAccess } from "@/hooks/useTradeAccess";
 import { isContractedActiveJob } from "@/lib/activeProjects";
 import LegalReviewBanner from "@/components/LegalReviewBanner";
+import QuickBuildDraftsList from "@/components/trade/quickbuild/QuickBuildDraftsList";
+import { isFeatureEnabled } from "@/lib/featureFlags";
 
 interface TradeProfile {
   name: string;
@@ -367,6 +369,9 @@ const TradeDashboard = () => {
           {trade && <DashboardPlanningAlerts trade={trade} />}
           {trade && trade.is_green_trade && <CertificationsSection trade={trade} />}
 
+          {trade && isFeatureEnabled("quickBuild") && (
+            <QuickBuildDraftsList tradeId={trade.id} />
+          )}
           <QuotesList quotes={quotes} />
           </>
           )}
