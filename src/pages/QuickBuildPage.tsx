@@ -21,6 +21,17 @@ import {
   QuickBuildReview,
   type AIQuoteOutput,
 } from "@/components/trade/quickbuild/QuickBuildReview";
+import {
+  QUICKBUILD_SCENARIOS,
+  seedScenarioPhotos,
+} from "@/components/trade/quickbuild/quickBuildScenarios";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { FlaskConical } from "lucide-react";
 
 type Stage = "input" | "generating" | "review";
 
@@ -114,6 +125,23 @@ const QuickBuildPage = () => {
     navigate("/dashboard/trade");
   };
 
+  const loadScenario = async (scenarioId: string) => {
+    if (!userId) return;
+    const sc = QUICKBUILD_SCENARIOS.find((s) => s.id === scenarioId);
+    if (!sc) return;
+    toast.info(`Loading test scenario: ${sc.label}…`);
+    setTranscript(sc.transcript);
+    setStructured(sc.structured);
+    try {
+      const seeded = await seedScenarioPhotos(userId, sc);
+      setPhotos((prev) => [...prev, ...seeded].slice(0, 8));
+      toast.success("Test scenario loaded — click Generate draft.");
+    } catch (e) {
+      console.error(e);
+      toast.error("Couldn't seed test photos (text + structured fields still loaded).");
+    }
+  };
+
   if (!isFeatureEnabled("quickBuild") || !userId) return null;
 
   return (
@@ -124,11 +152,27 @@ const QuickBuildPage = () => {
           <h1 className="text-2xl font-bold">QuickBuild</h1>
           <QuickBuildBetaBadge />
         </div>
-        {remaining !== null && (
-          <span className="text-xs text-muted-foreground">
-            {remaining} generation{remaining === 1 ? "" : "s"} left today
-          </span>
-        )}
+        <div className="flex items-center gap-3">
+          {remaining !== null && (
+            <span className="text-xs text-muted-foreground">
+              {remaining} left today
+            </span>
+          )}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                <FlaskConical className="h-4 w-4" /> Load test scenario
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {QUICKBUILD_SCENARIOS.map((s) => (
+                <DropdownMenuItem key={s.id} onClick={() => loadScenario(s.id)}>
+                  {s.label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </header>
 
       {stage === "input" && (
