@@ -102,7 +102,7 @@ const QuickBuildPage = () => {
     if (generationId) {
       await supabase
         .from("quickbuild_generations")
-        .update({ final_output: final as unknown as Record<string, unknown> })
+        .update({ final_output: JSON.parse(JSON.stringify(final)) })
         .eq("id", generationId);
     }
     // Stash for the existing quote builder to pick up later when wired
