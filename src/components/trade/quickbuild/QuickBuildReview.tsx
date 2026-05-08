@@ -233,7 +233,7 @@ export const QuickBuildReview = ({ initial, onAccept, onBack }: Props) => {
                 variant={active ? "default" : "outline"}
                 className="cursor-pointer"
               >
-                {f.replaceAll("_", " ")}
+                {f.replace(/_/g, " ")}
               </Badge>
             );
           })}
