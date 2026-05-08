@@ -214,6 +214,16 @@ const QuickBuildDraftsList = ({ tradeId }: { tradeId: string }) => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Preview Draft Dialog */}
+      <Dialog open={!!previewDraft} onOpenChange={(o) => !o && setPreviewDraft(null)}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          {previewDraft && <DraftPreviewContent draft={previewDraft} onConvert={() => {
+            setPreviewDraft(null);
+            openPicker(previewDraft.id);
+          }} />}
+        </DialogContent>
+      </Dialog>
     </section>
   );
 };
