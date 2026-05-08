@@ -1,4 +1,5 @@
 import { PoundSterling, MapPin } from "lucide-react";
+import GenerateQuotePdfButton from "./GenerateQuotePdfButton";
 
 interface Quote {
   id: string;
@@ -49,13 +50,14 @@ const QuotesList = ({ quotes }: { quotes: Quote[] }) => (
                 </span>
               </div>
             </div>
-            <div className="text-right">
+            <div className="flex flex-col items-end gap-2">
               <p className="font-heading text-secondary text-xl">
                 £{Number(quote.amount).toLocaleString()}
               </p>
               <span className="bg-yellow-100 text-yellow-700 font-mono text-[10px] px-2 py-0.5 rounded-full">
                 Pending
               </span>
+              <GenerateQuotePdfButton quoteId={quote.id} />
             </div>
           </div>
         ))}
