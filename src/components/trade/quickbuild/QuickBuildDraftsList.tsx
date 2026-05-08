@@ -162,6 +162,9 @@ const QuickBuildDraftsList = ({ tradeId }: { tradeId: string }) => {
                 </p>
               </div>
               <div className="flex flex-col gap-2 shrink-0">
+                <Button size="sm" variant="outline" onClick={() => setPreviewDraft(d)}>
+                  <Eye className="w-3 h-3 mr-1" /> View
+                </Button>
                 <Button size="sm" onClick={() => openPicker(d.id)}>
                   Convert to quote <ChevronRight className="w-3 h-3" />
                 </Button>
