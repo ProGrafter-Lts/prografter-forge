@@ -146,6 +146,66 @@ const ProjectDetail = () => {
     return () => { supabase.removeChannel(channel); };
   }, [id]);
 
+  // Pull a QuickBuild draft into the quote form when ?qbDraft=<id> is present
+  useEffect(() => {
+    if (!qbDraftId) {
+      setQbPrefill(null);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await supabase
+        .from("quickbuild_generations")
+        .select("id, final_output, ai_output")
+        .eq("id", qbDraftId)
+        .maybeSingle();
+      if (cancelled) return;
+      if (error || !data) {
+        toast.error("Couldn't load that QuickBuild draft.");
+        return;
+      }
+      const out = (data.final_output ?? data.ai_output) as {
+        line_items: Array<{ description: string; quantity: number; unit: string; estimated_unit_price: number }>;
+        methodology: string;
+        timeline_days: number;
+        variation_buffer_recommended_pence: number;
+      } | null;
+      if (!out) return;
+      const lineTotal = out.line_items.reduce(
+        (s, li) => s + (Number(li.quantity) || 0) * (Number(li.estimated_unit_price) || 0),
+        0,
+      );
+      const buffer = (out.variation_buffer_recommended_pence || 0) / 100;
+      const total = lineTotal + buffer;
+      const lines = out.line_items
+        .map((li) => `• ${li.description} (${li.quantity} ${li.unit} @ £${Number(li.estimated_unit_price).toFixed(2)})`)
+        .join("\n");
+      const message = [
+        out.methodology?.trim() || "",
+        "",
+        "SCHEDULE OF WORKS",
+        lines,
+        "",
+        `Timeline: ${out.timeline_days} working days`,
+        buffer > 0 ? `Variation buffer included: £${buffer.toFixed(2)}` : "",
+        "",
+        "— Drafted with QuickBuild AI; reviewed and confirmed by the trade.",
+      ]
+        .filter(Boolean)
+        .join("\n");
+      setQbPrefill({
+        generationId: data.id,
+        amount: total > 0 ? Math.round(total).toString() : "",
+        message,
+        workingDays: out.timeline_days ?? null,
+        methodology: out.methodology ?? null,
+      });
+      toast.success("QuickBuild draft loaded — review and submit.");
+    })();
+    return () => { cancelled = true; };
+  }, [qbDraftId]);
+
+
   const loadProjectData = async () => {
     setProjectError(null);
     setLoading(true);
