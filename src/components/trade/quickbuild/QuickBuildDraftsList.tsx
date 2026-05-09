@@ -272,9 +272,12 @@ const QuickBuildDraftsList = ({ tradeId }: { tradeId: string }) => {
             <Sparkles className="w-5 h-5 text-amber-600" />
             QuickBuild drafts
           </h2>
-          <Button size="sm" variant="outline" onClick={() => navigate("/quote-builder/quickbuild")}>
-            Start a draft
-          </Button>
+          <div className="flex items-center gap-2">
+            <TestDraftMenu />
+            <Button size="sm" variant="outline" onClick={() => navigate("/quote-builder/quickbuild")}>
+              Start a draft
+            </Button>
+          </div>
         </div>
         <div className="bg-card rounded-2xl p-6 border border-amber-200 text-center">
           <p className="font-mono text-xs text-muted-foreground">
