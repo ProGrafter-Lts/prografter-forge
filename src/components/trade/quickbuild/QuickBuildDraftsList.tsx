@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Sparkles, ChevronRight, Trash2, Loader2, Eye, AlertTriangle } from "lucide-react";
+import { Sparkles, ChevronRight, Trash2, Loader2, Eye, AlertTriangle, FlaskConical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -11,9 +11,16 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import type { AIQuoteOutput } from "./QuickBuildReview";
+import { QUICKBUILD_SCENARIOS, seedScenarioPhotos } from "./quickBuildScenarios";
 
 interface DraftRow {
   id: string;
@@ -135,6 +142,69 @@ const QuickBuildDraftsList = ({ tradeId }: { tradeId: string }) => {
   const [previewDraft, setPreviewDraft] = useState<DraftRow | null>(null);
   const [matches, setMatches] = useState<JobMatch[]>([]);
   const [pickerLoading, setPickerLoading] = useState(false);
+  const [generatingTest, setGeneratingTest] = useState(false);
+
+  const generateTestDraft = async (scenarioId: string) => {
+    const sc = QUICKBUILD_SCENARIOS.find((s) => s.id === scenarioId);
+    if (!sc) return;
+    const { data: userRes } = await supabase.auth.getUser();
+    if (!userRes.user) {
+      toast.error("Please sign in first.");
+      return;
+    }
+    setGeneratingTest(true);
+    const t = toast.loading(`Generating test draft: ${sc.label}…`);
+    try {
+      let photo_paths: string[] = [];
+      let photo_captions: string[] = [];
+      try {
+        const seeded = await seedScenarioPhotos(userRes.user.id, sc);
+        photo_paths = seeded.map((p) => p.path);
+        photo_captions = seeded.map((p) => p.caption);
+      } catch (e) {
+        console.warn("photo seed failed, continuing without photos", e);
+      }
+      const { error } = await supabase.functions.invoke("quickbuild-generate", {
+        body: {
+          transcript: sc.transcript,
+          photo_paths,
+          photo_captions,
+          structured_input: sc.structured,
+        },
+      });
+      if (error) {
+        console.error(error);
+        toast.error("Couldn't generate test draft.", { id: t });
+        return;
+      }
+      toast.success("Test draft created.", { id: t });
+      await load();
+    } finally {
+      setGeneratingTest(false);
+    }
+  };
+
+  const TestDraftMenu = () => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button size="sm" variant="outline" disabled={generatingTest}>
+          {generatingTest ? (
+            <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+          ) : (
+            <FlaskConical className="w-3 h-3 mr-1" />
+          )}
+          Generate test draft
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        {QUICKBUILD_SCENARIOS.map((s) => (
+          <DropdownMenuItem key={s.id} onClick={() => generateTestDraft(s.id)}>
+            {s.label}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 
   const load = async () => {
     setLoading(true);
@@ -202,9 +272,12 @@ const QuickBuildDraftsList = ({ tradeId }: { tradeId: string }) => {
             <Sparkles className="w-5 h-5 text-amber-600" />
             QuickBuild drafts
           </h2>
-          <Button size="sm" variant="outline" onClick={() => navigate("/quote-builder/quickbuild")}>
-            Start a draft
-          </Button>
+          <div className="flex items-center gap-2">
+            <TestDraftMenu />
+            <Button size="sm" variant="outline" onClick={() => navigate("/quote-builder/quickbuild")}>
+              Start a draft
+            </Button>
+          </div>
         </div>
         <div className="bg-card rounded-2xl p-6 border border-amber-200 text-center">
           <p className="font-mono text-xs text-muted-foreground">
@@ -225,9 +298,12 @@ const QuickBuildDraftsList = ({ tradeId }: { tradeId: string }) => {
             {drafts.length}
           </span>
         </h2>
-        <Button size="sm" variant="outline" onClick={() => navigate("/quote-builder/quickbuild")}>
-          New draft
-        </Button>
+        <div className="flex items-center gap-2">
+          <TestDraftMenu />
+          <Button size="sm" variant="outline" onClick={() => navigate("/quote-builder/quickbuild")}>
+            New draft
+          </Button>
+        </div>
       </div>
 
       <div className="space-y-3">
