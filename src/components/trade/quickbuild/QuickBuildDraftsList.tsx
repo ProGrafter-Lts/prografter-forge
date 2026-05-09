@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Sparkles, ChevronRight, Trash2, Loader2, Eye, AlertTriangle } from "lucide-react";
+import { Sparkles, ChevronRight, Trash2, Loader2, Eye, AlertTriangle, FlaskConical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -11,9 +11,16 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import type { AIQuoteOutput } from "./QuickBuildReview";
+import { QUICKBUILD_SCENARIOS, seedScenarioPhotos } from "./quickBuildScenarios";
 
 interface DraftRow {
   id: string;
