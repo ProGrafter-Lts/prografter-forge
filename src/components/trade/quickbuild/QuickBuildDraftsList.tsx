@@ -298,9 +298,12 @@ const QuickBuildDraftsList = ({ tradeId }: { tradeId: string }) => {
             {drafts.length}
           </span>
         </h2>
-        <Button size="sm" variant="outline" onClick={() => navigate("/quote-builder/quickbuild")}>
-          New draft
-        </Button>
+        <div className="flex items-center gap-2">
+          <TestDraftMenu />
+          <Button size="sm" variant="outline" onClick={() => navigate("/quote-builder/quickbuild")}>
+            New draft
+          </Button>
+        </div>
       </div>
 
       <div className="space-y-3">
