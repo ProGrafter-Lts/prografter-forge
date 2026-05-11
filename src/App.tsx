@@ -44,6 +44,7 @@ const IsCheckatradeWorthIt = lazy(() => import("./pages/IsCheckatradeWorthIt.tsx
 const ContractPage = lazy(() => import("./pages/ContractPage.tsx"));
 const LegalReview = lazy(() => import("./pages/LegalReview.tsx"));
 const QuickBuildPage = lazy(() => import("./pages/QuickBuildPage.tsx"));
+const Apply = lazy(() => import("./pages/Apply.tsx"));
 import AdminRoute from "./components/AdminRoute.tsx";
 
 const queryClient = new QueryClient({
@@ -153,6 +154,7 @@ const App = () => (
             <Route path="/admin/testimonials" element={<AdminRoute><AdminTestimonials /></AdminRoute>} />
             <Route path="/share-your-experience" element={<SubmitTestimonial />} />
             <Route path="/legal-review" element={<LegalReview />} />
+            <Route path="/apply" element={<Apply />} />
             <Route
               path="/quote-builder/quickbuild"
               element={
