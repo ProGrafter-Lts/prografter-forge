@@ -51,11 +51,11 @@ const Index = () => {
       <Ticker />
       <HowItWorks />
       <OldWayContrast />
-      <GreenEnergySection />
       <ContrastSection />
       <FeaturesGrid />
       <TradesHowItWorks />
       <HomeownersHowItWorks />
+      <GreenEnergySection />
       <WhatYouGet />
       <WhyDifferent />
       <PlatformPreview />
