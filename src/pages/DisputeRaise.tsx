@@ -121,7 +121,7 @@ export default function DisputeRaise() {
   };
 
   if (error) return (
-    <div style={{ minHeight:"100vh", background:C.cream, padding:"2rem", fontFamily:"system-ui, sans-serif" }}>
+    <div style={{ minHeight:"100vh", background:C.cream, padding:"2rem" }}>
       <div style={{ maxWidth:600, margin:"0 auto", background:C.white, border:`1.5px solid ${C.border}`,
         borderRadius:14, padding:"1.5rem" }}>
         <p style={{ color:C.red, margin:0 }}>{error}</p>
@@ -130,8 +130,8 @@ export default function DisputeRaise() {
   );
 
   if (!job || !role) return (
-    <div style={{ minHeight:"100vh", background:C.cream, display:"flex",
-      alignItems:"center", justifyContent:"center", color:C.secondary, fontFamily:"system-ui" }}>
+      <div style={{ minHeight:"100vh", background:C.cream, display:"flex",
+        alignItems:"center", justifyContent:"center", color:C.secondary }}>
       Loading…
     </div>
   );
@@ -144,7 +144,7 @@ export default function DisputeRaise() {
   });
 
   return (
-    <div style={{ minHeight:"100vh", background:C.cream, fontFamily:"system-ui, sans-serif" }}>
+    <div style={{ minHeight:"100vh", background:C.cream }}>
       <div style={{ background:C.deep, padding:"14px 24px",
         display:"flex", alignItems:"center", gap:12 }}>
         <div style={{ fontSize:20, fontWeight:700 }}>

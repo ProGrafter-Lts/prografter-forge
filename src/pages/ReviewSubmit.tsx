@@ -194,11 +194,11 @@ export default function ReviewSubmit() {
   };
 
   if (!isReady || loading) {
-    return <div style={{ minHeight:"100vh", background:C.cream, display:"flex", alignItems:"center", justifyContent:"center", color:C.secondary, fontFamily:"system-ui" }}>Loading…</div>;
+    return <div style={{ minHeight:"100vh", background:C.cream, display:"flex", alignItems:"center", justifyContent:"center", color:C.secondary }}>Loading…</div>;
   }
   if (error || !ctx) {
     return (
-      <div style={{ minHeight:"100vh", background:C.cream, padding:"3rem 1rem", fontFamily:"system-ui" }}>
+      <div style={{ minHeight:"100vh", background:C.cream, padding:"3rem 1rem" }}>
         <div style={{ maxWidth:480, margin:"0 auto", background:C.white, border:`1.5px solid ${C.border}`, borderRadius:14, padding:"1.5rem", textAlign:"center" }}>
           <p style={{ fontSize:15, fontWeight:600, color:C.deep }}>{error ?? "Unable to load review."}</p>
           <Link to="/" style={{ display:"inline-block", marginTop:12, color:C.teal, fontWeight:600 }}>← Back home</Link>
@@ -212,7 +212,7 @@ export default function ReviewSubmit() {
     : !!ctx.existing?.homeowner_review_submitted_at;
 
   return (
-    <div style={{ minHeight:"100vh", background:C.cream, fontFamily:"system-ui, sans-serif" }}>
+    <div style={{ minHeight:"100vh", background:C.cream }}>
       <SEO title="Leave a review · ProGrafter" description="Submit a permanent, verified review on your completed job." path={`/reviews/${ctx.jobRef}`} noindex />
 
       <div style={{ background:C.deep, padding:"14px 24px", display:"flex", alignItems:"center", justifyContent:"space-between", position:"sticky", top:0, zIndex:10 }}>
@@ -224,13 +224,13 @@ export default function ReviewSubmit() {
           <span style={{ color:"rgba(245,240,232,0.2)", fontSize:16 }}>|</span>
           <span style={{ fontSize:12, color:C.dimText, fontWeight:500, letterSpacing:"0.05em" }}>REVIEW</span>
         </div>
-        <span style={{ fontSize:11, color:C.dimText, fontFamily:"monospace" }}>{ctx.jobRef}</span>
+        <span style={{ fontSize:11, color:C.dimText, fontFamily:"'DM Mono', monospace" }}>{ctx.jobRef}</span>
       </div>
 
       <div style={{ maxWidth:680, margin:"0 auto", padding:"1.5rem 1rem" }}>
         {/* Job summary */}
         <div style={{ background:C.white, border:`1.5px solid ${C.border}`, borderRadius:14, padding:"14px 18px", marginBottom:20 }}>
-          <p style={{ fontSize:12, fontFamily:"monospace", color:C.teal, margin:"0 0 4px" }}>{ctx.jobRef}</p>
+          <p style={{ fontSize:12, fontFamily:"'DM Mono', monospace", color:C.teal, margin:"0 0 4px" }}>{ctx.jobRef}</p>
           <h2 style={{ fontSize:16, fontWeight:700, color:C.deep, margin:"0 0 3px" }}>{ctx.jobTitle}</h2>
           {ctx.jobAddress && <p style={{ fontSize:12, color:C.secondary, margin:0 }}>{ctx.jobAddress}</p>}
         </div>

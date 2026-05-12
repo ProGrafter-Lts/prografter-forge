@@ -97,7 +97,7 @@ export default function AdminDisputes() {
   };
 
   return (
-    <div style={{ minHeight:"100vh", background:C.cream, fontFamily:"system-ui, sans-serif" }}>
+    <div style={{ minHeight:"100vh", background:C.cream }}>
       <div style={{ background:C.deep, padding:"14px 24px",
         display:"flex", alignItems:"center", gap:12 }}>
         <div style={{ fontSize:20, fontWeight:700 }}>
@@ -133,7 +133,7 @@ export default function AdminDisputes() {
                     alignItems:"flex-start", gap:8 }}>
                     <div>
                       <div style={{ display:"flex", gap:8, alignItems:"center", marginBottom:3 }}>
-                        <span style={{ fontSize:11, fontFamily:"monospace", color:C.teal }}>{d.ref}</span>
+                        <span style={{ fontSize:11, fontFamily:"'DM Mono', monospace", color:C.teal }}>{d.ref}</span>
                         <SBadge status={d.status} />
                       </div>
                       <p style={{ fontSize:11, color:C.dimText, margin:0 }}>
@@ -160,7 +160,7 @@ export default function AdminDisputes() {
                 border:`1px solid ${C.darkBorder}`, padding:"14px", marginBottom:14 }}>
                 <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:12 }}>
                   <div>
-                    <span style={{ fontSize:12, fontFamily:"monospace", color:C.teal, marginRight:8 }}>{sel.ref}</span>
+                    <span style={{ fontSize:12, fontFamily:"'DM Mono', monospace", color:C.teal, marginRight:8 }}>{sel.ref}</span>
                     <SBadge status={sel.status} />
                   </div>
                   <p style={{ fontSize:16, fontWeight:700, color:C.red, margin:0 }}>
