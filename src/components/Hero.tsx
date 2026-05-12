@@ -75,9 +75,9 @@ const Hero = () => {
           {/* Stats — inline on all sizes for trade column */}
           <div className="mt-8 grid grid-cols-3 gap-3 max-w-md">
             {stats.map((stat) => (
-              <div key={stat.label} className="bg-navy/50 backdrop-blur-sm border border-teal/20 rounded-xl px-3 py-3 text-center">
-                <div className="font-heading text-teal text-xl craft:text-2xl">{stat.value}</div>
-                <div className="font-mono text-[10px] text-secondary-text uppercase">{stat.label}</div>
+            <div key={stat.label} className="bg-navy/50 backdrop-blur-sm border border-teal/20 rounded-xl px-3 py-3 flex flex-col items-center justify-between text-center">
+                <div className="font-heading text-teal text-xl craft:text-2xl leading-none flex items-center justify-center h-7 craft:h-8">{stat.value}</div>
+                <div className="font-mono text-[10px] text-secondary-text uppercase mt-2 leading-none">{stat.label}</div>
               </div>
             ))}
           </div>
