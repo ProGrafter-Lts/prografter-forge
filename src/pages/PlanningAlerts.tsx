@@ -885,7 +885,7 @@ export default function PlanningAlerts() {
 
                   {/* Detail panel */}
                   {selectedApp && (
-                    <AppDetail app={selectedApp} onClose={()=>setSelectedApp(null)} />
+                    <AppDetail app={selectedApp} onClose={()=>setSelectedApp(null)} isMobile={isMobile} />
                   )}
                 </div>
               </>
