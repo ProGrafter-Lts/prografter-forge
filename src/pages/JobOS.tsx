@@ -507,9 +507,9 @@ async function loadJobByRef(ref: string, userId: string): Promise<{ job: JobData
     tradeId = m?.trade_id || null;
   }
   if (tradeId) {
-    const { data: trd } = await supabase.from("trades").select("full_name, business_name, trade_type").eq("id", tradeId).maybeSingle();
-    traderName = trd?.full_name || "";
-    traderBusiness = trd?.business_name || "";
+    const { data: trd } = await supabase.from("trades").select("name, company_name, trade_type").eq("id", tradeId).maybeSingle();
+    traderName = trd?.name || "";
+    traderBusiness = trd?.company_name || "";
   }
 
   // 4. Stages → current_stage
