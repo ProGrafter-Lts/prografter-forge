@@ -54,7 +54,7 @@ const GreenEnergySection = () => {
             href="/green"
             className="inline-block bg-[#16A34A] text-white font-mono text-sm px-8 py-3.5 rounded-xl hover:bg-[#15803D] transition-colors shadow-lg shadow-[#16A34A]/20"
           >
-            Find Out What You Could Qualify For — Free →
+            Check What You Could Save — Free →
           </a>
         </div>
       </div>
