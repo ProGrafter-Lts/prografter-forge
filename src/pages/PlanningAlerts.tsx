@@ -488,7 +488,7 @@ const AppDetail = ({ app, onClose, isMobile }: { app: PlanningApp; onClose: () =
         </div>
       )}
 
-      <div style={{ padding:"16px 18px" }}>
+      <div style={{ padding:"16px 18px", overflowY:"auto", flex:1, minHeight:0 }}>
         {/* Key info */}
         <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:14 }}>
           {[
