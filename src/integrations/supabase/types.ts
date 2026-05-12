@@ -454,6 +454,156 @@ export type Database = {
           },
         ]
       }
+      dispute_events: {
+        Row: {
+          created_at: string
+          dispute_id: string
+          event_text: string
+          event_type: string
+          id: string
+          occurred_at: string
+        }
+        Insert: {
+          created_at?: string
+          dispute_id: string
+          event_text: string
+          event_type: string
+          id?: string
+          occurred_at?: string
+        }
+        Update: {
+          created_at?: string
+          dispute_id?: string
+          event_text?: string
+          event_type?: string
+          id?: string
+          occurred_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dispute_events_dispute_id_fkey"
+            columns: ["dispute_id"]
+            isOneToOne: false
+            referencedRelation: "disputes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dispute_evidence: {
+        Row: {
+          dispute_id: string
+          id: string
+          item_type: string
+          label: string
+          uploaded_at: string
+          uploaded_by: string
+          url: string | null
+        }
+        Insert: {
+          dispute_id: string
+          id?: string
+          item_type: string
+          label: string
+          uploaded_at?: string
+          uploaded_by: string
+          url?: string | null
+        }
+        Update: {
+          dispute_id?: string
+          id?: string
+          item_type?: string
+          label?: string
+          uploaded_at?: string
+          uploaded_by?: string
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dispute_evidence_dispute_id_fkey"
+            columns: ["dispute_id"]
+            isOneToOne: false
+            referencedRelation: "disputes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      disputes: {
+        Row: {
+          against_user_id: string | null
+          amount_disputed_pence: number | null
+          claimant_statement: string
+          created_at: string
+          desired_outcome: string | null
+          evidence_notes: string | null
+          frozen_amount_pence: number | null
+          id: string
+          job_id: string
+          raised_by_role: string
+          raised_by_user_id: string
+          reason: string
+          reason_label: string | null
+          recommendation: string | null
+          ref: string
+          resolution: string | null
+          resolved_at: string | null
+          respondent_statement: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          against_user_id?: string | null
+          amount_disputed_pence?: number | null
+          claimant_statement: string
+          created_at?: string
+          desired_outcome?: string | null
+          evidence_notes?: string | null
+          frozen_amount_pence?: number | null
+          id?: string
+          job_id: string
+          raised_by_role: string
+          raised_by_user_id: string
+          reason: string
+          reason_label?: string | null
+          recommendation?: string | null
+          ref?: string
+          resolution?: string | null
+          resolved_at?: string | null
+          respondent_statement?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          against_user_id?: string | null
+          amount_disputed_pence?: number | null
+          claimant_statement?: string
+          created_at?: string
+          desired_outcome?: string | null
+          evidence_notes?: string | null
+          frozen_amount_pence?: number | null
+          id?: string
+          job_id?: string
+          raised_by_role?: string
+          raised_by_user_id?: string
+          reason?: string
+          reason_label?: string | null
+          recommendation?: string | null
+          ref?: string
+          resolution?: string | null
+          resolved_at?: string | null
+          respondent_statement?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "disputes_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       early_signups: {
         Row: {
           created_at: string
@@ -2761,6 +2911,10 @@ export type Database = {
       }
       user_is_contract_party: {
         Args: { _contract_id: string; _user_id: string }
+        Returns: boolean
+      }
+      user_is_job_participant: {
+        Args: { _job_id: string; _user_id: string }
         Returns: boolean
       }
       user_owns_homeowner: {

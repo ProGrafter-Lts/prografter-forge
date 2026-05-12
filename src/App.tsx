@@ -51,6 +51,9 @@ const QuoteCheckerAI = lazy(() => import("./pages/QuoteCheckerAI.tsx"));
 const JobOS = lazy(() => import("./pages/JobOS.tsx"));
 const ReviewSubmit = lazy(() => import("./pages/ReviewSubmit.tsx"));
 const TraderReviews = lazy(() => import("./pages/TraderReviews.tsx"));
+const DisputeRaise = lazy(() => import("./pages/DisputeRaise.tsx"));
+const DisputeDetail = lazy(() => import("./pages/DisputeDetail.tsx"));
+const AdminDisputes = lazy(() => import("./pages/AdminDisputes.tsx"));
 import AdminRoute from "./components/AdminRoute.tsx";
 
 const queryClient = new QueryClient({
@@ -167,6 +170,9 @@ const App = () => (
             <Route path="/jobs/:ref" element={<ProtectedRoute><JobOS /></ProtectedRoute>} />
             <Route path="/reviews/:ref" element={<ProtectedRoute><ReviewSubmit /></ProtectedRoute>} />
             <Route path="/traders/:id/reviews" element={<TraderReviews />} />
+            <Route path="/disputes/new" element={<ProtectedRoute><DisputeRaise /></ProtectedRoute>} />
+            <Route path="/disputes/:id" element={<ProtectedRoute><DisputeDetail /></ProtectedRoute>} />
+            <Route path="/admin/disputes" element={<AdminRoute><AdminDisputes /></AdminRoute>} />
             <Route
               path="/quote-builder/quickbuild"
               element={

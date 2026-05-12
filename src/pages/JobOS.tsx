@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import SEO from "@/components/SEO";
 import AppShell from "@/components/AppShell";
 import { supabase } from "@/integrations/supabase/client";
@@ -609,6 +609,7 @@ async function loadJobByRef(ref: string, userId: string): Promise<{ job: JobData
 // ── Main ──────────────────────────────────────────────────────────────────────
 function JobOSContent() {
   const { ref } = useParams<{ ref: string }>();
+  const navigate = useNavigate();
   const { isReady, user } = useAuthReady();
   const [job, setJob] = useState<JobData | null>(null);
   const [view, setView] = useState<"trader" | "homeowner">("trader");
@@ -710,9 +711,11 @@ function JobOSContent() {
         </div>
 
         <div style={{ marginTop:16, display:"flex", justifyContent:"center" }}>
-          <button style={{ background:"none", border:`1px solid ${C.redBorder}`,
-            color:C.red, borderRadius:8, padding:"8px 18px",
-            fontSize:12, cursor:"pointer" }}>
+          <button
+            onClick={() => navigate(`/disputes/new?job=${ref}`)}
+            style={{ background:"none", border:`1px solid ${C.redBorder}`,
+              color:C.red, borderRadius:8, padding:"8px 18px",
+              fontSize:12, cursor:"pointer" }}>
             ⚠️ Raise a dispute
           </button>
         </div>
