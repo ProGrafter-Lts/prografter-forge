@@ -27,3 +27,5 @@ project_id = "xryinqaxjclcmhebdcex"
     verify_jwt = true
   [functions.quickbuild-generate]
     verify_jwt = true
+  [functions.analyse-quote-ai]
+    verify_jwt = false
