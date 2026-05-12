@@ -64,17 +64,20 @@ body::before {
   }
   body {
     @apply bg-background text-foreground;
-    font-family: 'DM Sans', sans-serif;
+    font-family: var(--font-sans);
     color: #1F2937;
   }
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Bebas Neue', sans-serif;
-    letter-spacing: 0.04em;
-    font-weight: 400;
+    font-family: var(--font-mono);
+    letter-spacing: 0.02em;
+    font-weight: 500;
   }
-  h1 { line-height: 1.05; letter-spacing: 0.04em; }
-  h2 { line-height: 1.10; letter-spacing: 0.04em; }
-  h3 { letter-spacing: 0.03em; }
+  h1 { line-height: 1.1; }
+  h2 { line-height: 1.15; }
+  h3 { line-height: 1.2; }
+  .font-heading { font-family: var(--font-mono) !important; }
+  .font-mono { font-family: var(--font-mono) !important; }
+  .font-sans, .font-body { font-family: var(--font-sans) !important; }
   button, input, select, textarea {
     font-family: inherit;
   }
