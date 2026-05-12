@@ -229,7 +229,7 @@ export default function Vetting() {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100vh", fontFamily: "system-ui,sans-serif", background: C.deep }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "100vh", fontFamily: "'DM Sans', system-ui, sans-serif", background: C.deep }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: C.deep, borderBottom: `1px solid ${C.darkBorder}`, padding: "0 20px", height: 56, flexShrink: 0 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <div style={{ fontSize: 18, fontWeight: 700 }}>

@@ -262,7 +262,7 @@ ${form.quote_text}`;
   const displayText = result || streaming;
 
   return (
-    <div style={{ minHeight:"100vh", background:C.cream, fontFamily:"system-ui, sans-serif" }}>
+    <div style={{ minHeight:"100vh", background:C.cream, fontFamily:"'DM Sans', system-ui, sans-serif" }}>
 
       <div style={{ background:C.deep, padding:"16px 24px",
         display:"flex", alignItems:"center", justifyContent:"space-between",
@@ -427,7 +427,7 @@ ${form.quote_text}`;
               <textarea rows={8} style={{
                 ...inp(!!errors.quote_text),
                 resize:"vertical", minHeight:180,
-                fontFamily:"ui-monospace, monospace", fontSize:13,
+                fontFamily:"'DM Mono', ui-monospace, monospace", fontSize:13,
               }} value={form.quote_text} onChange={upd("quote_text")}
                 placeholder={`Supply and fit new Hager 18th edition consumer unit with surge protection: £380
 Strip out all existing wiring (3 bed semi, approx 85m² floor area): £420

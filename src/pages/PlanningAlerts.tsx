@@ -762,7 +762,7 @@ export default function PlanningAlerts() {
         path="/planning-alerts"
       />
       <AppShell>
-        <div style={{ minHeight:"calc(100vh - 64px)", background:C.cream, fontFamily:"system-ui, sans-serif" }}>
+        <div style={{ minHeight:"calc(100vh - 64px)", background:C.cream, fontFamily:"'DM Sans', system-ui, sans-serif" }}>
 
           {/* Sub-header */}
           <div style={{ background:C.deep, padding:"16px 24px",
