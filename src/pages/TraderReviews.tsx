@@ -9,7 +9,7 @@ const C = {
   body:"#1F2937", secondary:"#4B5563", border:"#D1CBB8", white:"#FFFFFF",
   amber:"#D97706", amberBg:"#FFFBEB", amberBorder:"#FDE68A",
   green:"#16A34A", greenBg:"#F0FDF4", greenBorder:"#BBF7D0",
-  red:"#DC2626", dimText:"rgba(245,240,232,0.5)", brightText:"#F5F0E8",
+  red:"#DC2626", dimText:"rgba(245,240,232,0.78)", brightText:"#F5F0E8",
 };
 
 const TRADER_DIMENSIONS = [

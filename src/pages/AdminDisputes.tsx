@@ -3,8 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 
 const C = {
   cream:"#F5F0E8", deep:"#0F2238", navy:"#1B3A5C",
-  teal:"#0D9488", brightText:"#F5F0E8", dimText:"rgba(245,240,232,0.5)",
-  darkSurface:"#152C45", darkCard:"#1B3A5C", darkBorder:"rgba(245,240,232,0.1)",
+  teal:"#0D9488", brightText:"#F5F0E8", dimText:"rgba(245,240,232,0.78)",
+  darkSurface:"#152C45", darkCard:"#1B3A5C", darkBorder:"rgba(245,240,232,0.22)",
   white:"#FFFFFF", red:"#DC2626", redBorder:"#FECACA", amber:"#D97706", amberBorder:"#FDE68A",
   green:"#16A34A", greenBorder:"#BBF7D0", purple:"#7C3AED", purpleBorder:"#DDD6FE",
   amberBg:"#FFFBEB", redBg:"#FEF2F2", greenBg:"#F0FDF4", purpleBg:"#F5F3FF",
@@ -103,8 +103,8 @@ export default function AdminDisputes() {
         <div style={{ fontSize:20, fontWeight:700 }}>
           <span style={{ color:C.cream }}>Pro</span><span style={{ color:C.teal }}>Grafter</span>
         </div>
-        <span style={{ color:"rgba(245,240,232,0.2)" }}>|</span>
-        <span style={{ fontSize:12, color:"rgba(245,240,232,0.5)", letterSpacing:"0.05em" }}>
+        <span style={{ color:"rgba(245,240,232,0.45)" }}>|</span>
+        <span style={{ fontSize:12, color:"rgba(245,240,232,0.78)", letterSpacing:"0.05em" }}>
           ADMIN · DISPUTE MANAGEMENT
         </span>
       </div>

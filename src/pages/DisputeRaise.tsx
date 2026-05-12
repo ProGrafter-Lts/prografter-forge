@@ -150,8 +150,8 @@ export default function DisputeRaise() {
         <div style={{ fontSize:20, fontWeight:700 }}>
           <span style={{ color:C.cream }}>Pro</span><span style={{ color:C.teal }}>Grafter</span>
         </div>
-        <span style={{ color:"rgba(245,240,232,0.2)" }}>|</span>
-        <span style={{ fontSize:12, color:"rgba(245,240,232,0.5)", letterSpacing:"0.05em" }}>
+        <span style={{ color:"rgba(245,240,232,0.45)" }}>|</span>
+        <span style={{ fontSize:12, color:"rgba(245,240,232,0.78)", letterSpacing:"0.05em" }}>
           DISPUTE RESOLUTION · {job.ref}
         </span>
       </div>
