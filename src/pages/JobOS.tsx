@@ -609,6 +609,7 @@ async function loadJobByRef(ref: string, userId: string): Promise<{ job: JobData
 // ── Main ──────────────────────────────────────────────────────────────────────
 function JobOSContent() {
   const { ref } = useParams<{ ref: string }>();
+  const navigate = useNavigate();
   const { isReady, user } = useAuthReady();
   const [job, setJob] = useState<JobData | null>(null);
   const [view, setView] = useState<"trader" | "homeowner">("trader");
