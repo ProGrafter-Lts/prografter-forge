@@ -1,4 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== "undefined" ? window.matchMedia("(max-width: 899px)").matches : false
+  );
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 899px)");
+    const onChange = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+  return isMobile;
+}
 import SEO from "@/components/SEO";
 import AppShell from "@/components/AppShell";
 
@@ -420,21 +433,41 @@ const AppCard = ({ app, onSelect, selected }: { app: PlanningApp; onSelect: (app
 
 // ── Application detail panel ──────────────────────────────────────────────────
 
-const AppDetail = ({ app, onClose }: { app: PlanningApp; onClose: () => void }) => {
+const AppDetail = ({ app, onClose, isMobile }: { app: PlanningApp; onClose: () => void; isMobile: boolean }) => {
   const s = STATUS_CFG[app.status] || STATUS_CFG.submitted;
   const daysSinceSubmission = Math.floor((Date.now() - new Date(app.submitted_date).getTime()) / 86400000);
-  return (
-    <div style={{ background:C.white, borderRadius:16, border:`2px solid ${C.teal}`,
-      overflow:"hidden", position:"sticky", top:80 }}>
+
+  useEffect(() => {
+    if (!isMobile) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prev; };
+  }, [isMobile]);
+
+  const panel = (
+    <div style={{
+      background:C.white,
+      borderRadius: isMobile ? 0 : 16,
+      border: isMobile ? "none" : `2px solid ${C.teal}`,
+      overflow: "hidden",
+      position: isMobile ? "static" : "sticky",
+      top: isMobile ? undefined : 80,
+      height: isMobile ? "100%" : "auto",
+      maxHeight: isMobile ? "100%" : "calc(100vh - 100px)",
+      display:"flex", flexDirection:"column",
+    }}>
       <div style={{ background:C.deep, padding:"14px 18px",
-        display:"flex", alignItems:"center", justifyContent:"space-between" }}>
-        <div>
-          <p style={{ fontSize:13, fontWeight:700, color:C.cream, margin:0 }}>{app.address}</p>
-          <p style={{ fontSize:11, color:"rgba(245,240,232,0.5)", margin:"2px 0 0" }}>{app.id} · {app.council}</p>
+        display:"flex", alignItems:"center", justifyContent:"space-between", gap:12, flexShrink:0 }}>
+        <div style={{ minWidth:0, flex:1 }}>
+          <p style={{ fontSize:13, fontWeight:700, color:C.cream, margin:0,
+            overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{app.address}</p>
+          <p style={{ fontSize:11, color:"rgba(245,240,232,0.78)", margin:"2px 0 0",
+            overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{app.id} · {app.council}</p>
         </div>
-        <button onClick={onClose}
-          style={{ background:"none", border:"none", color:"rgba(245,240,232,0.4)",
-            fontSize:20, cursor:"pointer", padding:0, lineHeight:1 }}>✕</button>
+        <button onClick={onClose} aria-label="Close"
+          style={{ background:"rgba(245,240,232,0.15)", border:"none", color:C.cream,
+            fontSize:16, cursor:"pointer", padding:0, lineHeight:1, flexShrink:0,
+            width:32, height:32, borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center" }}>✕</button>
       </div>
 
       {/* Priority alert */}
@@ -455,7 +488,7 @@ const AppDetail = ({ app, onClose }: { app: PlanningApp; onClose: () => void }) 
         </div>
       )}
 
-      <div style={{ padding:"16px 18px" }}>
+      <div style={{ padding:"16px 18px", overflowY:"auto", flex:1, minHeight:0 }}>
         {/* Key info */}
         <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:14 }}>
           {[
@@ -527,6 +560,24 @@ const AppDetail = ({ app, onClose }: { app: PlanningApp; onClose: () => void }) 
       </div>
     </div>
   );
+
+  if (isMobile) {
+    return (
+      <div
+        onClick={onClose}
+        style={{
+          position:"fixed", inset:0, background:"rgba(15,34,56,0.6)",
+          zIndex:1000, display:"flex", alignItems:"stretch", justifyContent:"center",
+        }}
+      >
+        <div onClick={e => e.stopPropagation()} style={{ width:"100%", height:"100%", background:C.white, display:"flex", flexDirection:"column" }}>
+          {panel}
+        </div>
+      </div>
+    );
+  }
+
+  return panel;
 };
 
 // ── PD Checker ───────────────────────────────────────────────────────────────
@@ -672,6 +723,7 @@ const PDChecker = () => {
 // ── Main component ────────────────────────────────────────────────────────────
 
 export default function PlanningAlerts() {
+  const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState("pipeline");
   const [selectedApp, setSelectedApp] = useState<PlanningApp | null>(null);
   const [filterStatus, setFilterStatus] = useState("all");
@@ -796,7 +848,7 @@ export default function PlanningAlerts() {
                   </button>
                 </div>
 
-                <div style={{ display:"grid", gridTemplateColumns: selectedApp ? "1fr 380px" : "1fr", gap:16 }}>
+                <div style={{ display:"grid", gridTemplateColumns: (selectedApp && !isMobile) ? "1fr 380px" : "1fr", gap:16, alignItems:"start" }}>
                   {/* Application list */}
                   <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
                     {sorted.length === 0 && (
@@ -833,7 +885,7 @@ export default function PlanningAlerts() {
 
                   {/* Detail panel */}
                   {selectedApp && (
-                    <AppDetail app={selectedApp} onClose={()=>setSelectedApp(null)} />
+                    <AppDetail app={selectedApp} onClose={()=>setSelectedApp(null)} isMobile={isMobile} />
                   )}
                 </div>
               </>
