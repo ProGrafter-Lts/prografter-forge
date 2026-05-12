@@ -158,6 +158,7 @@ const App = () => (
             <Route path="/legal-review" element={<LegalReview />} />
             <Route path="/apply" element={<Apply />} />
             <Route path="/vetting" element={<Vetting />} />
+            <Route path="/post-job-brief" element={<PostJobBrief />} />
             <Route
               path="/quote-builder/quickbuild"
               element={
