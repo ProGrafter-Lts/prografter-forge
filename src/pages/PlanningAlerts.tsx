@@ -729,12 +729,12 @@ export default function PlanningAlerts() {
 
           {/* Tab bar */}
           <div style={{ background:C.white, borderBottom:`1px solid ${C.border}`,
-            padding:"0 24px", display:"flex", alignItems:"center", gap:4 }}>
-            <button style={tab(activeTab==="pipeline")} onClick={()=>setActiveTab("pipeline")}>
+            padding:"0 16px", display:"flex", alignItems:"stretch", gap:4, flexWrap:"wrap", overflowX:"auto" }}>
+            <button style={{ ...tab(activeTab==="pipeline"), whiteSpace:"nowrap" }} onClick={()=>setActiveTab("pipeline")}>
               📡 Live pipeline
             </button>
-            <button style={tab(activeTab==="checker")} onClick={()=>setActiveTab("checker")}>
-              🔍 Do I need planning permission?
+            <button style={{ ...tab(activeTab==="checker"), whiteSpace:"nowrap" }} onClick={()=>setActiveTab("checker")}>
+              🔍 Planning permission?
             </button>
           </div>
 
