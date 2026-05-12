@@ -729,12 +729,12 @@ export default function PlanningAlerts() {
 
           {/* Tab bar */}
           <div style={{ background:C.white, borderBottom:`1px solid ${C.border}`,
-            padding:"0 24px", display:"flex", alignItems:"center", gap:4 }}>
-            <button style={tab(activeTab==="pipeline")} onClick={()=>setActiveTab("pipeline")}>
+            padding:"0 16px", display:"flex", alignItems:"stretch", gap:4, flexWrap:"wrap", overflowX:"auto" }}>
+            <button style={{ ...tab(activeTab==="pipeline"), whiteSpace:"nowrap" }} onClick={()=>setActiveTab("pipeline")}>
               📡 Live pipeline
             </button>
-            <button style={tab(activeTab==="checker")} onClick={()=>setActiveTab("checker")}>
-              🔍 Do I need planning permission?
+            <button style={{ ...tab(activeTab==="checker"), whiteSpace:"nowrap" }} onClick={()=>setActiveTab("checker")}>
+              🔍 Planning permission?
             </button>
           </div>
 
@@ -770,8 +770,8 @@ export default function PlanningAlerts() {
                 </div>
 
                 {/* Filters */}
-                <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr auto", gap:10, marginBottom:16 }}>
-                  <input style={inp()} value={searchQuery}
+                <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(160px, 1fr))", gap:10, marginBottom:16 }}>
+                  <input style={{ ...inp(), gridColumn:"1 / -1" }} value={searchQuery}
                     onChange={e=>setSearchQuery(e.target.value)}
                     placeholder="Search address or description..." />
                   <select style={inp()} value={filterTrade} onChange={e=>setFilterTrade(e.target.value)}>
@@ -783,8 +783,8 @@ export default function PlanningAlerts() {
                     {allCouncils.map(c=><option key={c} value={c}>{c}</option>)}
                   </select>
                   <button onClick={()=>{setFilterStatus("all");setFilterTrade("all");setFilterCouncil("all");setSearchQuery("");}}
-                    style={{ padding:"9px 14px", background:"none", border:`1.5px solid ${C.border}`,
-                      borderRadius:8, fontSize:12, color:C.secondary, cursor:"pointer", whiteSpace:"nowrap" }}>
+                    style={{ padding:"9px 14px", background:C.white, border:`1.5px solid ${C.border}`,
+                      borderRadius:8, fontSize:12, fontWeight:600, color:C.deep, cursor:"pointer", whiteSpace:"nowrap" }}>
                     Clear filters
                   </button>
                 </div>
