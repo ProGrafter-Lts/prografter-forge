@@ -186,40 +186,68 @@ function recordLatLng(r: PlanItRecord): { lat: number; lng: number } | null {
   return null;
 }
 
-// Loose trade-type relevance filter — better to over-include than miss leads.
-function isRelevant(record: PlanItRecord, tradeType: string): boolean {
+// Strict allowlist — ONLY surface solid structural job types.
+// Categories (in order): single-storey ext, double/two-storey ext, first-floor ext,
+// loft conversion, garage conversion, detached garage, detached outbuilding,
+// annexe, boundary wall, lawful development certificate.
+const ALLOWED_PATTERNS: RegExp[] = [
+  // Single storey extension (rear/side/front/wrap-around)
+  /\bsingle[\s-]?stor(?:e?y|ied)\b.*\bextension\b/,
+  /\bextension\b.*\bsingle[\s-]?stor(?:e?y|ied)\b/,
+  // Two / double storey extension
+  /\b(?:two|2|double)[\s-]?stor(?:e?y|ied)\b.*\bextension\b/,
+  /\bextension\b.*\b(?:two|2|double)[\s-]?stor(?:e?y|ied)\b/,
+  // First floor extension
+  /\bfirst[\s-]?floor\b.*\bextension\b/,
+  /\bextension\b.*\bfirst[\s-]?floor\b/,
+  // Loft conversion (incl. dormer / hip-to-gable / roof conversion)
+  /\bloft\s+conversion\b/,
+  /\bdormer\b/,
+  /\bhip[\s-]?to[\s-]?gable\b/,
+  /\broof\s+conversion\b/,
+  // Garage conversion
+  /\bgarage\s+conversion\b/,
+  /\bconversion\s+of\s+(?:existing\s+)?garage\b/,
+  // Detached garage (new build)
+  /\b(?:detached|new)\s+garage\b/,
+  /\berection\s+of\s+(?:a\s+)?(?:detached\s+)?garage\b/,
+  // Detached outbuilding / outbuilding
+  /\bdetached\s+outbuilding\b/,
+  /\boutbuilding\b/,
+  // Annexe / annex / granny annexe
+  /\bannex(?:e)?\b/,
+  /\bgranny\s+annex(?:e)?\b/,
+  // Boundary wall / fence / gates (boundary treatment)
+  /\bboundary\s+wall\b/,
+  /\bboundary\s+treatment\b/,
+  // Lawful Development Certificate
+  /\blawful\s+development\s+certificate\b/,
+  /\bcertificate\s+of\s+lawful(?:ness)?\b/,
+  /\bldc\b/,
+];
+
+// Hard exclusions — even if an allowlist pattern matches, drop these.
+const EXCLUDE_PATTERNS: RegExp[] = [
+  /\bnon[\s-]?material\s+amendment\b/,
+  /\bminor[\s-]?material\s+amendment\b/,
+  /\bs(?:ection)?\s?73\b/,            // variation of conditions
+  /\bvariation\s+of\s+condition/,
+  /\bdischarge\s+of\s+condition/,
+  /\bapproval\s+of\s+(?:details|conditions?)\b/,
+  /\bprior\s+approval\b.*\b(?:telecom|advert)/,
+  /\btree\s+(?:works|preservation|surgery)\b/,
+  /\btpo\b/,
+  /\blisted\s+building\b/,
+  /\badvertisement\b/,
+  /\btelecom(?:munication)?s?\b/,
+];
+
+function isRelevant(record: PlanItRecord, _tradeType: string): boolean {
   const desc =
     `${record.description ?? ""} ${record.app_type ?? ""}`.toLowerCase();
-  if (!desc.trim()) return true;
-  const t = tradeType.toLowerCase();
-
-  const keywordMap: Record<string, string[]> = {
-    extension: ["extension", "rear extension", "side extension", "single storey", "two storey"],
-    "loft conversion": ["loft", "dormer", "roof conversion"],
-    roofing: ["roof", "re-roof", "tiling"],
-    "solar pv": ["solar", "photovoltaic", "pv panel"],
-    "heat pump": ["heat pump", "ashp", "gshp", "renewable heating"],
-    ewi: ["external wall insulation", "ewi", "render", "cladding"],
-    cwi: ["cavity wall", "cavity insulation"],
-    "ev charger": ["ev charge", "electric vehicle", "charge point"],
-    windows: ["window", "glazing", "fenestration"],
-    kitchen: ["kitchen"],
-    bathroom: ["bathroom", "wet room", "en-suite"],
-    landscaping: ["landscap", "garden", "patio", "driveway"],
-    driveway: ["driveway", "dropped kerb", "hardstanding"],
-    plastering: ["internal alteration"],
-    electrical: ["rewire", "consumer unit"],
-    plumbing: ["plumb", "boiler"],
-    builder: [
-      "extension", "loft", "conversion", "alteration", "outbuilding",
-      "garage", "annex", "rebuild",
-    ],
-  };
-
-  for (const [key, kws] of Object.entries(keywordMap)) {
-    if (t.includes(key)) return kws.some((kw) => desc.includes(kw));
-  }
-  return true;
+  if (!desc.trim()) return false;
+  if (EXCLUDE_PATTERNS.some((re) => re.test(desc))) return false;
+  return ALLOWED_PATTERNS.some((re) => re.test(desc));
 }
 
 async function processSub(
