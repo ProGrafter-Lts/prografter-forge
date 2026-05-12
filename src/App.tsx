@@ -170,6 +170,9 @@ const App = () => (
             <Route path="/jobs/:ref" element={<ProtectedRoute><JobOS /></ProtectedRoute>} />
             <Route path="/reviews/:ref" element={<ProtectedRoute><ReviewSubmit /></ProtectedRoute>} />
             <Route path="/traders/:id/reviews" element={<TraderReviews />} />
+            <Route path="/disputes/new" element={<ProtectedRoute><DisputeRaise /></ProtectedRoute>} />
+            <Route path="/disputes/:id" element={<ProtectedRoute><DisputeDetail /></ProtectedRoute>} />
+            <Route path="/admin/disputes" element={<AdminRoute><AdminDisputes /></AdminRoute>} />
             <Route
               path="/quote-builder/quickbuild"
               element={
