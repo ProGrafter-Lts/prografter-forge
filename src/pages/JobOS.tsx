@@ -481,7 +481,7 @@ async function loadJobByRef(ref: string, userId: string): Promise<{ job: JobData
 
   // 2. Determine viewer role
   const { data: ho } = await supabase.from("homeowners").select("id, name").eq("user_id", userId).maybeSingle();
-  const { data: tr } = await supabase.from("trades").select("id, business_name, full_name").eq("user_id", userId).maybeSingle();
+  const { data: tr } = await supabase.from("trades").select("id, name, company_name").eq("user_id", userId).maybeSingle();
 
   let view: "trader" | "homeowner" | null = null;
   let senderId: string | null = null;
