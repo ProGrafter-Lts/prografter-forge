@@ -653,12 +653,12 @@ function JobOSContent() {
   }
 
   return (
-    <div style={{ minHeight:"100vh", background:C.cream, fontFamily:"system-ui, sans-serif" }}>
+    <div style={{ minHeight:"100vh", background:C.cream }}>
       <div style={{ background:C.deep, padding:"14px 24px",
         display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:8 }}>
         <div style={{ display:"flex", alignItems:"center", gap:12, flexWrap:"wrap" }}>
           <span style={{ fontSize:12, color:C.dimText, fontWeight:500, letterSpacing:"0.05em" }}>JOB OS</span>
-          <span style={{ fontSize:12, fontFamily:"monospace", color:C.teal,
+          <span style={{ fontSize:12, fontFamily:"'DM Mono', monospace", color:C.teal,
             background:"rgba(13,148,136,0.15)", padding:"2px 8px", borderRadius:6 }}>
             {job.ref}
           </span>

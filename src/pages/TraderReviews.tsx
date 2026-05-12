@@ -160,11 +160,11 @@ export default function TraderReviews() {
   }, [id]);
 
   if (loading) {
-    return <div style={{ minHeight:"100vh", background:C.cream, display:"flex", alignItems:"center", justifyContent:"center", color:C.secondary, fontFamily:"system-ui" }}>Loading…</div>;
+    return <div style={{ minHeight:"100vh", background:C.cream, display:"flex", alignItems:"center", justifyContent:"center", color:C.secondary }}>Loading…</div>;
   }
   if (!trader) {
     return (
-      <div style={{ minHeight:"100vh", background:C.cream, padding:"3rem 1rem", fontFamily:"system-ui" }}>
+      <div style={{ minHeight:"100vh", background:C.cream, padding:"3rem 1rem" }}>
         <div style={{ maxWidth:480, margin:"0 auto", background:C.white, border:`1.5px solid ${C.border}`, borderRadius:14, padding:"1.5rem", textAlign:"center" }}>
           <p style={{ fontSize:15, fontWeight:600, color:C.deep }}>Trader not found.</p>
           <Link to="/" style={{ display:"inline-block", marginTop:12, color:C.teal, fontWeight:600 }}>← Back home</Link>
@@ -183,7 +183,7 @@ export default function TraderReviews() {
   });
 
   return (
-    <div style={{ minHeight:"100vh", background:C.cream, fontFamily:"system-ui, sans-serif" }}>
+    <div style={{ minHeight:"100vh", background:C.cream }}>
       <SEO
         title={`${trader.name} · ${trader.company_name ?? ""} reviews · ProGrafter`}
         description={`Verified reviews for ${trader.name}${trader.company_name ? ` (${trader.company_name})` : ""} on ProGrafter.`}
