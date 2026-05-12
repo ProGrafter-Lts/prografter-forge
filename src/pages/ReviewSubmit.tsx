@@ -213,7 +213,7 @@ export default function ReviewSubmit() {
 
   return (
     <div style={{ minHeight:"100vh", background:C.cream, fontFamily:"system-ui, sans-serif" }}>
-      <SEO title="Leave a review · ProGrafter" description="Submit a permanent, verified review on your completed job." canonical={`https://prografter.co.uk/reviews/${ctx.jobRef}`} />
+      <SEO title="Leave a review · ProGrafter" description="Submit a permanent, verified review on your completed job." path={`/reviews/${ctx.jobRef}`} noindex />
 
       <div style={{ background:C.deep, padding:"14px 24px", display:"flex", alignItems:"center", justifyContent:"space-between", position:"sticky", top:0, zIndex:10 }}>
         <div style={{ display:"flex", alignItems:"center", gap:12 }}>
