@@ -770,8 +770,8 @@ export default function PlanningAlerts() {
                 </div>
 
                 {/* Filters */}
-                <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr auto", gap:10, marginBottom:16 }}>
-                  <input style={inp()} value={searchQuery}
+                <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(160px, 1fr))", gap:10, marginBottom:16 }}>
+                  <input style={{ ...inp(), gridColumn:"1 / -1" }} value={searchQuery}
                     onChange={e=>setSearchQuery(e.target.value)}
                     placeholder="Search address or description..." />
                   <select style={inp()} value={filterTrade} onChange={e=>setFilterTrade(e.target.value)}>
@@ -783,8 +783,8 @@ export default function PlanningAlerts() {
                     {allCouncils.map(c=><option key={c} value={c}>{c}</option>)}
                   </select>
                   <button onClick={()=>{setFilterStatus("all");setFilterTrade("all");setFilterCouncil("all");setSearchQuery("");}}
-                    style={{ padding:"9px 14px", background:"none", border:`1.5px solid ${C.border}`,
-                      borderRadius:8, fontSize:12, color:C.secondary, cursor:"pointer", whiteSpace:"nowrap" }}>
+                    style={{ padding:"9px 14px", background:C.white, border:`1.5px solid ${C.border}`,
+                      borderRadius:8, fontSize:12, fontWeight:600, color:C.deep, cursor:"pointer", whiteSpace:"nowrap" }}>
                     Clear filters
                   </button>
                 </div>
