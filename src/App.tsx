@@ -47,6 +47,7 @@ const QuickBuildPage = lazy(() => import("./pages/QuickBuildPage.tsx"));
 const Apply = lazy(() => import("./pages/Apply.tsx"));
 const Vetting = lazy(() => import("./pages/Vetting.tsx"));
 const PostJobBrief = lazy(() => import("./pages/PostJobBrief.tsx"));
+const QuoteCheckerAI = lazy(() => import("./pages/QuoteCheckerAI.tsx"));
 import AdminRoute from "./components/AdminRoute.tsx";
 
 const queryClient = new QueryClient({
@@ -159,6 +160,7 @@ const App = () => (
             <Route path="/apply" element={<Apply />} />
             <Route path="/vetting" element={<Vetting />} />
             <Route path="/post-job-brief" element={<PostJobBrief />} />
+            <Route path="/quote-checker-ai" element={<QuoteCheckerAI />} />
             <Route
               path="/quote-builder/quickbuild"
               element={
