@@ -115,7 +115,7 @@ export default function ReviewSubmit() {
 
       setCtx({
         job_id: row.job_id, homeowner_id: row.homeowner_id, trade_id: row.trade_id,
-        role: row.role,
+        role: row.role as "homeowner" | "trade",
         jobRef: ref!,
         jobTitle: job?.title ?? job?.job_type ?? "Job",
         jobAddress: job?.address ?? "",
