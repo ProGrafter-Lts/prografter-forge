@@ -310,7 +310,7 @@ const PROP_TYPES = [
 const inp = () => ({
   width:"100%", padding:"9px 12px", borderRadius:8,
   border:`1.5px solid ${C.border}`, fontSize:13, color:C.body,
-  fontFamily:"inherit", outline:"none", boxSizing:"border-box", background:C.white,
+  fontFamily:"inherit", outline:"none", background:C.white,
 });
 
 const tab = (active: boolean) => ({
