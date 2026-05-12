@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import SEO from "@/components/SEO";
 import AppShell from "@/components/AppShell";
 import { supabase } from "@/integrations/supabase/client";
