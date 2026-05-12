@@ -711,9 +711,11 @@ function JobOSContent() {
         </div>
 
         <div style={{ marginTop:16, display:"flex", justifyContent:"center" }}>
-          <button style={{ background:"none", border:`1px solid ${C.redBorder}`,
-            color:C.red, borderRadius:8, padding:"8px 18px",
-            fontSize:12, cursor:"pointer" }}>
+          <button
+            onClick={() => navigate(`/disputes/new?job=${ref}`)}
+            style={{ background:"none", border:`1px solid ${C.redBorder}`,
+              color:C.red, borderRadius:8, padding:"8px 18px",
+              fontSize:12, cursor:"pointer" }}>
             ⚠️ Raise a dispute
           </button>
         </div>
