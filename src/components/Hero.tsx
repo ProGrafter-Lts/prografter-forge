@@ -67,10 +67,6 @@ const Hero = () => {
 
           {/* Tertiary links */}
           <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-xs text-secondary-text">
-            <a href="/green" className="hover:text-teal transition-colors">
-              🌿 Green grants
-            </a>
-            <span className="text-cream/20">·</span>
             <a href="/login" className="hover:text-teal transition-colors">
               Already have an account? Sign in
             </a>
