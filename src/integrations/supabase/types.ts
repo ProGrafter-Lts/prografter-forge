@@ -1850,14 +1850,26 @@ export type Database = {
           created_at: string
           headline: string | null
           homeowner_id: string
+          homeowner_overall: number | null
+          homeowner_review_submitted_at: string | null
           id: string
           is_test: boolean
           job_id: string
-          rating: number
+          published_at: string | null
+          rating: number | null
           reliability_rating: number | null
+          tidiness_rating: number | null
+          trade_access_rating: number | null
+          trade_communication_rating: number | null
           trade_id: string
+          trade_overall: number | null
+          trade_payment_rating: number | null
+          trade_reasonable_rating: number | null
           trade_responded_at: string | null
           trade_response: string | null
+          trade_review_comment: string | null
+          trade_review_submitted_at: string | null
+          trade_scope_rating: number | null
           updated_at: string
           value_rating: number | null
           workmanship_rating: number | null
@@ -1869,14 +1881,26 @@ export type Database = {
           created_at?: string
           headline?: string | null
           homeowner_id: string
+          homeowner_overall?: number | null
+          homeowner_review_submitted_at?: string | null
           id?: string
           is_test?: boolean
           job_id: string
-          rating: number
+          published_at?: string | null
+          rating?: number | null
           reliability_rating?: number | null
+          tidiness_rating?: number | null
+          trade_access_rating?: number | null
+          trade_communication_rating?: number | null
           trade_id: string
+          trade_overall?: number | null
+          trade_payment_rating?: number | null
+          trade_reasonable_rating?: number | null
           trade_responded_at?: string | null
           trade_response?: string | null
+          trade_review_comment?: string | null
+          trade_review_submitted_at?: string | null
+          trade_scope_rating?: number | null
           updated_at?: string
           value_rating?: number | null
           workmanship_rating?: number | null
@@ -1888,14 +1912,26 @@ export type Database = {
           created_at?: string
           headline?: string | null
           homeowner_id?: string
+          homeowner_overall?: number | null
+          homeowner_review_submitted_at?: string | null
           id?: string
           is_test?: boolean
           job_id?: string
-          rating?: number
+          published_at?: string | null
+          rating?: number | null
           reliability_rating?: number | null
+          tidiness_rating?: number | null
+          trade_access_rating?: number | null
+          trade_communication_rating?: number | null
           trade_id?: string
+          trade_overall?: number | null
+          trade_payment_rating?: number | null
+          trade_reasonable_rating?: number | null
           trade_responded_at?: string | null
           trade_response?: string | null
+          trade_review_comment?: string | null
+          trade_review_submitted_at?: string | null
+          trade_scope_rating?: number | null
           updated_at?: string
           value_rating?: number | null
           workmanship_rating?: number | null
@@ -2612,6 +2648,15 @@ export type Database = {
       generate_contract_reference: { Args: never; Returns: string }
       generate_job_ref: { Args: never; Returns: string }
       generate_quote_reference: { Args: never; Returns: string }
+      get_review_context: {
+        Args: { _ref: string }
+        Returns: {
+          homeowner_id: string
+          job_id: string
+          role: string
+          trade_id: string
+        }[]
+      }
       get_trade_for_job: {
         Args: { _job_id: string }
         Returns: {
