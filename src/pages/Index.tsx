@@ -48,6 +48,7 @@ const Index = () => {
       />
       <Navbar />
       <Hero />
+      <GreenGrantsChecker />
       <AboutStoryBanner />
       <Ticker />
       <HowItWorks />
@@ -55,7 +56,6 @@ const Index = () => {
       <ContrastSection />
       <FeaturesGrid />
       <TradesHowItWorks />
-      <GreenGrantsChecker />
       <HomeownersHowItWorks />
       <GreenEnergySection />
       <WhatYouGet />
