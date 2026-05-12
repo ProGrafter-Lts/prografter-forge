@@ -433,21 +433,41 @@ const AppCard = ({ app, onSelect, selected }: { app: PlanningApp; onSelect: (app
 
 // ── Application detail panel ──────────────────────────────────────────────────
 
-const AppDetail = ({ app, onClose }: { app: PlanningApp; onClose: () => void }) => {
+const AppDetail = ({ app, onClose, isMobile }: { app: PlanningApp; onClose: () => void; isMobile: boolean }) => {
   const s = STATUS_CFG[app.status] || STATUS_CFG.submitted;
   const daysSinceSubmission = Math.floor((Date.now() - new Date(app.submitted_date).getTime()) / 86400000);
-  return (
-    <div style={{ background:C.white, borderRadius:16, border:`2px solid ${C.teal}`,
-      overflow:"hidden", position:"sticky", top:80 }}>
+
+  useEffect(() => {
+    if (!isMobile) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prev; };
+  }, [isMobile]);
+
+  const panel = (
+    <div style={{
+      background:C.white,
+      borderRadius: isMobile ? 0 : 16,
+      border: isMobile ? "none" : `2px solid ${C.teal}`,
+      overflow: "hidden",
+      position: isMobile ? "static" : "sticky",
+      top: isMobile ? undefined : 80,
+      height: isMobile ? "100%" : "auto",
+      maxHeight: isMobile ? "100%" : "calc(100vh - 100px)",
+      display:"flex", flexDirection:"column",
+    }}>
       <div style={{ background:C.deep, padding:"14px 18px",
-        display:"flex", alignItems:"center", justifyContent:"space-between" }}>
-        <div>
-          <p style={{ fontSize:13, fontWeight:700, color:C.cream, margin:0 }}>{app.address}</p>
-          <p style={{ fontSize:11, color:"rgba(245,240,232,0.5)", margin:"2px 0 0" }}>{app.id} · {app.council}</p>
+        display:"flex", alignItems:"center", justifyContent:"space-between", gap:12, flexShrink:0 }}>
+        <div style={{ minWidth:0, flex:1 }}>
+          <p style={{ fontSize:13, fontWeight:700, color:C.cream, margin:0,
+            overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{app.address}</p>
+          <p style={{ fontSize:11, color:"rgba(245,240,232,0.78)", margin:"2px 0 0",
+            overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{app.id} · {app.council}</p>
         </div>
-        <button onClick={onClose}
-          style={{ background:"none", border:"none", color:"rgba(245,240,232,0.4)",
-            fontSize:20, cursor:"pointer", padding:0, lineHeight:1 }}>✕</button>
+        <button onClick={onClose} aria-label="Close"
+          style={{ background:"rgba(245,240,232,0.15)", border:"none", color:C.cream,
+            fontSize:16, cursor:"pointer", padding:0, lineHeight:1, flexShrink:0,
+            width:32, height:32, borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center" }}>✕</button>
       </div>
 
       {/* Priority alert */}
