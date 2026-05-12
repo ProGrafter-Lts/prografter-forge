@@ -11,7 +11,7 @@ const C = {
   amber:"#D97706", amberBg:"#FFFBEB", amberBorder:"#FDE68A",
   green:"#16A34A", greenBg:"#F0FDF4", greenBorder:"#BBF7D0",
   red:"#DC2626", redBg:"#FEF2F2", redBorder:"#FECACA",
-  dimText:"rgba(245,240,232,0.5)", brightText:"#F5F0E8",
+  dimText:"rgba(245,240,232,0.78)", brightText:"#F5F0E8",
 };
 
 const TRADER_DIMENSIONS = [
@@ -221,7 +221,7 @@ export default function ReviewSubmit() {
             <span style={{ color:C.brightText }}>Pro</span>
             <span style={{ color:C.teal }}>Grafter</span>
           </Link>
-          <span style={{ color:"rgba(245,240,232,0.2)", fontSize:16 }}>|</span>
+          <span style={{ color:"rgba(245,240,232,0.45)", fontSize:16 }}>|</span>
           <span style={{ fontSize:12, color:C.dimText, fontWeight:500, letterSpacing:"0.05em" }}>REVIEW</span>
         </div>
         <span style={{ fontSize:11, color:C.dimText, fontFamily:"'DM Mono', monospace" }}>{ctx.jobRef}</span>

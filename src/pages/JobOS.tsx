@@ -13,8 +13,8 @@ const C = {
   green:"#16A34A", greenBg:"#F0FDF4", greenBorder:"#BBF7D0",
   red:"#DC2626", redBg:"#FEF2F2", redBorder:"#FECACA",
   purple:"#7C3AED", purpleBg:"#F5F3FF", purpleBorder:"#DDD6FE",
-  darkBorder:"rgba(245,240,232,0.1)",
-  dimText:"rgba(245,240,232,0.5)", brightText:"#F5F0E8",
+  darkBorder:"rgba(245,240,232,0.22)",
+  dimText:"rgba(245,240,232,0.78)", brightText:"#F5F0E8",
 };
 
 const STAGES = [
