@@ -723,6 +723,7 @@ const PDChecker = () => {
 // ── Main component ────────────────────────────────────────────────────────────
 
 export default function PlanningAlerts() {
+  const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState("pipeline");
   const [selectedApp, setSelectedApp] = useState<PlanningApp | null>(null);
   const [filterStatus, setFilterStatus] = useState("all");
