@@ -165,6 +165,8 @@ const App = () => (
             <Route path="/post-job-brief" element={<PostJobBrief />} />
             <Route path="/quote-checker-ai" element={<QuoteCheckerAI />} />
             <Route path="/jobs/:ref" element={<ProtectedRoute><JobOS /></ProtectedRoute>} />
+            <Route path="/reviews/:ref" element={<ProtectedRoute><ReviewSubmit /></ProtectedRoute>} />
+            <Route path="/traders/:id/reviews" element={<TraderReviews />} />
             <Route
               path="/quote-builder/quickbuild"
               element={
