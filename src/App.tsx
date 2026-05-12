@@ -46,6 +46,7 @@ const LegalReview = lazy(() => import("./pages/LegalReview.tsx"));
 const QuickBuildPage = lazy(() => import("./pages/QuickBuildPage.tsx"));
 const Apply = lazy(() => import("./pages/Apply.tsx"));
 const Vetting = lazy(() => import("./pages/Vetting.tsx"));
+const PostJobBrief = lazy(() => import("./pages/PostJobBrief.tsx"));
 import AdminRoute from "./components/AdminRoute.tsx";
 
 const queryClient = new QueryClient({
