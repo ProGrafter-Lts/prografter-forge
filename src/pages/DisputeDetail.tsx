@@ -104,13 +104,13 @@ export default function DisputeDetail() {
 
   if (err) return (
     <div style={{ minHeight:"100vh", background:C.cream, padding:"3rem 1rem",
-      fontFamily:"system-ui", display:"flex", justifyContent:"center" }}>
+      display:"flex", justifyContent:"center" }}>
       <p style={{ color:C.red }}>{err}</p>
     </div>
   );
   if (!dispute) return (
     <div style={{ minHeight:"100vh", background:C.cream, display:"flex",
-      alignItems:"center", justifyContent:"center", color:C.secondary, fontFamily:"system-ui" }}>
+      alignItems:"center", justifyContent:"center", color:C.secondary }}>
       Loading…
     </div>
   );
