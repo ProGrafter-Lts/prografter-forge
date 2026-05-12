@@ -771,7 +771,7 @@ export default function PlanningAlerts() {
 
                 {/* Filters */}
                 <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(160px, 1fr))", gap:10, marginBottom:16 }}>
-                  <input style={{ ...inp(), gridColumn:"1 / -1" }} value={searchQuery}
+                  <input className="placeholder:text-secondary placeholder:opacity-100" style={{ ...inp(), gridColumn:"1 / -1" }} value={searchQuery}
                     onChange={e=>setSearchQuery(e.target.value)}
                     placeholder="Search address or description..." />
                   <select style={inp()} value={filterTrade} onChange={e=>setFilterTrade(e.target.value)}>
