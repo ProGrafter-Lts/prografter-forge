@@ -330,6 +330,8 @@ async function processSub(
     "advertising",
     "heritage",
     "telecoms",
+    "trees",
+    "listed building",
     "other",
   ]);
   const rows = inRadius
