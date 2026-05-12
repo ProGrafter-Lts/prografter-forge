@@ -182,7 +182,7 @@ const BriefPreview = ({ form }: { form: typeof BLANK }) => {
         </div>
         <div style={{ textAlign: "right" }}>
           <p style={{ color: C.tealHover, fontSize: 12, fontWeight: 600,
-            margin: 0, fontFamily: "monospace" }}>{ref}</p>
+            margin: 0, fontFamily: "'DM Mono', monospace" }}>{ref}</p>
           <p style={{ color: "rgba(245,240,232,0.5)", fontSize: 10,
             margin: "2px 0 0" }}>{new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</p>
         </div>
@@ -271,7 +271,7 @@ const BriefPreview = ({ form }: { form: typeof BLANK }) => {
           <strong style={{ color: C.navy }}>ProGrafter Job Brief</strong> — This document forms part of the job record.
           Both parties are required to agree the scope of works before any payment is made.
           All payments are held in escrow and released on signed milestone completion.
-          Reference: <span style={{ fontFamily: "monospace", color: C.teal }}>{ref}</span>
+          Reference: <span style={{ fontFamily: "'DM Mono', monospace", color: C.teal }}>{ref}</span>
         </div>
       </div>
     </div>
@@ -523,7 +523,7 @@ export default function PostJobBrief() {
     const ref = `PG-${Date.now().toString(36).toUpperCase().slice(-6)}`;
     return (
       <div style={{ minHeight: "100vh", background: C.cream, display: "flex",
-        alignItems: "center", justifyContent: "center", fontFamily: "system-ui, sans-serif", padding: "2rem 1rem" }}>
+        alignItems: "center", justifyContent: "center", fontFamily: "'DM Sans', system-ui, sans-serif", padding: "2rem 1rem" }}>
         <div style={{ maxWidth: 480, width: "100%", background: C.white,
           borderRadius: 20, border: `1.5px solid ${C.border}`,
           padding: "2.5rem 2rem", textAlign: "center",
@@ -543,7 +543,7 @@ export default function PostJobBrief() {
           <div style={{ background: C.cream, borderRadius: 10, padding: "12px 16px", marginBottom: 16 }}>
             <p style={{ fontSize: 11, color: C.secondary, margin: "0 0 4px" }}>Your reference number</p>
             <p style={{ fontSize: 18, fontWeight: 700, color: C.teal,
-              fontFamily: "monospace", margin: 0 }}>{ref}</p>
+              fontFamily: "'DM Mono', monospace", margin: 0 }}>{ref}</p>
           </div>
           <p style={{ fontSize: 12, color: C.secondary }}>
             Confirmation sent to <strong style={{ color: C.navy }}>{form.email}</strong>
@@ -560,7 +560,7 @@ export default function PostJobBrief() {
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: C.cream, fontFamily: "system-ui, sans-serif" }}>
+    <div style={{ minHeight: "100vh", background: C.cream, fontFamily: "'DM Sans', system-ui, sans-serif" }}>
       <div style={{ background: C.deep, padding: "16px 24px",
         display: "flex", alignItems: "center", justifyContent: "space-between",
         position: "sticky", top: 0, zIndex: 10 }}>
