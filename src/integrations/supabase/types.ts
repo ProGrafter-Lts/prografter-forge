@@ -820,6 +820,47 @@ export type Database = {
           },
         ]
       }
+      job_photos: {
+        Row: {
+          created_at: string
+          id: string
+          job_id: string
+          label: string
+          photo_url: string
+          stage: number
+          uploaded_by: string
+          uploader_user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          job_id: string
+          label?: string
+          photo_url: string
+          stage?: number
+          uploaded_by?: string
+          uploader_user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          job_id?: string
+          label?: string
+          photo_url?: string
+          stage?: number
+          uploaded_by?: string
+          uploader_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_photos_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       jobs: {
         Row: {
           address: string
@@ -837,6 +878,7 @@ export type Database = {
           job_type: string
           photo_urls: string[] | null
           postcode: string
+          ref: string
           specialism_id: string | null
           stage: string
           status: string
@@ -859,6 +901,7 @@ export type Database = {
           job_type: string
           photo_urls?: string[] | null
           postcode: string
+          ref?: string
           specialism_id?: string | null
           stage?: string
           status?: string
@@ -881,6 +924,7 @@ export type Database = {
           job_type?: string
           photo_urls?: string[] | null
           postcode?: string
+          ref?: string
           specialism_id?: string | null
           stage?: string
           status?: string
@@ -2566,6 +2610,7 @@ export type Database = {
         Returns: string
       }
       generate_contract_reference: { Args: never; Returns: string }
+      generate_job_ref: { Args: never; Returns: string }
       generate_quote_reference: { Args: never; Returns: string }
       get_trade_for_job: {
         Args: { _job_id: string }
