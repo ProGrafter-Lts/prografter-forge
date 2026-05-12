@@ -51,6 +51,9 @@ const QuoteCheckerAI = lazy(() => import("./pages/QuoteCheckerAI.tsx"));
 const JobOS = lazy(() => import("./pages/JobOS.tsx"));
 const ReviewSubmit = lazy(() => import("./pages/ReviewSubmit.tsx"));
 const TraderReviews = lazy(() => import("./pages/TraderReviews.tsx"));
+const DisputeRaise = lazy(() => import("./pages/DisputeRaise.tsx"));
+const DisputeDetail = lazy(() => import("./pages/DisputeDetail.tsx"));
+const AdminDisputes = lazy(() => import("./pages/AdminDisputes.tsx"));
 import AdminRoute from "./components/AdminRoute.tsx";
 
 const queryClient = new QueryClient({
