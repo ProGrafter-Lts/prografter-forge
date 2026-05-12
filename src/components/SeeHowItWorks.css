@@ -98,7 +98,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: 'DM Mono', monospace;
   font-size: 22px;
   color: hsl(174 84% 32%);
   margin-bottom: 14px;
@@ -179,7 +179,7 @@
 .sc-body { padding: 14px; }
 
 .greeting {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: 'DM Mono', monospace;
   font-size: 15px;
   color: white;
   letter-spacing: 0.5px;
@@ -224,7 +224,7 @@
 }
 
 .stat-n {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: 'DM Mono', monospace;
   font-size: 18px;
   color: hsl(174 84% 32%);
   line-height: 1;
@@ -260,7 +260,7 @@
 .jc-title { font-size: 10px; font-weight: 700; color: white; margin-bottom: 2px; }
 .jc-meta { font-size: 8px; color: rgba(255,255,255,0.3); font-family: 'DM Mono', monospace; margin-bottom: 5px; }
 .jc-bottom { display: flex; justify-content: space-between; align-items: center; }
-.jc-val { font-family: 'Bebas Neue', sans-serif; font-size: 14px; color: hsl(174 84% 32%); }
+.jc-val { font-family: 'DM Mono', monospace; font-size: 14px; color: hsl(174 84% 32%); }
 .jc-btn {
   background: hsl(174 84% 32%);
   color: white;
@@ -288,7 +288,7 @@
 
 .jb-top { display: flex; justify-content: space-between; margin-bottom: 5px; }
 .jb-title { font-size: 11px; font-weight: 700; color: white; }
-.jb-val { font-family: 'Bebas Neue', sans-serif; font-size: 16px; color: hsl(174 84% 32%); }
+.jb-val { font-family: 'DM Mono', monospace; font-size: 16px; color: hsl(174 84% 32%); }
 .jb-tags { margin-bottom: 5px; }
 
 .tag {
@@ -333,7 +333,7 @@
 
 .jsm-title { font-size: 9px; font-weight: 700; color: white; }
 .jsm-loc { font-size: 7px; color: rgba(255,255,255,0.28); font-family: 'DM Mono', monospace; }
-.jsm-val { font-family: 'Bebas Neue', sans-serif; font-size: 13px; color: hsl(174 84% 32%); }
+.jsm-val { font-family: 'DM Mono', monospace; font-size: 13px; color: hsl(174 84% 32%); }
 
 /* ── TIMELINE SCREEN ── */
 .timeline-body { padding: 12px; }
@@ -409,7 +409,7 @@
   position: absolute;
   right: 8px;
   top: 8px;
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: 'DM Mono', monospace;
   font-size: 9px;
   letter-spacing: 1px;
   background: rgba(13,148,136,0.2);
@@ -420,13 +420,13 @@
 }
 
 .ph-lbl { font-size: 7px; color: rgba(255,255,255,0.25); font-family: 'DM Mono', monospace; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 3px; }
-.ph-title { font-family: 'Bebas Neue', sans-serif; font-size: 14px; color: white; letter-spacing: 0.5px; margin-bottom: 2px; }
+.ph-title { font-family: 'DM Mono', monospace; font-size: 14px; color: white; letter-spacing: 0.5px; margin-bottom: 2px; }
 .ph-trade { font-size: 8px; color: rgba(255,255,255,0.38); margin-bottom: 7px; }
 .ph-prog { height: 4px; background: rgba(255,255,255,0.07); border-radius: 99px; overflow: hidden; margin-bottom: 4px; }
 .ph-fill { height: 100%; background: linear-gradient(90deg, hsl(174 84% 32%), hsl(174 78% 40%)); border-radius: 99px; }
 
 .ph-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
-.ph-stat .n { font-family: 'Bebas Neue', sans-serif; font-size: 14px; color: hsl(174 84% 32%); line-height: 1; }
+.ph-stat .n { font-family: 'DM Mono', monospace; font-size: 14px; color: hsl(174 84% 32%); line-height: 1; }
 .ph-stat .l { font-size: 7px; color: rgba(255,255,255,0.2); font-family: 'DM Mono', monospace; }
 
 .update-card {
@@ -491,7 +491,7 @@
 /* ── QUOTE CHECKER SCREEN ── */
 .qc-body { padding: 12px; }
 .qc-score { text-align: center; padding: 8px 0 10px; border-bottom: 1px solid rgba(255,255,255,0.05); margin-bottom: 8px; }
-.qc-num { font-family: 'Bebas Neue', sans-serif; font-size: 44px; color: white; line-height: 1; }
+.qc-num { font-family: 'DM Mono', monospace; font-size: 44px; color: white; line-height: 1; }
 .qc-num span { font-size: 20px; color: rgba(255,255,255,0.25); }
 .qc-lbl { font-size: 8px; color: rgba(255,255,255,0.28); font-family: 'DM Mono', monospace; letter-spacing: 0.8px; }
 
@@ -512,7 +512,7 @@
   margin-bottom: 10px;
 }
 
-.mh-title { font-family: 'Bebas Neue', sans-serif; font-size: 14px; color: white; letter-spacing: 0.5px; margin-bottom: 2px; }
+.mh-title { font-family: 'DM Mono', monospace; font-size: 14px; color: white; letter-spacing: 0.5px; margin-bottom: 2px; }
 .mh-addr { font-size: 8px; color: rgba(255,255,255,0.5); font-family: 'DM Mono', monospace; }
 
 .manual-sec {
@@ -559,7 +559,7 @@
 }
 
 .bs-text .t {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: 'DM Mono', monospace;
   font-size: 24px;
   color: white;
   letter-spacing: 1px;
