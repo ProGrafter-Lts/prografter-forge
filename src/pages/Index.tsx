@@ -55,6 +55,7 @@ const Index = () => {
       <ContrastSection />
       <FeaturesGrid />
       <TradesHowItWorks />
+      <GreenGrantsChecker />
       <HomeownersHowItWorks />
       <GreenEnergySection />
       <WhatYouGet />
