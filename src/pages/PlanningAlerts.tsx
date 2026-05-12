@@ -848,7 +848,7 @@ export default function PlanningAlerts() {
                   </button>
                 </div>
 
-                <div style={{ display:"grid", gridTemplateColumns: selectedApp ? "1fr 380px" : "1fr", gap:16 }}>
+                <div style={{ display:"grid", gridTemplateColumns: (selectedApp && !isMobile) ? "1fr 380px" : "1fr", gap:16, alignItems:"start" }}>
                   {/* Application list */}
                   <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
                     {sorted.length === 0 && (
