@@ -185,17 +185,27 @@ Quote content:
 ${form.quote_text}`;
 
     try {
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 1000,
-          stream: true,
-          system: systemPrompt,
-          messages: [{ role:"user", content:userMessage }],
-        }),
-      });
+      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+      const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      const response = await fetch(
+        `https://${projectId}.supabase.co/functions/v1/analyse-quote-ai`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            apikey: anonKey,
+            Authorization: `Bearer ${anonKey}`,
+          },
+          body: JSON.stringify({
+            max_tokens: 1500,
+            system: systemPrompt,
+            messages: [{ role: "user", content: userMessage }],
+          }),
+        },
+      );
+      if (!response.ok || !response.body) {
+        throw new Error(`Proxy error ${response.status}`);
+      }
 
       const reader = response.body!.getReader();
       const decoder = new TextDecoder();
