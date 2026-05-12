@@ -1,14 +1,10 @@
 import { useState } from "react";
 
-// ── ProGrafter Brand ──────────────────────────────────────────────────────────
-const C = {
-  cream: "#F5F0E8", deep: "#0F2238", navy: "#1B3A5C",
-  teal: "#0D9488", tealLight: "#CCFBF1",
-  body: "#1F2937", secondary: "#4B5563", border: "#D1CBB8", white: "#FFFFFF",
-  // Green Grants — deliberately bold and distinct from the ProGrafter teal palette
+// Green palette — kept distinct for the grants visual identity, but typography
+// follows the site system (Bebas Neue headings, DM Sans body, DM Mono labels).
+const G = {
   g900: "#14532D", g800: "#166534", g700: "#15803D", g600: "#16A34A",
   g500: "#22C55E", g400: "#4ADE80", g200: "#BBF7D0", g100: "#DCFCE7", g50: "#F0FDF4",
-  amber: "#D97706", amberBg: "#FFFBEB", amberBorder: "#FDE68A",
 };
 
 const SCHEMES: Record<string, { name: string; full: string; max: string; covers: string[]; who: string; deadline: string; funded_by: string; url: string }> = {
@@ -112,7 +108,7 @@ const QUESTIONS = [
     ],
   },
   {
-    id: "epc", question: "What is your property's EPC (Energy Performance Certificate) rating?",
+    id: "epc", question: "What is your property's EPC rating?",
     hint: "Found on your EPC certificate or at gov.uk/find-energy-certificate",
     options: [
       { value: "a_b_c", label: "A, B or C — good rating", icon: "⭐" },
@@ -142,35 +138,54 @@ const SchemeResult = ({ result, onPostJob }: { result: Result; onPostJob: () => 
   const scheme = SCHEMES[result.scheme];
   const high = result.confidence === "high";
   return (
-    <div style={{ background: C.white, border: `2px solid ${high ? C.g600 : C.g200}`, borderRadius: 14, overflow: "hidden", marginBottom: 12 }}>
-      <div style={{ background: high ? C.g700 : C.g100, padding: "12px 16px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
+    <div
+      className="rounded-2xl overflow-hidden mb-3 bg-white"
+      style={{ border: `2px solid ${high ? G.g600 : G.g200}` }}
+    >
+      <div
+        className="px-4 py-3 flex justify-between items-center flex-wrap gap-2"
+        style={{ background: high ? G.g700 : G.g100 }}
+      >
         <div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ fontSize: 18 }}>{high ? "✅" : "🔍"}</span>
-            <p style={{ fontSize: 14, fontWeight: 700, color: high ? C.white : C.g800, margin: 0 }}>{scheme.name}</p>
-            <span style={{ fontSize: 11, fontWeight: 600, background: high ? "rgba(255,255,255,0.2)" : C.g200, color: high ? C.white : C.g700, padding: "2px 8px", borderRadius: 20 }}>
+          <div className="flex items-center gap-2">
+            <span className="text-lg">{high ? "✅" : "🔍"}</span>
+            <p className={`font-mono text-sm font-bold m-0 ${high ? "text-white" : ""}`} style={!high ? { color: G.g800 } : {}}>{scheme.name}</p>
+            <span
+              className="font-mono text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wide"
+              style={high
+                ? { background: "rgba(255,255,255,0.2)", color: "#fff" }
+                : { background: G.g200, color: G.g700 }}
+            >
               {high ? "Likely eligible" : "Possibly eligible"}
             </span>
           </div>
-          <p style={{ fontSize: 11, color: high ? "rgba(255,255,255,0.75)" : C.g700, margin: "3px 0 0" }}>{scheme.full}</p>
+          <p className="font-body text-[11px] mt-1 mb-0" style={{ color: high ? "rgba(255,255,255,0.75)" : G.g700 }}>{scheme.full}</p>
         </div>
-        <div style={{ textAlign: "right" }}>
-          <p style={{ fontSize: 18, fontWeight: 700, color: high ? C.g400 : C.g600, margin: 0 }}>Up to {scheme.max}</p>
-          <p style={{ fontSize: 10, color: high ? "rgba(255,255,255,0.6)" : C.g700, margin: "2px 0 0" }}>grant funding</p>
+        <div className="text-right">
+          <p className="font-heading text-2xl tracking-wide m-0" style={{ color: high ? G.g400 : G.g600 }}>Up to {scheme.max}</p>
+          <p className="font-mono text-[10px] mt-0.5 mb-0 uppercase tracking-wider" style={{ color: high ? "rgba(255,255,255,0.6)" : G.g700 }}>grant funding</p>
         </div>
       </div>
-      <div style={{ padding: "12px 16px" }}>
-        <p style={{ fontSize: 12, color: C.secondary, lineHeight: 1.6, margin: "0 0 10px", fontStyle: "italic" }}>{result.reason}</p>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
+      <div className="px-4 py-3">
+        <p className="font-body text-xs italic leading-relaxed mb-2.5 text-secondary-text">{result.reason}</p>
+        <div className="flex flex-wrap gap-1.5 mb-2.5">
           {scheme.covers.map(item => (
-            <span key={item} style={{ fontSize: 10, fontWeight: 600, background: C.g100, color: C.g700, border: `1px solid ${C.g200}`, padding: "2px 8px", borderRadius: 20 }}>{item}</span>
+            <span key={item} className="font-mono text-[10px] font-semibold px-2 py-0.5 rounded-full border" style={{ background: G.g100, color: G.g700, borderColor: G.g200 }}>{item}</span>
           ))}
         </div>
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-          <button onClick={onPostJob} style={{ flex: "1 1 200px", background: C.g600, color: C.white, border: "none", borderRadius: 8, padding: "9px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+        <div className="flex flex-wrap gap-2.5">
+          <button
+            onClick={onPostJob}
+            className="flex-1 min-w-[200px] font-mono text-xs font-bold text-white rounded-lg py-2.5 hover:opacity-90 transition-opacity"
+            style={{ background: G.g600 }}
+          >
             Find a vetted installer →
           </button>
-          <a href={scheme.url} target="_blank" rel="noopener noreferrer" style={{ flex: "1 1 200px", background: "none", border: `1.5px solid ${C.g200}`, color: C.g700, borderRadius: 8, padding: "9px", fontSize: 12, fontWeight: 600, cursor: "pointer", textAlign: "center", textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <a
+            href={scheme.url} target="_blank" rel="noopener noreferrer"
+            className="flex-1 min-w-[200px] font-mono text-xs font-semibold rounded-lg py-2.5 text-center inline-flex items-center justify-center hover:opacity-80 transition-opacity"
+            style={{ border: `1.5px solid ${G.g200}`, color: G.g700 }}
+          >
             Official scheme details ↗
           </a>
         </div>
@@ -204,42 +219,63 @@ export default function GreenGrantsChecker() {
     .filter(r => r.confidence === "high")
     .reduce((s, r) => s + parseInt(SCHEMES[r.scheme].max.replace(/[^0-9]/g, "")), 0);
 
-  // Section wrapper — full-width, cream background to slot between page sections
   const Wrap = ({ children }: { children: React.ReactNode }) => (
     <section className="bg-cream py-16 md:py-24 px-6">
       <div className="max-w-[1100px] mx-auto">{children}</div>
     </section>
   );
 
+  // ── Intro ──────────────────────────────────────────────
   if (step === -1) return (
     <Wrap>
-      <div style={{ fontFamily: "system-ui, sans-serif", background: `linear-gradient(135deg, ${C.g900} 0%, ${C.g700} 60%, ${C.g600} 100%)`, borderRadius: 24, overflow: "hidden", position: "relative" }}>
-        <div style={{ position: "absolute", inset: 0, opacity: 0.06, backgroundImage: "radial-gradient(circle at 20% 50%, #fff 1px, transparent 1px), radial-gradient(circle at 80% 50%, #fff 1px, transparent 1px)", backgroundSize: "30px 30px" }} />
-        <div style={{ position: "relative", padding: "3rem 2rem" }}>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 20, padding: "4px 12px", marginBottom: 20 }}>
-            <span style={{ fontSize: 14 }}>🌿</span>
-            <span style={{ fontSize: 11, fontWeight: 700, color: C.g400, letterSpacing: "0.08em" }}>GREEN HOME GRANTS</span>
+      <div
+        className="rounded-3xl overflow-hidden relative"
+        style={{ background: `linear-gradient(135deg, ${G.g900} 0%, ${G.g700} 60%, ${G.g600} 100%)` }}
+      >
+        <div className="absolute inset-0 opacity-[0.06] pointer-events-none"
+          style={{ backgroundImage: "radial-gradient(circle at 20% 50%, #fff 1px, transparent 1px), radial-gradient(circle at 80% 50%, #fff 1px, transparent 1px)", backgroundSize: "30px 30px" }} />
+        <div className="relative px-8 py-12 md:px-12 md:py-16">
+          <div
+            className="inline-flex items-center gap-2 rounded-full px-3 py-1 mb-5"
+            style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.2)" }}
+          >
+            <span className="text-sm">🌿</span>
+            <span className="font-mono text-[11px] font-bold tracking-widest uppercase" style={{ color: G.g400 }}>Green Home Grants</span>
           </div>
-          <h2 style={{ fontSize: "clamp(28px, 4vw, 44px)", fontWeight: 800, color: C.white, margin: "0 0 14px", lineHeight: 1.15, letterSpacing: "-0.5px" }}>
+
+          <h2 className="font-heading text-cream text-[44px] md:text-[64px] leading-[0.95] mb-4">
             Could the government<br />
-            <span style={{ color: C.g400 }}>pay for your upgrade?</span>
+            <span style={{ color: G.g400 }}>pay for your upgrade?</span>
           </h2>
-          <p style={{ fontSize: 16, color: "rgba(255,255,255,0.8)", lineHeight: 1.65, margin: "0 0 24px", maxWidth: 620 }}>
-            Millions of UK homeowners qualify for grants worth up to <strong style={{ color: C.g400 }}>£15,000</strong> for insulation, heat pumps, solar panels and more. Find out in 60 seconds.
+
+          <p className="font-body text-base md:text-lg leading-relaxed max-w-[620px] mb-7 font-light" style={{ color: "rgba(255,255,255,0.8)" }}>
+            Millions of UK homeowners qualify for grants worth up to{" "}
+            <strong className="font-semibold" style={{ color: G.g400 }}>£15,000</strong>{" "}
+            for insulation, heat pumps, solar panels and more. Find out in 60 seconds.
           </p>
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 28 }}>
+
+          <div className="flex flex-wrap gap-2 mb-7">
             {Object.values(SCHEMES).map(s => (
-              <span key={s.name} style={{ fontSize: 11, fontWeight: 600, background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)", color: C.white, padding: "4px 12px", borderRadius: 20 }}>
+              <span
+                key={s.name}
+                className="font-mono text-[11px] font-semibold text-white px-3 py-1 rounded-full"
+                style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)" }}
+              >
                 {s.name} · up to {s.max}
               </span>
             ))}
           </div>
-          <button onClick={() => setStep(0)} style={{ background: C.white, color: C.g800, border: "none", borderRadius: 12, padding: "16px 28px", fontSize: 16, fontWeight: 800, cursor: "pointer", boxShadow: "0 4px 20px rgba(0,0,0,0.2)", display: "inline-flex", alignItems: "center", gap: 10, letterSpacing: "-0.2px" }}>
-            <span style={{ fontSize: 20 }}>🌿</span>
+
+          <button
+            onClick={() => setStep(0)}
+            className="inline-flex items-center gap-2.5 bg-white rounded-xl px-7 py-4 font-mono text-sm font-bold hover:opacity-95 transition-opacity"
+            style={{ color: G.g800, boxShadow: "0 4px 20px rgba(0,0,0,0.2)" }}
+          >
+            <span className="text-lg">🌿</span>
             Check my eligibility — free, 60 seconds
             <span>→</span>
           </button>
-          <p style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", marginTop: 12 }}>
+          <p className="font-mono text-[10px] mt-3 uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.5)" }}>
             No personal details required · Instant result · No obligation
           </p>
         </div>
@@ -247,92 +283,117 @@ export default function GreenGrantsChecker() {
     </Wrap>
   );
 
+  // ── Question step ──────────────────────────────────────
   if (step >= 0 && step < QUESTIONS.length) return (
     <Wrap>
-      <div style={{ fontFamily: "system-ui, sans-serif", background: `linear-gradient(135deg, ${C.g900} 0%, ${C.g700} 100%)`, borderRadius: 24, padding: "2.5rem 2rem" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
-          <div style={{ display: "flex", gap: 4 }}>
+      <div
+        className="rounded-3xl px-8 py-10 md:px-12"
+        style={{ background: `linear-gradient(135deg, ${G.g900} 0%, ${G.g700} 100%)` }}
+      >
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex gap-1">
             {QUESTIONS.map((_, i) => (
-              <div key={i} style={{ width: 32, height: 4, borderRadius: 2, background: i <= step ? C.g400 : "rgba(255,255,255,0.15)", transition: "background 0.3s" }} />
+              <div key={i} className="w-8 h-1 rounded-sm transition-colors"
+                style={{ background: i <= step ? G.g400 : "rgba(255,255,255,0.15)" }} />
             ))}
           </div>
-          <span style={{ fontSize: 11, color: "rgba(255,255,255,0.5)" }}>{step + 1} of {QUESTIONS.length}</span>
+          <span className="font-mono text-[11px]" style={{ color: "rgba(255,255,255,0.5)" }}>{step + 1} of {QUESTIONS.length}</span>
         </div>
-        <div style={{ marginBottom: 24 }}>
-          <p style={{ fontSize: 11, fontWeight: 700, color: C.g400, letterSpacing: "0.08em", textTransform: "uppercase", margin: "0 0 8px" }}>🌿 Green Grants Checker</p>
-          <h3 style={{ fontSize: 22, fontWeight: 700, color: C.white, margin: "0 0 6px", lineHeight: 1.3 }}>{currentQ.question}</h3>
-          {currentQ.hint && <p style={{ fontSize: 13, color: "rgba(255,255,255,0.6)", margin: 0, lineHeight: 1.5 }}>{currentQ.hint}</p>}
+        <div className="mb-6">
+          <p className="font-mono text-[11px] font-bold tracking-widest uppercase mb-2" style={{ color: G.g400 }}>🌿 Green Grants Checker</p>
+          <h3 className="font-heading text-cream text-3xl md:text-4xl leading-[1.05] mb-1.5">{currentQ.question}</h3>
+          {currentQ.hint && <p className="font-body text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.6)" }}>{currentQ.hint}</p>}
         </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        <div className="flex flex-col gap-2">
           {currentQ.options.map(opt => (
-            <button key={opt.value} onClick={() => selectAnswer(opt.value)}
-              style={{ display: "flex", alignItems: "center", gap: 12, background: "rgba(255,255,255,0.08)", border: "1.5px solid rgba(255,255,255,0.15)", borderRadius: 12, padding: "14px 18px", cursor: "pointer", textAlign: "left", transition: "all 0.15s", color: C.white, width: "100%", fontFamily: "inherit" }}
-              onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.15)"; e.currentTarget.style.borderColor = "rgba(74,222,128,0.5)"; }}
-              onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)"; }}>
-              <span style={{ fontSize: 22, flexShrink: 0 }}>{opt.icon}</span>
-              <span style={{ fontSize: 14, fontWeight: 500, lineHeight: 1.3 }}>{opt.label}</span>
-              <span style={{ marginLeft: "auto", color: "rgba(255,255,255,0.3)", fontSize: 16, flexShrink: 0 }}>→</span>
+            <button
+              key={opt.value}
+              onClick={() => selectAnswer(opt.value)}
+              className="flex items-center gap-3 rounded-xl px-4 py-3.5 text-left text-white w-full transition-colors hover:bg-white/15"
+              style={{ background: "rgba(255,255,255,0.08)", border: "1.5px solid rgba(255,255,255,0.15)" }}
+            >
+              <span className="text-xl flex-shrink-0">{opt.icon}</span>
+              <span className="font-body text-sm font-medium leading-snug">{opt.label}</span>
+              <span className="ml-auto text-base flex-shrink-0" style={{ color: "rgba(255,255,255,0.3)" }}>→</span>
             </button>
           ))}
         </div>
         {step > 0 && (
-          <button onClick={() => setStep(s => s - 1)} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.4)", fontSize: 12, cursor: "pointer", marginTop: 16, padding: 0 }}>← Back</button>
+          <button onClick={() => setStep(s => s - 1)} className="font-mono text-[11px] mt-4 uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.4)" }}>← Back</button>
         )}
       </div>
     </Wrap>
   );
 
+  // ── Results ────────────────────────────────────────────
   return (
     <Wrap>
-      <div style={{ fontFamily: "system-ui, sans-serif" }}>
-        <div style={{ background: `linear-gradient(135deg, ${C.g900} 0%, ${C.g700} 100%)`, borderRadius: "24px 24px 0 0", padding: "2rem" }}>
-          <p style={{ fontSize: 11, fontWeight: 700, color: C.g400, letterSpacing: "0.08em", textTransform: "uppercase", margin: "0 0 8px" }}>🌿 Your grant eligibility results</p>
+      <div>
+        <div
+          className="rounded-t-3xl px-8 py-8"
+          style={{ background: `linear-gradient(135deg, ${G.g900} 0%, ${G.g700} 100%)` }}
+        >
+          <p className="font-mono text-[11px] font-bold tracking-widest uppercase mb-2" style={{ color: G.g400 }}>🌿 Your grant eligibility results</p>
           {highCount > 0 ? (
             <>
-              <h3 style={{ fontSize: 26, fontWeight: 800, color: C.white, margin: "0 0 8px", lineHeight: 1.2 }}>Great news — you likely qualify</h3>
-              <p style={{ fontSize: 15, color: "rgba(255,255,255,0.75)", margin: "0 0 16px", lineHeight: 1.55 }}>
+              <h3 className="font-heading text-cream text-4xl md:text-5xl leading-[1.05] mb-2">Great news — you likely qualify</h3>
+              <p className="font-body text-base leading-relaxed mb-4" style={{ color: "rgba(255,255,255,0.75)" }}>
                 Based on your answers, you may be eligible for up to{" "}
-                <strong style={{ color: C.g400 }}>£{totalFunding.toLocaleString()}</strong>{" "}
+                <strong className="font-semibold" style={{ color: G.g400 }}>£{totalFunding.toLocaleString()}</strong>{" "}
                 in government grant funding.
               </p>
             </>
           ) : (
             <>
-              <h3 style={{ fontSize: 26, fontWeight: 800, color: C.white, margin: "0 0 8px", lineHeight: 1.2 }}>You may have options</h3>
-              <p style={{ fontSize: 15, color: "rgba(255,255,255,0.75)", margin: "0 0 16px", lineHeight: 1.55 }}>
+              <h3 className="font-heading text-cream text-4xl md:text-5xl leading-[1.05] mb-2">You may have options</h3>
+              <p className="font-body text-base leading-relaxed mb-4" style={{ color: "rgba(255,255,255,0.75)" }}>
                 Some schemes may apply to your situation. Check the details below and speak to a registered installer who can confirm your eligibility.
               </p>
             </>
           )}
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <div className="flex flex-wrap gap-2">
             {[
               { label: `${results.length} scheme${results.length !== 1 ? "s" : ""} identified`, icon: "📋" },
               { label: `${highCount} likely eligible`, icon: "✅" },
               { label: "ProGrafter installers vetted", icon: "🔒" },
             ].map(p => (
-              <span key={p.label} style={{ fontSize: 11, fontWeight: 600, background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.2)", color: C.white, padding: "4px 10px", borderRadius: 20 }}>
+              <span
+                key={p.label}
+                className="font-mono text-[11px] font-semibold text-white px-2.5 py-1 rounded-full"
+                style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.2)" }}
+              >
                 {p.icon} {p.label}
               </span>
             ))}
           </div>
         </div>
-        <div style={{ background: C.g50, borderRadius: "0 0 24px 24px", padding: "1.5rem", border: `2px solid ${C.g200}`, borderTop: "none" }}>
+        <div
+          className="rounded-b-3xl p-6 border-2 border-t-0"
+          style={{ background: G.g50, borderColor: G.g200 }}
+        >
           {results.map(r => (
             <SchemeResult key={r.scheme} result={r} onPostJob={() => window.location.href = "/post-job"} />
           ))}
-          <div style={{ background: C.amberBg, border: `1px solid ${C.amberBorder}`, borderRadius: 10, padding: "10px 14px", marginBottom: 14, fontSize: 12, color: C.amber, lineHeight: 1.65 }}>
-            <strong>Important:</strong> This checker provides guidance only. Final eligibility is confirmed by your energy supplier, installer, or local authority. A ProGrafter-vetted installer can assess your property and confirm which grants you qualify for at no obligation.
+          <div
+            className="rounded-xl px-4 py-2.5 mb-3.5 font-body text-xs leading-relaxed"
+            style={{ background: "#FFFBEB", border: "1px solid #FDE68A", color: "#D97706" }}
+          >
+            <strong className="font-semibold">Important:</strong> This checker provides guidance only. Final eligibility is confirmed by your energy supplier, installer, or local authority. A ProGrafter-vetted installer can assess your property and confirm which grants you qualify for at no obligation.
           </div>
-          <div style={{ background: C.g700, borderRadius: 14, padding: "1.5rem", textAlign: "center" }}>
-            <p style={{ fontSize: 16, fontWeight: 700, color: C.white, margin: "0 0 6px" }}>Find a ProGrafter-vetted installer</p>
-            <p style={{ fontSize: 13, color: "rgba(255,255,255,0.7)", margin: "0 0 16px", lineHeight: 1.55 }}>
+          <div className="rounded-2xl p-6 text-center" style={{ background: G.g700 }}>
+            <p className="font-heading text-cream text-2xl md:text-3xl leading-none mb-1.5">Find a ProGrafter-vetted installer</p>
+            <p className="font-body text-sm leading-relaxed mb-4" style={{ color: "rgba(255,255,255,0.7)" }}>
               Every installer on ProGrafter is personally vetted, insured, and qualified. Many are MCS-certified — required for grant-funded installations.
             </p>
-            <button onClick={() => window.location.href = "/post-job"} style={{ background: C.white, color: C.g800, border: "none", borderRadius: 10, padding: "13px 28px", fontSize: 14, fontWeight: 800, cursor: "pointer", marginBottom: 8 }}>
+            <button
+              onClick={() => window.location.href = "/post-job"}
+              className="inline-flex bg-white rounded-xl px-7 py-3.5 font-mono text-sm font-bold mb-2 hover:opacity-95 transition-opacity"
+              style={{ color: G.g800 }}
+            >
               Post a job brief — free →
             </button>
             <div>
-              <button onClick={reset} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.5)", fontSize: 12, cursor: "pointer", padding: 0 }}>Start again</button>
+              <button onClick={reset} className="font-mono text-[11px] uppercase tracking-wider hover:text-white/80" style={{ color: "rgba(255,255,255,0.5)" }}>Start again</button>
             </div>
           </div>
         </div>
