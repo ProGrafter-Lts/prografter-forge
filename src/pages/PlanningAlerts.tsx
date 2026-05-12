@@ -560,6 +560,24 @@ const AppDetail = ({ app, onClose, isMobile }: { app: PlanningApp; onClose: () =
       </div>
     </div>
   );
+
+  if (isMobile) {
+    return (
+      <div
+        onClick={onClose}
+        style={{
+          position:"fixed", inset:0, background:"rgba(15,34,56,0.6)",
+          zIndex:1000, display:"flex", alignItems:"stretch", justifyContent:"center",
+        }}
+      >
+        <div onClick={e => e.stopPropagation()} style={{ width:"100%", height:"100%", background:C.white, display:"flex", flexDirection:"column" }}>
+          {panel}
+        </div>
+      </div>
+    );
+  }
+
+  return panel;
 };
 
 // ── PD Checker ───────────────────────────────────────────────────────────────
