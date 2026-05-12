@@ -771,9 +771,16 @@ export default function PlanningAlerts() {
 
                 {/* Filters */}
                 <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(160px, 1fr))", gap:10, marginBottom:16 }}>
-                  <input className="placeholder:text-secondary placeholder:opacity-100" style={{ ...inp(), gridColumn:"1 / -1" }} value={searchQuery}
-                    onChange={e=>setSearchQuery(e.target.value)}
-                    placeholder="Search address or description..." />
+                  <div style={{ position:"relative", gridColumn:"1 / -1" }}>
+                    <span style={{ position:"absolute", left:12, top:"50%", transform:"translateY(-50%)",
+                      fontSize:14, color:C.secondary, pointerEvents:"none",
+                      display: searchQuery ? "none" : "block" }}>
+                      🔍 Search address or description…
+                    </span>
+                    <input style={inp()} value={searchQuery}
+                      onChange={e=>setSearchQuery(e.target.value)}
+                      aria-label="Search address or description" />
+                  </div>
                   <select style={inp()} value={filterTrade} onChange={e=>setFilterTrade(e.target.value)}>
                     <option value="all">All trades</option>
                     {allTrades.map(t=><option key={t} value={t}>{t}</option>)}
