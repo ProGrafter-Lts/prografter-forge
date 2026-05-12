@@ -72,6 +72,13 @@ body::before {
   h1 { line-height: 1.05; letter-spacing: 0.04em; }
   h2 { line-height: 1.10; letter-spacing: 0.04em; }
   h3 { letter-spacing: 0.03em; }
+  button, input, select, textarea {
+    font-family: inherit;
+  }
+  input::placeholder, textarea::placeholder {
+    color: #6B7280;
+    opacity: 1;
+  }
 }
 
 /* === Visual hierarchy: paragraph readability === */
