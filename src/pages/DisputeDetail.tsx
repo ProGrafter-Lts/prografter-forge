@@ -121,7 +121,7 @@ export default function DisputeDetail() {
   const canRespond = isRespondent && !dispute.respondent_statement;
 
   return (
-    <div style={{ minHeight:"100vh", background:C.cream, fontFamily:"system-ui, sans-serif" }}>
+    <div style={{ minHeight:"100vh", background:C.cream }}>
       <div style={{ background:C.deep, padding:"14px 24px",
         display:"flex", alignItems:"center", gap:12 }}>
         <div style={{ fontSize:20, fontWeight:700 }}>
@@ -140,7 +140,7 @@ export default function DisputeDetail() {
           <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:12 }}>
             <div>
               <div style={{ display:"flex", gap:8, alignItems:"center", marginBottom:4 }}>
-                <span style={{ fontSize:12, fontFamily:"monospace", color:C.teal }}>{dispute.ref}</span>
+                <span style={{ fontSize:12, fontFamily:"'DM Mono', monospace", color:C.teal }}>{dispute.ref}</span>
                 <SBadge status={dispute.status} />
               </div>
               <p style={{ fontSize:14, fontWeight:700, color:C.deep, margin:"0 0 2px" }}>
