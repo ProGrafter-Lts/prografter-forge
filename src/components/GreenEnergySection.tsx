@@ -27,13 +27,13 @@ const GreenEnergySection = () => {
       <div className="w-full max-w-[1800px] mx-auto">
         <div className="text-center mb-12">
           <span className="text-[#16A34A] font-mono text-sm tracking-widest uppercase mb-3 block">
-            🌿 Green Energy
+            🌿 Homeowner Grants & Savings
           </span>
           <h2 className="font-heading text-4xl md:text-5xl text-navy tracking-wide mb-4">
-            COULD YOU GET HELP FUNDING YOUR HOME IMPROVEMENTS?
+            CUT THE COST OF YOUR HOME IMPROVEMENTS
           </h2>
           <p className="font-body text-body-text max-w-2xl mx-auto text-base leading-relaxed">
-            The UK government is funding thousands of pounds of energy improvements for eligible homeowners. ProGrafter connects you with certified local installers for solar panels, heat pumps, insulation, and EV chargers — and helps you understand what funding you may qualify for.
+            As a homeowner, you could save thousands on solar panels, heat pumps, insulation, and EV chargers thanks to UK government grants and 0% VAT. We'll help you check what you qualify for — then match you with certified local installers through ProGrafter.
           </p>
         </div>
 
