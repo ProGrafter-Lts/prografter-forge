@@ -2807,6 +2807,19 @@ export type Database = {
           trade_id: string
         }[]
       }
+      get_signup_stats: {
+        Args: never
+        Returns: {
+          genuine_homeowners: number
+          genuine_homeowners_30d: number
+          genuine_homeowners_7d: number
+          genuine_trades: number
+          genuine_trades_30d: number
+          genuine_trades_7d: number
+          total_homeowners: number
+          total_trades: number
+        }[]
+      }
       get_trade_for_job: {
         Args: { _job_id: string }
         Returns: {
@@ -2838,6 +2851,7 @@ export type Database = {
         Args: { _trade_id: string; _user_id: string }
         Returns: boolean
       }
+      is_test_email: { Args: { _email: string }; Returns: boolean }
       log_contract_email_sent: {
         Args: {
           _contract_id: string
