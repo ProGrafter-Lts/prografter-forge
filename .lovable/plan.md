@@ -1,56 +1,54 @@
-# QuickBuild MVP v0.5 — Implementation Plan
+# Planning Pipeline — admin page wired to Supabase
 
-Following the established pattern (Quote PDF), this ships **fully built but hidden behind a `quickBuild` feature flag** so nothing is user-visible until you flip it on.
+A new admin-only page for managing planning application leads and the agent network behind them. The pasted component had some mangled JSX from the copy/paste — I'll reconstruct those bits as part of the build.
 
-## Scope
+## What gets built
 
-A 3-stage flow (Input → Review → Accept) at `/quote-builder/quickbuild` that turns voice + photos + structured fields into an editable AI-drafted Schedule of Works, ready to hand off to the existing quote builder.
+### 1. Two new database tables (admin-only)
 
-## AI provider
+**`planning_leads`** — one row per planning application
+- application_ref, council_name, site_address, postcode
+- application_type, status (submitted / pending_decision / approved)
+- description, submitted_date
+- applicant_name, applicant_address
+- agent_id (FK → planning_agents)
+- trades_likely (text[]), estimated_value_min/max
+- priority_score, pipeline_status
+- documents_available, form1app_extracted
+- notes, next_action
 
-Spec says "Anthropic API". This project already standardises on **Lovable AI Gateway** (no API key needed, already wired). I'll use `google/gemini-2.5-pro` (strong reasoning + multimodal for photos) via the gateway with the exact UK-construction-estimator system prompt from the spec. If you specifically want Anthropic Claude, that needs a separate `ANTHROPIC_API_KEY` secret — flag this and I'll switch.
+**`planning_agents`** — one row per architect / planning consultant
+- contact_name, company_name, email, phone, address
+- relationship_status (identified/contacted/interested/partner/not_interested)
+- intro_sent, meeting_held
+- councils_active (text[])
+- avg_job_value_estimate, notes
 
-## Database (1 migration)
+Both tables: **RLS = admin-only** (uses existing `has_role(auth.uid(), 'admin')`). Standard `created_at` / `updated_at` plus an updated-at trigger.
 
-- `quickbuild_generations` — one row per AI call. Columns: `id`, `trade_user_id`, `quote_id` (nullable, set when accepted), `transcript`, `photo_paths` (text[]), `structured_input` (jsonb: trade_type, property_type, age_band, postcode, hourly_rate, day_rate), `ai_output` (jsonb: full response), `final_output` (jsonb, nullable, set on accept), `was_sent` (bool), `won_lost` (text, nullable), `actual_labour_days` (int, nullable), `actual_materials_pence` (int, nullable), `created_at`. RLS: trade can read/write own rows; admins read all.
-- `quickbuild-photos` storage bucket (private, RLS: trade can upload/read own folder).
-- Rate limit enforced via SQL: count rows in last 24h per `trade_user_id`, cap 5.
+### 2. New page
 
-## Edge function: `quickbuild-generate`
+`src/pages/PlanningPipeline.tsx` at route `/admin/planning-pipeline`, wrapped in `<AdminRoute>`. Three tabs (Leads / Agents / Kanban board) — same layout you pasted, but:
+- Mock arrays replaced with live Supabase queries
+- "Save changes" on a lead writes pipeline_status / notes / next_action
+- Agent status buttons write `relationship_status`
+- "Run scraper" button is left as a stub (no scraper backend yet) — flagged so we know to add it later
+- Broken JSX in `SBadge`, `PriorityBar`, and `LeadCard` reconstructed properly
+- Replaced inline `style={{}}` / hard-coded colour map with the project's design tokens where it touches semantic colours, but keeping the dark navy admin look intentionally distinct from the marketing site
 
-- Auth required (verify JWT in code).
-- Validates input with zod.
-- Checks 24h rate limit (returns 429 with remaining count if exceeded).
-- Calls Lovable AI Gateway with system prompt + transcript + photo URLs (signed) + structured fields, requesting JSON via tool-calling for guaranteed schema (`line_items`, `methodology`, `timeline_days`, `risk_flags`, `variation_buffer_recommended_pence`, `confidence_score`, `notes_to_trade`).
-- Inserts row into `quickbuild_generations`, returns generation id + parsed output + remaining quota.
-- Graceful degradation: 402/429/invalid-JSON → typed error codes the UI can branch on.
+### 3. Seed data
 
-## Frontend
+Insert the 5 sample leads and 3 agents you pasted as starter content so the page isn't empty on first open.
 
-New route `/quote-builder/quickbuild` (gated by `isFeatureEnabled("quickBuild")`; redirects to `/dashboard/trade` when off). Components:
+## What is *not* in scope
 
-- `QuickBuildPage.tsx` — stage state machine (input → review → accept).
-- `QuickBuildVoiceRecorder.tsx` — Web Speech API live transcription, 60s cap, re-record, manual text fallback.
-- `QuickBuildPhotoUploader.tsx` — 1–8 photos, client-side compression to ≤2MB, optional captions, uploads to `quickbuild-photos` bucket.
-- `QuickBuildStructuredForm.tsx` — trade/property/age/postcode/rates, prefilled from trade profile.
-- `QuickBuildReview.tsx` — editable line items (reuse styling from existing quote builder), methodology textarea, timeline, risk flag chips, variation buffer slider. Yellow `AI-draft` accent on untouched fields, switches to neutral once edited (tracks per-field `aiOriginated` bool).
-- `QuickBuildBetaBadge.tsx` — "Beta" pill + tooltip copy from spec.
-- "Use this quote" → writes `final_output` to row + redirects to existing quote builder with state pre-populated (URL state or sessionStorage hand-off).
+- No scraper / ingestion pipeline (the "Run scraper" button does nothing yet — separate job)
+- No Form 1App extraction (button stays as a placeholder)
+- No email / call integrations beyond `mailto:` and `tel:` links
 
-Entry point: hidden "Generate with QuickBuild" button at top of existing quote-builder, behind same flag.
+## Order of operations
 
-## Logging for Phase 2
-
-Every generation logs transcript, photo refs, raw AI JSON, final edited JSON, sent status. Hooks for `won_lost` + actuals are added on the row but populated by existing quote/contract/completion flows in a follow-up (out of scope here — schema is ready).
-
-## Feature flag
-
-`featureFlags.ts` gets `quickBuild: false`. Route, entry button, and any cross-links all gated. Flip to `true` when ready.
-
-## Out of scope (explicitly)
-
-- Wiring `won_lost` + actuals from contract/completion (schema ready, wiring deferred).
-- Anthropic-specific provider (using Lovable AI unless you say otherwise).
-- Phase 2 platform-benchmarked retraining.
-
-Approve and I'll build it end-to-end behind the flag.
+1. Run the migration (tables + RLS + trigger)
+2. Insert seed data
+3. Add the page + route + admin guard
+4. Confirm the page loads at `/admin/planning-pipeline` while logged in as admin
