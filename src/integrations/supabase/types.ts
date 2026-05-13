@@ -1216,6 +1216,57 @@ export type Database = {
           },
         ]
       }
+      planning_agents: {
+        Row: {
+          address: string | null
+          avg_job_value_estimate: number | null
+          company_name: string | null
+          contact_name: string
+          councils_active: string[]
+          created_at: string
+          email: string | null
+          id: string
+          intro_sent: boolean
+          meeting_held: boolean
+          notes: string | null
+          phone: string | null
+          relationship_status: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          avg_job_value_estimate?: number | null
+          company_name?: string | null
+          contact_name: string
+          councils_active?: string[]
+          created_at?: string
+          email?: string | null
+          id?: string
+          intro_sent?: boolean
+          meeting_held?: boolean
+          notes?: string | null
+          phone?: string | null
+          relationship_status?: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          avg_job_value_estimate?: number | null
+          company_name?: string | null
+          contact_name?: string
+          councils_active?: string[]
+          created_at?: string
+          email?: string | null
+          id?: string
+          intro_sent?: boolean
+          meeting_held?: boolean
+          notes?: string | null
+          phone?: string | null
+          relationship_status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       planning_alert_shortlist: {
         Row: {
           contact_status: Database["public"]["Enums"]["shortlist_contact_status"]
@@ -1393,6 +1444,92 @@ export type Database = {
             columns: ["trade_id"]
             isOneToOne: false
             referencedRelation: "trades_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      planning_leads: {
+        Row: {
+          agent_id: string | null
+          applicant_address: string | null
+          applicant_name: string | null
+          application_ref: string
+          application_type: string | null
+          council_name: string
+          created_at: string
+          description: string | null
+          documents_available: boolean
+          estimated_value_max: number | null
+          estimated_value_min: number | null
+          form1app_extracted: boolean
+          id: string
+          next_action: string | null
+          notes: string | null
+          pipeline_status: string
+          postcode: string | null
+          priority_score: number
+          site_address: string
+          status: string
+          submitted_date: string | null
+          trades_likely: string[]
+          updated_at: string
+        }
+        Insert: {
+          agent_id?: string | null
+          applicant_address?: string | null
+          applicant_name?: string | null
+          application_ref: string
+          application_type?: string | null
+          council_name: string
+          created_at?: string
+          description?: string | null
+          documents_available?: boolean
+          estimated_value_max?: number | null
+          estimated_value_min?: number | null
+          form1app_extracted?: boolean
+          id?: string
+          next_action?: string | null
+          notes?: string | null
+          pipeline_status?: string
+          postcode?: string | null
+          priority_score?: number
+          site_address: string
+          status?: string
+          submitted_date?: string | null
+          trades_likely?: string[]
+          updated_at?: string
+        }
+        Update: {
+          agent_id?: string | null
+          applicant_address?: string | null
+          applicant_name?: string | null
+          application_ref?: string
+          application_type?: string | null
+          council_name?: string
+          created_at?: string
+          description?: string | null
+          documents_available?: boolean
+          estimated_value_max?: number | null
+          estimated_value_min?: number | null
+          form1app_extracted?: boolean
+          id?: string
+          next_action?: string | null
+          notes?: string | null
+          pipeline_status?: string
+          postcode?: string | null
+          priority_score?: number
+          site_address?: string
+          status?: string
+          submitted_date?: string | null
+          trades_likely?: string[]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "planning_leads_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "planning_agents"
             referencedColumns: ["id"]
           },
         ]
