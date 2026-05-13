@@ -1,0 +1,25 @@
+# ProGrafter
+
+> UK trades marketplace connecting verified tradespeople with homeowners. No monthly fees — trades pay 7.5% only when a job completes, capped at £900 per job.
+
+ProGrafter is built by Lee Palfreeman, a qualified electrician of 20 years. The platform handles job posting, verified quoting, stage-based payments, variation sign-off, an AI quote checker, and matching with green-energy grant schemes (ECO4, Boiler Upgrade Scheme, Warm Homes Plan).
+
+## Pages
+
+- [Home](/): Overview, pricing, how it works, who it's for.
+- [About](/about): Founding story, beliefs, why ProGrafter exists.
+- [Contact](/contact): Email contacts, contact form, company details.
+- [Post a Job](/post-a-job): Free job posting flow for homeowners.
+- [Quote Checker](/quote-checker): £9 AI-powered 43-point review of any building quote.
+- [Green Grants](/green): Eligibility checker for UK green-energy grant schemes.
+- [Checkatrade Alternative](/checkatrade-alternative): Side-by-side comparison vs Checkatrade pricing.
+- [Is Checkatrade Worth It?](/is-checkatrade-worth-it): Editorial analysis of Checkatrade pricing.
+- [Planning Alerts](/planning-alerts): Local planning application alerts for trades.
+- [Legal Review](/legal-review): Independent solicitor review of building contracts.
+- [Share Your Experience](/share-your-experience): Submit a testimonial.
+
+## Optional
+
+- [Terms](/terms): Platform terms of use.
+- [Privacy](/privacy): Privacy policy and data handling.
+- [Register](/register): Account registration entry point.
