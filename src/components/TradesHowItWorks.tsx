@@ -40,7 +40,7 @@ const TradesHowItWorks = () => {
               className="relative p-8 fade-up"
               style={{ transitionDelay: `${i * 0.08}s` }}
             >
-              <span className="absolute top-2 right-4 craft:top-4 craft:right-6 font-heading text-[48px] craft:text-[80px] leading-none text-cream/[0.04] select-none pointer-events-none">
+              <span className="absolute top-3 right-4 craft:top-5 craft:right-6 font-heading text-[28px] craft:text-[40px] leading-none text-cream/[0.06] select-none pointer-events-none">
                 {step.num}
               </span>
               <span className="font-mono text-xs text-teal tracking-widest mb-4 block">{step.num}</span>
