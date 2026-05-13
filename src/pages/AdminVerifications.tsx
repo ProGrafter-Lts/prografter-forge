@@ -50,39 +50,6 @@ const AdminVerifications = () => {
   const [working, setWorking] = useState(false);
   const [queryMessage, setQueryMessage] = useState("");
   const [queryOpen, setQueryOpen] = useState(false);
-  const [materialsMetric, setMaterialsMetric] = useState<{
-    quotesWithMaterials: number;
-    totalQuotes: number;
-    avgLines: number;
-    avgValue: number;
-  } | null>(null);
-
-  useEffect(() => {
-    (async () => {
-      const { count: totalQuotes } = await supabase
-        .from("quotes")
-        .select("id", { count: "exact", head: true });
-      const { data: mats } = await supabase
-        .from("quote_materials")
-        .select("quote_id, line_total_ex_vat");
-      const grouped = new Map<string, { lines: number; value: number }>();
-      (mats || []).forEach((m: any) => {
-        const g = grouped.get(m.quote_id) || { lines: 0, value: 0 };
-        g.lines += 1;
-        g.value += Number(m.line_total_ex_vat) || 0;
-        grouped.set(m.quote_id, g);
-      });
-      const quotesWithMaterials = grouped.size;
-      const totalLines = Array.from(grouped.values()).reduce((s, g) => s + g.lines, 0);
-      const totalValue = Array.from(grouped.values()).reduce((s, g) => s + g.value, 0);
-      setMaterialsMetric({
-        quotesWithMaterials,
-        totalQuotes: totalQuotes || 0,
-        avgLines: quotesWithMaterials ? totalLines / quotesWithMaterials : 0,
-        avgValue: quotesWithMaterials ? totalValue / quotesWithMaterials : 0,
-      });
-    })();
-  }, []);
 
 
   const load = async () => {
@@ -289,44 +256,6 @@ const AdminVerifications = () => {
         <p className="font-body text-secondary-text mb-6">
           Review applications and approve, reject, or request more information.
         </p>
-
-        {materialsMetric && (
-          <div className="bg-white border border-navy/10 rounded-2xl p-4 mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
-              <p className="font-mono text-[10px] uppercase tracking-wider text-secondary-text">
-                Quotes with structured materials
-              </p>
-              <p className="font-heading text-navy text-2xl">
-                {materialsMetric.quotesWithMaterials}
-                <span className="text-secondary-text text-base"> / {materialsMetric.totalQuotes}</span>
-              </p>
-              <p className="font-mono text-[10px] text-secondary-text">
-                {materialsMetric.totalQuotes
-                  ? Math.round(
-                      (materialsMetric.quotesWithMaterials / materialsMetric.totalQuotes) * 100,
-                    )
-                  : 0}
-                % populated
-              </p>
-            </div>
-            <div>
-              <p className="font-mono text-[10px] uppercase tracking-wider text-secondary-text">
-                Avg lines per quote
-              </p>
-              <p className="font-heading text-navy text-2xl">
-                {materialsMetric.avgLines.toFixed(1)}
-              </p>
-            </div>
-            <div>
-              <p className="font-mono text-[10px] uppercase tracking-wider text-secondary-text">
-                Avg materials value (ex VAT)
-              </p>
-              <p className="font-heading text-navy text-2xl">
-                £{materialsMetric.avgValue.toFixed(2)}
-              </p>
-            </div>
-          </div>
-        )}
 
         <div className="flex flex-wrap gap-2 mb-6">
           {STATUS_FILTERS.map((f) => (
