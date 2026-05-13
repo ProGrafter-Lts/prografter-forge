@@ -39,6 +39,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'trade-verification-submitted': tradeVerificationSubmitted,
   'trade-signup-admin-notification': tradeSignupAdminNotification,
   'trade-verified': tradeVerified,
+  'trade-rejected': tradeRejected,
   'trade-verification-query': tradeVerificationQuery,
   'finish-trade-registration': finishTradeRegistration,
   // Contract lifecycle (7)
