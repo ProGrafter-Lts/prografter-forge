@@ -11,8 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import AppShell from "@/components/AppShell";
 import SEO from "@/components/SEO";
 import { buildServiceJsonLd } from "@/lib/seoSchemas";
 import { Upload, FileText, Loader2, ShieldCheck, AlertTriangle } from "lucide-react";
