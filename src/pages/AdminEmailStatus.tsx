@@ -16,6 +16,7 @@ const EMAIL_CATALOG: { name: string; category: "auth" | "onboarding" | "contract
   { name: "trade-welcome",                category: "onboarding" },
   { name: "trade-verification-submitted", category: "onboarding" },
   { name: "trade-verified",               category: "onboarding" },
+  { name: "trade-rejected",               category: "onboarding" },
   { name: "trade-verification-query",     category: "onboarding" },
   // Contract lifecycle (kebab-case to match the transactional template registry)
   { name: "contract-generated",           category: "contract" },
@@ -35,6 +36,7 @@ const REGISTERED_TEMPLATES = new Set([
   "trade-welcome",
   "trade-verification-submitted",
   "trade-verified",
+  "trade-rejected",
   "trade-verification-query",
   "waitlist-welcome",
   "waitlist-admin-notification",
