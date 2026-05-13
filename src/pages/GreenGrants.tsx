@@ -339,7 +339,7 @@ const GreenGrantsPage = () => {
               {step === 2 && (
                 <div>
                   <h2 className="font-heading text-cream text-2xl mb-6">What is your home's current EPC energy rating?</h2>
-                  <p className="font-body text-cream/50 text-sm mb-5">
+                  <p className="font-body text-cream/60 text-sm mb-5">
                     Your EPC (Energy Performance Certificate) rates your home from A (most efficient) to G (least efficient).
                   </p>
                   <div className="grid grid-cols-1 gap-3">
@@ -347,7 +347,7 @@ const GreenGrantsPage = () => {
                       <button key={opt.value} onClick={() => setEpc(opt.value)} className={cardClass(epc === opt.value)}>
                         <span className="text-lg mr-3">{opt.color}</span>
                         <span className="font-body text-sm font-medium">{opt.label}</span>
-                        {opt.sub && <span className="font-body text-xs text-cream/40 ml-2">— {opt.sub}</span>}
+                        {opt.sub && <span className="font-body text-xs text-cream/50 ml-2">— {opt.sub}</span>}
                       </button>
                     ))}
                   </div>
@@ -370,7 +370,7 @@ const GreenGrantsPage = () => {
               {step === 3 && (
                 <div>
                   <h2 className="font-heading text-cream text-2xl mb-6">Which of these describe your household?</h2>
-                  <p className="font-mono text-xs text-cream/40 uppercase tracking-widest mb-4">Select all that apply</p>
+                  <p className="font-mono text-xs text-cream/50 uppercase tracking-widest mb-4">Select all that apply</p>
                   <div className="grid grid-cols-1 gap-3">
                     {HOUSEHOLD_OPTIONS.map((opt) => {
                       const isActive = household.includes(opt.value);
