@@ -167,6 +167,27 @@ const SignupTrade = () => {
         } catch (e) {
           console.warn("trade-welcome email failed (non-blocking)", e);
         }
+
+        // Admin notification — alert team that a new trade signed up
+        try {
+          await supabase.functions.invoke("send-transactional-email", {
+            body: {
+              templateName: "trade-signup-admin-notification",
+              idempotencyKey: `trade-admin-signup-${userId}`,
+              templateData: {
+                name: fullName.trim(),
+                email: email.trim(),
+                phone: phone.trim(),
+                postcode: postcode.trim().toUpperCase(),
+                companyName: companyName.trim() || fullName.trim(),
+                tradeType,
+                stage: "account_created",
+              },
+            },
+          });
+        } catch (e) {
+          console.warn("trade-signup admin notification failed (non-blocking)", e);
+        }
       }
 
       // If session not established (email confirmations on), we need to wait
@@ -317,6 +338,25 @@ const SignupTrade = () => {
           },
         });
       } catch (e) { console.warn("submitted email failed (non-blocking)", e); }
+
+      // Admin notification — alert team that the trade has submitted for review
+      try {
+        await supabase.functions.invoke("send-transactional-email", {
+          body: {
+            templateName: "trade-signup-admin-notification",
+            idempotencyKey: `trade-admin-submitted-${createdTradeId}`,
+            templateData: {
+              name: fullName.trim(),
+              email: email.trim(),
+              phone: phone.trim(),
+              postcode: postcode.trim().toUpperCase(),
+              companyName: companyName.trim() || fullName.trim(),
+              tradeType,
+              stage: "submitted_for_review",
+            },
+          },
+        });
+      } catch (e) { console.warn("trade-signup admin (review) notification failed", e); }
 
       navigate("/signup/trade/under-review", { replace: true });
     } catch (err) {
