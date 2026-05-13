@@ -257,44 +257,6 @@ const AdminVerifications = () => {
           Review applications and approve, reject, or request more information.
         </p>
 
-        {materialsMetric && (
-          <div className="bg-white border border-navy/10 rounded-2xl p-4 mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
-              <p className="font-mono text-[10px] uppercase tracking-wider text-secondary-text">
-                Quotes with structured materials
-              </p>
-              <p className="font-heading text-navy text-2xl">
-                {materialsMetric.quotesWithMaterials}
-                <span className="text-secondary-text text-base"> / {materialsMetric.totalQuotes}</span>
-              </p>
-              <p className="font-mono text-[10px] text-secondary-text">
-                {materialsMetric.totalQuotes
-                  ? Math.round(
-                      (materialsMetric.quotesWithMaterials / materialsMetric.totalQuotes) * 100,
-                    )
-                  : 0}
-                % populated
-              </p>
-            </div>
-            <div>
-              <p className="font-mono text-[10px] uppercase tracking-wider text-secondary-text">
-                Avg lines per quote
-              </p>
-              <p className="font-heading text-navy text-2xl">
-                {materialsMetric.avgLines.toFixed(1)}
-              </p>
-            </div>
-            <div>
-              <p className="font-mono text-[10px] uppercase tracking-wider text-secondary-text">
-                Avg materials value (ex VAT)
-              </p>
-              <p className="font-heading text-navy text-2xl">
-                £{materialsMetric.avgValue.toFixed(2)}
-              </p>
-            </div>
-          </div>
-        )}
-
         <div className="flex flex-wrap gap-2 mb-6">
           {STATUS_FILTERS.map((f) => (
             <button
