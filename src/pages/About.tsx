@@ -31,8 +31,8 @@ const About = () => {
   return (
     <AppShell>
       <SEO
-        title="About ProGrafter — Built by a Qualified Electrician for Trades & Homeowners"
-        description="ProGrafter was founded by Lee Palfreeman, a qualified electrician of 20 years, after losing 18 leads and £625 to a competing platform without winning a single job."
+        title="About ProGrafter — Built by a Qualified Electrician"
+        description="Founded by Lee Palfreeman, an electrician of 20 years, after losing 18 leads and £625 to a competing platform without winning a single job."
         path="/about"
         jsonLd={localBusinessJsonLd}
       />
