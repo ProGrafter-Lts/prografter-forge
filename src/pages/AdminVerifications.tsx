@@ -191,18 +191,45 @@ const AdminVerifications = () => {
     load();
   };
 
+  const sendRejectedEmail = async (trade: PendingTrade, reason: string) => {
+    if (!trade.email) return;
+    const firstName = (trade.name || "").trim().split(/\s+/)[0] || "";
+    try {
+      await supabase.functions.invoke("send-transactional-email", {
+        body: {
+          templateName: "trade-rejected",
+          recipientEmail: trade.email,
+          idempotencyKey: `trade-rejected-${trade.id}`,
+          templateData: { firstName, reason },
+        },
+      });
+    } catch (e) {
+      console.warn("trade-rejected email failed", e);
+    }
+  };
+
   const reject = async (trade: PendingTrade) => {
+    const reason = window.prompt(
+      "Optional reason to share with the applicant (leave blank to send a generic decline):",
+      ""
+    );
+    if (reason === null) return; // cancelled
     setWorking(true);
     const { error } = await supabase
       .from("trades")
-      .update({ verified: false, verification_status: "rejected" } as any)
+      .update({
+        verified: false,
+        verification_status: "rejected",
+        verification_notes: reason.trim() || null,
+      } as any)
       .eq("id", trade.id);
     if (error) {
       toast.error(error.message);
       setWorking(false);
       return;
     }
-    toast.success("Rejected");
+    await sendRejectedEmail(trade, reason.trim());
+    toast.success("Rejected — applicant notified");
     setActiveId(null);
     setWorking(false);
     load();
