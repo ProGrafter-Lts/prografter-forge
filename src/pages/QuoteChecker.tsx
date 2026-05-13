@@ -11,8 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import AppShell from "@/components/AppShell";
 import SEO from "@/components/SEO";
 import { buildServiceJsonLd } from "@/lib/seoSchemas";
 import { Upload, FileText, Loader2, ShieldCheck, AlertTriangle } from "lucide-react";
@@ -363,57 +362,57 @@ const QuoteChecker = () => {
 
   if (verifying) {
     return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <div className="pt-24 pb-16 px-6">
-          <div className="max-w-2xl mx-auto text-center py-16 space-y-4">
-            <Loader2 className="mx-auto h-10 w-10 text-teal animate-spin" />
-            <h2 className="font-heading text-2xl text-navy">Confirming your payment…</h2>
-            <p className="font-mono text-sm text-muted-foreground">Please wait while we verify your payment and start your analysis.</p>
+      <AppShell>
+        <div className="min-h-screen bg-background">
+          <div className="pt-24 pb-16 px-6">
+            <div className="max-w-2xl mx-auto text-center py-16 space-y-4">
+              <Loader2 className="mx-auto h-10 w-10 text-teal animate-spin" />
+              <h2 className="font-heading text-2xl text-navy">Confirming your payment…</h2>
+              <p className="font-mono text-sm text-muted-foreground">Please wait while we verify your payment and start your analysis.</p>
+            </div>
           </div>
         </div>
-        <Footer />
-      </div>
+      </AppShell>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <SEO
-        title="AI Quote Checker — ProGrafter | Check Any Building Quote for £49"
-        description="Upload any building quote and our AI checks it against industry benchmarks. £49 one-off, no signup required."
-        path="/quote-checker"
-        jsonLd={buildServiceJsonLd({
-          name: "AI Quote Checker",
-          description: "AI-powered review of any UK building quote against a 43-point checklist.",
-          url: "https://prografter.co.uk/quote-checker",
-          serviceType: "Construction quote review",
-          price: "49.00",
-        })}
-      />
-      <Navbar />
-      <div className="pt-24 pb-16 px-6">
-        <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-10">
-            <div className="inline-flex items-center gap-2 bg-teal/10 text-teal font-mono text-xs px-3 py-1.5 rounded-full mb-4">
-              <ShieldCheck className="h-3.5 w-3.5" />
-              43-Point Quote Analysis
+    <AppShell>
+      <div className="min-h-screen bg-background">
+        <SEO
+          title="AI Quote Checker — ProGrafter | Check Any Building Quote for £49"
+          description="Upload any building quote and our AI checks it against industry benchmarks. £49 one-off, no signup required."
+          path="/quote-checker"
+          jsonLd={buildServiceJsonLd({
+            name: "AI Quote Checker",
+            description: "AI-powered review of any UK building quote against a 43-point checklist.",
+            url: "https://prografter.co.uk/quote-checker",
+            serviceType: "Construction quote review",
+            price: "49.00",
+          })}
+        />
+        <div className="pt-24 pb-16 px-6">
+          <div className="max-w-2xl mx-auto">
+            <div className="text-center mb-10">
+              <div className="inline-flex items-center gap-2 bg-teal/10 text-teal font-mono text-xs px-3 py-1.5 rounded-full mb-4">
+                <ShieldCheck className="h-3.5 w-3.5" />
+                43-Point Quote Analysis
+              </div>
+              <h1 className="font-heading text-4xl md:text-5xl text-navy mb-3">AI Quote Checker</h1>
+              <p className="text-muted-foreground font-mono text-sm max-w-md mx-auto leading-relaxed">
+                Upload any building quote. Our AI checks it against a 43-point checklist and tells you exactly what's missing. Report in your inbox within 2 minutes. <span className="font-semibold text-navy">£49.</span>
+              </p>
             </div>
-            <h1 className="font-heading text-4xl md:text-5xl text-navy mb-3">AI Quote Checker</h1>
-            <p className="text-muted-foreground font-mono text-sm max-w-md mx-auto leading-relaxed">
-              Upload any building quote. Our AI checks it against a 43-point checklist and tells you exactly what's missing. Report in your inbox within 2 minutes. <span className="font-semibold text-navy">£49.</span>
-            </p>
-          </div>
 
-          {result ? (
-            <QuoteCheckerResult quoteCheckId={result.id} email={result.email} lookupToken={result.lookupToken} />
-          ) : (
-            <QuoteCheckerForm onSubmitted={(id, email, lookupToken) => setResult({ id, email, lookupToken })} />
-          )}
+            {result ? (
+              <QuoteCheckerResult quoteCheckId={result.id} email={result.email} lookupToken={result.lookupToken} />
+            ) : (
+              <QuoteCheckerForm onSubmitted={(id, email, lookupToken) => setResult({ id, email, lookupToken })} />
+            )}
+          </div>
         </div>
       </div>
-      <Footer />
-    </div>
+    </AppShell>
   );
 };
 
