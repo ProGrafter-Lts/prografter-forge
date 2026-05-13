@@ -6,13 +6,14 @@ interface SEOProps {
   path?: string;
   image?: string;
   noindex?: boolean;
+  ogType?: "website" | "article";
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
 }
 
 const SITE_URL = "https://prografter.co.uk";
 const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.png`;
 
-const SEO = ({ title, description, path = "", image, noindex, jsonLd }: SEOProps) => {
+const SEO = ({ title, description, path = "", image, noindex, ogType = "website", jsonLd }: SEOProps) => {
   const url = `${SITE_URL}${path}`;
   const ogImage = image ?? DEFAULT_OG_IMAGE;
   const schemas = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
@@ -28,7 +29,7 @@ const SEO = ({ title, description, path = "", image, noindex, jsonLd }: SEOProps
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
       <meta property="og:url" content={url} />
-      <meta property="og:type" content="website" />
+      <meta property="og:type" content={ogType} />
       <meta property="og:locale" content="en_GB" />
       <meta property="og:site_name" content="ProGrafter" />
       <meta property="og:image" content={ogImage} />
