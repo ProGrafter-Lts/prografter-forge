@@ -29,3 +29,5 @@ project_id = "xryinqaxjclcmhebdcex"
     verify_jwt = true
   [functions.analyse-quote-ai]
     verify_jwt = false
+  [functions.send-trade-verification-reminders]
+    verify_jwt = false
