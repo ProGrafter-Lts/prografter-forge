@@ -136,19 +136,19 @@ const SCHEMES: Scheme[] = [
 const badgeStyles: Record<Scheme["badge"], { border: string; chip: string; accent: string; dot: string }> = {
   green: {
     border: "border-l-[#16A34A]",
-    chip: "bg-[#16A34A]/10 text-[#16A34A] border border-[#16A34A]/30",
+    chip: "bg-[#16A34A]/15 text-[#16A34A] border border-[#16A34A]/40",
     accent: "text-[#16A34A]",
     dot: "bg-[#16A34A]",
   },
   teal: {
     border: "border-l-[#0D9488]",
-    chip: "bg-[#0D9488]/10 text-[#0D9488] border border-[#0D9488]/30",
+    chip: "bg-[#0D9488]/15 text-[#0D9488] border border-[#0D9488]/40",
     accent: "text-[#0D9488]",
     dot: "bg-[#0D9488]",
   },
   amber: {
     border: "border-l-[#D97706]",
-    chip: "bg-[#D97706]/10 text-[#D97706] border border-[#D97706]/30",
+    chip: "bg-[#D97706]/15 text-[#D97706] border border-[#D97706]/40",
     accent: "text-[#D97706]",
     dot: "bg-[#D97706]",
   },
@@ -246,7 +246,7 @@ const GreenSchemesBreakdown = () => {
                       )}
                     </div>
                   </div>
-                  <p className="font-body text-xs text-body-text/70 leading-snug bg-navy/[0.03] rounded-md p-3">
+                  <p className="font-body text-xs text-body-text/70 leading-snug bg-navy/[0.06] rounded-md p-3">
                     {scheme.note}
                   </p>
                 </div>
