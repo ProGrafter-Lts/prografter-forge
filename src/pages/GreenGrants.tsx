@@ -395,7 +395,7 @@ const GreenGrantsPage = () => {
               {/* Navigation buttons */}
               <div className="flex items-center justify-between mt-8">
                 {step > 0 ? (
-                  <button onClick={() => setStep(step - 1)} className="flex items-center gap-2 font-mono text-sm text-cream/50 hover:text-cream transition-colors">
+                  <button onClick={() => setStep(step - 1)} className="flex items-center gap-2 font-mono text-sm text-cream/60 hover:text-cream transition-colors">
                     <ChevronLeft className="w-4 h-4" /> Back
                   </button>
                 ) : <div />}
@@ -420,8 +420,8 @@ const GreenGrantsPage = () => {
               {schemes.map((s) => <SchemeCard key={s.id} scheme={s} />)}
 
               {/* Disclaimer */}
-              <div className="bg-cream/[0.03] border border-cream/10 rounded-xl px-6 py-5">
-                <p className="font-body text-cream/50 text-xs leading-relaxed">
+              <div className="bg-cream/[0.06] border border-cream/15 rounded-xl px-6 py-5">
+                <p className="font-body text-cream/60 text-xs leading-relaxed">
                   These results are a guide based on the information you provided. Your exact eligibility will be confirmed by a certified installer during a free assessment. ProGrafter provides information only — not financial advice. For official guidance visit{" "}
                   <a href="https://www.gov.uk" target="_blank" rel="noopener noreferrer" className="text-teal underline">gov.uk</a>.
                 </p>
@@ -441,7 +441,7 @@ const GreenGrantsPage = () => {
               <div className="text-center">
                 <button
                   onClick={() => { setStep(0); setProperty(null); setOwnership(null); setEpc(null); setHousehold([]); }}
-                  className="font-mono text-xs text-cream/40 hover:text-cream/60 underline underline-offset-4 transition-colors"
+                  className="font-mono text-xs text-cream/50 hover:text-cream/70 underline underline-offset-4 transition-colors"
                 >
                   Start over
                 </button>
