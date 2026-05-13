@@ -163,11 +163,11 @@ const StepIndicator = ({ current, total }: { current: number; total: number }) =
     {Array.from({ length: total }, (_, i) => (
       <div key={i} className="flex items-center gap-3 flex-1">
         <div className={`w-8 h-8 rounded-full flex items-center justify-center font-mono text-sm transition-all ${
-          i < current ? "bg-[#16A34A] text-white" : i === current ? "bg-teal text-cream" : "bg-cream/10 text-cream/30"
+          i < current ? "bg-[#16A34A] text-white" : i === current ? "bg-teal text-cream" : "bg-cream/15 text-cream/50"
         }`}>
           {i < current ? "✓" : i + 1}
         </div>
-        {i < total - 1 && <div className={`h-[2px] flex-1 ${i < current ? "bg-[#16A34A]" : "bg-cream/10"}`} />}
+        {i < total - 1 && <div className={`h-[2px] flex-1 ${i < current ? "bg-[#16A34A]" : "bg-cream/15"}`} />}
       </div>
     ))}
   </div>
@@ -176,7 +176,7 @@ const StepIndicator = ({ current, total }: { current: number; total: number }) =
 const SchemeCard = ({ scheme }: { scheme: Scheme }) => {
   const isMay = scheme.confidence === "may";
   return (
-    <div className="rounded-xl border border-[#16A34A]/20 bg-[#16A34A]/[0.04] p-6 space-y-4">
+    <div className="rounded-xl border border-[#16A34A]/35 bg-[#16A34A]/[0.08] p-6 space-y-4">
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-3">
           <span className="text-2xl">{scheme.icon}</span>
@@ -189,13 +189,13 @@ const SchemeCard = ({ scheme }: { scheme: Scheme }) => {
         </div>
         <span className="font-heading text-[#16A34A] text-lg whitespace-nowrap">{scheme.value}</span>
       </div>
-      <p className="font-body text-cream/60 text-sm leading-relaxed">{scheme.summary}</p>
+      <p className="font-body text-cream/70 text-sm leading-relaxed">{scheme.summary}</p>
       {scheme.metCriteria.length > 0 && (
         <div className="space-y-1.5">
           {scheme.metCriteria.map((c) => (
             <div key={c} className="flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-[#16A34A] flex-shrink-0" />
-              <span className="font-body text-sm text-cream/70">{c}</span>
+              <span className="font-body text-sm text-cream/80">{c}</span>
             </div>
           ))}
         </div>
@@ -205,7 +205,7 @@ const SchemeCard = ({ scheme }: { scheme: Scheme }) => {
           {scheme.confirmCriteria.map((c) => (
             <div key={c} className="flex items-center gap-2">
               <HelpCircle className="w-4 h-4 text-amber-400 flex-shrink-0" />
-              <span className="font-body text-sm text-cream/50">{c}</span>
+              <span className="font-body text-sm text-cream/65">{c}</span>
             </div>
           ))}
         </div>
@@ -258,7 +258,7 @@ const GreenGrantsPage = () => {
     `cursor-pointer rounded-xl border px-5 py-4 transition-all text-left ${
       isActive
         ? "border-teal/60 bg-teal/10 text-cream"
-        : "border-cream/10 bg-cream/[0.02] text-cream/60 hover:border-cream/20"
+        : "border-cream/15 bg-cream/[0.06] text-cream/75 hover:border-cream/25"
     }`;
 
   return (
@@ -339,7 +339,7 @@ const GreenGrantsPage = () => {
               {step === 2 && (
                 <div>
                   <h2 className="font-heading text-cream text-2xl mb-6">What is your home's current EPC energy rating?</h2>
-                  <p className="font-body text-cream/50 text-sm mb-5">
+                  <p className="font-body text-cream/60 text-sm mb-5">
                     Your EPC (Energy Performance Certificate) rates your home from A (most efficient) to G (least efficient).
                   </p>
                   <div className="grid grid-cols-1 gap-3">
@@ -347,7 +347,7 @@ const GreenGrantsPage = () => {
                       <button key={opt.value} onClick={() => setEpc(opt.value)} className={cardClass(epc === opt.value)}>
                         <span className="text-lg mr-3">{opt.color}</span>
                         <span className="font-body text-sm font-medium">{opt.label}</span>
-                        {opt.sub && <span className="font-body text-xs text-cream/40 ml-2">— {opt.sub}</span>}
+                        {opt.sub && <span className="font-body text-xs text-cream/50 ml-2">— {opt.sub}</span>}
                       </button>
                     ))}
                   </div>
@@ -370,7 +370,7 @@ const GreenGrantsPage = () => {
               {step === 3 && (
                 <div>
                   <h2 className="font-heading text-cream text-2xl mb-6">Which of these describe your household?</h2>
-                  <p className="font-mono text-xs text-cream/40 uppercase tracking-widest mb-4">Select all that apply</p>
+                  <p className="font-mono text-xs text-cream/50 uppercase tracking-widest mb-4">Select all that apply</p>
                   <div className="grid grid-cols-1 gap-3">
                     {HOUSEHOLD_OPTIONS.map((opt) => {
                       const isActive = household.includes(opt.value);
@@ -395,7 +395,7 @@ const GreenGrantsPage = () => {
               {/* Navigation buttons */}
               <div className="flex items-center justify-between mt-8">
                 {step > 0 ? (
-                  <button onClick={() => setStep(step - 1)} className="flex items-center gap-2 font-mono text-sm text-cream/50 hover:text-cream transition-colors">
+                  <button onClick={() => setStep(step - 1)} className="flex items-center gap-2 font-mono text-sm text-cream/60 hover:text-cream transition-colors">
                     <ChevronLeft className="w-4 h-4" /> Back
                   </button>
                 ) : <div />}
@@ -420,8 +420,8 @@ const GreenGrantsPage = () => {
               {schemes.map((s) => <SchemeCard key={s.id} scheme={s} />)}
 
               {/* Disclaimer */}
-              <div className="bg-cream/[0.03] border border-cream/10 rounded-xl px-6 py-5">
-                <p className="font-body text-cream/50 text-xs leading-relaxed">
+              <div className="bg-cream/[0.06] border border-cream/15 rounded-xl px-6 py-5">
+                <p className="font-body text-cream/60 text-xs leading-relaxed">
                   These results are a guide based on the information you provided. Your exact eligibility will be confirmed by a certified installer during a free assessment. ProGrafter provides information only — not financial advice. For official guidance visit{" "}
                   <a href="https://www.gov.uk" target="_blank" rel="noopener noreferrer" className="text-teal underline">gov.uk</a>.
                 </p>
@@ -441,7 +441,7 @@ const GreenGrantsPage = () => {
               <div className="text-center">
                 <button
                   onClick={() => { setStep(0); setProperty(null); setOwnership(null); setEpc(null); setHousehold([]); }}
-                  className="font-mono text-xs text-cream/40 hover:text-cream/60 underline underline-offset-4 transition-colors"
+                  className="font-mono text-xs text-cream/50 hover:text-cream/70 underline underline-offset-4 transition-colors"
                 >
                   Start over
                 </button>

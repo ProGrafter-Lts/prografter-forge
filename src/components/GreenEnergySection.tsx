@@ -41,10 +41,10 @@ const GreenEnergySection = () => {
           {schemes.map((s) => (
             <div
               key={s.title}
-              className={`${s.bg} rounded-xl p-6 text-white`}
+              className={`${s.bg} rounded-xl p-6 text-white shadow-lg shadow-black/10`}
             >
               <h3 className="font-heading text-2xl tracking-wide mb-1">{s.title}</h3>
-              <p className="font-mono text-sm opacity-90">{s.description}</p>
+              <p className="font-mono text-sm opacity-95">{s.description}</p>
             </div>
           ))}
         </div>
