@@ -362,17 +362,17 @@ const QuoteChecker = () => {
 
   if (verifying) {
     return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <div className="pt-24 pb-16 px-6">
-          <div className="max-w-2xl mx-auto text-center py-16 space-y-4">
-            <Loader2 className="mx-auto h-10 w-10 text-teal animate-spin" />
-            <h2 className="font-heading text-2xl text-navy">Confirming your payment…</h2>
-            <p className="font-mono text-sm text-muted-foreground">Please wait while we verify your payment and start your analysis.</p>
+      <AppShell>
+        <div className="min-h-screen bg-background">
+          <div className="pt-24 pb-16 px-6">
+            <div className="max-w-2xl mx-auto text-center py-16 space-y-4">
+              <Loader2 className="mx-auto h-10 w-10 text-teal animate-spin" />
+              <h2 className="font-heading text-2xl text-navy">Confirming your payment…</h2>
+              <p className="font-mono text-sm text-muted-foreground">Please wait while we verify your payment and start your analysis.</p>
+            </div>
           </div>
         </div>
-        <Footer />
-      </div>
+      </AppShell>
     );
   }
 
