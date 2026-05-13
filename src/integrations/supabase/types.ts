@@ -2576,6 +2576,7 @@ export type Database = {
           insurance_expiry: string | null
           is_green_trade: boolean
           is_test: boolean
+          last_verification_reminder_at: string | null
           mcs_number: string | null
           mcs_verified: boolean
           name: string
@@ -2606,6 +2607,7 @@ export type Database = {
           vat_number: string | null
           vat_registered: boolean
           verification_notes: string | null
+          verification_reminder_count: number
           verification_status: string
           verified: boolean
           verified_on_prografter_at: string | null
@@ -2630,6 +2632,7 @@ export type Database = {
           insurance_expiry?: string | null
           is_green_trade?: boolean
           is_test?: boolean
+          last_verification_reminder_at?: string | null
           mcs_number?: string | null
           mcs_verified?: boolean
           name: string
@@ -2660,6 +2663,7 @@ export type Database = {
           vat_number?: string | null
           vat_registered?: boolean
           verification_notes?: string | null
+          verification_reminder_count?: number
           verification_status?: string
           verified?: boolean
           verified_on_prografter_at?: string | null
@@ -2684,6 +2688,7 @@ export type Database = {
           insurance_expiry?: string | null
           is_green_trade?: boolean
           is_test?: boolean
+          last_verification_reminder_at?: string | null
           mcs_number?: string | null
           mcs_verified?: boolean
           name?: string
@@ -2714,6 +2719,7 @@ export type Database = {
           vat_number?: string | null
           vat_registered?: boolean
           verification_notes?: string | null
+          verification_reminder_count?: number
           verification_status?: string
           verified?: boolean
           verified_on_prografter_at?: string | null
