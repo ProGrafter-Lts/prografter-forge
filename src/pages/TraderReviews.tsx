@@ -182,12 +182,42 @@ export default function TraderReviews() {
     if (vals.length) dimAvgs[d.id] = vals.reduce((s, v) => s + v, 0) / vals.length;
   });
 
+  const reviewSchemas = reviews
+    .filter((r) => r.homeowner_overall != null)
+    .map((r) => ({
+      "@type": "Review",
+      reviewRating: { "@type": "Rating", ratingValue: Number(r.homeowner_overall), bestRating: 5 },
+      author: { "@type": "Person", name: r.homeowner_name },
+      datePublished: r.published_at,
+      reviewBody: r.body ?? undefined,
+    }));
+
+  const traderJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    name: trader.company_name || trader.name,
+    description: `${trader.trade_type} based in ${trader.postcode}`,
+    address: { "@type": "PostalAddress", postalCode: trader.postcode, addressCountry: "GB" },
+    ...(reviews.length
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: Number(overallAvg.toFixed(2)),
+            reviewCount: reviews.length,
+            bestRating: 5,
+          },
+          review: reviewSchemas,
+        }
+      : {}),
+  };
+
   return (
     <div style={{ minHeight:"100vh", background:C.cream }}>
       <SEO
         title={`${trader.name} · ${trader.company_name ?? ""} reviews · ProGrafter`}
         description={`Verified reviews for ${trader.name}${trader.company_name ? ` (${trader.company_name})` : ""} on ProGrafter.`}
         path={`/traders/${id}/reviews`}
+        jsonLd={traderJsonLd}
       />
 
       <div style={{ background:C.deep, padding:"14px 24px", display:"flex", alignItems:"center", justifyContent:"space-between", position:"sticky", top:0, zIndex:10 }}>

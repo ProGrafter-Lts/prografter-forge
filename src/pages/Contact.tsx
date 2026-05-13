@@ -102,6 +102,22 @@ const Contact = () => {
         title="Contact ProGrafter | Get in Touch"
         description="Get in touch with the ProGrafter team. We respond to every enquiry within one working day."
         path="/contact"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          name: "ProGrafter Ltd",
+          url: "https://prografter.co.uk/contact",
+          email: "hello@prografter.co.uk",
+          address: {
+            "@type": "PostalAddress",
+            streetAddress: "66 Paul Street",
+            addressLocality: "London",
+            postalCode: "EC2A 4NA",
+            addressCountry: "GB",
+          },
+          identifier: { "@type": "PropertyValue", propertyID: "Companies House", value: "17124130" },
+          areaServed: { "@type": "Country", name: "United Kingdom" },
+        }}
       />
 
       <main className="pt-24 pb-16">
