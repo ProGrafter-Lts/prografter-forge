@@ -16,6 +16,7 @@ import {
 } from "@/lib/greenTrades";
 import { saveTradeSpecialisms } from "@/lib/specialisms";
 import { useSetupRedirect, SetupRedirectLoader } from "@/hooks/useSetupRedirect";
+import TradeVerificationExplainer from "@/components/TradeVerificationExplainer";
 
 const SpecialismsPicker = lazy(() => import("@/components/SpecialismsPicker"));
 const TradeDateField = lazy(() => import("@/components/trade/TradeDateField"));
@@ -667,6 +668,7 @@ const SignupTrade = () => {
           )}
         </div>
       </div>
+      <TradeVerificationExplainer />
     </div>
   );
 };
