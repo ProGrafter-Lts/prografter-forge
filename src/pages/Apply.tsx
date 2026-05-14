@@ -248,14 +248,42 @@ export default function Apply() {
           {TRADES.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
         </S>
       </Field>
-      {cat && (
-        <InfoBox variant={reg ? "amber" : "teal"}>
-          <strong style={{ display: "block", marginBottom: 4 }}>
-            {reg ? "🔒 Regulated trade — registration required" : "✅ Experience pathway"}
-          </strong>
-          {reg
-            ? `You'll need your ${cat.body} registration number. We verify this directly with the registration body — not just a self-declaration.`
-            : `We assess experience through your trading history, a portfolio of completed jobs, and two client references we'll contact directly by phone.`}
+      {cat?.id === "electrician" && (
+        <InfoBox variant="amber">
+          <strong style={{ display: "block", marginBottom: 4 }}>Electrician — Competent Person Scheme verification</strong>
+          <p style={{ margin: "0 0 8px" }}>
+            We verify your registration with a Competent Person Scheme (CPS) — NICEIC, NAPIT, ELECSA, or equivalent. This is the legal requirement for domestic electrical work in England and Wales under Part P of the Building Regulations.
+          </p>
+          <p style={{ margin: "0 0 8px" }}>
+            We do not require a CSCS card or ECS Gold Card as a separate check. If you are currently registered with a CPS as a domestic installer or qualified supervisor, you are eligible regardless of your qualification route — including if you qualified via the Experienced Worker Assessment rather than a traditional apprenticeship.
+          </p>
+          <p style={{ margin: 0 }}>
+            The ECS Gold Card requirements changed in December 2025. We are aware of this and will not penalise electricians who are mid-transition between qualification routes, provided your CPS registration is current.
+          </p>
+        </InfoBox>
+      )}
+      {cat?.id === "gas_engineer" && (
+        <InfoBox variant="amber">
+          <strong style={{ display: "block", marginBottom: 4 }}>Gas Engineer — Gas Safe Register verification</strong>
+          You must be currently listed on the Gas Safe Register for the gas work categories you intend to carry out. We verify your registration directly against the public register — registration is the ongoing legal check, so it must be live at the time of every job.
+        </InfoBox>
+      )}
+      {cat && cat.lane === "unregulated" && (
+        <InfoBox variant="teal">
+          <strong style={{ display: "block", marginBottom: 4 }}>{cat.name} — experience and insurance verification</strong>
+          <p style={{ margin: "0 0 8px" }}>
+            We do not require a CSCS card for domestic trades work. CSCS cards are a commercial construction site requirement and are not applicable to the residential work ProGrafter covers.
+          </p>
+          <p style={{ margin: "0 0 6px", fontWeight: 600 }}>We verify:</p>
+          <ul style={{ margin: "0 0 8px", paddingLeft: 18 }}>
+            <li>Valid public liability insurance (we contact your insurer)</li>
+            <li>Trading history and business registration</li>
+            <li>Two client references (we call them by phone)</li>
+            <li>A short interview conducted by the ProGrafter team</li>
+          </ul>
+          <p style={{ margin: 0 }}>
+            This is a more meaningful check for residential trades than any card — and it&apos;s how we ensure the trades on our platform are genuinely at the top of their game.
+          </p>
         </InfoBox>
       )}
       <Field label="Years trading in this profession" req err={errors.years_trading}>
