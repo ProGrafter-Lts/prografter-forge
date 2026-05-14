@@ -311,9 +311,33 @@ export default function Apply() {
           <InfoBox variant="amber">
             <strong>Important:</strong> We check your registration number against the {cat?.body} public register. Any discrepancy pauses your application until resolved.
           </InfoBox>
-          <Field label={`${cat?.body} registration number`} req err={errors.registration_number}>
-            <I f="registration_number" placeholder="123456" />
-          </Field>
+          {cat?.id === "electrician" ? (
+            <>
+              <Field
+                label="Competent Person Scheme registration number"
+                req
+                err={errors.registration_number}
+                hint="Your NICEIC, NAPIT, ELECSA or equivalent registration number. We verify this directly with your scheme — this takes 2 minutes and confirms you are currently authorised to self-certify domestic electrical work."
+              >
+                <I f="registration_number" placeholder="123456" />
+              </Field>
+              <Field label="Which scheme are you registered with?" req err={errors.cps_scheme}>
+                <S f="cps_scheme">
+                  <option value="">Select scheme...</option>
+                  <option value="NICEIC">NICEIC</option>
+                  <option value="NAPIT">NAPIT</option>
+                  <option value="ELECSA">ELECSA</option>
+                  <option value="Stroma Certification">Stroma Certification</option>
+                  <option value="OFTEC">OFTEC (oil/solid fuel)</option>
+                  <option value="Other">Other approved CPS</option>
+                </S>
+              </Field>
+            </>
+          ) : (
+            <Field label={`${cat?.body} registration number`} req err={errors.registration_number}>
+              <I f="registration_number" placeholder="123456" />
+            </Field>
+          )}
           <Field label="Registration expiry date" req err={errors.registration_expiry}>
             <I f="registration_expiry" type="date" />
           </Field>
