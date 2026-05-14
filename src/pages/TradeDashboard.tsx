@@ -47,6 +47,7 @@ interface TradeProfile {
   avg_rating: number | null;
   tier: string | null;
   verification_status: string | null;
+  submitted_for_review_at: string | null;
 }
 
 const TradeDashboard = () => {
@@ -96,7 +97,7 @@ const TradeDashboard = () => {
     try {
       const { data: tradeData, error: tradeError } = await supabase
         .from("trades")
-        .select("id, name, company_name, verified, trade_type, phone, is_green_trade, mcs_number, trustmark_number, pas_2030_accredited, pas_2035_coordinator, ozev_approved, fgas_registered, ciga_registered, inca_certified, green_cert_expiry, specialisms_prompt_seen, completed_jobs_count, review_count, avg_rating, tier, verification_status")
+        .select("id, name, company_name, verified, trade_type, phone, is_green_trade, mcs_number, trustmark_number, pas_2030_accredited, pas_2035_coordinator, ozev_approved, fgas_registered, ciga_registered, inca_certified, green_cert_expiry, specialisms_prompt_seen, completed_jobs_count, review_count, avg_rating, tier, verification_status, submitted_for_review_at")
         .eq("id", tradeId)
         .maybeSingle();
 
@@ -259,8 +260,33 @@ const TradeDashboard = () => {
           ) : (
             <>
           <LegalReviewBanner />
+          {/* Incomplete application banner */}
+          {trade?.verification_status === "pending" && !trade?.submitted_for_review_at && (
+            <div
+              className="mt-10 md:mt-0 p-4 rounded-xl font-body text-sm"
+              style={{ backgroundColor: "rgba(251,191,36,0.10)", border: "1px solid rgba(251,191,36,0.35)", color: "#FDE68A" }}
+            >
+              <div className="flex items-center justify-between gap-4 flex-wrap">
+                <div>
+                  <p className="font-mono text-xs uppercase tracking-widest mb-1" style={{ color: "#FCD34D" }}>
+                    Application incomplete
+                  </p>
+                  <p>
+                    You've created your account, but your trade application isn't finished yet. Complete the remaining steps so we can review your profile and get you on the platform.
+                  </p>
+                </div>
+                <a
+                  href="/apply"
+                  className="inline-block font-mono text-xs px-4 py-2 rounded-lg hover:opacity-90 transition-opacity"
+                  style={{ backgroundColor: "#FCD34D", color: "#0F2238" }}
+                >
+                  Complete application
+                </a>
+              </div>
+            </div>
+          )}
           {/* Verification banner */}
-          {trade?.verification_status && trade.verification_status !== "approved" && (() => {
+          {trade?.verification_status && trade.verification_status !== "approved" && trade?.submitted_for_review_at && (() => {
             const status = trade.verification_status;
             const palette =
               status === "info_requested"
