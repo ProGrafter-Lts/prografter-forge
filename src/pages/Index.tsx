@@ -19,6 +19,7 @@ import PlatformPreview from "@/components/PlatformPreview";
 import Testimonials from "@/components/Testimonials";
 import SeeHowItWorks from "@/components/SeeHowItWorks";
 import SignUpSection from "@/components/SignUpSection";
+import TradeVerificationExplainer from "@/components/TradeVerificationExplainer";
 import Footer from "@/components/Footer";
 
 const Index = () => {
