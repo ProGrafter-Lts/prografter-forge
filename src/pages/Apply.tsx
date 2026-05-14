@@ -41,7 +41,7 @@ const BLANK: FormState = {
   full_name: "", business_name: "", business_type: "", companies_house_number: "",
   email: "", phone: "", address_line1: "", address_line2: "", city: "", postcode: "",
   trade_category_id: "", years_trading: "", trading_history_description: "",
-  registration_number: "", registration_expiry: "", portfolio_description: "",
+  registration_number: "", registration_expiry: "", cps_scheme: "", portfolio_description: "",
   insurance_provider: "", insurance_policy_number: "", insurance_expiry: "",
   public_liability_cover: "", employers_liability_cover: "",
   ref1_name: "", ref1_phone: "", ref1_email: "", ref1_relationship: "", ref1_job_description: "", ref1_job_year: "",
