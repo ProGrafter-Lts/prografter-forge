@@ -1,5 +1,32 @@
 import { useState, type CSSProperties, type ReactNode, type ChangeEvent } from "react";
 
+function FAQItem({ q, a }: { q: string; a: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div style={{ borderBottom: `1px solid ${C.border}`, marginBottom: 0 }}>
+      <button
+        onClick={() => setOpen(!open)}
+        style={{
+          width: "100%", textAlign: "left", background: "none", border: "none", padding: "16px 0",
+          fontSize: 14, fontWeight: 600, color: C.deep, cursor: "pointer",
+          display: "flex", justifyContent: "space-between", alignItems: "center",
+        }}
+      >
+        <span>{q}</span>
+        <span style={{
+          display: "inline-block", transition: "transform 0.2s", transform: open ? "rotate(180deg)" : "rotate(0deg)",
+          fontSize: 12, color: C.teal, marginLeft: 12,
+        }}>▼</span>
+      </button>
+      {open && (
+        <div style={{ padding: "0 0 16px", fontSize: 13, color: C.body, lineHeight: 1.65 }}>
+          {a}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── ProGrafter Brand Palette ──────────────────────────────────────────────────
 const C = {
   cream: "#F5F0E8",
