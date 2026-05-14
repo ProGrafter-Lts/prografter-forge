@@ -97,7 +97,7 @@ const TradeDashboard = () => {
     try {
       const { data: tradeData, error: tradeError } = await supabase
         .from("trades")
-        .select("id, name, company_name, verified, trade_type, phone, is_green_trade, mcs_number, trustmark_number, pas_2030_accredited, pas_2035_coordinator, ozev_approved, fgas_registered, ciga_registered, inca_certified, green_cert_expiry, specialisms_prompt_seen, completed_jobs_count, review_count, avg_rating, tier, verification_status")
+        .select("id, name, company_name, verified, trade_type, phone, is_green_trade, mcs_number, trustmark_number, pas_2030_accredited, pas_2035_coordinator, ozev_approved, fgas_registered, ciga_registered, inca_certified, green_cert_expiry, specialisms_prompt_seen, completed_jobs_count, review_count, avg_rating, tier, verification_status, submitted_for_review_at")
         .eq("id", tradeId)
         .maybeSingle();
 
