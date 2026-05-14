@@ -280,61 +280,105 @@ const AdminVerifications = () => {
             <p className="font-body text-secondary-text">No trades in this state.</p>
           </div>
         ) : (
-          <div className="bg-white rounded-2xl border border-navy/10 overflow-hidden">
-            <table className="w-full">
-              <thead className="bg-navy/5">
-                <tr className="text-left font-mono text-xs uppercase tracking-wider text-secondary-text">
-                  <th className="px-4 py-3">Trade</th>
-                  <th className="px-4 py-3">Type</th>
-                  <th className="px-4 py-3">Postcode</th>
-                  <th className="px-4 py-3">Submitted</th>
-                  <th className="px-4 py-3">Insurance</th>
-                  <th className="px-4 py-3"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {trades.map((t) => (
-                  <tr key={t.id} className="border-t border-navy/5 hover:bg-cream/40">
-                    <td className="px-4 py-3">
-                      <div className="font-body text-navy font-medium">
-                        {t.company_name || t.name}
+          <div className="space-y-3">
+            {trades.map((t) => {
+              const submitted = t.submitted_for_review_at;
+              const daysAgo = Math.floor(
+                (Date.now() - new Date(t.created_at).getTime()) / 86_400_000,
+              );
+              const awaitingSubmit = !submitted;
+              return (
+                <div
+                  key={t.id}
+                  className="bg-white rounded-2xl border border-navy/10 p-4 md:p-5"
+                >
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <div className="font-heading text-lg text-navy leading-tight">
+                        {t.company_name || t.name || "Unnamed trade"}
                       </div>
-                      <div className="font-mono text-xs text-secondary-text">
-                        {t.email}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 font-body text-sm text-body-text">
-                      {t.trade_type || "—"}
-                    </td>
-                    <td className="px-4 py-3 font-mono text-xs text-body-text">
-                      {t.postcode || "—"}
-                    </td>
-                    <td className="px-4 py-3 font-mono text-xs text-secondary-text">
-                      {t.submitted_for_review_at
-                        ? format(new Date(t.submitted_for_review_at), "dd MMM yyyy")
-                        : "—"}
-                    </td>
-                    <td className="px-4 py-3">
-                      {t.insurance_expiry ? (
-                        <span className="font-mono text-xs text-body-text">
-                          exp {format(new Date(t.insurance_expiry), "dd MMM yyyy")}
-                        </span>
-                      ) : (
-                        <span className="font-mono text-xs text-red-600">missing</span>
+                      {t.company_name && t.name && t.name !== t.company_name && (
+                        <div className="font-body text-sm text-body-text">{t.name}</div>
                       )}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <button
-                        onClick={() => openTrade(t.id)}
-                        className="font-mono text-xs uppercase tracking-wider text-teal hover:underline"
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        <Badge className="bg-navy/10 text-navy">
+                          {t.trade_type || "Trade type missing"}
+                        </Badge>
+                        {t.postcode && (
+                          <Badge className="bg-navy/10 text-navy font-mono">
+                            {t.postcode}
+                          </Badge>
+                        )}
+                        {awaitingSubmit ? (
+                          <Badge className="bg-amber-100 text-amber-700">
+                            Awaiting submit · {daysAgo}d
+                          </Badge>
+                        ) : (
+                          <Badge className="bg-blue-100 text-blue-700">
+                            Submitted {format(new Date(submitted!), "dd MMM")}
+                          </Badge>
+                        )}
+                        {t.insurance_expiry ? (
+                          <Badge className="bg-green-100 text-green-700 font-mono">
+                            Insurance to {format(new Date(t.insurance_expiry), "dd MMM yy")}
+                          </Badge>
+                        ) : (
+                          <Badge className="bg-red-100 text-red-700">No insurance</Badge>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+                    {t.email ? (
+                      <a
+                        href={`mailto:${t.email}`}
+                        className="font-mono text-xs text-teal hover:underline break-all"
                       >
-                        Review →
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                        ✉ {t.email}
+                      </a>
+                    ) : (
+                      <span className="font-mono text-xs text-secondary-text">
+                        ✉ no email on file
+                      </span>
+                    )}
+                    {t.phone ? (
+                      <a
+                        href={`tel:${t.phone.replace(/\s+/g, "")}`}
+                        className="font-mono text-xs text-teal hover:underline"
+                      >
+                        ☎ {t.phone}
+                      </a>
+                    ) : (
+                      <span className="font-mono text-xs text-secondary-text">
+                        ☎ no phone on file
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <button
+                      onClick={() => openTrade(t.id)}
+                      className="bg-navy text-white font-mono text-xs uppercase tracking-wider px-4 py-2 rounded-xl hover:bg-navy/90"
+                    >
+                      Review documents →
+                    </button>
+                    {t.email && awaitingSubmit && (
+                      <a
+                        href={`mailto:${t.email}?subject=${encodeURIComponent(
+                          "Finish your ProGrafter application",
+                        )}&body=${encodeURIComponent(
+                          `Hi ${(t.name || "").split(/\s+/)[0] || "there"},\n\nThanks for signing up to ProGrafter. We noticed your verification application isn't quite finished yet — to start receiving job leads, please log in and complete the remaining steps:\n\nhttps://prografter.co.uk/apply\n\nIf you've hit a snag or need a hand, just reply to this email.\n\nThanks,\nThe ProGrafter team`,
+                        )}`}
+                        className="bg-amber-500 text-white font-mono text-xs uppercase tracking-wider px-4 py-2 rounded-xl hover:bg-amber-600"
+                      >
+                        Nudge to finish
+                      </a>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
       </main>
