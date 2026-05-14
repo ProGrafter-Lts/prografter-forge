@@ -485,6 +485,18 @@ export default function Apply() {
           <h1 style={{ fontSize: 24, fontWeight: 700, color: C.deep, margin: "0 0 6px" }}>Apply to join ProGrafter</h1>
           <p style={{ fontSize: 14, color: C.secondary, margin: 0 }}>We review every application personally. This takes around 10 minutes.</p>
         </div>
+
+        <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 14, padding: "20px 24px", marginBottom: 24, boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+          <h2 style={{ fontSize: 16, fontWeight: 700, color: C.deep, margin: "0 0 4px" }}>Common questions from trades</h2>
+          <p style={{ fontSize: 13, color: C.secondary, margin: "0 0 16px" }}>Before you start, here are answers to questions we hear most often.</p>
+          <FAQItem q="Do I need a CSCS card to join ProGrafter?" a="No. CSCS cards are a commercial construction site requirement and are not applicable to domestic residential work. We do not require a CSCS card from any trade. We verify insurance, trading history, references, and conduct a short interview — which we believe is a more meaningful check for residential work." />
+          <FAQItem q="I'm an electrician — do I need an ECS Gold Card or NVQ Level 3?" a="No, not as a separate requirement. We verify your Competent Person Scheme registration (NICEIC, NAPIT, ELECSA or equivalent) directly. Your scheme membership already confirms your competence has been assessed. We are aware the ECS Gold Card requirements changed in December 2025 and will not penalise electricians who qualified via the Experienced Worker Assessment or the domestic NVQ route, as long as your CPS registration is current." />
+          <FAQItem q="I've worked domestically for 20 years but don't have formal qualifications — can I still apply?" a="Yes, for unregulated trades (decorating, tiling, landscaping, groundworks, general building, bathroom fitting, carpentry, plastering, roofing). We assess experience through your portfolio, your trading history, and the two client references we call personally. A 20-year trade with demonstrable quality work is exactly who we want on ProGrafter." />
+          <FAQItem q="I work on domestic properties only — do I need the same qualifications as someone who works commercially?" a="No. Commercial and industrial qualifications are irrelevant to the work ProGrafter covers. We verify what applies to residential work only." />
+          <FAQItem q="What happens after I submit my application?" a="Lee Palfreeman (founder) personally reviews every application. We'll contact your references by phone — not by form. We'll then book a short interview call. If approved, you'll be notified within 3-5 working days and your profile goes live on the platform." />
+          <FAQItem q="Is there any cost to join?" a="No upfront cost, no monthly fee. ProGrafter charges 7.5% of the job value only when you win and complete a job, capped at £900 regardless of contract size. You pay nothing until you earn." />
+        </div>
+
         <StepBar current={step} />
         <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 14, padding: 24, boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
           {pages[step]}
