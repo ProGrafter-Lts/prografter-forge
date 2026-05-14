@@ -64,6 +64,7 @@ const Index = () => {
       <PlatformPreview />
       <Testimonials />
       <SeeHowItWorks />
+      <TradeVerificationExplainer />
       <SignUpSection />
       <Footer />
     </div>
