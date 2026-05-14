@@ -19,7 +19,7 @@ const C = {
 };
 
 const TRADES = [
-  { id: "electrician", name: "Electrician", lane: "regulated", body: "NICEIC / NAPIT / ECA" },
+  { id: "electrician", name: "Electrician", lane: "regulated", body: "Competent Person Scheme" },
   { id: "gas_engineer", name: "Gas Engineer", lane: "regulated", body: "Gas Safe Register" },
   { id: "general_builder", name: "General Builder", lane: "unregulated" },
   { id: "plasterer", name: "Plasterer", lane: "unregulated" },
@@ -28,8 +28,10 @@ const TRADES = [
   { id: "decorator", name: "Decorator / Painter", lane: "unregulated" },
   { id: "roofer", name: "Roofer", lane: "unregulated" },
   { id: "plumber", name: "Plumber", lane: "unregulated" },
+  { id: "scaffolder", name: "Scaffolder", lane: "unregulated" },
   { id: "landscaper", name: "Landscaper", lane: "unregulated" },
 ] as const;
+
 
 const STEPS = ["Your details", "Your trade", "Qualifications", "Insurance", "References", "Declaration"];
 
@@ -39,7 +41,7 @@ const BLANK: FormState = {
   full_name: "", business_name: "", business_type: "", companies_house_number: "",
   email: "", phone: "", address_line1: "", address_line2: "", city: "", postcode: "",
   trade_category_id: "", years_trading: "", trading_history_description: "",
-  registration_number: "", registration_expiry: "", portfolio_description: "",
+  registration_number: "", registration_expiry: "", cps_scheme: "", portfolio_description: "",
   insurance_provider: "", insurance_policy_number: "", insurance_expiry: "",
   public_liability_cover: "", employers_liability_cover: "",
   ref1_name: "", ref1_phone: "", ref1_email: "", ref1_relationship: "", ref1_job_description: "", ref1_job_year: "",
@@ -161,6 +163,7 @@ export default function Apply() {
       if (reg) {
         if (!v("registration_number")) e.registration_number = "Required";
         if (!form.registration_expiry) e.registration_expiry = "Required";
+        if (cat?.id === "electrician" && !v("cps_scheme")) e.cps_scheme = "Required";
       } else {
         if (!v("portfolio_description")) e.portfolio_description = "Required";
       }
@@ -246,14 +249,42 @@ export default function Apply() {
           {TRADES.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
         </S>
       </Field>
-      {cat && (
-        <InfoBox variant={reg ? "amber" : "teal"}>
-          <strong style={{ display: "block", marginBottom: 4 }}>
-            {reg ? "🔒 Regulated trade — registration required" : "✅ Experience pathway"}
-          </strong>
-          {reg
-            ? `You'll need your ${cat.body} registration number. We verify this directly with the registration body — not just a self-declaration.`
-            : `We assess experience through your trading history, a portfolio of completed jobs, and two client references we'll contact directly by phone.`}
+      {cat?.id === "electrician" && (
+        <InfoBox variant="amber">
+          <strong style={{ display: "block", marginBottom: 4 }}>Electrician — Competent Person Scheme verification</strong>
+          <p style={{ margin: "0 0 8px" }}>
+            We verify your registration with a Competent Person Scheme (CPS) — NICEIC, NAPIT, ELECSA, or equivalent. This is the legal requirement for domestic electrical work in England and Wales under Part P of the Building Regulations.
+          </p>
+          <p style={{ margin: "0 0 8px" }}>
+            We do not require a CSCS card or ECS Gold Card as a separate check. If you are currently registered with a CPS as a domestic installer or qualified supervisor, you are eligible regardless of your qualification route — including if you qualified via the Experienced Worker Assessment rather than a traditional apprenticeship.
+          </p>
+          <p style={{ margin: 0 }}>
+            The ECS Gold Card requirements changed in December 2025. We are aware of this and will not penalise electricians who are mid-transition between qualification routes, provided your CPS registration is current.
+          </p>
+        </InfoBox>
+      )}
+      {cat?.id === "gas_engineer" && (
+        <InfoBox variant="amber">
+          <strong style={{ display: "block", marginBottom: 4 }}>Gas Engineer — Gas Safe Register verification</strong>
+          You must be currently listed on the Gas Safe Register for the gas work categories you intend to carry out. We verify your registration directly against the public register — registration is the ongoing legal check, so it must be live at the time of every job.
+        </InfoBox>
+      )}
+      {cat && cat.lane === "unregulated" && (
+        <InfoBox variant="teal">
+          <strong style={{ display: "block", marginBottom: 4 }}>{cat.name} — experience and insurance verification</strong>
+          <p style={{ margin: "0 0 8px" }}>
+            We do not require a CSCS card for domestic trades work. CSCS cards are a commercial construction site requirement and are not applicable to the residential work ProGrafter covers.
+          </p>
+          <p style={{ margin: "0 0 6px", fontWeight: 600 }}>We verify:</p>
+          <ul style={{ margin: "0 0 8px", paddingLeft: 18 }}>
+            <li>Valid public liability insurance (we contact your insurer)</li>
+            <li>Trading history and business registration</li>
+            <li>Two client references (we call them by phone)</li>
+            <li>A short interview conducted by the ProGrafter team</li>
+          </ul>
+          <p style={{ margin: 0 }}>
+            This is a more meaningful check for residential trades than any card — and it&apos;s how we ensure the trades on our platform are genuinely at the top of their game.
+          </p>
         </InfoBox>
       )}
       <Field label="Years trading in this profession" req err={errors.years_trading}>
@@ -281,9 +312,33 @@ export default function Apply() {
           <InfoBox variant="amber">
             <strong>Important:</strong> We check your registration number against the {cat?.body} public register. Any discrepancy pauses your application until resolved.
           </InfoBox>
-          <Field label={`${cat?.body} registration number`} req err={errors.registration_number}>
-            <I f="registration_number" placeholder="123456" />
-          </Field>
+          {cat?.id === "electrician" ? (
+            <>
+              <Field
+                label="Competent Person Scheme registration number"
+                req
+                err={errors.registration_number}
+                hint="Your NICEIC, NAPIT, ELECSA or equivalent registration number. We verify this directly with your scheme — this takes 2 minutes and confirms you are currently authorised to self-certify domestic electrical work."
+              >
+                <I f="registration_number" placeholder="123456" />
+              </Field>
+              <Field label="Which scheme are you registered with?" req err={errors.cps_scheme}>
+                <S f="cps_scheme">
+                  <option value="">Select scheme...</option>
+                  <option value="NICEIC">NICEIC</option>
+                  <option value="NAPIT">NAPIT</option>
+                  <option value="ELECSA">ELECSA</option>
+                  <option value="Stroma Certification">Stroma Certification</option>
+                  <option value="OFTEC">OFTEC (oil/solid fuel)</option>
+                  <option value="Other">Other approved CPS</option>
+                </S>
+              </Field>
+            </>
+          ) : (
+            <Field label={`${cat?.body} registration number`} req err={errors.registration_number}>
+              <I f="registration_number" placeholder="123456" />
+            </Field>
+          )}
           <Field label="Registration expiry date" req err={errors.registration_expiry}>
             <I f="registration_expiry" type="date" />
           </Field>
