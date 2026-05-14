@@ -163,6 +163,7 @@ export default function Apply() {
       if (reg) {
         if (!v("registration_number")) e.registration_number = "Required";
         if (!form.registration_expiry) e.registration_expiry = "Required";
+        if (cat?.id === "electrician" && !v("cps_scheme")) e.cps_scheme = "Required";
       } else {
         if (!v("portfolio_description")) e.portfolio_description = "Required";
       }
