@@ -47,6 +47,7 @@ interface TradeProfile {
   avg_rating: number | null;
   tier: string | null;
   verification_status: string | null;
+  submitted_for_review_at: string | null;
 }
 
 const TradeDashboard = () => {
