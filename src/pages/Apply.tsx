@@ -19,7 +19,7 @@ const C = {
 };
 
 const TRADES = [
-  { id: "electrician", name: "Electrician", lane: "regulated", body: "NICEIC / NAPIT / ECA" },
+  { id: "electrician", name: "Electrician", lane: "regulated", body: "Competent Person Scheme" },
   { id: "gas_engineer", name: "Gas Engineer", lane: "regulated", body: "Gas Safe Register" },
   { id: "general_builder", name: "General Builder", lane: "unregulated" },
   { id: "plasterer", name: "Plasterer", lane: "unregulated" },
@@ -28,8 +28,10 @@ const TRADES = [
   { id: "decorator", name: "Decorator / Painter", lane: "unregulated" },
   { id: "roofer", name: "Roofer", lane: "unregulated" },
   { id: "plumber", name: "Plumber", lane: "unregulated" },
+  { id: "scaffolder", name: "Scaffolder", lane: "unregulated" },
   { id: "landscaper", name: "Landscaper", lane: "unregulated" },
 ] as const;
+
 
 const STEPS = ["Your details", "Your trade", "Qualifications", "Insurance", "References", "Declaration"];
 
