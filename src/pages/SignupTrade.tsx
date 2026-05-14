@@ -668,6 +668,7 @@ const SignupTrade = () => {
           )}
         </div>
       </div>
+      <TradeVerificationExplainer />
     </div>
   );
 };
