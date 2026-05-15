@@ -412,6 +412,57 @@ const SignupTrade = () => {
 
   if (checkingExisting) return <SetupRedirectLoader />;
 
+  if (!gatePassed) {
+    return (
+      <div className="min-h-screen flex flex-col" style={{ backgroundColor: "hsl(var(--deep))" }}>
+        <SEO title="Before you start — Join ProGrafter" description="What you'll need to apply as a trade on ProGrafter." path="/register/trade" noindex />
+        <header className="py-6 px-6">
+          <Link to="/" className="font-heading text-2xl tracking-wider">
+            <span className="text-cream">Pro</span><span className="text-teal">Grafter</span>
+          </Link>
+        </header>
+        <div className="flex-1 flex items-center justify-center px-6 py-8">
+          <div className="w-full max-w-lg">
+            <p className="font-mono text-xs text-teal uppercase tracking-widest mb-3">Application checklist</p>
+            <h2 className="font-heading text-cream text-[40px] leading-[1.05] mb-6">
+              Before you start — <span className="text-teal">have these ready.</span>
+            </h2>
+            <ul className="space-y-4 mb-6">
+              {[
+                { icon: ShieldCheck, title: "Public Liability Insurance certificate", body: "PDF or photo, must show your business name and expiry date" },
+                { icon: IdCard, title: "Photo ID", body: "Passport or driving licence" },
+                { icon: Award, title: "Trade qualification", body: "NICEIC card, Gas Safe registration, MCS cert, CSCS card, or equivalent for your trade" },
+              ].map(({ icon: Icon, title, body }) => (
+                <li key={title} className="flex items-start gap-3 p-4 rounded-xl border border-cream/10 bg-cream/5">
+                  <span className="flex-none w-9 h-9 rounded-lg bg-teal/15 flex items-center justify-center">
+                    <Check className="w-5 h-5 text-teal" strokeWidth={2.5} />
+                  </span>
+                  <div className="flex-1">
+                    <p className="font-heading text-cream text-base leading-tight mb-1">{title}</p>
+                    <p className="font-body text-cream/60 text-sm">{body}</p>
+                  </div>
+                  <Icon className="hidden sm:block w-5 h-5 text-teal/60 mt-1" strokeWidth={1.5} />
+                </li>
+              ))}
+            </ul>
+            <p className="font-body text-cream/70 text-sm mb-6 px-1">
+              Uploading takes around 4 minutes. We review within 1 working day.
+            </p>
+            <button
+              onClick={() => setGatePassed(true)}
+              className="w-full bg-teal text-cream font-mono text-sm py-4 rounded-xl hover:bg-teal-hover transition-colors"
+            >
+              I have these ready — start my application
+            </button>
+            <p className="mt-4 text-center font-body text-sm text-cream/60">
+              Already a member? <Link to="/login" className="text-teal underline">Sign in</Link>
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: "hsl(var(--deep))" }}>
       <SEO
