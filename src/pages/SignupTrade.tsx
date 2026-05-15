@@ -2,7 +2,22 @@ import { lazy, Suspense, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { format, differenceInDays } from "date-fns";
 import { z } from "zod";
-import { Leaf } from "lucide-react";
+import { Leaf, Check, ShieldCheck, IdCard, Award, CheckCircle2 } from "lucide-react";
+
+const MAX_DOC_BYTES = 10 * 1024 * 1024; // 10MB
+
+const qualificationCopy = (tradeType: string): { label: string; helper: string; required: boolean } => {
+  const t = tradeType.toLowerCase();
+  if (t.includes("electrician")) return { label: "Trade qualification — NICEIC, NAPIT or ECA", helper: "NICEIC, NAPIT, or ECA registration card or certificate", required: true };
+  if (t.includes("gas") || t === "plumber") return { label: "Trade qualification — Gas Safe", helper: "Gas Safe Register card — front and back", required: true };
+  if (t.includes("oil")) return { label: "Trade qualification — OFTEC", helper: "OFTEC registration certificate", required: true };
+  if (t.includes("solar") || t.includes("heat pump") || t.includes("biomass")) return { label: "Trade qualification — MCS", helper: "MCS certification", required: true };
+  if (t.includes("ev") || t.includes("charger")) return { label: "Trade qualification — OZEV", helper: "OZEV-approved installer registration", required: true };
+  if (t.includes("builder") || t.includes("contractor")) return { label: "Trade qualification — CSCS / NVQ", helper: "CSCS card or NVQ Level 2/3 certificate", required: false };
+  if (t.includes("scaffold")) return { label: "Trade qualification — CISRS", helper: "CISRS card", required: true };
+  if (!tradeType || t === "other") return { label: "Trade qualification", helper: "Any relevant qualification, accreditation, or membership certificate", required: false };
+  return { label: "Trade qualification", helper: "Any relevant qualification, accreditation, or membership certificate (strongly preferred)", required: false };
+};
 import { supabase } from "@/integrations/supabase/client";
 import SEO from "@/components/SEO";
 import { buildServiceJsonLd } from "@/lib/seoSchemas";
