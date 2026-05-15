@@ -63,7 +63,7 @@ const TradeProfileSection = ({ tradeId }: TradeProfileSectionProps) => {
       const { data, error } = await supabase
         .from("trades")
         .select(
-          "name, company_name, phone, postcode, trade_type, bio, website, years_experience, verified, is_green_trade, mcs_number, mcs_verified, trustmark_number, trustmark_verified, pas_2030_accredited, pas_2035_coordinator, ozev_approved, fgas_registered, ciga_registered, inca_certified, green_cert_expiry",
+          "name, company_name, phone, postcode, trade_type, bio, website, years_experience, verified, cps_scheme, cps_registration_number, gas_safe_number, is_green_trade, mcs_number, mcs_verified, trustmark_number, trustmark_verified, pas_2030_accredited, pas_2035_coordinator, ozev_approved, fgas_registered, ciga_registered, inca_certified, green_cert_expiry",
         )
         .eq("id", tradeId)
         .single();
