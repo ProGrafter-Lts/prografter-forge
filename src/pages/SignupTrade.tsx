@@ -662,26 +662,27 @@ const SignupTrade = () => {
           {step === 3 && (
             <div>
               <h2 className="font-heading text-cream text-[40px] leading-none mb-3">
-                Verification <span className="text-teal">Documents.</span>
+                Your <span className="text-teal">documents.</span>
               </h2>
               <p className="font-body text-cream/60 text-sm mb-6">
-                Upload these so we can verify you. Files are stored privately and only seen by our verification team.
+                Upload everything in one go — we'll review within 1 working day. Files are stored privately and only seen by our verification team. Max 10MB per file.
               </p>
               <div className="space-y-6">
                 {/* Insurance */}
                 <div className="p-4 rounded-xl border border-cream/10">
-                  <p className="font-mono text-xs text-teal uppercase tracking-widest mb-2">Public Liability Insurance *</p>
+                  <p className="font-mono text-xs text-teal uppercase tracking-widest mb-1">Public Liability Insurance certificate *</p>
+                  <p className="text-xs text-cream/60 font-body mb-2">Must show your business name, policy number, and expiry date. PDF, JPG or PNG.</p>
                   <input
                     type="file"
-                    accept="application/pdf,image/*"
-                    onChange={(e) => setInsuranceFile(e.target.files?.[0] ?? null)}
+                    accept="application/pdf,image/jpeg,image/png"
+                    onChange={handleFile(setInsuranceFile)}
                     className="text-cream text-sm file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-teal file:text-cream file:font-mono file:text-xs file:cursor-pointer"
                   />
                   {insuranceFile && <p className="mt-2 text-xs text-cream/60 font-body">✓ {insuranceFile.name}</p>}
                   <div className="mt-3">
-                    <label className={labelClass}>Expiry Date *</label>
+                    <label className={labelClass}>Certificate expiry date *</label>
                     <Suspense fallback={null}>
-                      <TradeDateField value={insuranceExpiry} onChange={setInsuranceExpiry} placeholder="Select expiry date" inputClassName={inputClass} />
+                      <TradeDateField value={insuranceExpiry} onChange={(d) => { setInsuranceExpiry(d); setDocsConfirmed(false); }} placeholder="Select expiry date" inputClassName={inputClass} />
                     </Suspense>
                     {insuranceStatus === "expired" && <p className="mt-1 text-xs text-red-400">⚠ Insurance has expired</p>}
                     {insuranceStatus === "expiring" && <p className="mt-1 text-xs text-yellow-400">⚠ Expires within 30 days</p>}
@@ -690,38 +691,57 @@ const SignupTrade = () => {
 
                 {/* ID */}
                 <div className="p-4 rounded-xl border border-cream/10">
-                  <p className="font-mono text-xs text-teal uppercase tracking-widest mb-2">Photo ID *</p>
-                  <p className="text-xs text-cream/60 font-body mb-2">Passport or driving licence</p>
+                  <p className="font-mono text-xs text-teal uppercase tracking-widest mb-1">Photo ID *</p>
+                  <p className="text-xs text-cream/60 font-body mb-2">Passport or driving licence. Must be the ID of the person registering this account. JPG, PNG or PDF.</p>
                   <input
                     type="file"
-                    accept="application/pdf,image/*"
-                    onChange={(e) => setIdFile(e.target.files?.[0] ?? null)}
+                    accept="application/pdf,image/jpeg,image/png"
+                    onChange={handleFile(setIdFile)}
                     className="text-cream text-sm file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-teal file:text-cream file:font-mono file:text-xs file:cursor-pointer"
                   />
                   {idFile && <p className="mt-2 text-xs text-cream/60 font-body">✓ {idFile.name}</p>}
                 </div>
 
-                {/* Qualification */}
+                {/* Qualification — dynamic per trade type */}
                 <div className="p-4 rounded-xl border border-cream/10">
-                  <p className="font-mono text-xs text-teal uppercase tracking-widest mb-2">Trade Qualification (optional)</p>
-                  <p className="text-xs text-cream/60 font-body mb-2">e.g. Gas Safe card, NICEIC, MCS cert. Speeds up verification.</p>
+                  <p className="font-mono text-xs text-teal uppercase tracking-widest mb-1">
+                    {qualMeta.label} {qualMeta.required ? "*" : "(strongly preferred)"}
+                  </p>
+                  <p className="text-xs text-cream/60 font-body mb-2">{qualMeta.helper}. PDF, JPG or PNG.</p>
                   <input
                     type="file"
-                    accept="application/pdf,image/*"
-                    onChange={(e) => setQualFile(e.target.files?.[0] ?? null)}
+                    accept="application/pdf,image/jpeg,image/png"
+                    onChange={handleFile(setQualFile)}
                     className="text-cream text-sm file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-teal file:text-cream file:font-mono file:text-xs file:cursor-pointer"
                   />
                   {qualFile && <p className="mt-2 text-xs text-cream/60 font-body">✓ {qualFile.name}</p>}
+                  <div className="mt-3">
+                    <label className={labelClass}>Expiry date (if applicable)</label>
+                    <Suspense fallback={null}>
+                      <TradeDateField value={qualExpiry} onChange={(d) => { setQualExpiry(d); setDocsConfirmed(false); }} placeholder="Select expiry date" inputClassName={inputClass} />
+                    </Suspense>
+                  </div>
                 </div>
+
+                {docsConfirmed && (
+                  <div className="flex items-start gap-3 p-4 rounded-xl bg-teal/10 border border-teal/40">
+                    <CheckCircle2 className="w-5 h-5 text-teal flex-none mt-0.5" strokeWidth={2} />
+                    <p className="font-body text-cream text-sm">
+                      <span className="font-mono text-teal uppercase tracking-widest text-xs block mb-1">Documents received</span>
+                      You're nearly done — tap continue to review and submit.
+                    </p>
+                  </div>
+                )}
               </div>
               <div className="flex gap-3 mt-8">
                 <button onClick={() => setStep(2)} className="flex-1 border border-cream/20 text-cream/80 font-mono text-sm py-3 rounded-xl hover:bg-cream/5 transition-colors">← Back</button>
                 <button onClick={submitStep3} disabled={loading} className="flex-[2] bg-teal text-cream font-mono text-sm py-3 rounded-xl hover:bg-teal-hover transition-colors disabled:opacity-50">
-                  {loading ? "Uploading…" : "Continue → Review"}
+                  {loading ? "Uploading…" : docsConfirmed ? "Continue → Review" : "Upload documents"}
                 </button>
               </div>
             </div>
           )}
+
 
           {/* STEP 4 */}
           {step === 4 && (
