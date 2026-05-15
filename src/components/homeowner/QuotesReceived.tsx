@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { BadgeCheck, SearchCheck, Shield, ArrowRight, Check, Loader2 } from "lucide-react";
+import { SearchCheck, Shield, ArrowRight, Check, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import VerifiedTradeBadge from "@/components/trade/VerifiedTradeBadge";
 import { getVerdictTheme, type AiVerdict } from "@/lib/quoteVerdict";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
