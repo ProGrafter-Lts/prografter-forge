@@ -100,9 +100,14 @@ const SignupTradeUnderReview = () => {
           ) : (
             <>
               <Icon className={`${tone} w-16 h-16 mx-auto mb-4`} strokeWidth={1.5} />
-              <h1 className="font-heading text-cream text-4xl mb-3">Under <span className="text-teal">review.</span></h1>
-              <p className="font-body text-cream/70 mb-2">Thanks — your application is in the queue.</p>
-              <p className="font-body text-cream/60 text-sm mb-8">We typically review within 1 business day. You'll get an email the moment you're approved.</p>
+              <h1 className="font-heading text-cream text-4xl mb-3">Application <span className="text-teal">received.</span></h1>
+              <p className="font-body text-cream/80 mb-3">
+                We have everything we need — your documents, details and qualifications are all with us.
+              </p>
+              <p className="font-body text-cream/70 mb-2">
+                Our team reviews every application within 1 working day. You'll receive an email the moment you're verified, at which point you can start quoting on jobs straight away.
+              </p>
+              <p className="font-body text-cream/60 text-sm mb-8">There's nothing else you need to do.</p>
               <div className="flex flex-col gap-3 items-center">
                 <Link to="/dashboard/trade" className="inline-block bg-teal text-cream font-mono text-sm py-3 px-8 rounded-xl hover:bg-teal-hover transition-colors">
                   Go to dashboard
