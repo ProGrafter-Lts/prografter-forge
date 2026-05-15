@@ -177,6 +177,13 @@ section[class*="bg-navy"] textarea::placeholder {
 .bg-white h1, .bg-white h2, .bg-white h3 {
   color: #1B3A5C;
 }
+/* Dark sections must keep their light heading colour */
+.bg-navy h1, .bg-navy h2, .bg-navy h3,
+.bg-deep h1, .bg-deep h2, .bg-deep h3,
+section[class*="bg-navy"] h1, section[class*="bg-navy"] h2, section[class*="bg-navy"] h3,
+section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-deep"] h3 {
+  color: #F5F0E8;
+}
 
 /* === Card polish === */
 .bg-cream .rounded-xl,
