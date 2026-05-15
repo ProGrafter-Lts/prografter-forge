@@ -57,10 +57,10 @@ const VerifiedTradeBadge = ({
   let label: React.ReactNode;
 
   if (isElectrician(tradeType)) {
-    const scheme = cpsScheme?.trim() || "CPS Scheme";
+    const scheme = cpsScheme?.trim();
     label = (
       <>
-        CPS Registered — {scheme} · Domestic installer
+        CPS Registered{scheme ? ` — ${scheme}` : ""} · Domestic installer
       </>
     );
   } else if (isGasEngineer(tradeType)) {
