@@ -117,7 +117,7 @@ const CompareQuotes = () => {
         supabase
           .from("quotes")
           .select(
-            "id, amount, message, status, ai_verdict, ai_verdict_summary, trades(name, company_name, verified, review_count, avg_rating, tier)",
+            "id, amount, message, status, ai_verdict, ai_verdict_summary, trades(name, company_name, verified, review_count, avg_rating, tier, trade_type, cps_scheme, cps_registration_number, gas_safe_number)",
           )
           .eq("job_id", jobId)
           .order("amount", { ascending: true }),
