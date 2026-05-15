@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { UserCircle, BadgeCheck, Save, Sparkles } from "lucide-react";
+import { UserCircle, Save, Sparkles } from "lucide-react";
 import { GreenSpecialistBanner, CertificationsSection } from "@/components/GreenCertBadges";
+import VerifiedTradeBadge from "@/components/trade/VerifiedTradeBadge";
 import SpecialismsPicker from "@/components/SpecialismsPicker";
 import {
   Specialism,
