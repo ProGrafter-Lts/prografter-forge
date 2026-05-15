@@ -2,7 +2,22 @@ import { lazy, Suspense, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { format, differenceInDays } from "date-fns";
 import { z } from "zod";
-import { Leaf } from "lucide-react";
+import { Leaf, Check, ShieldCheck, IdCard, Award, CheckCircle2 } from "lucide-react";
+
+const MAX_DOC_BYTES = 10 * 1024 * 1024; // 10MB
+
+const qualificationCopy = (tradeType: string): { label: string; helper: string; required: boolean } => {
+  const t = tradeType.toLowerCase();
+  if (t.includes("electrician")) return { label: "Trade qualification — NICEIC, NAPIT or ECA", helper: "NICEIC, NAPIT, or ECA registration card or certificate", required: true };
+  if (t.includes("gas") || t === "plumber") return { label: "Trade qualification — Gas Safe", helper: "Gas Safe Register card — front and back", required: true };
+  if (t.includes("oil")) return { label: "Trade qualification — OFTEC", helper: "OFTEC registration certificate", required: true };
+  if (t.includes("solar") || t.includes("heat pump") || t.includes("biomass")) return { label: "Trade qualification — MCS", helper: "MCS certification", required: true };
+  if (t.includes("ev") || t.includes("charger")) return { label: "Trade qualification — OZEV", helper: "OZEV-approved installer registration", required: true };
+  if (t.includes("builder") || t.includes("contractor")) return { label: "Trade qualification — CSCS / NVQ", helper: "CSCS card or NVQ Level 2/3 certificate", required: false };
+  if (t.includes("scaffold")) return { label: "Trade qualification — CISRS", helper: "CISRS card", required: true };
+  if (!tradeType || t === "other") return { label: "Trade qualification", helper: "Any relevant qualification, accreditation, or membership certificate", required: false };
+  return { label: "Trade qualification", helper: "Any relevant qualification, accreditation, or membership certificate (strongly preferred)", required: false };
+};
 import { supabase } from "@/integrations/supabase/client";
 import SEO from "@/components/SEO";
 import { buildServiceJsonLd } from "@/lib/seoSchemas";
@@ -57,6 +72,7 @@ const checkboxClass = "w-4 h-4 rounded border-cream/20 bg-cream/5 accent-teal cu
 const SignupTrade = () => {
   const navigate = useNavigate();
   const checkingExisting = useSetupRedirect("trade");
+  const [gatePassed, setGatePassed] = useState(false);
   const [step, setStep] = useState<Step>(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -94,6 +110,22 @@ const SignupTrade = () => {
   const [insuranceExpiry, setInsuranceExpiry] = useState<Date | undefined>();
   const [idFile, setIdFile] = useState<File | null>(null);
   const [qualFile, setQualFile] = useState<File | null>(null);
+  const [qualExpiry, setQualExpiry] = useState<Date | undefined>();
+  const [docsConfirmed, setDocsConfirmed] = useState(false);
+
+  const qualMeta = qualificationCopy(tradeType);
+
+  const handleFile = (setter: (f: File | null) => void) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0] ?? null;
+    if (f && f.size > MAX_DOC_BYTES) {
+      setError(`${f.name} is over 10MB. Please upload a smaller file.`);
+      e.target.value = "";
+      return;
+    }
+    setError("");
+    setter(f);
+    setDocsConfirmed(false);
+  };
 
   // Account info created during step 1
   const [createdUserId, setCreatedUserId] = useState<string | null>(null);
@@ -273,7 +305,11 @@ const SignupTrade = () => {
   };
 
   // ---- STEP 3: upload documents ----
-  const uploadDoc = async (file: File, docType: "insurance" | "id" | "qualification") => {
+  const uploadDoc = async (
+    file: File,
+    docType: "insurance" | "id" | "qualification",
+    expiry?: Date,
+  ) => {
     if (!createdUserId || !createdTradeId) throw new Error("Account not ready");
     const ext = file.name.split(".").pop() ?? "bin";
     const path = `${createdUserId}/${docType}-${Date.now()}.${ext}`;
@@ -286,36 +322,43 @@ const SignupTrade = () => {
       doc_type: docType,
       file_path: path,
       original_filename: file.name,
-      expiry_date: docType === "insurance" && insuranceExpiry
-        ? format(insuranceExpiry, "yyyy-MM-dd")
-        : null,
+      expiry_date: expiry ? format(expiry, "yyyy-MM-dd") : null,
     } as any);
     return path;
   };
 
-  const submitStep3 = async () => {
+  const uploadDocsOnly = async () => {
     setError("");
     if (!insuranceFile) { setError("Public liability insurance is required"); return; }
     if (!insuranceExpiry) { setError("Insurance expiry date is required"); return; }
     if (insuranceStatus === "expired") { setError("Your insurance has expired"); return; }
-    if (!idFile) { setError("ID document is required"); return; }
+    if (!idFile) { setError("Photo ID is required"); return; }
+    if (qualMeta.required && !qualFile) { setError(`${qualMeta.label} is required for your trade`); return; }
     setLoading(true);
     try {
-      const insurancePath = await uploadDoc(insuranceFile, "insurance");
+      const insurancePath = await uploadDoc(insuranceFile, "insurance", insuranceExpiry);
       await uploadDoc(idFile, "id");
-      if (qualFile) await uploadDoc(qualFile, "qualification");
+      if (qualFile) await uploadDoc(qualFile, "qualification", qualExpiry);
 
       await supabase.from("trades").update({
         insurance_cert_url: insurancePath,
         insurance_expiry: format(insuranceExpiry!, "yyyy-MM-dd"),
       } as any).eq("id", createdTradeId!);
 
-      setStep(4);
+      setDocsConfirmed(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Upload failed");
     } finally {
       setLoading(false);
     }
+  };
+
+  const submitStep3 = async () => {
+    if (!docsConfirmed) {
+      await uploadDocsOnly();
+      return;
+    }
+    setStep(4);
   };
 
   // ---- STEP 4: submit for review ----
@@ -368,6 +411,57 @@ const SignupTrade = () => {
   };
 
   if (checkingExisting) return <SetupRedirectLoader />;
+
+  if (!gatePassed) {
+    return (
+      <div className="min-h-screen flex flex-col" style={{ backgroundColor: "hsl(var(--deep))" }}>
+        <SEO title="Before you start — Join ProGrafter" description="What you'll need to apply as a trade on ProGrafter." path="/register/trade" noindex />
+        <header className="py-6 px-6">
+          <Link to="/" className="font-heading text-2xl tracking-wider">
+            <span className="text-cream">Pro</span><span className="text-teal">Grafter</span>
+          </Link>
+        </header>
+        <div className="flex-1 flex items-center justify-center px-6 py-8">
+          <div className="w-full max-w-lg">
+            <p className="font-mono text-xs text-teal uppercase tracking-widest mb-3">Application checklist</p>
+            <h2 className="font-heading text-cream text-[40px] leading-[1.05] mb-6">
+              Before you start — <span className="text-teal">have these ready.</span>
+            </h2>
+            <ul className="space-y-4 mb-6">
+              {[
+                { icon: ShieldCheck, title: "Public Liability Insurance certificate", body: "PDF or photo, must show your business name and expiry date" },
+                { icon: IdCard, title: "Photo ID", body: "Passport or driving licence" },
+                { icon: Award, title: "Trade qualification", body: "NICEIC card, Gas Safe registration, MCS cert, CSCS card, or equivalent for your trade" },
+              ].map(({ icon: Icon, title, body }) => (
+                <li key={title} className="flex items-start gap-3 p-4 rounded-xl border border-cream/10 bg-cream/5">
+                  <span className="flex-none w-9 h-9 rounded-lg bg-teal/15 flex items-center justify-center">
+                    <Check className="w-5 h-5 text-teal" strokeWidth={2.5} />
+                  </span>
+                  <div className="flex-1">
+                    <p className="font-heading text-cream text-base leading-tight mb-1">{title}</p>
+                    <p className="font-body text-cream/60 text-sm">{body}</p>
+                  </div>
+                  <Icon className="hidden sm:block w-5 h-5 text-teal/60 mt-1" strokeWidth={1.5} />
+                </li>
+              ))}
+            </ul>
+            <p className="font-body text-cream/70 text-sm mb-6 px-1">
+              Uploading takes around 4 minutes. We review within 1 working day.
+            </p>
+            <button
+              onClick={() => setGatePassed(true)}
+              className="w-full bg-teal text-cream font-mono text-sm py-4 rounded-xl hover:bg-teal-hover transition-colors"
+            >
+              I have these ready — start my application
+            </button>
+            <p className="mt-4 text-center font-body text-sm text-cream/60">
+              Already a member? <Link to="/login" className="text-teal underline">Sign in</Link>
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: "hsl(var(--deep))" }}>
@@ -568,26 +662,27 @@ const SignupTrade = () => {
           {step === 3 && (
             <div>
               <h2 className="font-heading text-cream text-[40px] leading-none mb-3">
-                Verification <span className="text-teal">Documents.</span>
+                Your <span className="text-teal">documents.</span>
               </h2>
               <p className="font-body text-cream/60 text-sm mb-6">
-                Upload these so we can verify you. Files are stored privately and only seen by our verification team.
+                Upload everything in one go — we'll review within 1 working day. Files are stored privately and only seen by our verification team. Max 10MB per file.
               </p>
               <div className="space-y-6">
                 {/* Insurance */}
                 <div className="p-4 rounded-xl border border-cream/10">
-                  <p className="font-mono text-xs text-teal uppercase tracking-widest mb-2">Public Liability Insurance *</p>
+                  <p className="font-mono text-xs text-teal uppercase tracking-widest mb-1">Public Liability Insurance certificate *</p>
+                  <p className="text-xs text-cream/60 font-body mb-2">Must show your business name, policy number, and expiry date. PDF, JPG or PNG.</p>
                   <input
                     type="file"
-                    accept="application/pdf,image/*"
-                    onChange={(e) => setInsuranceFile(e.target.files?.[0] ?? null)}
+                    accept="application/pdf,image/jpeg,image/png"
+                    onChange={handleFile(setInsuranceFile)}
                     className="text-cream text-sm file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-teal file:text-cream file:font-mono file:text-xs file:cursor-pointer"
                   />
                   {insuranceFile && <p className="mt-2 text-xs text-cream/60 font-body">✓ {insuranceFile.name}</p>}
                   <div className="mt-3">
-                    <label className={labelClass}>Expiry Date *</label>
+                    <label className={labelClass}>Certificate expiry date *</label>
                     <Suspense fallback={null}>
-                      <TradeDateField value={insuranceExpiry} onChange={setInsuranceExpiry} placeholder="Select expiry date" inputClassName={inputClass} />
+                      <TradeDateField value={insuranceExpiry} onChange={(d) => { setInsuranceExpiry(d); setDocsConfirmed(false); }} placeholder="Select expiry date" inputClassName={inputClass} />
                     </Suspense>
                     {insuranceStatus === "expired" && <p className="mt-1 text-xs text-red-400">⚠ Insurance has expired</p>}
                     {insuranceStatus === "expiring" && <p className="mt-1 text-xs text-yellow-400">⚠ Expires within 30 days</p>}
@@ -596,38 +691,57 @@ const SignupTrade = () => {
 
                 {/* ID */}
                 <div className="p-4 rounded-xl border border-cream/10">
-                  <p className="font-mono text-xs text-teal uppercase tracking-widest mb-2">Photo ID *</p>
-                  <p className="text-xs text-cream/60 font-body mb-2">Passport or driving licence</p>
+                  <p className="font-mono text-xs text-teal uppercase tracking-widest mb-1">Photo ID *</p>
+                  <p className="text-xs text-cream/60 font-body mb-2">Passport or driving licence. Must be the ID of the person registering this account. JPG, PNG or PDF.</p>
                   <input
                     type="file"
-                    accept="application/pdf,image/*"
-                    onChange={(e) => setIdFile(e.target.files?.[0] ?? null)}
+                    accept="application/pdf,image/jpeg,image/png"
+                    onChange={handleFile(setIdFile)}
                     className="text-cream text-sm file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-teal file:text-cream file:font-mono file:text-xs file:cursor-pointer"
                   />
                   {idFile && <p className="mt-2 text-xs text-cream/60 font-body">✓ {idFile.name}</p>}
                 </div>
 
-                {/* Qualification */}
+                {/* Qualification — dynamic per trade type */}
                 <div className="p-4 rounded-xl border border-cream/10">
-                  <p className="font-mono text-xs text-teal uppercase tracking-widest mb-2">Trade Qualification (optional)</p>
-                  <p className="text-xs text-cream/60 font-body mb-2">e.g. Gas Safe card, NICEIC, MCS cert. Speeds up verification.</p>
+                  <p className="font-mono text-xs text-teal uppercase tracking-widest mb-1">
+                    {qualMeta.label} {qualMeta.required ? "*" : "(strongly preferred)"}
+                  </p>
+                  <p className="text-xs text-cream/60 font-body mb-2">{qualMeta.helper}. PDF, JPG or PNG.</p>
                   <input
                     type="file"
-                    accept="application/pdf,image/*"
-                    onChange={(e) => setQualFile(e.target.files?.[0] ?? null)}
+                    accept="application/pdf,image/jpeg,image/png"
+                    onChange={handleFile(setQualFile)}
                     className="text-cream text-sm file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-teal file:text-cream file:font-mono file:text-xs file:cursor-pointer"
                   />
                   {qualFile && <p className="mt-2 text-xs text-cream/60 font-body">✓ {qualFile.name}</p>}
+                  <div className="mt-3">
+                    <label className={labelClass}>Expiry date (if applicable)</label>
+                    <Suspense fallback={null}>
+                      <TradeDateField value={qualExpiry} onChange={(d) => { setQualExpiry(d); setDocsConfirmed(false); }} placeholder="Select expiry date" inputClassName={inputClass} />
+                    </Suspense>
+                  </div>
                 </div>
+
+                {docsConfirmed && (
+                  <div className="flex items-start gap-3 p-4 rounded-xl bg-teal/10 border border-teal/40">
+                    <CheckCircle2 className="w-5 h-5 text-teal flex-none mt-0.5" strokeWidth={2} />
+                    <p className="font-body text-cream text-sm">
+                      <span className="font-mono text-teal uppercase tracking-widest text-xs block mb-1">Documents received</span>
+                      You're nearly done — tap continue to review and submit.
+                    </p>
+                  </div>
+                )}
               </div>
               <div className="flex gap-3 mt-8">
                 <button onClick={() => setStep(2)} className="flex-1 border border-cream/20 text-cream/80 font-mono text-sm py-3 rounded-xl hover:bg-cream/5 transition-colors">← Back</button>
                 <button onClick={submitStep3} disabled={loading} className="flex-[2] bg-teal text-cream font-mono text-sm py-3 rounded-xl hover:bg-teal-hover transition-colors disabled:opacity-50">
-                  {loading ? "Uploading…" : "Continue → Review"}
+                  {loading ? "Uploading…" : docsConfirmed ? "Continue → Review" : "Upload documents"}
                 </button>
               </div>
             </div>
           )}
+
 
           {/* STEP 4 */}
           {step === 4 && (
