@@ -157,12 +157,20 @@ const CompareQuotes = () => {
       label: "Tradesperson",
       render: (q) => (
         <div className="space-y-1">
-          <div className="flex items-center gap-1 flex-wrap">
+          <div className="flex items-center gap-2 flex-wrap">
             <span className="font-heading text-primary text-sm">
               {q.trades?.company_name || q.trades?.name || "—"}
             </span>
-            {q.trades?.verified && <BadgeCheck className="w-4 h-4 text-secondary" />}
           </div>
+          {q.trades?.verified && (
+            <VerifiedTradeBadge
+              compact
+              tradeType={q.trades.trade_type}
+              cpsScheme={q.trades.cps_scheme}
+              cpsRegistrationNumber={q.trades.cps_registration_number}
+              gasSafeNumber={q.trades.gas_safe_number}
+            />
+          )}
           {ratingNode(q.trades)}
         </div>
       ),
