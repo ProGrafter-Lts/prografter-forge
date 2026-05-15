@@ -171,9 +171,14 @@ const TradeProfileSection = ({ tradeId }: TradeProfileSectionProps) => {
           </p>
         </div>
         {verified && (
-          <span className="ml-auto flex items-center gap-1 bg-secondary/10 text-secondary px-3 py-1 rounded-full font-mono text-xs">
-            <BadgeCheck className="w-3.5 h-3.5" /> Verified
-          </span>
+          <div className="ml-auto">
+            <VerifiedTradeBadge
+              tradeType={form.trade_type}
+              cpsScheme={cpsScheme}
+              cpsRegistrationNumber={cpsRegistrationNumber}
+              gasSafeNumber={gasSafeNumber}
+            />
+          </div>
         )}
       </div>
 
