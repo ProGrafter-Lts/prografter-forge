@@ -8,19 +8,22 @@ interface TradeWelcomeProps {
 
 const TradeWelcomeEmail = ({ firstName }: TradeWelcomeProps) => (
   <ProGrafterShell
-    preview={`Welcome to ${SITE_NAME} — your application is being reviewed`}
-    heading={firstName ? `Thanks, ${firstName}.` : 'Thanks for applying.'}
+    preview={`Application received — we'll be in touch within 1 working day`}
+    heading={firstName ? `Thanks, ${firstName}.` : 'Application received.'}
   >
     <Para>{firstName ? `Hi ${firstName},` : 'Hi there,'}</Para>
     <Para>
-      Thanks for applying to {SITE_NAME}. Your application is under review. Typical
-      turnaround is 1–2 working days. We'll email you as soon as you're approved and
-      ready to start quoting on jobs.
+      Thanks for applying to join {SITE_NAME}. We've received your details and documents
+      and our team will review your application within 1 working day.
     </Para>
-    <InfoCard title="What we're checking">
-      • Your public liability insurance<br />
-      • Your photo ID<br />
-      • Your trade qualifications
+    <Para>
+      You'll hear from us as soon as you're verified — at which point you can start
+      quoting on homeowner jobs immediately.
+    </Para>
+    <InfoCard title="What happens next">
+      • Our team reviews your application (within 1 working day)<br />
+      • You'll get an email the moment you're verified<br />
+      • Nothing else is needed from you right now
     </InfoCard>
     <CTA href={`${SITE_URL}/dashboard/trade`} label="View your dashboard" />
   </ProGrafterShell>
@@ -28,7 +31,7 @@ const TradeWelcomeEmail = ({ firstName }: TradeWelcomeProps) => (
 
 export const template = {
   component: TradeWelcomeEmail,
-  subject: `Welcome to ${SITE_NAME} — your application is being reviewed`,
+  subject: `Application received — we'll be in touch within 1 working day`,
   displayName: 'Trade welcome',
   previewData: { firstName: 'Sam' },
 } satisfies TemplateEntry
