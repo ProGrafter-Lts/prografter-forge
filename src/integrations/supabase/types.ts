@@ -2567,8 +2567,11 @@ export type Database = {
           companies_house_number: string | null
           company_name: string
           completed_jobs_count: number
+          cps_registration_number: string | null
+          cps_scheme: string | null
           created_at: string
           fgas_registered: boolean
+          gas_safe_number: string | null
           green_cert_expiry: string | null
           id: string
           inca_certified: boolean
@@ -2623,8 +2626,11 @@ export type Database = {
           companies_house_number?: string | null
           company_name: string
           completed_jobs_count?: number
+          cps_registration_number?: string | null
+          cps_scheme?: string | null
           created_at?: string
           fgas_registered?: boolean
+          gas_safe_number?: string | null
           green_cert_expiry?: string | null
           id?: string
           inca_certified?: boolean
@@ -2679,8 +2685,11 @@ export type Database = {
           companies_house_number?: string | null
           company_name?: string
           completed_jobs_count?: number
+          cps_registration_number?: string | null
+          cps_scheme?: string | null
           created_at?: string
           fgas_registered?: boolean
+          gas_safe_number?: string | null
           green_cert_expiry?: string | null
           id?: string
           inca_certified?: boolean
