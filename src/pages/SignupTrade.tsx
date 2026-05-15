@@ -110,6 +110,22 @@ const SignupTrade = () => {
   const [insuranceExpiry, setInsuranceExpiry] = useState<Date | undefined>();
   const [idFile, setIdFile] = useState<File | null>(null);
   const [qualFile, setQualFile] = useState<File | null>(null);
+  const [qualExpiry, setQualExpiry] = useState<Date | undefined>();
+  const [docsConfirmed, setDocsConfirmed] = useState(false);
+
+  const qualMeta = qualificationCopy(tradeType);
+
+  const handleFile = (setter: (f: File | null) => void) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0] ?? null;
+    if (f && f.size > MAX_DOC_BYTES) {
+      setError(`${f.name} is over 10MB. Please upload a smaller file.`);
+      e.target.value = "";
+      return;
+    }
+    setError("");
+    setter(f);
+    setDocsConfirmed(false);
+  };
 
   // Account info created during step 1
   const [createdUserId, setCreatedUserId] = useState<string | null>(null);
