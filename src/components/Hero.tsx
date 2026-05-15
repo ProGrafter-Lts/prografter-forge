@@ -109,7 +109,7 @@ const Hero = () => {
             </div>
             <a
               href="/post-a-job"
-              className="homeowner-cta inline-flex items-center justify-center w-full font-mono text-sm px-6 py-3.5 rounded-xl transition-all duration-200"
+              className="homeowner-cta inline-flex items-center justify-center w-full font-mono text-base px-8 py-4 rounded-xl transition-all duration-200 shadow-md"
               style={{
                 backgroundColor: "transparent",
                 border: "2px solid #1B3A5C",
