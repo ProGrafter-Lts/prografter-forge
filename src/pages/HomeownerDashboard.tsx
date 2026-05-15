@@ -116,7 +116,7 @@ const HomeownerDashboard = () => {
     const [quoteRes, variationRes, updatesRes] = await Promise.all([
       supabase
         .from("quotes")
-        .select("id, amount, message, status, created_at, trade_id, job_id, ai_verdict, ai_verdict_summary, tier_enabled, budget_price, budget_description, standard_price, standard_description, premium_price, premium_description, selected_tier, trades:trades_public!quotes_trade_id_fkey(name, company_name, verified, review_count, avg_rating, tier), jobs(title, job_type)")
+        .select("id, amount, message, status, created_at, trade_id, job_id, ai_verdict, ai_verdict_summary, tier_enabled, budget_price, budget_description, standard_price, standard_description, premium_price, premium_description, selected_tier, trades:trades_public!quotes_trade_id_fkey(name, company_name, verified, review_count, avg_rating, tier, trade_type, cps_scheme, cps_registration_number, gas_safe_number), jobs(title, job_type)")
         .in("job_id", jobIds)
         .order("created_at", { ascending: false }),
       supabase
