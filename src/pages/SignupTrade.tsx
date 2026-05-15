@@ -305,7 +305,11 @@ const SignupTrade = () => {
   };
 
   // ---- STEP 3: upload documents ----
-  const uploadDoc = async (file: File, docType: "insurance" | "id" | "qualification") => {
+  const uploadDoc = async (
+    file: File,
+    docType: "insurance" | "id" | "qualification",
+    expiry?: Date,
+  ) => {
     if (!createdUserId || !createdTradeId) throw new Error("Account not ready");
     const ext = file.name.split(".").pop() ?? "bin";
     const path = `${createdUserId}/${docType}-${Date.now()}.${ext}`;
@@ -318,36 +322,43 @@ const SignupTrade = () => {
       doc_type: docType,
       file_path: path,
       original_filename: file.name,
-      expiry_date: docType === "insurance" && insuranceExpiry
-        ? format(insuranceExpiry, "yyyy-MM-dd")
-        : null,
+      expiry_date: expiry ? format(expiry, "yyyy-MM-dd") : null,
     } as any);
     return path;
   };
 
-  const submitStep3 = async () => {
+  const uploadDocsOnly = async () => {
     setError("");
     if (!insuranceFile) { setError("Public liability insurance is required"); return; }
     if (!insuranceExpiry) { setError("Insurance expiry date is required"); return; }
     if (insuranceStatus === "expired") { setError("Your insurance has expired"); return; }
-    if (!idFile) { setError("ID document is required"); return; }
+    if (!idFile) { setError("Photo ID is required"); return; }
+    if (qualMeta.required && !qualFile) { setError(`${qualMeta.label} is required for your trade`); return; }
     setLoading(true);
     try {
-      const insurancePath = await uploadDoc(insuranceFile, "insurance");
+      const insurancePath = await uploadDoc(insuranceFile, "insurance", insuranceExpiry);
       await uploadDoc(idFile, "id");
-      if (qualFile) await uploadDoc(qualFile, "qualification");
+      if (qualFile) await uploadDoc(qualFile, "qualification", qualExpiry);
 
       await supabase.from("trades").update({
         insurance_cert_url: insurancePath,
         insurance_expiry: format(insuranceExpiry!, "yyyy-MM-dd"),
       } as any).eq("id", createdTradeId!);
 
-      setStep(4);
+      setDocsConfirmed(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Upload failed");
     } finally {
       setLoading(false);
     }
+  };
+
+  const submitStep3 = async () => {
+    if (!docsConfirmed) {
+      await uploadDocsOnly();
+      return;
+    }
+    setStep(4);
   };
 
   // ---- STEP 4: submit for review ----
