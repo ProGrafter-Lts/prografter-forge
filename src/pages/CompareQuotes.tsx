@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, BadgeCheck, Check, X, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Check, X, AlertTriangle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { getVerdictTheme, type AiVerdict } from "@/lib/quoteVerdict";
+import VerifiedTradeBadge from "@/components/trade/VerifiedTradeBadge";
 import { toast } from "sonner";
 
 interface QuoteRow {
