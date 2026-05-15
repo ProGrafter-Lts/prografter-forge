@@ -243,9 +243,13 @@ const QuotesReceived = ({ quotes, onQuoteAccepted }: QuotesReceivedProps) => {
                       {company}
                     </h3>
                     {q.trades?.verified && (
-                      <span title="Identity verified" className="inline-flex items-center gap-1 text-secondary text-[10px] font-mono">
-                        <BadgeCheck className="w-4 h-4" /> Verified
-                      </span>
+                      <VerifiedTradeBadge
+                        compact
+                        tradeType={q.trades.trade_type}
+                        cpsScheme={q.trades.cps_scheme}
+                        cpsRegistrationNumber={q.trades.cps_registration_number}
+                        gasSafeNumber={q.trades.gas_safe_number}
+                      />
                     )}
                   </div>
                   {q.trades?.name && q.trades.name !== company && (
