@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, BadgeCheck, Check, X, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Check, X, AlertTriangle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { getVerdictTheme, type AiVerdict } from "@/lib/quoteVerdict";
+import VerifiedTradeBadge from "@/components/trade/VerifiedTradeBadge";
 import { toast } from "sonner";
 
 interface QuoteRow {
@@ -20,6 +21,10 @@ interface QuoteRow {
     review_count: number;
     avg_rating: number | null;
     tier: string | null;
+    trade_type?: string | null;
+    cps_scheme?: string | null;
+    cps_registration_number?: string | null;
+    gas_safe_number?: string | null;
   } | null;
 }
 
@@ -112,7 +117,7 @@ const CompareQuotes = () => {
         supabase
           .from("quotes")
           .select(
-            "id, amount, message, status, ai_verdict, ai_verdict_summary, trades(name, company_name, verified, review_count, avg_rating, tier)",
+            "id, amount, message, status, ai_verdict, ai_verdict_summary, trades(name, company_name, verified, review_count, avg_rating, tier, trade_type, cps_scheme, cps_registration_number, gas_safe_number)",
           )
           .eq("job_id", jobId)
           .order("amount", { ascending: true }),
@@ -152,12 +157,20 @@ const CompareQuotes = () => {
       label: "Tradesperson",
       render: (q) => (
         <div className="space-y-1">
-          <div className="flex items-center gap-1 flex-wrap">
+          <div className="flex items-center gap-2 flex-wrap">
             <span className="font-heading text-primary text-sm">
               {q.trades?.company_name || q.trades?.name || "—"}
             </span>
-            {q.trades?.verified && <BadgeCheck className="w-4 h-4 text-secondary" />}
           </div>
+          {q.trades?.verified && (
+            <VerifiedTradeBadge
+              compact
+              tradeType={q.trades.trade_type}
+              cpsScheme={q.trades.cps_scheme}
+              cpsRegistrationNumber={q.trades.cps_registration_number}
+              gasSafeNumber={q.trades.gas_safe_number}
+            />
+          )}
           {ratingNode(q.trades)}
         </div>
       ),

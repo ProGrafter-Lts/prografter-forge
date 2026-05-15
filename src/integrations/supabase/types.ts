@@ -2567,8 +2567,11 @@ export type Database = {
           companies_house_number: string | null
           company_name: string
           completed_jobs_count: number
+          cps_registration_number: string | null
+          cps_scheme: string | null
           created_at: string
           fgas_registered: boolean
+          gas_safe_number: string | null
           green_cert_expiry: string | null
           id: string
           inca_certified: boolean
@@ -2623,8 +2626,11 @@ export type Database = {
           companies_house_number?: string | null
           company_name: string
           completed_jobs_count?: number
+          cps_registration_number?: string | null
+          cps_scheme?: string | null
           created_at?: string
           fgas_registered?: boolean
+          gas_safe_number?: string | null
           green_cert_expiry?: string | null
           id?: string
           inca_certified?: boolean
@@ -2679,8 +2685,11 @@ export type Database = {
           companies_house_number?: string | null
           company_name?: string
           completed_jobs_count?: number
+          cps_registration_number?: string | null
+          cps_scheme?: string | null
           created_at?: string
           fgas_registered?: boolean
+          gas_safe_number?: string | null
           green_cert_expiry?: string | null
           id?: string
           inca_certified?: boolean
@@ -2848,6 +2857,9 @@ export type Database = {
           bio: string | null
           company_name: string | null
           completed_jobs_count: number | null
+          cps_registration_number: string | null
+          cps_scheme: string | null
+          gas_safe_number: string | null
           id: string | null
           is_green_trade: boolean | null
           mcs_verified: boolean | null
@@ -2865,6 +2877,9 @@ export type Database = {
           bio?: string | null
           company_name?: string | null
           completed_jobs_count?: number | null
+          cps_registration_number?: string | null
+          cps_scheme?: string | null
+          gas_safe_number?: string | null
           id?: string | null
           is_green_trade?: boolean | null
           mcs_verified?: boolean | null
@@ -2882,6 +2897,9 @@ export type Database = {
           bio?: string | null
           company_name?: string | null
           completed_jobs_count?: number | null
+          cps_registration_number?: string | null
+          cps_scheme?: string | null
+          gas_safe_number?: string | null
           id?: string | null
           is_green_trade?: boolean | null
           mcs_verified?: boolean | null

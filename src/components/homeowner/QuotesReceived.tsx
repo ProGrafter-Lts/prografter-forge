@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { BadgeCheck, SearchCheck, Shield, ArrowRight, Check, Loader2 } from "lucide-react";
+import { SearchCheck, Shield, ArrowRight, Check, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import VerifiedTradeBadge from "@/components/trade/VerifiedTradeBadge";
 import { getVerdictTheme, type AiVerdict } from "@/lib/quoteVerdict";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -39,6 +40,10 @@ interface Quote {
     review_count?: number;
     avg_rating?: number | null;
     tier?: string | null;
+    trade_type?: string | null;
+    cps_scheme?: string | null;
+    cps_registration_number?: string | null;
+    gas_safe_number?: string | null;
   } | null;
   jobs: { title: string | null; job_type: string } | null;
 }
@@ -238,9 +243,13 @@ const QuotesReceived = ({ quotes, onQuoteAccepted }: QuotesReceivedProps) => {
                       {company}
                     </h3>
                     {q.trades?.verified && (
-                      <span title="Identity verified" className="inline-flex items-center gap-1 text-secondary text-[10px] font-mono">
-                        <BadgeCheck className="w-4 h-4" /> Verified
-                      </span>
+                      <VerifiedTradeBadge
+                        compact
+                        tradeType={q.trades.trade_type}
+                        cpsScheme={q.trades.cps_scheme}
+                        cpsRegistrationNumber={q.trades.cps_registration_number}
+                        gasSafeNumber={q.trades.gas_safe_number}
+                      />
                     )}
                   </div>
                   {q.trades?.name && q.trades.name !== company && (

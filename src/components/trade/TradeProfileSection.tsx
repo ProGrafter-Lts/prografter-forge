@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { UserCircle, BadgeCheck, Save, Sparkles } from "lucide-react";
+import { UserCircle, Save, Sparkles } from "lucide-react";
 import { GreenSpecialistBanner, CertificationsSection } from "@/components/GreenCertBadges";
+import VerifiedTradeBadge from "@/components/trade/VerifiedTradeBadge";
 import SpecialismsPicker from "@/components/SpecialismsPicker";
 import {
   Specialism,
@@ -45,6 +46,9 @@ const TradeProfileSection = ({ tradeId }: TradeProfileSectionProps) => {
     years_experience: 0,
   });
   const [verified, setVerified] = useState(false);
+  const [cpsScheme, setCpsScheme] = useState<string | null>(null);
+  const [cpsRegistrationNumber, setCpsRegistrationNumber] = useState<string | null>(null);
+  const [gasSafeNumber, setGasSafeNumber] = useState<string | null>(null);
   const [green, setGreen] = useState<GreenData | null>(null);
   const [allSpecialisms, setAllSpecialisms] = useState<Specialism[]>([]);
   const [selectedSpecialisms, setSelectedSpecialisms] = useState<string[]>([]);
@@ -59,7 +63,7 @@ const TradeProfileSection = ({ tradeId }: TradeProfileSectionProps) => {
       const { data, error } = await supabase
         .from("trades")
         .select(
-          "name, company_name, phone, postcode, trade_type, bio, website, years_experience, verified, is_green_trade, mcs_number, mcs_verified, trustmark_number, trustmark_verified, pas_2030_accredited, pas_2035_coordinator, ozev_approved, fgas_registered, ciga_registered, inca_certified, green_cert_expiry",
+          "name, company_name, phone, postcode, trade_type, bio, website, years_experience, verified, cps_scheme, cps_registration_number, gas_safe_number, is_green_trade, mcs_number, mcs_verified, trustmark_number, trustmark_verified, pas_2030_accredited, pas_2035_coordinator, ozev_approved, fgas_registered, ciga_registered, inca_certified, green_cert_expiry",
         )
         .eq("id", tradeId)
         .single();
@@ -78,6 +82,9 @@ const TradeProfileSection = ({ tradeId }: TradeProfileSectionProps) => {
           years_experience: data.years_experience || 0,
         });
         setVerified(data.verified);
+        setCpsScheme((data as any).cps_scheme ?? null);
+        setCpsRegistrationNumber((data as any).cps_registration_number ?? null);
+        setGasSafeNumber((data as any).gas_safe_number ?? null);
         setGreen({
           is_green_trade: data.is_green_trade,
           mcs_number: data.mcs_number,
@@ -164,9 +171,14 @@ const TradeProfileSection = ({ tradeId }: TradeProfileSectionProps) => {
           </p>
         </div>
         {verified && (
-          <span className="ml-auto flex items-center gap-1 bg-secondary/10 text-secondary px-3 py-1 rounded-full font-mono text-xs">
-            <BadgeCheck className="w-3.5 h-3.5" /> Verified
-          </span>
+          <div className="ml-auto">
+            <VerifiedTradeBadge
+              tradeType={form.trade_type}
+              cpsScheme={cpsScheme}
+              cpsRegistrationNumber={cpsRegistrationNumber}
+              gasSafeNumber={gasSafeNumber}
+            />
+          </div>
         )}
       </div>
 
