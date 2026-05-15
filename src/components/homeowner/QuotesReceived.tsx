@@ -40,6 +40,10 @@ interface Quote {
     review_count?: number;
     avg_rating?: number | null;
     tier?: string | null;
+    trade_type?: string | null;
+    cps_scheme?: string | null;
+    cps_registration_number?: string | null;
+    gas_safe_number?: string | null;
   } | null;
   jobs: { title: string | null; job_type: string } | null;
 }
