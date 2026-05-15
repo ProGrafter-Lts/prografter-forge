@@ -46,6 +46,9 @@ const TradeProfileSection = ({ tradeId }: TradeProfileSectionProps) => {
     years_experience: 0,
   });
   const [verified, setVerified] = useState(false);
+  const [cpsScheme, setCpsScheme] = useState<string | null>(null);
+  const [cpsRegistrationNumber, setCpsRegistrationNumber] = useState<string | null>(null);
+  const [gasSafeNumber, setGasSafeNumber] = useState<string | null>(null);
   const [green, setGreen] = useState<GreenData | null>(null);
   const [allSpecialisms, setAllSpecialisms] = useState<Specialism[]>([]);
   const [selectedSpecialisms, setSelectedSpecialisms] = useState<string[]>([]);
