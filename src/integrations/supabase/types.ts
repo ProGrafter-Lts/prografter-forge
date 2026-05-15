@@ -2857,6 +2857,9 @@ export type Database = {
           bio: string | null
           company_name: string | null
           completed_jobs_count: number | null
+          cps_registration_number: string | null
+          cps_scheme: string | null
+          gas_safe_number: string | null
           id: string | null
           is_green_trade: boolean | null
           mcs_verified: boolean | null
@@ -2874,6 +2877,9 @@ export type Database = {
           bio?: string | null
           company_name?: string | null
           completed_jobs_count?: number | null
+          cps_registration_number?: string | null
+          cps_scheme?: string | null
+          gas_safe_number?: string | null
           id?: string | null
           is_green_trade?: boolean | null
           mcs_verified?: boolean | null
@@ -2891,6 +2897,9 @@ export type Database = {
           bio?: string | null
           company_name?: string | null
           completed_jobs_count?: number | null
+          cps_registration_number?: string | null
+          cps_scheme?: string | null
+          gas_safe_number?: string | null
           id?: string | null
           is_green_trade?: boolean | null
           mcs_verified?: boolean | null
