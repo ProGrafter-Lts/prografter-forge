@@ -82,6 +82,9 @@ const TradeProfileSection = ({ tradeId }: TradeProfileSectionProps) => {
           years_experience: data.years_experience || 0,
         });
         setVerified(data.verified);
+        setCpsScheme((data as any).cps_scheme ?? null);
+        setCpsRegistrationNumber((data as any).cps_registration_number ?? null);
+        setGasSafeNumber((data as any).gas_safe_number ?? null);
         setGreen({
           is_green_trade: data.is_green_trade,
           mcs_number: data.mcs_number,
