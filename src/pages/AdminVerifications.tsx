@@ -50,7 +50,20 @@ const AdminVerifications = () => {
   const [working, setWorking] = useState(false);
   const [queryMessage, setQueryMessage] = useState("");
   const [queryOpen, setQueryOpen] = useState(false);
+  const [matStats, setMatStats] = useState<{ withMaterials: number; total: number } | null>(null);
 
+  useEffect(() => {
+    (async () => {
+      const { count: total } = await supabase
+        .from("quotes")
+        .select("id", { count: "exact", head: true });
+      const { data: distinctRows } = await supabase
+        .from("quote_materials")
+        .select("quote_id");
+      const withMaterials = new Set((distinctRows || []).map((r: any) => r.quote_id)).size;
+      setMatStats({ withMaterials, total: total || 0 });
+    })();
+  }, []);
 
   const load = async () => {
     setLoading(true);
