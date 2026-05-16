@@ -128,6 +128,23 @@ section[class*="bg-deep"] .font-mono,
 section[class*="bg-navy"] .font-mono {
   color: rgba(255, 255, 255, 0.85);
 }
+/* Re-assert dark text inside white/cream cards nested within dark sections */
+.bg-deep .bg-white p,
+.bg-deep .bg-white li,
+.bg-deep .bg-white .text-body-text,
+.bg-navy .bg-white p,
+.bg-navy .bg-white li,
+.bg-navy .bg-white .text-body-text {
+  color: #1F2937;
+}
+.bg-deep .bg-white .text-secondary-text,
+.bg-navy .bg-white .text-secondary-text {
+  color: #4B5563;
+}
+.bg-deep .bg-white .font-mono.text-teal,
+.bg-navy .bg-white .font-mono.text-teal {
+  color: #0D9488;
+}
 /* Floor low-opacity white/cream text on dark backgrounds at 0.85 */
 .bg-deep [class*="text-cream/"],
 .bg-navy [class*="text-cream/"],
