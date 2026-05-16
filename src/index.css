@@ -277,8 +277,14 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
 .dashboard-dark h6 {
   color: #FFFFFF;
 }
-.dashboard-dark p {
+.dashboard-dark p,
+.dashboard-dark li,
+.dashboard-dark .text-body-text {
   color: rgba(255, 255, 255, 0.92);
+}
+.dashboard-dark ul.list-disc > li::marker,
+.dashboard-dark ol > li::marker {
+  color: #5EEAD4;
 }
 .dashboard-dark .font-mono {
   color: rgba(255, 255, 255, 0.85);
