@@ -162,6 +162,8 @@ const App = () => (
             <Route path="/signup/trade" element={<SignupTradeRedirect />} />
             <Route path="/signup/trade/under-review" element={<ProtectedRoute><SignupTradeUnderReview /></ProtectedRoute>} />
             <Route path="/admin/verifications" element={<AdminRoute><AdminVerifications /></AdminRoute>} />
+            <Route path="/admin/suppliers" element={<AdminRoute><AdminSuppliers /></AdminRoute>} />
+            <Route path="/suppliers" element={<Suppliers />} />
             <Route path="/admin/email-status" element={<AdminRoute><AdminEmailStatus /></AdminRoute>} />
             <Route path="/admin/testimonials" element={<AdminRoute><AdminTestimonials /></AdminRoute>} />
             <Route path="/share-your-experience" element={<SubmitTestimonial />} />
