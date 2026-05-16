@@ -268,12 +268,11 @@ const AdminVerifications = () => {
               admin
             </span>
           </Link>
-          <Link
-            to="/admin/email-status"
-            className="font-mono text-xs uppercase tracking-widest text-teal hover:underline"
-          >
-            Email status →
-          </Link>
+          <nav className="flex gap-4 font-mono text-xs uppercase tracking-widest">
+            <Link to="/admin/verifications" className="text-teal underline">Verifications</Link>
+            <Link to="/admin/suppliers" className="text-navy hover:text-teal">Suppliers</Link>
+            <Link to="/admin/email-status" className="text-navy hover:text-teal">Email status →</Link>
+          </nav>
         </div>
       </header>
 
