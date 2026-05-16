@@ -36,6 +36,8 @@ const SignupHomeownerNext = lazy(() => import("./pages/SignupHomeownerNext.tsx")
 const SignupCheckEmail = lazy(() => import("./pages/SignupCheckEmail.tsx"));
 const SignupTradeRedirect = lazy(() => import("./pages/SignupTradeRedirect.tsx"));
 const AdminVerifications = lazy(() => import("./pages/AdminVerifications.tsx"));
+const AdminSuppliers = lazy(() => import("./pages/AdminSuppliers.tsx"));
+const Suppliers = lazy(() => import("./pages/Suppliers.tsx"));
 const AdminEmailStatus = lazy(() => import("./pages/AdminEmailStatus.tsx"));
 const AdminTestimonials = lazy(() => import("./pages/AdminTestimonials.tsx"));
 const SubmitTestimonial = lazy(() => import("./pages/SubmitTestimonial.tsx"));
@@ -160,6 +162,8 @@ const App = () => (
             <Route path="/signup/trade" element={<SignupTradeRedirect />} />
             <Route path="/signup/trade/under-review" element={<ProtectedRoute><SignupTradeUnderReview /></ProtectedRoute>} />
             <Route path="/admin/verifications" element={<AdminRoute><AdminVerifications /></AdminRoute>} />
+            <Route path="/admin/suppliers" element={<AdminRoute><AdminSuppliers /></AdminRoute>} />
+            <Route path="/suppliers" element={<Suppliers />} />
             <Route path="/admin/email-status" element={<AdminRoute><AdminEmailStatus /></AdminRoute>} />
             <Route path="/admin/testimonials" element={<AdminRoute><AdminTestimonials /></AdminRoute>} />
             <Route path="/share-your-experience" element={<SubmitTestimonial />} />

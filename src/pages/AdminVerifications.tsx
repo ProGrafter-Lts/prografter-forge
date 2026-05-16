@@ -51,6 +51,7 @@ const AdminVerifications = () => {
   const [queryMessage, setQueryMessage] = useState("");
   const [queryOpen, setQueryOpen] = useState(false);
   const [matStats, setMatStats] = useState<{ withMaterials: number; total: number } | null>(null);
+  const [supplierStats, setSupplierStats] = useState<{ total: number; new: number; contacted: number; qualified: number } | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -62,6 +63,18 @@ const AdminVerifications = () => {
         .select("quote_id");
       const withMaterials = new Set((distinctRows || []).map((r: any) => r.quote_id)).size;
       setMatStats({ withMaterials, total: total || 0 });
+
+      const { data: supRows } = await supabase
+        .from("supplier_interest")
+        .select("status");
+      const s = { total: 0, new: 0, contacted: 0, qualified: 0 };
+      for (const r of (supRows as { status: string }[]) || []) {
+        s.total++;
+        if (r.status === "new") s.new++;
+        else if (r.status === "contacted") s.contacted++;
+        else if (r.status === "qualified") s.qualified++;
+      }
+      setSupplierStats(s);
     })();
   }, []);
 
@@ -255,12 +268,11 @@ const AdminVerifications = () => {
               admin
             </span>
           </Link>
-          <Link
-            to="/admin/email-status"
-            className="font-mono text-xs uppercase tracking-widest text-teal hover:underline"
-          >
-            Email status →
-          </Link>
+          <nav className="flex gap-4 font-mono text-xs uppercase tracking-widest">
+            <Link to="/admin/verifications" className="text-teal underline">Verifications</Link>
+            <Link to="/admin/suppliers" className="text-navy hover:text-teal">Suppliers</Link>
+            <Link to="/admin/email-status" className="text-navy hover:text-teal">Email status →</Link>
+          </nav>
         </div>
       </header>
 
@@ -283,6 +295,24 @@ const AdminVerifications = () => {
             <span className="font-mono text-xs text-secondary-text">
               {matStats.withMaterials} of {matStats.total} quotes have materials data
             </span>
+          </div>
+        )}
+
+        {supplierStats && (
+          <div className="bg-white rounded-2xl border border-navy/10 p-4 mb-6 flex flex-wrap items-baseline gap-3">
+            <span className="font-mono text-[10px] uppercase tracking-widest text-secondary-text">
+              Supplier registrations
+            </span>
+            <span className="font-heading text-2xl text-navy">{supplierStats.total}</span>
+            <span className="font-mono text-xs text-secondary-text">
+              new: {supplierStats.new} · contacted: {supplierStats.contacted} · qualified: {supplierStats.qualified}
+            </span>
+            <Link
+              to="/admin/suppliers"
+              className="ml-auto font-mono text-xs uppercase tracking-widest text-teal hover:underline"
+            >
+              Open queue →
+            </Link>
           </div>
         )}
 
