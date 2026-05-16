@@ -50,7 +50,20 @@ const AdminVerifications = () => {
   const [working, setWorking] = useState(false);
   const [queryMessage, setQueryMessage] = useState("");
   const [queryOpen, setQueryOpen] = useState(false);
+  const [matStats, setMatStats] = useState<{ withMaterials: number; total: number } | null>(null);
 
+  useEffect(() => {
+    (async () => {
+      const { count: total } = await supabase
+        .from("quotes")
+        .select("id", { count: "exact", head: true });
+      const { data: distinctRows } = await supabase
+        .from("quote_materials")
+        .select("quote_id");
+      const withMaterials = new Set((distinctRows || []).map((r: any) => r.quote_id)).size;
+      setMatStats({ withMaterials, total: total || 0 });
+    })();
+  }, []);
 
   const load = async () => {
     setLoading(true);
@@ -256,6 +269,22 @@ const AdminVerifications = () => {
         <p className="font-body text-secondary-text mb-6">
           Review applications and approve, reject, or request more information.
         </p>
+
+        {matStats && (
+          <div className="bg-white rounded-2xl border border-navy/10 p-4 mb-6 flex flex-wrap items-baseline gap-3">
+            <span className="font-mono text-[10px] uppercase tracking-widest text-secondary-text">
+              Structured materials coverage
+            </span>
+            <span className="font-heading text-2xl text-navy">
+              {matStats.total === 0
+                ? "0%"
+                : `${Math.round((matStats.withMaterials / matStats.total) * 100)}%`}
+            </span>
+            <span className="font-mono text-xs text-secondary-text">
+              {matStats.withMaterials} of {matStats.total} quotes have materials data
+            </span>
+          </div>
+        )}
 
         <div className="flex flex-wrap gap-2 mb-6">
           {STATUS_FILTERS.map((f) => (
