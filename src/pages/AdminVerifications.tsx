@@ -51,6 +51,7 @@ const AdminVerifications = () => {
   const [queryMessage, setQueryMessage] = useState("");
   const [queryOpen, setQueryOpen] = useState(false);
   const [matStats, setMatStats] = useState<{ withMaterials: number; total: number } | null>(null);
+  const [supplierStats, setSupplierStats] = useState<{ total: number; new: number; contacted: number; qualified: number } | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -62,6 +63,18 @@ const AdminVerifications = () => {
         .select("quote_id");
       const withMaterials = new Set((distinctRows || []).map((r: any) => r.quote_id)).size;
       setMatStats({ withMaterials, total: total || 0 });
+
+      const { data: supRows } = await supabase
+        .from("supplier_interest")
+        .select("status");
+      const s = { total: 0, new: 0, contacted: 0, qualified: 0 };
+      for (const r of (supRows as { status: string }[]) || []) {
+        s.total++;
+        if (r.status === "new") s.new++;
+        else if (r.status === "contacted") s.contacted++;
+        else if (r.status === "qualified") s.qualified++;
+      }
+      setSupplierStats(s);
     })();
   }, []);
 
