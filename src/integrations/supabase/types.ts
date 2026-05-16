@@ -2403,6 +2403,75 @@ export type Database = {
           },
         ]
       }
+      supplier_interest: {
+        Row: {
+          admin_notes: string | null
+          business_name: string
+          category: string
+          contact_name: string
+          contacted_at: string | null
+          created_at: string
+          email: string
+          has_public_liability: boolean
+          id: string
+          notes: string | null
+          phone: string
+          postcode: string
+          public_liability_amount: string | null
+          qualified_at: string | null
+          service_area: string
+          specialist_type: string | null
+          status: string
+          updated_at: string
+          website: string | null
+          years_trading: number
+        }
+        Insert: {
+          admin_notes?: string | null
+          business_name: string
+          category: string
+          contact_name: string
+          contacted_at?: string | null
+          created_at?: string
+          email: string
+          has_public_liability?: boolean
+          id?: string
+          notes?: string | null
+          phone: string
+          postcode: string
+          public_liability_amount?: string | null
+          qualified_at?: string | null
+          service_area?: string
+          specialist_type?: string | null
+          status?: string
+          updated_at?: string
+          website?: string | null
+          years_trading?: number
+        }
+        Update: {
+          admin_notes?: string | null
+          business_name?: string
+          category?: string
+          contact_name?: string
+          contacted_at?: string | null
+          created_at?: string
+          email?: string
+          has_public_liability?: boolean
+          id?: string
+          notes?: string | null
+          phone?: string
+          postcode?: string
+          public_liability_amount?: string | null
+          qualified_at?: string | null
+          service_area?: string
+          specialist_type?: string | null
+          status?: string
+          updated_at?: string
+          website?: string | null
+          years_trading?: number
+        }
+        Relationships: []
+      }
       suppressed_emails: {
         Row: {
           created_at: string
