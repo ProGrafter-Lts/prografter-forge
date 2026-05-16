@@ -298,6 +298,24 @@ const AdminVerifications = () => {
           </div>
         )}
 
+        {supplierStats && (
+          <div className="bg-white rounded-2xl border border-navy/10 p-4 mb-6 flex flex-wrap items-baseline gap-3">
+            <span className="font-mono text-[10px] uppercase tracking-widest text-secondary-text">
+              Supplier registrations
+            </span>
+            <span className="font-heading text-2xl text-navy">{supplierStats.total}</span>
+            <span className="font-mono text-xs text-secondary-text">
+              new: {supplierStats.new} · contacted: {supplierStats.contacted} · qualified: {supplierStats.qualified}
+            </span>
+            <Link
+              to="/admin/suppliers"
+              className="ml-auto font-mono text-xs uppercase tracking-widest text-teal hover:underline"
+            >
+              Open queue →
+            </Link>
+          </div>
+        )}
+
         <div className="flex flex-wrap gap-2 mb-6">
           {STATUS_FILTERS.map((f) => (
             <button
