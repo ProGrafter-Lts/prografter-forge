@@ -111,7 +111,7 @@ const About = () => {
               The first 50 verified trades lock in 6% commission for life.
             </p>
             <a
-              href="/trade-register"
+              href="/register/trade"
               className="inline-flex items-center gap-2 font-mono text-sm text-teal hover:text-teal-hover transition-colors"
             >
               Register as a trade
