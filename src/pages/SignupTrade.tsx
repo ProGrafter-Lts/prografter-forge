@@ -619,10 +619,19 @@ const SignupTrade = () => {
   };
 
   const submitStep3 = async () => {
-    if (!docsConfirmed) {
-      await uploadDocsOnly();
+    setError("");
+    const hasInsurance = !!existingDocs.insurance;
+    const hasId = !!existingDocs.id;
+    const hasQual = !!existingDocs.qualification;
+    if (uploadingDoc.insurance || uploadingDoc.id || uploadingDoc.qualification) {
+      setError("Hold on — a document is still uploading.");
       return;
     }
+    if (!hasInsurance) { setError("Public liability insurance is required"); return; }
+    if (!insuranceExpiry) { setError("Insurance expiry date is required"); return; }
+    if (insuranceStatus === "expired") { setError("Your insurance has expired"); return; }
+    if (!hasId) { setError("Photo ID is required"); return; }
+    if (qualMeta.required && !hasQual) { setError(`${qualMeta.label} is required for your trade`); return; }
     setStep(4);
   };
 
