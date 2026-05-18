@@ -952,7 +952,7 @@ const SignupTrade = () => {
                   <input
                     type="file"
                     accept="application/pdf,image/jpeg,image/png"
-                    onChange={handleFile(setQualFile)}
+                    onChange={handleFile(setQualFile, "qualification", () => qualExpiry)}
                     className="text-cream text-sm file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-teal file:text-cream file:font-mono file:text-xs file:cursor-pointer"
                   />
                   {qualFile
