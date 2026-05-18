@@ -195,9 +195,86 @@ const SignupTrade = () => {
       if (hasDocs) setStep(4);
       else if (hasBusiness) setStep(3);
       else setStep(2);
+
+      // Hydrate previously-uploaded document metadata so the user
+      // doesn't have to re-upload on resume.
+      try {
+        const { data: docs } = await supabase
+          .from("trade_verification_documents")
+          .select("doc_type, original_filename, expiry_date, created_at")
+          .eq("trade_id", (data as any).id)
+          .order("created_at", { ascending: false });
+        if (!cancelled && docs && docs.length > 0) {
+          const seen: Record<string, ExistingDoc> = {};
+          for (const d of docs as any[]) {
+            if (seen[d.doc_type]) continue; // keep most recent only
+            seen[d.doc_type] = { name: d.original_filename, expiry: d.expiry_date };
+          }
+          setExistingDocs(seen);
+          if (seen.insurance?.expiry) {
+            setInsuranceExpiry(new Date(seen.insurance.expiry));
+          } else if ((data as any).insurance_expiry) {
+            setInsuranceExpiry(new Date((data as any).insurance_expiry));
+          }
+          if (seen.qualification?.expiry) {
+            setQualExpiry(new Date(seen.qualification.expiry));
+          }
+        }
+      } catch { /* non-blocking */ }
+
+      // Block the next autosave so hydration doesn't immediately re-write
+      // the same values back to the database.
+      skipNextAutosaveRef.current = true;
     })();
     return () => { cancelled = true; };
   }, [isReady, user, createdTradeId]);
+
+  // Debounced autosave for Step 2 — every keystroke/toggle/date change is
+  // persisted to the trades row so users can refresh or leave and come back
+  // to exactly the same state.
+  useEffect(() => {
+    if (!createdTradeId) return;
+    if (skipNextAutosaveRef.current) {
+      skipNextAutosaveRef.current = false;
+      return;
+    }
+    const handle = window.setTimeout(async () => {
+      setAutosaveState("saving");
+      const updates: Record<string, unknown> = {
+        trade_type: tradeType || null,
+        company_name: companyName.trim() || null,
+        years_experience: yearsExperience ? parseInt(yearsExperience, 10) : null,
+        website: website.trim() || null,
+        bio: bio.trim() || null,
+        is_green_trade: isGreen,
+        mcs_number: mcsNumber.trim() || null,
+        trustmark_number: trustmarkNumber.trim() || null,
+        pas_2030_accredited: pas2030,
+        pas_2035_coordinator: pas2035,
+        ozev_approved: ozevApproved,
+        fgas_registered: fgasRegistered,
+        ciga_registered: cigaRegistered,
+        inca_certified: incaCertified,
+        green_cert_expiry: greenCertExpiry ? format(greenCertExpiry, "yyyy-MM-dd") : null,
+      };
+      const { error: saveErr } = await supabase
+        .from("trades")
+        .update(updates as any)
+        .eq("id", createdTradeId);
+      if (saveErr) {
+        console.warn("Autosave failed (non-blocking)", saveErr);
+        setAutosaveState("idle");
+      } else {
+        setAutosaveState("saved");
+        window.setTimeout(() => setAutosaveState((s) => (s === "saved" ? "idle" : s)), 1500);
+      }
+    }, 800);
+    return () => window.clearTimeout(handle);
+  }, [
+    createdTradeId, tradeType, companyName, yearsExperience, website, bio, isGreen,
+    mcsNumber, trustmarkNumber, pas2030, pas2035, ozevApproved, fgasRegistered,
+    cigaRegistered, incaCertified, greenCertExpiry,
+  ]);
 
   const isGreen = isGreenTrade(tradeType);
 
