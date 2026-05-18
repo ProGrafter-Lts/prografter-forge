@@ -128,7 +128,14 @@ const SignupTrade = () => {
   const qualMeta = qualificationCopy(tradeType);
   const isGreen = isGreenTrade(tradeType);
 
-  const handleFile = (setter: (f: File | null) => void) => (e: React.ChangeEvent<HTMLInputElement>) => {
+  const [uploadingDoc, setUploadingDoc] = useState<{ insurance?: boolean; id?: boolean; qualification?: boolean }>({});
+  const [docAutosave, setDocAutosave] = useState<"idle" | "saving" | "saved">("idle");
+
+  const handleFile = (
+    setter: (f: File | null) => void,
+    docType: "insurance" | "id" | "qualification",
+    expiryFn?: () => Date | undefined,
+  ) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0] ?? null;
     if (f && f.size > MAX_DOC_BYTES) {
       setError(`${f.name} is over 10MB. Please upload a smaller file.`);
@@ -138,6 +145,10 @@ const SignupTrade = () => {
     setError("");
     setter(f);
     setDocsConfirmed(false);
+    // Autosave: upload immediately so the file persists across refresh.
+    if (f && createdUserId && createdTradeId) {
+      void autoUploadDoc(f, docType, expiryFn?.());
+    }
   };
 
   // Account info created during step 1
