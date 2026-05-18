@@ -474,21 +474,35 @@ const SignupTrade = () => {
 
   const uploadDocsOnly = async () => {
     setError("");
-    if (!insuranceFile) { setError("Public liability insurance is required"); return; }
+    const hasInsurance = !!insuranceFile || !!existingDocs.insurance;
+    const hasId = !!idFile || !!existingDocs.id;
+    const hasQual = !!qualFile || !!existingDocs.qualification;
+    if (!hasInsurance) { setError("Public liability insurance is required"); return; }
     if (!insuranceExpiry) { setError("Insurance expiry date is required"); return; }
     if (insuranceStatus === "expired") { setError("Your insurance has expired"); return; }
-    if (!idFile) { setError("Photo ID is required"); return; }
-    if (qualMeta.required && !qualFile) { setError(`${qualMeta.label} is required for your trade`); return; }
+    if (!hasId) { setError("Photo ID is required"); return; }
+    if (qualMeta.required && !hasQual) { setError(`${qualMeta.label} is required for your trade`); return; }
     setLoading(true);
     try {
-      const insurancePath = await uploadDoc(insuranceFile, "insurance", insuranceExpiry);
-      await uploadDoc(idFile, "id");
-      if (qualFile) await uploadDoc(qualFile, "qualification", qualExpiry);
+      let insurancePath: string | null = null;
+      if (insuranceFile) {
+        insurancePath = await uploadDoc(insuranceFile, "insurance", insuranceExpiry);
+        setExistingDocs((d) => ({ ...d, insurance: { name: insuranceFile.name, expiry: format(insuranceExpiry!, "yyyy-MM-dd") } }));
+      }
+      if (idFile) {
+        await uploadDoc(idFile, "id");
+        setExistingDocs((d) => ({ ...d, id: { name: idFile.name, expiry: null } }));
+      }
+      if (qualFile) {
+        await uploadDoc(qualFile, "qualification", qualExpiry);
+        setExistingDocs((d) => ({ ...d, qualification: { name: qualFile.name, expiry: qualExpiry ? format(qualExpiry, "yyyy-MM-dd") : null } }));
+      }
 
-      await supabase.from("trades").update({
-        insurance_cert_url: insurancePath,
+      const tradeUpdates: Record<string, unknown> = {
         insurance_expiry: format(insuranceExpiry!, "yyyy-MM-dd"),
-      } as any).eq("id", createdTradeId!);
+      };
+      if (insurancePath) tradeUpdates.insurance_cert_url = insurancePath;
+      await supabase.from("trades").update(tradeUpdates as any).eq("id", createdTradeId!);
 
       setDocsConfirmed(true);
     } catch (err) {
