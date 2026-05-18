@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthReady } from "@/hooks/useAuthReady";
@@ -19,15 +19,23 @@ export function useSetupRedirect(role: "trade" | "homeowner") {
   const navigate = useNavigate();
   const [checking, setChecking] = useState(true);
   const { isReady, user } = useAuthReady();
+  // One-shot guard: once we've resolved the initial redirect decision we must
+  // NOT re-run on subsequent auth-state emissions (token refreshes, sign-in
+  // completing mid-form, etc.). Re-running would yank a user out of a
+  // multi-step signup flow as soon as their first row is created, which
+  // causes the form to unmount mid-typing.
+  const resolvedRef = useRef(false);
 
   useEffect(() => {
+    if (resolvedRef.current) return;
+    if (!isReady) return;
+
     let cancelled = false;
 
     const check = async () => {
-      if (!isReady) return;
-
       // Not signed in — let the page render so the user can sign up / post.
       if (!user) {
+        resolvedRef.current = true;
         setChecking(false);
         return;
       }
@@ -49,6 +57,7 @@ export function useSetupRedirect(role: "trade" | "homeowner") {
         const [tradeRes, homeownerRes] = await Promise.race([lookupPromise, timeoutPromise]);
 
         if (cancelled) return;
+        resolvedRef.current = true;
 
         if (role === "trade" && tradeRes.data) {
           navigate("/dashboard/trade", { replace: true });
@@ -75,6 +84,7 @@ export function useSetupRedirect(role: "trade" | "homeowner") {
       } catch (error) {
         console.error("useSetupRedirect profile lookup failed", error);
         if (!cancelled) {
+          resolvedRef.current = true;
           setChecking(false);
         }
       }
