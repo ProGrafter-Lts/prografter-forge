@@ -134,6 +134,62 @@ const SignupTrade = () => {
   const [createdUserId, setCreatedUserId] = useState<string | null>(null);
   const [createdTradeId, setCreatedTradeId] = useState<string | null>(null);
 
+  // Resume a partially-completed signup. If the user already created an
+  // account (Step 1) but never submitted for review, hydrate their saved
+  // data and drop them at the right step instead of forcing a restart.
+  useEffect(() => {
+    if (!isReady || !user || createdTradeId) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("trades")
+        .select(
+          "id, name, company_name, phone, postcode, trade_type, years_experience, website, bio, mcs_number, trustmark_number, pas_2030_accredited, pas_2035_coordinator, ozev_approved, fgas_registered, ciga_registered, inca_certified, green_cert_expiry, insurance_cert_url, insurance_expiry, submitted_for_review_at",
+        )
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (cancelled || !data) return;
+      // Don't resume if they've already submitted — useSetupRedirect handles that.
+      if ((data as any).submitted_for_review_at) return;
+
+      setResuming(true);
+      setCreatedUserId(user.id);
+      setCreatedTradeId((data as any).id);
+      setGatePassed(true);
+      setFullName((data as any).name ?? "");
+      setEmail(user.email ?? "");
+      setPhone((data as any).phone ?? "");
+      setPostcode((data as any).postcode ?? "");
+      setAgreedTerms(true);
+
+      const tt = (data as any).trade_type ?? "";
+      // 'Other' is the placeholder set by handle_new_user — treat as empty.
+      setTradeType(tt && tt !== "Other" ? tt : "");
+      setCompanyName((data as any).company_name ?? "");
+      setYearsExperience(
+        (data as any).years_experience != null ? String((data as any).years_experience) : "",
+      );
+      setWebsite((data as any).website ?? "");
+      setBio((data as any).bio ?? "");
+      setMcsNumber((data as any).mcs_number ?? "");
+      setTrustmarkNumber((data as any).trustmark_number ?? "");
+      setPas2030(!!(data as any).pas_2030_accredited);
+      setPas2035(!!(data as any).pas_2035_coordinator);
+      setOzevApproved(!!(data as any).ozev_approved);
+      setFgasRegistered(!!(data as any).fgas_registered);
+      setCigaRegistered(!!(data as any).ciga_registered);
+      setIncaCertified(!!(data as any).inca_certified);
+
+      // Figure out which step to drop them at.
+      const hasBusiness = !!(data as any).trade_type && (data as any).trade_type !== "Other";
+      const hasDocs = !!(data as any).insurance_cert_url;
+      if (hasDocs) setStep(4);
+      else if (hasBusiness) setStep(3);
+      else setStep(2);
+    })();
+    return () => { cancelled = true; };
+  }, [isReady, user, createdTradeId]);
+
   const isGreen = isGreenTrade(tradeType);
 
   const insuranceStatus = useMemo(() => {
