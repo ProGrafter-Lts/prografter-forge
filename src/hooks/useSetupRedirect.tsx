@@ -44,7 +44,11 @@ export function useSetupRedirect(role: "trade" | "homeowner") {
 
       try {
         const lookupPromise = Promise.all([
-          supabase.from("trades").select("id").eq("user_id", userId).maybeSingle(),
+          supabase
+            .from("trades")
+            .select("id, submitted_for_review_at")
+            .eq("user_id", userId)
+            .maybeSingle(),
           supabase.from("homeowners").select("id").eq("user_id", userId).maybeSingle(),
         ]);
 
@@ -59,9 +63,17 @@ export function useSetupRedirect(role: "trade" | "homeowner") {
         if (cancelled) return;
         resolvedRef.current = true;
 
+        // Trade signup: only kick them to the dashboard if they've fully
+        // submitted for review. A partial trade row (created at Step 1)
+        // means they need to keep filling in the form — do NOT redirect.
         if (role === "trade" && tradeRes.data) {
-          navigate("/dashboard/trade", { replace: true });
-          return;
+          const submitted = (tradeRes.data as { submitted_for_review_at?: string | null })
+            .submitted_for_review_at;
+          if (submitted) {
+            navigate("/dashboard/trade", { replace: true });
+            return;
+          }
+          // Partial signup — fall through and let SignupTrade resume.
         }
 
         if (role === "homeowner" && homeownerRes.data) {
@@ -71,7 +83,7 @@ export function useSetupRedirect(role: "trade" | "homeowner") {
 
         // Signed in as the *other* role — bounce them to their own dashboard
         // rather than letting them create a duplicate profile in this one.
-        if (role === "trade" && homeownerRes.data) {
+        if (role === "trade" && homeownerRes.data && !tradeRes.data) {
           navigate("/dashboard/homeowner", { replace: true });
           return;
         }
