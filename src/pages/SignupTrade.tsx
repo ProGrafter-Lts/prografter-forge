@@ -483,6 +483,57 @@ const SignupTrade = () => {
     return path;
   };
 
+  // Autosave a single document: upload to storage, replace any prior doc of
+  // the same type, and update the trades row for insurance. Errors surface
+  // inline but never block the form.
+  const autoUploadDoc = async (
+    file: File,
+    docType: "insurance" | "id" | "qualification",
+    expiry?: Date,
+  ) => {
+    if (!createdUserId || !createdTradeId) return;
+    setUploadingDoc((s) => ({ ...s, [docType]: true }));
+    setDocAutosave("saving");
+    try {
+      const ext = file.name.split(".").pop() ?? "bin";
+      const path = `${createdUserId}/${docType}-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("trade-verification-documents")
+        .upload(path, file, { upsert: false });
+      if (upErr) throw upErr;
+      // Remove prior rows of this doc_type so the latest is canonical.
+      await supabase
+        .from("trade_verification_documents")
+        .delete()
+        .eq("trade_id", createdTradeId)
+        .eq("doc_type", docType);
+      await supabase.from("trade_verification_documents").insert({
+        trade_id: createdTradeId,
+        doc_type: docType,
+        file_path: path,
+        original_filename: file.name,
+        expiry_date: expiry ? format(expiry, "yyyy-MM-dd") : null,
+      } as any);
+      if (docType === "insurance") {
+        const tradeUpdates: Record<string, unknown> = { insurance_cert_url: path };
+        if (expiry) tradeUpdates.insurance_expiry = format(expiry, "yyyy-MM-dd");
+        await supabase.from("trades").update(tradeUpdates as any).eq("id", createdTradeId);
+      }
+      setExistingDocs((d) => ({
+        ...d,
+        [docType]: { name: file.name, expiry: expiry ? format(expiry, "yyyy-MM-dd") : null },
+      }));
+      setDocAutosave("saved");
+      window.setTimeout(() => setDocAutosave((s) => (s === "saved" ? "idle" : s)), 1500);
+    } catch (err) {
+      console.warn("Document autosave failed", err);
+      setError(err instanceof Error ? err.message : "Upload failed — please try again");
+      setDocAutosave("idle");
+    } finally {
+      setUploadingDoc((s) => ({ ...s, [docType]: false }));
+    }
+  };
+
   const uploadDocsOnly = async () => {
     setError("");
     const hasInsurance = !!insuranceFile || !!existingDocs.insurance;
