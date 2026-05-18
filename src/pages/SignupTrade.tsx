@@ -1050,7 +1050,7 @@ const SignupTrade = () => {
               <div className="flex gap-3 mt-8">
                 <button onClick={() => setStep(2)} className="flex-1 border border-cream/20 text-cream/80 font-mono text-sm py-3 rounded-xl hover:bg-cream/5 transition-colors">← Back</button>
                 <button onClick={submitStep3} disabled={loading} className="flex-[2] bg-teal text-cream font-mono text-sm py-3 rounded-xl hover:bg-teal-hover transition-colors disabled:opacity-50">
-                  {loading ? "Uploading…" : docsConfirmed ? "Continue → Review" : "Upload documents"}
+                  {loading ? "Saving…" : "Continue → Review"}
                 </button>
               </div>
             </div>
