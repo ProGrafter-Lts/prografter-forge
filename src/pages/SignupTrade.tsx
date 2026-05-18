@@ -940,12 +940,20 @@ const SignupTrade = () => {
           {/* STEP 3 */}
           {step === 3 && (
             <div>
-              <h2 className="font-heading text-cream text-[40px] leading-none mb-3">
-                Your <span className="text-teal">documents.</span>
-              </h2>
+              <div className="flex items-baseline justify-between gap-3 mb-3">
+                <h2 className="font-heading text-cream text-[40px] leading-none">
+                  Your <span className="text-teal">documents.</span>
+                </h2>
+                {docAutosave !== "idle" && (
+                  <span className="font-mono text-[10px] text-teal/80 uppercase tracking-widest whitespace-nowrap">
+                    {docAutosave === "saving" ? "Saving…" : "Saved ✓"}
+                  </span>
+                )}
+              </div>
               <p className="font-body text-cream/60 text-sm mb-6">
-                Upload everything in one go — we'll review within 1 working day. Files are stored privately and only seen by our verification team. Max 10MB per file.
+                Each document is saved automatically as you upload. Files are stored privately and only seen by our verification team. Max 10MB per file.
               </p>
+
               <div className="space-y-6">
                 {/* Insurance */}
                 <div className="p-4 rounded-xl border border-cream/10">
