@@ -128,7 +128,14 @@ const SignupTrade = () => {
   const qualMeta = qualificationCopy(tradeType);
   const isGreen = isGreenTrade(tradeType);
 
-  const handleFile = (setter: (f: File | null) => void) => (e: React.ChangeEvent<HTMLInputElement>) => {
+  const [uploadingDoc, setUploadingDoc] = useState<{ insurance?: boolean; id?: boolean; qualification?: boolean }>({});
+  const [docAutosave, setDocAutosave] = useState<"idle" | "saving" | "saved">("idle");
+
+  const handleFile = (
+    setter: (f: File | null) => void,
+    docType: "insurance" | "id" | "qualification",
+    expiryFn?: () => Date | undefined,
+  ) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0] ?? null;
     if (f && f.size > MAX_DOC_BYTES) {
       setError(`${f.name} is over 10MB. Please upload a smaller file.`);
@@ -138,6 +145,10 @@ const SignupTrade = () => {
     setError("");
     setter(f);
     setDocsConfirmed(false);
+    // Autosave: upload immediately so the file persists across refresh.
+    if (f && createdUserId && createdTradeId) {
+      void autoUploadDoc(f, docType, expiryFn?.());
+    }
   };
 
   // Account info created during step 1
@@ -276,6 +287,50 @@ const SignupTrade = () => {
     mcsNumber, trustmarkNumber, pas2030, pas2035, ozevApproved, fgasRegistered,
     cigaRegistered, incaCertified, greenCertExpiry,
   ]);
+
+  // Debounced autosave for Step 3 expiry dates — keeps the most-recent
+  // doc row in sync when the user adjusts a date after uploading.
+  useEffect(() => {
+    if (!createdTradeId) return;
+    if (!existingDocs.insurance && !existingDocs.qualification) return;
+    const handle = window.setTimeout(async () => {
+      setDocAutosave("saving");
+      try {
+        if (existingDocs.insurance && insuranceExpiry) {
+          const iso = format(insuranceExpiry, "yyyy-MM-dd");
+          if (iso !== existingDocs.insurance.expiry) {
+            await supabase
+              .from("trade_verification_documents")
+              .update({ expiry_date: iso } as any)
+              .eq("trade_id", createdTradeId)
+              .eq("doc_type", "insurance");
+            await supabase
+              .from("trades")
+              .update({ insurance_expiry: iso } as any)
+              .eq("id", createdTradeId);
+            setExistingDocs((d) => ({ ...d, insurance: d.insurance ? { ...d.insurance, expiry: iso } : d.insurance }));
+          }
+        }
+        if (existingDocs.qualification) {
+          const iso = qualExpiry ? format(qualExpiry, "yyyy-MM-dd") : null;
+          if (iso !== existingDocs.qualification.expiry) {
+            await supabase
+              .from("trade_verification_documents")
+              .update({ expiry_date: iso } as any)
+              .eq("trade_id", createdTradeId)
+              .eq("doc_type", "qualification");
+            setExistingDocs((d) => ({ ...d, qualification: d.qualification ? { ...d.qualification, expiry: iso } : d.qualification }));
+          }
+        }
+        setDocAutosave("saved");
+        window.setTimeout(() => setDocAutosave((s) => (s === "saved" ? "idle" : s)), 1500);
+      } catch (err) {
+        console.warn("Doc expiry autosave failed", err);
+        setDocAutosave("idle");
+      }
+    }, 800);
+    return () => window.clearTimeout(handle);
+  }, [createdTradeId, insuranceExpiry, qualExpiry, existingDocs.insurance, existingDocs.qualification]);
 
 
   const insuranceStatus = useMemo(() => {
@@ -472,6 +527,57 @@ const SignupTrade = () => {
     return path;
   };
 
+  // Autosave a single document: upload to storage, replace any prior doc of
+  // the same type, and update the trades row for insurance. Errors surface
+  // inline but never block the form.
+  const autoUploadDoc = async (
+    file: File,
+    docType: "insurance" | "id" | "qualification",
+    expiry?: Date,
+  ) => {
+    if (!createdUserId || !createdTradeId) return;
+    setUploadingDoc((s) => ({ ...s, [docType]: true }));
+    setDocAutosave("saving");
+    try {
+      const ext = file.name.split(".").pop() ?? "bin";
+      const path = `${createdUserId}/${docType}-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("trade-verification-documents")
+        .upload(path, file, { upsert: false });
+      if (upErr) throw upErr;
+      // Remove prior rows of this doc_type so the latest is canonical.
+      await supabase
+        .from("trade_verification_documents")
+        .delete()
+        .eq("trade_id", createdTradeId)
+        .eq("doc_type", docType);
+      await supabase.from("trade_verification_documents").insert({
+        trade_id: createdTradeId,
+        doc_type: docType,
+        file_path: path,
+        original_filename: file.name,
+        expiry_date: expiry ? format(expiry, "yyyy-MM-dd") : null,
+      } as any);
+      if (docType === "insurance") {
+        const tradeUpdates: Record<string, unknown> = { insurance_cert_url: path };
+        if (expiry) tradeUpdates.insurance_expiry = format(expiry, "yyyy-MM-dd");
+        await supabase.from("trades").update(tradeUpdates as any).eq("id", createdTradeId);
+      }
+      setExistingDocs((d) => ({
+        ...d,
+        [docType]: { name: file.name, expiry: expiry ? format(expiry, "yyyy-MM-dd") : null },
+      }));
+      setDocAutosave("saved");
+      window.setTimeout(() => setDocAutosave((s) => (s === "saved" ? "idle" : s)), 1500);
+    } catch (err) {
+      console.warn("Document autosave failed", err);
+      setError(err instanceof Error ? err.message : "Upload failed — please try again");
+      setDocAutosave("idle");
+    } finally {
+      setUploadingDoc((s) => ({ ...s, [docType]: false }));
+    }
+  };
+
   const uploadDocsOnly = async () => {
     setError("");
     const hasInsurance = !!insuranceFile || !!existingDocs.insurance;
@@ -513,10 +619,19 @@ const SignupTrade = () => {
   };
 
   const submitStep3 = async () => {
-    if (!docsConfirmed) {
-      await uploadDocsOnly();
+    setError("");
+    const hasInsurance = !!existingDocs.insurance;
+    const hasId = !!existingDocs.id;
+    const hasQual = !!existingDocs.qualification;
+    if (uploadingDoc.insurance || uploadingDoc.id || uploadingDoc.qualification) {
+      setError("Hold on — a document is still uploading.");
       return;
     }
+    if (!hasInsurance) { setError("Public liability insurance is required"); return; }
+    if (!insuranceExpiry) { setError("Insurance expiry date is required"); return; }
+    if (insuranceStatus === "expired") { setError("Your insurance has expired"); return; }
+    if (!hasId) { setError("Photo ID is required"); return; }
+    if (qualMeta.required && !hasQual) { setError(`${qualMeta.label} is required for your trade`); return; }
     setStep(4);
   };
 
@@ -834,12 +949,20 @@ const SignupTrade = () => {
           {/* STEP 3 */}
           {step === 3 && (
             <div>
-              <h2 className="font-heading text-cream text-[40px] leading-none mb-3">
-                Your <span className="text-teal">documents.</span>
-              </h2>
+              <div className="flex items-baseline justify-between gap-3 mb-3">
+                <h2 className="font-heading text-cream text-[40px] leading-none">
+                  Your <span className="text-teal">documents.</span>
+                </h2>
+                {docAutosave !== "idle" && (
+                  <span className="font-mono text-[10px] text-teal/80 uppercase tracking-widest whitespace-nowrap">
+                    {docAutosave === "saving" ? "Saving…" : "Saved ✓"}
+                  </span>
+                )}
+              </div>
               <p className="font-body text-cream/60 text-sm mb-6">
-                Upload everything in one go — we'll review within 1 working day. Files are stored privately and only seen by our verification team. Max 10MB per file.
+                Each document is saved automatically as you upload. Files are stored privately and only seen by our verification team. Max 10MB per file.
               </p>
+
               <div className="space-y-6">
                 {/* Insurance */}
                 <div className="p-4 rounded-xl border border-cream/10">
@@ -848,12 +971,15 @@ const SignupTrade = () => {
                   <input
                     type="file"
                     accept="application/pdf,image/jpeg,image/png"
-                    onChange={handleFile(setInsuranceFile)}
+                    onChange={handleFile(setInsuranceFile, "insurance", () => insuranceExpiry)}
                     className="text-cream text-sm file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-teal file:text-cream file:font-mono file:text-xs file:cursor-pointer"
                   />
-                  {insuranceFile
-                    ? <p className="mt-2 text-xs text-cream/60 font-body">✓ {insuranceFile.name}</p>
-                    : existingDocs.insurance && <p className="mt-2 text-xs text-teal font-body">✓ Already uploaded: {existingDocs.insurance.name} (re-upload to replace)</p>}
+                  {uploadingDoc.insurance
+                    ? <p className="mt-2 text-xs text-teal font-body">Uploading {insuranceFile?.name}…</p>
+                    : insuranceFile
+                      ? <p className="mt-2 text-xs text-cream/60 font-body">✓ {insuranceFile.name} saved</p>
+                      : existingDocs.insurance && <p className="mt-2 text-xs text-teal font-body">✓ Already uploaded: {existingDocs.insurance.name} (re-upload to replace)</p>}
+
 
                   <div className="mt-3">
                     <label className={labelClass}>Certificate expiry date *</label>
@@ -872,12 +998,15 @@ const SignupTrade = () => {
                   <input
                     type="file"
                     accept="application/pdf,image/jpeg,image/png"
-                    onChange={handleFile(setIdFile)}
+                    onChange={handleFile(setIdFile, "id")}
                     className="text-cream text-sm file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-teal file:text-cream file:font-mono file:text-xs file:cursor-pointer"
                   />
-                  {idFile
-                    ? <p className="mt-2 text-xs text-cream/60 font-body">✓ {idFile.name}</p>
-                    : existingDocs.id && <p className="mt-2 text-xs text-teal font-body">✓ Already uploaded: {existingDocs.id.name} (re-upload to replace)</p>}
+                  {uploadingDoc.id
+                    ? <p className="mt-2 text-xs text-teal font-body">Uploading {idFile?.name}…</p>
+                    : idFile
+                      ? <p className="mt-2 text-xs text-cream/60 font-body">✓ {idFile.name} saved</p>
+                      : existingDocs.id && <p className="mt-2 text-xs text-teal font-body">✓ Already uploaded: {existingDocs.id.name} (re-upload to replace)</p>}
+
 
                 </div>
 
@@ -890,12 +1019,15 @@ const SignupTrade = () => {
                   <input
                     type="file"
                     accept="application/pdf,image/jpeg,image/png"
-                    onChange={handleFile(setQualFile)}
+                    onChange={handleFile(setQualFile, "qualification", () => qualExpiry)}
                     className="text-cream text-sm file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-teal file:text-cream file:font-mono file:text-xs file:cursor-pointer"
                   />
-                  {qualFile
-                    ? <p className="mt-2 text-xs text-cream/60 font-body">✓ {qualFile.name}</p>
-                    : existingDocs.qualification && <p className="mt-2 text-xs text-teal font-body">✓ Already uploaded: {existingDocs.qualification.name} (re-upload to replace)</p>}
+                  {uploadingDoc.qualification
+                    ? <p className="mt-2 text-xs text-teal font-body">Uploading {qualFile?.name}…</p>
+                    : qualFile
+                      ? <p className="mt-2 text-xs text-cream/60 font-body">✓ {qualFile.name} saved</p>
+                      : existingDocs.qualification && <p className="mt-2 text-xs text-teal font-body">✓ Already uploaded: {existingDocs.qualification.name} (re-upload to replace)</p>}
+
 
                   <div className="mt-3">
                     <label className={labelClass}>Expiry date (if applicable)</label>
@@ -918,7 +1050,7 @@ const SignupTrade = () => {
               <div className="flex gap-3 mt-8">
                 <button onClick={() => setStep(2)} className="flex-1 border border-cream/20 text-cream/80 font-mono text-sm py-3 rounded-xl hover:bg-cream/5 transition-colors">← Back</button>
                 <button onClick={submitStep3} disabled={loading} className="flex-[2] bg-teal text-cream font-mono text-sm py-3 rounded-xl hover:bg-teal-hover transition-colors disabled:opacity-50">
-                  {loading ? "Uploading…" : docsConfirmed ? "Continue → Review" : "Upload documents"}
+                  {loading ? "Saving…" : "Continue → Review"}
                 </button>
               </div>
             </div>
