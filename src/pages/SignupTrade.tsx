@@ -126,6 +126,7 @@ const SignupTrade = () => {
   const [docsConfirmed, setDocsConfirmed] = useState(false);
 
   const qualMeta = qualificationCopy(tradeType);
+  const isGreen = isGreenTrade(tradeType);
 
   const handleFile = (setter: (f: File | null) => void) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0] ?? null;
