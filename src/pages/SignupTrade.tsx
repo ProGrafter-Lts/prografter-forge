@@ -1013,9 +1013,12 @@ const SignupTrade = () => {
                     onChange={handleFile(setQualFile, "qualification", () => qualExpiry)}
                     className="text-cream text-sm file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-teal file:text-cream file:font-mono file:text-xs file:cursor-pointer"
                   />
-                  {qualFile
-                    ? <p className="mt-2 text-xs text-cream/60 font-body">✓ {qualFile.name}</p>
-                    : existingDocs.qualification && <p className="mt-2 text-xs text-teal font-body">✓ Already uploaded: {existingDocs.qualification.name} (re-upload to replace)</p>}
+                  {uploadingDoc.qualification
+                    ? <p className="mt-2 text-xs text-teal font-body">Uploading {qualFile?.name}…</p>
+                    : qualFile
+                      ? <p className="mt-2 text-xs text-cream/60 font-body">✓ {qualFile.name} saved</p>
+                      : existingDocs.qualification && <p className="mt-2 text-xs text-teal font-body">✓ Already uploaded: {existingDocs.qualification.name} (re-upload to replace)</p>}
+
 
                   <div className="mt-3">
                     <label className={labelClass}>Expiry date (if applicable)</label>
