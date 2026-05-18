@@ -31,6 +31,7 @@ import {
 } from "@/lib/greenTrades";
 import { saveTradeSpecialisms } from "@/lib/specialisms";
 import { useSetupRedirect, SetupRedirectLoader } from "@/hooks/useSetupRedirect";
+import { useAuthReady } from "@/hooks/useAuthReady";
 import TradeVerificationExplainer from "@/components/TradeVerificationExplainer";
 
 const SpecialismsPicker = lazy(() => import("@/components/SpecialismsPicker"));
