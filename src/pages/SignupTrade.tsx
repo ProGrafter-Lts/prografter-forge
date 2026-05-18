@@ -201,12 +201,21 @@ const SignupTrade = () => {
       setCigaRegistered(!!(data as any).ciga_registered);
       setIncaCertified(!!(data as any).inca_certified);
 
-      // Figure out which step to drop them at.
+      // Figure out which step to drop them at. Prefer the explicitly-saved
+      // step from localStorage (so Step 4 survives a refresh), but never let
+      // the saved step skip ahead of what data actually exists.
       const hasBusiness = !!(data as any).trade_type && (data as any).trade_type !== "Other";
       const hasDocs = !!(data as any).insurance_cert_url;
-      if (hasDocs) setStep(4);
-      else if (hasBusiness) setStep(3);
-      else setStep(2);
+      const maxAllowed: Step = hasDocs ? 4 : hasBusiness ? 3 : 2;
+      let resumeStep: Step = maxAllowed;
+      try {
+        const saved = localStorage.getItem(`trade-signup-step:${(data as any).id}`);
+        const n = saved ? parseInt(saved, 10) : NaN;
+        if (n === 2 || n === 3 || n === 4) {
+          resumeStep = (Math.min(n, maxAllowed) as Step);
+        }
+      } catch { /* non-blocking */ }
+      setStep(resumeStep);
 
       // Hydrate previously-uploaded document metadata so the user
       // doesn't have to re-upload on resume.
