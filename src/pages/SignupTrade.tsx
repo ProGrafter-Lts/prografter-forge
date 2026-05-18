@@ -73,8 +73,10 @@ const checkboxClass = "w-4 h-4 rounded border-cream/20 bg-cream/5 accent-teal cu
 const SignupTrade = () => {
   const navigate = useNavigate();
   const checkingExisting = useSetupRedirect("trade");
+  const { isReady, user } = useAuthReady();
   const [gatePassed, setGatePassed] = useState(false);
   const [step, setStep] = useState<Step>(1);
+  const [resuming, setResuming] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
