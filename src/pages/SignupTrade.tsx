@@ -216,7 +216,7 @@ const SignupTrade = () => {
         email: email.trim(),
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/signup/trade/under-review`,
+          emailRedirectTo: `${window.location.origin}/register/trade`,
           data: {
             user_type: "trade",
             full_name: fullName.trim(),
