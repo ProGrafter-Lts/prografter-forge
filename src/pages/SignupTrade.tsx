@@ -564,6 +564,12 @@ const SignupTrade = () => {
             </span>
           </div>
 
+          {resuming && step > 1 && (
+            <div className="mb-4 p-3 rounded-lg bg-teal/10 border border-teal/30 text-teal text-sm font-body">
+              Welcome back — we've picked up where you left off.
+            </div>
+          )}
+
           {error && (
             <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-300 text-sm font-body">
               {error}
