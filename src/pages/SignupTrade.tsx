@@ -949,10 +949,11 @@ const SignupTrade = () => {
                     {trustmarkNumber && <SummaryRow label="TrustMark" value={trustmarkNumber} />}
                   </>
                 )}
-                <SummaryRow label="Insurance" value={insuranceFile?.name ?? "—"} onEdit={() => setStep(3)} />
+                <SummaryRow label="Insurance" value={insuranceFile?.name ?? existingDocs.insurance?.name ?? "—"} onEdit={() => setStep(3)} />
                 <SummaryRow label="Insurance expires" value={insuranceExpiry ? format(insuranceExpiry, "d MMM yyyy") : "—"} />
-                <SummaryRow label="ID" value={idFile?.name ?? "—"} />
-                <SummaryRow label="Qualification" value={qualFile?.name ?? "Not provided"} />
+                <SummaryRow label="ID" value={idFile?.name ?? existingDocs.id?.name ?? "—"} />
+                <SummaryRow label="Qualification" value={qualFile?.name ?? existingDocs.qualification?.name ?? "Not provided"} />
+
               </div>
               <div className="flex gap-3 mt-8">
                 <button onClick={() => setStep(3)} className="flex-1 border border-cream/20 text-cream/80 font-mono text-sm py-3 rounded-xl hover:bg-cream/5 transition-colors">← Back</button>
