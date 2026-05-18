@@ -70,6 +70,8 @@ const inputClass =
   "w-full bg-cream/5 border border-cream/10 text-cream placeholder-cream/40 font-body text-sm rounded-xl px-4 py-3 focus:border-teal focus:outline-none transition-colors";
 const checkboxClass = "w-4 h-4 rounded border-cream/20 bg-cream/5 accent-teal cursor-pointer";
 
+type ExistingDoc = { name: string; expiry: string | null };
+
 const SignupTrade = () => {
   const navigate = useNavigate();
   const checkingExisting = useSetupRedirect("trade");
@@ -79,6 +81,13 @@ const SignupTrade = () => {
   const [resuming, setResuming] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [autosaveState, setAutosaveState] = useState<"idle" | "saving" | "saved">("idle");
+  const skipNextAutosaveRef = useRef(false);
+  const [existingDocs, setExistingDocs] = useState<{
+    insurance?: ExistingDoc;
+    id?: ExistingDoc;
+    qualification?: ExistingDoc;
+  }>({});
 
   // Step 1: account
   const [fullName, setFullName] = useState("");
