@@ -350,6 +350,15 @@ const SignupTrade = () => {
     return "valid";
   }, [insuranceExpiry]);
 
+  // Persist the current step so a refresh on Step 4 (or any later step)
+  // returns the user to the same place instead of bouncing them back.
+  useEffect(() => {
+    if (!createdTradeId) return;
+    try {
+      localStorage.setItem(`trade-signup-step:${createdTradeId}`, String(step));
+    } catch { /* non-blocking */ }
+  }, [createdTradeId, step]);
+
   // ---- STEP 1: create auth user + trade row (pending) ----
   const submitStep1 = async () => {
     setError("");
