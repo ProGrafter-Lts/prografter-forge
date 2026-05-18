@@ -288,6 +288,50 @@ const SignupTrade = () => {
     cigaRegistered, incaCertified, greenCertExpiry,
   ]);
 
+  // Debounced autosave for Step 3 expiry dates — keeps the most-recent
+  // doc row in sync when the user adjusts a date after uploading.
+  useEffect(() => {
+    if (!createdTradeId) return;
+    if (!existingDocs.insurance && !existingDocs.qualification) return;
+    const handle = window.setTimeout(async () => {
+      setDocAutosave("saving");
+      try {
+        if (existingDocs.insurance && insuranceExpiry) {
+          const iso = format(insuranceExpiry, "yyyy-MM-dd");
+          if (iso !== existingDocs.insurance.expiry) {
+            await supabase
+              .from("trade_verification_documents")
+              .update({ expiry_date: iso } as any)
+              .eq("trade_id", createdTradeId)
+              .eq("doc_type", "insurance");
+            await supabase
+              .from("trades")
+              .update({ insurance_expiry: iso } as any)
+              .eq("id", createdTradeId);
+            setExistingDocs((d) => ({ ...d, insurance: d.insurance ? { ...d.insurance, expiry: iso } : d.insurance }));
+          }
+        }
+        if (existingDocs.qualification) {
+          const iso = qualExpiry ? format(qualExpiry, "yyyy-MM-dd") : null;
+          if (iso !== existingDocs.qualification.expiry) {
+            await supabase
+              .from("trade_verification_documents")
+              .update({ expiry_date: iso } as any)
+              .eq("trade_id", createdTradeId)
+              .eq("doc_type", "qualification");
+            setExistingDocs((d) => ({ ...d, qualification: d.qualification ? { ...d.qualification, expiry: iso } : d.qualification }));
+          }
+        }
+        setDocAutosave("saved");
+        window.setTimeout(() => setDocAutosave((s) => (s === "saved" ? "idle" : s)), 1500);
+      } catch (err) {
+        console.warn("Doc expiry autosave failed", err);
+        setDocAutosave("idle");
+      }
+    }, 800);
+    return () => window.clearTimeout(handle);
+  }, [createdTradeId, insuranceExpiry, qualExpiry, existingDocs.insurance, existingDocs.qualification]);
+
 
   const insuranceStatus = useMemo(() => {
     if (!insuranceExpiry) return null;
