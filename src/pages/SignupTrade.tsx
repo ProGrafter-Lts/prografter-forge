@@ -843,7 +843,10 @@ const SignupTrade = () => {
                     onChange={handleFile(setInsuranceFile)}
                     className="text-cream text-sm file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-teal file:text-cream file:font-mono file:text-xs file:cursor-pointer"
                   />
-                  {insuranceFile && <p className="mt-2 text-xs text-cream/60 font-body">✓ {insuranceFile.name}</p>}
+                  {insuranceFile
+                    ? <p className="mt-2 text-xs text-cream/60 font-body">✓ {insuranceFile.name}</p>
+                    : existingDocs.insurance && <p className="mt-2 text-xs text-teal font-body">✓ Already uploaded: {existingDocs.insurance.name} (re-upload to replace)</p>}
+
                   <div className="mt-3">
                     <label className={labelClass}>Certificate expiry date *</label>
                     <Suspense fallback={null}>
