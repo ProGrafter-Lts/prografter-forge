@@ -277,7 +277,6 @@ const SignupTrade = () => {
     cigaRegistered, incaCertified, greenCertExpiry,
   ]);
 
-  const isGreen = isGreenTrade(tradeType);
 
   const insuranceStatus = useMemo(() => {
     if (!insuranceExpiry) return null;
