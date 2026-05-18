@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { format, differenceInDays } from "date-fns";
 import { z } from "zod";
@@ -70,6 +70,8 @@ const inputClass =
   "w-full bg-cream/5 border border-cream/10 text-cream placeholder-cream/40 font-body text-sm rounded-xl px-4 py-3 focus:border-teal focus:outline-none transition-colors";
 const checkboxClass = "w-4 h-4 rounded border-cream/20 bg-cream/5 accent-teal cursor-pointer";
 
+type ExistingDoc = { name: string; expiry: string | null };
+
 const SignupTrade = () => {
   const navigate = useNavigate();
   const checkingExisting = useSetupRedirect("trade");
@@ -79,6 +81,13 @@ const SignupTrade = () => {
   const [resuming, setResuming] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [autosaveState, setAutosaveState] = useState<"idle" | "saving" | "saved">("idle");
+  const skipNextAutosaveRef = useRef(false);
+  const [existingDocs, setExistingDocs] = useState<{
+    insurance?: ExistingDoc;
+    id?: ExistingDoc;
+    qualification?: ExistingDoc;
+  }>({});
 
   // Step 1: account
   const [fullName, setFullName] = useState("");
@@ -117,6 +126,7 @@ const SignupTrade = () => {
   const [docsConfirmed, setDocsConfirmed] = useState(false);
 
   const qualMeta = qualificationCopy(tradeType);
+  const isGreen = isGreenTrade(tradeType);
 
   const handleFile = (setter: (f: File | null) => void) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0] ?? null;
@@ -186,11 +196,87 @@ const SignupTrade = () => {
       if (hasDocs) setStep(4);
       else if (hasBusiness) setStep(3);
       else setStep(2);
+
+      // Hydrate previously-uploaded document metadata so the user
+      // doesn't have to re-upload on resume.
+      try {
+        const { data: docs } = await supabase
+          .from("trade_verification_documents")
+          .select("doc_type, original_filename, expiry_date, created_at")
+          .eq("trade_id", (data as any).id)
+          .order("created_at", { ascending: false });
+        if (!cancelled && docs && docs.length > 0) {
+          const seen: Record<string, ExistingDoc> = {};
+          for (const d of docs as any[]) {
+            if (seen[d.doc_type]) continue; // keep most recent only
+            seen[d.doc_type] = { name: d.original_filename, expiry: d.expiry_date };
+          }
+          setExistingDocs(seen);
+          if (seen.insurance?.expiry) {
+            setInsuranceExpiry(new Date(seen.insurance.expiry));
+          } else if ((data as any).insurance_expiry) {
+            setInsuranceExpiry(new Date((data as any).insurance_expiry));
+          }
+          if (seen.qualification?.expiry) {
+            setQualExpiry(new Date(seen.qualification.expiry));
+          }
+        }
+      } catch { /* non-blocking */ }
+
+      // Block the next autosave so hydration doesn't immediately re-write
+      // the same values back to the database.
+      skipNextAutosaveRef.current = true;
     })();
     return () => { cancelled = true; };
   }, [isReady, user, createdTradeId]);
 
-  const isGreen = isGreenTrade(tradeType);
+  // Debounced autosave for Step 2 — every keystroke/toggle/date change is
+  // persisted to the trades row so users can refresh or leave and come back
+  // to exactly the same state.
+  useEffect(() => {
+    if (!createdTradeId) return;
+    if (skipNextAutosaveRef.current) {
+      skipNextAutosaveRef.current = false;
+      return;
+    }
+    const handle = window.setTimeout(async () => {
+      setAutosaveState("saving");
+      const updates: Record<string, unknown> = {
+        trade_type: tradeType || null,
+        company_name: companyName.trim() || null,
+        years_experience: yearsExperience ? parseInt(yearsExperience, 10) : null,
+        website: website.trim() || null,
+        bio: bio.trim() || null,
+        is_green_trade: isGreen,
+        mcs_number: mcsNumber.trim() || null,
+        trustmark_number: trustmarkNumber.trim() || null,
+        pas_2030_accredited: pas2030,
+        pas_2035_coordinator: pas2035,
+        ozev_approved: ozevApproved,
+        fgas_registered: fgasRegistered,
+        ciga_registered: cigaRegistered,
+        inca_certified: incaCertified,
+        green_cert_expiry: greenCertExpiry ? format(greenCertExpiry, "yyyy-MM-dd") : null,
+      };
+      const { error: saveErr } = await supabase
+        .from("trades")
+        .update(updates as any)
+        .eq("id", createdTradeId);
+      if (saveErr) {
+        console.warn("Autosave failed (non-blocking)", saveErr);
+        setAutosaveState("idle");
+      } else {
+        setAutosaveState("saved");
+        window.setTimeout(() => setAutosaveState((s) => (s === "saved" ? "idle" : s)), 1500);
+      }
+    }, 800);
+    return () => window.clearTimeout(handle);
+  }, [
+    createdTradeId, tradeType, companyName, yearsExperience, website, bio, isGreen,
+    mcsNumber, trustmarkNumber, pas2030, pas2035, ozevApproved, fgasRegistered,
+    cigaRegistered, incaCertified, greenCertExpiry,
+  ]);
+
 
   const insuranceStatus = useMemo(() => {
     if (!insuranceExpiry) return null;
@@ -388,21 +474,35 @@ const SignupTrade = () => {
 
   const uploadDocsOnly = async () => {
     setError("");
-    if (!insuranceFile) { setError("Public liability insurance is required"); return; }
+    const hasInsurance = !!insuranceFile || !!existingDocs.insurance;
+    const hasId = !!idFile || !!existingDocs.id;
+    const hasQual = !!qualFile || !!existingDocs.qualification;
+    if (!hasInsurance) { setError("Public liability insurance is required"); return; }
     if (!insuranceExpiry) { setError("Insurance expiry date is required"); return; }
     if (insuranceStatus === "expired") { setError("Your insurance has expired"); return; }
-    if (!idFile) { setError("Photo ID is required"); return; }
-    if (qualMeta.required && !qualFile) { setError(`${qualMeta.label} is required for your trade`); return; }
+    if (!hasId) { setError("Photo ID is required"); return; }
+    if (qualMeta.required && !hasQual) { setError(`${qualMeta.label} is required for your trade`); return; }
     setLoading(true);
     try {
-      const insurancePath = await uploadDoc(insuranceFile, "insurance", insuranceExpiry);
-      await uploadDoc(idFile, "id");
-      if (qualFile) await uploadDoc(qualFile, "qualification", qualExpiry);
+      let insurancePath: string | null = null;
+      if (insuranceFile) {
+        insurancePath = await uploadDoc(insuranceFile, "insurance", insuranceExpiry);
+        setExistingDocs((d) => ({ ...d, insurance: { name: insuranceFile.name, expiry: format(insuranceExpiry!, "yyyy-MM-dd") } }));
+      }
+      if (idFile) {
+        await uploadDoc(idFile, "id");
+        setExistingDocs((d) => ({ ...d, id: { name: idFile.name, expiry: null } }));
+      }
+      if (qualFile) {
+        await uploadDoc(qualFile, "qualification", qualExpiry);
+        setExistingDocs((d) => ({ ...d, qualification: { name: qualFile.name, expiry: qualExpiry ? format(qualExpiry, "yyyy-MM-dd") : null } }));
+      }
 
-      await supabase.from("trades").update({
-        insurance_cert_url: insurancePath,
+      const tradeUpdates: Record<string, unknown> = {
         insurance_expiry: format(insuranceExpiry!, "yyyy-MM-dd"),
-      } as any).eq("id", createdTradeId!);
+      };
+      if (insurancePath) tradeUpdates.insurance_cert_url = insurancePath;
+      await supabase.from("trades").update(tradeUpdates as any).eq("id", createdTradeId!);
 
       setDocsConfirmed(true);
     } catch (err) {
@@ -632,9 +732,17 @@ const SignupTrade = () => {
           {/* STEP 2 */}
           {step === 2 && (
             <div>
-              <h2 className="font-heading text-cream text-[40px] leading-none mb-6">
-                Your <span className="text-teal">Business.</span>
-              </h2>
+              <div className="flex items-baseline justify-between gap-3 mb-6">
+                <h2 className="font-heading text-cream text-[40px] leading-none">
+                  Your <span className="text-teal">Business.</span>
+                </h2>
+                {autosaveState !== "idle" && (
+                  <span className="font-mono text-[10px] text-teal/80 uppercase tracking-widest whitespace-nowrap">
+                    {autosaveState === "saving" ? "Saving…" : "Saved ✓"}
+                  </span>
+                )}
+              </div>
+
               <div className="space-y-4">
                 <div>
                   <label className={labelClass}>Trade Type *</label>
@@ -743,7 +851,10 @@ const SignupTrade = () => {
                     onChange={handleFile(setInsuranceFile)}
                     className="text-cream text-sm file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-teal file:text-cream file:font-mono file:text-xs file:cursor-pointer"
                   />
-                  {insuranceFile && <p className="mt-2 text-xs text-cream/60 font-body">✓ {insuranceFile.name}</p>}
+                  {insuranceFile
+                    ? <p className="mt-2 text-xs text-cream/60 font-body">✓ {insuranceFile.name}</p>
+                    : existingDocs.insurance && <p className="mt-2 text-xs text-teal font-body">✓ Already uploaded: {existingDocs.insurance.name} (re-upload to replace)</p>}
+
                   <div className="mt-3">
                     <label className={labelClass}>Certificate expiry date *</label>
                     <Suspense fallback={null}>
@@ -764,7 +875,10 @@ const SignupTrade = () => {
                     onChange={handleFile(setIdFile)}
                     className="text-cream text-sm file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-teal file:text-cream file:font-mono file:text-xs file:cursor-pointer"
                   />
-                  {idFile && <p className="mt-2 text-xs text-cream/60 font-body">✓ {idFile.name}</p>}
+                  {idFile
+                    ? <p className="mt-2 text-xs text-cream/60 font-body">✓ {idFile.name}</p>
+                    : existingDocs.id && <p className="mt-2 text-xs text-teal font-body">✓ Already uploaded: {existingDocs.id.name} (re-upload to replace)</p>}
+
                 </div>
 
                 {/* Qualification — dynamic per trade type */}
@@ -779,7 +893,10 @@ const SignupTrade = () => {
                     onChange={handleFile(setQualFile)}
                     className="text-cream text-sm file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-teal file:text-cream file:font-mono file:text-xs file:cursor-pointer"
                   />
-                  {qualFile && <p className="mt-2 text-xs text-cream/60 font-body">✓ {qualFile.name}</p>}
+                  {qualFile
+                    ? <p className="mt-2 text-xs text-cream/60 font-body">✓ {qualFile.name}</p>
+                    : existingDocs.qualification && <p className="mt-2 text-xs text-teal font-body">✓ Already uploaded: {existingDocs.qualification.name} (re-upload to replace)</p>}
+
                   <div className="mt-3">
                     <label className={labelClass}>Expiry date (if applicable)</label>
                     <Suspense fallback={null}>
@@ -832,10 +949,11 @@ const SignupTrade = () => {
                     {trustmarkNumber && <SummaryRow label="TrustMark" value={trustmarkNumber} />}
                   </>
                 )}
-                <SummaryRow label="Insurance" value={insuranceFile?.name ?? "—"} onEdit={() => setStep(3)} />
+                <SummaryRow label="Insurance" value={insuranceFile?.name ?? existingDocs.insurance?.name ?? "—"} onEdit={() => setStep(3)} />
                 <SummaryRow label="Insurance expires" value={insuranceExpiry ? format(insuranceExpiry, "d MMM yyyy") : "—"} />
-                <SummaryRow label="ID" value={idFile?.name ?? "—"} />
-                <SummaryRow label="Qualification" value={qualFile?.name ?? "Not provided"} />
+                <SummaryRow label="ID" value={idFile?.name ?? existingDocs.id?.name ?? "—"} />
+                <SummaryRow label="Qualification" value={qualFile?.name ?? existingDocs.qualification?.name ?? "Not provided"} />
+
               </div>
               <div className="flex gap-3 mt-8">
                 <button onClick={() => setStep(3)} className="flex-1 border border-cream/20 text-cream/80 font-mono text-sm py-3 rounded-xl hover:bg-cream/5 transition-colors">← Back</button>
