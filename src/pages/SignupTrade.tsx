@@ -732,9 +732,17 @@ const SignupTrade = () => {
           {/* STEP 2 */}
           {step === 2 && (
             <div>
-              <h2 className="font-heading text-cream text-[40px] leading-none mb-6">
-                Your <span className="text-teal">Business.</span>
-              </h2>
+              <div className="flex items-baseline justify-between gap-3 mb-6">
+                <h2 className="font-heading text-cream text-[40px] leading-none">
+                  Your <span className="text-teal">Business.</span>
+                </h2>
+                {autosaveState !== "idle" && (
+                  <span className="font-mono text-[10px] text-teal/80 uppercase tracking-widest whitespace-nowrap">
+                    {autosaveState === "saving" ? "Saving…" : "Saved ✓"}
+                  </span>
+                )}
+              </div>
+
               <div className="space-y-4">
                 <div>
                   <label className={labelClass}>Trade Type *</label>
