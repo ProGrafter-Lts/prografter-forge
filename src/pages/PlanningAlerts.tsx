@@ -185,7 +185,7 @@ const STATUS_CFG: Record<string, { label: string; chip: string; dot: string; pri
   submitted:        { label:"Submitted",        chip:"bg-secondary/10 text-secondary border-secondary/30",        dot:"bg-secondary",        priority:"Act now",       accent:"text-secondary" },
   pending_decision: { label:"Pending decision", chip:"bg-amber-500/10 text-amber-700 border-amber-500/30",        dot:"bg-amber-500",        priority:"Still time",    accent:"text-amber-700" },
   approved:         { label:"Approved",         chip:"bg-emerald-500/10 text-emerald-700 border-emerald-500/30",  dot:"bg-emerald-500",      priority:"Ready",         accent:"text-emerald-700" },
-  refused:          { label:"Refused",          chip:"bg-destructive/10 text-destructive border-destructive/30",  dot:"bg-destructive",      priority:"Refused",       accent:"text-destructive" },
+  refused:          { label:"Refused",          chip:"bg-destructive/10 text-destructive border-destructive/30",  dot:"bg-destructive",      priority:"No further action", accent:"text-destructive" },
 };
 
 const PROP_TYPES = [
