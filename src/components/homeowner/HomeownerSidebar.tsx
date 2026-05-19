@@ -36,12 +36,14 @@ const HomeownerSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen
 
   return (
     <>
-      <button
-        className="md:hidden fixed top-4 left-4 z-50 bg-primary text-primary-foreground p-2 rounded-xl shadow-lg"
-        onClick={() => setSidebarOpen(!sidebarOpen)}
-      >
-        <LayoutDashboard className="w-5 h-5" />
-      </button>
+      {!sidebarOpen && (
+        <button
+          className="md:hidden fixed top-4 left-4 z-50 bg-primary text-primary-foreground p-2 rounded-xl shadow-lg"
+          onClick={() => setSidebarOpen(true)}
+        >
+          <LayoutDashboard className="w-5 h-5" />
+        </button>
+      )}
 
      <aside
        className={`dashboard-sidebar fixed md:sticky md:top-0 inset-y-0 left-0 z-40 w-64 h-screen md:h-screen flex flex-col transition-transform duration-300 ${
