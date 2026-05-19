@@ -48,7 +48,7 @@ const Privacy = () => {
             <section>
               <h2 className="mb-3 font-heading text-3xl leading-none text-navy">Your rights</h2>
               <p>
-                Access, rectification, erasure, portability, objection. Contact: <a href="mailto:privacy@prografter.co.uk" className="text-teal underline-offset-4 hover:underline">privacy@prografter.co.uk</a>
+                Access, rectification, erasure, portability, objection. Contact: <a href="mailto:hello@prografter.co.uk" className="text-teal underline-offset-4 hover:underline">hello@prografter.co.uk</a>
               </p>
             </section>
 
