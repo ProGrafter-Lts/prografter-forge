@@ -141,18 +141,26 @@ const Login = () => {
   return (
     <div className="min-h-screen bg-cream flex items-center justify-center px-4">
       <SEO
-        title="Sign in — ProGrafter"
+        title="Sign In — ProGrafter"
         description="Sign in to your ProGrafter account to manage jobs, quotes and contracts."
         path="/login"
         noindex
       />
       <div className="w-full max-w-md">
+        <div className="text-center mb-2">
+          <a
+            href="https://prografter.co.uk"
+            className="text-sm text-[#6B7280] no-underline hover:underline"
+          >
+            ← Back to ProGrafter
+          </a>
+        </div>
         <div className="text-center mb-8">
-          <a href="/" className="font-heading text-[32px] leading-none tracking-wide">
+          <a href="/" className="font-body text-[32px] leading-none tracking-wide">
             <span className="text-navy">Pro</span>
             <span className="text-teal">grafter</span>
           </a>
-          <p className="font-mono text-sm text-secondary-text mt-2">Sign in to your account</p>
+          <p className="font-mono text-sm text-secondary-text mt-2">Sign in — trade or homeowner</p>
         </div>
 
         <div className="bg-white rounded-2xl p-8 shadow-lg border border-navy/10">
