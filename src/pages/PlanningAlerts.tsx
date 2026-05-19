@@ -1,7 +1,32 @@
 import { useState, useEffect } from "react";
 import SEO from "@/components/SEO";
 import AppShell from "@/components/AppShell";
-import { Bell, Search, X, Radio, Building2, MapPin, Calendar, FileText, CheckCircle2, AlertTriangle, XCircle } from "lucide-react";
+import { Bell, Search, X, Radio, Building2, MapPin, Calendar, FileText, CheckCircle2, AlertTriangle, XCircle, Sparkles } from "lucide-react";
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+type ProjectKind = "DOMESTIC" | "CONVERSION" | "NEW BUILD";
+
+const getProjectType = (app: { type: string; description: string }): ProjectKind => {
+  const d = (app.description || "").toLowerCase();
+  if (/erection of (a |new )?(dwelling|house)|\bnew dwelling\b|\bnew build\b/.test(d)) return "NEW BUILD";
+  if (/\bclass q\b|barn conversion|change of use|commercial to residential|agricultural barn/.test(d)) return "CONVERSION";
+  return "DOMESTIC";
+};
+
+const parseMaxValue = (v: string): number => {
+  const nums = (v || "").replace(/[£,]/g, "").match(/\d+/g);
+  if (!nums) return 0;
+  return Math.max(...nums.map(Number));
+};
+
+const isLargeProject = (v: string) => parseMaxValue(v) >= 100000;
+
+const PROJECT_TYPE_STYLES: Record<ProjectKind, string> = {
+  "DOMESTIC": "bg-secondary/10 text-secondary border-secondary/30",
+  "CONVERSION": "bg-purple-500/10 text-purple-700 border-purple-500/30",
+  "NEW BUILD": "bg-blue-500/10 text-blue-700 border-blue-500/30",
+};
+
 
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(
@@ -160,7 +185,7 @@ const STATUS_CFG: Record<string, { label: string; chip: string; dot: string; pri
   submitted:        { label:"Submitted",        chip:"bg-secondary/10 text-secondary border-secondary/30",        dot:"bg-secondary",        priority:"Act now",       accent:"text-secondary" },
   pending_decision: { label:"Pending decision", chip:"bg-amber-500/10 text-amber-700 border-amber-500/30",        dot:"bg-amber-500",        priority:"Still time",    accent:"text-amber-700" },
   approved:         { label:"Approved",         chip:"bg-emerald-500/10 text-emerald-700 border-emerald-500/30",  dot:"bg-emerald-500",      priority:"Ready",         accent:"text-emerald-700" },
-  refused:          { label:"Refused",          chip:"bg-destructive/10 text-destructive border-destructive/30",  dot:"bg-destructive",      priority:"Refused",       accent:"text-destructive" },
+  refused:          { label:"Refused",          chip:"bg-destructive/10 text-destructive border-destructive/30",  dot:"bg-destructive",      priority:"No further action", accent:"text-destructive" },
 };
 
 const PROP_TYPES = [
@@ -200,6 +225,12 @@ interface PlanningApp {
 
 const AppCard = ({ app, onSelect, selected }: { app: PlanningApp; onSelect: (app: PlanningApp) => void; selected: boolean }) => {
   const s = STATUS_CFG[app.status];
+  const [tradesExpanded, setTradesExpanded] = useState(false);
+  const projectKind = getProjectType(app);
+  const large = isLargeProject(app.estimated_value);
+  const visibleTrades = tradesExpanded ? app.trades_needed : app.trades_needed.slice(0, 3);
+  const overflow = app.trades_needed.length - 3;
+
   return (
     <div
       onClick={() => onSelect(app)}
@@ -212,6 +243,14 @@ const AppCard = ({ app, onSelect, selected }: { app: PlanningApp; onSelect: (app
           <div className="flex items-center gap-2 mb-1 flex-wrap">
             <Building2 className="w-3.5 h-3.5 text-secondary flex-shrink-0" />
             <span className="font-mono text-xs text-secondary font-semibold">{app.id}</span>
+            <span className={`font-mono text-[10px] px-2 py-0.5 rounded-full border uppercase tracking-wider ${PROJECT_TYPE_STYLES[projectKind]}`}>
+              {projectKind}
+            </span>
+            {large && (
+              <span className="inline-flex items-center gap-1 font-mono text-[10px] px-2 py-0.5 rounded-full border bg-amber-500/10 text-amber-700 border-amber-500/30 uppercase tracking-wider">
+                <Sparkles className="w-2.5 h-2.5" /> Large project
+              </span>
+            )}
           </div>
           <h4 className="font-heading text-primary text-sm leading-snug">{app.address}</h4>
           <p className="font-mono text-[11px] text-muted-foreground mt-0.5">{app.council} · {app.postcode}</p>
@@ -222,17 +261,34 @@ const AppCard = ({ app, onSelect, selected }: { app: PlanningApp; onSelect: (app
         </div>
       </div>
 
-      <p className="font-sans text-xs text-foreground leading-relaxed mb-3 line-clamp-2">
+      <p className="font-sans text-xs text-foreground leading-relaxed mb-2 line-clamp-2">
         {app.description}
       </p>
+      {app.status === "approved" && (
+        <p className="font-mono text-[11px] text-emerald-700 mb-3 leading-relaxed">
+          Planning approved — homeowner can proceed with work.
+        </p>
+      )}
 
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex gap-1.5 flex-wrap">
-          {app.trades_needed.slice(0,3).map(t => <TradePill key={t} trade={t} />)}
-          {app.trades_needed.length > 3 && (
-            <span className="font-mono text-[10px] text-muted-foreground self-center uppercase tracking-wider">
-              +{app.trades_needed.length - 3}
-            </span>
+          {visibleTrades.map(t => <TradePill key={t} trade={t} />)}
+          {overflow > 0 && !tradesExpanded && (
+            <button
+              onClick={(e) => { e.stopPropagation(); setTradesExpanded(true); }}
+              className="font-mono text-[10px] text-secondary self-center uppercase tracking-wider hover:underline cursor-pointer"
+              aria-label={`Show ${overflow} more trade${overflow === 1 ? "" : "s"}`}
+            >
+              +{overflow} more
+            </button>
+          )}
+          {tradesExpanded && overflow > 0 && (
+            <button
+              onClick={(e) => { e.stopPropagation(); setTradesExpanded(false); }}
+              className="font-mono text-[10px] text-muted-foreground self-center uppercase tracking-wider hover:underline cursor-pointer"
+            >
+              Show less
+            </button>
           )}
         </div>
         <div className="text-right">
@@ -532,15 +588,25 @@ export default function PlanningAlerts() {
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterTrade, setFilterTrade] = useState("all");
   const [filterCouncil, setFilterCouncil] = useState("all");
+  const [filterDate, setFilterDate] = useState<"all" | "7" | "30" | "90">("90");
+  const [filterProjectType, setFilterProjectType] = useState<"all" | ProjectKind>("all");
+  const [showRefused, setShowRefused] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
   const allTrades = [...new Set(MOCK_APPLICATIONS.flatMap(a => a.trades_needed))].sort();
   const allCouncils = [...new Set(MOCK_APPLICATIONS.map(a => a.council))].sort();
 
   const filtered = MOCK_APPLICATIONS.filter(app => {
+    // Hide refused by default unless user explicitly toggles or status filter is "refused"
+    if (!showRefused && app.status === "refused" && filterStatus !== "refused") return false;
     if (filterStatus !== "all" && app.status !== filterStatus) return false;
     if (filterTrade !== "all" && !app.trades_needed.includes(filterTrade)) return false;
     if (filterCouncil !== "all" && app.council !== filterCouncil) return false;
+    if (filterProjectType !== "all" && getProjectType(app) !== filterProjectType) return false;
+    if (filterDate !== "all") {
+      const cutoff = Date.now() - Number(filterDate) * 86400000;
+      if (new Date(app.submitted_date).getTime() < cutoff) return false;
+    }
     if (searchQuery && !app.description.toLowerCase().includes(searchQuery.toLowerCase())
       && !app.address.toLowerCase().includes(searchQuery.toLowerCase())) return false;
     return true;
@@ -628,8 +694,8 @@ export default function PlanningAlerts() {
                 </div>
 
                 {/* Filters */}
-                <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_auto_auto] gap-2.5 mb-4">
-                  <div className="relative">
+                <div className="flex flex-wrap gap-2.5 mb-3">
+                  <div className="relative flex-1 min-w-[220px]">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
                     <input
                       value={searchQuery}
@@ -642,6 +708,7 @@ export default function PlanningAlerts() {
                   <select
                     value={filterTrade}
                     onChange={e=>setFilterTrade(e.target.value)}
+                    aria-label="Filter by trade"
                     className="px-3 py-2.5 rounded-xl border border-border bg-card font-mono text-xs text-foreground outline-none focus:border-secondary"
                   >
                     <option value="all">All trades</option>
@@ -650,18 +717,54 @@ export default function PlanningAlerts() {
                   <select
                     value={filterCouncil}
                     onChange={e=>setFilterCouncil(e.target.value)}
+                    aria-label="Filter by council"
                     className="px-3 py-2.5 rounded-xl border border-border bg-card font-mono text-xs text-foreground outline-none focus:border-secondary"
                   >
                     <option value="all">All councils</option>
                     {allCouncils.map(c=><option key={c} value={c}>{c}</option>)}
                   </select>
+                  <select
+                    value={filterProjectType}
+                    onChange={e=>setFilterProjectType(e.target.value as "all" | ProjectKind)}
+                    aria-label="Filter by project type"
+                    className="px-3 py-2.5 rounded-xl border border-border bg-card font-mono text-xs text-foreground outline-none focus:border-secondary"
+                  >
+                    <option value="all">All project types</option>
+                    <option value="DOMESTIC">Domestic</option>
+                    <option value="CONVERSION">Conversion</option>
+                    <option value="NEW BUILD">New build</option>
+                  </select>
+                  <select
+                    value={filterDate}
+                    onChange={e=>setFilterDate(e.target.value as "all" | "7" | "30" | "90")}
+                    aria-label="Filter by recency"
+                    className="px-3 py-2.5 rounded-xl border border-border bg-card font-mono text-xs text-foreground outline-none focus:border-secondary"
+                  >
+                    <option value="all">All dates</option>
+                    <option value="7">Last 7 days</option>
+                    <option value="30">Last 30 days</option>
+                    <option value="90">Last 90 days</option>
+                  </select>
+                  <label className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-border bg-card font-mono text-xs text-foreground cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={showRefused}
+                      onChange={e=>setShowRefused(e.target.checked)}
+                      className="w-3.5 h-3.5 accent-secondary cursor-pointer"
+                    />
+                    Show refused applications
+                  </label>
                   <button
-                    onClick={()=>{setFilterStatus("all");setFilterTrade("all");setFilterCouncil("all");setSearchQuery("");}}
+                    onClick={()=>{setFilterStatus("all");setFilterTrade("all");setFilterCouncil("all");setFilterProjectType("all");setFilterDate("90");setShowRefused(false);setSearchQuery("");}}
                     className="px-4 py-2.5 bg-card border border-border rounded-xl font-mono text-xs text-primary uppercase tracking-wider hover:bg-muted transition-colors whitespace-nowrap"
                   >
                     Clear
                   </button>
                 </div>
+
+                <p className="font-mono text-[11px] text-muted-foreground mb-5 leading-relaxed">
+                  Budget estimates are indicative only, based on typical UK build costs. Actual project costs will vary.
+                </p>
 
                 <div className={`grid gap-4 items-start ${selectedApp && !isMobile ? "grid-cols-[1fr_380px]" : "grid-cols-1"}`}>
                   {/* Application list */}
@@ -682,15 +785,13 @@ export default function PlanningAlerts() {
 
                     {/* Data source notice */}
                     <div className="bg-card border border-border rounded-2xl px-4 py-3 flex items-start gap-3">
-                      <Radio className="w-4 h-4 text-secondary flex-shrink-0 mt-0.5" />
+                      <span className="relative flex w-2.5 h-2.5 mt-1.5 flex-shrink-0" aria-hidden>
+                        <span className="absolute inset-0 rounded-full bg-emerald-500/40 animate-ping" />
+                        <span className="relative inline-flex w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                      </span>
                       <div>
-                        <p className="font-mono text-[11px] font-semibold text-primary uppercase tracking-wider mb-1">
-                          Live data in production
-                        </p>
                         <p className="font-sans text-xs text-muted-foreground leading-relaxed">
-                          This feed pulls live planning applications from PlanIt.org.uk (covering every UK
-                          local authority) via a backend function that runs nightly. New structural-job
-                          applications appear within 24 hours of council validation.
+                          <span className="font-semibold text-primary">Live planning data</span> — updated nightly from local authority planning portals covering South Derbyshire, Nottingham City, Broxtowe, Rushcliffe, Amber Valley, Erewash and North West Leicestershire. New applications appear within 24 hours of council validation.
                         </p>
                       </div>
                     </div>
