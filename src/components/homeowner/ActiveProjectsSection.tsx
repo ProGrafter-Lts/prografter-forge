@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { FolderKanban, MapPin, Clock, FileText, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { isActiveJob } from "@/lib/activeProjects";
+import { formatStatusLabel } from "@/lib/statusLabel";
 
 interface Job {
   id: string;
