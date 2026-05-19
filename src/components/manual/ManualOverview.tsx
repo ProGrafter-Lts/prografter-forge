@@ -1,4 +1,5 @@
 import { Calendar, MapPin, Briefcase, User, Building2, FileText } from "lucide-react";
+import { titleCase } from "@/lib/statusLabel";
 
 interface Props {
   job: any;
@@ -6,6 +7,7 @@ interface Props {
   homeowner: any;
   contract: any;
   stages: any[];
+  acceptedQuoteAmount?: number | null;
 }
 
 const ManualOverview = ({ job, trade, homeowner, contract, stages }: Props) => {
