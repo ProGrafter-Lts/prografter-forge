@@ -225,6 +225,12 @@ interface PlanningApp {
 
 const AppCard = ({ app, onSelect, selected }: { app: PlanningApp; onSelect: (app: PlanningApp) => void; selected: boolean }) => {
   const s = STATUS_CFG[app.status];
+  const [tradesExpanded, setTradesExpanded] = useState(false);
+  const projectKind = getProjectType(app);
+  const large = isLargeProject(app.estimated_value);
+  const visibleTrades = tradesExpanded ? app.trades_needed : app.trades_needed.slice(0, 3);
+  const overflow = app.trades_needed.length - 3;
+
   return (
     <div
       onClick={() => onSelect(app)}
@@ -237,6 +243,14 @@ const AppCard = ({ app, onSelect, selected }: { app: PlanningApp; onSelect: (app
           <div className="flex items-center gap-2 mb-1 flex-wrap">
             <Building2 className="w-3.5 h-3.5 text-secondary flex-shrink-0" />
             <span className="font-mono text-xs text-secondary font-semibold">{app.id}</span>
+            <span className={`font-mono text-[10px] px-2 py-0.5 rounded-full border uppercase tracking-wider ${PROJECT_TYPE_STYLES[projectKind]}`}>
+              {projectKind}
+            </span>
+            {large && (
+              <span className="inline-flex items-center gap-1 font-mono text-[10px] px-2 py-0.5 rounded-full border bg-amber-500/10 text-amber-700 border-amber-500/30 uppercase tracking-wider">
+                <Sparkles className="w-2.5 h-2.5" /> Large project
+              </span>
+            )}
           </div>
           <h4 className="font-heading text-primary text-sm leading-snug">{app.address}</h4>
           <p className="font-mono text-[11px] text-muted-foreground mt-0.5">{app.council} · {app.postcode}</p>
@@ -247,17 +261,34 @@ const AppCard = ({ app, onSelect, selected }: { app: PlanningApp; onSelect: (app
         </div>
       </div>
 
-      <p className="font-sans text-xs text-foreground leading-relaxed mb-3 line-clamp-2">
+      <p className="font-sans text-xs text-foreground leading-relaxed mb-2 line-clamp-2">
         {app.description}
       </p>
+      {app.status === "approved" && (
+        <p className="font-mono text-[11px] text-emerald-700 mb-3 leading-relaxed">
+          Planning approved — homeowner can proceed with work.
+        </p>
+      )}
 
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex gap-1.5 flex-wrap">
-          {app.trades_needed.slice(0,3).map(t => <TradePill key={t} trade={t} />)}
-          {app.trades_needed.length > 3 && (
-            <span className="font-mono text-[10px] text-muted-foreground self-center uppercase tracking-wider">
-              +{app.trades_needed.length - 3}
-            </span>
+          {visibleTrades.map(t => <TradePill key={t} trade={t} />)}
+          {overflow > 0 && !tradesExpanded && (
+            <button
+              onClick={(e) => { e.stopPropagation(); setTradesExpanded(true); }}
+              className="font-mono text-[10px] text-secondary self-center uppercase tracking-wider hover:underline cursor-pointer"
+              aria-label={`Show ${overflow} more trade${overflow === 1 ? "" : "s"}`}
+            >
+              +{overflow} more
+            </button>
+          )}
+          {tradesExpanded && overflow > 0 && (
+            <button
+              onClick={(e) => { e.stopPropagation(); setTradesExpanded(false); }}
+              className="font-mono text-[10px] text-muted-foreground self-center uppercase tracking-wider hover:underline cursor-pointer"
+            >
+              Show less
+            </button>
           )}
         </div>
         <div className="text-right">
