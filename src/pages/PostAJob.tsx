@@ -7,43 +7,63 @@ import { isGreenTrade } from "@/lib/greenTrades";
 import { Specialism, fetchSpecialisms } from "@/lib/specialisms";
 import { useSetupRedirect, SetupRedirectLoader } from "@/hooks/useSetupRedirect";
 
-const ALL_JOB_TYPES = [
-  { label: "Extension", icon: "🏗️", green: false },
-  { label: "Loft Conversion", icon: "🏠", green: false },
-  { label: "Full Rewire", icon: "⚡", green: false },
-  { label: "Bathroom", icon: "🚿", green: false },
-  { label: "Kitchen", icon: "🍳", green: false },
-  { label: "Boiler / Heating", icon: "🔥", green: false },
-  { label: "Roofing", icon: "🏚️", green: false },
-  { label: "Plastering", icon: "🧱", green: false },
-  { label: "Painting & Decorating", icon: "🎨", green: false },
-  { label: "Landscaping", icon: "🌿", green: false },
-  { label: "New Build", icon: "🏢", green: false },
-  // Green / Renewable
-  { label: "Solar PV Installation", icon: "☀️", green: true },
-  { label: "Air Source Heat Pump", icon: "🌡️", green: true },
-  { label: "Ground Source Heat Pump", icon: "🌡️", green: true },
-  { label: "External Wall Insulation (EWI)", icon: "🧱", green: true },
-  { label: "Cavity Wall Insulation", icon: "🏠", green: true },
-  { label: "Loft Insulation", icon: "🏠", green: true },
-  { label: "EV Charger Installation", icon: "🔌", green: true },
-  { label: "Battery Storage", icon: "🔋", green: true },
-  { label: "MVHR Installer", icon: "🌀", green: true },
-  { label: "Underfloor Heating", icon: "🔥", green: true },
-  { label: "Draught Proofing Specialist", icon: "🪟", green: true },
-  { label: "EPC Assessor", icon: "📋", green: true },
-  { label: "Retrofit Coordinator", icon: "📐", green: true },
-  { label: "Other", icon: "🔧", green: false },
-] as const;
+type JobTypeItem = { label: string; icon: string; green: boolean };
+
+const JOB_SECTIONS: { label: string; items: JobTypeItem[] }[] = [
+  {
+    label: "Popular Projects",
+    items: [
+      { label: "Extension", icon: "🏗️", green: false },
+      { label: "Loft Conversion", icon: "🏠", green: false },
+      { label: "Garage Conversion", icon: "🚪", green: false },
+      { label: "Kitchen", icon: "🍳", green: false },
+      { label: "Bathroom", icon: "🚿", green: false },
+      { label: "Plastering", icon: "🧱", green: false },
+      { label: "Painting & Decorating", icon: "🎨", green: false },
+      { label: "Landscaping", icon: "🌿", green: false },
+    ],
+  },
+  {
+    label: "Energy & Retrofit",
+    items: [
+      { label: "Solar PV Installation", icon: "☀️", green: true },
+      { label: "Air Source Heat Pump", icon: "🌡️", green: true },
+      { label: "Ground Source Heat Pump", icon: "🌡️", green: true },
+      { label: "Battery Storage", icon: "🔋", green: true },
+      { label: "EV Charger Installation", icon: "🔌", green: true },
+      { label: "External Wall Insulation (EWI)", icon: "🧱", green: true },
+      { label: "Cavity Wall Insulation", icon: "🏠", green: true },
+      { label: "Loft Insulation", icon: "🏠", green: true },
+      { label: "Underfloor Heating", icon: "🔥", green: true },
+      { label: "Ventilation System", icon: "🌀", green: true },
+      { label: "Draught Proofing Specialist", icon: "🪟", green: true },
+      { label: "EPC Certificate", icon: "📋", green: true },
+      { label: "Retrofit Assessment", icon: "📐", green: true },
+    ],
+  },
+  {
+    label: "Specialist Work",
+    items: [
+      { label: "Full Rewire", icon: "⚡", green: false },
+      { label: "Consumer Unit Upgrade", icon: "🔌", green: false },
+      { label: "Plumbing", icon: "🔧", green: false },
+      { label: "Boiler / Heating", icon: "🔥", green: false },
+      { label: "Roofing", icon: "🏚️", green: false },
+      { label: "Other", icon: "🛠️", green: false },
+    ],
+  },
+];
+
+const ALL_JOB_TYPES: JobTypeItem[] = JOB_SECTIONS.flatMap((s) => s.items);
 
 /* Scheme → allowed green trade type labels */
 const SCHEME_TRADE_MAP: Record<string, string[]> = {
-  eco4: ["External Wall Insulation (EWI)", "Cavity Wall Insulation", "Loft Insulation", "Retrofit Coordinator", "EPC Assessor"],
+  eco4: ["External Wall Insulation (EWI)", "Cavity Wall Insulation", "Loft Insulation", "Retrofit Assessment", "EPC Certificate"],
   bus: ["Air Source Heat Pump", "Ground Source Heat Pump"],
   gbis: ["External Wall Insulation (EWI)", "Cavity Wall Insulation", "Loft Insulation", "Draught Proofing Specialist"],
-  vat: ["Solar PV Installation", "Air Source Heat Pump", "Ground Source Heat Pump", "External Wall Insulation (EWI)", "Cavity Wall Insulation", "Loft Insulation", "EV Charger Installation", "Battery Storage", "MVHR Installer", "Underfloor Heating", "Draught Proofing Specialist", "EPC Assessor", "Retrofit Coordinator"],
-  hug: ["External Wall Insulation (EWI)", "Cavity Wall Insulation", "Loft Insulation", "Retrofit Coordinator", "EPC Assessor"],
-  epc: ["EPC Assessor"],
+  vat: ["Solar PV Installation", "Air Source Heat Pump", "Ground Source Heat Pump", "External Wall Insulation (EWI)", "Cavity Wall Insulation", "Loft Insulation", "EV Charger Installation", "Battery Storage", "Ventilation System", "Underfloor Heating", "Draught Proofing Specialist", "EPC Certificate", "Retrofit Assessment"],
+  hug: ["External Wall Insulation (EWI)", "Cavity Wall Insulation", "Loft Insulation", "Retrofit Assessment", "EPC Certificate"],
+  epc: ["EPC Certificate"],
 };
 
 // UK postcode regex (covers standard formats: A9 9AA, A9A 9AA, A99 9AA, AA9 9AA, AA9A 9AA, AA99 9AA)
@@ -59,13 +79,15 @@ const PostAJob = () => {
   const schemeParam = searchParams.get("schemes") || "";
   const schemeIds = schemeParam ? schemeParam.split(",") : [];
 
-  const filteredJobTypes = useMemo(() => {
-    if (!isGreenFlow || schemeIds.length === 0) return ALL_JOB_TYPES.filter(() => true);
+  const filteredSections = useMemo(() => {
+    if (!isGreenFlow || schemeIds.length === 0) return JOB_SECTIONS;
     const allowedLabels = new Set<string>();
     schemeIds.forEach((id) => {
       (SCHEME_TRADE_MAP[id] || []).forEach((label) => allowedLabels.add(label));
     });
-    return ALL_JOB_TYPES.filter((jt) => allowedLabels.has(jt.label));
+    return JOB_SECTIONS
+      .map((s) => ({ ...s, items: s.items.filter((it) => allowedLabels.has(it.label)) }))
+      .filter((s) => s.items.length > 0);
   }, [isGreenFlow, schemeParam]);
 
   const [step, setStep] = useState<Step>(1);
@@ -79,6 +101,10 @@ const PostAJob = () => {
   // Step 2
   const [description, setDescription] = useState("");
   const [photos, setPhotos] = useState<File[]>([]);
+  const [step2Attempted, setStep2Attempted] = useState(false);
+
+  // Funds GDPR modal
+  const [fundsGdprOpen, setFundsGdprOpen] = useState(false);
 
   // Step 3
   const [address, setAddress] = useState("");
@@ -338,23 +364,32 @@ const PostAJob = () => {
                       Based on your eligibility results, these are the certified trade types relevant to your project:
                     </p>
                   )}
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    {filteredJobTypes.map((jt) => (
-                      <button
-                        key={jt.label}
-                        type="button"
-                        onClick={() => setJobType(jt.label)}
-                        className={`flex flex-col items-center justify-center gap-2 p-5 rounded-xl border-2 transition-all text-center ${
-                          jobType === jt.label
-                            ? "border-teal bg-teal/10 text-teal"
-                            : "border-cream/10 hover:border-cream/25 text-cream/70 hover:text-cream"
-                        }`}
-                      >
-                        <span className="text-2xl">{jt.icon}</span>
-                        <span className="font-mono text-xs uppercase tracking-wide">
-                          {jt.label}
-                        </span>
-                      </button>
+                  <div className="space-y-6">
+                    {filteredSections.map((section) => (
+                      <div key={section.label}>
+                        <p className="font-mono text-[10px] text-teal/70 uppercase tracking-widest mb-2">
+                          {section.label}
+                        </p>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                          {section.items.map((jt) => (
+                            <button
+                              key={jt.label}
+                              type="button"
+                              onClick={() => setJobType(jt.label)}
+                              className={`flex flex-col items-center justify-center gap-2 p-5 rounded-xl border-2 transition-all text-center ${
+                                jobType === jt.label
+                                  ? "border-teal bg-teal/10 text-teal"
+                                  : "border-cream/10 hover:border-cream/25 text-cream/70 hover:text-cream"
+                              }`}
+                            >
+                              <span className="text-2xl">{jt.icon}</span>
+                              <span className="font-mono text-xs uppercase tracking-wide">
+                                {jt.label}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
                     ))}
                   </div>
                   {isGreenFlow && (
@@ -385,19 +420,19 @@ const PostAJob = () => {
                       <textarea
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
-                        placeholder="Describe the job in detail — what needs doing, any access issues, your timeframe..."
+                        placeholder="e.g. I need the bathroom fully retiled — floor and walls. Old tiles to be removed. Room is approximately 3m x 2m. Happy to discuss timing."
                         rows={5}
                         className={`${inputClass} resize-none`}
                       />
-                      <p
-                        className={`text-right font-mono text-xs mt-1 ${
-                          description.trim().length < 50 ? "text-red-400" : "text-teal/70"
-                        }`}
-                      >
-                        {description.trim().length < 50
-                          ? `Minimum 50 characters — ${50 - description.trim().length} more to go`
-                          : `${description.trim().length} characters · minimum met ✓`}
-                      </p>
+                      {step2Attempted && description.trim().length < 50 ? (
+                        <p className="text-right font-mono text-xs mt-1 text-amber-400">
+                          Minimum 50 characters — {50 - description.trim().length} more to go
+                        </p>
+                      ) : description.trim().length >= 50 ? (
+                        <p className="text-right font-mono text-xs mt-1 text-teal/70">
+                          {description.trim().length} characters · minimum met ✓
+                        </p>
+                      ) : null}
                     </div>
 
                     <div>
@@ -431,7 +466,7 @@ const PostAJob = () => {
                       {photos.length < 4 && (
                         <label className="block cursor-pointer">
                           <div className="border-2 border-dashed border-cream/15 hover:border-cream/30 rounded-xl p-6 text-center transition-colors">
-                            <p className="font-mono text-cream/50 text-sm">Click to add photos</p>
+                            <p className="font-mono text-cream/50 text-sm">Tap or click to add photos</p>
                             <p className="font-body text-cream/30 text-xs mt-1">
                               JPG or PNG, max 10 MB each
                             </p>
@@ -445,6 +480,9 @@ const PostAJob = () => {
                           />
                         </label>
                       )}
+                      <p className="font-body text-cream/50 text-xs mt-2 leading-relaxed">
+                        Photos help trades price accurately — the more detail the better. Only verified trades you're matched with can see them.
+                      </p>
                     </div>
                   </div>
                   <div className="flex gap-4 mt-8">
@@ -457,9 +495,13 @@ const PostAJob = () => {
                     </button>
                     <button
                       type="button"
-                      disabled={!canStep2}
-                      onClick={() => { setError(""); setStep(3); }}
-                      className="flex-1 bg-teal text-cream font-mono text-sm py-3 rounded-xl hover:bg-teal-hover transition-colors disabled:opacity-40"
+                      onClick={() => {
+                        setStep2Attempted(true);
+                        if (!canStep2) return;
+                        setError("");
+                        setStep(3);
+                      }}
+                      className="flex-1 bg-teal text-cream font-mono text-sm py-3 rounded-xl hover:bg-teal-hover transition-colors"
                     >
                       Continue
                     </button>
@@ -491,13 +533,13 @@ const PostAJob = () => {
                         type="text"
                         value={postcode}
                         onChange={(e) => setPostcode(e.target.value.toUpperCase())}
-                        placeholder="SW1A 1AA"
+                        placeholder="NG1 1AA"
                         required
                         className={inputClass}
                       />
                       {postcode.trim().length > 0 && !postcodeValid && (
                         <p className="font-mono text-xs text-red-400 mt-1">
-                          Enter a valid UK postcode (e.g. SW1A 1AA).
+                          Enter a valid UK postcode (e.g. NG1 1AA).
                         </p>
                       )}
                     </div>
@@ -532,25 +574,8 @@ const PostAJob = () => {
                           Enter whole numbers, both required, max ≥ min.
                         </p>
                       )}
-                      <p className="font-mono text-[10px] text-cream/40 mt-1">
-                        Whole pounds only. Used to match you with appropriate trades.
-                      </p>
-                    </div>
-                    <div>
-                      <label className={labelClass}>Project type (optional)</label>
-                      <select
-                        value={specialismId}
-                        onChange={(e) => setSpecialismId(e.target.value)}
-                        className={`${inputClass} appearance-none`}
-                        style={{ backgroundColor: "hsl(var(--deep))" }}
-                      >
-                        <option value="">e.g. Full bathroom renovation, Kitchen install — leave blank if not sure</option>
-                        {specialisms.map((s) => (
-                          <option key={s.id} value={s.id}>{s.name}</option>
-                        ))}
-                      </select>
-                      <p className="font-mono text-[10px] text-cream/40 mt-1">
-                        Helps us match you with trades who specialise in this work.
+                      <p className="font-body text-cream/50 text-xs mt-2 leading-relaxed">
+                        Not sure of your budget? Enter a rough estimate — your quotes from trades will give you the real number. You're not committing to anything here.
                       </p>
                     </div>
                   </div>
@@ -577,9 +602,6 @@ const PostAJob = () => {
               {/* STEP 3b — OPTIONAL Funds Verification */}
               {step === 3.5 && (
                 <>
-                  <span className="inline-block bg-cream/10 text-cream/60 font-mono text-[10px] uppercase tracking-widest px-2 py-1 rounded mb-3">
-                    Optional Step
-                  </span>
                   <h2 className="font-heading text-cream text-[36px] leading-none mb-3">
                     Build Trust <span className="text-teal">With Trades.</span>
                   </h2>
@@ -593,12 +615,11 @@ const PostAJob = () => {
                     significantly more quotes and from higher-quality trades.
                   </p>
                   <p className="font-body text-cream/50 text-xs leading-relaxed mb-6">
-                    Your financial documents are encrypted, stored privately, and never shown
-                    to trades or ProGrafter staff. We only display a verification badge on
-                    your job posting.
+                    Your documents are stored securely and never shown to trades — only a
+                    Funds Verified badge appears on your job posting.
                   </p>
 
-                  {/* OPTION A — Document upload card */}
+                  {/* Document upload card */}
                   <div className="rounded-xl border-l-4 border-teal bg-cream/5 border border-cream/10 p-5 mb-4">
                     <div className="flex items-start gap-3 mb-3">
                       <svg className="w-6 h-6 text-teal flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -655,23 +676,53 @@ const PostAJob = () => {
                       <p className="font-mono text-xs text-red-400 mt-2">{fundsDocError}</p>
                     )}
 
-                    <p className="font-body text-cream/40 text-[11px] leading-relaxed mt-4 border-t border-cream/10 pt-3">
-                      Your document is encrypted in transit and at rest. It is stored on
-                      ProGrafter's secure servers and is accessible only to ProGrafter's
-                      verification team. It will never be shared with trades, third parties,
-                      or used for any purpose other than issuing your verification badge.
-                      You may request deletion at any time by emailing hello@prografter.co.uk.
-                      Processed under GDPR Article 6(1)(a) — your explicit consent.
-                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setFundsGdprOpen(true)}
+                      className="font-mono text-[11px] text-cream/40 hover:text-cream/70 underline underline-offset-2 mt-4 inline-block"
+                    >
+                      How is this data stored and used? →
+                    </button>
                   </div>
 
-                  {/* OPTION B — Skip card */}
-                  <div className="rounded-xl border-l-4 border-cream/20 bg-cream/5 border border-cream/10 p-5 mb-6">
-                    <h3 className="font-heading text-cream/70 text-lg leading-tight mb-1">Skip for now</h3>
-                    <p className="font-body text-cream/50 text-xs">
-                      Skip this step — I'll verify later if needed.
-                    </p>
-                  </div>
+                  {fundsGdprOpen && (
+                    <div
+                      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-deep/80 backdrop-blur-sm"
+                      onClick={() => setFundsGdprOpen(false)}
+                    >
+                      <div
+                        className="max-w-lg w-full bg-deep border border-cream/15 rounded-2xl p-6"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <div className="flex items-start justify-between mb-3">
+                          <h4 className="font-heading text-cream text-xl">How your funds document is stored</h4>
+                          <button
+                            type="button"
+                            onClick={() => setFundsGdprOpen(false)}
+                            className="text-cream/50 hover:text-cream text-lg leading-none"
+                            aria-label="Close"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                        <p className="font-body text-cream/70 text-sm leading-relaxed">
+                          Your document is encrypted in transit and at rest. It is stored on
+                          ProGrafter's secure servers and is accessible only to ProGrafter's
+                          verification team. It will never be shared with trades, third parties,
+                          or used for any purpose other than issuing your verification badge.
+                          You may request deletion at any time by emailing hello@prografter.co.uk.
+                          Processed under GDPR Article 6(1)(a) — your explicit consent.
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => setFundsGdprOpen(false)}
+                          className="mt-5 w-full bg-teal text-cream font-mono text-sm py-2.5 rounded-xl hover:bg-teal-hover transition-colors"
+                        >
+                          Got it
+                        </button>
+                      </div>
+                    </div>
+                  )}
 
                   <div className="flex gap-4 mt-8">
                     <button
