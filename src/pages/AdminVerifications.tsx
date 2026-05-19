@@ -20,6 +20,7 @@ interface PendingTrade {
   submitted_for_review_at: string | null;
   created_at: string;
   insurance_expiry: string | null;
+  trade_type_other: string | null;
 }
 
 interface VerificationDoc {
