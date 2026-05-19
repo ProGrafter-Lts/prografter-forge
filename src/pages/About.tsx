@@ -12,6 +12,7 @@ const About = () => {
         jsonLd={localBusinessJsonLd}
       />
 
+      <div className="bg-deep">
       {/* Hero */}
       <section className="relative pt-32 pb-20 px-6 overflow-hidden">
         <span
