@@ -2,6 +2,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Clock, ShieldCheck, Star } from "lucide-react";
 import { GreenLeafBadge } from "@/lib/greenTrades";
+import { formatStatusLabel } from "@/lib/statusLabel";
 
 interface ProjectHeaderProps {
   job: {
