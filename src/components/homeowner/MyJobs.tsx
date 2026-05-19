@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { MapPin, FolderKanban } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { formatStatusLabel } from "@/lib/statusLabel";
 
 const STATUS_COLORS: Record<string, string> = {
   open: "bg-secondary/10 text-secondary",
