@@ -17,14 +17,19 @@ interface ManualData {
   trade: any;
   homeowner: any;
   contract: any;
+  acceptedQuoteAmount: number | null;
   stages: any[];
   stageUpdates: any[];
+  jobPhotos: any[];
   materials: any[];
   certificates: any[];
   warranties: any[];
   greenData: any;
   isPro: boolean;
   isGreen: boolean;
+  /** True when the job ran through ProGrafter to completion — all manual
+   *  sections are free for these jobs (commission already paid). */
+  isProGrafterCompleted: boolean;
 }
 
 const SECTIONS = [
