@@ -169,14 +169,14 @@ const badgeStyles: Record<Scheme["badge"], { border: string; chip: string; accen
   },
 };
 
-const GreenSchemesBreakdown = () => {
+const GreenSchemesBreakdown = ({ onCheckEligibility }: GreenSchemesBreakdownProps) => {
   return (
     <section className="py-20 px-6 bg-cream">
       <div className="max-w-6xl mx-auto">
         {/* Heading */}
         <div className="text-center mb-12">
-          <span className="font-mono text-xs text-[#16A34A] uppercase tracking-widest mb-4 block">
-            🌿 Available Funding
+          <span className="font-mono text-xs text-teal uppercase tracking-widest mb-4 block">
+            Available Funding
           </span>
           <h2 className="font-heading text-navy text-[36px] sm:text-[44px] md:text-[52px] leading-[0.95] tracking-wide mb-5">
             WHAT HELP IS ACTUALLY AVAILABLE RIGHT NOW
@@ -194,7 +194,7 @@ const GreenSchemesBreakdown = () => {
             return (
               <article
                 key={scheme.id}
-                className={`bg-white rounded-xl border border-navy/10 border-l-4 ${styles.border} p-6 md:p-7 shadow-sm hover:shadow-md transition-shadow flex flex-col`}
+                className={`bg-white rounded-xl border border-navy/10 border-l-4 ${styles.border} p-6 md:p-7 shadow-sm hover:shadow-md transition-shadow flex flex-col ${scheme.closed ? "opacity-80" : ""}`}
               >
                 {/* Top row: badge */}
                 <div className="flex items-center justify-between mb-4 gap-3">
@@ -204,24 +204,25 @@ const GreenSchemesBreakdown = () => {
                     <span className={`w-1.5 h-1.5 rounded-full ${styles.dot}`} />
                     {scheme.badgeLabel}
                   </span>
+                  {scheme.closed && (
+                    <span className="font-mono text-[10px] uppercase tracking-widest px-2.5 py-1 rounded-full bg-navy/10 text-navy/70 border border-navy/20">
+                      Scheme closed
+                    </span>
+                  )}
                 </div>
 
-                {/* Name */}
                 <h3 className="font-heading text-navy text-2xl md:text-[26px] tracking-wide leading-tight mb-2">
                   {scheme.name}
                 </h3>
 
-                {/* One-liner */}
                 <p className="font-body text-body-text text-sm md:text-base leading-relaxed italic mb-5">
                   "{scheme.oneLiner}"
                 </p>
 
-                {/* What it is */}
                 <p className="font-body text-body-text/90 text-sm leading-relaxed mb-5">
                   {scheme.whatItIs}
                 </p>
 
-                {/* Who qualifies */}
                 <div className="mb-5">
                   <h4 className="font-mono text-[11px] uppercase tracking-widest text-navy/70 mb-2">
                     Who qualifies
@@ -236,7 +237,6 @@ const GreenSchemesBreakdown = () => {
                   </ul>
                 </div>
 
-                {/* What it pays for */}
                 <div className="mb-5">
                   <h4 className="font-mono text-[11px] uppercase tracking-widest text-navy/70 mb-2">
                     What it pays for
@@ -244,7 +244,6 @@ const GreenSchemesBreakdown = () => {
                   <p className="font-body text-sm text-body-text leading-snug">{scheme.paysFor}</p>
                 </div>
 
-                {/* Max value — prominent */}
                 <div className="mt-auto pt-5 border-t border-navy/10">
                   <div className="flex items-end justify-between gap-3 mb-3">
                     <div>
@@ -270,10 +269,34 @@ const GreenSchemesBreakdown = () => {
           })}
         </div>
 
+        {/* Bottom CTA */}
+        <div className="bg-navy rounded-2xl p-8 md:p-12 text-center mb-10">
+          <h3 className="font-heading text-cream text-[28px] sm:text-[36px] md:text-[44px] leading-[0.95] tracking-wide mb-4">
+            READY TO FIND A VERIFIED INSTALLER?
+          </h3>
+          <p className="font-body text-cream/70 text-base md:text-lg max-w-2xl mx-auto leading-relaxed mb-8">
+            Post your project on ProGrafter and we'll match you with verified, accredited installers in your area. No monthly fees — trades only pay when work is done.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Link
+              to="/post-a-job"
+              className="inline-block bg-teal text-cream font-mono text-sm px-8 py-3.5 rounded-xl hover:bg-teal-hover transition-colors shadow-lg shadow-teal/20"
+            >
+              Post a Job →
+            </Link>
+            <button
+              onClick={onCheckEligibility}
+              className="inline-block bg-transparent text-cream border border-cream/40 font-mono text-sm px-8 py-3.5 rounded-xl hover:bg-cream/10 transition-colors"
+            >
+              Check My Eligibility
+            </button>
+          </div>
+        </div>
+
         {/* Disclaimer */}
         <p className="font-mono text-xs text-body-text/50 leading-relaxed text-center max-w-3xl mx-auto">
           Scheme eligibility criteria and funding levels are set by the UK government and may
-          change. Information correct as of April 2026. Use the eligibility checker below to find
+          change. Information correct as of May 2026. Use the eligibility checker below to find
           out which schemes apply to your property. ProGrafter provides information only — not
           financial advice. For official guidance visit gov.uk/energy-grants.
         </p>
