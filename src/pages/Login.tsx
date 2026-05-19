@@ -41,7 +41,7 @@ const Login = () => {
 
   useEffect(() => {
     if (searchParams.get("reset") === "success") {
-      setSuccessMessage("Password updated — please sign in");
+      setSuccessMessage("Password updated. Please sign in with your new password.");
       // Clean the param from the URL
       const next = new URLSearchParams(searchParams);
       next.delete("reset");
