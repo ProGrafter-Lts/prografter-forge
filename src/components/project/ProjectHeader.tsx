@@ -2,6 +2,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Clock, ShieldCheck, Star } from "lucide-react";
 import { GreenLeafBadge } from "@/lib/greenTrades";
+import { formatStatusLabel } from "@/lib/statusLabel";
 
 interface ProjectHeaderProps {
   job: {
@@ -61,7 +62,7 @@ const ProjectHeader = ({
   endDate,
 }: ProjectHeaderProps) => {
   const schedule = computeSchedule(startDate, endDate);
-  const statusLabel = job.status.replace(/_/g, " ");
+  const statusLabel = formatStatusLabel(job.status);
 
   return (
     <div className="bg-white rounded-2xl p-6 border border-navy/10 shadow-sm">
@@ -97,7 +98,7 @@ const ProjectHeader = ({
         </div>
         <div className="flex items-center gap-3">
           <Badge className={STATUS_BADGE[job.status] || "bg-navy/10 text-navy"}>
-            {statusLabel.charAt(0).toUpperCase() + statusLabel.slice(1)}
+            {statusLabel}
           </Badge>
           {contractValue > 0 && (
             <span className="font-heading text-teal text-2xl">£{contractValue.toLocaleString()}</span>

@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { FolderKanban, MapPin, Clock, FileText, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { isActiveJob } from "@/lib/activeProjects";
+import { formatStatusLabel } from "@/lib/statusLabel";
 
 interface Job {
   id: string;
@@ -75,7 +76,7 @@ const ActiveProjectsSection = ({ jobs, quoteCounts, activeJobs: activeJobsProp }
             count > 0 && job.status === "awaiting_quotes"
               ? { label: `${count} Quote${count > 1 ? "s" : ""} Received`, className: "bg-secondary/15 text-secondary" }
               : STATUS_BADGE[job.status] ??
-                { label: job.status.replace(/_/g, " "), className: "bg-muted text-primary" };
+                { label: formatStatusLabel(job.status), className: "bg-muted text-primary" };
 
           return (
             <div

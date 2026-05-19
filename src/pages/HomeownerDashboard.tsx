@@ -88,11 +88,13 @@ const HomeownerDashboard = () => {
     setHomeownerName(ho.name);
     setLoading(false);
 
-    // Fetch jobs first so we can scope subsequent queries server-side
+    // Fetch jobs first so we can scope subsequent queries server-side.
+    // Exclude is_test seed data (e.g. "Past electrical work — review #1") from production accounts.
     const { data: jobData } = await supabase
       .from("jobs")
-      .select("id, title, job_type, postcode, status, stage, description, created_at, photo_urls")
+      .select("id, title, job_type, postcode, status, stage, description, created_at, photo_urls, is_test")
       .eq("homeowner_id", ho.id)
+      .eq("is_test", false)
       .order("created_at", { ascending: false });
 
     const jobs = jobData || [];

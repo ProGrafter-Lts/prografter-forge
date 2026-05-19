@@ -1,12 +1,17 @@
 import { useNavigate } from "react-router-dom";
 import { MapPin, FolderKanban } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { formatStatusLabel } from "@/lib/statusLabel";
 
 const STATUS_COLORS: Record<string, string> = {
   open: "bg-secondary/10 text-secondary",
+  awaiting_quotes: "bg-amber-100 text-amber-800",
   matched: "bg-blue-100 text-blue-700",
   active: "bg-amber-100 text-amber-700",
+  in_progress: "bg-secondary/15 text-secondary",
+  review: "bg-purple-100 text-purple-800",
   complete: "bg-green-100 text-green-700",
+  completed: "bg-green-100 text-green-700",
 };
 
 const timeAgo = (dateStr: string) => {
@@ -32,7 +37,12 @@ const MyJobs = ({ jobs }: { jobs: Job[] }) => {
   return (
     <section>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="font-heading text-primary text-2xl">My Jobs</h2>
+        <div>
+          <h2 className="font-heading text-primary text-2xl">All Posted Jobs</h2>
+          <p className="font-mono text-xs text-muted-foreground mt-1">
+            Every job you've posted on ProGrafter, in any status.
+          </p>
+        </div>
         <a
           href="/post-a-job"
           className="font-mono text-xs text-secondary hover:opacity-80 transition-opacity"
@@ -69,7 +79,7 @@ const MyJobs = ({ jobs }: { jobs: Job[] }) => {
                 </div>
               </div>
               <Badge className={STATUS_COLORS[job.status] || "bg-muted text-primary"}>
-                {job.status.charAt(0).toUpperCase() + job.status.slice(1)}
+                {formatStatusLabel(job.status)}
               </Badge>
             </div>
           ))}

@@ -296,9 +296,8 @@ const GreenSchemesBreakdown = ({ onCheckEligibility }: GreenSchemesBreakdownProp
         {/* Disclaimer */}
         <p className="font-mono text-xs text-body-text/50 leading-relaxed text-center max-w-3xl mx-auto">
           Scheme eligibility criteria and funding levels are set by the UK government and may
-          change. Information correct as of May 2026. Use the eligibility checker below to find
-          out which schemes apply to your property. ProGrafter provides information only — not
-          financial advice. For official guidance visit gov.uk/energy-grants.
+          change. Information correct as of May 2026. ProGrafter provides information only — not
+          financial advice. For official eligibility guidance visit gov.uk/energy-grants.
         </p>
       </div>
     </section>

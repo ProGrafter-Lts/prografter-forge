@@ -1,4 +1,5 @@
 import { Calendar, MapPin, Briefcase, User, Building2, FileText } from "lucide-react";
+import { titleCase } from "@/lib/statusLabel";
 
 interface Props {
   job: any;
@@ -6,11 +7,33 @@ interface Props {
   homeowner: any;
   contract: any;
   stages: any[];
+  acceptedQuoteAmount?: number | null;
 }
 
-const ManualOverview = ({ job, trade, homeowner, contract, stages }: Props) => {
+const ManualOverview = ({ job, trade, homeowner, contract, stages, acceptedQuoteAmount }: Props) => {
   const firstStage = stages.find(s => s.actual_start);
   const lastStage = [...stages].reverse().find(s => s.actual_end);
+
+  // Contract value resolution order:
+  //   1. Modern contract `total_value_incl_vat_pence` (pence -> pounds)
+  //   2. Legacy contract `agreed_price` (already in pounds)
+  //   3. Accepted quote amount (pounds) — fallback when contract row hasn't been generated yet
+  const resolveContractValuePounds = (): number | null => {
+    if (contract?.total_value_incl_vat_pence != null) {
+      const pounds = Number(contract.total_value_incl_vat_pence) / 100;
+      if (!Number.isNaN(pounds)) return pounds;
+    }
+    if (contract?.agreed_price != null) {
+      const pounds = Number(contract.agreed_price);
+      if (!Number.isNaN(pounds)) return pounds;
+    }
+    if (acceptedQuoteAmount != null) {
+      const pounds = Number(acceptedQuoteAmount);
+      if (!Number.isNaN(pounds)) return pounds;
+    }
+    return null;
+  };
+  const contractValuePounds = resolveContractValuePounds();
 
   return (
     <section id="overview" className="bg-card rounded-2xl border border-border p-6 mb-6">
@@ -20,10 +43,10 @@ const ManualOverview = ({ job, trade, homeowner, contract, stages }: Props) => {
       </h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <InfoRow icon={Briefcase} label="Project Name" value={job.title || job.job_type} />
+        <InfoRow icon={Briefcase} label="Project Name" value={job.title || titleCase(job.job_type)} />
         <InfoRow icon={FileText} label="Reference" value={job.id?.slice(0, 8).toUpperCase()} />
         <InfoRow icon={MapPin} label="Property Address" value={`${job.address}, ${job.postcode}`} />
-        <InfoRow icon={Briefcase} label="Project Type" value={job.job_type} />
+        <InfoRow icon={Briefcase} label="Project Type" value={titleCase(job.job_type)} />
         <InfoRow
           icon={Calendar}
           label="Start Date"
@@ -34,11 +57,11 @@ const ManualOverview = ({ job, trade, homeowner, contract, stages }: Props) => {
           label="Completion Date"
           value={lastStage?.actual_end ? new Date(lastStage.actual_end).toLocaleDateString("en-GB") : "—"}
         />
-        {contract && (
+        {contractValuePounds != null && (
           <InfoRow
             icon={FileText}
             label="Contract Value"
-            value={`£${Number(contract.agreed_price).toLocaleString()}`}
+            value={`£${contractValuePounds.toLocaleString("en-GB", { maximumFractionDigits: 2 })}`}
           />
         )}
         <InfoRow icon={FileText} label="ProGrafter Ref" value={`PG-${job.id?.slice(0, 8).toUpperCase()}`} />
@@ -53,7 +76,7 @@ const ManualOverview = ({ job, trade, homeowner, contract, stages }: Props) => {
             <InfoRow icon={User} label="Name" value={trade.name} />
             <InfoRow icon={Building2} label="Company" value={trade.company_name} />
             <InfoRow icon={FileText} label="Phone" value={trade.phone} />
-            <InfoRow icon={FileText} label="Trade Type" value={trade.trade_type} />
+            <InfoRow icon={FileText} label="Trade Type" value={titleCase(trade.trade_type)} />
           </div>
         </div>
       )}
