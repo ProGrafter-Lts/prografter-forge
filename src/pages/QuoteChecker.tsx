@@ -85,11 +85,11 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
     }
     setIsSubmitting(true);
     try {
-      // Upload PDF
+      // Upload file (preserve original content type so it isn't forced to PDF)
       const fileName = `${Date.now()}-${file.name}`;
       const { error: uploadError } = await supabase.storage
         .from("quote-pdfs")
-        .upload(fileName, file, { contentType: "application/pdf" });
+        .upload(fileName, file, { contentType: file.type || "application/octet-stream" });
       if (uploadError) throw uploadError;
 
       // Create record
@@ -113,12 +113,8 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
           "pendingQuoteCheck",
           JSON.stringify({ id: record.id, email, lookupToken: (record as any).lookup_token }),
         );
-        // Use top-level navigation so the redirect works inside iframes (e.g. Lovable preview)
-        if (window.top && window.top !== window.self) {
-          window.top.location.href = checkoutData.url;
-        } else {
-          window.location.href = checkoutData.url;
-        }
+        // Plain top-frame assignment — cross-origin iframes block window.top.location.href
+        window.location.href = checkoutData.url;
       } else {
         throw new Error("No checkout URL returned");
       }
