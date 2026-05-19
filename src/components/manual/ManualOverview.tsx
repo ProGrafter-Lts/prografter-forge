@@ -76,7 +76,7 @@ const ManualOverview = ({ job, trade, homeowner, contract, stages, acceptedQuote
             <InfoRow icon={User} label="Name" value={trade.name} />
             <InfoRow icon={Building2} label="Company" value={trade.company_name} />
             <InfoRow icon={FileText} label="Phone" value={trade.phone} />
-            <InfoRow icon={FileText} label="Trade Type" value={trade.trade_type} />
+            <InfoRow icon={FileText} label="Trade Type" value={titleCase(trade.trade_type)} />
           </div>
         </div>
       )}
