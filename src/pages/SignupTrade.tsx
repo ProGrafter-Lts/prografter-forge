@@ -13,7 +13,7 @@ const qualificationCopy = (tradeType: string): { label: string; helper: string; 
   if (t.includes("oil")) return { label: "Trade qualification — OFTEC", helper: "OFTEC registration certificate", required: true };
   if (t.includes("solar") || t.includes("heat pump") || t.includes("biomass")) return { label: "Trade qualification — MCS", helper: "MCS certification", required: true };
   if (t.includes("ev") || t.includes("charger")) return { label: "Trade qualification — OZEV", helper: "OZEV-approved installer registration", required: true };
-  if (t.includes("builder") || t.includes("contractor")) return { label: "Trade qualification — CSCS / NVQ", helper: "CSCS card or NVQ Level 2/3 certificate", required: false };
+  if (t.includes("builder") || t.includes("contractor")) return { label: "Trade qualification — City & Guilds / NVQ", helper: "City & Guilds, NVQ Level 2/3, or other relevant qualification", required: false };
   if (t.includes("scaffold")) return { label: "Trade qualification — CISRS", helper: "CISRS card", required: true };
   if (!tradeType || t === "other") return { label: "Trade qualification", helper: "Any relevant qualification, accreditation, or membership certificate", required: false };
   return { label: "Trade qualification", helper: "Any relevant qualification, accreditation, or membership certificate (strongly preferred)", required: false };
@@ -475,6 +475,12 @@ const SignupTrade = () => {
       setError("Trade type and company name are required");
       return;
     }
+    if (!bio.trim()) {
+      const proceed = window.confirm(
+        "Adding a bio improves your chances of winning jobs — are you sure you want to skip this?"
+      );
+      if (!proceed) return;
+    }
     if (!createdTradeId) {
       setError("Account not ready — refresh and try again");
       return;
@@ -721,9 +727,9 @@ const SignupTrade = () => {
             </h2>
             <ul className="space-y-4 mb-6">
               {[
-                { icon: ShieldCheck, title: "Public Liability Insurance certificate", body: "PDF or photo, must show your business name and expiry date" },
+                { icon: ShieldCheck, title: "Public Liability Insurance certificate", body: "PDF or photo. Must show your business name, policy number, and expiry date." },
                 { icon: IdCard, title: "Photo ID", body: "Passport or driving licence" },
-                { icon: Award, title: "Trade qualification", body: "NICEIC card, Gas Safe registration, MCS cert, CSCS card, or equivalent for your trade" },
+                { icon: Award, title: "Trade qualification", body: "NICEIC card, Gas Safe registration, MCS cert, City & Guilds, or relevant qualification for your trade" },
               ].map(({ icon: Icon, title, body }) => (
                 <li key={title} className="flex items-start gap-3 p-4 rounded-xl border border-cream/10 bg-cream/5">
                   <span className="flex-none w-9 h-9 rounded-lg bg-teal/15 flex items-center justify-center">
@@ -897,6 +903,9 @@ const SignupTrade = () => {
                 <div>
                   <label className={labelClass}>Company Name *</label>
                   <input className={inputClass} value={companyName} onChange={(e) => setCompanyName(e.target.value)} placeholder="Smith Plumbing Ltd" />
+                  <p className="mt-1.5 font-body text-xs text-cream/50">
+                    Sole trader? Your full name is fine. Ltd company? Use your registered Companies House name.
+                  </p>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -909,8 +918,11 @@ const SignupTrade = () => {
                   </div>
                 </div>
                 <div>
-                  <label className={labelClass}>Short Bio</label>
+                  <label className={labelClass}>Short Bio (Strongly Recommended)</label>
                   <textarea rows={3} className={inputClass} value={bio} onChange={(e) => setBio(e.target.value)} placeholder="A few lines about your work…" />
+                  <p className="mt-1.5 font-body text-xs text-cream/50">
+                    Trades with a bio are significantly more likely to win jobs. Describe your experience, the areas you cover, and what makes your work stand out.
+                  </p>
                 </div>
 
                 {tradeType && (
