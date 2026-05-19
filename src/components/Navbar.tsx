@@ -6,13 +6,9 @@ const Navbar = () => {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-[12px]" style={{ backgroundColor: "rgba(245, 240, 232, 0.92)" }}>
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between h-16">
-        <a href="/" className="flex items-center" aria-label="ProGrafter home">
-          <img
-            src="/og-logo.png"
-            alt="ProGrafter"
-            className="h-10 w-auto craft:h-12"
-            loading="eager"
-          />
+        <a href="/" className="flex items-center font-heading text-2xl tracking-wider" aria-label="ProGrafter home">
+          <span className="text-navy">Pro</span>
+          <span className="text-teal">grafter</span>
         </a>
 
         <div className="hidden craft:flex items-center gap-6">
@@ -20,7 +16,7 @@ const Navbar = () => {
           <a href="/#pricing" className="font-mono text-sm text-body-text hover:text-teal transition-colors">Pricing</a>
           <a href="/#features" className="font-mono text-sm text-body-text hover:text-teal transition-colors">Features</a>
           <a href="/quote-checker" className="font-mono text-sm text-body-text hover:text-teal transition-colors">Quote Checker</a>
-          <a href="/green" className="font-mono text-sm text-[#16A34A] hover:text-[#15803D] transition-colors flex items-center gap-1">🌿 Green Grants</a>
+          <a href="/green" className="font-mono text-sm text-body-text hover:text-teal transition-colors">Green Grants</a>
           <a href="/login" className="font-mono text-sm text-body-text hover:text-teal transition-colors">Login</a>
           <a
             href="/signup/trade"
@@ -57,7 +53,7 @@ const Navbar = () => {
           <a href="/#pricing" className="font-mono text-sm text-body-text" onClick={() => setMenuOpen(false)}>Pricing</a>
           <a href="/#features" className="font-mono text-sm text-body-text" onClick={() => setMenuOpen(false)}>Features</a>
           <a href="/quote-checker" className="font-mono text-sm text-body-text" onClick={() => setMenuOpen(false)}>Quote Checker</a>
-          <a href="/green" className="font-mono text-sm text-[#16A34A] flex items-center gap-1" onClick={() => setMenuOpen(false)}>🌿 Green Grants</a>
+          <a href="/green" className="font-mono text-sm text-body-text" onClick={() => setMenuOpen(false)}>Green Grants</a>
           <a href="/login" className="font-mono text-sm text-body-text" onClick={() => setMenuOpen(false)}>Login</a>
           <a href="/signup/trade" className="border border-teal text-teal font-mono text-sm px-5 py-2 rounded-xl text-center" onClick={() => setMenuOpen(false)}>Join as a Trade</a>
           <a href="/signup/homeowner" className="bg-teal text-cream font-mono text-sm px-5 py-2.5 rounded-xl text-center shadow-lg shadow-teal/20" onClick={() => setMenuOpen(false)}>Post a Job</a>
