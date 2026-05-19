@@ -146,7 +146,7 @@ const Contact = () => {
 
         {/* Contact Cards */}
         <section className="max-w-7xl mx-auto px-6 mb-20">
-          <div className="grid craft:grid-cols-3 gap-6">
+          <div className="grid craft:grid-cols-2 gap-6">
             {CONTACT_CARDS.map((card, idx) => (
               <div
                 key={card.title}
@@ -176,6 +176,7 @@ const Contact = () => {
                 )}
                 <button
                   onClick={() => handleCopy(card.email, idx)}
+                  title={card.subjectLine ? `Subject: ${card.subjectLine}` : undefined}
                   className="mt-auto flex items-center justify-center gap-2 border border-teal text-teal font-mono text-xs px-4 py-2.5 rounded-xl hover:bg-teal hover:text-cream transition-colors"
                 >
                   {copiedIdx === idx ? (
@@ -186,7 +187,7 @@ const Contact = () => {
                   ) : (
                     <>
                       <Copy className="w-3.5 h-3.5" />
-                      Copy Email
+                      Copy with Subject
                     </>
                   )}
                 </button>
