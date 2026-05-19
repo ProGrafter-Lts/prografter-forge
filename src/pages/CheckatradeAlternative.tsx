@@ -95,7 +95,7 @@ const CheckatradeAlternative = () => {
                 Register as a Trade Free <ArrowRight className="ml-1" />
               </Link>
             </Button>
-            <Button asChild size="lg" variant="outline" className="bg-white border-2 border-white text-navy hover:bg-white/90 hover:text-navy font-mono uppercase tracking-wider">
+            <Button asChild size="lg" variant="outline" className="bg-transparent border-2 border-cream text-cream hover:bg-cream hover:text-navy font-mono uppercase tracking-wider">
               <Link to="/#pricing">See the numbers</Link>
             </Button>
           </div>
