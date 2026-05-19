@@ -181,7 +181,7 @@ const CalendarConnect = ({ variant = "full" }: CalendarConnectProps) => {
               <InstructionCard title="Google Calendar">
                 <ol className="space-y-1 list-decimal list-inside">
                   <li>Open Google Calendar</li>
-                  <li>Click <b>Other calendars</b> → <b>+</b></li>
+                  <li>Click <b>'+ Other calendars'</b></li>
                   <li>Choose <b>From URL</b></li>
                   <li>Paste your link</li>
                 </ol>
@@ -201,6 +201,9 @@ const CalendarConnect = ({ variant = "full" }: CalendarConnectProps) => {
                   <li>Paste your link</li>
                   <li>Name it "ProGrafter"</li>
                 </ol>
+                <p className="mt-3 pt-3 border-t border-foreground/10 text-[11px] leading-relaxed">
+                  <b>Using Outlook on the web?</b> Go to Settings → View all Outlook settings → Calendar → Shared calendars → Subscribe from web.
+                </p>
               </InstructionCard>
             </div>
           </div>
