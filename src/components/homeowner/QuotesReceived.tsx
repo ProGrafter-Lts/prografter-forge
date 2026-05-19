@@ -208,12 +208,16 @@ const QuotesReceived = ({ quotes, onQuoteAccepted }: QuotesReceivedProps) => {
                 isDeclined ? "opacity-60" : ""
               }`}
             >
-              {/* Status banner */}
+              {/* Status banner — only show the AI verdict pill when a verdict has actually been computed.
+                  Platform-matched quotes don't run through Quote Checker, so a "Pending" pill there
+                  would be misleading. */}
               <div className="flex items-center gap-2 mb-3 flex-wrap">
-                <Badge className={`${theme.badgeClass} font-mono text-[10px] inline-flex items-center gap-1`}>
-                  <VIcon className={`w-3 h-3 ${theme.iconClass}`} />
-                  {theme.label}
-                </Badge>
+                {q.ai_verdict && (
+                  <Badge className={`${theme.badgeClass} font-mono text-[10px] inline-flex items-center gap-1`}>
+                    <VIcon className={`w-3 h-3 ${theme.iconClass}`} />
+                    {theme.label}
+                  </Badge>
+                )}
                 {isAccepted && (
                   <Badge className="bg-green-100 text-green-700 font-mono text-[10px]">
                     Accepted
@@ -224,9 +228,11 @@ const QuotesReceived = ({ quotes, onQuoteAccepted }: QuotesReceivedProps) => {
                     Declined
                   </Badge>
                 )}
-                <span className="font-mono text-[10px] text-muted-foreground hidden sm:inline">
-                  {theme.description}
-                </span>
+                {q.ai_verdict && (
+                  <span className="font-mono text-[10px] text-muted-foreground hidden sm:inline">
+                    {theme.description}
+                  </span>
+                )}
               </div>
 
               {q.ai_verdict_summary && (
