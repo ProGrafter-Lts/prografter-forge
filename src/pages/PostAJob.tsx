@@ -364,23 +364,32 @@ const PostAJob = () => {
                       Based on your eligibility results, these are the certified trade types relevant to your project:
                     </p>
                   )}
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    {filteredJobTypes.map((jt) => (
-                      <button
-                        key={jt.label}
-                        type="button"
-                        onClick={() => setJobType(jt.label)}
-                        className={`flex flex-col items-center justify-center gap-2 p-5 rounded-xl border-2 transition-all text-center ${
-                          jobType === jt.label
-                            ? "border-teal bg-teal/10 text-teal"
-                            : "border-cream/10 hover:border-cream/25 text-cream/70 hover:text-cream"
-                        }`}
-                      >
-                        <span className="text-2xl">{jt.icon}</span>
-                        <span className="font-mono text-xs uppercase tracking-wide">
-                          {jt.label}
-                        </span>
-                      </button>
+                  <div className="space-y-6">
+                    {filteredSections.map((section) => (
+                      <div key={section.label}>
+                        <p className="font-mono text-[10px] text-teal/70 uppercase tracking-widest mb-2">
+                          {section.label}
+                        </p>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                          {section.items.map((jt) => (
+                            <button
+                              key={jt.label}
+                              type="button"
+                              onClick={() => setJobType(jt.label)}
+                              className={`flex flex-col items-center justify-center gap-2 p-5 rounded-xl border-2 transition-all text-center ${
+                                jobType === jt.label
+                                  ? "border-teal bg-teal/10 text-teal"
+                                  : "border-cream/10 hover:border-cream/25 text-cream/70 hover:text-cream"
+                              }`}
+                            >
+                              <span className="text-2xl">{jt.icon}</span>
+                              <span className="font-mono text-xs uppercase tracking-wide">
+                                {jt.label}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
                     ))}
                   </div>
                   {isGreenFlow && (
