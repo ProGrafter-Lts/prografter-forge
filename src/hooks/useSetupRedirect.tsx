@@ -80,7 +80,7 @@ export function useSetupRedirect(
           // Partial signup — fall through and let SignupTrade resume.
         }
 
-        if (role === "homeowner" && homeownerRes.data) {
+        if (role === "homeowner" && homeownerRes.data && redirectIfExists) {
           navigate("/dashboard/homeowner", { replace: true });
           return;
         }
