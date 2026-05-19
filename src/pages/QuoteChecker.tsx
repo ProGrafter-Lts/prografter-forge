@@ -57,17 +57,25 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
+  const ACCEPTED_TYPES = ["application/pdf", "image/jpeg", "image/png"];
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0];
-    if (selected && selected.type === "application/pdf") {
+    if (selected && ACCEPTED_TYPES.includes(selected.type)) {
       if (selected.size > 10 * 1024 * 1024) {
         toast({ title: "File too large", description: "Maximum file size is 10MB.", variant: "destructive" });
         return;
       }
       setFile(selected);
     } else {
-      toast({ title: "Invalid file", description: "Please upload a PDF file.", variant: "destructive" });
+      toast({ title: "Invalid file", description: "Please upload a PDF, JPG or PNG file.", variant: "destructive" });
     }
+  };
+
+  const formatFileSize = (bytes: number) => {
+    const mb = bytes / (1024 * 1024);
+    if (mb >= 0.1) return `${mb.toFixed(1)}MB`;
+    const kb = bytes / 1024;
+    return `${kb.toFixed(0)}KB`;
   };
 
   const handleSubmit = async () => {
