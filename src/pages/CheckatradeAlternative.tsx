@@ -17,9 +17,12 @@ const comparisonRows = [
   { feature: "Monthly fee", pg: "£0", ct: "£30 – £1,959" },
   { feature: "Cost per lead", pg: "£0 — leads are free", ct: "Often shared with up to 5 trades; credits on top of the membership" },
   { feature: "Commission", pg: "7.5% on completed jobs only", ct: "None — but you've already paid the membership" },
-  { feature: "Lead exclusivity", pg: "Job-led — homeowner picks who quotes", ct: "Shared with multiple trades" },
+  { feature: "Lead exclusivity", pg: "Homeowner-controlled — up to 5 quotes, homeowner selects who they work with", ct: "Shared with multiple trades" },
   { feature: "Variation sign-off", pg: "Built-in homeowner approval flow", ct: "No tooling — handled off-platform" },
-  { feature: "Verification process", pg: "ID + insurance + qualification check before going live", ct: "ID and document checks, paid tier" },
+  { feature: "Standardised contract", pg: "Built-in, solicitor-reviewed contract on every job", ct: "No contract tooling provided", ctBad: true },
+  { feature: "Escrow payment protection", pg: "Stripe milestone payments — funds held until stage complete", ct: "Payment handled off-platform", ctBad: true },
+  { feature: "Dispute mediation", pg: "ProGrafter mediates with full documented evidence trail", ct: "Disputes handled between trade and homeowner directly", ctBad: true },
+  { feature: "Verification process", pg: "5-point verification: ID, insurance, qualification, Companies House, reference — all checked before going live", ct: "ID and document checks, paid tier" },
   { feature: "Cap on charges", pg: "£900 maximum per job, ever", ct: "No cap — fees scale with tier and lead spend" },
 ];
 
