@@ -14,7 +14,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        heading: ['"DM Mono"', 'ui-monospace', 'monospace'],
+        heading: ['"Bebas Neue"', '"DM Sans"', 'system-ui', 'sans-serif'],
         body: ['"DM Sans"', 'system-ui', 'sans-serif'],
         sans: ['"DM Sans"', 'system-ui', 'sans-serif'],
         mono: ['"DM Mono"', 'ui-monospace', 'monospace'],
