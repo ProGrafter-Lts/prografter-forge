@@ -79,13 +79,15 @@ const PostAJob = () => {
   const schemeParam = searchParams.get("schemes") || "";
   const schemeIds = schemeParam ? schemeParam.split(",") : [];
 
-  const filteredJobTypes = useMemo(() => {
-    if (!isGreenFlow || schemeIds.length === 0) return ALL_JOB_TYPES.filter(() => true);
+  const filteredSections = useMemo(() => {
+    if (!isGreenFlow || schemeIds.length === 0) return JOB_SECTIONS;
     const allowedLabels = new Set<string>();
     schemeIds.forEach((id) => {
       (SCHEME_TRADE_MAP[id] || []).forEach((label) => allowedLabels.add(label));
     });
-    return ALL_JOB_TYPES.filter((jt) => allowedLabels.has(jt.label));
+    return JOB_SECTIONS
+      .map((s) => ({ ...s, items: s.items.filter((it) => allowedLabels.has(it.label)) }))
+      .filter((s) => s.items.length > 0);
   }, [isGreenFlow, schemeParam]);
 
   const [step, setStep] = useState<Step>(1);
