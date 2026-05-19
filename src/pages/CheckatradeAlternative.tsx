@@ -17,9 +17,12 @@ const comparisonRows = [
   { feature: "Monthly fee", pg: "£0", ct: "£30 – £1,959" },
   { feature: "Cost per lead", pg: "£0 — leads are free", ct: "Often shared with up to 5 trades; credits on top of the membership" },
   { feature: "Commission", pg: "7.5% on completed jobs only", ct: "None — but you've already paid the membership" },
-  { feature: "Lead exclusivity", pg: "Job-led — homeowner picks who quotes", ct: "Shared with multiple trades" },
+  { feature: "Lead exclusivity", pg: "Homeowner-controlled — up to 5 quotes, homeowner selects who they work with", ct: "Shared with multiple trades" },
   { feature: "Variation sign-off", pg: "Built-in homeowner approval flow", ct: "No tooling — handled off-platform" },
-  { feature: "Verification process", pg: "ID + insurance + qualification check before going live", ct: "ID and document checks, paid tier" },
+  { feature: "Standardised contract", pg: "Built-in, solicitor-reviewed contract on every job", ct: "No contract tooling provided", ctBad: true },
+  { feature: "Escrow payment protection", pg: "Stripe milestone payments — funds held until stage complete", ct: "Payment handled off-platform", ctBad: true },
+  { feature: "Dispute mediation", pg: "ProGrafter mediates with full documented evidence trail", ct: "Disputes handled between trade and homeowner directly", ctBad: true },
+  { feature: "Verification process", pg: "5-point verification: ID, insurance, qualification, Companies House, reference — all checked before going live", ct: "ID and document checks, paid tier" },
   { feature: "Cap on charges", pg: "£900 maximum per job, ever", ct: "No cap — fees scale with tier and lead spend" },
 ];
 
@@ -74,13 +77,6 @@ const CheckatradeAlternative = () => {
 
       {/* Hero */}
       <section className="relative pt-32 pb-20 px-6 overflow-hidden">
-        <span
-          className="absolute -bottom-8 right-0 font-heading text-[160px] craft:text-[280px] text-cream select-none pointer-events-none leading-none"
-          style={{ opacity: 0.03 }}
-          aria-hidden
-        >
-          SWITCH
-        </span>
         <div className="max-w-5xl mx-auto relative z-10">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-8 h-[2px] bg-teal" />
@@ -99,7 +95,7 @@ const CheckatradeAlternative = () => {
                 Register as a Trade Free <ArrowRight className="ml-1" />
               </Link>
             </Button>
-            <Button asChild size="lg" variant="outline" className="border-cream/20 text-cream hover:bg-cream/10 font-mono uppercase tracking-wider">
+            <Button asChild size="lg" variant="outline" className="bg-white border-2 border-white text-navy hover:bg-white/90 hover:text-navy font-mono uppercase tracking-wider">
               <Link to="/#pricing">See the numbers</Link>
             </Button>
           </div>
@@ -159,7 +155,7 @@ const CheckatradeAlternative = () => {
             </div>
           </div>
           <p className="font-body text-cream/70 mt-10 max-w-3xl text-lg leading-relaxed">
-            Want to see how that maps to a real job? <Link to="/quote-checker" className="text-teal underline">Try the free Quote Checker</Link> or read the <Link to="/#pricing" className="text-teal underline">Honest Numbers section</Link>.
+            Want to see how that maps to a real job? <Link to="/quote-checker" className="text-teal underline">Try the Quote Checker →</Link> or read the <Link to="/#pricing" className="text-teal underline">Honest Numbers section</Link>.
           </p>
         </div>
       </section>
@@ -216,7 +212,7 @@ const CheckatradeAlternative = () => {
               I'm Lee, an electrician 20 years in. Like a lot of trades, I tried Checkatrade, MyBuilder and Rated People — and watched the membership and credit fees stack up while the leads were sold to four other people in the group chat before I'd even read them.
             </p>
             <p>
-              ProGrafter is the platform I wished existed when I was on the tools: free to join, fair commission on completion, real homeowner verification, and a cap so the platform never eats more than its share of a big job.
+              ProGrafter is the platform I built for trades like me — no monthly fees, no ghost leads, no platform taking more than its fair share.
             </p>
           </div>
           <Link to="/about" className="inline-flex items-center gap-2 mt-8 font-mono text-sm text-teal hover:text-teal-hover">
