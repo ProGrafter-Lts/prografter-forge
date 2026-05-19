@@ -212,7 +212,7 @@ const CheckatradeAlternative = () => {
               I'm Lee, an electrician 20 years in. Like a lot of trades, I tried Checkatrade, MyBuilder and Rated People — and watched the membership and credit fees stack up while the leads were sold to four other people in the group chat before I'd even read them.
             </p>
             <p>
-              ProGrafter is the platform I wished existed when I was on the tools: free to join, fair commission on completion, real homeowner verification, and a cap so the platform never eats more than its share of a big job.
+              ProGrafter is the platform I built for trades like me — no monthly fees, no ghost leads, no platform taking more than its fair share.
             </p>
           </div>
           <Link to="/about" className="inline-flex items-center gap-2 mt-8 font-mono text-sm text-teal hover:text-teal-hover">
