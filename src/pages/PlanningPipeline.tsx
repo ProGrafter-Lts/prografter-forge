@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const C = {
   cream: "#F5F0E8", deep: "#0F2238", navy: "#1B3A5C",
@@ -310,6 +311,7 @@ export default function PlanningPipeline() {
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterPipeline, setFilterPipeline] = useState("all");
   const [search, setSearch] = useState("");
+  const isMobile = useIsMobile();
 
   const load = async () => {
     setLoading(true);
@@ -367,150 +369,168 @@ export default function PlanningPipeline() {
   );
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100vh", fontFamily: "system-ui, sans-serif", background: C.deep }}>
-      <div style={{ background: C.deep, borderBottom: `1px solid ${C.darkBorder}`, padding: "0 20px", height: 56, display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <div className="font-heading tracking-wider" style={{ fontSize: 22, fontWeight: 700 }}>
+    <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", height: isMobile ? "auto" : "100vh", fontFamily: "system-ui, sans-serif", background: C.deep, width: "100%", overflowX: "hidden" }}>
+      <div style={{ background: C.deep, borderBottom: `1px solid ${C.darkBorder}`, padding: isMobile ? "10px 14px" : "0 20px", minHeight: 56, display: "flex", flexDirection: isMobile ? "column" : "row", alignItems: isMobile ? "stretch" : "center", justifyContent: "space-between", gap: isMobile ? 10 : 0, flexShrink: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+          <div className="font-heading tracking-wider" style={{ fontSize: isMobile ? 18 : 22, fontWeight: 700 }}>
             <span style={{ color: C.brightText }}>PRO</span>
             <span style={{ color: C.teal }}>GRAFTER</span>
           </div>
           <span style={{ color: C.darkBorder }}>|</span>
-          <span style={{ fontSize: 12, color: C.dimText, fontWeight: 500, letterSpacing: "0.05em" }}>PLANNING PIPELINE</span>
+          <span style={{ fontSize: isMobile ? 10 : 12, color: C.dimText, fontWeight: 500, letterSpacing: "0.05em" }}>PLANNING PIPELINE</span>
         </div>
-        <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
-          <div style={{ textAlign: "center" }}>
+        <div style={{ display: "flex", gap: isMobile ? 8 : 16, alignItems: "center", flexWrap: "wrap", justifyContent: isMobile ? "space-between" : "flex-end" }}>
+          <div style={{ textAlign: "center", flex: isMobile ? "1 1 60px" : "none" }}>
             <p style={{ fontSize: 16, fontWeight: 700, color: C.red, margin: 0 }}>{hotLeads}</p>
-            <p style={{ fontSize: 9, color: C.dimText, margin: 0 }}>HOT LEADS</p>
+            <p style={{ fontSize: 9, color: C.dimText, margin: 0 }}>HOT</p>
           </div>
-          <div style={{ textAlign: "center" }}>
+          <div style={{ textAlign: "center", flex: isMobile ? "1 1 60px" : "none" }}>
             <p style={{ fontSize: 16, fontWeight: 700, color: C.brightText, margin: 0 }}>{leads.length}</p>
             <p style={{ fontSize: 9, color: C.dimText, margin: 0 }}>TOTAL</p>
           </div>
-          <div style={{ textAlign: "center" }}>
+          <div style={{ textAlign: "center", flex: isMobile ? "1 1 60px" : "none" }}>
             <p style={{ fontSize: 16, fontWeight: 700, color: C.teal, margin: 0 }}>{agents.length}</p>
             <p style={{ fontSize: 9, color: C.dimText, margin: 0 }}>AGENTS</p>
           </div>
-          <div style={{ textAlign: "center" }}>
+          <div style={{ textAlign: "center", flex: isMobile ? "1 1 80px" : "none" }}>
             <p style={{ fontSize: 14, fontWeight: 700, color: C.green, margin: 0 }}>{fmt(totalValue)}</p>
-            <p style={{ fontSize: 9, color: C.dimText, margin: 0 }}>PIPELINE VALUE</p>
+            <p style={{ fontSize: 9, color: C.dimText, margin: 0 }}>VALUE</p>
           </div>
           <button onClick={() => toast({ title: "Scraper not yet connected", description: "Ingestion pipeline is on the roadmap." })}
-            style={{ background: C.teal, color: C.white, border: "none", borderRadius: 8, padding: "7px 14px", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>
+            style={{ background: C.teal, color: C.white, border: "none", borderRadius: 8, padding: "7px 14px", fontSize: 11, fontWeight: 700, cursor: "pointer", flex: isMobile ? "1 1 100%" : "none" }}>
             🔄 Run scraper
           </button>
         </div>
       </div>
 
-      <div style={{ background: C.darkSurface, borderBottom: `1px solid ${C.darkBorder}`, padding: "0 20px", display: "flex", gap: 4 }}>
-        {navTab("leads", `📋 Leads (${leads.length})`)}
-        {navTab("agents", `🏛️ Agents (${agents.length})`)}
-        {navTab("kanban", "📊 Pipeline board")}
+      <div style={{ background: C.darkSurface, borderBottom: `1px solid ${C.darkBorder}`, padding: isMobile ? "0 8px" : "0 20px", display: "flex", gap: 4, overflowX: "auto" }}>
+        {navTab("leads", isMobile ? `📋 (${leads.length})` : `📋 Leads (${leads.length})`)}
+        {navTab("agents", isMobile ? `🏛️ (${agents.length})` : `🏛️ Agents (${agents.length})`)}
+        {navTab("kanban", isMobile ? "📊 Board" : "📊 Pipeline board")}
       </div>
 
       {loading ? (
-        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: C.dimText }}>Loading…</div>
+        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: C.dimText, padding: 40 }}>Loading…</div>
       ) : tab === "leads" ? (
-        <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
-          <div style={{ width: 320, flexShrink: 0, borderRight: `1px solid ${C.darkBorder}`, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-            <div style={{ padding: 12, borderBottom: `1px solid ${C.darkBorder}` }}>
-              <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search address, applicant, agent…" style={{ ...inp(), marginBottom: 8 }} />
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
-                <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} style={inp()}>
-                  <option value="all" style={{ color: C.body }}>All statuses</option>
-                  <option value="submitted" style={{ color: C.body }}>🔥 Submitted</option>
-                  <option value="pending_decision" style={{ color: C.body }}>⏳ Pending</option>
-                  <option value="approved" style={{ color: C.body }}>✅ Approved</option>
-                </select>
-                <select value={filterPipeline} onChange={(e) => setFilterPipeline(e.target.value)} style={inp()}>
-                  <option value="all" style={{ color: C.body }}>All stages</option>
-                  {PIPELINE_STAGES.map((s) => <option key={s.id} value={s.id} style={{ color: C.body }}>{s.label}</option>)}
-                </select>
+        <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", flex: 1, overflow: isMobile ? "visible" : "hidden" }}>
+          {(!isMobile || !selectedLeadId) && (
+            <div style={{ width: isMobile ? "100%" : 320, flexShrink: 0, borderRight: isMobile ? "none" : `1px solid ${C.darkBorder}`, borderBottom: isMobile ? `1px solid ${C.darkBorder}` : "none", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+              <div style={{ padding: 12, borderBottom: `1px solid ${C.darkBorder}` }}>
+                <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search address, applicant, agent…" style={{ ...inp(), marginBottom: 8 }} />
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+                  <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} style={inp()}>
+                    <option value="all" style={{ color: C.body }}>All statuses</option>
+                    <option value="submitted" style={{ color: C.body }}>🔥 Submitted</option>
+                    <option value="pending_decision" style={{ color: C.body }}>⏳ Pending</option>
+                    <option value="approved" style={{ color: C.body }}>✅ Approved</option>
+                  </select>
+                  <select value={filterPipeline} onChange={(e) => setFilterPipeline(e.target.value)} style={inp()}>
+                    <option value="all" style={{ color: C.body }}>All stages</option>
+                    {PIPELINE_STAGES.map((s) => <option key={s.id} value={s.id} style={{ color: C.body }}>{s.label}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div style={{ flex: 1, overflowY: "auto", padding: "10px 12px", maxHeight: isMobile ? "none" : undefined }}>
+                {filteredLeads.map((lead) => (
+                  <LeadCard key={lead.id} lead={lead} agent={lead.agent_id ? agentsById[lead.agent_id] : undefined}
+                    selected={selectedLead?.id === lead.id} onSelect={(l) => setSelectedLeadId(l.id)} />
+                ))}
+                {filteredLeads.length === 0 && (
+                  <p style={{ color: C.dimText, fontSize: 12, textAlign: "center", marginTop: 20 }}>No leads match your filters.</p>
+                )}
               </div>
             </div>
-            <div style={{ flex: 1, overflowY: "auto", padding: "10px 12px" }}>
-              {filteredLeads.map((lead) => (
-                <LeadCard key={lead.id} lead={lead} agent={lead.agent_id ? agentsById[lead.agent_id] : undefined}
-                  selected={selectedLead?.id === lead.id} onSelect={(l) => setSelectedLeadId(l.id)} />
-              ))}
-              {filteredLeads.length === 0 && (
-                <p style={{ color: C.dimText, fontSize: 12, textAlign: "center", marginTop: 20 }}>No leads match your filters.</p>
+          )}
+          {(!isMobile || selectedLeadId) && (
+            <div style={{ flex: 1, overflow: isMobile ? "visible" : "hidden", background: C.darkSurface }}>
+              {isMobile && selectedLeadId && (
+                <button onClick={() => setSelectedLeadId(null)} style={{ background: "transparent", border: "none", color: C.teal, padding: "12px 16px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
+                  ← Back to leads
+                </button>
+              )}
+              {selectedLead ? (
+                <LeadDetail lead={selectedLead} agent={selectedLead.agent_id ? agentsById[selectedLead.agent_id] : undefined} onSaved={load} />
+              ) : (
+                !isMobile && <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: C.dimText, fontSize: 13 }}>Select a lead to review</div>
               )}
             </div>
-          </div>
-          <div style={{ flex: 1, overflow: "hidden", background: C.darkSurface }}>
-            {selectedLead ? (
-              <LeadDetail lead={selectedLead} agent={selectedLead.agent_id ? agentsById[selectedLead.agent_id] : undefined} onSaved={load} />
-            ) : (
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: C.dimText, fontSize: 13 }}>Select a lead to review</div>
-            )}
-          </div>
+          )}
         </div>
       ) : tab === "agents" ? (
-        <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
-          <div style={{ width: 300, flexShrink: 0, borderRight: `1px solid ${C.darkBorder}`, padding: 12, overflowY: "auto" }}>
-            <p style={{ fontSize: 10, fontWeight: 700, color: C.teal, letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 10px" }}>Agent network ({agents.length})</p>
-            {agents.map((agent) => (
-              <AgentCard key={agent.id} agent={agent} selected={selectedAgent?.id === agent.id} onSelect={setSelectedAgent} />
-            ))}
-          </div>
-          <div style={{ flex: 1, padding: 20, overflowY: "auto", color: C.brightText }}>
-            {selectedAgent ? (
-              <div>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20, gap: 12 }}>
-                  <div>
-                    <h2 style={{ fontSize: 20, fontWeight: 700, color: C.brightText, margin: "0 0 4px" }}>{selectedAgent.contact_name}</h2>
-                    <p style={{ fontSize: 13, color: C.teal, margin: "0 0 8px" }}>{selectedAgent.company_name}</p>
-                    {(() => {
-                      const s = AGENT_STATUS[selectedAgent.relationship_status] || AGENT_STATUS.identified;
-                      return <span style={{ fontSize: 11, fontWeight: 600, background: s.bg, color: s.text, border: `1px solid ${s.border}`, borderRadius: 20, padding: "3px 10px" }}>{s.label}</span>;
-                    })()}
-                  </div>
-                  <div style={{ display: "flex", gap: 8 }}>
-                    {selectedAgent.phone && <a href={`tel:${selectedAgent.phone}`} style={{ background: C.teal, color: C.white, borderRadius: 8, padding: "8px 14px", fontSize: 12, fontWeight: 600, textDecoration: "none" }}>📞 Call</a>}
-                    {selectedAgent.email && <a href={`mailto:${selectedAgent.email}`} style={{ background: "none", border: `1px solid ${C.teal}`, color: C.teal, borderRadius: 8, padding: "8px 14px", fontSize: 12, fontWeight: 600, textDecoration: "none" }}>✉️ Email</a>}
-                  </div>
-                </div>
-
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
-                  {[
-                    { label: "Email", value: selectedAgent.email },
-                    { label: "Phone", value: selectedAgent.phone },
-                    { label: "Address", value: selectedAgent.address },
-                    { label: "Active councils", value: (selectedAgent.councils_active || []).join(", ") },
-                    { label: "Avg job value", value: fmt(selectedAgent.avg_job_value_estimate) },
-                  ].map((r) => r.value ? (
-                    <div key={r.label} style={{ background: "rgba(255,255,255,0.04)", borderRadius: 8, padding: "8px 12px" }}>
-                      <p style={{ fontSize: 10, color: C.dimText, margin: "0 0 2px" }}>{r.label}</p>
-                      <p style={{ fontSize: 12, color: C.brightText, fontWeight: 500, margin: 0 }}>{r.value}</p>
+        <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", flex: 1, overflow: isMobile ? "visible" : "hidden" }}>
+          {(!isMobile || !selectedAgent) && (
+            <div style={{ width: isMobile ? "100%" : 300, flexShrink: 0, borderRight: isMobile ? "none" : `1px solid ${C.darkBorder}`, borderBottom: isMobile ? `1px solid ${C.darkBorder}` : "none", padding: 12, overflowY: "auto" }}>
+              <p style={{ fontSize: 10, fontWeight: 700, color: C.teal, letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 10px" }}>Agent network ({agents.length})</p>
+              {agents.map((agent) => (
+                <AgentCard key={agent.id} agent={agent} selected={selectedAgent?.id === agent.id} onSelect={setSelectedAgent} />
+              ))}
+            </div>
+          )}
+          {(!isMobile || selectedAgent) && (
+            <div style={{ flex: 1, padding: isMobile ? "12px 16px" : 20, overflowY: "auto", color: C.brightText }}>
+              {isMobile && selectedAgent && (
+                <button onClick={() => setSelectedAgent(null)} style={{ background: "transparent", border: "none", color: C.teal, padding: "0 0 12px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
+                  ← Back to agents
+                </button>
+              )}
+              {selectedAgent ? (
+                <div>
+                  <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", justifyContent: "space-between", alignItems: isMobile ? "flex-start" : "flex-start", marginBottom: 20, gap: 12 }}>
+                    <div>
+                      <h2 style={{ fontSize: 20, fontWeight: 700, color: C.brightText, margin: "0 0 4px" }}>{selectedAgent.contact_name}</h2>
+                      <p style={{ fontSize: 13, color: C.teal, margin: "0 0 8px" }}>{selectedAgent.company_name}</p>
+                      {(() => {
+                        const s = AGENT_STATUS[selectedAgent.relationship_status] || AGENT_STATUS.identified;
+                        return <span style={{ fontSize: 11, fontWeight: 600, background: s.bg, color: s.text, border: `1px solid ${s.border}`, borderRadius: 20, padding: "3px 10px" }}>{s.label}</span>;
+                      })()}
                     </div>
-                  ) : null)}
-                </div>
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                      {selectedAgent.phone && <a href={`tel:${selectedAgent.phone}`} style={{ background: C.teal, color: C.white, borderRadius: 8, padding: "8px 14px", fontSize: 12, fontWeight: 600, textDecoration: "none" }}>📞 Call</a>}
+                      {selectedAgent.email && <a href={`mailto:${selectedAgent.email}`} style={{ background: "none", border: `1px solid ${C.teal}`, color: C.teal, borderRadius: 8, padding: "8px 14px", fontSize: 12, fontWeight: 600, textDecoration: "none" }}>✉️ Email</a>}
+                    </div>
+                  </div>
 
-                <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: 10, padding: "12px 14px", marginBottom: 12 }}>
-                  <p style={{ fontSize: 10, fontWeight: 700, color: C.teal, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 8px" }}>Notes & relationship log</p>
-                  <p style={{ fontSize: 12, color: selectedAgent.notes ? C.brightText : C.dimText, lineHeight: 1.65, margin: 0, whiteSpace: "pre-wrap" }}>{selectedAgent.notes || "No notes yet."}</p>
-                </div>
+                  <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 12, marginBottom: 16 }}>
+                    {[
+                      { label: "Email", value: selectedAgent.email },
+                      { label: "Phone", value: selectedAgent.phone },
+                      { label: "Address", value: selectedAgent.address },
+                      { label: "Active councils", value: (selectedAgent.councils_active || []).join(", ") },
+                      { label: "Avg job value", value: fmt(selectedAgent.avg_job_value_estimate) },
+                    ].map((r) => r.value ? (
+                      <div key={r.label} style={{ background: "rgba(255,255,255,0.04)", borderRadius: 8, padding: "8px 12px" }}>
+                        <p style={{ fontSize: 10, color: C.dimText, margin: "0 0 2px" }}>{r.label}</p>
+                        <p style={{ fontSize: 12, color: C.brightText, fontWeight: 500, margin: 0, wordBreak: "break-word" }}>{r.value}</p>
+                      </div>
+                    ) : null)}
+                  </div>
 
-                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                  {(["contacted", "interested", "partner", "not_interested"] as const).map((s) => (
-                    <button key={s} onClick={() => updateAgentStatus(selectedAgent, s)}
-                      style={{ background: "rgba(255,255,255,0.06)", border: `1px solid ${AGENT_STATUS[s].border}`, color: AGENT_STATUS[s].text, borderRadius: 7, padding: "6px 12px", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>
-                      Mark as {AGENT_STATUS[s].label}
-                    </button>
-                  ))}
+                  <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: 10, padding: "12px 14px", marginBottom: 12 }}>
+                    <p style={{ fontSize: 10, fontWeight: 700, color: C.teal, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 8px" }}>Notes & relationship log</p>
+                    <p style={{ fontSize: 12, color: selectedAgent.notes ? C.brightText : C.dimText, lineHeight: 1.65, margin: 0, whiteSpace: "pre-wrap" }}>{selectedAgent.notes || "No notes yet."}</p>
+                  </div>
+
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    {(["contacted", "interested", "partner", "not_interested"] as const).map((s) => (
+                      <button key={s} onClick={() => updateAgentStatus(selectedAgent, s)}
+                        style={{ background: "rgba(255,255,255,0.06)", border: `1px solid ${AGENT_STATUS[s].border}`, color: AGENT_STATUS[s].text, borderRadius: 7, padding: "6px 12px", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>
+                        Mark as {AGENT_STATUS[s].label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: C.dimText, fontSize: 13 }}>Select an agent to view their profile</div>
-            )}
-          </div>
+              ) : (
+                !isMobile && <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: C.dimText, fontSize: 13 }}>Select an agent to view their profile</div>
+              )}
+            </div>
+          )}
         </div>
       ) : (
-        <div style={{ flex: 1, overflowX: "auto", padding: 16, display: "flex", gap: 10 }}>
+        <div style={{ flex: 1, overflowX: isMobile ? "visible" : "auto", padding: isMobile ? 12 : 16, display: "flex", flexDirection: isMobile ? "column" : "row", gap: isMobile ? 16 : 10 }}>
           {PIPELINE_STAGES.filter((s) => s.id !== "not_suitable").map((stage) => {
             const stageLeads = leads.filter((l) => l.pipeline_status === stage.id);
             return (
-              <div key={stage.id} style={{ width: 220, flexShrink: 0 }}>
+              <div key={stage.id} style={{ width: isMobile ? "100%" : 220, flexShrink: 0 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
                   <p style={{ fontSize: 11, fontWeight: 700, color: stage.color, margin: 0, textTransform: "uppercase", letterSpacing: "0.06em" }}>{stage.label}</p>
                   <span style={{ fontSize: 11, color: C.dimText, background: "rgba(255,255,255,0.06)", borderRadius: 20, padding: "1px 8px" }}>{stageLeads.length}</span>
@@ -524,6 +544,9 @@ export default function PlanningPipeline() {
                       <PriorityBar score={lead.priority_score} />
                     </div>
                   ))}
+                  {stageLeads.length === 0 && (
+                    <p style={{ fontSize: 11, color: C.dimText, fontStyle: "italic", margin: "4px 0" }}>No leads in this stage</p>
+                  )}
                 </div>
               </div>
             );
