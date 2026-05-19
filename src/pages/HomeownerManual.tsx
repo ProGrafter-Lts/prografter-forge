@@ -275,7 +275,12 @@ const HomeownerManual = () => {
         </LockedSection>
 
         {/* Section 7 — Key Contacts */}
-        <ManualContacts trade={data.trade} warranties={data.warranties} />
+        <ManualContacts
+          trade={data.trade}
+          warranties={data.warranties}
+          jobType={data.job.job_type}
+          postcode={data.job.postcode}
+        />
 
         {/* Green Sections */}
         {data.isGreen && (
