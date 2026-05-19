@@ -243,7 +243,10 @@ const TradeRegisterNew = () => {
     phone.trim().length > 0 &&
     postcode.trim().length > 0;
 
-  const canProceedStep2 = tradeType.length > 0 && companyName.trim().length > 0;
+  const canProceedStep2 =
+    tradeType.length > 0 &&
+    companyName.trim().length > 0 &&
+    (tradeType !== "Other" || tradeTypeOther.trim().length > 0);
 
   const handleStep2Continue = () => {
     void import("@/components/SpecialismsPicker");
