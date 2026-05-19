@@ -268,9 +268,9 @@ const ContractPage = () => {
 
     return (
       <div className="min-h-screen flex flex-col items-center justify-center px-4 bg-background">
-        <a href="/" className="font-body text-[32px] leading-none tracking-wide mb-8">
-          <span className="text-navy">Pro</span>
-          <span className="text-teal">grafter</span>
+        <a href="/" className="font-heading text-[32px] leading-none tracking-wider mb-8">
+          <span className="text-navy">PRO</span>
+          <span className="text-teal">GRAFTER</span>
         </a>
         <div className="text-center max-w-md bg-card border border-border rounded-2xl p-8 shadow-sm">
           <ShieldAlert className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
