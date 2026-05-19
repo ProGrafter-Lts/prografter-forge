@@ -140,7 +140,7 @@ const Contact = () => {
             <span className="text-teal">TOUCH.</span>
           </h1>
           <p className="font-body text-body-text text-lg max-w-xl font-light">
-            We aim to respond to all enquiries within 24 hours on working days.
+            We aim to respond to all enquiries within 1–2 working days.
           </p>
         </section>
 
