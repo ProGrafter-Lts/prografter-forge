@@ -40,8 +40,18 @@ const STATUS_FILTERS = [
 
 type FilterKey = typeof STATUS_FILTERS[number]["key"];
 
+const LAUNCH_AREA_PREFIXES = ["NG", "DE", "LE"] as const;
+const isInLaunchArea = (postcode: string | null) => {
+  if (!postcode) return false;
+  const p = postcode.trim().toUpperCase();
+  return LAUNCH_AREA_PREFIXES.some((pre) => p.startsWith(pre));
+};
+const isInternalEmail = (email: string | null) =>
+  !!email && email.toLowerCase().endsWith("@prografter.co.uk");
+
 const AdminVerifications = () => {
   const [filter, setFilter] = useState<FilterKey>("pending");
+  const [sortMode, setSortMode] = useState<"wait" | "recent">("wait");
   const [trades, setTrades] = useState<PendingTrade[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeId, setActiveId] = useState<string | null>(null);
