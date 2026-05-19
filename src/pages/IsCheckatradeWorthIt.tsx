@@ -71,7 +71,7 @@ const IsCheckatradeWorthIt = () => {
         <div className="max-w-6xl mx-auto">
           <span className="font-mono text-xs text-teal uppercase tracking-widest">01 / The Real Cost</span>
           <h2 className="font-heading text-cream text-[36px] craft:text-[64px] leading-[1] mt-3 mb-8 max-w-3xl">
-            Checkatrade pricing<br />in 2026.
+            Checkatrade pricing<br />in {new Date().getFullYear()}.
           </h2>
           <p className="font-body text-cream/70 max-w-3xl mb-10 text-lg leading-relaxed">
             There are four main tiers. The cheapest gets you a listing; the most expensive is more than most trades' monthly take-home.
