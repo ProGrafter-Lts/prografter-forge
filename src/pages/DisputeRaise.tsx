@@ -147,8 +147,8 @@ export default function DisputeRaise() {
     <div style={{ minHeight:"100vh", background:C.cream }}>
       <div style={{ background:C.deep, padding:"14px 24px",
         display:"flex", alignItems:"center", gap:12 }}>
-        <div style={{ fontSize:20, fontWeight:700 }}>
-          <span style={{ color:C.cream }}>Pro</span><span style={{ color:C.teal }}>Grafter</span>
+        <div className="font-heading tracking-wider" style={{ fontSize:24, fontWeight:700 }}>
+          <span style={{ color:C.cream }}>PRO</span><span style={{ color:C.teal }}>GRAFTER</span>
         </div>
         <span style={{ color:"rgba(245,240,232,0.45)" }}>|</span>
         <span style={{ fontSize:12, color:"rgba(245,240,232,0.78)", letterSpacing:"0.05em" }}>

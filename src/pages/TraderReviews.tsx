@@ -221,9 +221,9 @@ export default function TraderReviews() {
       />
 
       <div style={{ background:C.deep, padding:"14px 24px", display:"flex", alignItems:"center", justifyContent:"space-between", position:"sticky", top:0, zIndex:10 }}>
-        <Link to="/" style={{ fontSize:20, fontWeight:700, textDecoration:"none" }}>
-          <span style={{ color:C.brightText }}>Pro</span>
-          <span style={{ color:C.teal }}>Grafter</span>
+        <Link to="/" className="font-heading tracking-wider" style={{ fontSize:24, textDecoration:"none" }}>
+          <span style={{ color:C.brightText }}>PRO</span>
+          <span style={{ color:C.teal }}>GRAFTER</span>
         </Link>
         <span style={{ fontSize:12, color:C.dimText, fontWeight:500, letterSpacing:"0.05em" }}>TRADER PROFILE</span>
       </div>

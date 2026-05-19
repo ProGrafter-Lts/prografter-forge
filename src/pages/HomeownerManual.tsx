@@ -180,9 +180,9 @@ const HomeownerManual = () => {
               <p className="font-mono text-[10px] uppercase tracking-wider text-primary-foreground/60 mb-1">
                 Homeowner Manual
               </p>
-              <h1 className="font-heading text-3xl md:text-4xl">
-                <span className="text-primary-foreground">Pro</span>
-                <span className="text-secondary">grafter</span>
+              <h1 className="font-heading text-3xl md:text-4xl tracking-wider">
+                <span className="text-primary-foreground">PRO</span>
+                <span className="text-secondary">GRAFTER</span>
               </h1>
             </div>
             <button

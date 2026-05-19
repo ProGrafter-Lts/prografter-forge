@@ -81,9 +81,9 @@ const ResetPassword = () => {
       />
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <a href="/" className="font-body text-[32px] leading-none tracking-wide font-bold">
-            <span className="text-navy">Pro</span>
-            <span className="text-teal">grafter</span>
+          <a href="/" className="font-heading text-[32px] leading-none tracking-wider">
+            <span className="text-navy">PRO</span>
+            <span className="text-teal">GRAFTER</span>
           </a>
           <div className="mt-3">
             <a
