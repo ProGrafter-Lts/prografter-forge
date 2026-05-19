@@ -425,7 +425,9 @@ const AdminVerifications = () => {
                       )}
                       <div className="mt-2 flex flex-wrap gap-2">
                         <Badge className="bg-navy/10 text-navy">
-                          {t.trade_type || "Trade type missing"}
+                          {t.trade_type === "Other" && t.trade_type_other
+                            ? `Other: ${t.trade_type_other}`
+                            : t.trade_type || "Trade type missing"}
                         </Badge>
                         {t.postcode && (
                           <Badge className="bg-navy/10 text-navy font-mono">
