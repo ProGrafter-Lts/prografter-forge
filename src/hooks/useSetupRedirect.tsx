@@ -15,7 +15,11 @@ const SETUP_LOOKUP_TIMEOUT_MS = 6000;
  * Returns `checking = true` while we resolve the session + profile state,
  * so the page can render a loading shell instead of flashing the form.
  */
-export function useSetupRedirect(role: "trade" | "homeowner") {
+export function useSetupRedirect(
+  role: "trade" | "homeowner",
+  options: { redirectIfExists?: boolean } = {},
+) {
+  const { redirectIfExists = true } = options;
   const navigate = useNavigate();
   const [checking, setChecking] = useState(true);
   const { isReady, user } = useAuthReady();
@@ -76,7 +80,7 @@ export function useSetupRedirect(role: "trade" | "homeowner") {
           // Partial signup — fall through and let SignupTrade resume.
         }
 
-        if (role === "homeowner" && homeownerRes.data) {
+        if (role === "homeowner" && homeownerRes.data && redirectIfExists) {
           navigate("/dashboard/homeowner", { replace: true });
           return;
         }
