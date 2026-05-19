@@ -37,7 +37,7 @@ const About = () => {
       </section>
 
       {/* How the platform works */}
-      <section className="px-6 pb-20">
+      <section className="px-6 pb-16">
         <div className="max-w-3xl mx-auto">
           <div className="flex items-center gap-3 mb-8">
             <div className="w-8 h-[2px] bg-teal" />
@@ -45,10 +45,10 @@ const About = () => {
               The Platform
             </span>
           </div>
-          <h2 className="font-heading text-cream text-[36px] craft:text-[56px] leading-[0.95] mb-10">
+          <h2 className="font-heading text-cream text-[36px] craft:text-[56px] leading-[0.95] mb-8">
             How the platform works
           </h2>
-          <div className="space-y-6 font-body text-cream/80 text-lg leading-relaxed font-light">
+          <div className="space-y-6 font-body text-cream/90 text-lg leading-relaxed font-light">
             <p>
               Every trade on ProGrafter is verified five ways before their
               profile goes live: identity confirmed, insurance verified,
