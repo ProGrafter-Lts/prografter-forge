@@ -65,14 +65,16 @@ const HomeownerManual = () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { navigate("/login"); return; }
 
-    const [jobRes, contractRes, stagesRes, materialsRes, certsRes, warrantiesRes, proRes] = await Promise.all([
+    const [jobRes, contractRes, stagesRes, materialsRes, certsRes, warrantiesRes, proRes, quotesRes, jobPhotosRes] = await Promise.all([
       supabase.from("jobs").select("*").eq("id", projectId!).single(),
-      supabase.from("contracts").select("*").eq("job_id", projectId!).maybeSingle(),
+      supabase.from("contracts_compat").select("*").eq("job_id", projectId!).maybeSingle(),
       supabase.from("project_stages").select("*").eq("job_id", projectId!).order("stage_order"),
       supabase.from("materials_log").select("*").eq("job_id", projectId!).order("created_at"),
       supabase.from("project_certificates").select("*").eq("job_id", projectId!).order("created_at"),
       supabase.from("project_warranties").select("*").eq("job_id", projectId!).order("created_at"),
       supabase.from("manual_pro_purchases").select("*").eq("job_id", projectId!).eq("user_id", user.id).maybeSingle(),
+      supabase.from("quotes").select("id, amount, status").eq("job_id", projectId!).eq("status", "accepted").maybeSingle(),
+      supabase.from("job_photos").select("*").eq("job_id", projectId!).order("created_at"),
     ]);
 
     if (!jobRes.data) { setLoading(false); return; }
@@ -83,8 +85,8 @@ const HomeownerManual = () => {
     let trade = null, homeowner = null;
     if (contractRes.data) {
       const [tradeRes, hoRes] = await Promise.all([
-        supabase.from("trades").select("*").eq("id", contractRes.data.trade_id).single(),
-        supabase.from("homeowners").select("*").eq("id", contractRes.data.homeowner_id).single(),
+        supabase.from("trades").select("*").eq("id", (contractRes.data as any).trade_id).single(),
+        supabase.from("homeowners").select("*").eq("id", (contractRes.data as any).homeowner_id).single(),
       ]);
       trade = tradeRes.data;
       homeowner = hoRes.data;
@@ -113,19 +115,27 @@ const HomeownerManual = () => {
       greenData = gd;
     }
 
+    // A job is "ProGrafter completed" when it ran through the platform to
+    // completion (contract exists + job finished). All sections are free.
+    const isProGrafterCompleted =
+      !!contractRes.data && (job.stage === "completed" || job.status === "completed" || job.status === "complete");
+
     setData({
       job,
       trade,
       homeowner,
       contract: contractRes.data,
+      acceptedQuoteAmount: quotesRes.data ? Number((quotesRes.data as any).amount) : null,
       stages: stagesRes.data || [],
       stageUpdates,
+      jobPhotos: jobPhotosRes.data || [],
       materials: materialsRes.data || [],
       certificates: certsRes.data || [],
       warranties: warrantiesRes.data || [],
       greenData,
-      isPro: !!proRes.data,
+      isPro: !!proRes.data || isProGrafterCompleted,
       isGreen: job.is_green_job,
+      isProGrafterCompleted,
     });
     setLoading(false);
   };
