@@ -51,17 +51,10 @@ const IsCheckatradeWorthIt = () => {
 
       {/* Hero */}
       <section className="relative pt-32 pb-20 px-6 overflow-hidden">
-        <span
-          className="absolute -bottom-8 right-0 font-heading text-[160px] craft:text-[280px] text-cream select-none pointer-events-none leading-none"
-          style={{ opacity: 0.03 }}
-          aria-hidden
-        >
-          HONEST
-        </span>
         <div className="max-w-5xl mx-auto relative z-10">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-8 h-[2px] bg-teal" />
-            <span className="font-mono text-xs text-teal uppercase tracking-widest">Honest Trade Review · 2026</span>
+            <span className="font-mono text-xs text-teal uppercase tracking-widest">Honest Trade Review · {new Date().getFullYear()}</span>
           </div>
           <h1 className="font-heading text-cream text-[40px] craft:text-[80px] leading-[0.95] max-w-4xl">
             Is Checkatrade worth it?<br />
@@ -78,7 +71,7 @@ const IsCheckatradeWorthIt = () => {
         <div className="max-w-6xl mx-auto">
           <span className="font-mono text-xs text-teal uppercase tracking-widest">01 / The Real Cost</span>
           <h2 className="font-heading text-cream text-[36px] craft:text-[64px] leading-[1] mt-3 mb-8 max-w-3xl">
-            Checkatrade pricing<br />in 2026.
+            Checkatrade pricing<br />in {new Date().getFullYear()}.
           </h2>
           <p className="font-body text-cream/70 max-w-3xl mb-10 text-lg leading-relaxed">
             There are four main tiers. The cheapest gets you a listing; the most expensive is more than most trades' monthly take-home.
@@ -133,6 +126,9 @@ const IsCheckatradeWorthIt = () => {
           <p className="font-body text-cream/60 mt-6 text-sm leading-relaxed max-w-3xl">
             And that's just the membership. Add lead credits, marketing time and quiet months — the real number is higher.
           </p>
+          <p className="font-mono text-cream/40 text-xs mt-4 max-w-3xl leading-relaxed">
+            Assumes £400 average profit per domestic job. Margins vary by trade, job size, and materials cost. Use your own average job profit to calculate your personal break-even point.
+          </p>
         </div>
       </section>
 
@@ -176,11 +172,11 @@ const IsCheckatradeWorthIt = () => {
               That's the founder's own MyBuilder run before ProGrafter existed — the kind of result that pushed this whole thing into being. Same shared-lead problem, same outcome.
             </p>
             <p>
-              The full story is on the About page, including the receipts and the moment the maths stopped making sense.
+              The full story is on the About page — including the moment the maths stopped making sense.
             </p>
           </div>
           <Link to="/about" className="inline-flex items-center gap-2 mt-8 font-mono text-sm text-teal hover:text-teal-hover">
-            Read the full story on /about <ArrowRight className="w-4 h-4" />
+            Read the full story on the About page <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
       </section>
@@ -230,7 +226,7 @@ const IsCheckatradeWorthIt = () => {
             Register Free —<br /><span className="text-teal">No Monthly Fees.</span>
           </h2>
           <p className="font-body text-cream/70 max-w-xl mx-auto mb-10 text-lg">
-            7.5% on completion only. Capped at £900. No subscription, no credits, no contract.
+            7.5% on completion only. Capped at £900. No subscription, no credits, no lock-in.
           </p>
           <Button asChild size="lg" className="bg-teal hover:bg-teal/90 text-deep font-mono uppercase tracking-wider">
             <Link to="/register/trade">
