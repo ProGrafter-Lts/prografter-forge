@@ -311,6 +311,7 @@ export default function PlanningPipeline() {
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterPipeline, setFilterPipeline] = useState("all");
   const [search, setSearch] = useState("");
+  const isMobile = useIsMobile();
 
   const load = async () => {
     setLoading(true);
