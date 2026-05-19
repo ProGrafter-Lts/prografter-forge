@@ -4,17 +4,22 @@ import JobPhoto from "@/components/JobPhoto";
 interface Props {
   stages: any[];
   stageUpdates: any[];
+  jobPhotos?: any[];
+  jobPhotoUrls?: string[];
   isPro: boolean;
   onUpgrade: () => void;
 }
 
-const ManualPhotos = ({ stages, stageUpdates, isPro, onUpgrade }: Props) => {
-  // Collect all photos with stage info
+const ManualPhotos = ({ stages, stageUpdates, jobPhotos = [], jobPhotoUrls = [], isPro, onUpgrade }: Props) => {
+  // Collect all photos with stage info from multiple sources:
+  //  1. stage_updates.photo_urls (daily updates from the trade)
+  //  2. job_photos (uploaded by either party at any point in the project)
+  //  3. job.photo_urls (initial photos posted with the job)
   const photos: { url: string; stageName: string; date: string }[] = [];
 
   for (const update of stageUpdates) {
     const stage = stages.find(s => s.id === update.stage_id);
-    const stageName = stage?.stage_name || "Unknown Stage";
+    const stageName = stage?.stage_name || "Site Update";
     const urls = update.photo_urls || [];
     for (const url of urls) {
       photos.push({
@@ -23,6 +28,19 @@ const ManualPhotos = ({ stages, stageUpdates, isPro, onUpgrade }: Props) => {
         date: new Date(update.created_at).toLocaleDateString("en-GB"),
       });
     }
+  }
+
+  for (const jp of jobPhotos) {
+    const stage = stages.find(s => s.id === jp.stage);
+    photos.push({
+      url: jp.photo_url,
+      stageName: jp.label || stage?.stage_name || "Project Photo",
+      date: new Date(jp.created_at).toLocaleDateString("en-GB"),
+    });
+  }
+
+  for (const url of jobPhotoUrls) {
+    photos.push({ url, stageName: "Original job posting", date: "—" });
   }
 
   const freeLimit = 10;
