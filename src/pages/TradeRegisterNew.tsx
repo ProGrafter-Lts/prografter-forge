@@ -314,7 +314,7 @@ const TradeRegisterNew = () => {
                       </div>
                       <div>
                         <label className={labelClass}>Postcode *</label>
-                        <input type="text" value={postcode} onChange={(e) => setPostcode(e.target.value)} placeholder="SW1A 1AA" required className={inputClass} />
+                        <input type="text" value={postcode} onChange={(e) => setPostcode(e.target.value)} placeholder="NG1 1AA" required className={inputClass} />
                       </div>
                     </div>
                   </div>

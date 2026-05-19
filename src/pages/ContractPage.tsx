@@ -64,12 +64,15 @@ interface EventRow {
 const formatGBP = (pence: number) =>
   `£${(pence / 100).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
+type UnavailableReason = "no_contract" | "awaiting_signatures" | "permission_denied";
+
 const ContractPage = () => {
   const { id: jobId } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
   const [contract, setContract] = useState<ContractRow | null>(null);
+  const [unavailableReason, setUnavailableReason] = useState<UnavailableReason>("no_contract");
   const [variations, setVariations] = useState<VariationRow[]>([]);
   const [events, setEvents] = useState<EventRow[]>([]);
   const [signingEnabled, setSigningEnabled] = useState(false);
@@ -102,13 +105,20 @@ const ContractPage = () => {
       .maybeSingle();
 
     if (error) {
-      toast.error("Could not load contract");
+      const msg = (error.message || "").toLowerCase();
+      if (error.code === "PGRST301" || msg.includes("permission") || msg.includes("denied") || msg.includes("not allowed")) {
+        setUnavailableReason("permission_denied");
+      } else {
+        toast.error("Could not load contract");
+      }
+      setContract(null);
       setLoading(false);
       return;
     }
 
     if (!c) {
       setContract(null);
+      setUnavailableReason("no_contract");
       setLoading(false);
       return;
     }
@@ -243,14 +253,29 @@ const ContractPage = () => {
   }
 
   if (!contract) {
+    const copy =
+      unavailableReason === "permission_denied"
+        ? { title: "Access denied", body: "You don't have permission to view this contract." }
+        : unavailableReason === "awaiting_signatures"
+        ? {
+            title: "Contract awaiting signatures",
+            body: "Both the trade and homeowner must sign the contract before it can be viewed. Check back once both parties have signed.",
+          }
+        : {
+            title: "No contract yet",
+            body: "A contract will be generated once a quote is accepted and the project begins.",
+          };
+
     return (
-      <div className="min-h-screen flex items-center justify-center px-4">
-        <div className="text-center max-w-md">
+      <div className="min-h-screen flex flex-col items-center justify-center px-4 bg-background">
+        <a href="/" className="font-body text-[32px] leading-none tracking-wide mb-8">
+          <span className="text-navy">Pro</span>
+          <span className="text-teal">grafter</span>
+        </a>
+        <div className="text-center max-w-md bg-card border border-border rounded-2xl p-8 shadow-sm">
           <ShieldAlert className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-          <h1 className="font-heading text-2xl text-primary mb-2">Contract not available</h1>
-          <p className="font-mono text-sm text-muted-foreground mb-6">
-            No contract exists for this project, or you don't have permission to view it.
-          </p>
+          <h1 className="font-heading text-2xl text-primary mb-2">{copy.title}</h1>
+          <p className="font-mono text-sm text-muted-foreground mb-6">{copy.body}</p>
           <Button asChild variant="outline">
             <Link to={jobId ? `/project/${jobId}` : "/"}>
               <ArrowLeft className="w-4 h-4 mr-2" /> Back to project

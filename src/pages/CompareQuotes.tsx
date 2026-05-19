@@ -255,12 +255,43 @@ const CompareQuotes = () => {
         </button>
 
         <h1 className="font-heading text-primary text-3xl md:text-4xl">Compare Quotes</h1>
-        <p className="font-mono text-sm text-muted-foreground mt-1 mb-6">
-          {job?.title ?? job?.job_type} · {job?.postcode}
-        </p>
+        {(job?.title || job?.job_type || job?.postcode) && (
+          <p className="font-mono text-sm text-muted-foreground mt-1 mb-6">
+            {[job?.title ?? job?.job_type, job?.postcode].filter(Boolean).join(" · ")}
+          </p>
+        )}
 
         {quotes.length === 0 ? (
-          <p className="font-mono text-sm text-muted-foreground">No quotes yet for this job.</p>
+          <div className="bg-card border border-border rounded-2xl p-8 max-w-2xl">
+            <h2 className="font-heading text-primary text-xl mb-2">No quotes received yet</h2>
+            <p className="font-mono text-sm text-muted-foreground mb-6">
+              When trades submit quotes for your project, they'll appear here for comparison.
+              You can receive up to 5 quotes per job.
+            </p>
+            <div className="border border-dashed border-border rounded-xl p-5 bg-muted/20 mb-6">
+              <div className="flex items-center justify-between mb-3">
+                <div className="space-y-1">
+                  <div className="h-3 w-32 bg-muted rounded" />
+                  <div className="h-2 w-20 bg-muted/70 rounded" />
+                </div>
+                <div className="h-5 w-16 bg-muted rounded" />
+              </div>
+              <div className="space-y-2">
+                <div className="h-2 w-full bg-muted/60 rounded" />
+                <div className="h-2 w-4/5 bg-muted/60 rounded" />
+                <div className="h-2 w-3/5 bg-muted/60 rounded" />
+              </div>
+              <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground mt-4">
+                Quote card preview
+              </p>
+            </div>
+            <button
+              onClick={() => navigate(`/project/${jobId}`)}
+              className="font-mono text-xs text-secondary hover:underline inline-flex items-center gap-1"
+            >
+              <ArrowLeft className="w-3 h-3" /> Back to project
+            </button>
+          </div>
         ) : (
           <>
             {/* Verdict header strip */}
