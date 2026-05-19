@@ -5,9 +5,13 @@ import { formatStatusLabel } from "@/lib/statusLabel";
 
 const STATUS_COLORS: Record<string, string> = {
   open: "bg-secondary/10 text-secondary",
+  awaiting_quotes: "bg-amber-100 text-amber-800",
   matched: "bg-blue-100 text-blue-700",
   active: "bg-amber-100 text-amber-700",
+  in_progress: "bg-secondary/15 text-secondary",
+  review: "bg-purple-100 text-purple-800",
   complete: "bg-green-100 text-green-700",
+  completed: "bg-green-100 text-green-700",
 };
 
 const timeAgo = (dateStr: string) => {
