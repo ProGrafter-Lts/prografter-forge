@@ -62,7 +62,7 @@ const ProjectHeader = ({
   endDate,
 }: ProjectHeaderProps) => {
   const schedule = computeSchedule(startDate, endDate);
-  const statusLabel = job.status.replace(/_/g, " ");
+  const statusLabel = formatStatusLabel(job.status);
 
   return (
     <div className="bg-white rounded-2xl p-6 border border-navy/10 shadow-sm">
