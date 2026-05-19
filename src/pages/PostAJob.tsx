@@ -101,6 +101,10 @@ const PostAJob = () => {
   // Step 2
   const [description, setDescription] = useState("");
   const [photos, setPhotos] = useState<File[]>([]);
+  const [step2Attempted, setStep2Attempted] = useState(false);
+
+  // Funds GDPR modal
+  const [fundsGdprOpen, setFundsGdprOpen] = useState(false);
 
   // Step 3
   const [address, setAddress] = useState("");
