@@ -834,7 +834,7 @@ const SignupTrade = () => {
                 </div>
                 <div>
                   <label className={labelClass}>Business Postcode *</label>
-                  <input className={`${inputClass} uppercase`} value={postcode} onChange={(e) => setPostcode(e.target.value)} placeholder="SW1A 1AA" autoComplete="postal-code" />
+                  <input className={`${inputClass} uppercase`} value={postcode} onChange={(e) => setPostcode(e.target.value)} placeholder="NG1 1AA" autoComplete="postal-code" />
                 </div>
                 <label className="flex items-start gap-3 pt-2 cursor-pointer">
                   <input type="checkbox" checked={agreedTerms} onChange={(e) => setAgreedTerms(e.target.checked)} className={`${checkboxClass} mt-1`} />

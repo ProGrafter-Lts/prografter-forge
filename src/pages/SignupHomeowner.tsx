@@ -197,7 +197,7 @@ const SignupHomeowner = () => {
                 value={form.postcode}
                 onChange={(e) => update("postcode", e.target.value)}
                 className="input uppercase"
-                placeholder="e.g. SW1A 1AA"
+                placeholder="e.g. NG1 1AA"
               />
             </Field>
 

@@ -9,7 +9,13 @@ const SignupHomeownerNext = () => {
       <Navbar />
       <main className="pt-24 pb-16 px-6">
         <div className="max-w-2xl mx-auto text-center">
-          <span className="font-mono text-xs text-teal uppercase tracking-widest">Account created</span>
+          <a href="/" className="font-body text-[32px] leading-none tracking-wide inline-block mb-6">
+            <span className="text-navy">Pro</span>
+            <span className="text-teal">grafter</span>
+          </a>
+          <div>
+            <span className="font-mono text-xs text-teal uppercase tracking-widest">Account created</span>
+          </div>
           <h1 className="font-heading text-navy text-4xl craft:text-5xl mt-3 mb-4">
             What brings you here today?
           </h1>

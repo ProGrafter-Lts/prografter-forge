@@ -64,12 +64,15 @@ interface EventRow {
 const formatGBP = (pence: number) =>
   `£${(pence / 100).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
+type UnavailableReason = "no_contract" | "awaiting_signatures" | "permission_denied";
+
 const ContractPage = () => {
   const { id: jobId } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
   const [contract, setContract] = useState<ContractRow | null>(null);
+  const [unavailableReason, setUnavailableReason] = useState<UnavailableReason>("no_contract");
   const [variations, setVariations] = useState<VariationRow[]>([]);
   const [events, setEvents] = useState<EventRow[]>([]);
   const [signingEnabled, setSigningEnabled] = useState(false);

@@ -231,7 +231,7 @@ const TradeRegister = () => {
                           type="text"
                           value={postcode}
                           onChange={(e) => setPostcode(e.target.value)}
-                          placeholder="SW1A 1AA"
+                          placeholder="NG1 1AA"
                           required
                           className={inputClass}
                         />
