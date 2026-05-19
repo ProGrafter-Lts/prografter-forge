@@ -18,36 +18,42 @@ const contactSchema = z.object({
 });
 
 const SUBJECT_OPTIONS = [
-  "General",
-  "Trade Account",
-  "Homeowner Account",
-  "Technical Issue",
-  "Partnership",
-  "Press",
-  "Other",
+  "General Enquiry",
+  "Homeowner Support",
+  "Trade Support",
+  "Report a Problem",
+  "Press & Media",
+  "Partnership Enquiry",
 ];
 
 const CONTACT_CARDS = [
   {
     title: "General Enquiries",
     email: "hello@prografter.co.uk",
-    subjectLine: null as string | null,
+    subjectLine: "General Enquiry",
     description: "For general questions about ProGrafter",
     badge: "01",
   },
   {
+    title: "Homeowner Support",
+    email: "hello@prografter.co.uk",
+    subjectLine: "Homeowner Support",
+    description: "For homeowners with questions about their project or account",
+    badge: "02",
+  },
+  {
     title: "Trade Support",
     email: "hello@prografter.co.uk",
-    subjectLine: "Trade Support — [your name]",
+    subjectLine: "Trade Support",
     description: "For trades needing help with registration or your account",
-    badge: "02",
+    badge: "03",
   },
   {
     title: "Report a Problem",
     email: "hello@prografter.co.uk",
-    subjectLine: "Issue Report — [brief description]",
+    subjectLine: "Issue Report",
     description: "To report a technical problem or urgent issue",
-    badge: "03",
+    badge: "04",
   },
 ];
 
