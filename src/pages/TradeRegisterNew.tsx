@@ -388,6 +388,19 @@ const TradeRegisterNew = () => {
                           <span className="font-mono text-xs">Renewable & Energy Efficiency trade — green certifications next</span>
                         </div>
                       )}
+                      {tradeType === "Other" && (
+                        <div className="mt-3">
+                          <label className={labelClass}>Specify your trade *</label>
+                          <input
+                            type="text"
+                            value={tradeTypeOther}
+                            onChange={(e) => setTradeTypeOther(e.target.value)}
+                            placeholder="e.g. Stove Installer, Asbestos Surveyor…"
+                            required
+                            className={inputClass}
+                          />
+                        </div>
+                      )}
                     </div>
                     <div>
                       <label className={labelClass}>Company Name *</label>
