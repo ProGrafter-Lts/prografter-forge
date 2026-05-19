@@ -588,15 +588,25 @@ export default function PlanningAlerts() {
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterTrade, setFilterTrade] = useState("all");
   const [filterCouncil, setFilterCouncil] = useState("all");
+  const [filterDate, setFilterDate] = useState<"all" | "7" | "30" | "90">("90");
+  const [filterProjectType, setFilterProjectType] = useState<"all" | ProjectKind>("all");
+  const [showRefused, setShowRefused] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
   const allTrades = [...new Set(MOCK_APPLICATIONS.flatMap(a => a.trades_needed))].sort();
   const allCouncils = [...new Set(MOCK_APPLICATIONS.map(a => a.council))].sort();
 
   const filtered = MOCK_APPLICATIONS.filter(app => {
+    // Hide refused by default unless user explicitly toggles or status filter is "refused"
+    if (!showRefused && app.status === "refused" && filterStatus !== "refused") return false;
     if (filterStatus !== "all" && app.status !== filterStatus) return false;
     if (filterTrade !== "all" && !app.trades_needed.includes(filterTrade)) return false;
     if (filterCouncil !== "all" && app.council !== filterCouncil) return false;
+    if (filterProjectType !== "all" && getProjectType(app) !== filterProjectType) return false;
+    if (filterDate !== "all") {
+      const cutoff = Date.now() - Number(filterDate) * 86400000;
+      if (new Date(app.submitted_date).getTime() < cutoff) return false;
+    }
     if (searchQuery && !app.description.toLowerCase().includes(searchQuery.toLowerCase())
       && !app.address.toLowerCase().includes(searchQuery.toLowerCase())) return false;
     return true;
