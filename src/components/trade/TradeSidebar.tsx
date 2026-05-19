@@ -1,5 +1,6 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useVerificationStatus } from "@/hooks/useVerificationStatus";
 import {
   LayoutDashboard,
   Briefcase,
@@ -9,6 +10,7 @@ import {
   UserCircle,
   Settings,
   LogOut,
+  ShieldCheck,
 } from "lucide-react";
 
 const NAV_ITEMS = [
