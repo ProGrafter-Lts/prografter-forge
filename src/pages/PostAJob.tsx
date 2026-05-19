@@ -420,19 +420,19 @@ const PostAJob = () => {
                       <textarea
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
-                        placeholder="Describe the job in detail — what needs doing, any access issues, your timeframe..."
+                        placeholder="e.g. I need the bathroom fully retiled — floor and walls. Old tiles to be removed. Room is approximately 3m x 2m. Happy to discuss timing."
                         rows={5}
                         className={`${inputClass} resize-none`}
                       />
-                      <p
-                        className={`text-right font-mono text-xs mt-1 ${
-                          description.trim().length < 50 ? "text-red-400" : "text-teal/70"
-                        }`}
-                      >
-                        {description.trim().length < 50
-                          ? `Minimum 50 characters — ${50 - description.trim().length} more to go`
-                          : `${description.trim().length} characters · minimum met ✓`}
-                      </p>
+                      {step2Attempted && description.trim().length < 50 ? (
+                        <p className="text-right font-mono text-xs mt-1 text-amber-400">
+                          Minimum 50 characters — {50 - description.trim().length} more to go
+                        </p>
+                      ) : description.trim().length >= 50 ? (
+                        <p className="text-right font-mono text-xs mt-1 text-teal/70">
+                          {description.trim().length} characters · minimum met ✓
+                        </p>
+                      ) : null}
                     </div>
 
                     <div>
@@ -466,7 +466,7 @@ const PostAJob = () => {
                       {photos.length < 4 && (
                         <label className="block cursor-pointer">
                           <div className="border-2 border-dashed border-cream/15 hover:border-cream/30 rounded-xl p-6 text-center transition-colors">
-                            <p className="font-mono text-cream/50 text-sm">Click to add photos</p>
+                            <p className="font-mono text-cream/50 text-sm">Tap or click to add photos</p>
                             <p className="font-body text-cream/30 text-xs mt-1">
                               JPG or PNG, max 10 MB each
                             </p>
@@ -480,6 +480,9 @@ const PostAJob = () => {
                           />
                         </label>
                       )}
+                      <p className="font-body text-cream/50 text-xs mt-2 leading-relaxed">
+                        Photos help trades price accurately — the more detail the better. Only verified trades you're matched with can see them.
+                      </p>
                     </div>
                   </div>
                   <div className="flex gap-4 mt-8">
@@ -492,9 +495,13 @@ const PostAJob = () => {
                     </button>
                     <button
                       type="button"
-                      disabled={!canStep2}
-                      onClick={() => { setError(""); setStep(3); }}
-                      className="flex-1 bg-teal text-cream font-mono text-sm py-3 rounded-xl hover:bg-teal-hover transition-colors disabled:opacity-40"
+                      onClick={() => {
+                        setStep2Attempted(true);
+                        if (!canStep2) return;
+                        setError("");
+                        setStep(3);
+                      }}
+                      className="flex-1 bg-teal text-cream font-mono text-sm py-3 rounded-xl hover:bg-teal-hover transition-colors"
                     >
                       Continue
                     </button>
