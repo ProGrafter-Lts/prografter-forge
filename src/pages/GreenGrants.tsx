@@ -279,7 +279,7 @@ const GreenGrantsPage = () => {
       {/* SECTION 1 — HERO */}
       <section className="pt-28 pb-16 px-6 bg-navy">
         <div className="max-w-3xl mx-auto text-center">
-          <span className="font-mono text-xs text-[#16A34A] uppercase tracking-widest mb-4 block">🌿 Green Energy Grants</span>
+          <span className="font-mono text-xs text-teal uppercase tracking-widest mb-4 block">Green Energy Grants</span>
           <h1 className="font-heading text-cream text-[40px] sm:text-[52px] md:text-[60px] leading-[0.95] tracking-wide mb-5">
             COULD YOU GET HELP FUNDING YOUR HOME IMPROVEMENTS?
           </h1>
@@ -288,7 +288,7 @@ const GreenGrantsPage = () => {
           </p>
           <button
             onClick={scrollToChecker}
-            className="inline-block bg-[#16A34A] text-white font-mono text-sm px-8 py-3.5 rounded-xl hover:bg-[#15803D] transition-colors shadow-lg shadow-[#16A34A]/20"
+            className="inline-block bg-teal text-cream font-mono text-sm px-8 py-3.5 rounded-xl hover:bg-teal-hover transition-colors shadow-lg shadow-teal/20"
           >
             Check My Eligibility →
           </button>
@@ -296,7 +296,7 @@ const GreenGrantsPage = () => {
       </section>
 
       {/* SECTION 2 — DETAILED SCHEMES BREAKDOWN */}
-      <GreenSchemesBreakdown />
+      <GreenSchemesBreakdown onCheckEligibility={scrollToChecker} />
 
       {/* SECTION 3 — THE 4-STEP CHECKER */}
       <section className="px-6 pb-24" ref={checkerRef}>
