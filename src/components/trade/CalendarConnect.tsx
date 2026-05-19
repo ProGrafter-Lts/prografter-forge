@@ -156,7 +156,7 @@ const CalendarConnect = ({ variant = "full" }: CalendarConnectProps) => {
               className="flex items-center gap-2 bg-primary text-primary-foreground px-5 py-2.5 rounded font-mono text-sm hover:bg-primary/90 transition border-2 border-primary shadow-[3px_3px_0_0_hsl(var(--foreground))]"
             >
               {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-              {copied ? "Copied to clipboard" : "Copy Calendar Link"}
+              {copied ? "✓ Copied!" : "Copy Calendar Link"}
             </button>
             <button
               onClick={regenerate}
