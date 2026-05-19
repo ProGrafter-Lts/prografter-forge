@@ -22,14 +22,35 @@ const GENERAL_TRADE_TYPES = [
   "Electrician",
   "Plumber",
   "Gas Engineer",
+  "Heating Engineer",
   "Builder",
+  "General Builder",
+  "Bricklayer",
+  "Stonemason",
   "Roofer",
   "Plasterer",
-  "Carpenter",
+  "Renderer",
+  "Carpenter / Joiner",
+  "Kitchen Fitter",
+  "Bathroom Fitter",
   "Tiler",
-  "Decorator",
+  "Flooring Specialist",
+  "Decorator / Painter",
+  "Glazier / Window Fitter",
+  "Locksmith",
   "Scaffolder",
   "Landscaper",
+  "Driveway / Paving Specialist",
+  "Fencing Specialist",
+  "Groundworker",
+  "Drainage Specialist",
+  "Damp Proofing Specialist",
+  "Insulation Installer",
+  "Loft Conversion Specialist",
+  "Extension Specialist",
+  "Garage Conversion Specialist",
+  "Demolition / Clearance",
+  "Handyperson",
   "Other",
 ] as const;
 
@@ -51,6 +72,7 @@ const TradeRegisterNew = () => {
 
   // Step 2
   const [tradeType, setTradeType] = useState("");
+  const [tradeTypeOther, setTradeTypeOther] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [yearsExperience, setYearsExperience] = useState("");
   const [bio, setBio] = useState("");
@@ -163,6 +185,7 @@ const TradeRegisterNew = () => {
     const tradeData: Record<string, unknown> = {
       name: fullName.trim(),
       trade_type: tradeType,
+      trade_type_other: tradeType === "Other" ? tradeTypeOther.trim() || null : null,
       company_name: companyName.trim(),
       phone: phone.trim(),
       postcode: postcode.trim(),
@@ -220,7 +243,10 @@ const TradeRegisterNew = () => {
     phone.trim().length > 0 &&
     postcode.trim().length > 0;
 
-  const canProceedStep2 = tradeType.length > 0 && companyName.trim().length > 0;
+  const canProceedStep2 =
+    tradeType.length > 0 &&
+    companyName.trim().length > 0 &&
+    (tradeType !== "Other" || tradeTypeOther.trim().length > 0);
 
   const handleStep2Continue = () => {
     void import("@/components/SpecialismsPicker");
@@ -360,6 +386,19 @@ const TradeRegisterNew = () => {
                         <div className="flex items-center gap-2 mt-2 text-green-500">
                           <Leaf className="w-4 h-4" />
                           <span className="font-mono text-xs">Renewable & Energy Efficiency trade — green certifications next</span>
+                        </div>
+                      )}
+                      {tradeType === "Other" && (
+                        <div className="mt-3">
+                          <label className={labelClass}>Specify your trade *</label>
+                          <input
+                            type="text"
+                            value={tradeTypeOther}
+                            onChange={(e) => setTradeTypeOther(e.target.value)}
+                            placeholder="e.g. Stove Installer, Asbestos Surveyor…"
+                            required
+                            className={inputClass}
+                          />
                         </div>
                       )}
                     </div>

@@ -1,0 +1,2 @@
+ALTER TABLE public.trades ADD COLUMN IF NOT EXISTS trade_type_other text;
+DELETE FROM public.trades WHERE id IN ('bbbb0000-0000-0000-0000-000000000001','c7d3e2d0-b33a-4749-8fce-4b5db6065255','db45ce6a-ba4d-48e6-8b54-f10100371778');

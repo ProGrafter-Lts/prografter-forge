@@ -2673,6 +2673,7 @@ export type Database = {
           tier: string
           tier_updated_at: string | null
           trade_type: string
+          trade_type_other: string | null
           trustmark_number: string | null
           trustmark_verified: boolean
           user_id: string
@@ -2732,6 +2733,7 @@ export type Database = {
           tier?: string
           tier_updated_at?: string | null
           trade_type: string
+          trade_type_other?: string | null
           trustmark_number?: string | null
           trustmark_verified?: boolean
           user_id: string
@@ -2791,6 +2793,7 @@ export type Database = {
           tier?: string
           tier_updated_at?: string | null
           trade_type?: string
+          trade_type_other?: string | null
           trustmark_number?: string | null
           trustmark_verified?: boolean
           user_id?: string

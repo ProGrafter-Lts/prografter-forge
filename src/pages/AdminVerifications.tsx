@@ -20,6 +20,7 @@ interface PendingTrade {
   submitted_for_review_at: string | null;
   created_at: string;
   insurance_expiry: string | null;
+  trade_type_other: string | null;
 }
 
 interface VerificationDoc {
@@ -40,8 +41,18 @@ const STATUS_FILTERS = [
 
 type FilterKey = typeof STATUS_FILTERS[number]["key"];
 
+const LAUNCH_AREA_PREFIXES = ["NG", "DE", "LE"] as const;
+const isInLaunchArea = (postcode: string | null) => {
+  if (!postcode) return false;
+  const p = postcode.trim().toUpperCase();
+  return LAUNCH_AREA_PREFIXES.some((pre) => p.startsWith(pre));
+};
+const isInternalEmail = (email: string | null) =>
+  !!email && email.toLowerCase().endsWith("@prografter.co.uk");
+
 const AdminVerifications = () => {
   const [filter, setFilter] = useState<FilterKey>("pending");
+  const [sortMode, setSortMode] = useState<"wait" | "recent">("wait");
   const [trades, setTrades] = useState<PendingTrade[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -83,7 +94,7 @@ const AdminVerifications = () => {
     const { data, error } = await supabase
       .from("trades")
       .select(
-        "id,user_id,name,company_name,trade_type,postcode,phone,verification_status,verified,submitted_for_review_at,created_at,insurance_expiry"
+        "id,user_id,name,company_name,trade_type,trade_type_other,postcode,phone,verification_status,verified,submitted_for_review_at,created_at,insurance_expiry"
       )
       .eq("verification_status", filter)
       .order("submitted_for_review_at", { ascending: true, nullsFirst: false })
@@ -316,7 +327,7 @@ const AdminVerifications = () => {
           </div>
         )}
 
-        <div className="flex flex-wrap gap-2 mb-6">
+        <div className="flex flex-wrap gap-2 mb-4">
           {STATUS_FILTERS.map((f) => (
             <button
               key={f.key}
@@ -332,6 +343,33 @@ const AdminVerifications = () => {
           ))}
         </div>
 
+        {filter === "pending" && (() => {
+          const awaitingCount = trades.filter((t) => !t.submitted_for_review_at).length;
+          const readyCount = trades.length - awaitingCount;
+          return (
+            <div className="bg-white rounded-2xl border border-navy/10 p-4 mb-4 flex flex-wrap items-center justify-between gap-3">
+              <p className="font-mono text-xs text-secondary-text">
+                <span className="text-amber-700 font-semibold">{awaitingCount}</span>{" "}
+                trades awaiting document submission
+                <span className="mx-2 text-navy/30">|</span>
+                <span className="text-blue-700 font-semibold">{readyCount}</span>{" "}
+                trades ready for review
+              </p>
+              <label className="font-mono text-[10px] uppercase tracking-wider text-secondary-text flex items-center gap-2">
+                Sort:
+                <select
+                  value={sortMode}
+                  onChange={(e) => setSortMode(e.target.value as "wait" | "recent")}
+                  className="border border-navy/10 rounded-md px-2 py-1 text-navy text-xs"
+                >
+                  <option value="wait">Longest wait first</option>
+                  <option value="recent">Most recent first</option>
+                </select>
+              </label>
+            </div>
+          );
+        })()}
+
         {loading ? (
           <p className="font-mono text-sm text-secondary-text">Loading…</p>
         ) : trades.length === 0 ? (
@@ -340,28 +378,56 @@ const AdminVerifications = () => {
           </div>
         ) : (
           <div className="space-y-3">
-            {trades.map((t) => {
+            {[...trades]
+              .sort((a, b) => {
+                const ta = new Date(a.created_at).getTime();
+                const tb = new Date(b.created_at).getTime();
+                return sortMode === "wait" ? ta - tb : tb - ta;
+              })
+              .map((t) => {
               const submitted = t.submitted_for_review_at;
               const daysAgo = Math.floor(
                 (Date.now() - new Date(t.created_at).getTime()) / 86_400_000,
               );
               const awaitingSubmit = !submitted;
+              const internal = isInternalEmail(t.email);
+              const outOfArea = !!t.postcode && !isInLaunchArea(t.postcode);
+              const nudgeEligible = awaitingSubmit && daysAgo >= 7;
               return (
                 <div
                   key={t.id}
-                  className="bg-white rounded-2xl border border-navy/10 p-4 md:p-5"
+                  className={`bg-white rounded-2xl border p-4 md:p-5 ${
+                    awaitingSubmit ? "border-amber-200 bg-amber-50/40" : "border-navy/10"
+                  }`}
                 >
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
-                      <div className="font-heading text-lg text-navy leading-tight">
+                      <div className="font-heading text-lg text-navy leading-tight flex items-center gap-2 flex-wrap">
                         {t.company_name || t.name || "Unnamed trade"}
+                        {internal && (
+                          <Badge className="bg-purple-100 text-purple-700 font-mono text-[10px] uppercase">
+                            Internal
+                          </Badge>
+                        )}
+                        {outOfArea && (
+                          <Badge className="bg-orange-100 text-orange-700 font-mono text-[10px] uppercase">
+                            Out of area
+                          </Badge>
+                        )}
                       </div>
                       {t.company_name && t.name && t.name !== t.company_name && (
                         <div className="font-body text-sm text-body-text">{t.name}</div>
                       )}
+                      {outOfArea && (
+                        <p className="font-mono text-[11px] text-orange-700 mt-1">
+                          Beta launch covers East Midlands only (NG / DE / LE).
+                        </p>
+                      )}
                       <div className="mt-2 flex flex-wrap gap-2">
                         <Badge className="bg-navy/10 text-navy">
-                          {t.trade_type || "Trade type missing"}
+                          {t.trade_type === "Other" && t.trade_type_other
+                            ? `Other: ${t.trade_type_other}`
+                            : t.trade_type || "Trade type missing"}
                         </Badge>
                         {t.postcode && (
                           <Badge className="bg-navy/10 text-navy font-mono">
@@ -369,7 +435,7 @@ const AdminVerifications = () => {
                           </Badge>
                         )}
                         {awaitingSubmit ? (
-                          <Badge className="bg-amber-100 text-amber-700">
+                          <Badge className={daysAgo >= 7 ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"}>
                             Awaiting submit · {daysAgo}d
                           </Badge>
                         ) : (
@@ -416,18 +482,24 @@ const AdminVerifications = () => {
                   </div>
 
                   <div className="mt-4 flex flex-wrap gap-2">
-                    <button
-                      onClick={() => openTrade(t.id)}
-                      className="bg-navy text-white font-mono text-xs uppercase tracking-wider px-4 py-2 rounded-xl hover:bg-navy/90"
-                    >
-                      Review documents →
-                    </button>
-                    {t.email && awaitingSubmit && (
+                    {awaitingSubmit ? (
+                      <span className="font-mono text-[11px] uppercase tracking-wider text-amber-700 self-center px-2">
+                        Cannot review until trade submits documents
+                      </span>
+                    ) : (
+                      <button
+                        onClick={() => openTrade(t.id)}
+                        className="bg-navy text-white font-mono text-xs uppercase tracking-wider px-4 py-2 rounded-xl hover:bg-navy/90"
+                      >
+                        Review documents →
+                      </button>
+                    )}
+                    {t.email && nudgeEligible && (
                       <a
                         href={`mailto:${t.email}?subject=${encodeURIComponent(
                           "Finish your ProGrafter application",
                         )}&body=${encodeURIComponent(
-                          `Hi ${(t.name || "").split(/\s+/)[0] || "there"},\n\nThanks for signing up to ProGrafter. We noticed your verification application isn't quite finished yet — to start receiving job leads, please log in and complete the remaining steps:\n\nhttps://prografter.co.uk/apply\n\nIf you've hit a snag or need a hand, just reply to this email.\n\nThanks,\nThe ProGrafter team`,
+                          `Hi ${(t.name || "").split(/\s+/)[0] || "there"},\n\nThanks for signing up to ProGrafter ${daysAgo} days ago. We noticed your verification application isn't quite finished yet — to start receiving job leads, please log in and complete the remaining steps (typically: upload your public liability insurance certificate and confirm your trade details):\n\nhttps://prografter.co.uk/apply\n\n${outOfArea ? "Heads up — we're currently in beta in the East Midlands (NG / DE / LE postcodes). We'll be in touch when we expand to your area.\n\n" : ""}If you've hit a snag or need a hand, just reply to this email.\n\nThanks,\nThe ProGrafter team`,
                         )}`}
                         className="bg-amber-500 text-white font-mono text-xs uppercase tracking-wider px-4 py-2 rounded-xl hover:bg-amber-600"
                       >
@@ -441,6 +513,7 @@ const AdminVerifications = () => {
           </div>
         )}
       </main>
+
 
       {/* Drawer / Modal */}
       {activeTrade && (
