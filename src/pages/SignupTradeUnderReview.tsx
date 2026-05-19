@@ -58,8 +58,8 @@ const SignupTradeUnderReview = () => {
       <SEO title="Application under review — ProGrafter" description="Your trade application is being reviewed." path="/signup/trade/under-review" />
       <header className="py-6 px-6">
         <Link to="/" className="font-heading text-2xl tracking-wider">
-          <span className="text-cream">Pro</span>
-          <span className="text-teal">Grafter</span>
+          <span className="text-cream">PRO</span>
+          <span className="text-teal">GRAFTER</span>
         </Link>
       </header>
       <main className="flex-1 flex items-center justify-center px-6 py-12">
