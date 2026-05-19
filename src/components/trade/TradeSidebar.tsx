@@ -65,13 +65,15 @@ const TradeSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen }: 
 
   return (
     <>
-      {/* Mobile toggle */}
-      <button
-        className="md:hidden fixed top-4 left-4 z-50 bg-primary text-primary-foreground p-2 rounded-xl shadow-lg"
-        onClick={() => setSidebarOpen(!sidebarOpen)}
-      >
-        <LayoutDashboard className="w-5 h-5" />
-      </button>
+      {/* Mobile toggle - hidden when sidebar is open to avoid overlapping logo */}
+      {!sidebarOpen && (
+        <button
+          className="md:hidden fixed top-4 left-4 z-50 bg-primary text-primary-foreground p-2 rounded-xl shadow-lg"
+          onClick={() => setSidebarOpen(true)}
+        >
+          <LayoutDashboard className="w-5 h-5" />
+        </button>
+      )}
 
       {/* Sidebar */}
       <aside
