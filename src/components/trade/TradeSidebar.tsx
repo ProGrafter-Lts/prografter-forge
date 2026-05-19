@@ -1,5 +1,6 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useVerificationStatus } from "@/hooks/useVerificationStatus";
 import {
   LayoutDashboard,
   Briefcase,
@@ -9,6 +10,7 @@ import {
   UserCircle,
   Settings,
   LogOut,
+  ShieldCheck,
 } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -31,6 +33,7 @@ interface TradeSidebarProps {
 const TradeSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen }: TradeSidebarProps) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const verification = useVerificationStatus();
 
   const currentView = new URLSearchParams(location.search).get("view");
   const routeActiveNav = location.pathname.startsWith("/dashboard/trade/settings")
@@ -102,6 +105,45 @@ const TradeSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen }: 
             );
           })}
         </nav>
+
+        {/* Verification status */}
+        {!verification.loading && (
+          <div className="p-4 border-t border-white/10">
+            {verification.verified ? (
+              <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-emerald-500/15 border border-emerald-500/30">
+                <ShieldCheck className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                <span className="font-mono text-xs font-semibold text-emerald-300">Verified</span>
+              </div>
+            ) : (
+              <div className="px-1">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-mono text-[11px] uppercase tracking-wider text-primary-foreground/60">
+                    Verification
+                  </span>
+                  <span className="font-mono text-[11px] text-primary-foreground/80">
+                    {verification.completed} of {verification.total}
+                  </span>
+                </div>
+                <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden mb-2" aria-label={`${verification.completed} of ${verification.total} checks complete`}>
+                  <div
+                    className="h-full rounded-full transition-all"
+                    style={{
+                      width: `${(verification.completed / verification.total) * 100}%`,
+                      backgroundColor: "#14B8A6",
+                    }}
+                  />
+                </div>
+                <button
+                  onClick={() => handleNavClick("profile")}
+                  className="font-mono text-xs hover:underline"
+                  style={{ color: "#14B8A6" }}
+                >
+                  Complete verification →
+                </button>
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="p-4 border-t border-white/10">
           <button

@@ -27,7 +27,7 @@ const TradeSettings = () => {
                 Settings
               </h1>
               <p className="font-mono text-sm text-muted-foreground mt-1">
-                Manage your account, integrations and preferences.
+                Connect your calendar and manage your account integrations.
               </p>
             </div>
           </div>
