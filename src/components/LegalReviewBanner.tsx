@@ -4,10 +4,10 @@ import { Info, X } from "lucide-react";
 
 const STORAGE_KEY = "pg_legal_review_banner_dismissed";
 
-// Date the construction solicitor is expected to deliver the final template.
-// Update this when scheduling firms up. Shown to logged-in users in the banner
-// and on the /legal-review page.
-export const LEGAL_REVIEW_ETA = "early June 2026";
+// Contract templates are with our construction solicitor for final legal
+// review. We deliberately don't commit to a public date here — when signing
+// goes live we'll update the in-app banner and notify trades directly.
+export const LEGAL_REVIEW_ETA = "soon";
 
 const LegalReviewBanner = () => {
   const [dismissed, setDismissed] = useState(true);
@@ -29,7 +29,7 @@ const LegalReviewBanner = () => {
       <Info className="w-4 h-4 mt-0.5 shrink-0" style={{ color: "#FCD34D" }} />
       <p className="font-mono text-xs flex-1" style={{ color: "#FDE68A" }}>
         Contract templates: under final legal review with our construction solicitor.
-        Full signing functionality activates {LEGAL_REVIEW_ETA}.{" "}
+        Full signing functionality coming soon — we'll notify you when it's live.{" "}
         <Link to="/legal-review" className="underline font-medium hover:opacity-80" style={{ color: "#FEF3C7" }}>
           Read more →
         </Link>

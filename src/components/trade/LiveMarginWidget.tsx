@@ -10,6 +10,9 @@ const LiveMarginWidget = ({ totalQuoted, totalCosts, totalReceived }: MarginData
   const margin = totalQuoted - totalCosts;
   const marginPct = totalQuoted > 0 ? Math.round((margin / totalQuoted) * 100) : 0;
   const outstanding = totalQuoted - totalReceived;
+  // Undefined margin when there's no quoting/cost activity yet — showing
+  // "£0 / 0%" misleads new accounts into thinking they earned nothing.
+  const hasMarginData = totalQuoted > 0 || totalCosts > 0;
 
   const MarginIcon = margin > 0 ? TrendingUp : margin < 0 ? TrendingDown : Minus;
   const marginColor = margin > 0 ? "text-green-600" : margin < 0 ? "text-destructive" : "text-muted-foreground";
@@ -34,13 +37,19 @@ const LiveMarginWidget = ({ totalQuoted, totalCosts, totalReceived }: MarginData
           {/* Margin */}
           <div>
             <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Margin</p>
-            <div className="flex items-center gap-2">
-              <MarginIcon className={`w-5 h-5 ${marginColor}`} />
-              <p className={`font-heading text-2xl ${marginColor}`}>
-                £{Math.abs(margin).toLocaleString()}
-              </p>
-            </div>
-            <p className={`font-mono text-xs ${marginColor}`}>{marginPct}%</p>
+            {hasMarginData ? (
+              <>
+                <div className="flex items-center gap-2">
+                  <MarginIcon className={`w-5 h-5 ${marginColor}`} />
+                  <p className={`font-heading text-2xl ${marginColor}`}>
+                    £{Math.abs(margin).toLocaleString()}
+                  </p>
+                </div>
+                <p className={`font-mono text-xs ${marginColor}`}>{marginPct}%</p>
+              </>
+            ) : (
+              <p className="font-heading text-2xl text-muted-foreground">—</p>
+            )}
           </div>
 
           {/* Received */}

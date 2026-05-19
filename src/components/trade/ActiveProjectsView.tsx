@@ -116,11 +116,24 @@ const ActiveProjectsView = ({ tradeId }: { tradeId: string }) => {
       ) : filtered.length === 0 ? (
         <div className="bg-card rounded-2xl p-8 border border-primary/10 text-center">
           <FolderKanban className="w-10 h-10 text-primary/20 mx-auto mb-3" />
-          <p className="font-mono text-sm text-muted-foreground">
-            {projects.length === 0
-              ? "No active projects yet. Win a job to get started!"
-              : "Nothing here for this filter."}
-          </p>
+          {projects.length === 0 ? (
+            <>
+              <p className="font-mono text-sm text-muted-foreground mb-4">
+                No active projects yet. Head to Available Jobs to submit your first quote.
+              </p>
+              <button
+                onClick={() => navigate("/dashboard/trade?view=jobs")}
+                className="inline-flex items-center gap-1 bg-secondary text-secondary-foreground font-mono text-xs px-4 py-2 rounded-xl hover:opacity-90 transition-opacity"
+              >
+                Browse Available Jobs
+                <ChevronRight className="w-3 h-3" />
+              </button>
+            </>
+          ) : (
+            <p className="font-mono text-sm text-muted-foreground">
+              Nothing here for this filter.
+            </p>
+          )}
         </div>
       ) : (
         <div className="space-y-3">

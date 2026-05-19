@@ -141,11 +141,27 @@ const AvailableJobsView = ({ tradeId }: { tradeId: string }) => {
       ) : visible.length === 0 ? (
         <div className="bg-card rounded-2xl p-8 border border-primary/10 text-center">
           <Briefcase className="w-10 h-10 text-primary/20 mx-auto mb-3" />
-          <p className="font-mono text-sm text-muted-foreground">
-            {matches.length === 0
-              ? "No new job matches yet. We'll notify you when relevant jobs appear in your area."
-              : "No jobs match your filters. Try clearing them."}
-          </p>
+          {matches.length === 0 ? (
+            <>
+              <p className="font-mono text-sm text-muted-foreground mb-1">
+                No job matches yet — we'll notify you when relevant jobs appear near you.
+              </p>
+              <p className="font-mono text-xs text-muted-foreground mb-4">
+                In the meantime, check your Planning Alerts for local homeowners to contact.
+              </p>
+              <button
+                onClick={() => navigate("/planning-alerts")}
+                className="inline-flex items-center gap-1 bg-secondary text-secondary-foreground font-mono text-xs px-4 py-2 rounded-xl hover:opacity-90 transition-opacity"
+              >
+                View Planning Alerts
+                <ChevronRight className="w-3 h-3" />
+              </button>
+            </>
+          ) : (
+            <p className="font-mono text-sm text-muted-foreground">
+              No jobs match your filters. Try clearing them.
+            </p>
+          )}
         </div>
       ) : (
         <div className="space-y-3">
