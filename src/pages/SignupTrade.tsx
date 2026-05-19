@@ -778,8 +778,8 @@ const SignupTrade = () => {
       />
       <header className="py-6 px-6">
         <Link to="/" className="font-heading text-2xl tracking-wider">
-          <span className="text-cream">Pro</span>
-          <span className="text-teal">Grafter</span>
+          <span className="text-cream">PRO</span>
+          <span className="text-teal">GRAFTER</span>
         </Link>
       </header>
 
