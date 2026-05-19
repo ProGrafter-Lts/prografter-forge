@@ -75,7 +75,7 @@ const MyJobs = ({ jobs }: { jobs: Job[] }) => {
                 </div>
               </div>
               <Badge className={STATUS_COLORS[job.status] || "bg-muted text-primary"}>
-                {job.status.charAt(0).toUpperCase() + job.status.slice(1)}
+                {formatStatusLabel(job.status)}
               </Badge>
             </div>
           ))}
