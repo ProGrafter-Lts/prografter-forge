@@ -125,13 +125,13 @@ const Suppliers = () => {
             <p className="font-mono text-xs uppercase tracking-widest text-teal mb-3">
               For suppliers
             </p>
-            <h1 className="font-heading text-4xl md:text-6xl leading-none mb-4">
-              Supply the trades on ProGrafter
+            <h1 className="font-heading text-cream text-[44px] md:text-[72px] leading-[0.95] tracking-wider uppercase mb-4">
+              Supply the trades on <span className="text-teal">ProGrafter</span>
             </h1>
             <p className="font-body text-lg text-cream/80 max-w-2xl">
               We're building a small, trusted panel of scaffolders, plant/skip hire and specialist
               services for our verified trades. Register your interest below — Lee will be in touch
-              personally as we open Phase B.
+              personally as we grow our trade network.
             </p>
           </div>
         </section>
@@ -142,7 +142,7 @@ const Suppliers = () => {
               <div className="bg-white rounded-2xl border border-navy/10 p-8 text-center">
                 <h2 className="font-heading text-3xl text-navy mb-3">Thanks — got it.</h2>
                 <p className="font-body text-body-text mb-2">
-                  Lee will be in touch personally as Phase B opens.
+                  Lee will be in touch personally as we grow our trade network.
                 </p>
                 <p className="font-body text-secondary-text text-sm">
                   We're keeping this list small and focused — no spam, no auto-emails.
@@ -290,7 +290,7 @@ const Suppliers = () => {
                         I hold valid Public Liability insurance
                       </div>
                       <div className="font-body text-xs text-secondary-text">
-                        Required to qualify for Phase B.
+                        Required to qualify as a ProGrafter supplier partner.
                       </div>
                     </div>
                   </label>
