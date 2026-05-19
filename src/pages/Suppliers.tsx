@@ -142,7 +142,7 @@ const Suppliers = () => {
               <div className="bg-white rounded-2xl border border-navy/10 p-8 text-center">
                 <h2 className="font-heading text-3xl text-navy mb-3">Thanks — got it.</h2>
                 <p className="font-body text-body-text mb-2">
-                  Lee will be in touch personally as Phase B opens.
+                  Lee will be in touch personally as we grow our trade network.
                 </p>
                 <p className="font-body text-secondary-text text-sm">
                   We're keeping this list small and focused — no spam, no auto-emails.
