@@ -33,6 +33,7 @@ interface TradeSidebarProps {
 const TradeSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen }: TradeSidebarProps) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const verification = useVerificationStatus();
 
   const currentView = new URLSearchParams(location.search).get("view");
   const routeActiveNav = location.pathname.startsWith("/dashboard/trade/settings")
