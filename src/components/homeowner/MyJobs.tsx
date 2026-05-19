@@ -33,7 +33,12 @@ const MyJobs = ({ jobs }: { jobs: Job[] }) => {
   return (
     <section>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="font-heading text-primary text-2xl">My Jobs</h2>
+        <div>
+          <h2 className="font-heading text-primary text-2xl">All Posted Jobs</h2>
+          <p className="font-mono text-xs text-muted-foreground mt-1">
+            Every job you've posted on ProGrafter, in any status.
+          </p>
+        </div>
         <a
           href="/post-a-job"
           className="font-mono text-xs text-secondary hover:opacity-80 transition-opacity"
