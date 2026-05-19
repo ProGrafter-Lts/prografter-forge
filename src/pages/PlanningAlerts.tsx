@@ -1,7 +1,32 @@
 import { useState, useEffect } from "react";
 import SEO from "@/components/SEO";
 import AppShell from "@/components/AppShell";
-import { Bell, Search, X, Radio, Building2, MapPin, Calendar, FileText, CheckCircle2, AlertTriangle, XCircle } from "lucide-react";
+import { Bell, Search, X, Radio, Building2, MapPin, Calendar, FileText, CheckCircle2, AlertTriangle, XCircle, Sparkles } from "lucide-react";
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+type ProjectKind = "DOMESTIC" | "CONVERSION" | "NEW BUILD";
+
+const getProjectType = (app: { type: string; description: string }): ProjectKind => {
+  const d = (app.description || "").toLowerCase();
+  if (/erection of (a |new )?(dwelling|house)|\bnew dwelling\b|\bnew build\b/.test(d)) return "NEW BUILD";
+  if (/\bclass q\b|barn conversion|change of use|commercial to residential|agricultural barn/.test(d)) return "CONVERSION";
+  return "DOMESTIC";
+};
+
+const parseMaxValue = (v: string): number => {
+  const nums = (v || "").replace(/[£,]/g, "").match(/\d+/g);
+  if (!nums) return 0;
+  return Math.max(...nums.map(Number));
+};
+
+const isLargeProject = (v: string) => parseMaxValue(v) >= 100000;
+
+const PROJECT_TYPE_STYLES: Record<ProjectKind, string> = {
+  "DOMESTIC": "bg-secondary/10 text-secondary border-secondary/30",
+  "CONVERSION": "bg-purple-500/10 text-purple-700 border-purple-500/30",
+  "NEW BUILD": "bg-blue-500/10 text-blue-700 border-blue-500/30",
+};
+
 
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(
