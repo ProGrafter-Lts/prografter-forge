@@ -185,6 +185,7 @@ const TradeRegisterNew = () => {
     const tradeData: Record<string, unknown> = {
       name: fullName.trim(),
       trade_type: tradeType,
+      trade_type_other: tradeType === "Other" ? tradeTypeOther.trim() || null : null,
       company_name: companyName.trim(),
       phone: phone.trim(),
       postcode: postcode.trim(),
