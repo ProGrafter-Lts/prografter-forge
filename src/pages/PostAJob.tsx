@@ -533,13 +533,13 @@ const PostAJob = () => {
                         type="text"
                         value={postcode}
                         onChange={(e) => setPostcode(e.target.value.toUpperCase())}
-                        placeholder="SW1A 1AA"
+                        placeholder="NG1 1AA"
                         required
                         className={inputClass}
                       />
                       {postcode.trim().length > 0 && !postcodeValid && (
                         <p className="font-mono text-xs text-red-400 mt-1">
-                          Enter a valid UK postcode (e.g. SW1A 1AA).
+                          Enter a valid UK postcode (e.g. NG1 1AA).
                         </p>
                       )}
                     </div>
@@ -574,25 +574,8 @@ const PostAJob = () => {
                           Enter whole numbers, both required, max ≥ min.
                         </p>
                       )}
-                      <p className="font-mono text-[10px] text-cream/40 mt-1">
-                        Whole pounds only. Used to match you with appropriate trades.
-                      </p>
-                    </div>
-                    <div>
-                      <label className={labelClass}>Project type (optional)</label>
-                      <select
-                        value={specialismId}
-                        onChange={(e) => setSpecialismId(e.target.value)}
-                        className={`${inputClass} appearance-none`}
-                        style={{ backgroundColor: "hsl(var(--deep))" }}
-                      >
-                        <option value="">e.g. Full bathroom renovation, Kitchen install — leave blank if not sure</option>
-                        {specialisms.map((s) => (
-                          <option key={s.id} value={s.id}>{s.name}</option>
-                        ))}
-                      </select>
-                      <p className="font-mono text-[10px] text-cream/40 mt-1">
-                        Helps us match you with trades who specialise in this work.
+                      <p className="font-body text-cream/50 text-xs mt-2 leading-relaxed">
+                        Not sure of your budget? Enter a rough estimate — your quotes from trades will give you the real number. You're not committing to anything here.
                       </p>
                     </div>
                   </div>
