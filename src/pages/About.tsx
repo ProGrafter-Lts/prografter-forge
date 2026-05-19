@@ -37,7 +37,7 @@ const About = () => {
       </section>
 
       {/* How the platform works */}
-      <section className="px-6 pb-20">
+      <section className="px-6 pb-16">
         <div className="max-w-3xl mx-auto">
           <div className="flex items-center gap-3 mb-8">
             <div className="w-8 h-[2px] bg-teal" />
@@ -45,10 +45,10 @@ const About = () => {
               The Platform
             </span>
           </div>
-          <h2 className="font-heading text-cream text-[36px] craft:text-[56px] leading-[0.95] mb-10">
+          <h2 className="font-heading text-cream text-[36px] craft:text-[56px] leading-[0.95] mb-8">
             How the platform works
           </h2>
-          <div className="space-y-6 font-body text-cream/80 text-lg leading-relaxed font-light">
+          <div className="space-y-6 font-body text-cream/90 text-lg leading-relaxed font-light">
             <p>
               Every trade on ProGrafter is verified five ways before their
               profile goes live: identity confirmed, insurance verified,
@@ -73,7 +73,7 @@ const About = () => {
       </section>
 
       {/* How we make money */}
-      <section className="px-6 py-20 border-t border-cream/5">
+      <section className="px-6 py-16 border-t border-cream/5">
         <div className="max-w-3xl mx-auto">
           <div className="flex items-center gap-3 mb-8">
             <div className="w-8 h-[2px] bg-teal" />
@@ -81,10 +81,10 @@ const About = () => {
               Our Model
             </span>
           </div>
-          <h2 className="font-heading text-cream text-[36px] craft:text-[56px] leading-[0.95] mb-10">
+          <h2 className="font-heading text-cream text-[36px] craft:text-[56px] leading-[0.95] mb-8">
             How we make money
           </h2>
-          <div className="space-y-6 font-body text-cream/80 text-lg leading-relaxed font-light">
+          <div className="space-y-6 font-body text-cream/90 text-lg leading-relaxed font-light">
             <p>
               Homeowners pay nothing to use ProGrafter. Posting a job is free.
               Receiving quotes is free. The Homeowner Manual is free.
@@ -101,15 +101,19 @@ const About = () => {
       </section>
 
       {/* CTAs */}
-      <section className="px-6 py-20 border-t border-cream/5">
+      <section className="px-6 pt-4 pb-20">
         <div className="max-w-4xl mx-auto grid craft:grid-cols-2 gap-6">
-          <div className="bg-navy/40 border border-cream/10 rounded-2xl p-8 craft:p-10 hover:border-teal/40 transition-colors">
+          <div className="bg-navy border border-teal/30 rounded-2xl p-8 craft:p-10 hover:border-teal transition-colors">
             <div className="font-mono text-xs text-teal uppercase tracking-widest mb-4">
               For Tradespeople
             </div>
-            <p className="font-body text-cream/80 text-lg leading-relaxed font-light mb-6">
+            <p className="font-body text-cream text-lg leading-relaxed mb-3">
               See the verification standard and join the Founding Member cohort.
-              The first 50 verified trades lock in 6% commission for life.
+              The first 50 verified trades lock in 6% commission for life.<sup className="text-teal">*</sup>
+            </p>
+            <p className="font-body text-cream/70 text-xs leading-relaxed mb-6">
+              * 6% Founding Member rate applies to the first 50 verified trades.
+              Rate applies to all jobs completed through the ProGrafter platform.
             </p>
             <a
               href="/register/trade"
@@ -120,13 +124,14 @@ const About = () => {
             </a>
           </div>
 
-          <div className="bg-navy/40 border border-cream/10 rounded-2xl p-8 craft:p-10 hover:border-teal/40 transition-colors">
+          <div className="bg-navy border border-teal/30 rounded-2xl p-8 craft:p-10 hover:border-teal transition-colors">
             <div className="font-mono text-xs text-teal uppercase tracking-widest mb-4">
               For Homeowners
             </div>
-            <p className="font-body text-cream/80 text-lg leading-relaxed font-light mb-6">
-              Post your job free, receive quotes from verified local trades, see
-              the platform mechanism that protects both sides.
+            <p className="font-body text-cream text-lg leading-relaxed mb-6">
+              Post your project free. Get quotes from verified, insured local
+              trades. Every job protected by the ProGrafter contract and escrow
+              payment system.
             </p>
             <a
               href="/post-a-job"
