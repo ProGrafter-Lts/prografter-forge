@@ -172,11 +172,11 @@ const IsCheckatradeWorthIt = () => {
               That's the founder's own MyBuilder run before ProGrafter existed — the kind of result that pushed this whole thing into being. Same shared-lead problem, same outcome.
             </p>
             <p>
-              The full story is on the About page, including the receipts and the moment the maths stopped making sense.
+              The full story is on the About page — including the moment the maths stopped making sense.
             </p>
           </div>
           <Link to="/about" className="inline-flex items-center gap-2 mt-8 font-mono text-sm text-teal hover:text-teal-hover">
-            Read the full story on /about <ArrowRight className="w-4 h-4" />
+            Read the full story on the About page <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
       </section>
