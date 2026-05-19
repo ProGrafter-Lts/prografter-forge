@@ -77,13 +77,6 @@ const CheckatradeAlternative = () => {
 
       {/* Hero */}
       <section className="relative pt-32 pb-20 px-6 overflow-hidden">
-        <span
-          className="absolute -bottom-8 right-0 font-heading text-[160px] craft:text-[280px] text-cream select-none pointer-events-none leading-none"
-          style={{ opacity: 0.03 }}
-          aria-hidden
-        >
-          SWITCH
-        </span>
         <div className="max-w-5xl mx-auto relative z-10">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-8 h-[2px] bg-teal" />
@@ -102,7 +95,7 @@ const CheckatradeAlternative = () => {
                 Register as a Trade Free <ArrowRight className="ml-1" />
               </Link>
             </Button>
-            <Button asChild size="lg" variant="outline" className="border-cream/20 text-cream hover:bg-cream/10 font-mono uppercase tracking-wider">
+            <Button asChild size="lg" variant="outline" className="bg-white border-2 border-white text-navy hover:bg-white/90 hover:text-navy font-mono uppercase tracking-wider">
               <Link to="/#pricing">See the numbers</Link>
             </Button>
           </div>
