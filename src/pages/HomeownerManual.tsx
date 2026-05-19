@@ -224,6 +224,7 @@ const HomeownerManual = () => {
           homeowner={data.homeowner}
           contract={data.contract}
           stages={data.stages}
+          acceptedQuoteAmount={data.acceptedQuoteAmount}
         />
 
         {/* Section 2 — Materials */}
@@ -237,7 +238,11 @@ const HomeownerManual = () => {
         </LockedSection>
 
         {/* Section 3 — Certificates */}
-        <ManualCertificates certificates={data.certificates} jobId={projectId!} />
+        <ManualCertificates
+          certificates={data.certificates}
+          jobId={projectId!}
+          jobType={data.job.job_type}
+        />
 
         {/* Section 4 — Warranties */}
         <LockedSection
@@ -253,6 +258,8 @@ const HomeownerManual = () => {
         <ManualPhotos
           stages={data.stages}
           stageUpdates={data.stageUpdates}
+          jobPhotos={data.jobPhotos}
+          jobPhotoUrls={data.job.photo_urls || []}
           isPro={data.isPro}
           onUpgrade={() => setShowProModal(true)}
         />
