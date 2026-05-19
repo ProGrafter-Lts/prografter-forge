@@ -18,36 +18,42 @@ const contactSchema = z.object({
 });
 
 const SUBJECT_OPTIONS = [
-  "General",
-  "Trade Account",
-  "Homeowner Account",
-  "Technical Issue",
-  "Partnership",
-  "Press",
-  "Other",
+  "General Enquiry",
+  "Homeowner Support",
+  "Trade Support",
+  "Report a Problem",
+  "Press & Media",
+  "Partnership Enquiry",
 ];
 
 const CONTACT_CARDS = [
   {
     title: "General Enquiries",
     email: "hello@prografter.co.uk",
-    subjectLine: null as string | null,
+    subjectLine: "General Enquiry",
     description: "For general questions about ProGrafter",
     badge: "01",
   },
   {
+    title: "Homeowner Support",
+    email: "hello@prografter.co.uk",
+    subjectLine: "Homeowner Support",
+    description: "For homeowners with questions about their project or account",
+    badge: "02",
+  },
+  {
     title: "Trade Support",
     email: "hello@prografter.co.uk",
-    subjectLine: "Trade Support — [your name]",
+    subjectLine: "Trade Support",
     description: "For trades needing help with registration or your account",
-    badge: "02",
+    badge: "03",
   },
   {
     title: "Report a Problem",
     email: "hello@prografter.co.uk",
-    subjectLine: "Issue Report — [brief description]",
+    subjectLine: "Issue Report",
     description: "To report a technical problem or urgent issue",
-    badge: "03",
+    badge: "04",
   },
 ];
 
@@ -134,13 +140,13 @@ const Contact = () => {
             <span className="text-teal">TOUCH.</span>
           </h1>
           <p className="font-body text-body-text text-lg max-w-xl font-light">
-            We aim to respond to all enquiries within 24 hours on working days.
+            We aim to respond to all enquiries within 1–2 working days.
           </p>
         </section>
 
         {/* Contact Cards */}
         <section className="max-w-7xl mx-auto px-6 mb-20">
-          <div className="grid craft:grid-cols-3 gap-6">
+          <div className="grid craft:grid-cols-2 gap-6">
             {CONTACT_CARDS.map((card, idx) => (
               <div
                 key={card.title}
@@ -170,6 +176,7 @@ const Contact = () => {
                 )}
                 <button
                   onClick={() => handleCopy(card.email, idx)}
+                  title={card.subjectLine ? `Subject: ${card.subjectLine}` : undefined}
                   className="mt-auto flex items-center justify-center gap-2 border border-teal text-teal font-mono text-xs px-4 py-2.5 rounded-xl hover:bg-teal hover:text-cream transition-colors"
                 >
                   {copiedIdx === idx ? (
@@ -180,7 +187,7 @@ const Contact = () => {
                   ) : (
                     <>
                       <Copy className="w-3.5 h-3.5" />
-                      Copy Email
+                      Copy with Subject
                     </>
                   )}
                 </button>
@@ -197,7 +204,7 @@ const Contact = () => {
               Send a Message
             </span>
           </div>
-          <h2 className="font-heading text-navy text-3xl craft:text-4xl mb-8">
+          <h2 className="font-body font-bold text-navy text-3xl craft:text-4xl mb-8">
             Drop us a line.
           </h2>
 
