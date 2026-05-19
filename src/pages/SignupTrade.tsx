@@ -475,6 +475,12 @@ const SignupTrade = () => {
       setError("Trade type and company name are required");
       return;
     }
+    if (!bio.trim()) {
+      const proceed = window.confirm(
+        "Adding a bio improves your chances of winning jobs — are you sure you want to skip this?"
+      );
+      if (!proceed) return;
+    }
     if (!createdTradeId) {
       setError("Account not ready — refresh and try again");
       return;

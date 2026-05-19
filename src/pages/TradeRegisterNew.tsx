@@ -272,6 +272,10 @@ const TradeRegisterNew = () => {
 
           {success ? (
             <div className="bg-teal/10 border border-teal/30 rounded-xl p-8 text-center">
+              <a href="/" className="font-body text-[32px] leading-none tracking-wide inline-block mb-6">
+                <span className="text-cream">Pro</span>
+                <span className="text-teal">grafter</span>
+              </a>
               <h2 className="font-heading text-teal text-4xl mb-2">Application Received.</h2>
               <p className="font-body text-cream/70 text-sm mb-6">
                 We will verify your details within 24 hours and email you at the address provided.
