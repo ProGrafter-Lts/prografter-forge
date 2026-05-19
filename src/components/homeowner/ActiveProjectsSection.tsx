@@ -76,7 +76,7 @@ const ActiveProjectsSection = ({ jobs, quoteCounts, activeJobs: activeJobsProp }
             count > 0 && job.status === "awaiting_quotes"
               ? { label: `${count} Quote${count > 1 ? "s" : ""} Received`, className: "bg-secondary/15 text-secondary" }
               : STATUS_BADGE[job.status] ??
-                { label: job.status.replace(/_/g, " "), className: "bg-muted text-primary" };
+                { label: formatStatusLabel(job.status), className: "bg-muted text-primary" };
 
           return (
             <div
