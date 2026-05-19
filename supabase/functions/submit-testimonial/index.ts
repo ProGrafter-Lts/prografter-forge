@@ -10,7 +10,7 @@ const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
 const Body = z.object({
   first_name: z.string().trim().min(1).max(80),
-  town: z.string().trim().min(1).max(80),
+  town: z.string().trim().max(80).optional().default(''),
   quote: z.string().trim().min(10).max(280),
   rating: z.number().int().min(1).max(5).nullable().optional(),
   contract_id: z.string().uuid().nullable().optional(),
