@@ -173,9 +173,9 @@ const BriefPreview = ({ form }: { form: typeof BLANK }) => {
       <div style={{ background: C.deep, padding: "16px 20px",
         display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div>
-          <div style={{ fontSize: 18, fontWeight: 700 }}>
-            <span style={{ color: C.cream }}>Pro</span>
-            <span style={{ color: C.teal }}>Grafter</span>
+          <div className="font-heading tracking-wider" style={{ fontSize: 22, fontWeight: 700 }}>
+            <span style={{ color: C.cream }}>PRO</span>
+            <span style={{ color: C.teal }}>GRAFTER</span>
           </div>
           <p style={{ color: "rgba(245,240,232,0.6)", fontSize: 11,
             margin: "2px 0 0", letterSpacing: "0.05em" }}>JOB BRIEF</p>
