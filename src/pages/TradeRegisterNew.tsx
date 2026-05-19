@@ -72,6 +72,7 @@ const TradeRegisterNew = () => {
 
   // Step 2
   const [tradeType, setTradeType] = useState("");
+  const [tradeTypeOther, setTradeTypeOther] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [yearsExperience, setYearsExperience] = useState("");
   const [bio, setBio] = useState("");
