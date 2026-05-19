@@ -7,43 +7,63 @@ import { isGreenTrade } from "@/lib/greenTrades";
 import { Specialism, fetchSpecialisms } from "@/lib/specialisms";
 import { useSetupRedirect, SetupRedirectLoader } from "@/hooks/useSetupRedirect";
 
-const ALL_JOB_TYPES = [
-  { label: "Extension", icon: "🏗️", green: false },
-  { label: "Loft Conversion", icon: "🏠", green: false },
-  { label: "Full Rewire", icon: "⚡", green: false },
-  { label: "Bathroom", icon: "🚿", green: false },
-  { label: "Kitchen", icon: "🍳", green: false },
-  { label: "Boiler / Heating", icon: "🔥", green: false },
-  { label: "Roofing", icon: "🏚️", green: false },
-  { label: "Plastering", icon: "🧱", green: false },
-  { label: "Painting & Decorating", icon: "🎨", green: false },
-  { label: "Landscaping", icon: "🌿", green: false },
-  { label: "New Build", icon: "🏢", green: false },
-  // Green / Renewable
-  { label: "Solar PV Installation", icon: "☀️", green: true },
-  { label: "Air Source Heat Pump", icon: "🌡️", green: true },
-  { label: "Ground Source Heat Pump", icon: "🌡️", green: true },
-  { label: "External Wall Insulation (EWI)", icon: "🧱", green: true },
-  { label: "Cavity Wall Insulation", icon: "🏠", green: true },
-  { label: "Loft Insulation", icon: "🏠", green: true },
-  { label: "EV Charger Installation", icon: "🔌", green: true },
-  { label: "Battery Storage", icon: "🔋", green: true },
-  { label: "MVHR Installer", icon: "🌀", green: true },
-  { label: "Underfloor Heating", icon: "🔥", green: true },
-  { label: "Draught Proofing Specialist", icon: "🪟", green: true },
-  { label: "EPC Assessor", icon: "📋", green: true },
-  { label: "Retrofit Coordinator", icon: "📐", green: true },
-  { label: "Other", icon: "🔧", green: false },
-] as const;
+type JobTypeItem = { label: string; icon: string; green: boolean };
+
+const JOB_SECTIONS: { label: string; items: JobTypeItem[] }[] = [
+  {
+    label: "Popular Projects",
+    items: [
+      { label: "Extension", icon: "🏗️", green: false },
+      { label: "Loft Conversion", icon: "🏠", green: false },
+      { label: "Garage Conversion", icon: "🚪", green: false },
+      { label: "Kitchen", icon: "🍳", green: false },
+      { label: "Bathroom", icon: "🚿", green: false },
+      { label: "Plastering", icon: "🧱", green: false },
+      { label: "Painting & Decorating", icon: "🎨", green: false },
+      { label: "Landscaping", icon: "🌿", green: false },
+    ],
+  },
+  {
+    label: "Energy & Retrofit",
+    items: [
+      { label: "Solar PV Installation", icon: "☀️", green: true },
+      { label: "Air Source Heat Pump", icon: "🌡️", green: true },
+      { label: "Ground Source Heat Pump", icon: "🌡️", green: true },
+      { label: "Battery Storage", icon: "🔋", green: true },
+      { label: "EV Charger Installation", icon: "🔌", green: true },
+      { label: "External Wall Insulation (EWI)", icon: "🧱", green: true },
+      { label: "Cavity Wall Insulation", icon: "🏠", green: true },
+      { label: "Loft Insulation", icon: "🏠", green: true },
+      { label: "Underfloor Heating", icon: "🔥", green: true },
+      { label: "Ventilation System", icon: "🌀", green: true },
+      { label: "Draught Proofing Specialist", icon: "🪟", green: true },
+      { label: "EPC Certificate", icon: "📋", green: true },
+      { label: "Retrofit Assessment", icon: "📐", green: true },
+    ],
+  },
+  {
+    label: "Specialist Work",
+    items: [
+      { label: "Full Rewire", icon: "⚡", green: false },
+      { label: "Consumer Unit Upgrade", icon: "🔌", green: false },
+      { label: "Plumbing", icon: "🔧", green: false },
+      { label: "Boiler / Heating", icon: "🔥", green: false },
+      { label: "Roofing", icon: "🏚️", green: false },
+      { label: "Other", icon: "🛠️", green: false },
+    ],
+  },
+];
+
+const ALL_JOB_TYPES: JobTypeItem[] = JOB_SECTIONS.flatMap((s) => s.items);
 
 /* Scheme → allowed green trade type labels */
 const SCHEME_TRADE_MAP: Record<string, string[]> = {
-  eco4: ["External Wall Insulation (EWI)", "Cavity Wall Insulation", "Loft Insulation", "Retrofit Coordinator", "EPC Assessor"],
+  eco4: ["External Wall Insulation (EWI)", "Cavity Wall Insulation", "Loft Insulation", "Retrofit Assessment", "EPC Certificate"],
   bus: ["Air Source Heat Pump", "Ground Source Heat Pump"],
   gbis: ["External Wall Insulation (EWI)", "Cavity Wall Insulation", "Loft Insulation", "Draught Proofing Specialist"],
-  vat: ["Solar PV Installation", "Air Source Heat Pump", "Ground Source Heat Pump", "External Wall Insulation (EWI)", "Cavity Wall Insulation", "Loft Insulation", "EV Charger Installation", "Battery Storage", "MVHR Installer", "Underfloor Heating", "Draught Proofing Specialist", "EPC Assessor", "Retrofit Coordinator"],
-  hug: ["External Wall Insulation (EWI)", "Cavity Wall Insulation", "Loft Insulation", "Retrofit Coordinator", "EPC Assessor"],
-  epc: ["EPC Assessor"],
+  vat: ["Solar PV Installation", "Air Source Heat Pump", "Ground Source Heat Pump", "External Wall Insulation (EWI)", "Cavity Wall Insulation", "Loft Insulation", "EV Charger Installation", "Battery Storage", "Ventilation System", "Underfloor Heating", "Draught Proofing Specialist", "EPC Certificate", "Retrofit Assessment"],
+  hug: ["External Wall Insulation (EWI)", "Cavity Wall Insulation", "Loft Insulation", "Retrofit Assessment", "EPC Certificate"],
+  epc: ["EPC Certificate"],
 };
 
 // UK postcode regex (covers standard formats: A9 9AA, A9A 9AA, A99 9AA, AA9 9AA, AA9A 9AA, AA99 9AA)
