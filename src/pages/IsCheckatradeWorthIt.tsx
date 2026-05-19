@@ -51,17 +51,10 @@ const IsCheckatradeWorthIt = () => {
 
       {/* Hero */}
       <section className="relative pt-32 pb-20 px-6 overflow-hidden">
-        <span
-          className="absolute -bottom-8 right-0 font-heading text-[160px] craft:text-[280px] text-cream select-none pointer-events-none leading-none"
-          style={{ opacity: 0.03 }}
-          aria-hidden
-        >
-          HONEST
-        </span>
         <div className="max-w-5xl mx-auto relative z-10">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-8 h-[2px] bg-teal" />
-            <span className="font-mono text-xs text-teal uppercase tracking-widest">Honest Trade Review · 2026</span>
+            <span className="font-mono text-xs text-teal uppercase tracking-widest">Honest Trade Review · {new Date().getFullYear()}</span>
           </div>
           <h1 className="font-heading text-cream text-[40px] craft:text-[80px] leading-[0.95] max-w-4xl">
             Is Checkatrade worth it?<br />
