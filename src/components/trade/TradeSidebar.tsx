@@ -80,9 +80,9 @@ const TradeSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen }: 
         }`}
       >
         <div className="p-6 border-b border-white/10">
-          <a href="/" className="font-heading text-[24px] leading-none tracking-wide">
-            <span className="text-white">Pro</span>
-            <span style={{ color: "#14B8A6" }}>grafter</span>
+          <a href="/" className="font-heading text-[24px] leading-none tracking-wider">
+            <span className="text-white">PRO</span>
+            <span className="text-teal">GRAFTER</span>
           </a>
         </div>
 
