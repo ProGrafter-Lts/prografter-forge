@@ -147,6 +147,7 @@ const About = () => {
           </p>
         </div>
       </section>
+      </div>
     </AppShell>
   );
 };
