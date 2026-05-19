@@ -694,8 +694,8 @@ export default function PlanningAlerts() {
                 </div>
 
                 {/* Filters */}
-                <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_auto_auto] gap-2.5 mb-4">
-                  <div className="relative">
+                <div className="flex flex-wrap gap-2.5 mb-3">
+                  <div className="relative flex-1 min-w-[220px]">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
                     <input
                       value={searchQuery}
@@ -708,6 +708,7 @@ export default function PlanningAlerts() {
                   <select
                     value={filterTrade}
                     onChange={e=>setFilterTrade(e.target.value)}
+                    aria-label="Filter by trade"
                     className="px-3 py-2.5 rounded-xl border border-border bg-card font-mono text-xs text-foreground outline-none focus:border-secondary"
                   >
                     <option value="all">All trades</option>
@@ -716,18 +717,54 @@ export default function PlanningAlerts() {
                   <select
                     value={filterCouncil}
                     onChange={e=>setFilterCouncil(e.target.value)}
+                    aria-label="Filter by council"
                     className="px-3 py-2.5 rounded-xl border border-border bg-card font-mono text-xs text-foreground outline-none focus:border-secondary"
                   >
                     <option value="all">All councils</option>
                     {allCouncils.map(c=><option key={c} value={c}>{c}</option>)}
                   </select>
+                  <select
+                    value={filterProjectType}
+                    onChange={e=>setFilterProjectType(e.target.value as "all" | ProjectKind)}
+                    aria-label="Filter by project type"
+                    className="px-3 py-2.5 rounded-xl border border-border bg-card font-mono text-xs text-foreground outline-none focus:border-secondary"
+                  >
+                    <option value="all">All project types</option>
+                    <option value="DOMESTIC">Domestic</option>
+                    <option value="CONVERSION">Conversion</option>
+                    <option value="NEW BUILD">New build</option>
+                  </select>
+                  <select
+                    value={filterDate}
+                    onChange={e=>setFilterDate(e.target.value as "all" | "7" | "30" | "90")}
+                    aria-label="Filter by recency"
+                    className="px-3 py-2.5 rounded-xl border border-border bg-card font-mono text-xs text-foreground outline-none focus:border-secondary"
+                  >
+                    <option value="all">All dates</option>
+                    <option value="7">Last 7 days</option>
+                    <option value="30">Last 30 days</option>
+                    <option value="90">Last 90 days</option>
+                  </select>
+                  <label className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-border bg-card font-mono text-xs text-foreground cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={showRefused}
+                      onChange={e=>setShowRefused(e.target.checked)}
+                      className="w-3.5 h-3.5 accent-secondary cursor-pointer"
+                    />
+                    Show refused applications
+                  </label>
                   <button
-                    onClick={()=>{setFilterStatus("all");setFilterTrade("all");setFilterCouncil("all");setSearchQuery("");}}
+                    onClick={()=>{setFilterStatus("all");setFilterTrade("all");setFilterCouncil("all");setFilterProjectType("all");setFilterDate("90");setShowRefused(false);setSearchQuery("");}}
                     className="px-4 py-2.5 bg-card border border-border rounded-xl font-mono text-xs text-primary uppercase tracking-wider hover:bg-muted transition-colors whitespace-nowrap"
                   >
                     Clear
                   </button>
                 </div>
+
+                <p className="font-mono text-[11px] text-muted-foreground mb-5 leading-relaxed">
+                  Budget estimates are indicative only, based on typical UK build costs. Actual project costs will vary.
+                </p>
 
                 <div className={`grid gap-4 items-start ${selectedApp && !isMobile ? "grid-cols-[1fr_380px]" : "grid-cols-1"}`}>
                   {/* Application list */}
@@ -748,15 +785,13 @@ export default function PlanningAlerts() {
 
                     {/* Data source notice */}
                     <div className="bg-card border border-border rounded-2xl px-4 py-3 flex items-start gap-3">
-                      <Radio className="w-4 h-4 text-secondary flex-shrink-0 mt-0.5" />
+                      <span className="relative flex w-2.5 h-2.5 mt-1.5 flex-shrink-0" aria-hidden>
+                        <span className="absolute inset-0 rounded-full bg-emerald-500/40 animate-ping" />
+                        <span className="relative inline-flex w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                      </span>
                       <div>
-                        <p className="font-mono text-[11px] font-semibold text-primary uppercase tracking-wider mb-1">
-                          Live data in production
-                        </p>
                         <p className="font-sans text-xs text-muted-foreground leading-relaxed">
-                          This feed pulls live planning applications from PlanIt.org.uk (covering every UK
-                          local authority) via a backend function that runs nightly. New structural-job
-                          applications appear within 24 hours of council validation.
+                          <span className="font-semibold text-primary">Live planning data</span> — updated nightly from local authority planning portals covering South Derbyshire, Nottingham City, Broxtowe, Rushcliffe, Amber Valley, Erewash and North West Leicestershire. New applications appear within 24 hours of council validation.
                         </p>
                       </div>
                     </div>
