@@ -126,6 +126,9 @@ const IsCheckatradeWorthIt = () => {
           <p className="font-body text-cream/60 mt-6 text-sm leading-relaxed max-w-3xl">
             And that's just the membership. Add lead credits, marketing time and quiet months — the real number is higher.
           </p>
+          <p className="font-mono text-cream/40 text-xs mt-4 max-w-3xl leading-relaxed">
+            Assumes £400 average profit per domestic job. Margins vary by trade, job size, and materials cost. Use your own average job profit to calculate your personal break-even point.
+          </p>
         </div>
       </section>
 
