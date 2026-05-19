@@ -128,7 +128,6 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
 
   return (
     <div className="space-y-6">
-      <DisclaimerBanner />
       <div className="bg-card rounded-2xl border border-border p-6 md:p-8 space-y-6 shadow-sm">
         <div className="space-y-2">
           <Label className="font-mono text-sm text-navy">Quote PDF *</Label>
@@ -136,22 +135,22 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
             onClick={() => fileInputRef.current?.click()}
             className="border-2 border-dashed border-border rounded-xl p-8 text-center cursor-pointer hover:border-teal/50 transition-colors"
           >
-            <input ref={fileInputRef} type="file" accept=".pdf" onChange={handleFileChange} className="hidden" />
+            <input ref={fileInputRef} type="file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" onChange={handleFileChange} className="hidden" />
             {file ? (
               <div className="flex items-center justify-center gap-3">
                 <FileText className="h-8 w-8 text-teal" />
                 <div className="text-left">
                   <p className="font-mono text-sm text-navy font-medium">{file.name}</p>
                   <p className="font-mono text-xs text-muted-foreground">
-                    {(file.size / 1024 / 1024).toFixed(1)}MB — Click to change
+                    {formatFileSize(file.size)} — Click to change
                   </p>
                 </div>
               </div>
             ) : (
               <div>
                 <Upload className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
-                <p className="font-mono text-sm text-muted-foreground">Click to upload your quote PDF</p>
-                <p className="font-mono text-xs text-muted-foreground mt-1">PDF only — Max 10MB</p>
+                <p className="font-mono text-sm text-muted-foreground">Click to upload your quote</p>
+                <p className="font-mono text-xs text-muted-foreground mt-1">PDF, JPG or PNG — Max 10MB. Quote sent as a Word doc? Save it as a PDF first.</p>
               </div>
             )}
           </div>
@@ -171,7 +170,7 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
 
         <div className="space-y-2">
           <Label className="font-mono text-sm text-navy">Postcode</Label>
-          <Input type="text" placeholder="e.g. SW1A 1AA" value={postcode} onChange={(e) => setPostcode(e.target.value)} className="font-mono" />
+          <Input type="text" placeholder="e.g. NG1 1AA" value={postcode} onChange={(e) => setPostcode(e.target.value)} className="font-mono" />
         </div>
 
         <div className="space-y-2">
@@ -181,7 +180,13 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
             value={description} onChange={(e) => setDescription(e.target.value)} rows={3}
             className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 font-mono resize-none"
           />
-          <p className="font-mono text-xs text-muted-foreground">Minimum 30 characters ({description.length}/30)</p>
+          {description.length < 30 ? (
+            <p className="font-mono text-xs text-muted-foreground">Minimum 30 characters ({description.length}/30)</p>
+          ) : description.length === 30 ? (
+            <p className="font-mono text-xs text-green-600 flex items-center gap-1">
+              <Check className="h-3.5 w-3.5" /> Description looks good
+            </p>
+          ) : null}
         </div>
 
         <div className="space-y-2">
@@ -210,7 +215,7 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
         <Button
           onClick={handleSubmit}
           disabled={isSubmitting || !file || !projectType || !email || description.length < 30}
-          className="w-full h-12 bg-teal text-white font-mono text-sm rounded-xl hover:bg-teal-hover transition-colors shadow-lg shadow-teal/20 disabled:bg-muted disabled:text-muted-foreground disabled:shadow-none disabled:opacity-60"
+          className="w-full h-12 bg-teal text-white font-mono text-sm rounded-xl hover:bg-teal-hover transition-colors shadow-lg shadow-teal/20 disabled:bg-muted disabled:text-muted-foreground/70 disabled:shadow-none disabled:opacity-100"
         >
           {isSubmitting ? (
             <span className="flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" />Preparing checkout...</span>
@@ -218,6 +223,9 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
             "Check My Quote — £49"
           )}
         </Button>
+        <p className="text-center font-mono text-[11px] italic text-muted-foreground/80 leading-relaxed">
+          This report is AI-generated guidance only and does not constitute a professional survey or valuation. ProGrafter accepts no liability for decisions made based on this report.
+        </p>
         <p className="text-center font-mono text-xs text-muted-foreground">
           Secure payment via Stripe. Your report is generated in under 60 seconds.
         </p>
