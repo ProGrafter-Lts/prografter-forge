@@ -290,7 +290,7 @@ const Suppliers = () => {
                         I hold valid Public Liability insurance
                       </div>
                       <div className="font-body text-xs text-secondary-text">
-                        Required to qualify for Phase B.
+                        Required to qualify as a ProGrafter supplier partner.
                       </div>
                     </div>
                   </label>
