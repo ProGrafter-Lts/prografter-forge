@@ -98,7 +98,7 @@ const ProjectHeader = ({
         </div>
         <div className="flex items-center gap-3">
           <Badge className={STATUS_BADGE[job.status] || "bg-navy/10 text-navy"}>
-            {statusLabel.charAt(0).toUpperCase() + statusLabel.slice(1)}
+            {statusLabel}
           </Badge>
           {contractValue > 0 && (
             <span className="font-heading text-teal text-2xl">£{contractValue.toLocaleString()}</span>
