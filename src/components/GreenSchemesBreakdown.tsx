@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 interface Scheme {
   id: string;
   name: string;
@@ -8,8 +10,13 @@ interface Scheme {
   maxValue: string;
   maxValueSub?: string;
   note: string;
-  badge: "green" | "teal" | "amber";
+  badge: "teal" | "navy" | "amber" | "grey";
   badgeLabel: string;
+  closed?: boolean;
+}
+
+interface GreenSchemesBreakdownProps {
+  onCheckEligibility?: () => void;
 }
 
 const SCHEMES: Scheme[] = [
