@@ -53,7 +53,7 @@ const Navbar = () => {
           <a href="/#pricing" className="font-mono text-sm text-body-text" onClick={() => setMenuOpen(false)}>Pricing</a>
           <a href="/#features" className="font-mono text-sm text-body-text" onClick={() => setMenuOpen(false)}>Features</a>
           <a href="/quote-checker" className="font-mono text-sm text-body-text" onClick={() => setMenuOpen(false)}>Quote Checker</a>
-          <a href="/green" className="font-mono text-sm text-[#16A34A] flex items-center gap-1" onClick={() => setMenuOpen(false)}>🌿 Green Grants</a>
+          <a href="/green" className="font-mono text-sm text-body-text" onClick={() => setMenuOpen(false)}>Green Grants</a>
           <a href="/login" className="font-mono text-sm text-body-text" onClick={() => setMenuOpen(false)}>Login</a>
           <a href="/signup/trade" className="border border-teal text-teal font-mono text-sm px-5 py-2 rounded-xl text-center" onClick={() => setMenuOpen(false)}>Join as a Trade</a>
           <a href="/signup/homeowner" className="bg-teal text-cream font-mono text-sm px-5 py-2.5 rounded-xl text-center shadow-lg shadow-teal/20" onClick={() => setMenuOpen(false)}>Post a Job</a>
