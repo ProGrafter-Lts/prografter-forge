@@ -602,9 +602,6 @@ const PostAJob = () => {
               {/* STEP 3b — OPTIONAL Funds Verification */}
               {step === 3.5 && (
                 <>
-                  <span className="inline-block bg-cream/10 text-cream/60 font-mono text-[10px] uppercase tracking-widest px-2 py-1 rounded mb-3">
-                    Optional Step
-                  </span>
                   <h2 className="font-heading text-cream text-[36px] leading-none mb-3">
                     Build Trust <span className="text-teal">With Trades.</span>
                   </h2>
@@ -618,12 +615,11 @@ const PostAJob = () => {
                     significantly more quotes and from higher-quality trades.
                   </p>
                   <p className="font-body text-cream/50 text-xs leading-relaxed mb-6">
-                    Your financial documents are encrypted, stored privately, and never shown
-                    to trades or ProGrafter staff. We only display a verification badge on
-                    your job posting.
+                    Your documents are stored securely and never shown to trades — only a
+                    Funds Verified badge appears on your job posting.
                   </p>
 
-                  {/* OPTION A — Document upload card */}
+                  {/* Document upload card */}
                   <div className="rounded-xl border-l-4 border-teal bg-cream/5 border border-cream/10 p-5 mb-4">
                     <div className="flex items-start gap-3 mb-3">
                       <svg className="w-6 h-6 text-teal flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -680,23 +676,53 @@ const PostAJob = () => {
                       <p className="font-mono text-xs text-red-400 mt-2">{fundsDocError}</p>
                     )}
 
-                    <p className="font-body text-cream/40 text-[11px] leading-relaxed mt-4 border-t border-cream/10 pt-3">
-                      Your document is encrypted in transit and at rest. It is stored on
-                      ProGrafter's secure servers and is accessible only to ProGrafter's
-                      verification team. It will never be shared with trades, third parties,
-                      or used for any purpose other than issuing your verification badge.
-                      You may request deletion at any time by emailing hello@prografter.co.uk.
-                      Processed under GDPR Article 6(1)(a) — your explicit consent.
-                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setFundsGdprOpen(true)}
+                      className="font-mono text-[11px] text-cream/40 hover:text-cream/70 underline underline-offset-2 mt-4 inline-block"
+                    >
+                      How is this data stored and used? →
+                    </button>
                   </div>
 
-                  {/* OPTION B — Skip card */}
-                  <div className="rounded-xl border-l-4 border-cream/20 bg-cream/5 border border-cream/10 p-5 mb-6">
-                    <h3 className="font-heading text-cream/70 text-lg leading-tight mb-1">Skip for now</h3>
-                    <p className="font-body text-cream/50 text-xs">
-                      Skip this step — I'll verify later if needed.
-                    </p>
-                  </div>
+                  {fundsGdprOpen && (
+                    <div
+                      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-deep/80 backdrop-blur-sm"
+                      onClick={() => setFundsGdprOpen(false)}
+                    >
+                      <div
+                        className="max-w-lg w-full bg-deep border border-cream/15 rounded-2xl p-6"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <div className="flex items-start justify-between mb-3">
+                          <h4 className="font-heading text-cream text-xl">How your funds document is stored</h4>
+                          <button
+                            type="button"
+                            onClick={() => setFundsGdprOpen(false)}
+                            className="text-cream/50 hover:text-cream text-lg leading-none"
+                            aria-label="Close"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                        <p className="font-body text-cream/70 text-sm leading-relaxed">
+                          Your document is encrypted in transit and at rest. It is stored on
+                          ProGrafter's secure servers and is accessible only to ProGrafter's
+                          verification team. It will never be shared with trades, third parties,
+                          or used for any purpose other than issuing your verification badge.
+                          You may request deletion at any time by emailing hello@prografter.co.uk.
+                          Processed under GDPR Article 6(1)(a) — your explicit consent.
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => setFundsGdprOpen(false)}
+                          className="mt-5 w-full bg-teal text-cream font-mono text-sm py-2.5 rounded-xl hover:bg-teal-hover transition-colors"
+                        >
+                          Got it
+                        </button>
+                      </div>
+                    </div>
+                  )}
 
                   <div className="flex gap-4 mt-8">
                     <button
