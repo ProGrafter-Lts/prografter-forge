@@ -156,9 +156,9 @@ const Login = () => {
           </a>
         </div>
         <div className="text-center mb-8">
-          <a href="/" className="font-body text-[32px] leading-none tracking-wide">
-            <span className="text-navy">Pro</span>
-            <span className="text-teal">grafter</span>
+          <a href="/" className="font-heading text-[32px] leading-none tracking-wider">
+            <span className="text-navy">PRO</span>
+            <span className="text-teal">GRAFTER</span>
           </a>
           <p className="font-mono text-sm text-secondary-text mt-2">Sign in — trade or homeowner</p>
         </div>
