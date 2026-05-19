@@ -204,7 +204,7 @@ const Contact = () => {
               Send a Message
             </span>
           </div>
-          <h2 className="font-heading text-navy text-3xl craft:text-4xl mb-8">
+          <h2 className="font-body font-bold text-navy text-3xl craft:text-4xl mb-8">
             Drop us a line.
           </h2>
 
