@@ -99,7 +99,7 @@ const Terms = () => {
             <section>
               <h2 className="mb-3 font-heading text-3xl leading-none text-navy">11. Contact</h2>
               <p>
-                Questions about these terms: <a href="mailto:legal@prografter.co.uk" className="text-teal underline-offset-4 hover:underline">legal@prografter.co.uk</a>
+                Questions about these terms: <a href="mailto:hello@prografter.co.uk" className="text-teal underline-offset-4 hover:underline">hello@prografter.co.uk</a>
               </p>
             </section>
 
