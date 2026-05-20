@@ -148,38 +148,36 @@ const QuoteSubmitForm = ({ jobId, tradeId, onQuoteSubmitted, quickBuildPrefill }
     try {
       const { data: jobRow } = await supabase
         .from("jobs")
-        .select("id, title, address_line1, town, homeowner_id, project_type")
+        .select("id, title, address, postcode, homeowner_id, job_type")
         .eq("id", jobId)
         .maybeSingle();
       if (jobRow?.homeowner_id) {
-        const { data: ownerProfile } = await supabase
-          .from("profiles")
-          .select("email, first_name")
-          .eq("user_id", jobRow.homeowner_id)
+        const { data: ownerRow } = await supabase
+          .from("homeowners")
+          .select("email, name")
+          .eq("id", jobRow.homeowner_id)
           .maybeSingle();
-        const { data: tradeProfile } = await supabase
-          .from("profiles")
-          .select("display_name, company_name, first_name")
-          .eq("user_id", tradeId)
+        const { data: tradeRow } = await supabase
+          .from("trades")
+          .select("name, company_name")
+          .eq("id", tradeId)
           .maybeSingle();
-        if (ownerProfile?.email) {
+        if (ownerRow?.email) {
           const projectTitle =
-            jobRow.title || jobRow.project_type || "your project";
-          const projectAddress = [jobRow.address_line1, jobRow.town]
+            jobRow.title || jobRow.job_type || "your project";
+          const projectAddress = [jobRow.address, jobRow.postcode]
             .filter(Boolean)
             .join(", ");
           const tradeName =
-            tradeProfile?.company_name ||
-            tradeProfile?.display_name ||
-            tradeProfile?.first_name ||
-            "A trade";
+            tradeRow?.company_name || tradeRow?.name || "A trade";
+          const firstName = ownerRow.name?.split(" ")[0] || undefined;
           void supabase.functions.invoke("send-transactional-email", {
             body: {
               templateName: "quote-received",
-              recipientEmail: ownerProfile.email,
+              recipientEmail: ownerRow.email,
               idempotencyKey: `quote-received-${quoteRow.id}`,
               templateData: {
-                firstName: ownerProfile.first_name || undefined,
+                firstName,
                 tradeName,
                 amount: `£${baseAmount.toLocaleString("en-GB", { minimumFractionDigits: 2 })}`,
                 projectTitle,
