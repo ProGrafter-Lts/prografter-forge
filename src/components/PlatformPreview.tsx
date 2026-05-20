@@ -20,6 +20,9 @@ const BrowserFrame = ({
   url: string;
 }) => (
   <div className="flex flex-col gap-3">
+    <p className="font-mono text-[11px] text-cream/[0.55] text-center">
+      Illustrative preview — your dashboard fills in as real work flows through.
+    </p>
     <div
       className="rounded-xl overflow-hidden border shadow-2xl"
       style={{
