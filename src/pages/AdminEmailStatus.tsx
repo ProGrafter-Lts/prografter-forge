@@ -4,33 +4,43 @@ import { supabase } from "@/integrations/supabase/client";
 import SEO from "@/components/SEO";
 import { format } from "date-fns";
 
-// 15 emails the platform sends, grouped by category.
-const EMAIL_CATALOG: { name: string; category: "auth" | "onboarding" | "contract" }[] = [
-  // Auth (handled by auth-email-hook — log appears as template_name='auth_emails')
-  { name: "auth_signup_verification",   category: "auth" },
-  { name: "auth_password_reset",        category: "auth" },
-  { name: "auth_email_change",          category: "auth" },
-  { name: "auth_magic_link",            category: "auth" },
+// Emails the platform sends, grouped by category.
+// `matchKey` is the value stored in email_send_log.template_name.
+const EMAIL_CATALOG: {
+  name: string;
+  category: "auth" | "onboarding" | "contract" | "payments" | "quotes" | "project";
+  matchKey: string;
+}[] = [
+  // Auth (handled by auth-email-hook — each action_type logs under its own name)
+  { name: "auth_signup_verification", category: "auth", matchKey: "signup" },
+  { name: "auth_password_reset",      category: "auth", matchKey: "recovery" },
+  { name: "auth_email_change",        category: "auth", matchKey: "email_change" },
+  { name: "auth_magic_link",          category: "auth", matchKey: "magiclink" },
   // Onboarding
-  { name: "homeowner-welcome",            category: "onboarding" },
-  { name: "trade-welcome",                category: "onboarding" },
-  { name: "trade-verification-submitted", category: "onboarding" },
-  { name: "trade-verified",               category: "onboarding" },
-  { name: "trade-rejected",               category: "onboarding" },
-  { name: "trade-verification-query",     category: "onboarding" },
-  // Contract lifecycle (kebab-case to match the transactional template registry)
-  { name: "contract-generated",           category: "contract" },
-  { name: "contract-awaiting-signature",  category: "contract" },
-  { name: "contract-activated",           category: "contract" },
-  { name: "variation-proposed",           category: "contract" },
-  { name: "variation-approved",           category: "contract" },
-  { name: "completion-marked",            category: "contract" },
-  { name: "completion-accepted",          category: "contract" },
+  { name: "homeowner-welcome",            category: "onboarding", matchKey: "homeowner-welcome" },
+  { name: "trade-welcome",                category: "onboarding", matchKey: "trade-welcome" },
+  { name: "trade-verification-submitted", category: "onboarding", matchKey: "trade-verification-submitted" },
+  { name: "trade-verified",               category: "onboarding", matchKey: "trade-verified" },
+  { name: "trade-rejected",               category: "onboarding", matchKey: "trade-rejected" },
+  { name: "trade-verification-query",     category: "onboarding", matchKey: "trade-verification-query" },
+  // Quotes
+  { name: "quote-received",               category: "quotes", matchKey: "quote-received" },
+  // Payments
+  { name: "payment-released-trade",       category: "payments", matchKey: "payment-released-trade" },
+  { name: "payment-released-homeowner",   category: "payments", matchKey: "payment-released-homeowner" },
+  // Project lifecycle
+  { name: "project-overdue-trade",        category: "project", matchKey: "project-overdue-trade" },
+  { name: "project-overdue-homeowner",    category: "project", matchKey: "project-overdue-homeowner" },
+  // Contract lifecycle — templates registered, triggers ship with contract signing (target June 2026)
+  { name: "contract-generated",           category: "contract", matchKey: "contract-generated" },
+  { name: "contract-awaiting-signature",  category: "contract", matchKey: "contract-awaiting-signature" },
+  { name: "contract-activated",           category: "contract", matchKey: "contract-activated" },
+  { name: "variation-proposed",           category: "contract", matchKey: "variation-proposed" },
+  { name: "variation-approved",           category: "contract", matchKey: "variation-approved" },
+  { name: "completion-marked",            category: "contract", matchKey: "completion-marked" },
+  { name: "completion-accepted",          category: "contract", matchKey: "completion-accepted" },
 ];
 
-// Templates that ARE registered in the transactional email registry. Anything
-// else falls back to "not configured" unless it's an auth_* alias (auth emails
-// flow via auth-email-hook with template_name='auth_emails').
 const REGISTERED_TEMPLATES = new Set([
   "homeowner-welcome",
   "trade-welcome",
@@ -41,7 +51,11 @@ const REGISTERED_TEMPLATES = new Set([
   "waitlist-welcome",
   "waitlist-admin-notification",
   "contact-message",
-  // Contract lifecycle (kebab-case template names registered in registry.ts)
+  "quote-received",
+  "payment-released-trade",
+  "payment-released-homeowner",
+  "project-overdue-trade",
+  "project-overdue-homeowner",
   "contract-generated",
   "contract-awaiting-signature",
   "contract-activated",
