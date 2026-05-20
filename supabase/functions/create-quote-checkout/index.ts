@@ -5,7 +5,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const PRICE_ID = "price_1TLiREL4yG1Y84vbxJviZvIg";
+const PRICE_ID = "price_1TZBDKL4yG1Y84vbBzZwhKBH";
 
 // Strict-enough email regex (RFC 5322 lite) with TLD requirement
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;
