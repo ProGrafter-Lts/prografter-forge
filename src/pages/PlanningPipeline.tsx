@@ -370,6 +370,7 @@ export default function PlanningPipeline() {
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterPipeline, setFilterPipeline] = useState("all");
   const [search, setSearch] = useState("");
+  const [ingesting, setIngesting] = useState(false);
   const isMobile = useIsMobile();
 
   const load = async () => {
@@ -383,6 +384,25 @@ export default function PlanningPipeline() {
     setLeads((lData as Lead[]) || []);
     setAgents((aData as Agent[]) || []);
     setLoading(false);
+  };
+
+  const runIngest = async () => {
+    setIngesting(true);
+    const { data: { session } } = await supabase.auth.getSession();
+    const { data, error } = await supabase.functions.invoke("ingest-planning-leads", {
+      headers: session ? { Authorization: `Bearer ${session.access_token}` } : {},
+    });
+    setIngesting(false);
+    if (error) {
+      toast({ title: "Ingest failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    const r = data as { inserted?: number; fetched?: number; councils?: number };
+    toast({
+      title: "Planning ingest complete",
+      description: `${r.inserted ?? 0} new Notts leads from ${r.councils ?? 0} councils (${r.fetched ?? 0} scanned)`,
+    });
+    load();
   };
 
   useEffect(() => { load(); }, []);
