@@ -43,7 +43,12 @@ type Lead = {
   submitted_date: string | null;
   applicant_name: string | null;
   applicant_address: string | null;
+  applicant_contact: string | null;
   agent_id: string | null;
+  agent_name: string | null;
+  agent_address: string | null;
+  agent_contact: string | null;
+  proposal_type: string | null;
   trades_likely: string[] | null;
   estimated_value_min: number | null;
   estimated_value_max: number | null;
@@ -51,6 +56,9 @@ type Lead = {
   pipeline_status: string;
   documents_available: boolean;
   form1app_extracted: boolean;
+  council_application_url: string | null;
+  pdf_source_url: string | null;
+  pdf_enriched_at: string | null;
   notes: string | null;
   next_action: string | null;
 };
@@ -208,6 +216,7 @@ const LeadDetail = ({ lead, agent, onSaved }: { lead: Lead; agent?: Agent; onSav
   const [nextAction, setNextAction] = useState(lead.next_action || "");
   const [pipelineStatus, setPipelineStatus] = useState(lead.pipeline_status);
   const [saving, setSaving] = useState(false);
+  const [enriching, setEnriching] = useState(false);
 
   useEffect(() => {
     setNotes(lead.notes || "");
@@ -230,9 +239,30 @@ const LeadDetail = ({ lead, agent, onSaved }: { lead: Lead; agent?: Agent; onSav
     }
   };
 
+  const enrichFromPdf = async () => {
+    setEnriching(true);
+    const { data: { session } } = await supabase.auth.getSession();
+    const { data, error } = await supabase.functions.invoke("enrich-planning-lead-pdf", {
+      body: { lead_id: lead.id },
+      headers: session ? { Authorization: `Bearer ${session.access_token}` } : {},
+    });
+    setEnriching(false);
+    if (error) {
+      toast({ title: "PDF enrich failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    const r = data as { ok?: boolean; error?: string };
+    if (r?.error) {
+      toast({ title: "PDF enrich failed", description: r.error, variant: "destructive" });
+    } else {
+      toast({ title: "PDF read", description: "Applicant & agent details extracted." });
+      onSaved();
+    }
+  };
+
   const copyEmail = (email: string) => {
     navigator.clipboard?.writeText(email);
-    toast({ title: "Email copied" });
+    toast({ title: "Copied" });
   };
 
   const ds = daysSince(lead.submitted_date);
@@ -257,9 +287,17 @@ const LeadDetail = ({ lead, agent, onSaved }: { lead: Lead; agent?: Agent; onSav
               <span style={{ fontSize: 11, color: C.dimText }}>{ds} days ago</span>
             </div>
           </div>
-          <div style={{ textAlign: "right" }}>
+          <div style={{ textAlign: "right", display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>
             <p style={{ fontSize: 22, fontWeight: 700, color: C.teal, margin: 0 }}>{fmt(lead.estimated_value_max)}</p>
             <p style={{ fontSize: 10, color: C.dimText, margin: 0 }}>est. value</p>
+            <button onClick={enrichFromPdf} disabled={enriching || !lead.council_application_url}
+              title={lead.council_application_url ? "Read the official application form PDF and extract applicant + agent details" : "No council URL on file"}
+              style={{ marginTop: 6, background: lead.pdf_enriched_at ? "rgba(13,148,136,0.18)" : C.teal, color: lead.pdf_enriched_at ? C.teal : C.white, border: lead.pdf_enriched_at ? `1px solid rgba(13,148,136,0.4)` : "none", borderRadius: 7, padding: "6px 10px", fontSize: 10, fontWeight: 700, cursor: enriching ? "not-allowed" : "pointer", opacity: enriching || !lead.council_application_url ? 0.6 : 1, whiteSpace: "nowrap" }}>
+              {enriching ? "Reading PDF…" : lead.pdf_enriched_at ? "🔁 Re-read PDF" : "📄 Read PDF form"}
+            </button>
+            {lead.proposal_type && (
+              <span style={{ fontSize: 10, color: C.dimText, marginTop: 2 }}>{lead.proposal_type}</span>
+            )}
           </div>
         </div>
       </div>
@@ -282,10 +320,15 @@ const LeadDetail = ({ lead, agent, onSaved }: { lead: Lead; agent?: Agent; onSav
         <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: 10, padding: "12px 14px" }}>
           <p style={{ fontSize: 10, fontWeight: 700, color: C.teal, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 6px" }}>🏠 Applicant (homeowner)</p>
           <p style={{ fontSize: 13, fontWeight: 600, color: C.brightText, margin: "0 0 2px" }}>{lead.applicant_name || "Name not listed"}</p>
-          {lead.applicant_address && <p style={{ fontSize: 11, color: C.dimText, margin: 0 }}>{lead.applicant_address}</p>}
-          {!agent && (
+          {lead.applicant_address && <p style={{ fontSize: 11, color: C.dimText, margin: "0 0 4px" }}>{lead.applicant_address}</p>}
+          {lead.applicant_contact && (
+            <p style={{ fontSize: 11, color: C.teal, margin: "4px 0 0", fontWeight: 600 }}>📞 {lead.applicant_contact}
+              <button onClick={() => copyEmail(lead.applicant_contact!)} style={{ marginLeft: 8, background: "rgba(13,148,136,0.2)", color: C.teal, border: `1px solid rgba(13,148,136,0.3)`, borderRadius: 5, padding: "2px 7px", fontSize: 10, cursor: "pointer" }}>Copy</button>
+            </p>
+          )}
+          {!agent && !lead.agent_name && (
             <div style={{ marginTop: 8, padding: "8px 10px", background: "rgba(217,119,6,0.12)", border: `1px solid rgba(217,119,6,0.3)`, borderRadius: 7 }}>
-              <p style={{ fontSize: 11, color: C.amber, margin: 0 }}>⚠️ No agent listed — contact homeowner directly via planning portal address</p>
+              <p style={{ fontSize: 11, color: C.amber, margin: 0 }}>⚠️ No agent listed — read the PDF form or contact homeowner directly</p>
             </div>
           )}
         </div>
@@ -311,8 +354,27 @@ const LeadDetail = ({ lead, agent, onSaved }: { lead: Lead; agent?: Agent; onSav
                 </div>
               )}
             </>
+          ) : lead.agent_name ? (
+            <>
+              <p style={{ fontSize: 13, fontWeight: 600, color: C.brightText, margin: "0 0 2px" }}>{lead.agent_name}</p>
+              {lead.agent_address && <p style={{ fontSize: 11, color: C.dimText, margin: "0 0 6px" }}>{lead.agent_address}</p>}
+              {lead.agent_contact && (
+                <p style={{ fontSize: 11, color: C.teal, margin: 0, fontWeight: 600 }}>📞 {lead.agent_contact}
+                  <button onClick={() => copyEmail(lead.agent_contact!)} style={{ marginLeft: 8, background: "rgba(13,148,136,0.2)", color: C.teal, border: `1px solid rgba(13,148,136,0.3)`, borderRadius: 5, padding: "2px 7px", fontSize: 10, cursor: "pointer" }}>Copy</button>
+                </p>
+              )}
+              <p style={{ fontSize: 10, color: C.dimText, marginTop: 6 }}>Extracted from official application form PDF.</p>
+            </>
           ) : (
-            <p style={{ fontSize: 11, color: C.dimText, margin: 0 }}>No agent listed on this application — self-submission by homeowner.</p>
+            <p style={{ fontSize: 11, color: C.dimText, margin: 0 }}>No agent listed. Click "Read PDF form" above to extract from the official application.</p>
+          )}
+          {lead.council_application_url && (
+            <p style={{ fontSize: 10, marginTop: 8, marginBottom: 0 }}>
+              <a href={lead.council_application_url} target="_blank" rel="noreferrer" style={{ color: C.teal, textDecoration: "underline" }}>↗ Open council planning page</a>
+              {lead.pdf_source_url && (
+                <> · <a href={lead.pdf_source_url} target="_blank" rel="noreferrer" style={{ color: C.teal, textDecoration: "underline" }}>↗ Open form PDF</a></>
+              )}
+            </p>
           )}
         </div>
 
