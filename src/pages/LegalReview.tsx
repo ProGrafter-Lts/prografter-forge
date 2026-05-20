@@ -1,7 +1,7 @@
 import AppShell from "@/components/AppShell";
 import SEO from "@/components/SEO";
 import { LEGAL_REVIEW_ETA } from "@/components/LegalReviewBanner";
-import { ShieldCheck, FileText, Clock, ArrowLeft } from "lucide-react";
+import { ShieldCheck, FileText, Clock, ArrowLeft, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const LegalReview = () => {
