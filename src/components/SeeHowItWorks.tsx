@@ -77,6 +77,7 @@ const TradesPanel = () => (
       {/* Right column */}
       <div className="visual-right">
         <div>
+          <Disclaimer />
           <div className="hiw-screen">
             <ChromeBar url="prografter.co.uk/dashboard/trade" />
             <ScreenShot src={tradeJobs} alt="Available jobs view for trades" />
