@@ -43,7 +43,12 @@ type Lead = {
   submitted_date: string | null;
   applicant_name: string | null;
   applicant_address: string | null;
+  applicant_contact: string | null;
   agent_id: string | null;
+  agent_name: string | null;
+  agent_address: string | null;
+  agent_contact: string | null;
+  proposal_type: string | null;
   trades_likely: string[] | null;
   estimated_value_min: number | null;
   estimated_value_max: number | null;
@@ -51,6 +56,9 @@ type Lead = {
   pipeline_status: string;
   documents_available: boolean;
   form1app_extracted: boolean;
+  council_application_url: string | null;
+  pdf_source_url: string | null;
+  pdf_enriched_at: string | null;
   notes: string | null;
   next_action: string | null;
 };
