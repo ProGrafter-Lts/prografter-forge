@@ -65,6 +65,7 @@ const Index = () => {
       <WhyDifferent />
       <PlatformPreview />
       <FounderNote />
+      <VerificationStandards />
       <Testimonials />
       <SeeHowItWorks />
       <TradeVerificationExplainer />
