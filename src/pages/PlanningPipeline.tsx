@@ -123,52 +123,85 @@ const SBadge = ({ status }: { status: string }) => {
 const PriorityBar = ({ score }: { score: number }) => {
   const c = score >= 75 ? C.red : score >= 50 ? C.amber : C.teal;
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+    <div style={{ display: "flex", alignItems: "center", gap: 6 }} title={SCORE_TOOLTIP}>
       <div style={{ flex: 1, height: 4, background: "rgba(255,255,255,0.08)", borderRadius: 4, overflow: "hidden" }}>
         <div style={{ width: `${score}%`, height: "100%", background: c }} />
       </div>
-      <span style={{ fontSize: 10, fontWeight: 700, color: c, minWidth: 22, textAlign: "right" }}>{score}</span>
+      <span style={{ fontSize: 10, fontWeight: 700, color: c, minWidth: 26, textAlign: "right", cursor: "help" }}>
+        {score} ⓘ
+      </span>
     </div>
   );
 };
 
 const LeadCard = ({ lead, onSelect, selected, agent }: {
   lead: Lead; onSelect: (l: Lead) => void; selected: boolean; agent?: Agent;
-}) => (
-  <div onClick={() => onSelect(lead)}
-    style={{
-      background: selected ? C.darkCard : "rgba(255,255,255,0.04)",
-      border: `1px solid ${selected ? C.teal : C.darkBorder}`,
-      borderRadius: 10, padding: "10px 14px", cursor: "pointer",
-      marginBottom: 6, transition: "all 0.15s",
-    }}>
-    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6, gap: 8 }}>
-      <div style={{ minWidth: 0 }}>
-        <p style={{ fontSize: 12, fontWeight: 700, color: C.brightText, margin: "0 0 2px", lineHeight: 1.3 }}>
-          {lead.site_address}
-        </p>
-        <p style={{ fontSize: 10, color: C.dimText, margin: 0 }}>
-          {lead.council_name} · {lead.application_ref}
-        </p>
+}) => {
+  const days = daysSince(lead.submitted_date);
+  const overdue = isOverdue(lead.pipeline_status, days);
+  const noNextAction = !lead.next_action || !lead.next_action.trim();
+  const nonDomestic = isNonDomestic(lead);
+  return (
+    <div onClick={() => onSelect(lead)}
+      style={{
+        background: selected ? C.darkCard : "rgba(255,255,255,0.04)",
+        border: `1px solid ${selected ? C.teal : C.darkBorder}`,
+        borderRadius: 10, padding: "10px 14px", cursor: "pointer",
+        marginBottom: 6, transition: "all 0.15s",
+      }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6, gap: 8 }}>
+        <div style={{ minWidth: 0 }}>
+          <p style={{ fontSize: 12, fontWeight: 700, color: C.brightText, margin: "0 0 2px", lineHeight: 1.3 }}>
+            {lead.site_address}
+          </p>
+          <p style={{ fontSize: 10, color: C.dimText, margin: 0 }}>
+            {lead.council_name} · {lead.application_ref}
+          </p>
+        </div>
+        <div style={{ textAlign: "right", flexShrink: 0 }}>
+          <p style={{ fontSize: 12, fontWeight: 700, color: C.teal, margin: 0 }}>
+            {fmt(lead.estimated_value_max)}
+          </p>
+          <p style={{ fontSize: 9, color: C.dimText, margin: 0 }}>{days}d ago</p>
+        </div>
       </div>
-      <div style={{ textAlign: "right", flexShrink: 0 }}>
-        <p style={{ fontSize: 12, fontWeight: 700, color: C.teal, margin: 0 }}>
-          {fmt(lead.estimated_value_max)}
-        </p>
-        <p style={{ fontSize: 9, color: C.dimText, margin: 0 }}>{daysSince(lead.submitted_date)}d ago</p>
+      <div style={{ marginBottom: 6 }}>
+        <PriorityBar score={lead.priority_score} />
+      </div>
+      {(overdue || noNextAction || nonDomestic) && (
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 6 }}>
+          {overdue && (
+            <span style={{ fontSize: 9, fontWeight: 700, color: C.amber,
+              background: "rgba(217,119,6,0.18)", border: `1px solid ${C.amberBorder}`,
+              borderRadius: 4, padding: "1px 6px", letterSpacing: "0.04em" }}>
+              ⚠ FOLLOW-UP OVERDUE
+            </span>
+          )}
+          {noNextAction && (
+            <span style={{ fontSize: 9, fontWeight: 700, color: C.amber,
+              background: "rgba(217,119,6,0.18)", border: `1px solid ${C.amberBorder}`,
+              borderRadius: 4, padding: "1px 6px", letterSpacing: "0.04em" }}>
+              ⚠ NO NEXT ACTION
+            </span>
+          )}
+          {nonDomestic && (
+            <span style={{ fontSize: 9, fontWeight: 700, color: C.purple,
+              background: "rgba(124,58,237,0.18)", border: `1px solid ${C.purpleBorder}`,
+              borderRadius: 4, padding: "1px 6px", letterSpacing: "0.04em" }}>
+              ⚠ NON-DOMESTIC
+            </span>
+          )}
+        </div>
+      )}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 6 }}>
+        <SBadge status={lead.pipeline_status} />
+        <span style={{ fontSize: 9, color: C.dimText, textAlign: "right" }}>
+          {agent ? `🏛️ ${agent.company_name || agent.contact_name}` : "No agent"}
+        </span>
       </div>
     </div>
-    <div style={{ marginBottom: 6 }}>
-      <PriorityBar score={lead.priority_score} />
-    </div>
-    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 6 }}>
-      <SBadge status={lead.pipeline_status} />
-      <span style={{ fontSize: 9, color: C.dimText, textAlign: "right" }}>
-        {agent ? `🏛️ ${agent.company_name || agent.contact_name}` : "No agent"}
-      </span>
-    </div>
-  </div>
-);
+  );
+};
 
 const LeadDetail = ({ lead, agent, onSaved }: { lead: Lead; agent?: Agent; onSaved: () => void }) => {
   const [notes, setNotes] = useState(lead.notes || "");
