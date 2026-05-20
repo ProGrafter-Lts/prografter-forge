@@ -274,13 +274,19 @@ const AdminEmailStatus = () => {
           </div>
         )}
 
-        <p className="mt-6 font-mono text-xs text-secondary-text">
-          Note: All four auth emails share a single template name{" "}
-          <code>auth_emails</code> in the log (the auth-email-hook routes them
-          all through one pipeline), so the four auth rows above show the same
-          aggregate counts. Contract emails are not yet wired — they'll appear
-          once the contract triggers ship.
-        </p>
+        <div className="mt-6 space-y-3 font-mono text-xs text-secondary-text">
+          <p>
+            Auth emails (signup, recovery, magiclink, email_change) log under
+            their Supabase action_type — rows above map directly to those keys
+            in <code>email_send_log</code>.
+          </p>
+          <p>
+            <strong>Contract emails:</strong> 7 templates configured but not yet
+            wired. They will be connected when the contract signing feature
+            ships (target: early June 2026). Do NOT ship contract signing
+            without the <code>contract-awaiting-signature</code> trigger live.
+          </p>
+        </div>
       </main>
     </div>
   );
