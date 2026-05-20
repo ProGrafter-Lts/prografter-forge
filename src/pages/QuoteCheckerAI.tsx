@@ -402,7 +402,7 @@ ${form.quote_text}`;
               <F label="Property type" hint="Optional but helps with context">
                 <select style={inp()} value={form.property_type} onChange={upd("property_type")}>
                   <option value="">Select...</option>
-                  {["Detached house","Semi-detached","Terraced house","Bungalow","Flat / apartment","Commercial"].map(o=>(
+                  {["Detached house","Semi-detached house","Terraced house","End-of-terrace house","Flat / Apartment","Bungalow","Maisonette","Other"].map(o=>(
                     <option key={o} value={o}>{o}</option>
                   ))}
                 </select>
