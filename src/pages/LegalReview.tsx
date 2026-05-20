@@ -50,11 +50,18 @@ const LegalReview = () => {
                 sections, project-specific data populated from your profile, and space for bespoke
                 terms either party can add.
               </p>
-              <p>
+              <p className="mb-4">
                 You can review the full document, discuss it with the other party, and add bespoke
                 clauses. Signing is temporarily disabled until the solicitor's text replaces the
                 placeholder body copy in each section.
               </p>
+              <Link
+                to="/dashboard/trade"
+                className="inline-flex items-center gap-2 bg-teal text-cream font-mono text-sm px-6 py-2.5 rounded-xl hover:bg-teal/90 transition-colors"
+              >
+                Generate your contract
+                <ArrowRight className="w-4 h-4" />
+              </Link>
             </div>
           </div>
 
