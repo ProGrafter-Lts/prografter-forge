@@ -298,13 +298,18 @@ const LeadDetail = ({ lead, agent, onSaved }: { lead: Lead; agent?: Agent; onSav
               {agent.company_name && <p style={{ fontSize: 11, color: C.teal, margin: "0 0 2px" }}>{agent.company_name}</p>}
               {agent.address && <p style={{ fontSize: 11, color: C.dimText, margin: "0 0 8px" }}>{agent.address}</p>}
               <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
-                {agent.phone && (
-                  <a href={`tel:${agent.phone}`} style={{ display: "inline-flex", alignItems: "center", gap: 4, background: C.teal, color: C.white, borderRadius: 6, padding: "5px 10px", fontSize: 11, fontWeight: 600, textDecoration: "none" }}>📞 {agent.phone}</a>
+                {agent.email && (
+                  <a href={`mailto:${agent.email}`} style={{ display: "inline-flex", alignItems: "center", gap: 4, background: C.teal, color: C.white, borderRadius: 6, padding: "5px 10px", fontSize: 11, fontWeight: 600, textDecoration: "none" }}>✉️ {agent.email}</a>
                 )}
                 {agent.email && (
-                  <button onClick={() => copyEmail(agent.email!)} style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "rgba(13,148,136,0.2)", color: C.teal, border: `1px solid rgba(13,148,136,0.3)`, borderRadius: 6, padding: "5px 10px", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>✉️ Copy email</button>
+                  <button onClick={() => copyEmail(agent.email!)} style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "rgba(13,148,136,0.2)", color: C.teal, border: `1px solid rgba(13,148,136,0.3)`, borderRadius: 6, padding: "5px 10px", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>Copy</button>
                 )}
               </div>
+              {agent.phone && (
+                <div style={{ marginTop: 8, padding: "6px 10px", background: "rgba(217,119,6,0.10)", border: `1px solid ${C.amberBorder}`, borderRadius: 7, fontSize: 11, color: C.amber }}>
+                  ⚠ Phone on file ({agent.phone}) is unverified — planning portals rarely publish real phone numbers. Confirm via Companies House or the agent's own website before calling.
+                </div>
+              )}
             </>
           ) : (
             <p style={{ fontSize: 11, color: C.dimText, margin: 0 }}>No agent listed on this application — self-submission by homeowner.</p>
