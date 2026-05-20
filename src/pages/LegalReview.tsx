@@ -1,7 +1,7 @@
 import AppShell from "@/components/AppShell";
 import SEO from "@/components/SEO";
 import { LEGAL_REVIEW_ETA } from "@/components/LegalReviewBanner";
-import { ShieldCheck, FileText, Clock, ArrowLeft } from "lucide-react";
+import { ShieldCheck, FileText, Clock, ArrowLeft, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const LegalReview = () => {
@@ -50,11 +50,18 @@ const LegalReview = () => {
                 sections, project-specific data populated from your profile, and space for bespoke
                 terms either party can add.
               </p>
-              <p>
+              <p className="mb-4">
                 You can review the full document, discuss it with the other party, and add bespoke
                 clauses. Signing is temporarily disabled until the solicitor's text replaces the
                 placeholder body copy in each section.
               </p>
+              <Link
+                to="/dashboard/trade"
+                className="inline-flex items-center gap-2 bg-teal text-cream font-mono text-sm px-6 py-2.5 rounded-xl hover:bg-teal/90 transition-colors"
+              >
+                Generate your contract
+                <ArrowRight className="w-4 h-4" />
+              </Link>
             </div>
           </div>
 
@@ -63,10 +70,10 @@ const LegalReview = () => {
             <div>
               <h2 className="font-heading text-primary text-lg mb-2">Timeline</h2>
               <p>
-                Estimated delivery from the solicitor: <strong>{LEGAL_REVIEW_ETA}</strong>. When
-                the final template is approved we'll flip signing on automatically — no action
-                needed from you. Contracts you generate now will continue to reference the
-                placeholder version; new contracts after that date will use the approved version.
+                We're targeting delivery {LEGAL_REVIEW_ETA}. When the final template is
+                approved we'll flip signing on automatically — no action needed from you. Contracts
+                you generate now will continue to reference the placeholder version; new contracts
+                after that date will use the approved version.
               </p>
             </div>
           </div>
@@ -78,7 +85,7 @@ const LegalReview = () => {
               <a href="mailto:hello@prografter.co.uk" className="text-teal underline">
                 hello@prografter.co.uk
               </a>{" "}
-              and we'll get back to you the same working day.
+              and we'll get back to you within 1 working day.
             </p>
           </div>
         </div>
