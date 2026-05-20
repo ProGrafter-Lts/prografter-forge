@@ -579,7 +579,7 @@ export default function PostJobBrief() {
             Post your job brief
           </p>
           <p style={{ fontSize: 13, color: C.secondary }}>
-            Every trade who sees this brief is vetted, insured, and referenced. Takes about 5 minutes.
+            Every trade who sees this brief is verified and insured. Takes about 5 minutes.
           </p>
         </div>
 
