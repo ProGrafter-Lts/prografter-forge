@@ -16,6 +16,7 @@ import GreenGrantsChecker from "@/components/GreenGrantsChecker";
 import WhatYouGet from "@/components/WhatYouGet";
 import WhyDifferent from "@/components/WhyDifferent";
 import PlatformPreview from "@/components/PlatformPreview";
+import FounderNote from "@/components/FounderNote";
 import Testimonials from "@/components/Testimonials";
 import SeeHowItWorks from "@/components/SeeHowItWorks";
 import SignUpSection from "@/components/SignUpSection";
@@ -62,6 +63,7 @@ const Index = () => {
       <WhatYouGet />
       <WhyDifferent />
       <PlatformPreview />
+      <FounderNote />
       <Testimonials />
       <SeeHowItWorks />
       <TradeVerificationExplainer />
