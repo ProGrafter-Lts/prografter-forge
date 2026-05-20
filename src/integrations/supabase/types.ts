@@ -2255,6 +2255,78 @@ export type Database = {
           },
         ]
       }
+      scraped_trades: {
+        Row: {
+          address: string | null
+          city: string | null
+          contacted: boolean
+          contacted_at: string | null
+          created_at: string
+          email: string | null
+          has_website: boolean
+          id: string
+          last_scraped_at: string
+          notes: string | null
+          phone: string | null
+          postcode: string | null
+          rating: number | null
+          reviews_count: number | null
+          search_query: string | null
+          source: string
+          source_id: string | null
+          trade_name: string
+          trade_type: string | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          contacted?: boolean
+          contacted_at?: string | null
+          created_at?: string
+          email?: string | null
+          has_website?: boolean
+          id?: string
+          last_scraped_at?: string
+          notes?: string | null
+          phone?: string | null
+          postcode?: string | null
+          rating?: number | null
+          reviews_count?: number | null
+          search_query?: string | null
+          source?: string
+          source_id?: string | null
+          trade_name: string
+          trade_type?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          contacted?: boolean
+          contacted_at?: string | null
+          created_at?: string
+          email?: string | null
+          has_website?: boolean
+          id?: string
+          last_scraped_at?: string
+          notes?: string | null
+          phone?: string | null
+          postcode?: string | null
+          rating?: number | null
+          reviews_count?: number | null
+          search_query?: string | null
+          source?: string
+          source_id?: string | null
+          trade_name?: string
+          trade_type?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
       specialisms: {
         Row: {
           applicable_trades: string[]
