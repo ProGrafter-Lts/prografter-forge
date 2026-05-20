@@ -163,6 +163,9 @@ export default function Vetting() {
           </div>
           <span style={{ color: C.darkBorder, fontSize: 16 }}>|</span>
           <span style={{ fontSize: 12, color: C.dimText, fontWeight: 500, letterSpacing: "0.05em" }}>VETTING DASHBOARD</span>
+          <a href="/admin/verifications" style={{ fontSize: 11, color: C.teal, marginLeft: 8, textDecoration: "none", letterSpacing: "0.04em" }}>
+            Pre-submission queue →
+          </a>
         </div>
         <div style={{ display: "flex", gap: 6 }}>
           <button onClick={() => setFilter("all")} style={{ padding: "4px 10px", borderRadius: 20, border: `1px solid ${filter === "all" ? C.teal : C.darkBorder}`, background: filter === "all" ? C.tealDim : "transparent", color: filter === "all" ? C.teal : C.dimText, fontSize: 11, fontWeight: 500, cursor: "pointer" }}>
