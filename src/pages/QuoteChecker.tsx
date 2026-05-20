@@ -113,8 +113,17 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
           "pendingQuoteCheck",
           JSON.stringify({ id: record.id, email, lookupToken: (record as any).lookup_token }),
         );
-        // Plain top-frame assignment — cross-origin iframes block window.top.location.href
-        window.location.href = checkoutData.url;
+        // Try top-frame navigation (works on published site); fall back to new tab
+        // so the Lovable preview iframe doesn't go blank when Stripe blocks embedding.
+        try {
+          if (window.top && window.top !== window.self) {
+            window.open(checkoutData.url, "_blank", "noopener,noreferrer");
+          } else {
+            window.location.href = checkoutData.url;
+          }
+        } catch {
+          window.open(checkoutData.url, "_blank", "noopener,noreferrer");
+        }
       } else {
         throw new Error("No checkout URL returned");
       }
