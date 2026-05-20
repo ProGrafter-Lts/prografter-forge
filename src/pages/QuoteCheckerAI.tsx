@@ -146,7 +146,7 @@ Your role is to:
 1. Analyse the quote against current regional UK market rates
 2. Identify any missing items, ambiguous scope, or red flags
 3. Give an honest, balanced verdict
-4. Help the homeowner make an informed decision — not scare them away from good traders or push them toward cheap ones
+4. Help the homeowner make an informed decision — not scare them away from good trades or push them toward cheap ones
 
 You must structure your response EXACTLY as follows:
 
@@ -165,7 +165,7 @@ SCORE: [integer 0-100, where 100 = exceptional value, 50 = fair market rate, bel
 ## What to watch out for
 [Any missing items, ambiguous terms, payment terms red flags, or things the homeowner should clarify before accepting]
 
-## Questions to ask the trader
+## Questions to ask the trade
 [3-5 specific questions the homeowner should ask before accepting this quote]
 
 ## Our recommendation
@@ -358,7 +358,7 @@ ${form.quote_text}`;
                   Check another quote
                 </button>
                 <span style={{ fontSize:12, color:C.secondary }}>
-                  Want to find a vetted trader instead?
+                  Want to find a vetted trade instead?
                 </span>
                 <button style={{ background:"none", border:`1.5px solid ${C.teal}`,
                   color:C.teal, borderRadius:8, padding:"8px 16px",
@@ -482,7 +482,7 @@ Total: £2,585`} />
                 { n:"01", title:"Paste your quote", body:"Copy in the full quote — line items, totals, materials, anything included." },
                 { n:"02", title:"AI analysis", body:"Our AI checks it against current regional UK rates for that specific trade and location." },
                 { n:"03", title:"Honest verdict", body:"You get a clear fair / overpriced / low-ball verdict with the reasoning behind it." },
-                { n:"04", title:"Know what to ask", body:"Specific questions to put to the trader before you sign anything." },
+                { n:"04", title:"Know what to ask", body:"Specific questions to put to the trade before you sign anything." },
               ].map(s => (
                 <div key={s.n} style={{ background:C.white, border:`1px solid ${C.border}`,
                   borderRadius:12, padding:"14px 16px" }}>
