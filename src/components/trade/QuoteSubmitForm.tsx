@@ -144,6 +144,54 @@ const QuoteSubmitForm = ({ jobId, tradeId, onQuoteSubmitted, quickBuildPrefill }
         .eq("id", quickBuildPrefill.generationId);
     }
 
+    // Fire-and-forget homeowner notification email — never block the UX on email.
+    try {
+      const { data: jobRow } = await supabase
+        .from("jobs")
+        .select("id, title, address, postcode, homeowner_id, job_type")
+        .eq("id", jobId)
+        .maybeSingle();
+      if (jobRow?.homeowner_id) {
+        const { data: ownerRow } = await supabase
+          .from("homeowners")
+          .select("email, name")
+          .eq("id", jobRow.homeowner_id)
+          .maybeSingle();
+        const { data: tradeRow } = await supabase
+          .from("trades")
+          .select("name, company_name")
+          .eq("id", tradeId)
+          .maybeSingle();
+        if (ownerRow?.email) {
+          const projectTitle =
+            jobRow.title || jobRow.job_type || "your project";
+          const projectAddress = [jobRow.address, jobRow.postcode]
+            .filter(Boolean)
+            .join(", ");
+          const tradeName =
+            tradeRow?.company_name || tradeRow?.name || "A trade";
+          const firstName = ownerRow.name?.split(" ")[0] || undefined;
+          void supabase.functions.invoke("send-transactional-email", {
+            body: {
+              templateName: "quote-received",
+              recipientEmail: ownerRow.email,
+              idempotencyKey: `quote-received-${quoteRow.id}`,
+              templateData: {
+                firstName,
+                tradeName,
+                amount: `£${baseAmount.toLocaleString("en-GB", { minimumFractionDigits: 2 })}`,
+                projectTitle,
+                projectAddress: projectAddress || undefined,
+                jobId,
+              },
+            },
+          });
+        }
+      }
+    } catch (e) {
+      console.warn("quote-received email dispatch failed (non-blocking)", e);
+    }
+
     toast.success("Quote submitted successfully!");
     onQuoteSubmitted();
     setSubmitting(false);

@@ -30,6 +30,11 @@ import { template as completionMarked } from './completion-marked.tsx'
 import { template as completionAccepted } from './completion-accepted.tsx'
 import { template as testimonialRequest } from './testimonial-request.tsx'
 import { template as testimonialReceived } from './testimonial-received.tsx'
+import { template as paymentReleasedTrade } from './payment-released-trade.tsx'
+import { template as paymentReleasedHomeowner } from './payment-released-homeowner.tsx'
+import { template as quoteReceived } from './quote-received.tsx'
+import { template as projectOverdueTrade } from './project-overdue-trade.tsx'
+import { template as projectOverdueHomeowner } from './project-overdue-homeowner.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'waitlist-admin-notification': waitlistAdminNotification,
@@ -54,4 +59,9 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'completion-accepted': completionAccepted,
   'testimonial-request': testimonialRequest,
   'testimonial-received': testimonialReceived,
+  'payment-released-trade': paymentReleasedTrade,
+  'payment-released-homeowner': paymentReleasedHomeowner,
+  'quote-received': quoteReceived,
+  'project-overdue-trade': projectOverdueTrade,
+  'project-overdue-homeowner': projectOverdueHomeowner,
 }

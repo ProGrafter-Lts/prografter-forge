@@ -1,48 +1,57 @@
-# Replace homepage mockups with real platform screenshots
+# Email pipeline review — pre-launch hardening
 
-The homepage currently uses hand-coded HTML mockups in `PlatformPreview.tsx` (and supporting copy in `SeeHowItWorks.tsx`). You asked for actual screenshots of the live platform. Plan below covers seeding two demo accounts so the screenshots show realistic data, capturing each dashboard view, and wiring the images into the homepage.
+This is a sizeable change (4 separate items, 3 new templates, 3+ new trigger sites, 1 cron job, plus an investigation). Plan first so we don't half-wire anything before money flows.
 
-## 1. Seed demo data (migration + edge function)
+## 1. Auth email logging — investigate the "0 sends" rows
 
-Create one migration that:
-- Inserts a `demo_trade@prografter.co.uk` and `demo_homeowner@prografter.co.uk` auth user via SQL (using `auth.admin_create_user` through an edge function — auth users can't be inserted via migration).
-- Marks the trade as `verified`, with company "Northgate Plumbing & Heating", SE15, plumbing specialism, sample insurance + qualification doc rows.
-- Seeds 3 open jobs visible to the trade (kitchen reno, bathroom retile, loft) and 3 quotes from the trade.
-- Seeds 1 active project for the homeowner (Kitchen Renovation, stage 3/5) with 3 quotes received and a completed Project Manual record with materials/certs/photos rows.
-- Seeds earnings rows so the Earnings page shows YTD £42k with 3 stage payments.
+The 4 auth rows in the panel all read from `email_send_log` rows where `template_name = 'auth_emails'`. If Lee fired real signup/reset emails and they aren't showing, one of three things is true:
 
-Because auth.users requires service role, the actual user creation runs in a one-shot edge function `seed-demo-accounts` that uses the service role key and is idempotent (skips if users already exist). Data inserts attach to those user IDs.
+1. `auth-email-hook` is using the **old direct-send pattern** (`@lovable.dev/email-js`) instead of `enqueue_email` — bypassing the log entirely.
+2. The hook is enqueuing under a different `template_name` (e.g. `signup`, `recovery`) so it never matches the `auth_emails` filter.
+3. The hook isn't being invoked at all (Supabase Auth webhook not pointed at it).
 
-## 2. Capture screenshots
+**Action:** Read `supabase/functions/auth-email-hook/index.ts`, query `email_send_log` for the last 7 days grouped by `template_name`, and check `auth_logs` for actual send events. Fix whichever of the three is broken. If pattern (1), re-scaffold the hook so it queues properly.
 
-Using the browser tool, log into each demo account in the preview and capture six PNGs at 1440x900:
+## 2. New template + trigger: `payment-milestone-released`
 
-| File | Route | Account |
-|---|---|---|
-| `trade-dashboard.png` | `/dashboard/trade` | demo trade |
-| `trade-jobs.png` | `/dashboard/trade` (Jobs tab) | demo trade |
-| `trade-earnings.png` | `/dashboard/trade` (Earnings tab) | demo trade |
-| `homeowner-overview.png` | `/dashboard/homeowner` | demo homeowner |
-| `homeowner-quotes.png` | `/project/:id/compare` | demo homeowner |
-| `homeowner-manual.png` | `/manual/:id` | demo homeowner |
+Two recipients, two distinct emails, one trigger.
 
-Save into `src/assets/platform/`.
+- Create `supabase/functions/_shared/transactional-email-templates/payment-released-trade.tsx`
+- Create `supabase/functions/_shared/transactional-email-templates/payment-released-homeowner.tsx`
+- Register both in `registry.ts`
+- Add to `REGISTERED_TEMPLATES` + `EMAIL_CATALOG` (new category: `payments`) in `AdminEmailStatus.tsx`
+- **Trigger site:** wherever a stage's `payment_status` flips to `paid`. Current code reads `payment_status === "paid"` in `EarningsView` and `TradeDashboard` but I haven't located the write site yet — likely admin action or a Stripe webhook that doesn't exist yet. **Need to confirm with you where this flip happens today** (manual admin toggle? Stripe webhook? Not implemented?).
 
-## 3. Rewire the homepage
+## 3. New template + trigger: `quote-received` (homeowner)
 
-- `PlatformPreview.tsx`: replace each `BrowserFrame` body with an `<img>` of the corresponding screenshot, keep the macOS title bar + caption + tab structure.
-- `SeeHowItWorks.tsx`: check whether it also uses mockups; if so, swap to the same screenshot set (no new captures).
-- Delete now-unused mockup subcomponents (`TradeDashboardMockup`, `StatTile`, etc.) to keep the file lean.
+- Create `quote-received.tsx` template + register
+- **Trigger site:** `src/components/trade/QuoteSubmitForm.tsx` line ~108 (`from("quotes").insert(...)`) — after successful insert, fetch the job's homeowner email and invoke `send-transactional-email` with `idempotencyKey: quote-received-${quoteId}`.
+- Also wire the QuickBuild quote submission path.
+- Add to catalog under new `quotes` category.
 
-## Technical notes
+## 4. New template + trigger: `project-overdue` (both parties)
 
-- The seed function must be re-runnable safely. Use `ON CONFLICT DO NOTHING` for data rows and an `if user exists` short-circuit for auth creation.
-- Demo accounts get `is_demo = true` flag (new column on `profiles` / `trades`) so we can exclude them from admin lists later.
-- Screenshots use `loading="lazy"` and explicit `width`/`height` to avoid CLS.
-- No changes to backend RLS — demo accounts behave like normal users.
-- Estimated 1 migration, 1 new edge function, 6 image assets, edits to 2 components.
+Two emails, one cron-triggered scan.
 
-## Out of scope
+- Create `project-overdue-trade.tsx` + `project-overdue-homeowner.tsx` templates
+- Create new edge function `scan-overdue-projects` (verify_jwt = false, cron-invoked)
+- Logic: select projects where `planned_completion_date < now()` AND status != complete AND no `project-overdue` row in `email_send_log` for that project in the last 14 days (dedupe so we don't spam daily)
+- Schedule via `pg_cron` daily at 09:00 UTC
+- Add to catalog under `project` category
 
-- No changes to other homepage sections (Hero, Features, etc.) — only the platform screenshot panels.
-- No changes to copy/captions unless required to match what the screenshot actually shows.
+## 5. Contract email triggers — confirm timeline
+
+The 7 contract templates exist in the registry but are not invoked anywhere. I'll add a `// TODO: wire to contract signing flow (target June 2026)` comment in `ContractPanel.tsx` and a banner note in the admin panel so this stays visible. No new code wired until the signing feature ships — agreed.
+
+## Database changes
+
+- No new tables required.
+- New cron job (pg_cron) for the overdue scan — added via `insert` tool (not migration) since it embeds the function URL + anon key per the cron guide.
+
+## Open questions before I build
+
+1. **Payment release trigger:** Where does `payment_status` flip to `paid` today — manual admin, Stripe webhook, or not yet implemented? This determines whether item 2 is a code change in an existing flow or needs a placeholder for a future Stripe webhook.
+2. **Overdue cadence:** Daily scan with a 14-day re-notify suppression — does that match your intent, or do you want a one-shot notification only?
+3. Confirm category labels: I'm proposing `payments`, `quotes`, `project` as three new chips alongside `auth`, `onboarding`, `contract`.
+
+Once you confirm those three, I'll build everything in one pass.
