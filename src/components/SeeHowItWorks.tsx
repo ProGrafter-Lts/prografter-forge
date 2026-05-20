@@ -89,6 +89,7 @@ const TradesPanel = () => (
         </div>
 
         <div>
+          <Disclaimer />
           <div className="hiw-screen">
             <ChromeBar url="prografter.co.uk/dashboard/trade" />
             <ScreenShot src={tradeEarnings} alt="Trade earnings view" />
