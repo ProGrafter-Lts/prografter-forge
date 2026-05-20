@@ -1450,8 +1450,12 @@ export type Database = {
       }
       planning_leads: {
         Row: {
+          agent_address: string | null
+          agent_contact: string | null
           agent_id: string | null
+          agent_name: string | null
           applicant_address: string | null
+          applicant_contact: string | null
           applicant_name: string | null
           application_ref: string
           application_type: string | null
@@ -1465,9 +1469,12 @@ export type Database = {
           id: string
           next_action: string | null
           notes: string | null
+          pdf_enriched_at: string | null
+          pdf_source_url: string | null
           pipeline_status: string
           postcode: string | null
           priority_score: number
+          proposal_type: string | null
           site_address: string
           status: string
           submitted_date: string | null
@@ -1475,8 +1482,12 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          agent_address?: string | null
+          agent_contact?: string | null
           agent_id?: string | null
+          agent_name?: string | null
           applicant_address?: string | null
+          applicant_contact?: string | null
           applicant_name?: string | null
           application_ref: string
           application_type?: string | null
@@ -1490,9 +1501,12 @@ export type Database = {
           id?: string
           next_action?: string | null
           notes?: string | null
+          pdf_enriched_at?: string | null
+          pdf_source_url?: string | null
           pipeline_status?: string
           postcode?: string | null
           priority_score?: number
+          proposal_type?: string | null
           site_address: string
           status?: string
           submitted_date?: string | null
@@ -1500,8 +1514,12 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          agent_address?: string | null
+          agent_contact?: string | null
           agent_id?: string | null
+          agent_name?: string | null
           applicant_address?: string | null
+          applicant_contact?: string | null
           applicant_name?: string | null
           application_ref?: string
           application_type?: string | null
@@ -1515,9 +1533,12 @@ export type Database = {
           id?: string
           next_action?: string | null
           notes?: string | null
+          pdf_enriched_at?: string | null
+          pdf_source_url?: string | null
           pipeline_status?: string
           postcode?: string | null
           priority_score?: number
+          proposal_type?: string | null
           site_address?: string
           status?: string
           submitted_date?: string | null
