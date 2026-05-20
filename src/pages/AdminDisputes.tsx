@@ -91,6 +91,8 @@ export default function AdminDisputes() {
   const [recommendation, setRecommendation] = useState("");
   const [showRecommend, setShowRecommend] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [filter, setFilter] = useState<FilterKey>("all");
+  const [workflowOpen, setWorkflowOpen] = useState(false);
 
   const loadList = async () => {
     const { data } = await supabase.from("disputes").select("*").order("created_at", { ascending: false });
