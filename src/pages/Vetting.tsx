@@ -45,85 +45,11 @@ type App = {
   [key: string]: string | number | boolean | null;
 };
 
-const MOCK: App[] = [
-  {
-    id: "1", full_name: "James Harrison", business_name: "Harrison Electrical Ltd",
-    business_type: "limited_company", email: "james@harrisonelectrical.co.uk",
-    phone: "07700 900101", address_line1: "12 High Street", city: "Nottingham", postcode: "NG3 5AA",
-    trade_name: "Electrician", trade_lane: "regulated", years_trading: 14,
-    registration_body: "NICEIC", registration_number: "12345", registration_expiry: "2026-03-31",
-    insurance_provider: "Tradesman Saver", insurance_policy_number: "TS-111222",
-    insurance_expiry: "2026-09-30", public_liability_cover: "£2,000,000",
-    ref1_name: "Sarah Thompson", ref1_phone: "07700 900201", ref1_relationship: "Previous client",
-    ref1_job_description: "Full rewire of 4-bedroom house, consumer unit upgrade", ref1_job_year: 2023,
-    ref2_name: "David Clarke", ref2_phone: "07700 900202", ref2_relationship: "Architect",
-    ref2_job_description: "Commercial office fit-out, Nottingham city centre", ref2_job_year: 2022,
-    status: "under_review", created_at: "2026-05-01T09:30:00Z",
-    trading_history_description: "", portfolio_description: "",
-    vet_companies_house_checked: true, vet_companies_house_notes: "Active — no adverse filings. Director since 2018.",
-    vet_registration_verified: true, vet_registration_notes: "Confirmed live on NICEIC register.",
-    vet_insurance_verified: false, vet_insurance_notes: "",
-    vet_ccj_checked: true, vet_ccj_notes: "No CCJs found.",
-    vet_ref1_called: true, vet_ref1_notes: "Very positive. Said James was professional, tidy, and returned on time.",
-    vet_ref2_called: false, vet_ref2_notes: "",
-    vet_portfolio_reviewed: false, vet_portfolio_notes: "",
-    vet_interview_completed: false,
-    interview_scheduled_at: "", interview_notes: "",
-    admin_notes: "Strong application. Chasing ref 2 this week.", rejection_reason: "",
-  },
-  {
-    id: "2", full_name: "Mark Daniels", business_name: "",
-    business_type: "sole_trader", email: "mark@danielsplastering.co.uk",
-    phone: "07700 900102", address_line1: "44 Manor Road", city: "Derby", postcode: "DE1 2AB",
-    trade_name: "Plasterer", trade_lane: "unregulated", years_trading: 9,
-    registration_body: null, registration_number: "", registration_expiry: "",
-    insurance_provider: "Simply Business", insurance_policy_number: "SB-998877",
-    insurance_expiry: "2026-12-01", public_liability_cover: "£1,000,000",
-    ref1_name: "Lisa Ward", ref1_phone: "07700 900301", ref1_relationship: "Previous client",
-    ref1_job_description: "Kitchen and lounge skim coat", ref1_job_year: 2024,
-    ref2_name: "Tom Briggs", ref2_phone: "07700 900302", ref2_relationship: "Building contractor",
-    ref2_job_description: "New build — 3 properties, Long Eaton", ref2_job_year: 2023,
-    status: "received", created_at: "2026-05-03T14:15:00Z",
-    trading_history_description: "Sole trader for 9 years, domestic and light commercial plastering across Derbyshire and Nottinghamshire.",
-    portfolio_description: "1. Full kitchen plastering — Derby 2024.\n2. Lounge artex removal and skim — Nottingham 2023.\n3. New build 3 properties — Long Eaton 2023.",
-    vet_companies_house_checked: false, vet_companies_house_notes: "",
-    vet_registration_verified: false, vet_registration_notes: "",
-    vet_insurance_verified: false, vet_insurance_notes: "",
-    vet_ccj_checked: false, vet_ccj_notes: "",
-    vet_ref1_called: false, vet_ref1_notes: "",
-    vet_ref2_called: false, vet_ref2_notes: "",
-    vet_portfolio_reviewed: false, vet_portfolio_notes: "",
-    vet_interview_completed: false,
-    interview_scheduled_at: "", interview_notes: "",
-    admin_notes: "", rejection_reason: "",
-  },
-  {
-    id: "3", full_name: "Steve Palmer", business_name: "Palmer Gas Services Ltd",
-    business_type: "limited_company", email: "steve@palmergas.co.uk",
-    phone: "07700 900103", address_line1: "8 Church Lane", city: "Mansfield", postcode: "NG18 3TT",
-    trade_name: "Gas Engineer", trade_lane: "regulated", years_trading: 22,
-    registration_body: "Gas Safe Register", registration_number: "654321", registration_expiry: "2026-01-31",
-    insurance_provider: "Direct Line Business", insurance_policy_number: "DL-445566",
-    insurance_expiry: "2026-08-15", public_liability_cover: "£5,000,000",
-    ref1_name: "Paul Green", ref1_phone: "07700 900401", ref1_relationship: "Previous client",
-    ref1_job_description: "Boiler installation and full system flush", ref1_job_year: 2024,
-    ref2_name: "Helen Fox", ref2_phone: "07700 900402", ref2_relationship: "Estate agent",
-    ref2_job_description: "Annual CP12s across 12 rental properties", ref2_job_year: 2024,
-    status: "approved", created_at: "2026-04-15T11:00:00Z",
-    trading_history_description: "", portfolio_description: "",
-    vet_companies_house_checked: true, vet_companies_house_notes: "Active. Clean record.",
-    vet_registration_verified: true, vet_registration_notes: "Live on Gas Safe Register. Confirmed.",
-    vet_insurance_verified: true, vet_insurance_notes: "Verified with Direct Line — policy active.",
-    vet_ccj_checked: true, vet_ccj_notes: "No CCJs.",
-    vet_ref1_called: true, vet_ref1_notes: "Excellent — Paul said very professional, returned on schedule.",
-    vet_ref2_called: true, vet_ref2_notes: "Helen confirmed reliable. Does all her portfolio CP12s every year.",
-    vet_portfolio_reviewed: true, vet_portfolio_notes: "N/A — regulated trade.",
-    vet_interview_completed: true,
-    interview_scheduled_at: "2026-04-22T10:00:00Z",
-    interview_notes: "22 years experience. Excellent communicator. Handled scenario questions confidently. Approved.",
-    admin_notes: "Top tier application. Approved.", rejection_reason: "",
-  },
-];
+// Live applications submitted via the 6-step `/apply` flow will populate this list
+// once the application-submission edge function persists rows. Until then this
+// dashboard intentionally renders empty — demo/seed rows have been removed so Lee
+// never sees fictitious trades alongside real ones.
+const MOCK: App[] = [];
 
 const STATUS = {
   received: { label: "Received", bg: "rgba(13,148,136,0.1)", border: C.tealDim, text: C.teal },
@@ -237,6 +163,9 @@ export default function Vetting() {
           </div>
           <span style={{ color: C.darkBorder, fontSize: 16 }}>|</span>
           <span style={{ fontSize: 12, color: C.dimText, fontWeight: 500, letterSpacing: "0.05em" }}>VETTING DASHBOARD</span>
+          <a href="/admin/verifications" style={{ fontSize: 11, color: C.teal, marginLeft: 8, textDecoration: "none", letterSpacing: "0.04em" }}>
+            Pre-submission queue →
+          </a>
         </div>
         <div style={{ display: "flex", gap: 6 }}>
           <button onClick={() => setFilter("all")} style={{ padding: "4px 10px", borderRadius: 20, border: `1px solid ${filter === "all" ? C.teal : C.darkBorder}`, background: filter === "all" ? C.tealDim : "transparent", color: filter === "all" ? C.teal : C.dimText, fontSize: 11, fontWeight: 500, cursor: "pointer" }}>
@@ -250,6 +179,11 @@ export default function Vetting() {
         </div>
       </div>
 
+      <div style={{ padding: "10px 20px", background: "rgba(13,148,136,0.07)", borderBottom: `1px solid ${C.darkBorder}`, display: "flex", gap: 16, flexWrap: "wrap", fontSize: 11, color: C.mutedText, lineHeight: 1.5 }}>
+        <span><strong style={{ color: C.teal }}>This dashboard</strong> = submitted 6-step applications in active review. <a href="/admin/verifications" style={{ color: C.teal }}>/admin/verifications</a> = pre-submission queue (trades who started but haven't uploaded yet).</span>
+        <span><strong style={{ color: C.teal }}>5 published checks</strong> map to internal sub-steps: ID/business (Companies House + CCJ), Insurance (1), Qualification (Registration — regulated only), References (1 &amp; 2 phoned), Portfolio &amp; Interview (2 sub-steps). Total: 8 regulated / 7 unregulated.</span>
+        <span><strong style={{ color: C.teal }}>Interview booked</strong> stage is moved manually by Lee after emailing the trade a Calendly link; confirmation is sent to both parties via that booking.</span>
+      </div>
       <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
         <div style={{ width: 272, flexShrink: 0, borderRight: `1px solid ${C.darkBorder}`, background: C.darkSurface, overflowY: "auto", padding: 12, display: "flex", flexDirection: "column", gap: 8 }}>
           {filtered.length === 0 && <p style={{ fontSize: 12, color: C.dimText, textAlign: "center", paddingTop: 20 }}>No applications</p>}
