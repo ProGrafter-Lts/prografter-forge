@@ -179,6 +179,11 @@ export default function Vetting() {
         </div>
       </div>
 
+      <div style={{ padding: "10px 20px", background: "rgba(13,148,136,0.07)", borderBottom: `1px solid ${C.darkBorder}`, display: "flex", gap: 16, flexWrap: "wrap", fontSize: 11, color: C.mutedText, lineHeight: 1.5 }}>
+        <span><strong style={{ color: C.teal }}>This dashboard</strong> = submitted 6-step applications in active review. <a href="/admin/verifications" style={{ color: C.teal }}>/admin/verifications</a> = pre-submission queue (trades who started but haven't uploaded yet).</span>
+        <span><strong style={{ color: C.teal }}>5 published checks</strong> map to internal sub-steps: ID/business (Companies House + CCJ), Insurance (1), Qualification (Registration — regulated only), References (1 &amp; 2 phoned), Portfolio &amp; Interview (2 sub-steps). Total: 8 regulated / 7 unregulated.</span>
+        <span><strong style={{ color: C.teal }}>Interview booked</strong> stage is moved manually by Lee after emailing the trade a Calendly link; confirmation is sent to both parties via that booking.</span>
+      </div>
       <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
         <div style={{ width: 272, flexShrink: 0, borderRight: `1px solid ${C.darkBorder}`, background: C.darkSurface, overflowY: "auto", padding: 12, display: "flex", flexDirection: "column", gap: 8 }}>
           {filtered.length === 0 && <p style={{ fontSize: 12, color: C.dimText, textAlign: "center", paddingTop: 20 }}>No applications</p>}
