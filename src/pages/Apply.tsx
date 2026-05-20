@@ -259,8 +259,8 @@ export default function Apply() {
       <Field label="Address line 1" req err={errors.address_line1}><I f="address_line1" placeholder="123 High Street" /></Field>
       <Field label="Address line 2"><I f="address_line2" placeholder="Apt / Suite" /></Field>
       <Grid>
-        <Field label="City / Town" req err={errors.city}><I f="city" placeholder="Manchester" /></Field>
-        <Field label="Postcode" req err={errors.postcode}><I f="postcode" placeholder="M1 1AA" /></Field>
+        <Field label="City / Town" req err={errors.city}><I f="city" placeholder="Nottingham" /></Field>
+        <Field label="Postcode" req err={errors.postcode}><I f="postcode" placeholder="NG1 1AA" /></Field>
       </Grid>
     </div>,
 
