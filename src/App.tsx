@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
@@ -89,7 +89,7 @@ const App = () => (
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/register" element={<TradeRegister />} />
             <Route path="/register/trade" element={<SignupTradeRedirect />} />
-            <Route path="/post-a-job" element={<PostAJob />} />
+            <Route path="/post-a-job" element={<Navigate to="/post-job-brief" replace />} />
             <Route path="/quote-checker" element={<QuoteChecker />} />
             <Route path="/green" element={<GreenGrants />} />
             <Route path="/login" element={<Login />} />
