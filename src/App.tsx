@@ -89,7 +89,7 @@ const App = () => (
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/register" element={<TradeRegister />} />
             <Route path="/register/trade" element={<SignupTradeRedirect />} />
-            <Route path="/post-a-job" element={<PostAJob />} />
+            <Route path="/post-a-job" element={<Navigate to="/post-job-brief" replace />} />
             <Route path="/quote-checker" element={<QuoteChecker />} />
             <Route path="/green" element={<GreenGrants />} />
             <Route path="/login" element={<Login />} />
