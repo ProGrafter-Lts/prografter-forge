@@ -319,7 +319,88 @@ const ProjectDetail = () => {
   };
 
   const releasePayment = async (stageId: string) => {
-    toast.success("Payment release requested. This will be processed shortly.");
+    const stage = stages.find((s) => s.id === stageId);
+    if (!stage) {
+      toast.error("Stage not found");
+      return;
+    }
+    // 1) Flip stage to paid
+    const { error: updateErr } = await supabase
+      .from("project_stages")
+      .update({ payment_status: "paid" })
+      .eq("id", stageId);
+    if (updateErr) {
+      toast.error("Failed to release payment");
+      return;
+    }
+    toast.success("Payment released");
+    void loadProjectData();
+
+    // 2) Notify both parties (non-blocking)
+    try {
+      const tradeId = stage.trade_id || (quotes.find((q) => q.status === "accepted")?.trade_id);
+      const [ownerRowRes, tradeRowRes] = await Promise.all([
+        job?.homeowner_id
+          ? supabase.from("homeowners").select("email, name").eq("id", job.homeowner_id).maybeSingle()
+          : Promise.resolve({ data: null }),
+        tradeId
+          ? supabase.from("trades").select("id, name, company_name, user_id").eq("id", tradeId).maybeSingle()
+          : Promise.resolve({ data: null }),
+      ]);
+      const owner = (ownerRowRes as any)?.data;
+      const trade = (tradeRowRes as any)?.data;
+      const projectTitle = job?.title || job?.job_type || "your project";
+      const amount = `£${Number(stage.payment_amount || 0).toLocaleString("en-GB", { minimumFractionDigits: 2 })}`;
+      const stageName = stage.stage_name || "a project stage";
+      const reference = (job as any)?.ref || "";
+
+      // Homeowner email
+      if (owner?.email) {
+        const firstName = owner.name?.split(" ")[0];
+        void supabase.functions.invoke("send-transactional-email", {
+          body: {
+            templateName: "payment-released-homeowner",
+            recipientEmail: owner.email,
+            idempotencyKey: `payment-released-homeowner-${stageId}`,
+            templateData: {
+              firstName,
+              amount,
+              stageName,
+              projectTitle,
+              tradeName: trade?.company_name || trade?.name,
+              reference,
+            },
+          },
+        });
+      }
+      // Trade email — look up auth email via user_id
+      if (trade?.user_id) {
+        const { data: tradeProfile } = await supabase
+          .from("profiles")
+          .select("email, full_name")
+          .eq("user_id", trade.user_id)
+          .maybeSingle();
+        if (tradeProfile?.email) {
+          const firstName = tradeProfile.full_name?.split(" ")[0];
+          void supabase.functions.invoke("send-transactional-email", {
+            body: {
+              templateName: "payment-released-trade",
+              recipientEmail: tradeProfile.email,
+              idempotencyKey: `payment-released-trade-${stageId}`,
+              templateData: {
+                firstName,
+                amount,
+                stageName,
+                projectTitle,
+                reference,
+              },
+            },
+          });
+        }
+      }
+    } catch (e) {
+      console.warn("payment-released email dispatch failed (non-blocking)", e);
+    }
   };
 
   const refreshProject = () => {
