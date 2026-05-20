@@ -338,7 +338,7 @@ const ProjectDetail = () => {
 
     // 2) Notify both parties (non-blocking)
     try {
-      const tradeId = stage.trade_id || (quotes.find((q) => q.status === "accepted")?.trade_id);
+      const tradeId = quotes.find((q) => q.status === "accepted")?.trade_id;
       const [ownerRowRes, tradeRowRes] = await Promise.all([
         job?.homeowner_id
           ? supabase.from("homeowners").select("email, name").eq("id", job.homeowner_id).maybeSingle()
