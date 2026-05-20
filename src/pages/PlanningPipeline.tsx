@@ -370,6 +370,7 @@ export default function PlanningPipeline() {
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterPipeline, setFilterPipeline] = useState("all");
   const [search, setSearch] = useState("");
+  const [ingesting, setIngesting] = useState(false);
   const isMobile = useIsMobile();
 
   const load = async () => {
@@ -383,6 +384,25 @@ export default function PlanningPipeline() {
     setLeads((lData as Lead[]) || []);
     setAgents((aData as Agent[]) || []);
     setLoading(false);
+  };
+
+  const runIngest = async () => {
+    setIngesting(true);
+    const { data: { session } } = await supabase.auth.getSession();
+    const { data, error } = await supabase.functions.invoke("ingest-planning-leads", {
+      headers: session ? { Authorization: `Bearer ${session.access_token}` } : {},
+    });
+    setIngesting(false);
+    if (error) {
+      toast({ title: "Ingest failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    const r = data as { inserted?: number; fetched?: number; councils?: number };
+    toast({
+      title: "Planning ingest complete",
+      description: `${r.inserted ?? 0} new Notts leads from ${r.councils ?? 0} councils (${r.fetched ?? 0} scanned)`,
+    });
+    load();
   };
 
   useEffect(() => { load(); }, []);
@@ -455,9 +475,13 @@ export default function PlanningPipeline() {
             <p style={{ fontSize: 14, fontWeight: 700, color: C.green, margin: 0 }}>{fmt(totalValue)}</p>
             <p style={{ fontSize: 9, color: C.dimText, margin: 0 }}>VALUE</p>
           </div>
-          <button onClick={() => toast({ title: "Scraper not yet connected", description: "Ingestion pipeline is on the roadmap." })}
-            style={{ background: C.teal, color: C.white, border: "none", borderRadius: 8, padding: "7px 14px", fontSize: 11, fontWeight: 700, cursor: "pointer", flex: isMobile ? "1 1 100%" : "none" }}>
-            🔄 Run scraper
+          <a href="/admin/trade-scraper"
+            style={{ background: "transparent", color: C.teal, border: `1px solid ${C.teal}`, borderRadius: 8, padding: "7px 12px", fontSize: 11, fontWeight: 700, textDecoration: "none", flex: isMobile ? "1 1 100%" : "none", textAlign: "center" }}>
+            🛠 Trade scraper
+          </a>
+          <button onClick={runIngest} disabled={ingesting}
+            style={{ background: C.teal, color: C.white, border: "none", borderRadius: 8, padding: "7px 14px", fontSize: 11, fontWeight: 700, cursor: ingesting ? "not-allowed" : "pointer", opacity: ingesting ? 0.6 : 1, flex: isMobile ? "1 1 100%" : "none" }}>
+            {ingesting ? "Ingesting…" : "🔄 Ingest Notts planning"}
           </button>
         </div>
       </div>
