@@ -121,11 +121,7 @@ const AdminEmailStatus = () => {
   const statsByEmail = useMemo<Record<string, Stats>>(() => {
     const out: Record<string, Stats> = {};
     for (const e of EMAIL_CATALOG) {
-      // Auth emails all log as 'auth_emails' (single bucket) — for the 4 auth
-      // rows we mirror the same aggregate; not perfect but it tells the truth
-      // for the send pipeline.
-      const matchKey = e.category === "auth" ? "auth_emails" : e.name;
-      const rows = dedupedByMessage.filter((r) => r.template_name === matchKey);
+      const rows = dedupedByMessage.filter((r) => r.template_name === e.matchKey);
       const sent = rows.filter((r) => r.status === "sent");
       const failed = rows.filter(
         (r) => r.status === "failed" || r.status === "dlq" || r.status === "bounced"
@@ -133,7 +129,7 @@ const AdminEmailStatus = () => {
       out[e.name] = {
         configured:
           e.category === "auth"
-            ? true // auth-email-hook is deployed
+            ? true
             : REGISTERED_TEMPLATES.has(e.name),
         lastSent: sent[0]?.created_at || null,
         lastFailed: failed[0]?.created_at || null,
