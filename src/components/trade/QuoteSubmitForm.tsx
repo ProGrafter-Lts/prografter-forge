@@ -144,6 +144,56 @@ const QuoteSubmitForm = ({ jobId, tradeId, onQuoteSubmitted, quickBuildPrefill }
         .eq("id", quickBuildPrefill.generationId);
     }
 
+    // Fire-and-forget homeowner notification email — never block the UX on email.
+    try {
+      const { data: jobRow } = await supabase
+        .from("jobs")
+        .select("id, title, address_line1, town, homeowner_id, project_type")
+        .eq("id", jobId)
+        .maybeSingle();
+      if (jobRow?.homeowner_id) {
+        const { data: ownerProfile } = await supabase
+          .from("profiles")
+          .select("email, first_name")
+          .eq("user_id", jobRow.homeowner_id)
+          .maybeSingle();
+        const { data: tradeProfile } = await supabase
+          .from("profiles")
+          .select("display_name, company_name, first_name")
+          .eq("user_id", tradeId)
+          .maybeSingle();
+        if (ownerProfile?.email) {
+          const projectTitle =
+            jobRow.title || jobRow.project_type || "your project";
+          const projectAddress = [jobRow.address_line1, jobRow.town]
+            .filter(Boolean)
+            .join(", ");
+          const tradeName =
+            tradeProfile?.company_name ||
+            tradeProfile?.display_name ||
+            tradeProfile?.first_name ||
+            "A trade";
+          void supabase.functions.invoke("send-transactional-email", {
+            body: {
+              templateName: "quote-received",
+              recipientEmail: ownerProfile.email,
+              idempotencyKey: `quote-received-${quoteRow.id}`,
+              templateData: {
+                firstName: ownerProfile.first_name || undefined,
+                tradeName,
+                amount: `£${baseAmount.toLocaleString("en-GB", { minimumFractionDigits: 2 })}`,
+                projectTitle,
+                projectAddress: projectAddress || undefined,
+                jobId,
+              },
+            },
+          });
+        }
+      }
+    } catch (e) {
+      console.warn("quote-received email dispatch failed (non-blocking)", e);
+    }
+
     toast.success("Quote submitted successfully!");
     onQuoteSubmitted();
     setSubmitting(false);
