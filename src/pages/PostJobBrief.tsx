@@ -614,7 +614,7 @@ export default function PostJobBrief() {
           {[
             "🔒 Identity verified",
             "✅ Vetted trades only",
-            "💷 Escrow protected",
+            "💷 Payment protected",
             "📄 Full documentation",
           ].map(item => (
             <span key={item} style={{ fontSize: 12, color: C.secondary }}>{item}</span>
