@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { NavLink, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
 const C = {
@@ -9,6 +10,46 @@ const C = {
   green:"#16A34A", greenBorder:"#BBF7D0", purple:"#7C3AED", purpleBorder:"#DDD6FE",
   amberBg:"#FFFBEB", redBg:"#FEF2F2", greenBg:"#F0FDF4", purpleBg:"#F5F3FF",
 };
+
+const ADMIN_NAV = [
+  { to: "/admin", label: "← Admin" },
+  { to: "/vetting", label: "Vetting" },
+  { to: "/admin/verifications", label: "Verifications" },
+  { to: "/admin/suppliers", label: "Suppliers" },
+  { to: "/admin/email-status", label: "Email Status" },
+  { to: "/admin/disputes", label: "Disputes" },
+  { to: "/admin/testimonials", label: "Testimonials" },
+];
+
+function AdminNav() {
+  const { pathname } = useLocation();
+  return (
+    <div style={{ background:"#0A1A2E", padding:"8px 24px", display:"flex",
+      gap:4, flexWrap:"wrap", borderBottom:`1px solid ${C.darkBorder}` }}>
+      {ADMIN_NAV.map(n => {
+        const active = pathname === n.to;
+        return (
+          <NavLink key={n.to} to={n.to}
+            style={{ fontSize:12, fontWeight:600, padding:"6px 12px", borderRadius:6,
+              textDecoration:"none", letterSpacing:"0.03em",
+              color: active ? C.deep : C.dimText,
+              background: active ? C.teal : "transparent" }}>
+            {n.label}
+          </NavLink>
+        );
+      })}
+    </div>
+  );
+}
+
+const FILTERS = [
+  { key: "all",               label: "All" },
+  { key: "under_review",      label: "New / Under Review" },
+  { key: "awaiting_response", label: "Awaiting Response" },
+  { key: "resolved",          label: "Resolved" },
+  { key: "escalated",         label: "Escalated" },
+] as const;
+type FilterKey = typeof FILTERS[number]["key"];
 
 const STATUS_CFG: Record<string,{label:string;bg:string;border:string;text:string}> = {
   under_review:      { label:"Under review",       bg:C.purpleBg,  border:C.purpleBorder, text:C.purple },
@@ -50,6 +91,8 @@ export default function AdminDisputes() {
   const [recommendation, setRecommendation] = useState("");
   const [showRecommend, setShowRecommend] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [filter, setFilter] = useState<FilterKey>("all");
+  const [workflowOpen, setWorkflowOpen] = useState(false);
 
   const loadList = async () => {
     const { data } = await supabase.from("disputes").select("*").order("created_at", { ascending: false });
@@ -109,7 +152,50 @@ export default function AdminDisputes() {
         </span>
       </div>
 
+      <AdminNav />
+
       <div style={{ maxWidth:1100, margin:"0 auto", padding:"1.5rem 1rem" }}>
+        {/* Resolution workflow — collapsible operational reference */}
+        <div style={{ background:"#FFFBEB", border:`1px solid ${C.amberBorder}`,
+          borderRadius:12, padding:"12px 14px", marginBottom:14 }}>
+          <button onClick={() => setWorkflowOpen(o => !o)}
+            style={{ background:"none", border:"none", padding:0, cursor:"pointer",
+              display:"flex", alignItems:"center", gap:8, width:"100%", textAlign:"left" }}>
+            <span style={{ fontSize:14 }}>{workflowOpen ? "▼" : "▶"}</span>
+            <span style={{ fontSize:12, fontWeight:700, color:C.amber, letterSpacing:"0.06em",
+              textTransform:"uppercase" }}>
+              Dispute resolution workflow
+            </span>
+          </button>
+          {workflowOpen && (
+            <ol style={{ margin:"10px 0 0 28px", padding:0, color:"#78350F",
+              fontSize:13, lineHeight:1.7 }}>
+              <li><b>Acknowledge</b> within 1 working day of dispute being raised.</li>
+              <li><b>Request evidence</b> from both parties — messages, photos, variation sign-offs, payment records.</li>
+              <li><b>Review evidence</b> against the signed contract and variation records.</li>
+              <li><b>Issue a mediation decision</b> (find for claimant / respondent / split) with full reasoning.</li>
+              <li><b>If unresolved:</b> escalate to formal process (procedure to be defined in legal pack).</li>
+            </ol>
+          )}
+        </div>
+
+        {/* Required card-field reference — visible until first real dispute lands */}
+        {list.length === 0 && (
+          <div style={{ background:C.darkSurface, border:`1px solid ${C.darkBorder}`,
+            borderRadius:12, padding:"12px 14px", marginBottom:14 }}>
+            <p style={{ fontSize:11, fontWeight:700, color:C.teal, letterSpacing:"0.08em",
+              textTransform:"uppercase", margin:"0 0 8px" }}>
+              Dispute card — required fields
+            </p>
+            <p style={{ fontSize:12, color:C.dimText, lineHeight:1.6, margin:0 }}>
+              Ref · date raised · who raised it (role + name) · respondent (name + company) ·
+              project ref + address · type (Payment / Quality / Scope / Variation / Other) ·
+              status · brief description · link to full project (messages, variations, photos,
+              payment records) · timestamped action log of ProGrafter mediation steps.
+            </p>
+          </div>
+        )}
+
         <div style={{ background:C.deep, borderRadius:16,
           border:`1px solid ${C.darkBorder}`, padding:"1.25rem" }}>
           <p style={{ fontSize:10, fontWeight:700, color:C.teal,
@@ -117,12 +203,44 @@ export default function AdminDisputes() {
             All disputes ({list.length})
           </p>
 
-          {list.length === 0 && (
-            <p style={{ color:C.dimText, fontSize:13 }}>No disputes raised yet.</p>
-          )}
+          {/* Status filter tabs */}
+          <div style={{ display:"flex", gap:6, flexWrap:"wrap", marginBottom:14 }}>
+            {FILTERS.map(f => {
+              const count = f.key === "all" ? list.length : list.filter(d => d.status === f.key).length;
+              const active = filter === f.key;
+              return (
+                <button key={f.key} onClick={() => setFilter(f.key)}
+                  style={{ background: active ? C.teal : "transparent",
+                    color: active ? C.deep : C.dimText,
+                    border:`1px solid ${active ? C.teal : C.darkBorder}`,
+                    borderRadius:20, padding:"5px 12px", fontSize:11, fontWeight:600,
+                    cursor:"pointer" }}>
+                  {f.label} ({count})
+                </button>
+              );
+            })}
+          </div>
+
+          {(() => {
+            const filtered = filter === "all" ? list : list.filter(d => d.status === filter);
+            if (filtered.length === 0) {
+              return (
+                <div style={{ padding:"20px 4px" }}>
+                  <p style={{ color:C.brightText, fontSize:13, margin:"0 0 6px", fontWeight:600 }}>
+                    No disputes {filter === "all" ? "raised yet" : `in “${FILTERS.find(f=>f.key===filter)?.label}”`}.
+                  </p>
+                  <p style={{ color:C.dimText, fontSize:12, lineHeight:1.6, margin:0 }}>
+                    When a dispute is raised by a trade or homeowner, it will appear here for review
+                    and mediation. ProGrafter aims to respond to all disputes within 1 working day.
+                  </p>
+                </div>
+              );
+            }
+            return null;
+          })()}
 
           <div style={{ display:"flex", flexDirection:"column", gap:8, marginBottom:20 }}>
-            {list.map(d => {
+            {(filter === "all" ? list : list.filter(d => d.status === filter)).map(d => {
               const ageDays = Math.floor((Date.now() - new Date(d.created_at).getTime()) / 86400000);
               return (
                 <div key={d.id} onClick={() => loadDetail(d)}
