@@ -259,8 +259,8 @@ export default function Apply() {
       <Field label="Address line 1" req err={errors.address_line1}><I f="address_line1" placeholder="123 High Street" /></Field>
       <Field label="Address line 2"><I f="address_line2" placeholder="Apt / Suite" /></Field>
       <Grid>
-        <Field label="City / Town" req err={errors.city}><I f="city" placeholder="Manchester" /></Field>
-        <Field label="Postcode" req err={errors.postcode}><I f="postcode" placeholder="M1 1AA" /></Field>
+        <Field label="City / Town" req err={errors.city}><I f="city" placeholder="Nottingham" /></Field>
+        <Field label="Postcode" req err={errors.postcode}><I f="postcode" placeholder="NG1 1AA" /></Field>
       </Grid>
     </div>,
 
@@ -465,7 +465,7 @@ export default function Apply() {
         </div>
         <h1 style={{ fontSize: 22, fontWeight: 700, color: C.deep, margin: "0 0 10px" }}>Application received</h1>
         <p style={{ fontSize: 14, color: C.secondary, lineHeight: 1.6, margin: "0 0 16px" }}>
-          Thank you for applying to ProGrafter. We review every application personally — you'll hear from us within 3–5 working days about the next steps.
+          Thank you for applying to ProGrafter. We review every application personally — you'll hear from us within 1 working day about the next steps.
         </p>
         <p style={{ fontSize: 13, color: C.body, margin: 0 }}>We'll be in touch at <strong>{form.email as string}</strong></p>
       </div>
@@ -493,8 +493,8 @@ export default function Apply() {
           <FAQItem q="I'm an electrician — do I need an ECS Gold Card or NVQ Level 3?" a="No, not as a separate requirement. We verify your Competent Person Scheme registration (NICEIC, NAPIT, ELECSA or equivalent) directly. Your scheme membership already confirms your competence has been assessed. We are aware the ECS Gold Card requirements changed in December 2025 and will not penalise electricians who qualified via the Experienced Worker Assessment or the domestic NVQ route, as long as your CPS registration is current." />
           <FAQItem q="I've worked domestically for 20 years but don't have formal qualifications — can I still apply?" a="Yes, for unregulated trades (decorating, tiling, landscaping, groundworks, general building, bathroom fitting, carpentry, plastering, roofing). We assess experience through your portfolio, your trading history, and the two client references we call personally. A 20-year trade with demonstrable quality work is exactly who we want on ProGrafter." />
           <FAQItem q="I work on domestic properties only — do I need the same qualifications as someone who works commercially?" a="No. Commercial and industrial qualifications are irrelevant to the work ProGrafter covers. We verify what applies to residential work only." />
-          <FAQItem q="What happens after I submit my application?" a="Lee Palfreeman (founder) personally reviews every application. We'll contact your references by phone — not by form. We'll then book a short interview call. If approved, you'll be notified within 3-5 working days and your profile goes live on the platform." />
-          <FAQItem q="Is there any cost to join?" a="No upfront cost, no monthly fee. ProGrafter charges 7.5% of the job value only when you win and complete a job, capped at £900 regardless of contract size. You pay nothing until you earn." />
+          <FAQItem q="What happens after I submit my application?" a="Lee Palfreeman (founder) personally reviews every application within 1 working day. We'll contact your references by phone — not by form — and may book a short interview call. You'll receive an email the moment you're verified, and you can start quoting for jobs immediately after that." />
+          <FAQItem q="Is there any cost to join?" a="£0 to register. £0 to quote. We charge 7.5% commission on completed jobs only, capped at £900 regardless of contract size. No monthly fee — ever. You pay nothing until you earn." />
         </div>
 
         <StepBar current={step} />
@@ -505,7 +505,7 @@ export default function Apply() {
               ? <button onClick={back} style={{ background: "transparent", border: `1.5px solid ${C.border}`, color: C.body, padding: "10px 18px", borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>← Back</button>
               : <span />}
             {step < STEPS.length - 1
-              ? <button onClick={next} onMouseEnter={e => (e.currentTarget.style.background = C.deep)} onMouseLeave={e => (e.currentTarget.style.background = C.navy)} style={{ background: C.navy, color: C.white, border: "none", padding: "10px 20px", borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: "pointer", transition: "background 0.15s" }}>Continue →</button>
+              ? <button onClick={next} onMouseEnter={e => (e.currentTarget.style.background = C.tealHover)} onMouseLeave={e => (e.currentTarget.style.background = C.teal)} style={{ background: C.teal, color: C.white, border: "none", padding: "10px 20px", borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: "pointer", transition: "background 0.15s" }}>Continue →</button>
               : <button onClick={submit} style={{ background: C.teal, color: C.white, border: "none", padding: "10px 22px", borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: "pointer" }}>Submit application</button>}
           </div>
           <p style={{ textAlign: "center", fontSize: 12, color: C.secondary, margin: "16px 0 0" }}>
