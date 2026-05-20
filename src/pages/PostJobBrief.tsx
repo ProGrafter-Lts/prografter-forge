@@ -33,8 +33,8 @@ const TRADES = [
 ];
 
 const PROPERTY_TYPES = [
-  "Detached house", "Semi-detached house", "Terraced house",
-  "Bungalow", "Flat / apartment", "Commercial premises", "Other",
+  "Detached house", "Semi-detached house", "Terraced house", "End-of-terrace house",
+  "Flat / Apartment", "Bungalow", "Maisonette", "Other",
 ];
 
 const BUDGETS = [
