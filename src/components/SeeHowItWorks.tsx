@@ -20,6 +20,12 @@ const ChromeBar = ({ url }: { url: string }) => (
   </div>
 );
 
+const Disclaimer = () => (
+  <p className="font-mono text-[11px] text-white/[0.55] text-center mb-2">
+    Illustrative preview — your dashboard fills in as real work flows through.
+  </p>
+);
+
 const ScreenShot = ({ src, alt }: { src: string; alt: string }) => (
   <img
     src={src}
