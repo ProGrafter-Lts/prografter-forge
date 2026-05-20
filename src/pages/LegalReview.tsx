@@ -70,10 +70,10 @@ const LegalReview = () => {
             <div>
               <h2 className="font-heading text-primary text-lg mb-2">Timeline</h2>
               <p>
-                Estimated delivery from the solicitor: <strong>{LEGAL_REVIEW_ETA}</strong>. When
-                the final template is approved we'll flip signing on automatically — no action
-                needed from you. Contracts you generate now will continue to reference the
-                placeholder version; new contracts after that date will use the approved version.
+                We're targeting delivery {LEGAL_REVIEW_ETA}. When the final template is
+                approved we'll flip signing on automatically — no action needed from you. Contracts
+                you generate now will continue to reference the placeholder version; new contracts
+                after that date will use the approved version.
               </p>
             </div>
           </div>
