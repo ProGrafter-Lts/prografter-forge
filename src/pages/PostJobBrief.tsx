@@ -300,7 +300,7 @@ export default function PostJobBrief() {
     if (n === 1) {
       if (!form.trade_category_id) e.trade_category_id = "Please select a trade";
       if (!form.job_title.trim()) e.job_title = "A brief title is required";
-      if (form.job_description.trim().length < 50) e.job_description = "Please describe the job in at least 50 characters — traders need enough detail to quote accurately";
+      if (form.job_description.trim().length < 50) e.job_description = "Please describe the job in at least 50 characters — trades need enough detail to quote accurately";
     }
     if (n === 2) {
       if (!form.access_arrangement) e.access_arrangement = "Required";
@@ -334,7 +334,7 @@ export default function PostJobBrief() {
     <>
       <h2 style={{ fontSize: 17, fontWeight: 700, color: C.deep, margin: "0 0 4px" }}>Your details</h2>
       <p style={{ fontSize: 13, color: C.secondary, margin: "0 0 20px" }}>
-        These stay private — only shared with a trader once you've accepted their quote.
+        These stay private — only shared with a trade once you've accepted their quote.
       </p>
       <InfoBox variant="navy">
         <strong>Identity verified</strong> — ProGrafter verifies email and mobile before your brief is published.
@@ -406,13 +406,13 @@ export default function PostJobBrief() {
     <>
       <h2 style={{ fontSize: 17, fontWeight: 700, color: C.deep, margin: "0 0 4px" }}>Scope & access</h2>
       <p style={{ fontSize: 13, color: C.secondary, margin: "0 0 20px" }}>
-        Help traders understand exactly what's involved before they quote.
+        Help trades understand exactly what's involved before they quote.
       </p>
       <F label="Scope of works" hint="List specific items if you can. Bullet points are fine.">
         <T f="scope_items" rows={5}
           placeholder={"- Strip and remove existing loft boarding\n- Install steel beam (engineer spec to be provided)\n- Frame dormer structure to rear\n- Install 4 Velux windows to front\n- First and second fix carpentry throughout"} />
       </F>
-      <F label="Known issues or constraints" hint="Anything the trader needs to know — asbestos, awkward access, listed building status, party wall, existing damage">
+      <F label="Known issues or constraints" hint="Anything the trade needs to know — asbestos, awkward access, listed building status, party wall, existing damage">
         <T f="known_issues" rows={3}
           placeholder="Asbestos survey has been completed — clear. Party wall agreement with next door is in progress." />
       </F>
@@ -443,7 +443,7 @@ export default function PostJobBrief() {
           </S>
         </F>
       </G2>
-      <F label="Anything else the trader should know?">
+      <F label="Anything else the trade should know?">
         <T f="additional_notes" rows={3}
           placeholder="We have a dog (friendly!) and a 6-month-old so early morning starts before 8am would be appreciated if avoided where possible." />
       </F>
@@ -452,12 +452,12 @@ export default function PostJobBrief() {
     <>
       <h2 style={{ fontSize: 17, fontWeight: 700, color: C.deep, margin: "0 0 4px" }}>Budget & timing</h2>
       <p style={{ fontSize: 13, color: C.secondary, margin: "0 0 20px" }}>
-        Be honest about your budget — traders appreciate it and it saves everyone time.
+        Be honest about your budget — trades appreciate it and it saves everyone time.
       </p>
       <InfoBox variant="teal">
-        <strong>Why share your budget?</strong> Traders who see a realistic budget can tell you immediately if the scope fits.
+        <strong>Why share your budget?</strong> Trades who see a realistic budget can tell you immediately if the scope fits.
         It stops you receiving quotes that bear no relation to what's actually achievable for your money.
-        Your budget is only visible to traders you invite to quote.
+        Your budget is only visible to trades you invite to quote.
       </InfoBox>
       <F label="Budget band" req err={errors.budget_band}>
         <S f="budget_band">
@@ -471,7 +471,7 @@ export default function PostJobBrief() {
           {TIMELINES.map(o => <option key={o} value={o}>{o}</option>)}
         </S>
       </F>
-      <F label="Have you received any quotes already?" hint="This helps traders calibrate their response">
+      <F label="Have you received any quotes already?" hint="This helps trades calibrate their response">
         <S f="quotes_received">
           <option value="">Select...</option>
           <option value="No — this is my first step">No — this is my first step</option>
@@ -480,28 +480,28 @@ export default function PostJobBrief() {
           <option value="Yes — used Quote Checker to validate">Yes — used Quote Checker to validate</option>
         </S>
       </F>
-      <F label="What matters most to you in choosing a trader?" hint="Optional — helps traders understand your priorities">
+      <F label="What matters most to you in choosing a trade?" hint="Optional — helps trades understand your priorities">
         <S f="decision_criteria">
           <option value="">Select...</option>
           <option value="Quality of work above all else">Quality of work above all else</option>
           <option value="Best value for money">Best value for money</option>
           <option value="Speed — I need it done quickly">Speed — I need it done quickly</option>
           <option value="Reliability and communication">Reliability and communication</option>
-          <option value="Local trader preferred">Local trader preferred</option>
+          <option value="Local trade preferred">Local trade preferred</option>
           <option value="Specific qualifications or accreditations">Specific qualifications or accreditations</option>
         </S>
       </F>
       <InfoBox variant="amber">
         <strong>What happens next?</strong> Once submitted, your brief is reviewed by ProGrafter before being shared with
-        relevant vetted traders in your area. Traders must respond within 48 hours or the brief is passed to the next
-        available trader. You are under no obligation to accept any quote.
+        relevant vetted trades in your area. Trades must respond within 48 hours or the brief is passed to the next
+        available trade. You are under no obligation to accept any quote.
       </InfoBox>
     </>,
 
     <>
       <h2 style={{ fontSize: 17, fontWeight: 700, color: C.deep, margin: "0 0 4px" }}>Review your brief</h2>
       <p style={{ fontSize: 13, color: C.secondary, margin: "0 0 20px" }}>
-        This is exactly what vetted traders will see. Check it over before submitting.
+        This is exactly what vetted trades will see. Check it over before submitting.
       </p>
       <BriefPreview form={form} />
       <div style={{ marginTop: 16 }}>
@@ -509,8 +509,8 @@ export default function PostJobBrief() {
           <strong>By submitting this brief you agree that:</strong>
           <ul style={{ paddingLeft: 16, margin: "6px 0 0", lineHeight: 1.8 }}>
             <li>All information provided is accurate to the best of your knowledge.</li>
-            <li>You will respond to traders who request to quote within 48 hours.</li>
-            <li>You will not use ProGrafter quotes as price leverage with off-platform traders.</li>
+            <li>You will respond to trades who request to quote within 48 hours.</li>
+            <li>You will not use ProGrafter quotes as price leverage with off-platform trades.</li>
             <li>If you accept a quote and cancel without valid reason, a cancellation fee may apply.</li>
             <li>All payments must go through ProGrafter escrow — no cash arrangements.</li>
           </ul>
@@ -538,7 +538,7 @@ export default function PostJobBrief() {
           <h2 style={{ fontSize: 20, fontWeight: 700, color: C.deep, marginBottom: 8 }}>Brief submitted</h2>
           <p style={{ fontSize: 14, color: C.secondary, lineHeight: 1.65, marginBottom: 16 }}>
             Your job brief has been received. ProGrafter will review it and match you with
-            vetted traders in your area. You'll hear from us within 24 hours.
+            vetted trades in your area. You'll hear from us within 24 hours.
           </p>
           <div style={{ background: C.cream, borderRadius: 10, padding: "12px 16px", marginBottom: 16 }}>
             <p style={{ fontSize: 11, color: C.secondary, margin: "0 0 4px" }}>Your reference number</p>
@@ -550,8 +550,8 @@ export default function PostJobBrief() {
           </p>
           <div style={{ marginTop: 20, padding: "12px 16px", background: C.tealLight,
             borderRadius: 10, fontSize: 12, color: "#0F766E", lineHeight: 1.6 }}>
-            <strong>What to expect:</strong> Traders have 48 hours to respond to your brief.
-            You'll be notified for each quote received. All traders on ProGrafter are
+            <strong>What to expect:</strong> Trades have 48 hours to respond to your brief.
+            You'll be notified for each quote received. All trades on ProGrafter are
             personally vetted — qualifications verified, references called, interview conducted.
           </div>
         </div>
@@ -579,7 +579,7 @@ export default function PostJobBrief() {
             Post your job brief
           </p>
           <p style={{ fontSize: 13, color: C.secondary }}>
-            Every trader who sees this brief is vetted, insured, and referenced. Takes about 5 minutes.
+            Every trade who sees this brief is vetted, insured, and referenced. Takes about 5 minutes.
           </p>
         </div>
 
@@ -613,7 +613,7 @@ export default function PostJobBrief() {
           marginTop: 20, flexWrap: "wrap" }}>
           {[
             "🔒 Identity verified",
-            "✅ Vetted traders only",
+            "✅ Vetted trades only",
             "💷 Escrow protected",
             "📄 Full documentation",
           ].map(item => (
