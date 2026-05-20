@@ -473,6 +473,16 @@ Total: £2,585`} />
                 "Analyse this quote →"
               )}
             </button>
+            {loading && (
+              <p style={{ fontSize:12, color:C.secondary, textAlign:"center",
+                marginTop:12, lineHeight:1.55 }}>
+                Analysing your quote against current UK regional rates
+                {form.trade ? ` for ${form.trade}` : ""}
+                {form.region ? ` in ${form.region}` : ""}…
+                <br />
+                This usually takes about 60 seconds — please don&apos;t refresh.
+              </p>
+            )}
           </div>
         )}
 
