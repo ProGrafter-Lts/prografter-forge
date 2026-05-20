@@ -63,6 +63,7 @@ const TradesPanel = () => (
     <div className="visual-wrap">
       {/* Trade Dashboard - large */}
       <div>
+        <Disclaimer />
         <div className="hiw-screen">
           <ChromeBar url="prografter.co.uk/dashboard/trade" />
           <ScreenShot src={tradeDashboard} alt="Trade dashboard with stats and job matches" />
