@@ -57,12 +57,33 @@ type Lead = {
 
 const PIPELINE_STAGES = [
   { id: "new", label: "New lead", color: C.purple },
+  { id: "letter_sent", label: "Letter sent", color: C.amber },
   { id: "contacted_agent", label: "Agent contacted", color: C.teal },
+  { id: "call_made", label: "Call made", color: C.teal },
+  { id: "meeting_booked", label: "Meeting booked", color: C.navy },
+  { id: "quote_posted", label: "Quote posted", color: C.navy },
+  { id: "job_won", label: "Job won", color: C.green },
+  { id: "not_interested", label: "Not interested / Cold", color: C.secondary },
+  // Legacy aliases — render so older rows still display correctly
   { id: "contacted_homeowner", label: "Homeowner contacted", color: C.amber },
   { id: "brief_posted", label: "Brief posted", color: C.navy },
   { id: "converted", label: "Converted", color: C.green },
   { id: "not_suitable", label: "Not suitable", color: C.secondary },
 ];
+
+const SCORE_TOOLTIP =
+  "Score factors: project value (40%) · recency, days since submission (30%) · " +
+  "trades required, breadth of work (20%) · agent relationship status (10%). " +
+  "Scores 75+ are flagged red as hot leads.";
+
+const isOverdue = (status: string, days: number) =>
+  (status === "new" && days > 14) || (status === "contacted_agent" && days > 30);
+
+const isNonDomestic = (l: { application_type: string | null; description: string | null }) => {
+  const t = `${l.application_type ?? ""} ${l.description ?? ""}`.toLowerCase();
+  return /class\s*q|barn conversion|agricultural|change of use/.test(t)
+    || (l.application_type ?? "").toLowerCase() === "full";
+};
 
 const AGENT_STATUS: Record<string, { label: string; bg: string; border: string; text: string }> = {
   identified: { label: "Identified", bg: C.purpleBg, border: C.purpleBorder, text: C.purple },
