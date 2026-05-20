@@ -46,16 +46,22 @@ const FAQItem = ({ q, a }: { q: string; a: string }) => {
 };
 
 const TRADES = [
-  { id: "electrician", name: "Electrician", lane: "regulated", body: "Competent Person Scheme" },
+  // Regulated — mandatory scheme registration required
+  { id: "electrician", name: "Electrician", lane: "regulated", body: "Competent Person Scheme (NICEIC / NAPIT)" },
   { id: "gas_engineer", name: "Gas Engineer", lane: "regulated", body: "Gas Safe Register" },
+  { id: "solar_pv", name: "Solar PV Installer", lane: "regulated", body: "MCS" },
+  { id: "heat_pump", name: "Heat Pump Installer", lane: "regulated", body: "MCS" },
+  { id: "ev_charger", name: "EV Charger Installer", lane: "regulated", body: "OZEV-authorised" },
+  { id: "oil_boiler", name: "Oil Boiler Engineer", lane: "regulated", body: "OFTEC" },
+  // Unregulated — no mandatory scheme; vetted by experience, insurance, references
+  { id: "plumber", name: "Plumber", lane: "unregulated" },
   { id: "general_builder", name: "General Builder", lane: "unregulated" },
   { id: "plasterer", name: "Plasterer", lane: "unregulated" },
   { id: "carpenter", name: "Carpenter / Joiner", lane: "unregulated" },
   { id: "tiler", name: "Tiler", lane: "unregulated" },
   { id: "decorator", name: "Decorator / Painter", lane: "unregulated" },
   { id: "roofer", name: "Roofer", lane: "unregulated" },
-  { id: "plumber", name: "Plumber", lane: "unregulated" },
-  { id: "scaffolder", name: "Scaffolder", lane: "unregulated" },
+  { id: "kitchen_bathroom_fitter", name: "Kitchen / Bathroom Fitter", lane: "unregulated" },
   { id: "landscaper", name: "Landscaper", lane: "unregulated" },
 ] as const;
 
