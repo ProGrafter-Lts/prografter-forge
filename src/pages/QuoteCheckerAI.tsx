@@ -299,6 +299,12 @@ ${form.quote_text}`;
               <span key={t} style={{ fontSize:12, color:C.secondary }}>{t}</span>
             ))}
           </div>
+          <p style={{ fontSize:12, color:C.secondary, marginTop:14 }}>
+            Got a PDF instead?{" "}
+            <a href="/quote-checker" style={{ color:C.teal, fontWeight:600, textDecoration:"none" }}>
+              Try the PDF Quote Checker →
+            </a>
+          </p>
         </div>
 
         {(result || streaming) && (
