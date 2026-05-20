@@ -216,6 +216,7 @@ const LeadDetail = ({ lead, agent, onSaved }: { lead: Lead; agent?: Agent; onSav
   const [nextAction, setNextAction] = useState(lead.next_action || "");
   const [pipelineStatus, setPipelineStatus] = useState(lead.pipeline_status);
   const [saving, setSaving] = useState(false);
+  const [enriching, setEnriching] = useState(false);
 
   useEffect(() => {
     setNotes(lead.notes || "");
@@ -238,9 +239,30 @@ const LeadDetail = ({ lead, agent, onSaved }: { lead: Lead; agent?: Agent; onSav
     }
   };
 
+  const enrichFromPdf = async () => {
+    setEnriching(true);
+    const { data: { session } } = await supabase.auth.getSession();
+    const { data, error } = await supabase.functions.invoke("enrich-planning-lead-pdf", {
+      body: { lead_id: lead.id },
+      headers: session ? { Authorization: `Bearer ${session.access_token}` } : {},
+    });
+    setEnriching(false);
+    if (error) {
+      toast({ title: "PDF enrich failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    const r = data as { ok?: boolean; error?: string };
+    if (r?.error) {
+      toast({ title: "PDF enrich failed", description: r.error, variant: "destructive" });
+    } else {
+      toast({ title: "PDF read", description: "Applicant & agent details extracted." });
+      onSaved();
+    }
+  };
+
   const copyEmail = (email: string) => {
     navigator.clipboard?.writeText(email);
-    toast({ title: "Email copied" });
+    toast({ title: "Copied" });
   };
 
   const ds = daysSince(lead.submitted_date);
