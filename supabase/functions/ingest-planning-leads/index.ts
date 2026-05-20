@@ -245,6 +245,7 @@ serve(async (req) => {
             priority_score: score,
             pipeline_status: "new",
             documents_available: !!(r.url ?? r.link),
+            council_application_url: r.url ?? r.link ?? null,
             notes: of.agent_name
               ? `Agent: ${of.agent_name}${of.agent_company ? ` (${of.agent_company})` : ""}${of.agent_address ? ` — ${of.agent_address}` : ""}`
               : "",
