@@ -146,7 +146,7 @@ Your role is to:
 1. Analyse the quote against current regional UK market rates
 2. Identify any missing items, ambiguous scope, or red flags
 3. Give an honest, balanced verdict
-4. Help the homeowner make an informed decision — not scare them away from good traders or push them toward cheap ones
+4. Help the homeowner make an informed decision — not scare them away from good trades or push them toward cheap ones
 
 You must structure your response EXACTLY as follows:
 
@@ -165,7 +165,7 @@ SCORE: [integer 0-100, where 100 = exceptional value, 50 = fair market rate, bel
 ## What to watch out for
 [Any missing items, ambiguous terms, payment terms red flags, or things the homeowner should clarify before accepting]
 
-## Questions to ask the trader
+## Questions to ask the trade
 [3-5 specific questions the homeowner should ask before accepting this quote]
 
 ## Our recommendation
@@ -299,6 +299,12 @@ ${form.quote_text}`;
               <span key={t} style={{ fontSize:12, color:C.secondary }}>{t}</span>
             ))}
           </div>
+          <p style={{ fontSize:12, color:C.secondary, marginTop:14 }}>
+            Got a PDF instead?{" "}
+            <a href="/quote-checker" style={{ color:C.teal, fontWeight:600, textDecoration:"none" }}>
+              Try the PDF Quote Checker →
+            </a>
+          </p>
         </div>
 
         {(result || streaming) && (
@@ -358,13 +364,13 @@ ${form.quote_text}`;
                   Check another quote
                 </button>
                 <span style={{ fontSize:12, color:C.secondary }}>
-                  Want to find a vetted trader instead?
+                  Want to find a vetted trade instead?
                 </span>
-                <button style={{ background:"none", border:`1.5px solid ${C.teal}`,
+                <a href="/post-job-brief" style={{ background:"none", border:`1.5px solid ${C.teal}`,
                   color:C.teal, borderRadius:8, padding:"8px 16px",
-                  fontSize:13, fontWeight:600, cursor:"pointer" }}>
+                  fontSize:13, fontWeight:600, cursor:"pointer", textDecoration:"none" }}>
                   Post a job on ProGrafter →
-                </button>
+                </a>
               </div>
             )}
           </div>
@@ -402,7 +408,7 @@ ${form.quote_text}`;
               <F label="Property type" hint="Optional but helps with context">
                 <select style={inp()} value={form.property_type} onChange={upd("property_type")}>
                   <option value="">Select...</option>
-                  {["Detached house","Semi-detached","Terraced house","Bungalow","Flat / apartment","Commercial"].map(o=>(
+                  {["Detached house","Semi-detached house","Terraced house","End-of-terrace house","Flat / Apartment","Bungalow","Maisonette","Other"].map(o=>(
                     <option key={o} value={o}>{o}</option>
                   ))}
                 </select>
@@ -467,6 +473,16 @@ Total: £2,585`} />
                 "Analyse this quote →"
               )}
             </button>
+            {loading && (
+              <p style={{ fontSize:12, color:C.secondary, textAlign:"center",
+                marginTop:12, lineHeight:1.55 }}>
+                Analysing your quote against current UK regional rates
+                {form.trade ? ` for ${form.trade}` : ""}
+                {form.region ? ` in ${form.region}` : ""}…
+                <br />
+                This usually takes about 60 seconds — please don&apos;t refresh.
+              </p>
+            )}
           </div>
         )}
 
@@ -482,7 +498,7 @@ Total: £2,585`} />
                 { n:"01", title:"Paste your quote", body:"Copy in the full quote — line items, totals, materials, anything included." },
                 { n:"02", title:"AI analysis", body:"Our AI checks it against current regional UK rates for that specific trade and location." },
                 { n:"03", title:"Honest verdict", body:"You get a clear fair / overpriced / low-ball verdict with the reasoning behind it." },
-                { n:"04", title:"Know what to ask", body:"Specific questions to put to the trader before you sign anything." },
+                { n:"04", title:"Know what to ask", body:"Specific questions to put to the trade before you sign anything." },
               ].map(s => (
                 <div key={s.n} style={{ background:C.white, border:`1px solid ${C.border}`,
                   borderRadius:12, padding:"14px 16px" }}>
