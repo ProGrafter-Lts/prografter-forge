@@ -31,3 +31,6 @@ project_id = "xryinqaxjclcmhebdcex"
     verify_jwt = false
   [functions.send-trade-verification-reminders]
     verify_jwt = false
+  [functions.scan-overdue-projects]
+    verify_jwt = false
+
