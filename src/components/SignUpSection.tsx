@@ -99,10 +99,10 @@ const SignUpSection = () => {
             <span className="font-mono text-xs text-teal uppercase tracking-widest">Register Free</span>
           </div>
           <h2 className="font-heading text-cream text-[48px] craft:text-[64px] leading-none mb-4">
-            Live Across<br /><span className="text-teal">The UK.</span>
+            Live in Nottinghamshire.<br /><span className="text-teal">Growing outward.</span>
           </h2>
           <p className="font-body text-secondary-text text-base font-light max-w-sm">
-            ProGrafter is live across the UK. Register free today — no monthly fees, no spam, just verified job leads.
+            ProGrafter is live and taking signups across Nottinghamshire and the East Midlands — and growing. Register free today: no monthly fees, no spam, just verified job leads.
           </p>
         </div>
 
