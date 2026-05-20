@@ -1459,6 +1459,7 @@ export type Database = {
           applicant_name: string | null
           application_ref: string
           application_type: string | null
+          council_application_url: string | null
           council_name: string
           created_at: string
           description: string | null
@@ -1491,6 +1492,7 @@ export type Database = {
           applicant_name?: string | null
           application_ref: string
           application_type?: string | null
+          council_application_url?: string | null
           council_name: string
           created_at?: string
           description?: string | null
@@ -1523,6 +1525,7 @@ export type Database = {
           applicant_name?: string | null
           application_ref?: string
           application_type?: string | null
+          council_application_url?: string | null
           council_name?: string
           created_at?: string
           description?: string | null
