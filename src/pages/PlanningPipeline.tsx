@@ -287,9 +287,17 @@ const LeadDetail = ({ lead, agent, onSaved }: { lead: Lead; agent?: Agent; onSav
               <span style={{ fontSize: 11, color: C.dimText }}>{ds} days ago</span>
             </div>
           </div>
-          <div style={{ textAlign: "right" }}>
+          <div style={{ textAlign: "right", display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>
             <p style={{ fontSize: 22, fontWeight: 700, color: C.teal, margin: 0 }}>{fmt(lead.estimated_value_max)}</p>
             <p style={{ fontSize: 10, color: C.dimText, margin: 0 }}>est. value</p>
+            <button onClick={enrichFromPdf} disabled={enriching || !lead.council_application_url}
+              title={lead.council_application_url ? "Read the official application form PDF and extract applicant + agent details" : "No council URL on file"}
+              style={{ marginTop: 6, background: lead.pdf_enriched_at ? "rgba(13,148,136,0.18)" : C.teal, color: lead.pdf_enriched_at ? C.teal : C.white, border: lead.pdf_enriched_at ? `1px solid rgba(13,148,136,0.4)` : "none", borderRadius: 7, padding: "6px 10px", fontSize: 10, fontWeight: 700, cursor: enriching ? "not-allowed" : "pointer", opacity: enriching || !lead.council_application_url ? 0.6 : 1, whiteSpace: "nowrap" }}>
+              {enriching ? "Reading PDF…" : lead.pdf_enriched_at ? "🔁 Re-read PDF" : "📄 Read PDF form"}
+            </button>
+            {lead.proposal_type && (
+              <span style={{ fontSize: 10, color: C.dimText, marginTop: 2 }}>{lead.proposal_type}</span>
+            )}
           </div>
         </div>
       </div>
