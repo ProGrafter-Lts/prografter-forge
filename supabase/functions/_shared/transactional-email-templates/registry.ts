@@ -59,4 +59,9 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'completion-accepted': completionAccepted,
   'testimonial-request': testimonialRequest,
   'testimonial-received': testimonialReceived,
+  'payment-released-trade': paymentReleasedTrade,
+  'payment-released-homeowner': paymentReleasedHomeowner,
+  'quote-received': quoteReceived,
+  'project-overdue-trade': projectOverdueTrade,
+  'project-overdue-homeowner': projectOverdueHomeowner,
 }
