@@ -130,6 +130,7 @@ const HomeownersPanel = () => (
     <div className="visual-wrap">
       {/* Homeowner Dashboard - large */}
       <div>
+        <Disclaimer />
         <div className="hiw-screen">
           <ChromeBar url="prografter.co.uk/dashboard/homeowner" />
           <ScreenShot src={homeownerOverview} alt="Homeowner overview with active project and quotes" />
@@ -140,6 +141,7 @@ const HomeownersPanel = () => (
         </div>
 
         <div style={{ marginTop: 20 }}>
+          <Disclaimer />
           <div className="hiw-screen">
             <ChromeBar url="prografter.co.uk/project/compare" />
             <ScreenShot src={homeownerQuotes} alt="Side-by-side quote comparison" />
@@ -154,6 +156,7 @@ const HomeownersPanel = () => (
       {/* Right column */}
       <div className="visual-right">
         <div>
+          <Disclaimer />
           <div className="hiw-screen">
             <ChromeBar url="prografter.co.uk/quote-checker" />
             <ScreenShot src={quoteChecker} alt="AI Quote Checker tool" />
@@ -165,6 +168,7 @@ const HomeownersPanel = () => (
         </div>
 
         <div>
+          <Disclaimer />
           <div className="hiw-screen">
             <ChromeBar url="prografter.co.uk/manual" />
             <ScreenShot src={homeownerManual} alt="Homeowner project manual" />
