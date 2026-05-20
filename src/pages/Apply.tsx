@@ -505,7 +505,7 @@ export default function Apply() {
               ? <button onClick={back} style={{ background: "transparent", border: `1.5px solid ${C.border}`, color: C.body, padding: "10px 18px", borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>← Back</button>
               : <span />}
             {step < STEPS.length - 1
-              ? <button onClick={next} onMouseEnter={e => (e.currentTarget.style.background = C.deep)} onMouseLeave={e => (e.currentTarget.style.background = C.navy)} style={{ background: C.navy, color: C.white, border: "none", padding: "10px 20px", borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: "pointer", transition: "background 0.15s" }}>Continue →</button>
+              ? <button onClick={next} onMouseEnter={e => (e.currentTarget.style.background = C.tealHover)} onMouseLeave={e => (e.currentTarget.style.background = C.teal)} style={{ background: C.teal, color: C.white, border: "none", padding: "10px 20px", borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: "pointer", transition: "background 0.15s" }}>Continue →</button>
               : <button onClick={submit} style={{ background: C.teal, color: C.white, border: "none", padding: "10px 22px", borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: "pointer" }}>Submit application</button>}
           </div>
           <p style={{ textAlign: "center", fontSize: 12, color: C.secondary, margin: "16px 0 0" }}>
