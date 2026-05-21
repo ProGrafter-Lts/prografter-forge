@@ -236,6 +236,8 @@ const LeadDetail = ({ lead, agent, onSaved }: { lead: Lead; agent?: Agent; onSav
   const [homeownerInterested, setHomeownerInterested] = useState<string>(lead.homeowner_interested ?? "unknown");
   const [saving, setSaving] = useState(false);
   const [enriching, setEnriching] = useState(false);
+  const [councilUrl, setCouncilUrl] = useState(lead.council_application_url || "");
+  const [savingUrl, setSavingUrl] = useState(false);
 
   useEffect(() => {
     setNotes(lead.notes || "");
@@ -246,7 +248,30 @@ const LeadDetail = ({ lead, agent, onSaved }: { lead: Lead; agent?: Agent; onSav
     setHomeownerContacted(lead.homeowner_contacted ?? false);
     setHomeownerMethods(lead.homeowner_contact_methods ?? []);
     setHomeownerInterested(lead.homeowner_interested ?? "unknown");
+    setCouncilUrl(lead.council_application_url || "");
   }, [lead.id]);
+
+  const saveCouncilUrl = async () => {
+    const trimmed = councilUrl.trim();
+    if (trimmed && !/^https?:\/\//i.test(trimmed)) {
+      toast({ title: "Invalid URL", description: "Must start with http:// or https://", variant: "destructive" });
+      return;
+    }
+    setSavingUrl(true);
+    const { error } = await supabase
+      .from("planning_leads")
+      .update({ council_application_url: trimmed || null } as never)
+      .eq("id", lead.id);
+    setSavingUrl(false);
+    if (error) {
+      toast({ title: "Save failed", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Council URL saved", description: "You can now read the PDF form." });
+      onSaved();
+    }
+  };
+
+
 
   const toggleMethod = (current: string[], setter: (v: string[]) => void, m: string) => {
     setter(current.includes(m) ? current.filter((x) => x !== m) : [...current, m]);
@@ -341,6 +366,34 @@ const LeadDetail = ({ lead, agent, onSaved }: { lead: Lead; agent?: Agent; onSav
       </div>
 
       <div style={{ display: "grid", gap: 12 }}>
+        <div style={{ background: lead.council_application_url ? "rgba(255,255,255,0.04)" : "rgba(217,119,6,0.10)", border: lead.council_application_url ? "none" : `1px solid ${C.amberBorder}`, borderRadius: 10, padding: "12px 14px" }}>
+          <p style={{ fontSize: 10, fontWeight: 700, color: lead.council_application_url ? C.teal : C.amber, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 6px" }}>
+            🔗 Council application URL {lead.council_application_url ? "" : "(missing — paste to enable PDF read)"}
+          </p>
+          <div style={{ display: "flex", gap: 6 }}>
+            <input
+              type="url"
+              value={councilUrl}
+              onChange={(e) => setCouncilUrl(e.target.value)}
+              placeholder="https://publicaccess.council.gov.uk/online-applications/..."
+              style={{ flex: 1, background: "rgba(0,0,0,0.3)", border: `1px solid rgba(255,255,255,0.15)`, borderRadius: 6, padding: "6px 10px", fontSize: 11, color: C.brightText }}
+            />
+            <button
+              onClick={saveCouncilUrl}
+              disabled={savingUrl || councilUrl.trim() === (lead.council_application_url || "")}
+              style={{ background: C.teal, color: C.white, border: "none", borderRadius: 6, padding: "6px 12px", fontSize: 11, fontWeight: 700, cursor: savingUrl ? "not-allowed" : "pointer", opacity: savingUrl || councilUrl.trim() === (lead.council_application_url || "") ? 0.5 : 1, whiteSpace: "nowrap" }}
+            >
+              {savingUrl ? "Saving…" : "Save"}
+            </button>
+          </div>
+          {!lead.council_application_url && (
+            <p style={{ fontSize: 10, color: C.dimText, margin: "6px 0 0" }}>
+              Open the council's public access portal, find this application, copy the page URL and paste here. Then click "📄 Read PDF form" above.
+            </p>
+          )}
+        </div>
+
+
         <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: 10, padding: "12px 14px" }}>
           <p style={{ fontSize: 10, fontWeight: 700, color: C.teal, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 6px" }}>Description</p>
           <p style={{ fontSize: 12, color: C.brightText, lineHeight: 1.6, margin: 0 }}>{lead.description}</p>
