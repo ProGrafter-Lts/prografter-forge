@@ -249,7 +249,59 @@ serve(async (req) => {
     // Step 3: AI extraction
     const extracted = await extractWithAI(md);
 
-    // Step 4: update lead
+    // Step 4: Auto-link or create agent record so the Agents tab populates.
+    let agentId: string | null = null;
+    if (extracted.agent_name && extracted.agent_name.trim()) {
+      const contactName = extracted.agent_name.trim();
+      const companyName = (extracted.agent_company ?? "").trim() || null;
+      const { email, phone } = splitContact(extracted.agent_contact);
+
+      // Find existing (case-insensitive) on (contact_name, company_name)
+      const { data: existing } = await supabase
+        .from("planning_agents")
+        .select("id, councils_active, email, phone, address")
+        .ilike("contact_name", contactName)
+        .maybeSingle();
+
+      if (existing) {
+        agentId = existing.id;
+        const councils: string[] = existing.councils_active ?? [];
+        const nextCouncils = councils.includes(lead.council_name)
+          ? councils
+          : [...councils, lead.council_name];
+        await supabase
+          .from("planning_agents")
+          .update({
+            councils_active: nextCouncils,
+            email: existing.email ?? email ?? undefined,
+            phone: existing.phone ?? phone ?? undefined,
+            address: existing.address ?? extracted.agent_address ?? undefined,
+            company_name: companyName ?? undefined,
+          })
+          .eq("id", existing.id);
+      } else {
+        const { data: created, error: insertErr } = await supabase
+          .from("planning_agents")
+          .insert({
+            contact_name: contactName,
+            company_name: companyName,
+            email,
+            phone,
+            address: extracted.agent_address,
+            councils_active: [lead.council_name],
+            relationship_status: "identified",
+          })
+          .select("id")
+          .single();
+        if (insertErr) {
+          console.error("[ENRICH] agent insert failed:", insertErr.message);
+        } else {
+          agentId = created?.id ?? null;
+        }
+      }
+    }
+
+    // Step 5: update lead (including agent_id link)
     const { error: updErr } = await supabase
       .from("planning_leads")
       .update({
@@ -259,6 +311,7 @@ serve(async (req) => {
         agent_name: extracted.agent_name ?? undefined,
         agent_address: extracted.agent_address ?? undefined,
         agent_contact: extracted.agent_contact ?? undefined,
+        agent_id: agentId ?? undefined,
         proposal_type: extracted.proposal_type ?? undefined,
         pdf_source_url: pdfUrl,
         pdf_enriched_at: new Date().toISOString(),
