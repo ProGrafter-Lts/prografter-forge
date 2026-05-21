@@ -1452,6 +1452,9 @@ export type Database = {
         Row: {
           agent_address: string | null
           agent_contact: string | null
+          agent_contact_methods: string[]
+          agent_contacted: boolean
+          agent_contacted_at: string | null
           agent_id: string | null
           agent_name: string | null
           applicant_address: string | null
@@ -1467,6 +1470,10 @@ export type Database = {
           estimated_value_max: number | null
           estimated_value_min: number | null
           form1app_extracted: boolean
+          homeowner_contact_methods: string[]
+          homeowner_contacted: boolean
+          homeowner_contacted_at: string | null
+          homeowner_interested: string | null
           id: string
           next_action: string | null
           notes: string | null
@@ -1485,6 +1492,9 @@ export type Database = {
         Insert: {
           agent_address?: string | null
           agent_contact?: string | null
+          agent_contact_methods?: string[]
+          agent_contacted?: boolean
+          agent_contacted_at?: string | null
           agent_id?: string | null
           agent_name?: string | null
           applicant_address?: string | null
@@ -1500,6 +1510,10 @@ export type Database = {
           estimated_value_max?: number | null
           estimated_value_min?: number | null
           form1app_extracted?: boolean
+          homeowner_contact_methods?: string[]
+          homeowner_contacted?: boolean
+          homeowner_contacted_at?: string | null
+          homeowner_interested?: string | null
           id?: string
           next_action?: string | null
           notes?: string | null
@@ -1518,6 +1532,9 @@ export type Database = {
         Update: {
           agent_address?: string | null
           agent_contact?: string | null
+          agent_contact_methods?: string[]
+          agent_contacted?: boolean
+          agent_contacted_at?: string | null
           agent_id?: string | null
           agent_name?: string | null
           applicant_address?: string | null
@@ -1533,6 +1550,10 @@ export type Database = {
           estimated_value_max?: number | null
           estimated_value_min?: number | null
           form1app_extracted?: boolean
+          homeowner_contact_methods?: string[]
+          homeowner_contacted?: boolean
+          homeowner_contacted_at?: string | null
+          homeowner_interested?: string | null
           id?: string
           next_action?: string | null
           notes?: string | null
