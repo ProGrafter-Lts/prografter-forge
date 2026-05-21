@@ -248,7 +248,27 @@ const LeadDetail = ({ lead, agent, onSaved }: { lead: Lead; agent?: Agent; onSav
     setHomeownerContacted(lead.homeowner_contacted ?? false);
     setHomeownerMethods(lead.homeowner_contact_methods ?? []);
     setHomeownerInterested(lead.homeowner_interested ?? "unknown");
+    setCouncilUrl(lead.council_application_url || "");
   }, [lead.id]);
+
+  const saveCouncilUrl = async () => {
+    const trimmed = councilUrl.trim();
+    if (trimmed && !/^https?:\/\//i.test(trimmed)) {
+      toast({ title: "Invalid URL", description: "Must start with http:// or https://", variant: "destructive" });
+      return;
+    }
+    setSavingUrl(true);
+    const { error } = await supabase
+      .from("planning_leads")
+      .update({ council_application_url: trimmed || null } as never)
+      .eq("id", lead.id);
+    setSavingUrl(false);
+    if (error) {
+      toast({ title: "Save failed", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Council URL saved", description: "You can now read the PDF form." });
+      onSaved();
+    }
 
   const toggleMethod = (current: string[], setter: (v: string[]) => void, m: string) => {
     setter(current.includes(m) ? current.filter((x) => x !== m) : [...current, m]);
