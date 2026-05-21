@@ -132,7 +132,7 @@ export default function AdminTradeScraper() {
     }
     if (stage === "interested") patch.interested = true;
     if (stage === "not_interested") patch.interested = false;
-    updateRow(row.id, patch);
+    updateRow(row.id, patch as Partial<Scraped>);
   };
 
   const beginEdit = (r: Scraped) => {
