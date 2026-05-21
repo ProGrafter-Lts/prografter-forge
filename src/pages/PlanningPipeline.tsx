@@ -267,7 +267,7 @@ const LeadDetail = ({ lead, agent, onSaved }: { lead: Lead; agent?: Agent; onSav
     if (agentContacted && !lead.agent_contacted_at) patch.agent_contacted_at = new Date().toISOString();
     if (homeownerContacted && !lead.homeowner_contacted_at) patch.homeowner_contacted_at = new Date().toISOString();
 
-    const { error } = await supabase.from("planning_leads").update(patch).eq("id", lead.id);
+    const { error } = await supabase.from("planning_leads").update(patch as never).eq("id", lead.id);
     setSaving(false);
     if (error) {
       toast({ title: "Save failed", description: error.message, variant: "destructive" });
