@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+
+type Stage = "new" | "contacted" | "follow_up" | "interested" | "not_interested" | "converted";
 
 type Scraped = {
   id: string;
@@ -19,14 +21,31 @@ type Scraped = {
   source: string;
   search_query: string | null;
   contacted: boolean;
+  outreach_stage: Stage;
+  interested: boolean | null;
+  follow_up_at: string | null;
+  last_contacted_at: string | null;
+  notes: string | null;
   last_scraped_at: string;
 };
 
 const C = {
   cream: "#F5F0E8", deep: "#0F2238", navy: "#1B3A5C",
-  teal: "#0D9488", red: "#DC2626", green: "#16A34A",
+  teal: "#0D9488", red: "#DC2626", green: "#16A34A", amber: "#D97706",
   border: "rgba(245,240,232,0.1)", dim: "rgba(245,240,232,0.55)", bright: "#F5F0E8",
 };
+
+const STAGES: { value: Stage | "all"; label: string; color: string }[] = [
+  { value: "all", label: "All", color: C.dim },
+  { value: "new", label: "New", color: C.dim },
+  { value: "contacted", label: "Contacted", color: C.teal },
+  { value: "follow_up", label: "Follow-up", color: C.amber },
+  { value: "interested", label: "Interested", color: C.green },
+  { value: "not_interested", label: "Not interested", color: C.red },
+  { value: "converted", label: "Converted", color: "#7c3aed" },
+];
+
+const stageMeta = (s: Stage) => STAGES.find((x) => x.value === s) ?? STAGES[1];
 
 const inp: React.CSSProperties = {
   width: "100%", padding: "9px 12px", borderRadius: 8,
@@ -52,6 +71,11 @@ export default function AdminTradeScraper() {
   const [running, setRunning] = useState(false);
   const [filter, setFilter] = useState("");
   const [filterType, setFilterType] = useState("all");
+  const [filterStage, setFilterStage] = useState<Stage | "all">("all");
+  const [hideContacted, setHideContacted] = useState(false);
+  const [editing, setEditing] = useState<string | null>(null);
+  const [draftNotes, setDraftNotes] = useState("");
+  const [draftFollowUp, setDraftFollowUp] = useState("");
 
   const load = async () => {
     setLoading(true);
@@ -59,9 +83,9 @@ export default function AdminTradeScraper() {
       .from("scraped_trades")
       .select("*")
       .order("last_scraped_at", { ascending: false })
-      .limit(500);
+      .limit(1000);
     if (error) toast({ title: "Load failed", description: error.message, variant: "destructive" });
-    setRows((data as Scraped[]) ?? []);
+    setRows((data as unknown as Scraped[]) ?? []);
     setLoading(false);
   };
 
@@ -69,7 +93,7 @@ export default function AdminTradeScraper() {
 
   const runScrape = async () => {
     if (!tradeType.trim()) {
-      toast({ title: "Pick a trade type", description: "e.g. electricians, plumbers, builders", variant: "destructive" });
+      toast({ title: "Pick a trade type", variant: "destructive" });
       return;
     }
     setRunning(true);
@@ -90,14 +114,38 @@ export default function AdminTradeScraper() {
     load();
   };
 
-  const toggleContacted = async (row: Scraped) => {
-    const next = !row.contacted;
-    const { error } = await supabase
-      .from("scraped_trades")
-      .update({ contacted: next, contacted_at: next ? new Date().toISOString() : null })
-      .eq("id", row.id);
-    if (error) toast({ title: "Update failed", description: error.message, variant: "destructive" });
-    else load();
+  const updateRow = async (id: string, patch: Partial<Scraped>) => {
+    const { error } = await supabase.from("scraped_trades").update(patch as never).eq("id", id);
+    if (error) {
+      toast({ title: "Update failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    setRows((prev) => prev.map((r) => (r.id === id ? { ...r, ...patch } as Scraped : r)));
+  };
+
+  const setStage = (row: Scraped, stage: Stage) => {
+    const patch: Record<string, unknown> = { outreach_stage: stage };
+    if (stage !== "new") {
+      patch.contacted = true;
+      patch.last_contacted_at = new Date().toISOString();
+      if (!row.last_contacted_at) patch.contacted_at = new Date().toISOString();
+    }
+    if (stage === "interested") patch.interested = true;
+    if (stage === "not_interested") patch.interested = false;
+    updateRow(row.id, patch as Partial<Scraped>);
+  };
+
+  const beginEdit = (r: Scraped) => {
+    setEditing(r.id);
+    setDraftNotes(r.notes ?? "");
+    setDraftFollowUp(r.follow_up_at ? r.follow_up_at.slice(0, 10) : "");
+  };
+  const saveEdit = async (r: Scraped) => {
+    await updateRow(r.id, {
+      notes: draftNotes,
+      follow_up_at: draftFollowUp ? new Date(draftFollowUp).toISOString() : null,
+    });
+    setEditing(null);
   };
 
   const deleteRow = async (row: Scraped) => {
@@ -107,16 +155,43 @@ export default function AdminTradeScraper() {
     else load();
   };
 
+  const tradeTypes = Array.from(new Set(rows.map((r) => r.trade_type).filter(Boolean))) as string[];
+
+  const filtered = useMemo(() => rows.filter((r) => {
+    if (filterType !== "all" && r.trade_type !== filterType) return false;
+    if (filterStage !== "all" && r.outreach_stage !== filterStage) return false;
+    if (hideContacted && r.contacted) return false;
+    if (filter) {
+      const s = filter.toLowerCase();
+      return (
+        r.trade_name.toLowerCase().includes(s) ||
+        (r.address ?? "").toLowerCase().includes(s) ||
+        (r.phone ?? "").toLowerCase().includes(s) ||
+        (r.notes ?? "").toLowerCase().includes(s)
+      );
+    }
+    return true;
+  }), [rows, filter, filterType, filterStage, hideContacted]);
+
+  const counts = useMemo(() => {
+    const c: Record<string, number> = { all: rows.length };
+    for (const s of STAGES) if (s.value !== "all") c[s.value] = 0;
+    for (const r of rows) c[r.outreach_stage] = (c[r.outreach_stage] ?? 0) + 1;
+    return c;
+  }, [rows]);
+
   const exportCsv = () => {
-    if (!rows.length) return;
-    const header = ["Trade name", "Type", "Phone", "Email", "Website", "Address", "Postcode", "City", "Rating", "Reviews", "Contacted"];
+    if (!filtered.length) return;
+    const header = ["Trade name","Type","Phone","Email","Website","Address","Postcode","City","Rating","Reviews","Stage","Interested","Follow-up","Last contacted","Notes"];
     const lines = [header.join(",")];
     for (const r of filtered) {
       const cells = [
         r.trade_name, r.trade_type ?? "", r.phone ?? "", r.email ?? "",
         r.website ?? "", r.address ?? "", r.postcode ?? "", r.city ?? "",
         r.rating?.toString() ?? "", r.reviews_count?.toString() ?? "",
-        r.contacted ? "yes" : "no",
+        r.outreach_stage,
+        r.interested == null ? "" : r.interested ? "yes" : "no",
+        r.follow_up_at ?? "", r.last_contacted_at ?? "", r.notes ?? "",
       ].map((v) => `"${String(v).replace(/"/g, '""')}"`);
       lines.push(cells.join(","));
     }
@@ -129,20 +204,6 @@ export default function AdminTradeScraper() {
     URL.revokeObjectURL(url);
   };
 
-  const tradeTypes = Array.from(new Set(rows.map((r) => r.trade_type).filter(Boolean))) as string[];
-  const filtered = rows.filter((r) => {
-    if (filterType !== "all" && r.trade_type !== filterType) return false;
-    if (filter) {
-      const s = filter.toLowerCase();
-      return (
-        r.trade_name.toLowerCase().includes(s) ||
-        (r.address ?? "").toLowerCase().includes(s) ||
-        (r.phone ?? "").toLowerCase().includes(s)
-      );
-    }
-    return true;
-  });
-
   return (
     <div style={{ minHeight: "100vh", background: C.deep, fontFamily: "system-ui, sans-serif", color: C.bright, padding: "20px 24px" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, flexWrap: "wrap", gap: 12 }}>
@@ -150,10 +211,10 @@ export default function AdminTradeScraper() {
           <div className="font-heading tracking-wider" style={{ fontSize: 22, fontWeight: 700 }}>
             <span style={{ color: C.bright }}>PRO</span>
             <span style={{ color: C.teal }}>GRAFTER</span>
-            <span style={{ color: C.dim, fontSize: 12, marginLeft: 12 }}>TRADE SCRAPER</span>
+            <span style={{ color: C.dim, fontSize: 12, marginLeft: 12 }}>OUTREACH PIPELINE</span>
           </div>
           <p style={{ fontSize: 12, color: C.dim, margin: "4px 0 0" }}>
-            Pull contractor contact info from Google Places. Admin only.
+            Scrape, track outreach, log follow-ups. Admin only.
           </p>
         </div>
         <div style={{ display: "flex", gap: 8 }}>
@@ -188,17 +249,38 @@ export default function AdminTradeScraper() {
           </button>
         </div>
         <p style={{ fontSize: 10, color: C.dim, margin: "10px 0 0" }}>
-          Google Places returns name, phone, website, address, rating. Email is <b>not</b> available from Places — fill it manually after a website visit.
+          Re-running the same search won't create duplicates — existing leads are refreshed and your stage/notes are preserved.
         </p>
       </div>
 
-      <div style={{ display: "flex", gap: 10, marginBottom: 12, flexWrap: "wrap" }}>
-        <input placeholder="Search name, address, phone…" value={filter} onChange={(e) => setFilter(e.target.value)} style={{ ...inp, maxWidth: 320 }} />
+      {/* Stage chips */}
+      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
+        {STAGES.map((s) => {
+          const active = filterStage === s.value;
+          return (
+            <button key={s.value} onClick={() => setFilterStage(s.value)} style={{
+              background: active ? s.color : "transparent",
+              color: active ? "#fff" : s.color,
+              border: `1px solid ${s.color}`,
+              borderRadius: 999, padding: "5px 12px", fontSize: 11, fontWeight: 700, cursor: "pointer",
+            }}>
+              {s.label} <span style={{ opacity: 0.7, marginLeft: 4 }}>{counts[s.value] ?? 0}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      <div style={{ display: "flex", gap: 10, marginBottom: 12, flexWrap: "wrap", alignItems: "center" }}>
+        <input placeholder="Search name, address, phone, notes…" value={filter} onChange={(e) => setFilter(e.target.value)} style={{ ...inp, maxWidth: 320 }} />
         <select value={filterType} onChange={(e) => setFilterType(e.target.value)} style={{ ...inp, maxWidth: 200 }}>
           <option value="all" style={{ color: "#000" }}>All trade types</option>
           {tradeTypes.map((t) => <option key={t} value={t} style={{ color: "#000" }}>{t}</option>)}
         </select>
-        <span style={{ color: C.dim, fontSize: 12, alignSelf: "center" }}>
+        <label style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color: C.dim, cursor: "pointer" }}>
+          <input type="checkbox" checked={hideContacted} onChange={(e) => setHideContacted(e.target.checked)} />
+          Hide already-contacted
+        </label>
+        <span style={{ color: C.dim, fontSize: 12, marginLeft: "auto" }}>
           {filtered.length} of {rows.length}
         </span>
       </div>
@@ -211,60 +293,95 @@ export default function AdminTradeScraper() {
             <thead style={{ background: "rgba(255,255,255,0.04)" }}>
               <tr style={{ textAlign: "left", color: C.dim, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.06em" }}>
                 <th style={{ padding: "10px 12px" }}>Trade</th>
-                <th style={{ padding: "10px 12px" }}>Type</th>
-                <th style={{ padding: "10px 12px" }}>Phone</th>
-                <th style={{ padding: "10px 12px" }}>Email</th>
-                <th style={{ padding: "10px 12px" }}>Website</th>
+                <th style={{ padding: "10px 12px" }}>Contact</th>
                 <th style={{ padding: "10px 12px" }}>Location</th>
                 <th style={{ padding: "10px 12px" }}>Rating</th>
-                <th style={{ padding: "10px 12px" }}>Status</th>
+                <th style={{ padding: "10px 12px" }}>Stage</th>
+                <th style={{ padding: "10px 12px" }}>Follow-up</th>
+                <th style={{ padding: "10px 12px" }}>Notes</th>
                 <th style={{ padding: "10px 12px" }}></th>
               </tr>
             </thead>
             <tbody>
-              {filtered.map((r) => (
-                <tr key={r.id} style={{ borderTop: `1px solid ${C.border}` }}>
-                  <td style={{ padding: "10px 12px", fontWeight: 600 }}>{r.trade_name}</td>
-                  <td style={{ padding: "10px 12px", color: C.dim }}>{r.trade_type ?? "—"}</td>
-                  <td style={{ padding: "10px 12px" }}>
-                    {r.phone ? <a href={`tel:${r.phone}`} style={{ color: C.teal }}>{r.phone}</a> : <span style={{ color: C.dim }}>—</span>}
-                  </td>
-                  <td style={{ padding: "10px 12px" }}>
-                    {r.email ? <a href={`mailto:${r.email}`} style={{ color: C.teal }}>{r.email}</a> : <span style={{ color: C.dim }}>—</span>}
-                  </td>
-                  <td style={{ padding: "10px 12px" }}>
-                    {r.website ? (
-                      <a href={r.website} target="_blank" rel="noreferrer" style={{ color: C.green }}>✓ Yes</a>
-                    ) : (
-                      <span style={{ color: C.red }}>✗ No</span>
-                    )}
-                  </td>
-                  <td style={{ padding: "10px 12px", color: C.dim, maxWidth: 220 }}>
-                    {[r.city, r.postcode].filter(Boolean).join(" · ") || r.address || "—"}
-                  </td>
-                  <td style={{ padding: "10px 12px" }}>
-                    {r.rating != null ? `${r.rating} (${r.reviews_count ?? 0})` : "—"}
-                  </td>
-                  <td style={{ padding: "10px 12px" }}>
-                    <button onClick={() => toggleContacted(r)} style={{
-                      background: r.contacted ? C.green : "transparent",
-                      color: r.contacted ? "#fff" : C.dim,
-                      border: `1px solid ${r.contacted ? C.green : C.border}`,
-                      borderRadius: 6, padding: "3px 10px", fontSize: 10, fontWeight: 700, cursor: "pointer",
-                    }}>
-                      {r.contacted ? "✓ Contacted" : "Mark contacted"}
-                    </button>
-                  </td>
-                  <td style={{ padding: "10px 12px" }}>
-                    <button onClick={() => deleteRow(r)} style={{ background: "transparent", color: C.red, border: "none", cursor: "pointer", fontSize: 11 }}>
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {filtered.map((r) => {
+                const m = stageMeta(r.outreach_stage);
+                const isEditing = editing === r.id;
+                return (
+                  <tr key={r.id} style={{ borderTop: `1px solid ${C.border}`, verticalAlign: "top" }}>
+                    <td style={{ padding: "10px 12px" }}>
+                      <div style={{ fontWeight: 600 }}>{r.trade_name}</div>
+                      <div style={{ color: C.dim, fontSize: 10, marginTop: 2 }}>{r.trade_type ?? "—"}</div>
+                    </td>
+                    <td style={{ padding: "10px 12px" }}>
+                      {r.phone && <div><a href={`tel:${r.phone}`} style={{ color: C.teal }}>{r.phone}</a></div>}
+                      {r.email && <div><a href={`mailto:${r.email}`} style={{ color: C.teal }}>{r.email}</a></div>}
+                      {r.website && <div><a href={r.website} target="_blank" rel="noreferrer" style={{ color: C.green }}>website ↗</a></div>}
+                      {!r.phone && !r.email && !r.website && <span style={{ color: C.dim }}>—</span>}
+                    </td>
+                    <td style={{ padding: "10px 12px", color: C.dim, maxWidth: 200 }}>
+                      {[r.city, r.postcode].filter(Boolean).join(" · ") || r.address || "—"}
+                    </td>
+                    <td style={{ padding: "10px 12px" }}>
+                      {r.rating != null ? `${r.rating} (${r.reviews_count ?? 0})` : "—"}
+                    </td>
+                    <td style={{ padding: "10px 12px", minWidth: 160 }}>
+                      <select
+                        value={r.outreach_stage}
+                        onChange={(e) => setStage(r, e.target.value as Stage)}
+                        style={{
+                          ...inp, padding: "5px 8px", fontSize: 11, fontWeight: 700,
+                          borderColor: m.color, color: m.color, width: "auto",
+                        }}
+                      >
+                        {STAGES.filter((s) => s.value !== "all").map((s) => (
+                          <option key={s.value} value={s.value} style={{ color: "#000" }}>{s.label}</option>
+                        ))}
+                      </select>
+                      {r.last_contacted_at && (
+                        <div style={{ fontSize: 9, color: C.dim, marginTop: 4 }}>
+                          last: {new Date(r.last_contacted_at).toLocaleDateString()}
+                        </div>
+                      )}
+                    </td>
+                    <td style={{ padding: "10px 12px" }}>
+                      {isEditing ? (
+                        <input type="date" value={draftFollowUp} onChange={(e) => setDraftFollowUp(e.target.value)} style={{ ...inp, padding: "5px 8px", fontSize: 11 }} />
+                      ) : r.follow_up_at ? (
+                        <span style={{ color: new Date(r.follow_up_at) < new Date() ? C.red : C.amber, fontWeight: 600 }}>
+                          {new Date(r.follow_up_at).toLocaleDateString()}
+                        </span>
+                      ) : (
+                        <span style={{ color: C.dim }}>—</span>
+                      )}
+                    </td>
+                    <td style={{ padding: "10px 12px", maxWidth: 260 }}>
+                      {isEditing ? (
+                        <textarea value={draftNotes} onChange={(e) => setDraftNotes(e.target.value)} rows={3} style={{ ...inp, fontSize: 11 }} />
+                      ) : (
+                        <div style={{ color: r.notes ? C.bright : C.dim, fontSize: 11, whiteSpace: "pre-wrap" }}>
+                          {r.notes || "—"}
+                        </div>
+                      )}
+                    </td>
+                    <td style={{ padding: "10px 12px", whiteSpace: "nowrap" }}>
+                      {isEditing ? (
+                        <>
+                          <button onClick={() => saveEdit(r)} style={{ ...btn(true), padding: "5px 10px", fontSize: 10, marginRight: 4 }}>Save</button>
+                          <button onClick={() => setEditing(null)} style={{ background: "transparent", color: C.dim, border: "none", cursor: "pointer", fontSize: 11 }}>Cancel</button>
+                        </>
+                      ) : (
+                        <>
+                          <button onClick={() => beginEdit(r)} style={{ ...btn(false), padding: "5px 10px", fontSize: 10, marginRight: 4 }}>Edit</button>
+                          <button onClick={() => deleteRow(r)} style={{ background: "transparent", color: C.red, border: "none", cursor: "pointer", fontSize: 11 }}>Delete</button>
+                        </>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
               {!filtered.length && (
-                <tr><td colSpan={9} style={{ padding: 40, textAlign: "center", color: C.dim }}>
-                  No trades scraped yet. Run a scrape above to get started.
+                <tr><td colSpan={8} style={{ padding: 40, textAlign: "center", color: C.dim }}>
+                  No trades match. Try a different filter or run a scrape above.
                 </td></tr>
               )}
             </tbody>
