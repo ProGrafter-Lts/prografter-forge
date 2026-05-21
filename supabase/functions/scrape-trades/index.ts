@@ -38,29 +38,58 @@ function extractAddressBits(components?: PlaceDetails["address_components"]) {
   return { postcode, city };
 }
 
+// Uses Places API (New) — https://places.googleapis.com/v1
 async function textSearch(query: string, apiKey: string): Promise<PlaceTextResult[]> {
-  const url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query)}&key=${apiKey}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Places Text Search HTTP ${res.status}`);
+  const res = await fetch("https://places.googleapis.com/v1/places:searchText", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Goog-Api-Key": apiKey,
+      "X-Goog-FieldMask": "places.id,places.displayName,places.formattedAddress,places.rating,places.userRatingCount",
+    },
+    body: JSON.stringify({ textQuery: query }),
+  });
   const json = await res.json();
-  if (json.status !== "OK" && json.status !== "ZERO_RESULTS") {
-    throw new Error(`Places error: ${json.status} ${json.error_message ?? ""}`);
+  if (!res.ok) {
+    throw new Error(`Places error: ${json?.error?.status ?? res.status} ${json?.error?.message ?? ""}`);
   }
-  return (json.results ?? []) as PlaceTextResult[];
+  return (json.places ?? []).map((p: any) => ({
+    place_id: p.id,
+    name: p.displayName?.text ?? "",
+    formatted_address: p.formattedAddress,
+    rating: p.rating,
+    user_ratings_total: p.userRatingCount,
+  })) as PlaceTextResult[];
 }
 
 async function placeDetails(placeId: string, apiKey: string): Promise<PlaceDetails | null> {
-  const fields = [
-    "name", "formatted_address", "formatted_phone_number",
-    "international_phone_number", "website", "rating",
-    "user_ratings_total", "address_components",
+  const fieldMask = [
+    "id", "displayName", "formattedAddress", "nationalPhoneNumber",
+    "internationalPhoneNumber", "websiteUri", "rating",
+    "userRatingCount", "addressComponents",
   ].join(",");
-  const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=${fields}&key=${apiKey}`;
-  const res = await fetch(url);
+  const res = await fetch(`https://places.googleapis.com/v1/places/${placeId}`, {
+    headers: {
+      "X-Goog-Api-Key": apiKey,
+      "X-Goog-FieldMask": fieldMask,
+    },
+  });
   if (!res.ok) return null;
-  const json = await res.json();
-  if (json.status !== "OK") return null;
-  return json.result as PlaceDetails;
+  const p = await res.json();
+  return {
+    name: p.displayName?.text,
+    formatted_address: p.formattedAddress,
+    formatted_phone_number: p.nationalPhoneNumber,
+    international_phone_number: p.internationalPhoneNumber,
+    website: p.websiteUri,
+    rating: p.rating,
+    user_ratings_total: p.userRatingCount,
+    address_components: (p.addressComponents ?? []).map((c: any) => ({
+      long_name: c.longText,
+      short_name: c.shortText,
+      types: c.types ?? [],
+    })),
+  } as PlaceDetails;
 }
 
 serve(async (req) => {
