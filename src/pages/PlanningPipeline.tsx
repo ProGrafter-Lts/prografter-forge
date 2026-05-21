@@ -236,6 +236,8 @@ const LeadDetail = ({ lead, agent, onSaved }: { lead: Lead; agent?: Agent; onSav
   const [homeownerInterested, setHomeownerInterested] = useState<string>(lead.homeowner_interested ?? "unknown");
   const [saving, setSaving] = useState(false);
   const [enriching, setEnriching] = useState(false);
+  const [councilUrl, setCouncilUrl] = useState(lead.council_application_url || "");
+  const [savingUrl, setSavingUrl] = useState(false);
 
   useEffect(() => {
     setNotes(lead.notes || "");
