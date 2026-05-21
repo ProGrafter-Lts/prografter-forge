@@ -723,7 +723,7 @@ export default function PlanningPipeline() {
             <div style={{ width: isMobile ? "100%" : 300, flexShrink: 0, borderRight: isMobile ? "none" : `1px solid ${C.darkBorder}`, borderBottom: isMobile ? `1px solid ${C.darkBorder}` : "none", padding: 12, overflowY: "auto" }}>
               <p style={{ fontSize: 10, fontWeight: 700, color: C.teal, letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 10px" }}>Agent network ({agents.length})</p>
               {agents.map((agent) => (
-                <AgentCard key={agent.id} agent={agent} selected={selectedAgent?.id === agent.id} onSelect={setSelectedAgent} />
+                <AgentCard key={agent.id} agent={agent} selected={selectedAgent?.id === agent.id} onSelect={setSelectedAgent} leadCount={leadsByAgent[agent.id] ?? 0} />
               ))}
             </div>
           )}
