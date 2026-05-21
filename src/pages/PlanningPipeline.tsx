@@ -269,6 +269,9 @@ const LeadDetail = ({ lead, agent, onSaved }: { lead: Lead; agent?: Agent; onSav
       toast({ title: "Council URL saved", description: "You can now read the PDF form." });
       onSaved();
     }
+  };
+
+
 
   const toggleMethod = (current: string[], setter: (v: string[]) => void, m: string) => {
     setter(current.includes(m) ? current.filter((x) => x !== m) : [...current, m]);
