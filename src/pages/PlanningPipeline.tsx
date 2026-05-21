@@ -61,7 +61,21 @@ type Lead = {
   pdf_enriched_at: string | null;
   notes: string | null;
   next_action: string | null;
+  agent_contacted: boolean;
+  agent_contacted_at: string | null;
+  agent_contact_methods: string[] | null;
+  homeowner_contacted: boolean;
+  homeowner_contacted_at: string | null;
+  homeowner_contact_methods: string[] | null;
+  homeowner_interested: "yes" | "no" | "unknown" | null;
 };
+
+const CONTACT_METHODS = [
+  { id: "call", label: "📞 Call" },
+  { id: "email", label: "✉️ Email" },
+  { id: "letter", label: "📬 Letter" },
+  { id: "visit", label: "🚶 In person" },
+];
 
 const PIPELINE_STAGES = [
   { id: "new", label: "New lead", color: C.purple },
