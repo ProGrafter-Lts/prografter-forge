@@ -124,11 +124,11 @@ export default function AdminTradeScraper() {
   };
 
   const setStage = (row: Scraped, stage: Stage) => {
-    const patch: Partial<Scraped> = { outreach_stage: stage };
-    if (stage === "contacted" || stage === "follow_up" || stage === "interested" || stage === "not_interested" || stage === "converted") {
+    const patch: Record<string, unknown> = { outreach_stage: stage };
+    if (stage !== "new") {
       patch.contacted = true;
       patch.last_contacted_at = new Date().toISOString();
-      if (!row.contacted_at) (patch as Record<string, unknown>).contacted_at = new Date().toISOString();
+      if (!row.last_contacted_at) patch.contacted_at = new Date().toISOString();
     }
     if (stage === "interested") patch.interested = true;
     if (stage === "not_interested") patch.interested = false;
