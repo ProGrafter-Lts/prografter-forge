@@ -500,7 +500,7 @@ const LeadDetail = ({ lead, agent, onSaved }: { lead: Lead; agent?: Agent; onSav
   );
 };
 
-const AgentCard = ({ agent, onSelect, selected }: { agent: Agent; onSelect: (a: Agent) => void; selected: boolean }) => {
+const AgentCard = ({ agent, onSelect, selected, leadCount }: { agent: Agent; onSelect: (a: Agent) => void; selected: boolean; leadCount: number }) => {
   const status = AGENT_STATUS[agent.relationship_status] || AGENT_STATUS.identified;
   return (
     <div onClick={() => onSelect(agent)}
@@ -510,15 +510,20 @@ const AgentCard = ({ agent, onSelect, selected }: { agent: Agent; onSelect: (a: 
         borderRadius: 10, padding: "10px 14px", cursor: "pointer",
         marginBottom: 6, transition: "all 0.15s",
       }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
-        <div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6, gap: 8 }}>
+        <div style={{ minWidth: 0 }}>
           <p style={{ fontSize: 12, fontWeight: 700, color: C.brightText, margin: "0 0 1px" }}>{agent.contact_name}</p>
           <p style={{ fontSize: 10, color: C.teal, margin: 0 }}>{agent.company_name || "Independent"}</p>
         </div>
-        <span style={{ fontSize: 10, fontWeight: 600, background: status.bg, color: status.text, border: `1px solid ${status.border}`, borderRadius: 20, padding: "2px 8px" }}>{status.label}</span>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4 }}>
+          <span style={{ fontSize: 10, fontWeight: 600, background: status.bg, color: status.text, border: `1px solid ${status.border}`, borderRadius: 20, padding: "2px 8px", whiteSpace: "nowrap" }}>{status.label}</span>
+          <span title={`${leadCount} planning application${leadCount === 1 ? "" : "s"}`} style={{ fontSize: 10, fontWeight: 700, color: leadCount > 1 ? C.amber : C.dimText, background: "rgba(255,255,255,0.06)", border: `1px solid ${C.darkBorder}`, borderRadius: 20, padding: "2px 8px", whiteSpace: "nowrap" }}>
+            {leadCount} app{leadCount === 1 ? "" : "s"}
+          </span>
+        </div>
       </div>
       <div style={{ display: "flex", justifyContent: "space-between", gap: 6 }}>
-        <span style={{ fontSize: 10, color: C.dimText }}>{(agent.councils_active || []).join(", ")}</span>
+        <span style={{ fontSize: 10, color: C.dimText, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{(agent.councils_active || []).join(", ")}</span>
         <div style={{ display: "flex", gap: 6 }}>
           {agent.intro_sent && <span style={{ fontSize: 10, color: C.teal }}>✉️</span>}
           {agent.meeting_held && <span style={{ fontSize: 10, color: C.green }}>🤝</span>}
