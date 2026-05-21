@@ -81,6 +81,7 @@ interface Extracted {
   applicant_address: string | null;
   applicant_contact: string | null;
   agent_name: string | null;
+  agent_company: string | null;
   agent_address: string | null;
   agent_contact: string | null;
   proposal_type: string | null;
@@ -102,7 +103,8 @@ async function extractWithAI(pdfMarkdown: string): Promise<Extracted> {
           content:
             "You extract structured data from UK planning application form PDFs (form 1APP / householder application). " +
             "Return ONLY JSON matching the supplied schema. Use null where the value is not present. " +
-            "Concatenate multi-line addresses with commas. For contact, combine phone and email if both are present (phone | email).",
+            "Concatenate multi-line addresses with commas. For contact, combine phone and email if both are present (phone | email). " +
+            "agent_name is the individual person; agent_company is their architecture/planning firm if shown separately.",
         },
         { role: "user", content: `PDF contents:\n\n${truncated}` },
       ],
@@ -118,7 +120,8 @@ async function extractWithAI(pdfMarkdown: string): Promise<Extracted> {
                 applicant_name: { type: ["string", "null"] },
                 applicant_address: { type: ["string", "null"] },
                 applicant_contact: { type: ["string", "null"], description: "Phone and/or email" },
-                agent_name: { type: ["string", "null"], description: "Representative / agent full name" },
+                agent_name: { type: ["string", "null"], description: "Representative / agent full name (person)" },
+                agent_company: { type: ["string", "null"], description: "Agent's firm or practice name, e.g. 'Smith Architects Ltd'" },
                 agent_address: { type: ["string", "null"] },
                 agent_contact: { type: ["string", "null"], description: "Phone and/or email" },
                 proposal_type: {
@@ -131,6 +134,7 @@ async function extractWithAI(pdfMarkdown: string): Promise<Extracted> {
                 "applicant_address",
                 "applicant_contact",
                 "agent_name",
+                "agent_company",
                 "agent_address",
                 "agent_contact",
                 "proposal_type",
@@ -154,6 +158,17 @@ async function extractWithAI(pdfMarkdown: string): Promise<Extracted> {
   if (!args) throw new Error("AI returned no tool_call arguments");
   return JSON.parse(args) as Extracted;
 }
+
+function splitContact(raw: string | null): { email: string | null; phone: string | null } {
+  if (!raw) return { email: null, phone: null };
+  const emailMatch = raw.match(/[\w.+-]+@[\w-]+\.[\w.-]+/);
+  const email = emailMatch ? emailMatch[0] : null;
+  const remainder = email ? raw.replace(email, "") : raw;
+  const phoneMatch = remainder.match(/[+()\d][\d\s()+-]{7,}\d/);
+  const phone = phoneMatch ? phoneMatch[0].trim() : null;
+  return { email, phone };
+}
+
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
