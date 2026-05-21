@@ -416,6 +416,74 @@ const LeadDetail = ({ lead, agent, onSaved }: { lead: Lead; agent?: Agent; onSav
           )}
         </div>
 
+        {/* OUTREACH TRACKING */}
+        <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: 10, padding: "12px 14px" }}>
+          <p style={{ fontSize: 10, fontWeight: 700, color: C.teal, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 10px" }}>
+            📞 Outreach tracking
+          </p>
+
+          {/* Agent contact */}
+          <div style={{ marginBottom: 12, paddingBottom: 12, borderBottom: `1px solid ${C.darkBorder}` }}>
+            <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: C.brightText, cursor: "pointer", marginBottom: 6 }}>
+              <input type="checkbox" checked={agentContacted} onChange={(e) => setAgentContacted(e.target.checked)} />
+              <span style={{ fontWeight: 600 }}>Agent contacted</span>
+              {lead.agent_contacted_at && (
+                <span style={{ fontSize: 10, color: C.dimText }}>· first {new Date(lead.agent_contacted_at).toLocaleDateString()}</span>
+              )}
+            </label>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, paddingLeft: 22 }}>
+              {CONTACT_METHODS.map((m) => {
+                const on = agentMethods.includes(m.id);
+                return (
+                  <button key={m.id} type="button" onClick={() => toggleMethod(agentMethods, setAgentMethods, m.id)} style={{
+                    background: on ? C.teal : "transparent", color: on ? C.white : C.dimText,
+                    border: `1px solid ${on ? C.teal : C.darkBorder}`, borderRadius: 20, padding: "3px 10px",
+                    fontSize: 10, fontWeight: 600, cursor: "pointer",
+                  }}>{m.label}</button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Homeowner contact */}
+          <div>
+            <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: C.brightText, cursor: "pointer", marginBottom: 6 }}>
+              <input type="checkbox" checked={homeownerContacted} onChange={(e) => setHomeownerContacted(e.target.checked)} />
+              <span style={{ fontWeight: 600 }}>🏠 Homeowner contacted directly</span>
+              {lead.homeowner_contacted_at && (
+                <span style={{ fontSize: 10, color: C.dimText }}>· first {new Date(lead.homeowner_contacted_at).toLocaleDateString()}</span>
+              )}
+            </label>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, paddingLeft: 22, marginBottom: 8 }}>
+              {CONTACT_METHODS.map((m) => {
+                const on = homeownerMethods.includes(m.id);
+                return (
+                  <button key={m.id} type="button" onClick={() => toggleMethod(homeownerMethods, setHomeownerMethods, m.id)} style={{
+                    background: on ? C.teal : "transparent", color: on ? C.white : C.dimText,
+                    border: `1px solid ${on ? C.teal : C.darkBorder}`, borderRadius: 20, padding: "3px 10px",
+                    fontSize: 10, fontWeight: 600, cursor: "pointer",
+                  }}>{m.label}</button>
+                );
+              })}
+            </div>
+            <div style={{ paddingLeft: 22, display: "flex", alignItems: "center", gap: 8, fontSize: 11 }}>
+              <span style={{ color: C.dimText }}>Interested?</span>
+              {(["yes", "no", "unknown"] as const).map((v) => {
+                const on = homeownerInterested === v;
+                const color = v === "yes" ? C.green : v === "no" ? C.red : C.dimText;
+                return (
+                  <button key={v} type="button" onClick={() => setHomeownerInterested(v)} style={{
+                    background: on ? color : "transparent", color: on ? C.white : color,
+                    border: `1px solid ${color}`, borderRadius: 20, padding: "3px 12px",
+                    fontSize: 10, fontWeight: 700, cursor: "pointer", textTransform: "capitalize",
+                  }}>{v}</button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+
         <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: 10, padding: "12px 14px" }}>
           <p style={{ fontSize: 10, fontWeight: 700, color: C.teal, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 8px" }}>Pipeline status</p>
           <select value={pipelineStatus} onChange={(e) => setPipelineStatus(e.target.value)} style={{ ...inp(), marginBottom: 10 }}>
