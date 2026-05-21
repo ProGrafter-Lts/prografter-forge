@@ -2287,10 +2287,14 @@ export type Database = {
           contacted_at: string | null
           created_at: string
           email: string | null
+          follow_up_at: string | null
           has_website: boolean
           id: string
+          interested: boolean | null
+          last_contacted_at: string | null
           last_scraped_at: string
           notes: string | null
+          outreach_stage: string
           phone: string | null
           postcode: string | null
           rating: number | null
@@ -2310,10 +2314,14 @@ export type Database = {
           contacted_at?: string | null
           created_at?: string
           email?: string | null
+          follow_up_at?: string | null
           has_website?: boolean
           id?: string
+          interested?: boolean | null
+          last_contacted_at?: string | null
           last_scraped_at?: string
           notes?: string | null
+          outreach_stage?: string
           phone?: string | null
           postcode?: string | null
           rating?: number | null
@@ -2333,10 +2341,14 @@ export type Database = {
           contacted_at?: string | null
           created_at?: string
           email?: string | null
+          follow_up_at?: string | null
           has_website?: boolean
           id?: string
+          interested?: boolean | null
+          last_contacted_at?: string | null
           last_scraped_at?: string
           notes?: string | null
+          outreach_stage?: string
           phone?: string | null
           postcode?: string | null
           rating?: number | null
