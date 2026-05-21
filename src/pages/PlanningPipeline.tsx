@@ -581,6 +581,11 @@ export default function PlanningPipeline() {
   useEffect(() => { load(); }, []);
 
   const agentsById = useMemo(() => Object.fromEntries(agents.map((a) => [a.id, a])), [agents]);
+  const leadsByAgent = useMemo(() => {
+    const m: Record<string, number> = {};
+    for (const l of leads) if (l.agent_id) m[l.agent_id] = (m[l.agent_id] ?? 0) + 1;
+    return m;
+  }, [leads]);
   const selectedLead = leads.find((l) => l.id === selectedLeadId) || leads[0] || null;
 
   const filteredLeads = useMemo(() => leads.filter((l) => {
