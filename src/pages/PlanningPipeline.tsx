@@ -61,7 +61,21 @@ type Lead = {
   pdf_enriched_at: string | null;
   notes: string | null;
   next_action: string | null;
+  agent_contacted: boolean;
+  agent_contacted_at: string | null;
+  agent_contact_methods: string[] | null;
+  homeowner_contacted: boolean;
+  homeowner_contacted_at: string | null;
+  homeowner_contact_methods: string[] | null;
+  homeowner_interested: "yes" | "no" | "unknown" | null;
 };
+
+const CONTACT_METHODS = [
+  { id: "call", label: "📞 Call" },
+  { id: "email", label: "✉️ Email" },
+  { id: "letter", label: "📬 Letter" },
+  { id: "visit", label: "🚶 In person" },
+];
 
 const PIPELINE_STAGES = [
   { id: "new", label: "New lead", color: C.purple },
@@ -215,6 +229,11 @@ const LeadDetail = ({ lead, agent, onSaved }: { lead: Lead; agent?: Agent; onSav
   const [notes, setNotes] = useState(lead.notes || "");
   const [nextAction, setNextAction] = useState(lead.next_action || "");
   const [pipelineStatus, setPipelineStatus] = useState(lead.pipeline_status);
+  const [agentContacted, setAgentContacted] = useState(lead.agent_contacted ?? false);
+  const [agentMethods, setAgentMethods] = useState<string[]>(lead.agent_contact_methods ?? []);
+  const [homeownerContacted, setHomeownerContacted] = useState(lead.homeowner_contacted ?? false);
+  const [homeownerMethods, setHomeownerMethods] = useState<string[]>(lead.homeowner_contact_methods ?? []);
+  const [homeownerInterested, setHomeownerInterested] = useState<string>(lead.homeowner_interested ?? "unknown");
   const [saving, setSaving] = useState(false);
   const [enriching, setEnriching] = useState(false);
 
@@ -222,14 +241,33 @@ const LeadDetail = ({ lead, agent, onSaved }: { lead: Lead; agent?: Agent; onSav
     setNotes(lead.notes || "");
     setNextAction(lead.next_action || "");
     setPipelineStatus(lead.pipeline_status);
+    setAgentContacted(lead.agent_contacted ?? false);
+    setAgentMethods(lead.agent_contact_methods ?? []);
+    setHomeownerContacted(lead.homeowner_contacted ?? false);
+    setHomeownerMethods(lead.homeowner_contact_methods ?? []);
+    setHomeownerInterested(lead.homeowner_interested ?? "unknown");
   }, [lead.id]);
+
+  const toggleMethod = (current: string[], setter: (v: string[]) => void, m: string) => {
+    setter(current.includes(m) ? current.filter((x) => x !== m) : [...current, m]);
+  };
 
   const save = async () => {
     setSaving(true);
-    const { error } = await supabase
-      .from("planning_leads")
-      .update({ notes, next_action: nextAction, pipeline_status: pipelineStatus })
-      .eq("id", lead.id);
+    const patch: Record<string, unknown> = {
+      notes,
+      next_action: nextAction,
+      pipeline_status: pipelineStatus,
+      agent_contacted: agentContacted,
+      agent_contact_methods: agentMethods,
+      homeowner_contacted: homeownerContacted,
+      homeowner_contact_methods: homeownerMethods,
+      homeowner_interested: homeownerInterested === "unknown" ? null : homeownerInterested,
+    };
+    if (agentContacted && !lead.agent_contacted_at) patch.agent_contacted_at = new Date().toISOString();
+    if (homeownerContacted && !lead.homeowner_contacted_at) patch.homeowner_contacted_at = new Date().toISOString();
+
+    const { error } = await supabase.from("planning_leads").update(patch as never).eq("id", lead.id);
     setSaving(false);
     if (error) {
       toast({ title: "Save failed", description: error.message, variant: "destructive" });
@@ -378,6 +416,74 @@ const LeadDetail = ({ lead, agent, onSaved }: { lead: Lead; agent?: Agent; onSav
           )}
         </div>
 
+        {/* OUTREACH TRACKING */}
+        <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: 10, padding: "12px 14px" }}>
+          <p style={{ fontSize: 10, fontWeight: 700, color: C.teal, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 10px" }}>
+            📞 Outreach tracking
+          </p>
+
+          {/* Agent contact */}
+          <div style={{ marginBottom: 12, paddingBottom: 12, borderBottom: `1px solid ${C.darkBorder}` }}>
+            <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: C.brightText, cursor: "pointer", marginBottom: 6 }}>
+              <input type="checkbox" checked={agentContacted} onChange={(e) => setAgentContacted(e.target.checked)} />
+              <span style={{ fontWeight: 600 }}>Agent contacted</span>
+              {lead.agent_contacted_at && (
+                <span style={{ fontSize: 10, color: C.dimText }}>· first {new Date(lead.agent_contacted_at).toLocaleDateString()}</span>
+              )}
+            </label>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, paddingLeft: 22 }}>
+              {CONTACT_METHODS.map((m) => {
+                const on = agentMethods.includes(m.id);
+                return (
+                  <button key={m.id} type="button" onClick={() => toggleMethod(agentMethods, setAgentMethods, m.id)} style={{
+                    background: on ? C.teal : "transparent", color: on ? C.white : C.dimText,
+                    border: `1px solid ${on ? C.teal : C.darkBorder}`, borderRadius: 20, padding: "3px 10px",
+                    fontSize: 10, fontWeight: 600, cursor: "pointer",
+                  }}>{m.label}</button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Homeowner contact */}
+          <div>
+            <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: C.brightText, cursor: "pointer", marginBottom: 6 }}>
+              <input type="checkbox" checked={homeownerContacted} onChange={(e) => setHomeownerContacted(e.target.checked)} />
+              <span style={{ fontWeight: 600 }}>🏠 Homeowner contacted directly</span>
+              {lead.homeowner_contacted_at && (
+                <span style={{ fontSize: 10, color: C.dimText }}>· first {new Date(lead.homeowner_contacted_at).toLocaleDateString()}</span>
+              )}
+            </label>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, paddingLeft: 22, marginBottom: 8 }}>
+              {CONTACT_METHODS.map((m) => {
+                const on = homeownerMethods.includes(m.id);
+                return (
+                  <button key={m.id} type="button" onClick={() => toggleMethod(homeownerMethods, setHomeownerMethods, m.id)} style={{
+                    background: on ? C.teal : "transparent", color: on ? C.white : C.dimText,
+                    border: `1px solid ${on ? C.teal : C.darkBorder}`, borderRadius: 20, padding: "3px 10px",
+                    fontSize: 10, fontWeight: 600, cursor: "pointer",
+                  }}>{m.label}</button>
+                );
+              })}
+            </div>
+            <div style={{ paddingLeft: 22, display: "flex", alignItems: "center", gap: 8, fontSize: 11 }}>
+              <span style={{ color: C.dimText }}>Interested?</span>
+              {(["yes", "no", "unknown"] as const).map((v) => {
+                const on = homeownerInterested === v;
+                const color = v === "yes" ? C.green : v === "no" ? C.red : C.dimText;
+                return (
+                  <button key={v} type="button" onClick={() => setHomeownerInterested(v)} style={{
+                    background: on ? color : "transparent", color: on ? C.white : color,
+                    border: `1px solid ${color}`, borderRadius: 20, padding: "3px 12px",
+                    fontSize: 10, fontWeight: 700, cursor: "pointer", textTransform: "capitalize",
+                  }}>{v}</button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+
         <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: 10, padding: "12px 14px" }}>
           <p style={{ fontSize: 10, fontWeight: 700, color: C.teal, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 8px" }}>Pipeline status</p>
           <select value={pipelineStatus} onChange={(e) => setPipelineStatus(e.target.value)} style={{ ...inp(), marginBottom: 10 }}>
@@ -394,7 +500,7 @@ const LeadDetail = ({ lead, agent, onSaved }: { lead: Lead; agent?: Agent; onSav
   );
 };
 
-const AgentCard = ({ agent, onSelect, selected }: { agent: Agent; onSelect: (a: Agent) => void; selected: boolean }) => {
+const AgentCard = ({ agent, onSelect, selected, leadCount }: { agent: Agent; onSelect: (a: Agent) => void; selected: boolean; leadCount: number }) => {
   const status = AGENT_STATUS[agent.relationship_status] || AGENT_STATUS.identified;
   return (
     <div onClick={() => onSelect(agent)}
@@ -404,15 +510,20 @@ const AgentCard = ({ agent, onSelect, selected }: { agent: Agent; onSelect: (a: 
         borderRadius: 10, padding: "10px 14px", cursor: "pointer",
         marginBottom: 6, transition: "all 0.15s",
       }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
-        <div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6, gap: 8 }}>
+        <div style={{ minWidth: 0 }}>
           <p style={{ fontSize: 12, fontWeight: 700, color: C.brightText, margin: "0 0 1px" }}>{agent.contact_name}</p>
           <p style={{ fontSize: 10, color: C.teal, margin: 0 }}>{agent.company_name || "Independent"}</p>
         </div>
-        <span style={{ fontSize: 10, fontWeight: 600, background: status.bg, color: status.text, border: `1px solid ${status.border}`, borderRadius: 20, padding: "2px 8px" }}>{status.label}</span>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4 }}>
+          <span style={{ fontSize: 10, fontWeight: 600, background: status.bg, color: status.text, border: `1px solid ${status.border}`, borderRadius: 20, padding: "2px 8px", whiteSpace: "nowrap" }}>{status.label}</span>
+          <span title={`${leadCount} planning application${leadCount === 1 ? "" : "s"}`} style={{ fontSize: 10, fontWeight: 700, color: leadCount > 1 ? C.amber : C.dimText, background: "rgba(255,255,255,0.06)", border: `1px solid ${C.darkBorder}`, borderRadius: 20, padding: "2px 8px", whiteSpace: "nowrap" }}>
+            {leadCount} app{leadCount === 1 ? "" : "s"}
+          </span>
+        </div>
       </div>
       <div style={{ display: "flex", justifyContent: "space-between", gap: 6 }}>
-        <span style={{ fontSize: 10, color: C.dimText }}>{(agent.councils_active || []).join(", ")}</span>
+        <span style={{ fontSize: 10, color: C.dimText, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{(agent.councils_active || []).join(", ")}</span>
         <div style={{ display: "flex", gap: 6 }}>
           {agent.intro_sent && <span style={{ fontSize: 10, color: C.teal }}>✉️</span>}
           {agent.meeting_held && <span style={{ fontSize: 10, color: C.green }}>🤝</span>}
@@ -470,6 +581,11 @@ export default function PlanningPipeline() {
   useEffect(() => { load(); }, []);
 
   const agentsById = useMemo(() => Object.fromEntries(agents.map((a) => [a.id, a])), [agents]);
+  const leadsByAgent = useMemo(() => {
+    const m: Record<string, number> = {};
+    for (const l of leads) if (l.agent_id) m[l.agent_id] = (m[l.agent_id] ?? 0) + 1;
+    return m;
+  }, [leads]);
   const selectedLead = leads.find((l) => l.id === selectedLeadId) || leads[0] || null;
 
   const filteredLeads = useMemo(() => leads.filter((l) => {
@@ -607,7 +723,7 @@ export default function PlanningPipeline() {
             <div style={{ width: isMobile ? "100%" : 300, flexShrink: 0, borderRight: isMobile ? "none" : `1px solid ${C.darkBorder}`, borderBottom: isMobile ? `1px solid ${C.darkBorder}` : "none", padding: 12, overflowY: "auto" }}>
               <p style={{ fontSize: 10, fontWeight: 700, color: C.teal, letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 10px" }}>Agent network ({agents.length})</p>
               {agents.map((agent) => (
-                <AgentCard key={agent.id} agent={agent} selected={selectedAgent?.id === agent.id} onSelect={setSelectedAgent} />
+                <AgentCard key={agent.id} agent={agent} selected={selectedAgent?.id === agent.id} onSelect={setSelectedAgent} leadCount={leadsByAgent[agent.id] ?? 0} />
               ))}
             </div>
           )}
