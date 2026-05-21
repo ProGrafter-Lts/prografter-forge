@@ -229,6 +229,11 @@ const LeadDetail = ({ lead, agent, onSaved }: { lead: Lead; agent?: Agent; onSav
   const [notes, setNotes] = useState(lead.notes || "");
   const [nextAction, setNextAction] = useState(lead.next_action || "");
   const [pipelineStatus, setPipelineStatus] = useState(lead.pipeline_status);
+  const [agentContacted, setAgentContacted] = useState(lead.agent_contacted ?? false);
+  const [agentMethods, setAgentMethods] = useState<string[]>(lead.agent_contact_methods ?? []);
+  const [homeownerContacted, setHomeownerContacted] = useState(lead.homeowner_contacted ?? false);
+  const [homeownerMethods, setHomeownerMethods] = useState<string[]>(lead.homeowner_contact_methods ?? []);
+  const [homeownerInterested, setHomeownerInterested] = useState<string>(lead.homeowner_interested ?? "unknown");
   const [saving, setSaving] = useState(false);
   const [enriching, setEnriching] = useState(false);
 
@@ -236,14 +241,33 @@ const LeadDetail = ({ lead, agent, onSaved }: { lead: Lead; agent?: Agent; onSav
     setNotes(lead.notes || "");
     setNextAction(lead.next_action || "");
     setPipelineStatus(lead.pipeline_status);
+    setAgentContacted(lead.agent_contacted ?? false);
+    setAgentMethods(lead.agent_contact_methods ?? []);
+    setHomeownerContacted(lead.homeowner_contacted ?? false);
+    setHomeownerMethods(lead.homeowner_contact_methods ?? []);
+    setHomeownerInterested(lead.homeowner_interested ?? "unknown");
   }, [lead.id]);
+
+  const toggleMethod = (current: string[], setter: (v: string[]) => void, m: string) => {
+    setter(current.includes(m) ? current.filter((x) => x !== m) : [...current, m]);
+  };
 
   const save = async () => {
     setSaving(true);
-    const { error } = await supabase
-      .from("planning_leads")
-      .update({ notes, next_action: nextAction, pipeline_status: pipelineStatus })
-      .eq("id", lead.id);
+    const patch: Record<string, unknown> = {
+      notes,
+      next_action: nextAction,
+      pipeline_status: pipelineStatus,
+      agent_contacted: agentContacted,
+      agent_contact_methods: agentMethods,
+      homeowner_contacted: homeownerContacted,
+      homeowner_contact_methods: homeownerMethods,
+      homeowner_interested: homeownerInterested === "unknown" ? null : homeownerInterested,
+    };
+    if (agentContacted && !lead.agent_contacted_at) patch.agent_contacted_at = new Date().toISOString();
+    if (homeownerContacted && !lead.homeowner_contacted_at) patch.homeowner_contacted_at = new Date().toISOString();
+
+    const { error } = await supabase.from("planning_leads").update(patch).eq("id", lead.id);
     setSaving(false);
     if (error) {
       toast({ title: "Save failed", description: error.message, variant: "destructive" });
