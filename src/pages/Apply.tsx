@@ -224,15 +224,24 @@ export default function Apply() {
   const back = () => { setErrors({}); setStep(s => s - 1); };
   const submit = () => { const e = validate(5); setErrors(e); if (!Object.keys(e).length) setDone(true); };
 
-  const I = ({ f, type = "text", ...p }: { f: string; type?: string; placeholder?: string; maxLength?: number }) => (
-    <input type={type} style={inputBase(errors[f])} value={form[f] as string} onChange={upd(f)} {...p} />
-  );
-  const S = ({ f, children }: { f: string; children: ReactNode }) => (
-    <select style={inputBase(errors[f])} value={form[f] as string} onChange={upd(f)}>{children}</select>
-  );
-  const T = ({ f, ...p }: { f: string; placeholder?: string; rows?: number }) => (
-    <textarea style={{ ...inputBase(errors[f]), resize: "vertical", minHeight: 96 }} value={form[f] as string} onChange={upd(f)} {...p} />
-  );
+  // Keep latest form/errors/upd accessible without recreating I/S/T each render.
+  // Defining these inline as components caused React to remount the <input> on
+  // every keystroke (new component type per render) → lost focus / one char at a time.
+  const stateRef = useRef({ form, errors, upd });
+  stateRef.current = { form, errors, upd };
+
+  const I = useCallback(({ f, type = "text", ...p }: { f: string; type?: string; placeholder?: string; maxLength?: number }) => {
+    const { form, errors, upd } = stateRef.current;
+    return <input type={type} style={inputBase(errors[f])} value={form[f] as string} onChange={upd(f)} {...p} />;
+  }, []);
+  const S = useCallback(({ f, children }: { f: string; children: ReactNode }) => {
+    const { form, errors, upd } = stateRef.current;
+    return <select style={inputBase(errors[f])} value={form[f] as string} onChange={upd(f)}>{children}</select>;
+  }, []);
+  const T = useCallback(({ f, ...p }: { f: string; placeholder?: string; rows?: number }) => {
+    const { form, errors, upd } = stateRef.current;
+    return <textarea style={{ ...inputBase(errors[f]), resize: "vertical", minHeight: 96 }} value={form[f] as string} onChange={upd(f)} {...p} />;
+  }, []);
 
   const pages = [
     // 0 — Details
