@@ -1,93 +1,13 @@
-import { useState, FormEvent } from "react";
-import { supabase } from "@/integrations/supabase/client";
-
-const WAITLIST_USER_TYPES = [
-  { value: "trade", label: "Tradesperson" },
-  { value: "homeowner", label: "Homeowner" },
-] as const;
-
-const normalizePostcode = (value: string) => value.trim().replace(/\s+/g, " ").toUpperCase();
+import { Link } from "react-router-dom";
 
 const SignUpSection = () => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [postcode, setPostcode] = useState("");
-  const [userType, setUserType] = useState<(typeof WAITLIST_USER_TYPES)[number]["value"]>("trade");
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState("");
-
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!postcode.trim()) {
-      setError("Postcode is required.");
-      return;
-    }
-    setLoading(true);
-    setError("");
-
-    const cleanName = name.trim();
-    const cleanEmail = email.trim().toLowerCase();
-    const cleanPostcode = normalizePostcode(postcode);
-
-    if (!WAITLIST_USER_TYPES.some((option) => option.value === userType)) {
-      setLoading(false);
-      setError("Please choose a valid account type.");
-      return;
-    }
-
-    const signupId = crypto.randomUUID();
-    const { error: dbError } = await supabase.from("early_signups").insert({
-      id: signupId,
-      name: cleanName,
-      email: cleanEmail,
-      postcode: cleanPostcode,
-      user_type: userType,
-    });
-
-    if (dbError) {
-      setLoading(false);
-      // Postgres unique violation
-      if ((dbError as { code?: string }).code === "23505") {
-        setError("You're already on the waitlist for this option. We'll be in touch!");
-      } else {
-        setError("Something went wrong. Please try again.");
-        console.error(dbError);
-      }
-      return;
-    }
-
-    // Fire-and-forget notification + welcome emails (don't block UX on failures)
-    void supabase.functions.invoke("send-transactional-email", {
-      body: {
-        templateName: "waitlist-admin-notification",
-        idempotencyKey: `waitlist-admin-${signupId}`,
-        templateData: {
-          name: cleanName,
-          email: cleanEmail,
-          postcode: cleanPostcode,
-          userType: userType,
-        },
-      },
-    }).catch((err) => console.error("admin notification failed", err));
-
-    void supabase.functions.invoke("send-transactional-email", {
-      body: {
-        templateName: "waitlist-welcome",
-        recipientEmail: cleanEmail,
-        idempotencyKey: `waitlist-welcome-${signupId}`,
-        templateData: { name: cleanName },
-      },
-    }).catch((err) => console.error("welcome email failed", err));
-
-    setLoading(false);
-    setSuccess(true);
-  };
-
   return (
     <section id="signup" className="relative bg-deep py-24 px-6 overflow-hidden">
       {/* Ghost text */}
-      <span className="absolute bottom-8 right-8 font-heading text-[120px] craft:text-[200px] text-cream select-none pointer-events-none leading-none" style={{ opacity: 0.03 }}>
+      <span
+        className="absolute bottom-8 right-8 font-heading text-[120px] craft:text-[200px] text-cream select-none pointer-events-none leading-none"
+        style={{ opacity: 0.03 }}
+      >
         GRAFT
       </span>
 
@@ -106,62 +26,47 @@ const SignUpSection = () => {
           </p>
         </div>
 
-        {/* Right — Form */}
+        {/* Right — Account type chooser */}
         <div className="fade-up">
-          {success ? (
-            <div className="bg-teal/10 border border-teal/30 rounded-xl p-8 text-center">
-              <h3 className="font-heading text-teal text-3xl mb-2">You're In.</h3>
-              <p className="font-body text-cream/70 text-sm">Welcome aboard. Check your inbox to get started.</p>
+          <div className="bg-cream/5 border border-cream/10 rounded-2xl p-8 craft:p-10 space-y-6">
+            <div>
+              <h3 className="font-heading text-cream text-2xl craft:text-3xl mb-2">Create your free account</h3>
+              <p className="font-body text-secondary-text text-sm">Choose how you'd like to use ProGrafter.</p>
             </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <input
-                  type="text"
-                  placeholder="Full Name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                   className="bg-cream/5 border border-cream/10 text-cream placeholder-secondary-text font-body text-sm rounded-xl px-4 py-3 focus:border-teal focus:outline-none transition-colors"
-                />
-                <input
-                  type="text"
-                  placeholder="Postcode *"
-                  value={postcode}
-                  onChange={(e) => setPostcode(e.target.value)}
-                  required
-                  className="bg-cream/5 border border-cream/10 text-cream placeholder-secondary-text font-body text-sm rounded-xl px-4 py-3 focus:border-teal focus:outline-none transition-colors"
-                />
-              </div>
-              <input
-                type="email"
-                placeholder="Email Address"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="w-full bg-cream/5 border border-cream/10 text-cream placeholder-secondary-text font-body text-sm rounded-xl px-4 py-3 focus:border-teal focus:outline-none transition-colors"
-              />
-              <select
-                value={userType}
-                onChange={(e) => setUserType(e.target.value as (typeof WAITLIST_USER_TYPES)[number]["value"])}
-                className="w-full bg-cream/5 border border-cream/10 text-cream font-body text-sm rounded-xl px-4 py-3 focus:border-teal focus:outline-none transition-colors appearance-none"
+
+            <div className="grid gap-4">
+              <Link
+                to="/signup/homeowner"
+                className="group block bg-teal text-cream rounded-xl px-6 py-5 hover:bg-teal-hover transition-colors"
               >
-                {WAITLIST_USER_TYPES.map((option) => (
-                  <option key={option.value} value={option.value} className="bg-deep">
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-              {error && <p className="text-red-400 font-mono text-xs">{error}</p>}
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-teal text-cream font-mono text-sm py-3 rounded-xl hover:bg-teal-hover transition-colors disabled:opacity-50"
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-mono text-xs uppercase tracking-widest opacity-80 mb-1">For Homeowners</p>
+                    <p className="font-heading text-xl">Post a job, get quotes</p>
+                  </div>
+                  <span className="font-mono text-2xl opacity-80 group-hover:translate-x-1 transition-transform">→</span>
+                </div>
+              </Link>
+
+              <Link
+                to="/signup/trade"
+                className="group block bg-cream/5 border border-cream/20 text-cream rounded-xl px-6 py-5 hover:bg-cream/10 hover:border-teal/40 transition-colors"
               >
-                {loading ? "Submitting..." : "Get Early Access"}
-              </button>
-            </form>
-          )}
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-mono text-xs uppercase tracking-widest text-teal mb-1">For Tradespeople</p>
+                    <p className="font-heading text-xl">Get verified job leads</p>
+                  </div>
+                  <span className="font-mono text-2xl text-teal group-hover:translate-x-1 transition-transform">→</span>
+                </div>
+              </Link>
+            </div>
+
+            <p className="font-body text-secondary-text text-xs text-center">
+              Already have an account?{" "}
+              <Link to="/login" className="text-teal hover:underline">Sign in</Link>
+            </p>
+          </div>
         </div>
       </div>
     </section>
