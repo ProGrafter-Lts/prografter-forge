@@ -1,4 +1,4 @@
-import { useState, type CSSProperties, type ReactNode, type ChangeEvent } from "react";
+import { useCallback, useRef, useState, type CSSProperties, type ReactNode, type ChangeEvent } from "react";
 
 // ── ProGrafter Brand Palette ──────────────────────────────────────────────────
 const C = {
