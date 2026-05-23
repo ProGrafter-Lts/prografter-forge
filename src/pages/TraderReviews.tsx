@@ -131,10 +131,11 @@ export default function TraderReviews() {
     if (!id) return;
     (async () => {
       setLoading(true);
-      const [{ data: t }, { data: rvs }] = await Promise.all([
-        supabase.from("trades").select("id,name,company_name,trade_type,postcode,verified,tier").eq("id", id).maybeSingle(),
+      const [{ data: tRows }, { data: rvs }] = await Promise.all([
+        supabase.rpc("get_public_trade", { _id: id }),
         supabase.from("reviews").select("*").eq("trade_id", id).not("published_at", "is", null).order("published_at", { ascending: false }),
       ]);
+      const t = Array.isArray(tRows) ? tRows[0] : tRows;
       setTrader(t);
 
       // enrich with job + homeowner info
