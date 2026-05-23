@@ -12,11 +12,9 @@ const Hero = () => {
 
   useEffect(() => {
     supabase
-      .from("trades")
-      .select("id", { count: "exact", head: true })
-      .eq("verified", true)
-      .then(({ count }) => {
-        if (typeof count === "number") setTradeCount(count);
+      .rpc("count_verified_trades")
+      .then(({ data }) => {
+        if (typeof data === "number") setTradeCount(data);
       });
   }, []);
 
