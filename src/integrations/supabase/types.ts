@@ -3145,6 +3145,7 @@ export type Database = {
         Returns: undefined
       }
       compute_contract_hash: { Args: { _contract_id: string }; Returns: string }
+      count_verified_trades: { Args: never; Returns: number }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -3160,6 +3161,28 @@ export type Database = {
       generate_contract_reference: { Args: never; Returns: string }
       generate_job_ref: { Args: never; Returns: string }
       generate_quote_reference: { Args: never; Returns: string }
+      get_public_trade: {
+        Args: { _id: string }
+        Returns: {
+          avg_rating: number
+          bio: string
+          business_logo_path: string
+          company_name: string
+          completed_jobs_count: number
+          id: string
+          is_green_trade: boolean
+          mcs_verified: boolean
+          name: string
+          postcode: string
+          review_count: number
+          tier: string
+          trade_type: string
+          trustmark_verified: boolean
+          verified: boolean
+          website: string
+          years_experience: number
+        }[]
+      }
       get_review_context: {
         Args: { _ref: string }
         Returns: {
@@ -3263,6 +3286,28 @@ export type Database = {
       record_quote_pdf_event: {
         Args: { _event_type: string; _metadata?: Json; _quote_id: string }
         Returns: undefined
+      }
+      search_public_trades: {
+        Args: { _limit?: number; _q: string }
+        Returns: {
+          avg_rating: number
+          bio: string
+          business_logo_path: string
+          company_name: string
+          completed_jobs_count: number
+          id: string
+          is_green_trade: boolean
+          mcs_verified: boolean
+          name: string
+          postcode: string
+          review_count: number
+          tier: string
+          trade_type: string
+          trustmark_verified: boolean
+          verified: boolean
+          website: string
+          years_experience: number
+        }[]
       }
       sign_contract: {
         Args: { _contract_id: string; _ip?: unknown; _signature_hash: string }
