@@ -22,12 +22,9 @@ const SubTradeModal = ({ stageId, jobId, mainTradeId, onClose, onRefresh }: SubT
   const searchTrades = async () => {
     if (!searchQuery.trim()) return;
     setSearching(true);
-    const { data } = await supabase.from("trades")
-      .select("id, name, company_name, trade_type, verified")
-      .ilike("company_name", `%${searchQuery}%`)
-      .neq("id", mainTradeId)
-      .limit(10);
-    setSearchResults(data || []);
+    const { data } = await supabase.rpc("search_public_trades", { _q: searchQuery, _limit: 10 });
+    const filtered = (data || []).filter((t: any) => t.id !== mainTradeId);
+    setSearchResults(filtered);
     setSearching(false);
   };
 
