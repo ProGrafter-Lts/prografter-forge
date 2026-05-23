@@ -958,13 +958,6 @@ export type Database = {
             foreignKeyName: "job_matches_trade_id_fkey"
             columns: ["trade_id"]
             isOneToOne: false
-            referencedRelation: "public_trades"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "job_matches_trade_id_fkey"
-            columns: ["trade_id"]
-            isOneToOne: false
             referencedRelation: "trades"
             referencedColumns: ["id"]
           },
@@ -1320,13 +1313,6 @@ export type Database = {
             foreignKeyName: "planning_alert_shortlist_trade_id_fkey"
             columns: ["trade_id"]
             isOneToOne: false
-            referencedRelation: "public_trades"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "planning_alert_shortlist_trade_id_fkey"
-            columns: ["trade_id"]
-            isOneToOne: false
             referencedRelation: "trades"
             referencedColumns: ["id"]
           },
@@ -1374,13 +1360,6 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "planning_alert_subs_trade_id_fkey"
-            columns: ["trade_id"]
-            isOneToOne: false
-            referencedRelation: "public_trades"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "planning_alert_subs_trade_id_fkey"
             columns: ["trade_id"]
@@ -1453,13 +1432,6 @@ export type Database = {
           viewed?: boolean
         }
         Relationships: [
-          {
-            foreignKeyName: "planning_alerts_trade_id_fkey"
-            columns: ["trade_id"]
-            isOneToOne: false
-            referencedRelation: "public_trades"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "planning_alerts_trade_id_fkey"
             columns: ["trade_id"]
@@ -2149,13 +2121,6 @@ export type Database = {
             foreignKeyName: "quotes_trade_id_fkey"
             columns: ["trade_id"]
             isOneToOne: false
-            referencedRelation: "public_trades"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "quotes_trade_id_fkey"
-            columns: ["trade_id"]
-            isOneToOne: false
             referencedRelation: "trades"
             referencedColumns: ["id"]
           },
@@ -2317,13 +2282,6 @@ export type Database = {
             columns: ["job_id"]
             isOneToOne: false
             referencedRelation: "jobs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "reviews_trade_id_fkey"
-            columns: ["trade_id"]
-            isOneToOne: false
-            referencedRelation: "public_trades"
             referencedColumns: ["id"]
           },
           {
@@ -2496,13 +2454,6 @@ export type Database = {
             columns: ["stage_id"]
             isOneToOne: false
             referencedRelation: "project_stages"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "stage_updates_trade_id_fkey"
-            columns: ["trade_id"]
-            isOneToOne: false
-            referencedRelation: "public_trades"
             referencedColumns: ["id"]
           },
           {
@@ -2747,13 +2698,6 @@ export type Database = {
             foreignKeyName: "trade_specialisms_trade_id_fkey"
             columns: ["trade_id"]
             isOneToOne: false
-            referencedRelation: "public_trades"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "trade_specialisms_trade_id_fkey"
-            columns: ["trade_id"]
-            isOneToOne: false
             referencedRelation: "trades"
             referencedColumns: ["id"]
           },
@@ -2795,13 +2739,6 @@ export type Database = {
           uploaded_at?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "trade_verification_documents_trade_id_fkey"
-            columns: ["trade_id"]
-            isOneToOne: false
-            referencedRelation: "public_trades"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "trade_verification_documents_trade_id_fkey"
             columns: ["trade_id"]
@@ -3083,13 +3020,6 @@ export type Database = {
             foreignKeyName: "variations_trade_id_fkey"
             columns: ["trade_id"]
             isOneToOne: false
-            referencedRelation: "public_trades"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "variations_trade_id_fkey"
-            columns: ["trade_id"]
-            isOneToOne: false
             referencedRelation: "trades"
             referencedColumns: ["id"]
           },
@@ -3119,72 +3049,6 @@ export type Database = {
           trade_id: string | null
           trade_signed_at: string | null
           updated_at: string | null
-        }
-        Relationships: []
-      }
-      public_trades: {
-        Row: {
-          avg_rating: number | null
-          bio: string | null
-          business_logo_path: string | null
-          company_name: string | null
-          completed_jobs_count: number | null
-          created_at: string | null
-          id: string | null
-          is_green_trade: boolean | null
-          mcs_verified: boolean | null
-          name: string | null
-          postcode: string | null
-          review_count: number | null
-          tier: string | null
-          trade_type: string | null
-          trustmark_verified: boolean | null
-          user_id: string | null
-          verified: boolean | null
-          website: string | null
-          years_experience: number | null
-        }
-        Insert: {
-          avg_rating?: number | null
-          bio?: string | null
-          business_logo_path?: string | null
-          company_name?: string | null
-          completed_jobs_count?: number | null
-          created_at?: string | null
-          id?: string | null
-          is_green_trade?: boolean | null
-          mcs_verified?: boolean | null
-          name?: string | null
-          postcode?: string | null
-          review_count?: number | null
-          tier?: string | null
-          trade_type?: string | null
-          trustmark_verified?: boolean | null
-          user_id?: string | null
-          verified?: boolean | null
-          website?: string | null
-          years_experience?: number | null
-        }
-        Update: {
-          avg_rating?: number | null
-          bio?: string | null
-          business_logo_path?: string | null
-          company_name?: string | null
-          completed_jobs_count?: number | null
-          created_at?: string | null
-          id?: string | null
-          is_green_trade?: boolean | null
-          mcs_verified?: boolean | null
-          name?: string | null
-          postcode?: string | null
-          review_count?: number | null
-          tier?: string | null
-          trade_type?: string | null
-          trustmark_verified?: boolean | null
-          user_id?: string | null
-          verified?: boolean | null
-          website?: string | null
-          years_experience?: number | null
         }
         Relationships: []
       }
@@ -3281,6 +3145,7 @@ export type Database = {
         Returns: undefined
       }
       compute_contract_hash: { Args: { _contract_id: string }; Returns: string }
+      count_verified_trades: { Args: never; Returns: number }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -3296,6 +3161,28 @@ export type Database = {
       generate_contract_reference: { Args: never; Returns: string }
       generate_job_ref: { Args: never; Returns: string }
       generate_quote_reference: { Args: never; Returns: string }
+      get_public_trade: {
+        Args: { _id: string }
+        Returns: {
+          avg_rating: number
+          bio: string
+          business_logo_path: string
+          company_name: string
+          completed_jobs_count: number
+          id: string
+          is_green_trade: boolean
+          mcs_verified: boolean
+          name: string
+          postcode: string
+          review_count: number
+          tier: string
+          trade_type: string
+          trustmark_verified: boolean
+          verified: boolean
+          website: string
+          years_experience: number
+        }[]
+      }
       get_review_context: {
         Args: { _ref: string }
         Returns: {
@@ -3399,6 +3286,28 @@ export type Database = {
       record_quote_pdf_event: {
         Args: { _event_type: string; _metadata?: Json; _quote_id: string }
         Returns: undefined
+      }
+      search_public_trades: {
+        Args: { _limit?: number; _q: string }
+        Returns: {
+          avg_rating: number
+          bio: string
+          business_logo_path: string
+          company_name: string
+          completed_jobs_count: number
+          id: string
+          is_green_trade: boolean
+          mcs_verified: boolean
+          name: string
+          postcode: string
+          review_count: number
+          tier: string
+          trade_type: string
+          trustmark_verified: boolean
+          verified: boolean
+          website: string
+          years_experience: number
+        }[]
       }
       sign_contract: {
         Args: { _contract_id: string; _ip?: unknown; _signature_hash: string }
