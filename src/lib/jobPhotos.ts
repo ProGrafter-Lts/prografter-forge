@@ -34,16 +34,17 @@ export const getJobPhotoSignedUrl = async (urlOrPath: string): Promise<string | 
   const cached = cache.get(path);
   if (cached && cached.expiresAt > Date.now()) return cached.url;
 
-  // Bucket is now public — use the stable public URL (no auth required, never 403s).
-  const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
-  const publicUrl = data?.publicUrl ?? null;
-  if (!publicUrl) return null;
+  // Bucket is private — generate a short-lived signed URL.
+  const { data, error } = await supabase.storage
+    .from(BUCKET)
+    .createSignedUrl(path, SIGNED_URL_TTL_SECONDS);
+  if (error || !data?.signedUrl) return null;
 
   cache.set(path, {
-    url: publicUrl,
+    url: data.signedUrl,
     expiresAt: Date.now() + (SIGNED_URL_TTL_SECONDS - 60) * 1000,
   });
-  return publicUrl;
+  return data.signedUrl;
 };
 
 export const getJobPhotoSignedUrls = async (urlsOrPaths: string[]): Promise<string[]> => {
