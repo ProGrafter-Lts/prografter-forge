@@ -221,10 +221,49 @@ serve(async (req) => {
       });
     }
 
-    // Step 1: scrape council page to find PDF
+    // Step 1: scrape council page to find PDF (with documents sub-page fallback)
     console.log(`[ENRICH] ${lead.application_ref}: scraping ${lead.council_application_url}`);
     const page = await firecrawlScrape(lead.council_application_url, ["markdown", "links"]);
-    const candidates = extractPdfLinks(page.data?.markdown ?? "", page.data?.links ?? []);
+    const pageMd = page.data?.markdown ?? "";
+    const pageLinks = page.data?.links ?? [];
+    let candidates = extractPdfLinks(pageMd, pageLinks);
+
+    // Fallback: many council portals hide PDFs behind a Documents/Associated docs sub-page.
+    if (!candidates.some((c) => scoreFormLink(c.href, c.label) > 0)) {
+      const docHints = /(document|associated|supporting|files|attachments|drawing)/i;
+      const subPages = new Set<string>();
+      // From markdown [label](href) pairs
+      const mdLinkRe = /\[([^\]]+)\]\(([^)]+)\)/gi;
+      let m: RegExpExecArray | null;
+      while ((m = mdLinkRe.exec(pageMd)) !== null) {
+        const label = m[1];
+        const href = m[2];
+        if (/\.pdf/i.test(href)) continue;
+        if (docHints.test(label) || docHints.test(href)) subPages.add(href);
+      }
+      // From raw link list
+      for (const href of pageLinks) {
+        if (/\.pdf/i.test(href)) continue;
+        if (docHints.test(href)) subPages.add(href);
+      }
+
+      const tried: string[] = [];
+      for (const sub of Array.from(subPages).slice(0, 3)) {
+        const subUrl = new URL(sub, lead.council_application_url).toString();
+        tried.push(subUrl);
+        console.log(`[ENRICH] ${lead.application_ref}: fallback scraping ${subUrl}`);
+        try {
+          const subPage = await firecrawlScrape(subUrl, ["markdown", "links"]);
+          const more = extractPdfLinks(subPage.data?.markdown ?? "", subPage.data?.links ?? []);
+          candidates = candidates.concat(more);
+          if (more.some((c) => scoreFormLink(c.href, c.label) > 0)) break;
+        } catch (e) {
+          console.error(`[ENRICH] sub-page scrape failed: ${(e as Error).message}`);
+        }
+      }
+      if (tried.length) console.log(`[ENRICH] ${lead.application_ref}: tried ${tried.length} sub-pages`);
+    }
+
     candidates.sort((a, b) => scoreFormLink(b.href, b.label) - scoreFormLink(a.href, a.label));
     const best = candidates.find((c) => scoreFormLink(c.href, c.label) > 0);
     if (!best) {
