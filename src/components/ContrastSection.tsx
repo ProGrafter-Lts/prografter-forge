@@ -132,7 +132,7 @@ const ContrastSection = () => {
               <div className="grid grid-cols-[1fr_auto] gap-4 px-4 py-4 border-t border-teal/20 items-center">
                 <div>
                   <div className="font-body text-cream text-sm">
-                    Lock-in contract
+                    Lock-in
                   </div>
                 </div>
                 <span className="font-mono text-sm text-teal font-medium">

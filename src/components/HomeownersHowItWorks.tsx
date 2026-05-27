@@ -1,23 +1,23 @@
 const steps = [
   {
     num: "01",
-    title: "Post Your Job Free",
-    desc: "Describe the work, upload photos, set your budget. Takes 3 minutes. Costs nothing.",
+    title: "Verified trades",
+    desc: "5-check standard: ID, qualifications, insurance, Companies House, references. Every check logged per trade.",
   },
   {
     num: "02",
-    title: "Receive Verified Quotes",
-    desc: "Get quotes from verified, insured local trades. Compare profiles, reviews, and prices before you decide.",
+    title: "A real contract",
+    desc: "Every job has a written contract. Variations agreed in writing before work starts.",
   },
   {
     num: "03",
-    title: "Track Your Project Live",
-    desc: "Daily photo updates from site, a live timeline showing every stage, and direct messaging with your tradesperson.",
+    title: "Money protected",
+    desc: "Staged payments held safe until each milestone is signed off. The trade gets paid; you stay protected.",
   },
   {
     num: "04",
-    title: "Receive Your Manual",
-    desc: "At completion, a full PDF document: every material used, every certificate, every warranty. Yours to keep forever.",
+    title: "Full Homeowner Manual",
+    desc: "Every certificate, warranty and photo at completion. The record you'll show friends — and your insurer.",
   },
 ];
 
@@ -27,7 +27,7 @@ const HomeownersHowItWorks = () => {
       <div className="max-w-[1800px] mx-auto">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-8 h-[2px] bg-teal" />
-          <span className="font-mono text-xs text-teal uppercase tracking-widest">For Homeowners</span>
+          <span className="font-mono text-xs text-teal uppercase tracking-widest">Trust</span>
         </div>
         <h2 className="font-heading text-navy text-[48px] craft:text-[64px] leading-none mb-16">
           Your Project. Fully Visible. Fully Protected.
