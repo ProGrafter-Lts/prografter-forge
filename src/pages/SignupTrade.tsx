@@ -305,7 +305,8 @@ const SignupTrade = () => {
     }, 800);
     return () => window.clearTimeout(handle);
   }, [
-    createdTradeId, tradeType, companyName, yearsExperience, website, bio, isGreen,
+    createdTradeId, tradeType, companyName, businessStructure, companiesHouseNumber,
+    yearsExperience, website, bio, isGreen,
     mcsNumber, trustmarkNumber, pas2030, pas2035, ozevApproved, fgasRegistered,
     cigaRegistered, incaCertified, greenCertExpiry,
   ]);
