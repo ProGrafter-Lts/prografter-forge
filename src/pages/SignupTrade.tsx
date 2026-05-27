@@ -101,6 +101,9 @@ const SignupTrade = () => {
   // Step 2: business
   const [tradeType, setTradeType] = useState("");
   const [companyName, setCompanyName] = useState("");
+  const [businessStructure, setBusinessStructure] = useState<"" | "sole_trader" | "limited_company" | "partnership">("");
+  const [companiesHouseNumber, setCompaniesHouseNumber] = useState("");
+  const [companiesHouseError, setCompaniesHouseError] = useState("");
   const [yearsExperience, setYearsExperience] = useState("");
   const [website, setWebsite] = useState("");
   const [bio, setBio] = useState("");
