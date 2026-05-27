@@ -331,7 +331,7 @@ const TradeDashboard = () => {
                 {trade?.company_name} · {trade?.trade_type}
               </p>
             </div>
-            {trade?.verified && trade?.verification_status === "approved" && (
+            {trade?.verification_status === "approved" && (
               <span className="flex items-center gap-1 bg-secondary/10 text-secondary px-3 py-1 rounded-full font-mono text-xs">
                 <BadgeCheck className="w-3.5 h-3.5" />
                 Verified
