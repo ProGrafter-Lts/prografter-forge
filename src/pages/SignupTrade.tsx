@@ -53,6 +53,8 @@ const GENERAL_TRADE_TYPES = [
 ] as const;
 
 const UK_POSTCODE = /^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}$/i;
+const COMPANIES_HOUSE_NUMBER = /^([A-Z]{2}\d{6}|\d{8})$/;
+const normaliseChNumber = (v: string) => v.replace(/\s+/g, "").toUpperCase();
 
 const step1Schema = z.object({
   fullName: z.string().trim().min(2, "Enter your full name").max(120),
