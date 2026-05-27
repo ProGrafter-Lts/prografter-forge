@@ -48,19 +48,21 @@ const Hero = () => {
             </span>
           </div>
           <h1 className="font-heading text-cream text-[48px] craft:text-[72px] leading-[0.95] mb-6">
-            Built for<br />
-            <span className="text-teal">Proper</span><br />
-            Grafters.
+            Proper grafters<br />
+            don't pay to work.
           </h1>
           <p className="font-body text-secondary-text text-base craft:text-lg max-w-md mb-6 font-light">
-            No monthly fees. No hidden costs. Just a fair commission on the work you win — capped at £900 per job.
+            No monthly fee. No lead fees. No "free trial" that starts charging you later. We only earn when you do.
+          </p>
+          <p className="font-body text-secondary-text text-sm max-w-md mb-6 font-light">
+            7.5% commission only when the job completes and you've been paid — capped at £900 per job. Founding Members (first 50 trades): your first 5 jobs at 6%, permanent badge, personal welcome call from Lee.
           </p>
 
           <a
             href="/register/trade"
             className="inline-flex items-center justify-center bg-teal text-cream font-mono text-sm px-6 py-3.5 rounded-xl hover:bg-teal-hover transition-colors"
           >
-            Join as a Trade — Find Work →
+            Register free — win work
           </a>
 
           {/* Tertiary links */}
@@ -97,38 +99,62 @@ const Hero = () => {
               className="font-heading text-[32px] craft:text-[36px] leading-[1] mb-4"
               style={{ color: "#1B3A5C" }}
             >
-              Find a <span style={{ color: "#0D9488" }}>Proper Grafter</span>
+              Your project. Fully visible. Fully protected.
             </h2>
             <p className="font-body text-[15px] mb-5 font-light" style={{ color: "#1F2937" }}>
-              Verified UK trades. Real timelines. Variations signed off in writing. No surprise bills.
+              Verified local trades, a proper contract, and your money protected until the job's done right. From idea to completion.
             </p>
-            <div className="font-mono text-[14px] mb-6 leading-relaxed" style={{ color: "#4B5563" }}>
-              £0 to post · Verified trades · Stage payments protected
+            <p className="font-body text-[14px] mb-6 leading-relaxed font-light" style={{ color: "#4B5563" }}>
+              Anyone can hand you a cheap quote. ProGrafter gives you a verified trade, a written contract, daily photos from site, staged payments held safe, and every certificate and warranty at the end — the record you'll show friends.
+            </p>
+            <div className="flex flex-col gap-3">
+              <a
+                href="/post-a-job"
+                className="homeowner-cta inline-flex items-center justify-center w-full font-mono text-base px-8 py-4 rounded-xl transition-all duration-200 shadow-md"
+                style={{
+                  backgroundColor: "transparent",
+                  border: "2px solid #1B3A5C",
+                  color: "#1B3A5C",
+                  fontWeight: 700,
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "#0D9488";
+                  e.currentTarget.style.borderColor = "#0D9488";
+                  e.currentTarget.style.color = "#FFFFFF";
+                  e.currentTarget.style.transform = "translateY(-2px)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "transparent";
+                  e.currentTarget.style.borderColor = "#1B3A5C";
+                  e.currentTarget.style.color = "#1B3A5C";
+                  e.currentTarget.style.transform = "translateY(0)";
+                }}
+              >
+                Post your job — free
+              </a>
+              <a
+                href="#how-it-works"
+                className="inline-flex items-center justify-center w-full font-mono text-sm px-8 py-3 rounded-xl transition-all duration-200"
+                style={{
+                  backgroundColor: "transparent",
+                  border: "2px solid #1B3A5C",
+                  color: "#1B3A5C",
+                  fontWeight: 500,
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "#1B3A5C";
+                  e.currentTarget.style.color = "#FFFFFF";
+                  e.currentTarget.style.transform = "translateY(-2px)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "transparent";
+                  e.currentTarget.style.color = "#1B3A5C";
+                  e.currentTarget.style.transform = "translateY(0)";
+                }}
+              >
+                See how it works
+              </a>
             </div>
-            <a
-              href="/post-a-job"
-              className="homeowner-cta inline-flex items-center justify-center w-full font-mono text-base px-8 py-4 rounded-xl transition-all duration-200 shadow-md"
-              style={{
-                backgroundColor: "transparent",
-                border: "2px solid #1B3A5C",
-                color: "#1B3A5C",
-                fontWeight: 700,
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = "#0D9488";
-                e.currentTarget.style.borderColor = "#0D9488";
-                e.currentTarget.style.color = "#FFFFFF";
-                e.currentTarget.style.transform = "translateY(-2px)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "transparent";
-                e.currentTarget.style.borderColor = "#1B3A5C";
-                e.currentTarget.style.color = "#1B3A5C";
-                e.currentTarget.style.transform = "translateY(0)";
-              }}
-            >
-              Post a Job Free →
-            </a>
           </div>
         </div>
       </div>
