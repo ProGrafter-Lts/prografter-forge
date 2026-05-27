@@ -32,6 +32,38 @@ interface VerificationDoc {
   uploaded_at: string;
 }
 
+type ReferenceStatus = "not_contacted" | "contacted" | "verified" | "no_response";
+type ReferenceRelationship = "past_customer" | "trade_contact" | "supplier" | "other";
+
+interface TradeReference {
+  id: string;
+  trade_id: string | null;
+  applicant_email: string | null;
+  contact_name: string;
+  relationship: ReferenceRelationship;
+  phone: string | null;
+  email: string | null;
+  status: ReferenceStatus;
+  admin_notes: string | null;
+  status_updated_at: string | null;
+  created_at: string;
+}
+
+const REFERENCE_STATUS_LABEL: Record<ReferenceStatus, string> = {
+  not_contacted: "Not contacted",
+  contacted: "Contacted",
+  verified: "Verified",
+  no_response: "No response",
+};
+
+const REFERENCE_RELATIONSHIP_LABEL: Record<ReferenceRelationship, string> = {
+  past_customer: "Past customer",
+  trade_contact: "Trade contact",
+  supplier: "Supplier",
+  other: "Other",
+};
+
+
 const STATUS_FILTERS = [
   { key: "pending", label: "Pending review" },
   { key: "info_requested", label: "Info requested" },
