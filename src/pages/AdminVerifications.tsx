@@ -696,7 +696,70 @@ const AdminVerifications = () => {
                 </div>
               )}
 
+              {/* References */}
+              <div className="mt-8">
+                <h3 className="font-mono text-xs uppercase tracking-wider text-secondary-text mb-3">
+                  References ({references.length})
+                </h3>
+                {references.length === 0 ? (
+                  <p className="font-body text-sm text-secondary-text">
+                    No references submitted.
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+                    {references.map((r) => (
+                      <div
+                        key={r.id}
+                        className="border border-navy/10 rounded-xl p-3"
+                      >
+                        <div className="flex items-start justify-between gap-3 flex-wrap">
+                          <div className="min-w-0">
+                            <div className="font-body text-sm text-navy font-semibold">
+                              {r.contact_name}
+                            </div>
+                            <div className="font-mono text-xs uppercase text-teal">
+                              {REFERENCE_RELATIONSHIP_LABEL[r.relationship]}
+                            </div>
+                            <div className="font-body text-sm text-secondary-text mt-1 space-x-3">
+                              {r.phone && <span>📞 {r.phone}</span>}
+                              {r.email && <span>✉️ {r.email}</span>}
+                            </div>
+                            {r.status_updated_at && (
+                              <div className="font-mono text-[11px] text-secondary-text mt-1">
+                                last updated {format(new Date(r.status_updated_at), "dd MMM yyyy HH:mm")}
+                              </div>
+                            )}
+                          </div>
+                          <select
+                            value={r.status}
+                            disabled={refUpdating === r.id}
+                            onChange={(e) => updateReferenceStatus(r.id, e.target.value as ReferenceStatus)}
+                            className="border border-navy/15 rounded-lg px-2 py-1.5 text-xs font-mono uppercase text-navy bg-white focus:outline-none focus:border-teal"
+                          >
+                            {(Object.keys(REFERENCE_STATUS_LABEL) as ReferenceStatus[]).map((s) => (
+                              <option key={s} value={s}>{REFERENCE_STATUS_LABEL[s]}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <textarea
+                          defaultValue={r.admin_notes || ""}
+                          placeholder="Call notes (saved when you click out)…"
+                          onBlur={(e) => {
+                            if ((e.target.value || "") !== (r.admin_notes || "")) {
+                              updateReferenceNotes(r.id, e.target.value);
+                            }
+                          }}
+                          rows={2}
+                          className="mt-3 w-full border border-navy/10 rounded-lg p-2 font-body text-xs focus:outline-none focus:border-teal"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               {/* Actions */}
+
               {activeTrade.verification_status !== "approved" && (
                 <div className="mt-6 pt-5 border-t border-navy/10">
                   {!queryOpen ? (
