@@ -1,4 +1,6 @@
 import { useCallback, useRef, useState, type CSSProperties, type ReactNode, type ChangeEvent } from "react";
+import { supabase } from "@/integrations/supabase/client";
+
 
 // ── ProGrafter Brand Palette ──────────────────────────────────────────────────
 const C = {
@@ -68,6 +70,24 @@ const TRADES = [
 
 const STEPS = ["Your details", "Your trade", "Qualifications", "Insurance", "References", "Declaration"];
 
+const RELATIONSHIP_OPTIONS = [
+  { value: "past_customer", label: "Past customer" },
+  { value: "trade_contact", label: "Trade contact" },
+  { value: "supplier", label: "Supplier" },
+  { value: "other", label: "Other" },
+] as const;
+
+type RelationshipValue = (typeof RELATIONSHIP_OPTIONS)[number]["value"];
+
+type ReferenceEntry = {
+  contact_name: string;
+  relationship: RelationshipValue | "";
+  phone: string;
+  email: string;
+};
+
+const blankRef = (): ReferenceEntry => ({ contact_name: "", relationship: "", phone: "", email: "" });
+
 type FormState = Record<string, string | boolean>;
 
 const BLANK: FormState = {
@@ -77,8 +97,6 @@ const BLANK: FormState = {
   registration_number: "", registration_expiry: "", cps_scheme: "", portfolio_description: "",
   insurance_provider: "", insurance_policy_number: "", insurance_expiry: "",
   public_liability_cover: "", employers_liability_cover: "",
-  ref1_name: "", ref1_phone: "", ref1_email: "", ref1_relationship: "", ref1_job_description: "", ref1_job_year: "",
-  ref2_name: "", ref2_phone: "", ref2_email: "", ref2_relationship: "", ref2_job_description: "", ref2_job_year: "",
   declaration_accepted: false,
 };
 
@@ -128,48 +146,78 @@ const StepBar = ({ current }: { current: number }) => (
 
 type UpdFn = (k: string) => (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => void;
 
-const RefBlock = ({ n, px, form, upd, errors }: { n: number; px: "ref1" | "ref2"; form: FormState; upd: UpdFn; errors: Record<string, string> }) => (
-  <div style={{ border: `1px solid ${C.border}`, borderRadius: 10, padding: 16, marginBottom: 16, background: C.white }}>
-    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-      <div style={{ width: 28, height: 28, borderRadius: "50%", background: C.teal, color: C.white, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 700 }}>{n}</div>
-      <h3 style={{ fontSize: 15, fontWeight: 700, color: C.deep, margin: 0 }}>Reference {n}</h3>
+const RefBlock = ({
+  n,
+  ref,
+  errors,
+  onChange,
+  onRemove,
+  canRemove,
+}: {
+  n: number;
+  ref: ReferenceEntry;
+  errors: Record<string, string>;
+  onChange: (patch: Partial<ReferenceEntry>) => void;
+  onRemove: () => void;
+  canRemove: boolean;
+}) => {
+  const k = (field: string) => `ref${n}_${field}`;
+  return (
+    <div style={{ border: `1px solid ${C.border}`, borderRadius: 10, padding: 16, marginBottom: 16, background: C.white }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ width: 28, height: 28, borderRadius: "50%", background: C.teal, color: C.white, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 700 }}>{n}</div>
+          <h3 style={{ fontSize: 15, fontWeight: 700, color: C.deep, margin: 0 }}>Reference {n}</h3>
+        </div>
+        {canRemove && (
+          <button type="button" onClick={onRemove} style={{ background: "none", border: "none", color: C.error, fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
+            Remove
+          </button>
+        )}
+      </div>
+      <Field label="Contact name" req err={errors[k("contact_name")]}>
+        <input style={inputBase(errors[k("contact_name")])} value={ref.contact_name} onChange={(e) => onChange({ contact_name: e.target.value })} placeholder="Sarah Mitchell" />
+      </Field>
+      <Field label="Relationship" req err={errors[k("relationship")]}>
+        <select style={inputBase(errors[k("relationship")])} value={ref.relationship} onChange={(e) => onChange({ relationship: e.target.value as RelationshipValue })}>
+          <option value="">Select...</option>
+          {RELATIONSHIP_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+        </select>
+      </Field>
+      <Grid>
+        <Field label="Phone" err={errors[k("phone")]}>
+          <input style={inputBase(errors[k("phone")])} value={ref.phone} onChange={(e) => onChange({ phone: e.target.value })} placeholder="07700 900000" />
+        </Field>
+        <Field label="Email" err={errors[k("email")]}>
+          <input style={inputBase(errors[k("email")])} value={ref.email} onChange={(e) => onChange({ email: e.target.value })} placeholder="sarah@example.co.uk" />
+        </Field>
+      </Grid>
+      {errors[k("contact_method")] && (
+        <p style={{ fontSize: 12, color: C.error, margin: "-6px 0 0" }}>{errors[k("contact_method")]}</p>
+      )}
     </div>
-    <Grid>
-      <Field label="Full name" req err={errors[`${px}_name`]}>
-        <input style={inputBase(errors[`${px}_name`])} value={form[`${px}_name`] as string} onChange={upd(`${px}_name`)} placeholder="Sarah Mitchell" />
-      </Field>
-      <Field label="Phone" req err={errors[`${px}_phone`]}>
-        <input style={inputBase(errors[`${px}_phone`])} value={form[`${px}_phone`] as string} onChange={upd(`${px}_phone`)} placeholder="07700 900000" />
-      </Field>
-    </Grid>
-    <Field label="Email" err={errors[`${px}_email`]}>
-      <input style={inputBase(errors[`${px}_email`])} value={form[`${px}_email`] as string} onChange={upd(`${px}_email`)} placeholder="sarah@example.co.uk" />
-    </Field>
-    <Field label="Your relationship to this person" req err={errors[`${px}_relationship`]}>
-      <input style={inputBase(errors[`${px}_relationship`])} value={form[`${px}_relationship`] as string} onChange={upd(`${px}_relationship`)} placeholder="Previous client / Architect / Contractor" />
-    </Field>
-    <Field label="What job did you do for them?" req err={errors[`${px}_job_description`]}>
-      <input style={inputBase(errors[`${px}_job_description`])} value={form[`${px}_job_description`] as string} onChange={upd(`${px}_job_description`)} placeholder="Full rewire of 4-bedroom house" />
-    </Field>
-    <Field label="Year completed" req err={errors[`${px}_job_year`]}>
-      <select style={inputBase(errors[`${px}_job_year`])} value={form[`${px}_job_year`] as string} onChange={upd(`${px}_job_year`)}>
-        <option value="">Select year...</option>
-        {Array.from({ length: 11 }, (_, i) => new Date().getFullYear() - i).map(y => <option key={y} value={y}>{y}</option>)}
-      </select>
-    </Field>
-  </div>
-);
+  );
+};
+
 
 export default function Apply() {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<FormState>(BLANK);
+  const [references, setReferences] = useState<ReferenceEntry[]>([blankRef(), blankRef()]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [done, setDone] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const upd: UpdFn = (k) => (e) => {
     const target = e.target as HTMLInputElement;
     setForm(p => ({ ...p, [k]: target.type === "checkbox" ? target.checked : target.value }));
   };
+
+  const updateRef = (i: number, patch: Partial<ReferenceEntry>) => {
+    setReferences(prev => prev.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
+  };
+  const addRef = () => setReferences(prev => [...prev, blankRef()]);
+  const removeRef = (i: number) => setReferences(prev => prev.filter((_, idx) => idx !== i));
 
   const cat = TRADES.find(t => t.id === form.trade_category_id);
   const reg = cat?.lane === "regulated";
@@ -208,12 +256,20 @@ export default function Apply() {
       if (!form.public_liability_cover) e.public_liability_cover = "Required";
     }
     if (n === 4) {
-      (["ref1", "ref2"] as const).forEach(p => {
-        if (!v(`${p}_name`)) e[`${p}_name`] = "Required";
-        if (!v(`${p}_phone`)) e[`${p}_phone`] = "Required";
-        if (!v(`${p}_relationship`)) e[`${p}_relationship`] = "Required";
-        if (!v(`${p}_job_description`)) e[`${p}_job_description`] = "Required";
-        if (!form[`${p}_job_year`]) e[`${p}_job_year`] = "Required";
+      if (references.length < 2) {
+        e.references_count = "Please provide at least 2 references";
+      }
+      references.forEach((r, i) => {
+        const n2 = i + 1;
+        const k = (f: string) => `ref${n2}_${f}`;
+        if (!r.contact_name.trim()) e[k("contact_name")] = "Required";
+        if (!r.relationship) e[k("relationship")] = "Required";
+        const phone = r.phone.trim();
+        const email = r.email.trim();
+        if (!phone && !email) {
+          e[k("contact_method")] = "Provide at least a phone number or email";
+        }
+        if (email && !/\S+@\S+\.\S+/.test(email)) e[k("email")] = "Invalid email";
       });
     }
     if (n === 5 && !form.declaration_accepted) e.declaration_accepted = "You must accept the declaration to proceed";
@@ -222,7 +278,37 @@ export default function Apply() {
 
   const next = () => { const e = validate(step); setErrors(e); if (!Object.keys(e).length) setStep(s => s + 1); };
   const back = () => { setErrors({}); setStep(s => s - 1); };
-  const submit = () => { const e = validate(5); setErrors(e); if (!Object.keys(e).length) setDone(true); };
+
+  const persistReferences = async () => {
+    const applicantEmail = (form.email as string).trim().toLowerCase();
+    if (!applicantEmail) return;
+    const rows = references.map(r => ({
+      applicant_email: applicantEmail,
+      contact_name: r.contact_name.trim(),
+      relationship: r.relationship || "other",
+      phone: r.phone.trim() || null,
+      email: r.email.trim() || null,
+    }));
+    const { error } = await supabase.from("trade_references").insert(rows);
+    if (error) throw error;
+  };
+
+  const submit = async () => {
+    const e = validate(5);
+    setErrors(e);
+    if (Object.keys(e).length) return;
+    setSubmitting(true);
+    try {
+      await persistReferences();
+      setDone(true);
+    } catch (err: any) {
+      console.error("Reference persistence failed", err);
+      setErrors({ submit: err?.message || "Could not save your application. Please try again." });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
 
   // Keep latest form/errors/upd accessible without recreating I/S/T each render.
   // Defining these inline as components caused React to remount the <input> on
@@ -434,15 +520,35 @@ export default function Apply() {
     // 4 — References
     <div key="4">
       <div style={{ marginBottom: 20 }}>
-        <h2 style={{ fontSize: 17, fontWeight: 700, color: C.deep, margin: "0 0 4px" }}>Client references</h2>
-        <p style={{ fontSize: 13, color: C.secondary, margin: 0 }}>We call both references ourselves — a phone conversation, not a form.</p>
+        <h2 style={{ fontSize: 17, fontWeight: 700, color: C.deep, margin: "0 0 4px" }}>References</h2>
+        <p style={{ fontSize: 13, color: C.secondary, margin: 0 }}>Provide at least two references. We need a contact name, the relationship, and at least one way to reach them.</p>
       </div>
       <InfoBox variant="teal">
-        We call these references personally. Please let them know to expect our call. We'll ask about the work you did, how you handled any problems, and whether they'd use you again.
+        We call references personally. Please let them know to expect our call. Once submitted, your reference checks are tracked in your verification record — every call is logged against your application.
       </InfoBox>
-      <RefBlock n={1} px="ref1" form={form} upd={upd} errors={errors} />
-      <RefBlock n={2} px="ref2" form={form} upd={upd} errors={errors} />
+      {references.map((r, i) => (
+        <RefBlock
+          key={i}
+          n={i + 1}
+          ref={r}
+          errors={errors}
+          onChange={(patch) => updateRef(i, patch)}
+          onRemove={() => removeRef(i)}
+          canRemove={references.length > 2}
+        />
+      ))}
+      {errors.references_count && (
+        <p style={{ fontSize: 13, color: C.error, margin: "0 0 12px" }}>{errors.references_count}</p>
+      )}
+      <button
+        type="button"
+        onClick={addRef}
+        style={{ background: "transparent", border: `1.5px dashed ${C.border}`, color: C.teal, padding: "10px 14px", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: "pointer", width: "100%" }}
+      >
+        + Add another reference
+      </button>
     </div>,
+
 
     // 5 — Declaration
     <div key="5">
@@ -521,11 +627,15 @@ export default function Apply() {
               : <span />}
             {step < STEPS.length - 1
               ? <button onClick={next} onMouseEnter={e => (e.currentTarget.style.background = C.tealHover)} onMouseLeave={e => (e.currentTarget.style.background = C.teal)} style={{ background: C.teal, color: C.white, border: "none", padding: "10px 20px", borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: "pointer", transition: "background 0.15s" }}>Continue →</button>
-              : <button onClick={submit} style={{ background: C.teal, color: C.white, border: "none", padding: "10px 22px", borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: "pointer" }}>Submit application</button>}
+              : <button onClick={submit} disabled={submitting} style={{ background: C.teal, color: C.white, border: "none", padding: "10px 22px", borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: submitting ? "not-allowed" : "pointer", opacity: submitting ? 0.6 : 1 }}>{submitting ? "Submitting…" : "Submit application"}</button>}
           </div>
+          {errors.submit && (
+            <p style={{ textAlign: "center", fontSize: 12, color: C.error, margin: "12px 0 0" }}>{errors.submit}</p>
+          )}
           <p style={{ textAlign: "center", fontSize: 12, color: C.secondary, margin: "16px 0 0" }}>
             Step {step + 1} of {STEPS.length} — {STEPS[step]}
           </p>
+
         </div>
       </div>
     </div>

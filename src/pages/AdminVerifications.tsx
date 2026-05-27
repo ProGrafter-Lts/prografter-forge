@@ -32,6 +32,38 @@ interface VerificationDoc {
   uploaded_at: string;
 }
 
+type ReferenceStatus = "not_contacted" | "contacted" | "verified" | "no_response";
+type ReferenceRelationship = "past_customer" | "trade_contact" | "supplier" | "other";
+
+interface TradeReference {
+  id: string;
+  trade_id: string | null;
+  applicant_email: string | null;
+  contact_name: string;
+  relationship: ReferenceRelationship;
+  phone: string | null;
+  email: string | null;
+  status: ReferenceStatus;
+  admin_notes: string | null;
+  status_updated_at: string | null;
+  created_at: string;
+}
+
+const REFERENCE_STATUS_LABEL: Record<ReferenceStatus, string> = {
+  not_contacted: "Not contacted",
+  contacted: "Contacted",
+  verified: "Verified",
+  no_response: "No response",
+};
+
+const REFERENCE_RELATIONSHIP_LABEL: Record<ReferenceRelationship, string> = {
+  past_customer: "Past customer",
+  trade_contact: "Trade contact",
+  supplier: "Supplier",
+  other: "Other",
+};
+
+
 const STATUS_FILTERS = [
   { key: "pending", label: "Pending review" },
   { key: "info_requested", label: "Info requested" },
@@ -58,6 +90,9 @@ const AdminVerifications = () => {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [docs, setDocs] = useState<VerificationDoc[]>([]);
   const [docUrls, setDocUrls] = useState<Record<string, string>>({});
+  const [references, setReferences] = useState<TradeReference[]>([]);
+  const [refUpdating, setRefUpdating] = useState<string | null>(null);
+
   const [working, setWorking] = useState(false);
   const [queryMessage, setQueryMessage] = useState("");
   const [queryOpen, setQueryOpen] = useState(false);
@@ -121,10 +156,29 @@ const AdminVerifications = () => {
 
   useEffect(() => { load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [filter]);
 
+  const loadReferences = async (tradeId: string, applicantEmail: string | null) => {
+    // References may be linked by trade_id (post-signup) or applicant_email (pre-signup).
+    const orParts: string[] = [`trade_id.eq.${tradeId}`];
+    if (applicantEmail) orParts.push(`applicant_email.eq.${applicantEmail.toLowerCase()}`);
+    const { data, error } = await supabase
+      .from("trade_references")
+      .select("id,trade_id,applicant_email,contact_name,relationship,phone,email,status,admin_notes,status_updated_at,created_at")
+      .or(orParts.join(","))
+      .order("created_at", { ascending: true });
+    if (error) {
+      console.warn("loadReferences failed", error);
+      setReferences([]);
+      return;
+    }
+    setReferences((data as TradeReference[]) || []);
+  };
+
   const openTrade = async (tradeId: string) => {
     setActiveId(tradeId);
     setDocs([]);
     setDocUrls({});
+    setReferences([]);
+    const trade = trades.find((t) => t.id === tradeId);
     const { data } = await supabase
       .from("trade_verification_documents")
       .select("id,doc_type,file_path,original_filename,expiry_date,uploaded_at")
@@ -141,7 +195,38 @@ const AdminVerifications = () => {
       if (signed?.signedUrl) urls[d.id] = signed.signedUrl;
     }
     setDocUrls(urls);
+    await loadReferences(tradeId, trade?.email || null);
   };
+
+  const updateReferenceStatus = async (refId: string, status: ReferenceStatus) => {
+    setRefUpdating(refId);
+    const { error } = await supabase
+      .from("trade_references")
+      .update({ status })
+      .eq("id", refId);
+    if (error) {
+      toast.error(error.message);
+    } else {
+      setReferences((prev) =>
+        prev.map((r) => (r.id === refId ? { ...r, status, status_updated_at: new Date().toISOString() } : r)),
+      );
+      toast.success("Reference status updated");
+    }
+    setRefUpdating(null);
+  };
+
+  const updateReferenceNotes = async (refId: string, notes: string) => {
+    const { error } = await supabase
+      .from("trade_references")
+      .update({ admin_notes: notes || null })
+      .eq("id", refId);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    setReferences((prev) => prev.map((r) => (r.id === refId ? { ...r, admin_notes: notes || null } : r)));
+  };
+
 
   const sendVerifiedEmail = async (trade: PendingTrade) => {
     if (!trade.email) return;
@@ -611,7 +696,70 @@ const AdminVerifications = () => {
                 </div>
               )}
 
+              {/* References */}
+              <div className="mt-8">
+                <h3 className="font-mono text-xs uppercase tracking-wider text-secondary-text mb-3">
+                  References ({references.length})
+                </h3>
+                {references.length === 0 ? (
+                  <p className="font-body text-sm text-secondary-text">
+                    No references submitted.
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+                    {references.map((r) => (
+                      <div
+                        key={r.id}
+                        className="border border-navy/10 rounded-xl p-3"
+                      >
+                        <div className="flex items-start justify-between gap-3 flex-wrap">
+                          <div className="min-w-0">
+                            <div className="font-body text-sm text-navy font-semibold">
+                              {r.contact_name}
+                            </div>
+                            <div className="font-mono text-xs uppercase text-teal">
+                              {REFERENCE_RELATIONSHIP_LABEL[r.relationship]}
+                            </div>
+                            <div className="font-body text-sm text-secondary-text mt-1 space-x-3">
+                              {r.phone && <span>📞 {r.phone}</span>}
+                              {r.email && <span>✉️ {r.email}</span>}
+                            </div>
+                            {r.status_updated_at && (
+                              <div className="font-mono text-[11px] text-secondary-text mt-1">
+                                last updated {format(new Date(r.status_updated_at), "dd MMM yyyy HH:mm")}
+                              </div>
+                            )}
+                          </div>
+                          <select
+                            value={r.status}
+                            disabled={refUpdating === r.id}
+                            onChange={(e) => updateReferenceStatus(r.id, e.target.value as ReferenceStatus)}
+                            className="border border-navy/15 rounded-lg px-2 py-1.5 text-xs font-mono uppercase text-navy bg-white focus:outline-none focus:border-teal"
+                          >
+                            {(Object.keys(REFERENCE_STATUS_LABEL) as ReferenceStatus[]).map((s) => (
+                              <option key={s} value={s}>{REFERENCE_STATUS_LABEL[s]}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <textarea
+                          defaultValue={r.admin_notes || ""}
+                          placeholder="Call notes (saved when you click out)…"
+                          onBlur={(e) => {
+                            if ((e.target.value || "") !== (r.admin_notes || "")) {
+                              updateReferenceNotes(r.id, e.target.value);
+                            }
+                          }}
+                          rows={2}
+                          className="mt-3 w-full border border-navy/10 rounded-lg p-2 font-body text-xs focus:outline-none focus:border-teal"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               {/* Actions */}
+
               {activeTrade.verification_status !== "approved" && (
                 <div className="mt-6 pt-5 border-t border-navy/10">
                   {!queryOpen ? (
