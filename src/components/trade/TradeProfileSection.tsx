@@ -81,7 +81,7 @@ const TradeProfileSection = ({ tradeId }: TradeProfileSectionProps) => {
           website: data.website || "",
           years_experience: data.years_experience || 0,
         });
-        setVerified(data.verified);
+        setVerified(data.verification_status === "approved");
         setCpsScheme((data as any).cps_scheme ?? null);
         setCpsRegistrationNumber((data as any).cps_registration_number ?? null);
         setGasSafeNumber((data as any).gas_safe_number ?? null);
