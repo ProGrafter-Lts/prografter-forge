@@ -156,10 +156,29 @@ const AdminVerifications = () => {
 
   useEffect(() => { load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [filter]);
 
+  const loadReferences = async (tradeId: string, applicantEmail: string | null) => {
+    // References may be linked by trade_id (post-signup) or applicant_email (pre-signup).
+    const orParts: string[] = [`trade_id.eq.${tradeId}`];
+    if (applicantEmail) orParts.push(`applicant_email.eq.${applicantEmail.toLowerCase()}`);
+    const { data, error } = await supabase
+      .from("trade_references")
+      .select("id,trade_id,applicant_email,contact_name,relationship,phone,email,status,admin_notes,status_updated_at,created_at")
+      .or(orParts.join(","))
+      .order("created_at", { ascending: true });
+    if (error) {
+      console.warn("loadReferences failed", error);
+      setReferences([]);
+      return;
+    }
+    setReferences((data as TradeReference[]) || []);
+  };
+
   const openTrade = async (tradeId: string) => {
     setActiveId(tradeId);
     setDocs([]);
     setDocUrls({});
+    setReferences([]);
+    const trade = trades.find((t) => t.id === tradeId);
     const { data } = await supabase
       .from("trade_verification_documents")
       .select("id,doc_type,file_path,original_filename,expiry_date,uploaded_at")
@@ -176,7 +195,38 @@ const AdminVerifications = () => {
       if (signed?.signedUrl) urls[d.id] = signed.signedUrl;
     }
     setDocUrls(urls);
+    await loadReferences(tradeId, trade?.email || null);
   };
+
+  const updateReferenceStatus = async (refId: string, status: ReferenceStatus) => {
+    setRefUpdating(refId);
+    const { error } = await supabase
+      .from("trade_references")
+      .update({ status })
+      .eq("id", refId);
+    if (error) {
+      toast.error(error.message);
+    } else {
+      setReferences((prev) =>
+        prev.map((r) => (r.id === refId ? { ...r, status, status_updated_at: new Date().toISOString() } : r)),
+      );
+      toast.success("Reference status updated");
+    }
+    setRefUpdating(null);
+  };
+
+  const updateReferenceNotes = async (refId: string, notes: string) => {
+    const { error } = await supabase
+      .from("trade_references")
+      .update({ admin_notes: notes || null })
+      .eq("id", refId);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    setReferences((prev) => prev.map((r) => (r.id === refId ? { ...r, admin_notes: notes || null } : r)));
+  };
+
 
   const sendVerifiedEmail = async (trade: PendingTrade) => {
     if (!trade.email) return;
