@@ -2823,9 +2823,13 @@ export type Database = {
           avg_rating: number | null
           bio: string | null
           business_logo_path: string | null
+          business_structure: string | null
           calendar_token: string
           ciga_registered: boolean
+          companies_house_checked_at: string | null
           companies_house_number: string | null
+          companies_house_registered_name: string | null
+          companies_house_status: string
           company_name: string
           completed_jobs_count: number
           cps_registration_number: string | null
@@ -2883,9 +2887,13 @@ export type Database = {
           avg_rating?: number | null
           bio?: string | null
           business_logo_path?: string | null
+          business_structure?: string | null
           calendar_token?: string
           ciga_registered?: boolean
+          companies_house_checked_at?: string | null
           companies_house_number?: string | null
+          companies_house_registered_name?: string | null
+          companies_house_status?: string
           company_name: string
           completed_jobs_count?: number
           cps_registration_number?: string | null
@@ -2943,9 +2951,13 @@ export type Database = {
           avg_rating?: number | null
           bio?: string | null
           business_logo_path?: string | null
+          business_structure?: string | null
           calendar_token?: string
           ciga_registered?: boolean
+          companies_house_checked_at?: string | null
           companies_house_number?: string | null
+          companies_house_registered_name?: string | null
+          companies_house_status?: string
           company_name?: string
           completed_jobs_count?: number
           cps_registration_number?: string | null
