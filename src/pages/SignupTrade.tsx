@@ -53,6 +53,8 @@ const GENERAL_TRADE_TYPES = [
 ] as const;
 
 const UK_POSTCODE = /^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}$/i;
+const COMPANIES_HOUSE_NUMBER = /^([A-Z]{2}\d{6}|\d{8})$/;
+const normaliseChNumber = (v: string) => v.replace(/\s+/g, "").toUpperCase();
 
 const step1Schema = z.object({
   fullName: z.string().trim().min(2, "Enter your full name").max(120),
@@ -101,6 +103,9 @@ const SignupTrade = () => {
   // Step 2: business
   const [tradeType, setTradeType] = useState("");
   const [companyName, setCompanyName] = useState("");
+  const [businessStructure, setBusinessStructure] = useState<"" | "sole_trader" | "limited_company" | "partnership">("");
+  const [companiesHouseNumber, setCompaniesHouseNumber] = useState("");
+  const [companiesHouseError, setCompaniesHouseError] = useState("");
   const [yearsExperience, setYearsExperience] = useState("");
   const [website, setWebsite] = useState("");
   const [bio, setBio] = useState("");
@@ -165,7 +170,7 @@ const SignupTrade = () => {
       const { data } = await supabase
         .from("trades")
         .select(
-          "id, name, company_name, phone, postcode, trade_type, years_experience, website, bio, mcs_number, trustmark_number, pas_2030_accredited, pas_2035_coordinator, ozev_approved, fgas_registered, ciga_registered, inca_certified, green_cert_expiry, insurance_cert_url, insurance_expiry, submitted_for_review_at",
+          "id, name, company_name, phone, postcode, trade_type, years_experience, website, bio, mcs_number, trustmark_number, pas_2030_accredited, pas_2035_coordinator, ozev_approved, fgas_registered, ciga_registered, inca_certified, green_cert_expiry, insurance_cert_url, insurance_expiry, submitted_for_review_at, business_structure, companies_house_number",
         )
         .eq("user_id", user.id)
         .maybeSingle();
@@ -187,6 +192,8 @@ const SignupTrade = () => {
       // 'Other' is the placeholder set by handle_new_user — treat as empty.
       setTradeType(tt && tt !== "Other" ? tt : "");
       setCompanyName((data as any).company_name ?? "");
+      setBusinessStructure(((data as any).business_structure as any) ?? "");
+      setCompaniesHouseNumber((data as any).companies_house_number ?? "");
       setYearsExperience(
         (data as any).years_experience != null ? String((data as any).years_experience) : "",
       );
@@ -261,9 +268,15 @@ const SignupTrade = () => {
     }
     const handle = window.setTimeout(async () => {
       setAutosaveState("saving");
+      const chNorm = normaliseChNumber(companiesHouseNumber);
+      const chValid = !chNorm || COMPANIES_HOUSE_NUMBER.test(chNorm);
       const updates: Record<string, unknown> = {
         trade_type: tradeType || null,
         company_name: companyName.trim() || null,
+        business_structure: businessStructure || null,
+        // Only persist a CH number once it's a valid 8-char format; otherwise leave null
+        // so the DB trigger doesn't reject the autosave.
+        companies_house_number: chValid ? (chNorm || null) : null,
         years_experience: yearsExperience ? parseInt(yearsExperience, 10) : null,
         website: website.trim() || null,
         bio: bio.trim() || null,
@@ -292,7 +305,8 @@ const SignupTrade = () => {
     }, 800);
     return () => window.clearTimeout(handle);
   }, [
-    createdTradeId, tradeType, companyName, yearsExperience, website, bio, isGreen,
+    createdTradeId, tradeType, companyName, businessStructure, companiesHouseNumber,
+    yearsExperience, website, bio, isGreen,
     mcsNumber, trustmarkNumber, pas2030, pas2035, ozevApproved, fgasRegistered,
     cigaRegistered, incaCertified, greenCertExpiry,
   ]);
@@ -471,8 +485,27 @@ const SignupTrade = () => {
   // ---- STEP 2: save business details ----
   const submitStep2 = async () => {
     setError("");
+    setCompaniesHouseError("");
     if (!tradeType || !companyName.trim()) {
       setError("Trade type and company name are required");
+      return;
+    }
+    if (!businessStructure) {
+      setError("Please select your business structure");
+      return;
+    }
+    const chNorm = normaliseChNumber(companiesHouseNumber);
+    if (businessStructure === "limited_company") {
+      if (!chNorm) {
+        setCompaniesHouseError("Companies House number is required for limited companies");
+        return;
+      }
+      if (!COMPANIES_HOUSE_NUMBER.test(chNorm)) {
+        setCompaniesHouseError("Must be 8 digits, or 2 letters + 6 digits (e.g. SC123456)");
+        return;
+      }
+    } else if (chNorm && !COMPANIES_HOUSE_NUMBER.test(chNorm)) {
+      setCompaniesHouseError("Must be 8 digits, or 2 letters + 6 digits (e.g. SC123456)");
       return;
     }
     if (!bio.trim()) {
@@ -490,6 +523,8 @@ const SignupTrade = () => {
       const updates: Record<string, unknown> = {
         trade_type: tradeType,
         company_name: companyName.trim(),
+        business_structure: businessStructure,
+        companies_house_number: chNorm || null,
         years_experience: yearsExperience ? parseInt(yearsExperience, 10) : null,
         website: website.trim() || null,
         bio: bio.trim() || null,
@@ -907,6 +942,67 @@ const SignupTrade = () => {
                     Sole trader? Your full name is fine. Ltd company? Use your registered Companies House name.
                   </p>
                 </div>
+
+                {/* Company Registration */}
+                <div className="p-4 rounded-xl border border-cream/10 space-y-4">
+                  <p className="font-mono text-xs text-teal uppercase tracking-widest">Company Registration</p>
+                  <div>
+                    <label className={labelClass}>Business structure *</label>
+                    <div className="space-y-2">
+                      {([
+                        { v: "sole_trader", label: "Sole trader" },
+                        { v: "limited_company", label: "Limited company" },
+                        { v: "partnership", label: "Partnership" },
+                      ] as const).map((opt) => (
+                        <label key={opt.v} className="flex items-center gap-3 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="business_structure"
+                            value={opt.v}
+                            checked={businessStructure === opt.v}
+                            onChange={() => {
+                              setBusinessStructure(opt.v);
+                              setCompaniesHouseError("");
+                              if (opt.v === "sole_trader") setCompaniesHouseNumber("");
+                            }}
+                            className="w-4 h-4 accent-teal cursor-pointer"
+                          />
+                          <span className="text-sm text-cream/80">{opt.label}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                  {businessStructure && businessStructure !== "sole_trader" && (
+                    <div>
+                      <label className={labelClass}>
+                        Companies House number {businessStructure === "limited_company" ? "*" : "(optional)"}
+                      </label>
+                      <input
+                        className={inputClass}
+                        value={companiesHouseNumber}
+                        onChange={(e) => {
+                          setCompaniesHouseNumber(e.target.value.toUpperCase());
+                          setCompaniesHouseError("");
+                        }}
+                        onBlur={() => {
+                          const v = normaliseChNumber(companiesHouseNumber);
+                          if (v && !COMPANIES_HOUSE_NUMBER.test(v)) {
+                            setCompaniesHouseError("Must be 8 digits, or 2 letters + 6 digits (e.g. SC123456)");
+                          }
+                        }}
+                        placeholder="12345678 or SC123456"
+                        maxLength={8}
+                      />
+                      <p className="mt-1.5 font-body text-xs text-cream/50">
+                        8 characters — find yours on your certificate of incorporation or at find-and-update.company-information.service.gov.uk
+                      </p>
+                      {companiesHouseError && (
+                        <p className="mt-1.5 font-body text-xs text-red-400">{companiesHouseError}</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className={labelClass}>Years Experience</label>

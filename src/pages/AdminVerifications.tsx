@@ -21,6 +21,11 @@ interface PendingTrade {
   created_at: string;
   insurance_expiry: string | null;
   trade_type_other: string | null;
+  business_structure: string | null;
+  companies_house_number: string | null;
+  companies_house_status: string | null;
+  companies_house_registered_name: string | null;
+  companies_house_checked_at: string | null;
 }
 
 interface VerificationDoc {
@@ -129,7 +134,7 @@ const AdminVerifications = () => {
     const { data, error } = await supabase
       .from("trades")
       .select(
-        "id,user_id,name,company_name,trade_type,trade_type_other,postcode,phone,verification_status,verified,submitted_for_review_at,created_at,insurance_expiry"
+        "id,user_id,name,company_name,trade_type,trade_type_other,postcode,phone,verification_status,verified,submitted_for_review_at,created_at,insurance_expiry,business_structure,companies_house_number,companies_house_status,companies_house_registered_name,companies_house_checked_at"
       )
       .eq("verification_status", filter)
       .order("submitted_for_review_at", { ascending: true, nullsFirst: false })
@@ -226,6 +231,23 @@ const AdminVerifications = () => {
     }
     setReferences((prev) => prev.map((r) => (r.id === refId ? { ...r, admin_notes: notes || null } : r)));
   };
+
+  const updateCompaniesHouseStatus = async (
+    tradeId: string,
+    status: "not_checked" | "verified" | "mismatch" | "n/a_sole_trader",
+  ) => {
+    const { error } = await supabase
+      .from("trades")
+      .update({ companies_house_status: status, companies_house_checked_at: new Date().toISOString() } as any)
+      .eq("id", tradeId);
+    if (error) { toast.error(error.message); return; }
+    setTrades((prev) => prev.map((t) => (t.id === tradeId
+      ? { ...t, companies_house_status: status, companies_house_checked_at: new Date().toISOString() }
+      : t)));
+    toast.success("Companies House status updated");
+  };
+
+
 
 
   const sendVerifiedEmail = async (trade: PendingTrade) => {
@@ -651,6 +673,95 @@ const AdminVerifications = () => {
               >
                 Close
               </button>
+            </div>
+
+            <div className="px-6 py-5 border-b border-navy/10">
+              <h3 className="font-mono text-xs uppercase tracking-wider text-secondary-text mb-3">
+                Company Registration
+              </h3>
+              {(() => {
+                const bs = activeTrade.business_structure;
+                const bsLabel = bs === "sole_trader" ? "Sole trader"
+                  : bs === "limited_company" ? "Limited company"
+                  : bs === "partnership" ? "Partnership"
+                  : "Not provided";
+                const chs = (activeTrade.companies_house_status || "not_checked") as
+                  "not_checked" | "verified" | "mismatch" | "n/a_sole_trader";
+                const ch = activeTrade.companies_house_number;
+                const registerUrl = ch
+                  ? `https://find-and-update.company-information.service.gov.uk/company/${encodeURIComponent(ch)}`
+                  : null;
+                const statusClass =
+                  chs === "verified" ? "bg-green-100 text-green-700"
+                  : chs === "mismatch" ? "bg-red-100 text-red-700"
+                  : chs === "n/a_sole_trader" ? "bg-navy/10 text-navy"
+                  : "bg-amber-100 text-amber-700";
+                const statusLabel: Record<typeof chs, string> = {
+                  not_checked: "Not checked",
+                  verified: "Verified",
+                  mismatch: "Mismatch — review",
+                  "n/a_sole_trader": "N/A (sole trader)",
+                };
+                return (
+                  <div className="space-y-3">
+                    <div className="flex flex-wrap gap-3 items-center">
+                      <Badge className="bg-navy/10 text-navy">{bsLabel}</Badge>
+                      <Badge className={statusClass}>{statusLabel[chs]}</Badge>
+                      {activeTrade.companies_house_checked_at && (
+                        <span className="font-mono text-[11px] text-secondary-text">
+                          checked {format(new Date(activeTrade.companies_house_checked_at), "dd MMM yyyy HH:mm")}
+                        </span>
+                      )}
+                    </div>
+                    <div className="font-body text-sm text-navy">
+                      <span className="font-mono text-xs uppercase text-secondary-text mr-2">CH no:</span>
+                      {ch ? (
+                        <>
+                          <span className="font-mono">{ch}</span>
+                          {registerUrl && (
+                            <a
+                              href={registerUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="ml-3 font-mono text-xs uppercase tracking-wider text-teal hover:underline"
+                            >
+                              View on register ↗
+                            </a>
+                          )}
+                        </>
+                      ) : (
+                        <span className="text-secondary-text">—</span>
+                      )}
+                    </div>
+                    {activeTrade.companies_house_registered_name && (
+                      <div className="font-body text-sm text-navy">
+                        <span className="font-mono text-xs uppercase text-secondary-text mr-2">Registered name:</span>
+                        {activeTrade.companies_house_registered_name}
+                        {activeTrade.company_name
+                          && activeTrade.company_name.trim().toLowerCase()
+                             !== activeTrade.companies_house_registered_name.trim().toLowerCase() && (
+                          <span className="ml-2 text-xs text-red-600 font-mono uppercase">
+                            ≠ {activeTrade.company_name}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                    <div className="flex items-center gap-2">
+                      <label className="font-mono text-xs uppercase text-secondary-text">Status:</label>
+                      <select
+                        value={chs}
+                        onChange={(e) => updateCompaniesHouseStatus(activeTrade.id, e.target.value as any)}
+                        className="border border-navy/15 rounded-lg px-2 py-1.5 text-xs font-mono uppercase text-navy bg-white focus:outline-none focus:border-teal"
+                      >
+                        <option value="not_checked">Not checked</option>
+                        <option value="verified">Verified</option>
+                        <option value="mismatch">Mismatch</option>
+                        <option value="n/a_sole_trader">N/A (sole trader)</option>
+                      </select>
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
 
             <div className="px-6 py-5">
