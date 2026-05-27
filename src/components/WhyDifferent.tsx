@@ -1,23 +1,19 @@
 const comparisons = [
   {
-    others: "Some platforms charge £299/month and up before you've earned a single penny — and yes, we're talking about Checkatrade. Their large 50-mile tier hits £1,959/month, or £23,508/year.",
-    prografter: "£0 until a job completes. Then 7.5%.",
+    others: 'Sell you "leads" you pay for whether they hire you or not',
+    prografter: "Free to post a job. Free to quote a job.",
   },
   {
-    others: "Get matched, then left alone",
-    prografter: "Matched AND managed, start to finish",
+    others: '"Free trials" that start charging you a subscription',
+    prografter: "7.5% only on completion, capped at £900. No subscription, ever.",
   },
   {
-    others: "No project documentation",
-    prografter: "Full live project record",
+    others: "A directory — then they walk away",
+    prografter: "A written contract, staged payments held safe, and a Homeowner Manual at the end.",
   },
   {
-    others: "Disputes with no paper trail",
-    prografter: "Every change signed off digitally",
-  },
-  {
-    others: "Homeowner gets nothing at the end",
-    prografter: "Homeowner Manual delivered at completion",
+    others: "Price promises, with nothing protecting the customer behind them",
+    prografter: "Fair to the homeowner. Fair to the trade. We only earn when you do.",
   },
 ];
 
@@ -30,7 +26,7 @@ const WhyDifferent = () => {
           <span className="font-mono text-xs text-teal uppercase tracking-widest">The Difference</span>
         </div>
         <h2 className="font-heading text-cream text-[48px] craft:text-[64px] leading-none mb-16">
-          Every Other Platform. Then ProGrafter.
+          The difference, plainly.
         </h2>
 
         <div className="grid craft:grid-cols-2 gap-8">

@@ -26,7 +26,7 @@ const PRE_LOGIN_TRADE_QUESTIONS = [
   "How does the commission work?",
   "What trades can join?",
   "How do I get matched to jobs?",
-  "Is there a contract or lock-in?",
+  "Is there a lock-in?",
   "How do I get paid?",
 ];
 
