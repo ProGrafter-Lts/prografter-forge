@@ -232,6 +232,23 @@ const AdminVerifications = () => {
     setReferences((prev) => prev.map((r) => (r.id === refId ? { ...r, admin_notes: notes || null } : r)));
   };
 
+  const updateCompaniesHouseStatus = async (
+    tradeId: string,
+    status: "not_checked" | "verified" | "mismatch" | "n/a_sole_trader",
+  ) => {
+    const { error } = await supabase
+      .from("trades")
+      .update({ companies_house_status: status, companies_house_checked_at: new Date().toISOString() } as any)
+      .eq("id", tradeId);
+    if (error) { toast.error(error.message); return; }
+    setTrades((prev) => prev.map((t) => (t.id === tradeId
+      ? { ...t, companies_house_status: status, companies_house_checked_at: new Date().toISOString() }
+      : t)));
+    toast.success("Companies House status updated");
+  };
+
+
+
 
   const sendVerifiedEmail = async (trade: PendingTrade) => {
     if (!trade.email) return;
