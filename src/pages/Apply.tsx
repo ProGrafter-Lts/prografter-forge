@@ -1,4 +1,6 @@
 import { useCallback, useRef, useState, type CSSProperties, type ReactNode, type ChangeEvent } from "react";
+import { supabase } from "@/integrations/supabase/client";
+
 
 // ── ProGrafter Brand Palette ──────────────────────────────────────────────────
 const C = {
