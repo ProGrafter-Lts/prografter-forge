@@ -268,9 +268,15 @@ const SignupTrade = () => {
     }
     const handle = window.setTimeout(async () => {
       setAutosaveState("saving");
+      const chNorm = normaliseChNumber(companiesHouseNumber);
+      const chValid = !chNorm || COMPANIES_HOUSE_NUMBER.test(chNorm);
       const updates: Record<string, unknown> = {
         trade_type: tradeType || null,
         company_name: companyName.trim() || null,
+        business_structure: businessStructure || null,
+        // Only persist a CH number once it's a valid 8-char format; otherwise leave null
+        // so the DB trigger doesn't reject the autosave.
+        companies_house_number: chValid ? (chNorm || null) : null,
         years_experience: yearsExperience ? parseInt(yearsExperience, 10) : null,
         website: website.trim() || null,
         bio: bio.trim() || null,
