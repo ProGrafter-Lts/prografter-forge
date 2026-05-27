@@ -90,6 +90,9 @@ const AdminVerifications = () => {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [docs, setDocs] = useState<VerificationDoc[]>([]);
   const [docUrls, setDocUrls] = useState<Record<string, string>>({});
+  const [references, setReferences] = useState<TradeReference[]>([]);
+  const [refUpdating, setRefUpdating] = useState<string | null>(null);
+
   const [working, setWorking] = useState(false);
   const [queryMessage, setQueryMessage] = useState("");
   const [queryOpen, setQueryOpen] = useState(false);
