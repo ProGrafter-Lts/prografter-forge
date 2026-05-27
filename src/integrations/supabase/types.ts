@@ -2667,6 +2667,69 @@ export type Database = {
         }
         Relationships: []
       }
+      trade_references: {
+        Row: {
+          admin_notes: string | null
+          applicant_email: string | null
+          contact_name: string
+          created_at: string
+          email: string | null
+          id: string
+          phone: string | null
+          relationship: Database["public"]["Enums"]["trade_reference_relationship"]
+          status: Database["public"]["Enums"]["trade_reference_status"]
+          status_updated_at: string | null
+          status_updated_by: string | null
+          trade_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          applicant_email?: string | null
+          contact_name: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          phone?: string | null
+          relationship?: Database["public"]["Enums"]["trade_reference_relationship"]
+          status?: Database["public"]["Enums"]["trade_reference_status"]
+          status_updated_at?: string | null
+          status_updated_by?: string | null
+          trade_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          applicant_email?: string | null
+          contact_name?: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          phone?: string | null
+          relationship?: Database["public"]["Enums"]["trade_reference_relationship"]
+          status?: Database["public"]["Enums"]["trade_reference_status"]
+          status_updated_at?: string | null
+          status_updated_by?: string | null
+          trade_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trade_references_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "trades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trade_references_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "trades_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trade_specialisms: {
         Row: {
           created_at: string
@@ -3350,6 +3413,16 @@ export type Database = {
     Enums: {
       app_role: "admin" | "moderator" | "user"
       shortlist_contact_status: "todo" | "contacted" | "quoted" | "won" | "dead"
+      trade_reference_relationship:
+        | "past_customer"
+        | "trade_contact"
+        | "supplier"
+        | "other"
+      trade_reference_status:
+        | "not_contacted"
+        | "contacted"
+        | "verified"
+        | "no_response"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -3479,6 +3552,18 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "moderator", "user"],
       shortlist_contact_status: ["todo", "contacted", "quoted", "won", "dead"],
+      trade_reference_relationship: [
+        "past_customer",
+        "trade_contact",
+        "supplier",
+        "other",
+      ],
+      trade_reference_status: [
+        "not_contacted",
+        "contacted",
+        "verified",
+        "no_response",
+      ],
     },
   },
 } as const
