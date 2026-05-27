@@ -485,8 +485,27 @@ const SignupTrade = () => {
   // ---- STEP 2: save business details ----
   const submitStep2 = async () => {
     setError("");
+    setCompaniesHouseError("");
     if (!tradeType || !companyName.trim()) {
       setError("Trade type and company name are required");
+      return;
+    }
+    if (!businessStructure) {
+      setError("Please select your business structure");
+      return;
+    }
+    const chNorm = normaliseChNumber(companiesHouseNumber);
+    if (businessStructure === "limited_company") {
+      if (!chNorm) {
+        setCompaniesHouseError("Companies House number is required for limited companies");
+        return;
+      }
+      if (!COMPANIES_HOUSE_NUMBER.test(chNorm)) {
+        setCompaniesHouseError("Must be 8 digits, or 2 letters + 6 digits (e.g. SC123456)");
+        return;
+      }
+    } else if (chNorm && !COMPANIES_HOUSE_NUMBER.test(chNorm)) {
+      setCompaniesHouseError("Must be 8 digits, or 2 letters + 6 digits (e.g. SC123456)");
       return;
     }
     if (!bio.trim()) {
@@ -504,6 +523,8 @@ const SignupTrade = () => {
       const updates: Record<string, unknown> = {
         trade_type: tradeType,
         company_name: companyName.trim(),
+        business_structure: businessStructure,
+        companies_house_number: chNorm || null,
         years_experience: yearsExperience ? parseInt(yearsExperience, 10) : null,
         website: website.trim() || null,
         bio: bio.trim() || null,
