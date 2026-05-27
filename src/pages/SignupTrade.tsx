@@ -192,6 +192,8 @@ const SignupTrade = () => {
       // 'Other' is the placeholder set by handle_new_user — treat as empty.
       setTradeType(tt && tt !== "Other" ? tt : "");
       setCompanyName((data as any).company_name ?? "");
+      setBusinessStructure(((data as any).business_structure as any) ?? "");
+      setCompaniesHouseNumber((data as any).companies_house_number ?? "");
       setYearsExperience(
         (data as any).years_experience != null ? String((data as any).years_experience) : "",
       );
