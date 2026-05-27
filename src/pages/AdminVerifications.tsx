@@ -21,6 +21,11 @@ interface PendingTrade {
   created_at: string;
   insurance_expiry: string | null;
   trade_type_other: string | null;
+  business_structure: string | null;
+  companies_house_number: string | null;
+  companies_house_status: string | null;
+  companies_house_registered_name: string | null;
+  companies_house_checked_at: string | null;
 }
 
 interface VerificationDoc {
