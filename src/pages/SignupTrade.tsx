@@ -170,7 +170,7 @@ const SignupTrade = () => {
       const { data } = await supabase
         .from("trades")
         .select(
-          "id, name, company_name, phone, postcode, trade_type, years_experience, website, bio, mcs_number, trustmark_number, pas_2030_accredited, pas_2035_coordinator, ozev_approved, fgas_registered, ciga_registered, inca_certified, green_cert_expiry, insurance_cert_url, insurance_expiry, submitted_for_review_at",
+          "id, name, company_name, phone, postcode, trade_type, years_experience, website, bio, mcs_number, trustmark_number, pas_2030_accredited, pas_2035_coordinator, ozev_approved, fgas_registered, ciga_registered, inca_certified, green_cert_expiry, insurance_cert_url, insurance_expiry, submitted_for_review_at, business_structure, companies_house_number",
         )
         .eq("user_id", user.id)
         .maybeSingle();
