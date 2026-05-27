@@ -203,13 +203,21 @@ const RefBlock = ({
 export default function Apply() {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<FormState>(BLANK);
+  const [references, setReferences] = useState<ReferenceEntry[]>([blankRef(), blankRef()]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [done, setDone] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const upd: UpdFn = (k) => (e) => {
     const target = e.target as HTMLInputElement;
     setForm(p => ({ ...p, [k]: target.type === "checkbox" ? target.checked : target.value }));
   };
+
+  const updateRef = (i: number, patch: Partial<ReferenceEntry>) => {
+    setReferences(prev => prev.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
+  };
+  const addRef = () => setReferences(prev => [...prev, blankRef()]);
+  const removeRef = (i: number) => setReferences(prev => prev.filter((_, idx) => idx !== i));
 
   const cat = TRADES.find(t => t.id === form.trade_category_id);
   const reg = cat?.lane === "regulated";
@@ -248,12 +256,20 @@ export default function Apply() {
       if (!form.public_liability_cover) e.public_liability_cover = "Required";
     }
     if (n === 4) {
-      (["ref1", "ref2"] as const).forEach(p => {
-        if (!v(`${p}_name`)) e[`${p}_name`] = "Required";
-        if (!v(`${p}_phone`)) e[`${p}_phone`] = "Required";
-        if (!v(`${p}_relationship`)) e[`${p}_relationship`] = "Required";
-        if (!v(`${p}_job_description`)) e[`${p}_job_description`] = "Required";
-        if (!form[`${p}_job_year`]) e[`${p}_job_year`] = "Required";
+      if (references.length < 2) {
+        e.references_count = "Please provide at least 2 references";
+      }
+      references.forEach((r, i) => {
+        const n2 = i + 1;
+        const k = (f: string) => `ref${n2}_${f}`;
+        if (!r.contact_name.trim()) e[k("contact_name")] = "Required";
+        if (!r.relationship) e[k("relationship")] = "Required";
+        const phone = r.phone.trim();
+        const email = r.email.trim();
+        if (!phone && !email) {
+          e[k("contact_method")] = "Provide at least a phone number or email";
+        }
+        if (email && !/\S+@\S+\.\S+/.test(email)) e[k("email")] = "Invalid email";
       });
     }
     if (n === 5 && !form.declaration_accepted) e.declaration_accepted = "You must accept the declaration to proceed";
@@ -262,7 +278,37 @@ export default function Apply() {
 
   const next = () => { const e = validate(step); setErrors(e); if (!Object.keys(e).length) setStep(s => s + 1); };
   const back = () => { setErrors({}); setStep(s => s - 1); };
-  const submit = () => { const e = validate(5); setErrors(e); if (!Object.keys(e).length) setDone(true); };
+
+  const persistReferences = async () => {
+    const applicantEmail = (form.email as string).trim().toLowerCase();
+    if (!applicantEmail) return;
+    const rows = references.map(r => ({
+      applicant_email: applicantEmail,
+      contact_name: r.contact_name.trim(),
+      relationship: r.relationship || "other",
+      phone: r.phone.trim() || null,
+      email: r.email.trim() || null,
+    }));
+    const { error } = await supabase.from("trade_references").insert(rows);
+    if (error) throw error;
+  };
+
+  const submit = async () => {
+    const e = validate(5);
+    setErrors(e);
+    if (Object.keys(e).length) return;
+    setSubmitting(true);
+    try {
+      await persistReferences();
+      setDone(true);
+    } catch (err: any) {
+      console.error("Reference persistence failed", err);
+      setErrors({ submit: err?.message || "Could not save your application. Please try again." });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
 
   // Keep latest form/errors/upd accessible without recreating I/S/T each render.
   // Defining these inline as components caused React to remount the <input> on
