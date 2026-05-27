@@ -70,6 +70,24 @@ const TRADES = [
 
 const STEPS = ["Your details", "Your trade", "Qualifications", "Insurance", "References", "Declaration"];
 
+const RELATIONSHIP_OPTIONS = [
+  { value: "past_customer", label: "Past customer" },
+  { value: "trade_contact", label: "Trade contact" },
+  { value: "supplier", label: "Supplier" },
+  { value: "other", label: "Other" },
+] as const;
+
+type RelationshipValue = (typeof RELATIONSHIP_OPTIONS)[number]["value"];
+
+type ReferenceEntry = {
+  contact_name: string;
+  relationship: RelationshipValue | "";
+  phone: string;
+  email: string;
+};
+
+const blankRef = (): ReferenceEntry => ({ contact_name: "", relationship: "", phone: "", email: "" });
+
 type FormState = Record<string, string | boolean>;
 
 const BLANK: FormState = {
@@ -79,8 +97,6 @@ const BLANK: FormState = {
   registration_number: "", registration_expiry: "", cps_scheme: "", portfolio_description: "",
   insurance_provider: "", insurance_policy_number: "", insurance_expiry: "",
   public_liability_cover: "", employers_liability_cover: "",
-  ref1_name: "", ref1_phone: "", ref1_email: "", ref1_relationship: "", ref1_job_description: "", ref1_job_year: "",
-  ref2_name: "", ref2_phone: "", ref2_email: "", ref2_relationship: "", ref2_job_description: "", ref2_job_year: "",
   declaration_accepted: false,
 };
 
@@ -130,37 +146,59 @@ const StepBar = ({ current }: { current: number }) => (
 
 type UpdFn = (k: string) => (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => void;
 
-const RefBlock = ({ n, px, form, upd, errors }: { n: number; px: "ref1" | "ref2"; form: FormState; upd: UpdFn; errors: Record<string, string> }) => (
-  <div style={{ border: `1px solid ${C.border}`, borderRadius: 10, padding: 16, marginBottom: 16, background: C.white }}>
-    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-      <div style={{ width: 28, height: 28, borderRadius: "50%", background: C.teal, color: C.white, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 700 }}>{n}</div>
-      <h3 style={{ fontSize: 15, fontWeight: 700, color: C.deep, margin: 0 }}>Reference {n}</h3>
+const RefBlock = ({
+  n,
+  ref,
+  errors,
+  onChange,
+  onRemove,
+  canRemove,
+}: {
+  n: number;
+  ref: ReferenceEntry;
+  errors: Record<string, string>;
+  onChange: (patch: Partial<ReferenceEntry>) => void;
+  onRemove: () => void;
+  canRemove: boolean;
+}) => {
+  const k = (field: string) => `ref${n}_${field}`;
+  return (
+    <div style={{ border: `1px solid ${C.border}`, borderRadius: 10, padding: 16, marginBottom: 16, background: C.white }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ width: 28, height: 28, borderRadius: "50%", background: C.teal, color: C.white, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 700 }}>{n}</div>
+          <h3 style={{ fontSize: 15, fontWeight: 700, color: C.deep, margin: 0 }}>Reference {n}</h3>
+        </div>
+        {canRemove && (
+          <button type="button" onClick={onRemove} style={{ background: "none", border: "none", color: C.error, fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
+            Remove
+          </button>
+        )}
+      </div>
+      <Field label="Contact name" req err={errors[k("contact_name")]}>
+        <input style={inputBase(errors[k("contact_name")])} value={ref.contact_name} onChange={(e) => onChange({ contact_name: e.target.value })} placeholder="Sarah Mitchell" />
+      </Field>
+      <Field label="Relationship" req err={errors[k("relationship")]}>
+        <select style={inputBase(errors[k("relationship")])} value={ref.relationship} onChange={(e) => onChange({ relationship: e.target.value as RelationshipValue })}>
+          <option value="">Select...</option>
+          {RELATIONSHIP_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+        </select>
+      </Field>
+      <Grid>
+        <Field label="Phone" err={errors[k("phone")]}>
+          <input style={inputBase(errors[k("phone")])} value={ref.phone} onChange={(e) => onChange({ phone: e.target.value })} placeholder="07700 900000" />
+        </Field>
+        <Field label="Email" err={errors[k("email")]}>
+          <input style={inputBase(errors[k("email")])} value={ref.email} onChange={(e) => onChange({ email: e.target.value })} placeholder="sarah@example.co.uk" />
+        </Field>
+      </Grid>
+      {errors[k("contact_method")] && (
+        <p style={{ fontSize: 12, color: C.error, margin: "-6px 0 0" }}>{errors[k("contact_method")]}</p>
+      )}
     </div>
-    <Grid>
-      <Field label="Full name" req err={errors[`${px}_name`]}>
-        <input style={inputBase(errors[`${px}_name`])} value={form[`${px}_name`] as string} onChange={upd(`${px}_name`)} placeholder="Sarah Mitchell" />
-      </Field>
-      <Field label="Phone" req err={errors[`${px}_phone`]}>
-        <input style={inputBase(errors[`${px}_phone`])} value={form[`${px}_phone`] as string} onChange={upd(`${px}_phone`)} placeholder="07700 900000" />
-      </Field>
-    </Grid>
-    <Field label="Email" err={errors[`${px}_email`]}>
-      <input style={inputBase(errors[`${px}_email`])} value={form[`${px}_email`] as string} onChange={upd(`${px}_email`)} placeholder="sarah@example.co.uk" />
-    </Field>
-    <Field label="Your relationship to this person" req err={errors[`${px}_relationship`]}>
-      <input style={inputBase(errors[`${px}_relationship`])} value={form[`${px}_relationship`] as string} onChange={upd(`${px}_relationship`)} placeholder="Previous client / Architect / Contractor" />
-    </Field>
-    <Field label="What job did you do for them?" req err={errors[`${px}_job_description`]}>
-      <input style={inputBase(errors[`${px}_job_description`])} value={form[`${px}_job_description`] as string} onChange={upd(`${px}_job_description`)} placeholder="Full rewire of 4-bedroom house" />
-    </Field>
-    <Field label="Year completed" req err={errors[`${px}_job_year`]}>
-      <select style={inputBase(errors[`${px}_job_year`])} value={form[`${px}_job_year`] as string} onChange={upd(`${px}_job_year`)}>
-        <option value="">Select year...</option>
-        {Array.from({ length: 11 }, (_, i) => new Date().getFullYear() - i).map(y => <option key={y} value={y}>{y}</option>)}
-      </select>
-    </Field>
-  </div>
-);
+  );
+};
+
 
 export default function Apply() {
   const [step, setStep] = useState(0);
