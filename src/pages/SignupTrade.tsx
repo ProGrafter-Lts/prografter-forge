@@ -942,6 +942,67 @@ const SignupTrade = () => {
                     Sole trader? Your full name is fine. Ltd company? Use your registered Companies House name.
                   </p>
                 </div>
+
+                {/* Company Registration */}
+                <div className="p-4 rounded-xl border border-cream/10 space-y-4">
+                  <p className="font-mono text-xs text-teal uppercase tracking-widest">Company Registration</p>
+                  <div>
+                    <label className={labelClass}>Business structure *</label>
+                    <div className="space-y-2">
+                      {([
+                        { v: "sole_trader", label: "Sole trader" },
+                        { v: "limited_company", label: "Limited company" },
+                        { v: "partnership", label: "Partnership" },
+                      ] as const).map((opt) => (
+                        <label key={opt.v} className="flex items-center gap-3 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="business_structure"
+                            value={opt.v}
+                            checked={businessStructure === opt.v}
+                            onChange={() => {
+                              setBusinessStructure(opt.v);
+                              setCompaniesHouseError("");
+                              if (opt.v === "sole_trader") setCompaniesHouseNumber("");
+                            }}
+                            className="w-4 h-4 accent-teal cursor-pointer"
+                          />
+                          <span className="text-sm text-cream/80">{opt.label}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                  {businessStructure && businessStructure !== "sole_trader" && (
+                    <div>
+                      <label className={labelClass}>
+                        Companies House number {businessStructure === "limited_company" ? "*" : "(optional)"}
+                      </label>
+                      <input
+                        className={inputClass}
+                        value={companiesHouseNumber}
+                        onChange={(e) => {
+                          setCompaniesHouseNumber(e.target.value.toUpperCase());
+                          setCompaniesHouseError("");
+                        }}
+                        onBlur={() => {
+                          const v = normaliseChNumber(companiesHouseNumber);
+                          if (v && !COMPANIES_HOUSE_NUMBER.test(v)) {
+                            setCompaniesHouseError("Must be 8 digits, or 2 letters + 6 digits (e.g. SC123456)");
+                          }
+                        }}
+                        placeholder="12345678 or SC123456"
+                        maxLength={8}
+                      />
+                      <p className="mt-1.5 font-body text-xs text-cream/50">
+                        8 characters — find yours on your certificate of incorporation or at find-and-update.company-information.service.gov.uk
+                      </p>
+                      {companiesHouseError && (
+                        <p className="mt-1.5 font-body text-xs text-red-400">{companiesHouseError}</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className={labelClass}>Years Experience</label>
