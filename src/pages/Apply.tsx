@@ -627,11 +627,15 @@ export default function Apply() {
               : <span />}
             {step < STEPS.length - 1
               ? <button onClick={next} onMouseEnter={e => (e.currentTarget.style.background = C.tealHover)} onMouseLeave={e => (e.currentTarget.style.background = C.teal)} style={{ background: C.teal, color: C.white, border: "none", padding: "10px 20px", borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: "pointer", transition: "background 0.15s" }}>Continue →</button>
-              : <button onClick={submit} style={{ background: C.teal, color: C.white, border: "none", padding: "10px 22px", borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: "pointer" }}>Submit application</button>}
+              : <button onClick={submit} disabled={submitting} style={{ background: C.teal, color: C.white, border: "none", padding: "10px 22px", borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: submitting ? "not-allowed" : "pointer", opacity: submitting ? 0.6 : 1 }}>{submitting ? "Submitting…" : "Submit application"}</button>}
           </div>
+          {errors.submit && (
+            <p style={{ textAlign: "center", fontSize: 12, color: C.error, margin: "12px 0 0" }}>{errors.submit}</p>
+          )}
           <p style={{ textAlign: "center", fontSize: 12, color: C.secondary, margin: "16px 0 0" }}>
             Step {step + 1} of {STEPS.length} — {STEPS[step]}
           </p>
+
         </div>
       </div>
     </div>
