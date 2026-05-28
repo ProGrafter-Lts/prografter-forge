@@ -122,6 +122,8 @@ const AdminVerifications = () => {
   const [docUrls, setDocUrls] = useState<Record<string, string>>({});
   const [references, setReferences] = useState<TradeReference[]>([]);
   const [refUpdating, setRefUpdating] = useState<string | null>(null);
+  const [portfolio, setPortfolio] = useState<PortfolioItem[]>([]);
+  const [portfolioUrls, setPortfolioUrls] = useState<Record<string, string>>({});
 
   const [working, setWorking] = useState(false);
   const [queryMessage, setQueryMessage] = useState("");
