@@ -545,7 +545,6 @@ const LeadDetail = ({ lead, agent, onSaved, onSkip }: { lead: Lead; agent?: Agen
             </div>
           )}
         </div>
-        </div>
 
         <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: 10, padding: "12px 14px" }}>
           <p style={{ fontSize: 10, fontWeight: 700, color: C.teal, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 6px" }}>🏛️ Agent / representative (contact first)</p>
