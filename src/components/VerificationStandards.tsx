@@ -85,7 +85,12 @@ const VerificationStandards = () => {
               </div>
             );
           })}
-        </div>
+        {/* Honest sub-line */}
+        <p className="font-body text-cream/80 text-sm md:text-base mb-6 fade-up max-w-3xl">
+          Where the law requires registration — gas, electrical self-certification — we
+          require it. Everywhere else, a great trade with genuine experience has a real
+          route in.
+        </p>
 
         {/* Footer line + link */}
         <div className="fade-up flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
@@ -100,6 +105,8 @@ const VerificationStandards = () => {
             How we verify
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </a>
+        </div>
+
         </div>
       </div>
     </section>
