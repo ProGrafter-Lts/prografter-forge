@@ -378,6 +378,20 @@ const LeadDetail = ({ lead, agent, onSaved, onSkip }: { lead: Lead; agent?: Agen
     }
   };
 
+  const acceptSuggested = async (text: string) => {
+    setNextAction(text);
+    const { error } = await supabase
+      .from("planning_leads")
+      .update({ next_action: text } as never)
+      .eq("id", lead.id);
+    if (error) {
+      toast({ title: "Save failed", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Next action set", description: text });
+      onSaved();
+    }
+  };
+
   const enrichFromPdf = async () => {
     setEnriching(true);
     const { data: { session } } = await supabase.auth.getSession();
