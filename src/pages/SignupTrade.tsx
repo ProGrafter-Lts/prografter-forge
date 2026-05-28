@@ -559,6 +559,9 @@ const SignupTrade = () => {
         bio: bio.trim() || null,
         is_green_trade: isGreen,
         specialisms_prompt_seen: true,
+        band: bandConfig.band,
+        // Non-Band-3 trades go down the registered route automatically; Band 3 picks below.
+        verification_route: bandConfig.band === "competence_assessed" ? null : "registered",
       };
       if (isGreen) {
         updates.mcs_number = mcsNumber.trim() || null;
