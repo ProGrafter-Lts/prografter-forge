@@ -1475,8 +1475,10 @@ export type Database = {
           homeowner_contacted_at: string | null
           homeowner_interested: string | null
           id: string
+          letter_sent_at: string | null
           next_action: string | null
           notes: string | null
+          outreach_status: string
           pdf_enriched_at: string | null
           pdf_source_url: string | null
           pipeline_status: string
@@ -1515,8 +1517,10 @@ export type Database = {
           homeowner_contacted_at?: string | null
           homeowner_interested?: string | null
           id?: string
+          letter_sent_at?: string | null
           next_action?: string | null
           notes?: string | null
+          outreach_status?: string
           pdf_enriched_at?: string | null
           pdf_source_url?: string | null
           pipeline_status?: string
@@ -1555,8 +1559,10 @@ export type Database = {
           homeowner_contacted_at?: string | null
           homeowner_interested?: string | null
           id?: string
+          letter_sent_at?: string | null
           next_action?: string | null
           notes?: string | null
+          outreach_status?: string
           pdf_enriched_at?: string | null
           pdf_source_url?: string | null
           pipeline_status?: string
