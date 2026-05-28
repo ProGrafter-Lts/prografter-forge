@@ -301,7 +301,7 @@ const LeadCard = ({ lead, onSelect, selected, agent, onSkip }: {
   );
 };
 
-const LeadDetail = ({ lead, agent, onSaved }: { lead: Lead; agent?: Agent; onSaved: () => void }) => {
+const LeadDetail = ({ lead, agent, onSaved, onSkip }: { lead: Lead; agent?: Agent; onSaved: () => void; onSkip: (l: Lead, skip: boolean) => void }) => {
   const [notes, setNotes] = useState(lead.notes || "");
   const [nextAction, setNextAction] = useState(lead.next_action || "");
   const [pipelineStatus, setPipelineStatus] = useState(lead.pipeline_status);
