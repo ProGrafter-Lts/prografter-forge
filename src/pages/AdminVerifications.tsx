@@ -210,7 +210,8 @@ const AdminVerifications = () => {
     setDocs([]);
     setDocUrls({});
     setReferences([]);
-    const trade = trades.find((t) => t.id === tradeId);
+    setPortfolio([]);
+    setPortfolioUrls({});
     const { data } = await supabase
       .from("trade_verification_documents")
       .select("id,doc_type,file_path,original_filename,expiry_date,uploaded_at")
