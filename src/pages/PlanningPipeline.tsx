@@ -210,20 +210,23 @@ const PriorityBar = ({ score }: { score: number }) => {
   );
 };
 
-const LeadCard = ({ lead, onSelect, selected, agent }: {
+const LeadCard = ({ lead, onSelect, selected, agent, onSkip }: {
   lead: Lead; onSelect: (l: Lead) => void; selected: boolean; agent?: Agent;
+  onSkip: (l: Lead, skip: boolean) => void;
 }) => {
   const days = daysSince(lead.submitted_date);
   const overdue = isOverdue(lead.pipeline_status, days);
-  const noNextAction = !lead.next_action || !lead.next_action.trim();
+  const manual = (lead.next_action || "").trim();
+  const suggested = manual ? null : suggestedNextAction(lead, agent);
   const nonDomestic = isNonDomestic(lead);
+  const skipped = lead.outreach_status === "skipped";
   return (
     <div onClick={() => onSelect(lead)}
       style={{
         background: selected ? C.darkCard : "rgba(255,255,255,0.04)",
         border: `1px solid ${selected ? C.teal : C.darkBorder}`,
         borderRadius: 10, padding: "10px 14px", cursor: "pointer",
-        marginBottom: 6, transition: "all 0.15s",
+        marginBottom: 6, transition: "all 0.15s", opacity: skipped ? 0.6 : 1,
       }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6, gap: 8 }}>
         <div style={{ minWidth: 0 }}>
@@ -244,20 +247,13 @@ const LeadCard = ({ lead, onSelect, selected, agent }: {
       <div style={{ marginBottom: 6 }}>
         <PriorityBar score={lead.priority_score} />
       </div>
-      {(overdue || noNextAction || nonDomestic) && (
+      {(overdue || nonDomestic) && (
         <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 6 }}>
           {overdue && (
             <span style={{ fontSize: 9, fontWeight: 700, color: C.amber,
               background: "rgba(217,119,6,0.18)", border: `1px solid ${C.amberBorder}`,
               borderRadius: 4, padding: "1px 6px", letterSpacing: "0.04em" }}>
               ⚠ FOLLOW-UP OVERDUE
-            </span>
-          )}
-          {noNextAction && (
-            <span style={{ fontSize: 9, fontWeight: 700, color: C.amber,
-              background: "rgba(217,119,6,0.18)", border: `1px solid ${C.amberBorder}`,
-              borderRadius: 4, padding: "1px 6px", letterSpacing: "0.04em" }}>
-              ⚠ NO NEXT ACTION
             </span>
           )}
           {nonDomestic && (
@@ -269,11 +265,37 @@ const LeadCard = ({ lead, onSelect, selected, agent }: {
           )}
         </div>
       )}
+      {/* Next action — always shown: manual in white, or suggested in teal with an 'auto' tag */}
+      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+        <span style={{ fontSize: 9, color: C.dimText, flexShrink: 0 }}>▸</span>
+        <span style={{
+          fontSize: 10, fontWeight: 600, lineHeight: 1.3,
+          color: manual ? C.brightText : C.teal,
+          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+        }}>
+          {manual || suggested || "No suggestion"}
+        </span>
+        {!manual && suggested && (
+          <span style={{ fontSize: 8, fontWeight: 700, color: C.teal, background: "rgba(13,148,136,0.18)",
+            border: `1px solid rgba(13,148,136,0.4)`, borderRadius: 4, padding: "0 5px", letterSpacing: "0.06em", flexShrink: 0 }}>
+            AUTO
+          </span>
+        )}
+      </div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 6 }}>
         <SBadge status={lead.pipeline_status} />
-        <span style={{ fontSize: 9, color: C.dimText, textAlign: "right" }}>
-          {agent ? `🏛️ ${agent.company_name || agent.contact_name}` : "No agent"}
-        </span>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <span style={{ fontSize: 9, color: C.dimText, textAlign: "right" }}>
+            {agent ? `🏛️ ${agent.company_name || agent.contact_name}` : "No agent"}
+          </span>
+          <button
+            onClick={(e) => { e.stopPropagation(); onSkip(lead, !skipped); }}
+            title={skipped ? "Restore this lead" : "Skip this lead (reversible)"}
+            style={{ background: "transparent", border: `1px solid ${C.darkBorder}`, color: skipped ? C.teal : C.dimText,
+              borderRadius: 5, padding: "1px 7px", fontSize: 9, fontWeight: 700, cursor: "pointer", flexShrink: 0 }}>
+            {skipped ? "↺ Restore" : "Skip"}
+          </button>
+        </div>
       </div>
     </div>
   );
