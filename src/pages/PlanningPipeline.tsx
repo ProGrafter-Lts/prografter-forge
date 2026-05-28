@@ -909,8 +909,21 @@ export default function PlanningPipeline() {
           {(!isMobile || !selectedLeadId) && (
             <div style={{ width: isMobile ? "100%" : 320, flexShrink: 0, borderRight: isMobile ? "none" : `1px solid ${C.darkBorder}`, borderBottom: isMobile ? `1px solid ${C.darkBorder}` : "none", display: "flex", flexDirection: "column", overflow: "hidden" }}>
               <div style={{ padding: 12, borderBottom: `1px solid ${C.darkBorder}` }}>
+                {/* PART 2 — value band pills */}
+                <div style={{ display: "flex", gap: 6, marginBottom: 8, flexWrap: "wrap" }}>
+                  {VALUE_BANDS.map((b) => {
+                    const on = valueBand === b.id;
+                    return (
+                      <button key={b.id} type="button" onClick={() => setValueBand(b.id)} style={{
+                        background: on ? C.teal : "transparent", color: on ? C.white : C.dimText,
+                        border: `1px solid ${on ? C.teal : C.darkBorder}`, borderRadius: 20,
+                        padding: "4px 12px", fontSize: 11, fontWeight: 700, cursor: "pointer",
+                      }}>{b.label}</button>
+                    );
+                  })}
+                </div>
                 <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search address, applicant, agent…" style={{ ...inp(), marginBottom: 8 }} />
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 8 }}>
                   <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} style={inp()}>
                     <option value="all" style={{ color: C.body }}>All statuses</option>
                     <option value="submitted" style={{ color: C.body }}>🔥 Submitted</option>
@@ -922,11 +935,23 @@ export default function PlanningPipeline() {
                     {PIPELINE_STAGES.map((s) => <option key={s.id} value={s.id} style={{ color: C.body }}>{s.label}</option>)}
                   </select>
                 </div>
+                {/* PART 2 — sort dropdown + show-skipped toggle */}
+                <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                  <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} style={{ ...inp(), flex: 1 }}>
+                    {SORT_OPTIONS.map((s) => <option key={s.id} value={s.id} style={{ color: C.body }}>{s.label}</option>)}
+                  </select>
+                  <button type="button" onClick={() => setShowSkipped((v) => !v)} title="Toggle skipped leads" style={{
+                    background: showSkipped ? C.teal : "transparent", color: showSkipped ? C.white : C.dimText,
+                    border: `1px solid ${showSkipped ? C.teal : C.darkBorder}`, borderRadius: 7,
+                    padding: "8px 10px", fontSize: 10, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap",
+                  }}>{showSkipped ? "Hide" : "Show"} skipped{skippedCount ? ` (${skippedCount})` : ""}</button>
+                </div>
               </div>
               <div style={{ flex: 1, overflowY: "auto", padding: "10px 12px", maxHeight: isMobile ? "none" : undefined }}>
                 {filteredLeads.map((lead) => (
                   <LeadCard key={lead.id} lead={lead} agent={lead.agent_id ? agentsById[lead.agent_id] : undefined}
-                    selected={selectedLead?.id === lead.id} onSelect={(l) => setSelectedLeadId(l.id)} />
+                    selected={selectedLead?.id === lead.id} onSelect={(l) => setSelectedLeadId(l.id)} onSkip={skipLead} />
+                ))}
                 ))}
                 {filteredLeads.length === 0 && (
                   <p style={{ color: C.dimText, fontSize: 12, textAlign: "center", marginTop: 20 }}>No leads match your filters.</p>
