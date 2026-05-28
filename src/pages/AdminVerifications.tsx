@@ -6,6 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import SEO from "@/components/SEO";
 
+import { classifyTrade, REGISTER_URLS, SCHEME_LABEL, type RegistrationScheme } from "@/lib/tradeBanding";
+
 interface PendingTrade {
   id: string;
   user_id: string | null;
@@ -26,6 +28,26 @@ interface PendingTrade {
   companies_house_status: string | null;
   companies_house_registered_name: string | null;
   companies_house_checked_at: string | null;
+  band: string | null;
+  verification_route: string | null;
+  years_in_trade: number | null;
+  assessor_name: string | null;
+  assessment_notes: string | null;
+  assessment_evidence_complete: boolean;
+  references_called: boolean;
+  site_assessment_done: boolean;
+  competence_interview_done: boolean;
+  gas_safe_number: string | null;
+  cps_registration_number: string | null;
+  mcs_number: string | null;
+}
+
+interface PortfolioItem {
+  id: string;
+  storage_path: string;
+  area_or_address: string | null;
+  approx_date: string | null;
+  caption: string | null;
 }
 
 interface VerificationDoc {
