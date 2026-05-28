@@ -148,6 +148,17 @@ const SignupTrade = () => {
   const [qualExpiry, setQualExpiry] = useState<Date | undefined>();
   const [docsConfirmed, setDocsConfirmed] = useState(false);
 
+  // Banding + route
+  const bandConfig = useMemo(() => classifyTrade(tradeType), [tradeType]);
+  const [chosenRoute, setChosenRoute] = useState<VerificationRoute | "">("");
+  const [showRouteChoice, setShowRouteChoice] = useState(false);
+
+  // Time-served: portfolio + references
+  const [portfolio, setPortfolio] = useState<PortfolioDraft[]>([]);
+  const [uploadingPortfolio, setUploadingPortfolio] = useState(false);
+  const [references, setReferences] = useState<ReferenceDraft[]>([blankRef(), blankRef()]);
+  const isTimeServed = chosenRoute === "time_served";
+
   const qualMeta = qualificationCopy(tradeType);
   const isGreen = isGreenTrade(tradeType);
 
