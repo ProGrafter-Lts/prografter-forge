@@ -1006,7 +1006,7 @@ const AdminVerifications = () => {
 
               {/* Actions */}
 
-              {activeTrade.verification_status !== "approved" && (
+              {!["approved","verified","rejected"].includes(activeTrade.verification_status || "") && (
                 <div className="mt-6 pt-5 border-t border-navy/10">
                   {!queryOpen ? (
                     <div className="flex flex-wrap gap-2">
