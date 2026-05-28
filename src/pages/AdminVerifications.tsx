@@ -338,14 +338,16 @@ const AdminVerifications = () => {
 
   const approve = async (trade: PendingTrade) => {
     setWorking(true);
-    const { error } = await supabase
-      .from("trades")
-      .update({ verified: true, verification_status: "approved" } as any)
-      .eq("id", trade.id);
-    if (error) {
-      toast.error(error.message);
-      setWorking(false);
-      return;
+    // Time-served goes through the RPC which enforces the 4-item checklist.
+    if (trade.verification_route === "time_served") {
+      const { error } = await supabase.rpc("admin_approve_trade", { _trade_id: trade.id } as any);
+      if (error) { toast.error(error.message); setWorking(false); return; }
+    } else {
+      const { error } = await supabase
+        .from("trades")
+        .update({ verified: true, verification_status: "verified" } as any)
+        .eq("id", trade.id);
+      if (error) { toast.error(error.message); setWorking(false); return; }
     }
     await sendVerifiedEmail(trade);
     toast.success(`${trade.company_name || trade.name} approved — email sent`);
