@@ -735,7 +735,13 @@ export default function PlanningPipeline() {
   const [filterPipeline, setFilterPipeline] = useState("all");
   const [search, setSearch] = useState("");
   const [ingesting, setIngesting] = useState(false);
+  const [valueBand, setValueBand] = useState<string>(() => localStorage.getItem(LS_BAND) || "40k");
+  const [sortBy, setSortBy] = useState<string>(() => localStorage.getItem(LS_SORT) || "value_desc");
+  const [showSkipped, setShowSkipped] = useState(false);
   const isMobile = useIsMobile();
+
+  useEffect(() => { localStorage.setItem(LS_BAND, valueBand); }, [valueBand]);
+  useEffect(() => { localStorage.setItem(LS_SORT, sortBy); }, [sortBy]);
 
   const load = async () => {
     setLoading(true);
