@@ -92,9 +92,12 @@ const REFERENCE_RELATIONSHIP_LABEL: Record<ReferenceRelationship, string> = {
 
 
 const STATUS_FILTERS = [
-  { key: "pending", label: "Pending review" },
+  { key: "pending", label: "Pending (legacy)" },
+  { key: "pending_verification", label: "Pending verification" },
+  { key: "pending_assessment", label: "Pending assessment" },
   { key: "info_requested", label: "Info requested" },
   { key: "approved", label: "Approved" },
+  { key: "verified", label: "Verified" },
   { key: "rejected", label: "Rejected" },
 ] as const;
 
