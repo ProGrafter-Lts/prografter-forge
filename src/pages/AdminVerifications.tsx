@@ -900,7 +900,8 @@ const AdminVerifications = () => {
             </div>
 
             <div className="px-6 py-5">
-
+              <h3 className="font-mono text-xs uppercase tracking-wider text-secondary-text mb-3">
+                Documents ({docs.length})
               </h3>
               {docs.length === 0 ? (
                 <p className="font-body text-sm text-secondary-text">
