@@ -952,7 +952,6 @@ export default function PlanningPipeline() {
                   <LeadCard key={lead.id} lead={lead} agent={lead.agent_id ? agentsById[lead.agent_id] : undefined}
                     selected={selectedLead?.id === lead.id} onSelect={(l) => setSelectedLeadId(l.id)} onSkip={skipLead} />
                 ))}
-                ))}
                 {filteredLeads.length === 0 && (
                   <p style={{ color: C.dimText, fontSize: 12, textAlign: "center", marginTop: 20 }}>No leads match your filters.</p>
                 )}
