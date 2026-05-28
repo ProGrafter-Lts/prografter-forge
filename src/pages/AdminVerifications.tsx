@@ -818,7 +818,88 @@ const AdminVerifications = () => {
               })()}
             </div>
 
-            <div className="px-6 py-5">
+            {/* Route-aware verification panel */}
+            <div className="px-6 py-5 border-b border-navy/10">
+              {(() => {
+                const cfg = classifyTrade(activeTrade.trade_type);
+                const route = activeTrade.verification_route || (cfg.band === "competence_assessed" ? "—" : "registered");
+                const number = activeTrade.gas_safe_number || activeTrade.cps_registration_number || activeTrade.mcs_number || "";
+                return (
+                  <>
+                    <h3 className="font-mono text-xs uppercase tracking-wider text-secondary-text mb-3">
+                      Band & route
+                    </h3>
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      <Badge className="bg-navy/10 text-navy">Band: {cfg.band}</Badge>
+                      <Badge className="bg-teal/10 text-teal">Route: {route}</Badge>
+                      {activeTrade.years_in_trade != null && (
+                        <Badge className="bg-navy/10 text-navy font-mono">{activeTrade.years_in_trade}y in trade</Badge>
+                      )}
+                    </div>
+                    {cfg.required && cfg.required.length > 0 && (
+                      <div className="text-sm space-y-1 mb-3">
+                        <div className="font-mono text-xs uppercase text-secondary-text">Public register check (one click):</div>
+                        <div className="flex flex-wrap gap-2">
+                          {cfg.required.map((scheme) => (
+                            <a
+                              key={scheme}
+                              href={REGISTER_URLS[scheme as RegistrationScheme](number || "")}
+                              target="_blank" rel="noopener noreferrer"
+                              className="font-mono text-xs uppercase tracking-wider text-teal underline"
+                            >
+                              {SCHEME_LABEL[scheme as RegistrationScheme]} ↗
+                            </a>
+                          ))}
+                        </div>
+                        <div className="font-mono text-xs text-secondary-text">Number on file: {number || "—"}</div>
+                      </div>
+                    )}
+
+                    {activeTrade.verification_route === "time_served" && (
+                      <div className="mt-4 p-3 rounded-xl bg-amber-50 border border-amber-200 space-y-2">
+                        <div className="font-mono text-xs uppercase text-amber-800 mb-1">Time-served checklist — all 4 required to approve</div>
+                        {[
+                          ["assessment_evidence_complete", "Evidence reviewed (portfolio + years)"],
+                          ["references_called", "Both references called"],
+                          ["site_assessment_done", "Site / work assessment done"],
+                          ["competence_interview_done", "Competence interview done"],
+                        ].map(([field, label]) => (
+                          <label key={field} className="flex items-center gap-2 text-sm text-navy">
+                            <input
+                              type="checkbox"
+                              checked={!!(activeTrade as any)[field]}
+                              onChange={(e) => updateChecklist(activeTrade.id, field, e.target.checked)}
+                            />
+                            {label}
+                          </label>
+                        ))}
+                      </div>
+                    )}
+
+                    {portfolio.length > 0 && (
+                      <div className="mt-4">
+                        <div className="font-mono text-xs uppercase text-secondary-text mb-2">Portfolio ({portfolio.length})</div>
+                        <div className="grid grid-cols-3 gap-2">
+                          {portfolio.map((p) => (
+                            <a key={p.id} href={portfolioUrls[p.id]} target="_blank" rel="noopener noreferrer"
+                               className="block border border-navy/10 rounded-lg overflow-hidden hover:border-teal">
+                              {portfolioUrls[p.id]
+                                ? <img src={portfolioUrls[p.id]} alt={p.caption || "portfolio"} className="w-full h-24 object-cover" />
+                                : <div className="h-24 bg-navy/5" />}
+                              <div className="p-1 text-[10px] font-mono text-secondary-text truncate">
+                                {p.area_or_address || "—"}
+                              </div>
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
+            </div>
+
+
               <h3 className="font-mono text-xs uppercase tracking-wider text-secondary-text mb-3">
                 Documents ({docs.length})
               </h3>
