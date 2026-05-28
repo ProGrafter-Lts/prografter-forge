@@ -1206,8 +1206,47 @@ const SignupTrade = () => {
             </div>
           )}
 
+          {/* ROUTE CHOICE — Band 3 only */}
+          {showRouteChoice && bandConfig.band === "competence_assessed" && (
+            <div>
+              <h2 className="font-heading text-cream text-[40px] leading-none mb-3">
+                How will you <span className="text-teal">prove it?</span>
+              </h2>
+              <p className="font-body text-cream/60 text-sm mb-6">
+                {tradeType} isn't legally gated. Pick the route that matches your background — both lead to the same verified badge.
+              </p>
+              <div className="space-y-4">
+                <button
+                  type="button"
+                  onClick={() => { setChosenRoute("qualified"); setShowRouteChoice(false); setStep(3); }}
+                  className="w-full text-left p-5 rounded-xl border border-cream/15 hover:border-teal bg-cream/5 transition-colors"
+                >
+                  <p className="font-mono text-xs text-teal uppercase tracking-widest mb-2">Route A — Qualified</p>
+                  <p className="font-heading text-cream text-lg mb-1">I hold a trade qualification</p>
+                  <p className="font-body text-cream/60 text-sm">
+                    NVQ / City &amp; Guilds / apprenticeship certificate. Upload it as your trade qualification.
+                  </p>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setChosenRoute("time_served"); setShowRouteChoice(false); setStep(3); }}
+                  className="w-full text-left p-5 rounded-xl border border-cream/15 hover:border-teal bg-cream/5 transition-colors"
+                >
+                  <p className="font-mono text-xs text-teal uppercase tracking-widest mb-2">Route B — Time-Served</p>
+                  <p className="font-heading text-cream text-lg mb-1">I've earned it on the tools</p>
+                  <p className="font-body text-cream/60 text-sm">
+                    No formal qualification — proven by 2+ years in the trade, a portfolio of at least 5 photos of your own work, 2 references we phone, plus a short competence interview.
+                  </p>
+                </button>
+              </div>
+              <div className="flex gap-3 mt-8">
+                <button onClick={() => { setShowRouteChoice(false); setStep(2); }} className="flex-1 border border-cream/20 text-cream/80 font-mono text-sm py-3 rounded-xl hover:bg-cream/5 transition-colors">← Back</button>
+              </div>
+            </div>
+          )}
+
           {/* STEP 3 */}
-          {step === 3 && (
+          {step === 3 && !showRouteChoice && (
             <div>
               <div className="flex items-baseline justify-between gap-3 mb-3">
                 <h2 className="font-heading text-cream text-[40px] leading-none">
