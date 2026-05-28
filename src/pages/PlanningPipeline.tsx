@@ -875,6 +875,7 @@ export default function PlanningPipeline() {
           <div style={{ textAlign: "center", flex: isMobile ? "1 1 60px" : "none" }}>
             <p style={{ fontSize: 16, fontWeight: 700, color: C.brightText, margin: 0 }}>{leads.length}</p>
             <p style={{ fontSize: 9, color: C.dimText, margin: 0 }}>TOTAL</p>
+            <p style={{ fontSize: 9, color: C.teal, margin: 0, fontWeight: 700 }}>({filteredLeads.length} visible)</p>
           </div>
           <div style={{ textAlign: "center", flex: isMobile ? "1 1 60px" : "none" }}>
             <p style={{ fontSize: 16, fontWeight: 700, color: C.teal, margin: 0 }}>{agents.length}</p>
