@@ -509,9 +509,42 @@ const LeadDetail = ({ lead, agent, onSaved, onSkip }: { lead: Lead; agent?: Agen
           )}
           {!agent && !lead.agent_name && (
             <div style={{ marginTop: 8, padding: "8px 10px", background: "rgba(217,119,6,0.12)", border: `1px solid rgba(217,119,6,0.3)`, borderRadius: 7 }}>
-              <p style={{ fontSize: 11, color: C.amber, margin: 0 }}>⚠️ No agent listed — read the PDF form or contact homeowner directly</p>
+              <p style={{ fontSize: 11, color: C.amber, margin: "0 0 8px" }}>⚠️ No agent listed — read the PDF form or contact homeowner directly</p>
+              {/* PART 3 — homeowner search launchers (open-in-new-tab only; nothing is scraped or stored) */}
+              <p style={{ fontSize: 10, fontWeight: 700, color: C.amber, textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 6px" }}>Find homeowner contact:</p>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                {(() => {
+                  const town = guessTown(lead);
+                  const pc = (lead.postcode || "").trim();
+                  const links = [
+                    {
+                      label: "🔎 192.com search",
+                      url: `https://www.192.com/people/search/?initial=&surname=&town=${encodeURIComponent(town)}&postcode=${encodeURIComponent(pc)}`,
+                    },
+                    {
+                      label: "🏷️ Land Registry",
+                      url: "https://search-property-information.service.gov.uk/",
+                    },
+                    {
+                      label: "🌐 Google: occupier",
+                      url: `https://www.google.com/search?q=${encodeURIComponent(`occupier of ${lead.site_address}`)}`,
+                    },
+                  ];
+                  return links.map((l) => (
+                    <a key={l.label} href={l.url} target="_blank" rel="noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      style={{ display: "inline-flex", alignItems: "center", background: "rgba(255,255,255,0.06)", color: C.amber, border: `1px solid ${C.amberBorder}`, borderRadius: 6, padding: "5px 10px", fontSize: 10, fontWeight: 700, textDecoration: "none" }}>
+                      {l.label} ↗
+                    </a>
+                  ));
+                })()}
+              </div>
+              <p style={{ fontSize: 9, color: C.dimText, margin: "6px 0 0", lineHeight: 1.5 }}>
+                Convenience launchers only — ProGrafter does not fetch or store anything from these services.
+              </p>
             </div>
           )}
+        </div>
         </div>
 
         <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: 10, padding: "12px 14px" }}>
