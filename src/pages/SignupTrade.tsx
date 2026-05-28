@@ -816,8 +816,25 @@ const SignupTrade = () => {
     setError("");
     setLoading(true);
     try {
+      // Persist references for time-served route (idempotent: wipe + insert)
+      if (isTimeServed && createdTradeId) {
+        await supabase.from("trade_references").delete().eq("trade_id", createdTradeId);
+        const rows = references
+          .filter(r => r.contact_name.trim() && (r.phone.trim() || r.email.trim()))
+          .map(r => ({
+            trade_id: createdTradeId,
+            contact_name: r.contact_name.trim(),
+            relationship: r.relationship,
+            phone: r.phone.trim() || null,
+            email: r.email.trim() || null,
+          }));
+        if (rows.length) await supabase.from("trade_references").insert(rows as any);
+      }
+
       await supabase.from("trades").update({
-        verification_status: "pending",
+        verification_status: isTimeServed ? "pending_assessment" : "pending_verification",
+        verification_route: chosenRoute || "registered",
+        years_in_trade: yearsExperience ? parseInt(yearsExperience, 10) : null,
         submitted_for_review_at: new Date().toISOString(),
       } as any).eq("id", createdTradeId!);
 
