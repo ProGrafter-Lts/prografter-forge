@@ -68,6 +68,8 @@ type Lead = {
   homeowner_contacted_at: string | null;
   homeowner_contact_methods: string[] | null;
   homeowner_interested: "yes" | "no" | "unknown" | null;
+  outreach_status: string | null;
+  letter_sent_at: string | null;
 };
 
 const CONTACT_METHODS = [
