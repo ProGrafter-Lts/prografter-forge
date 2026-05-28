@@ -236,6 +236,7 @@ const SignupTrade = () => {
       setFgasRegistered(!!(data as any).fgas_registered);
       setCigaRegistered(!!(data as any).ciga_registered);
       setIncaCertified(!!(data as any).inca_certified);
+      if ((data as any).verification_route) setChosenRoute((data as any).verification_route);
 
       // Figure out which step to drop them at. Prefer the explicitly-saved
       // step from localStorage (so Step 4 survives a refresh), but never let
