@@ -665,9 +665,25 @@ const LeadDetail = ({ lead, agent, onSaved, onSkip }: { lead: Lead; agent?: Agen
             {PIPELINE_STAGES.map((s) => <option key={s.id} value={s.id} style={{ color: C.body }}>{s.label}</option>)}
           </select>
           <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={4} placeholder="Notes on this lead — conversations, outcomes…" style={{ ...inp(), resize: "vertical", marginBottom: 8 }} />
+          {/* PART 1 — one-click accept of the system-suggested next action */}
+          {(() => {
+            const sug = suggestedNextAction(lead, agent);
+            if (!sug) return null;
+            return (
+              <div style={{ display: "flex", alignItems: "center", gap: 8, background: "rgba(13,148,136,0.10)", border: `1px solid rgba(13,148,136,0.3)`, borderRadius: 8, padding: "8px 10px", marginBottom: 8 }}>
+                <span style={{ fontSize: 8, fontWeight: 700, color: C.teal, background: "rgba(13,148,136,0.18)", border: `1px solid rgba(13,148,136,0.4)`, borderRadius: 4, padding: "1px 5px", letterSpacing: "0.06em", flexShrink: 0 }}>AUTO</span>
+                <span style={{ fontSize: 11, color: C.teal, fontWeight: 600, flex: 1, lineHeight: 1.3 }}>{sug}</span>
+                <button onClick={() => acceptSuggested(sug)} style={{ background: C.teal, color: C.white, border: "none", borderRadius: 6, padding: "4px 12px", fontSize: 11, fontWeight: 700, cursor: "pointer", flexShrink: 0 }}>Accept</button>
+              </div>
+            );
+          })()}
           <input value={nextAction} onChange={(e) => setNextAction(e.target.value)} placeholder="Next action — e.g. 'Call agent back after 20 May'" style={{ ...inp(), marginBottom: 8 }} />
-          <button onClick={save} disabled={saving} style={{ width: "100%", background: C.teal, color: C.white, border: "none", borderRadius: 8, padding: "9px", fontSize: 12, fontWeight: 700, cursor: saving ? "not-allowed" : "pointer", opacity: saving ? 0.6 : 1 }}>
+          <button onClick={save} disabled={saving} style={{ width: "100%", background: C.teal, color: C.white, border: "none", borderRadius: 8, padding: "9px", fontSize: 12, fontWeight: 700, cursor: saving ? "not-allowed" : "pointer", opacity: saving ? 0.6 : 1, marginBottom: 8 }}>
             {saving ? "Saving…" : "Save changes"}
+          </button>
+          {/* PART 2 — reversible skip from the detail page */}
+          <button onClick={() => onSkip(lead, lead.outreach_status !== "skipped")} style={{ width: "100%", background: "transparent", color: lead.outreach_status === "skipped" ? C.teal : C.dimText, border: `1px solid ${C.darkBorder}`, borderRadius: 8, padding: "8px", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>
+            {lead.outreach_status === "skipped" ? "↺ Restore this lead" : "Skip this lead"}
           </button>
         </div>
       </div>
