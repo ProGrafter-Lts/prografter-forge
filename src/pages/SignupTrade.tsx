@@ -33,6 +33,24 @@ import { saveTradeSpecialisms } from "@/lib/specialisms";
 import { useSetupRedirect, SetupRedirectLoader } from "@/hooks/useSetupRedirect";
 import { useAuthReady } from "@/hooks/useAuthReady";
 import TradeVerificationExplainer from "@/components/TradeVerificationExplainer";
+import { classifyTrade, type VerificationRoute, SCHEME_LABEL } from "@/lib/tradeBanding";
+
+type ReferenceDraft = {
+  contact_name: string;
+  relationship: "past_customer" | "trade_contact" | "supplier" | "other";
+  phone: string;
+  email: string;
+};
+const blankRef = (): ReferenceDraft => ({ contact_name: "", relationship: "past_customer", phone: "", email: "" });
+
+type PortfolioDraft = {
+  id?: string;
+  storage_path: string;
+  preview_name: string;
+  area_or_address: string;
+  approx_date: string; // YYYY-MM
+  caption: string;
+};
 
 const SpecialismsPicker = lazy(() => import("@/components/SpecialismsPicker"));
 const TradeDateField = lazy(() => import("@/components/trade/TradeDateField"));
@@ -130,6 +148,17 @@ const SignupTrade = () => {
   const [qualExpiry, setQualExpiry] = useState<Date | undefined>();
   const [docsConfirmed, setDocsConfirmed] = useState(false);
 
+  // Banding + route
+  const bandConfig = useMemo(() => classifyTrade(tradeType), [tradeType]);
+  const [chosenRoute, setChosenRoute] = useState<VerificationRoute | "">("");
+  const [showRouteChoice, setShowRouteChoice] = useState(false);
+
+  // Time-served: portfolio + references
+  const [portfolio, setPortfolio] = useState<PortfolioDraft[]>([]);
+  const [uploadingPortfolio, setUploadingPortfolio] = useState(false);
+  const [references, setReferences] = useState<ReferenceDraft[]>([blankRef(), blankRef()]);
+  const isTimeServed = chosenRoute === "time_served";
+
   const qualMeta = qualificationCopy(tradeType);
   const isGreen = isGreenTrade(tradeType);
 
@@ -170,7 +199,7 @@ const SignupTrade = () => {
       const { data } = await supabase
         .from("trades")
         .select(
-          "id, name, company_name, phone, postcode, trade_type, years_experience, website, bio, mcs_number, trustmark_number, pas_2030_accredited, pas_2035_coordinator, ozev_approved, fgas_registered, ciga_registered, inca_certified, green_cert_expiry, insurance_cert_url, insurance_expiry, submitted_for_review_at, business_structure, companies_house_number",
+          "id, name, company_name, phone, postcode, trade_type, years_experience, website, bio, mcs_number, trustmark_number, pas_2030_accredited, pas_2035_coordinator, ozev_approved, fgas_registered, ciga_registered, inca_certified, green_cert_expiry, insurance_cert_url, insurance_expiry, submitted_for_review_at, business_structure, companies_house_number, verification_route, band",
         )
         .eq("user_id", user.id)
         .maybeSingle();
@@ -207,6 +236,7 @@ const SignupTrade = () => {
       setFgasRegistered(!!(data as any).fgas_registered);
       setCigaRegistered(!!(data as any).ciga_registered);
       setIncaCertified(!!(data as any).inca_certified);
+      if ((data as any).verification_route) setChosenRoute((data as any).verification_route);
 
       // Figure out which step to drop them at. Prefer the explicitly-saved
       // step from localStorage (so Step 4 survives a refresh), but never let
@@ -530,6 +560,9 @@ const SignupTrade = () => {
         bio: bio.trim() || null,
         is_green_trade: isGreen,
         specialisms_prompt_seen: true,
+        band: bandConfig.band,
+        // Non-Band-3 trades go down the registered route automatically; Band 3 picks below.
+        verification_route: bandConfig.band === "competence_assessed" ? null : "registered",
       };
       if (isGreen) {
         updates.mcs_number = mcsNumber.trim() || null;
@@ -555,7 +588,13 @@ const SignupTrade = () => {
           console.warn("Specialisms save failed (non-blocking)", e);
         }
       }
-      setStep(3);
+      // Band 3 trades pick their route before moving to documents.
+      if (bandConfig.band === "competence_assessed" && !chosenRoute) {
+        setShowRouteChoice(true);
+      } else {
+        if (bandConfig.band !== "competence_assessed") setChosenRoute("registered");
+        setStep(3);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Couldn't save your details");
     } finally {
@@ -677,20 +716,99 @@ const SignupTrade = () => {
     }
   };
 
+  // ---- Time-served portfolio upload ----
+  const uploadPortfolioFiles = async (files: FileList) => {
+    if (!createdUserId || !createdTradeId) return;
+    setUploadingPortfolio(true);
+    try {
+      const newItems: PortfolioDraft[] = [];
+      for (const file of Array.from(files)) {
+        if (file.size > MAX_DOC_BYTES) { setError(`${file.name} over 10MB`); continue; }
+        const ext = file.name.split(".").pop() ?? "jpg";
+        const path = `${createdUserId}/portfolio-${Date.now()}-${Math.random().toString(36).slice(2,7)}.${ext}`;
+        const { error: upErr } = await supabase.storage
+          .from("trade-verification-documents").upload(path, file, { upsert: false });
+        if (upErr) { setError(upErr.message); continue; }
+        const { data: ins, error: insErr } = await supabase.from("trade_portfolio_items").insert({
+          trade_id: createdTradeId,
+          storage_path: path,
+        } as any).select("id").single();
+        if (insErr) { console.warn(insErr); continue; }
+        newItems.push({ id: (ins as any).id, storage_path: path, preview_name: file.name, area_or_address: "", approx_date: "", caption: "" });
+      }
+      setPortfolio((p) => [...p, ...newItems]);
+    } finally { setUploadingPortfolio(false); }
+  };
+
+  const updatePortfolio = (idx: number, patch: Partial<PortfolioDraft>) => {
+    setPortfolio((p) => p.map((it, i) => i === idx ? { ...it, ...patch } : it));
+    const item = portfolio[idx];
+    if (item?.id) {
+      void supabase.from("trade_portfolio_items").update({
+        area_or_address: patch.area_or_address ?? item.area_or_address,
+        approx_date: (patch.approx_date ?? item.approx_date) ? `${patch.approx_date ?? item.approx_date}-01` : null,
+        caption: patch.caption ?? item.caption,
+      } as any).eq("id", item.id);
+    }
+  };
+
+  const removePortfolio = async (idx: number) => {
+    const item = portfolio[idx];
+    if (item?.id) await supabase.from("trade_portfolio_items").delete().eq("id", item.id);
+    if (item?.storage_path) await supabase.storage.from("trade-verification-documents").remove([item.storage_path]);
+    setPortfolio((p) => p.filter((_, i) => i !== idx));
+  };
+
+  // Hydrate portfolio rows on resume
+  useEffect(() => {
+    if (!createdTradeId || !isTimeServed) return;
+    (async () => {
+      const { data } = await supabase
+        .from("trade_portfolio_items")
+        .select("id, storage_path, area_or_address, approx_date, caption")
+        .eq("trade_id", createdTradeId)
+        .order("created_at", { ascending: true });
+      if (data && data.length) {
+        setPortfolio(data.map((d: any) => ({
+          id: d.id, storage_path: d.storage_path,
+          preview_name: d.storage_path.split("/").pop() ?? "photo",
+          area_or_address: d.area_or_address ?? "",
+          approx_date: d.approx_date ? String(d.approx_date).slice(0, 7) : "",
+          caption: d.caption ?? "",
+        })));
+      }
+    })();
+  }, [createdTradeId, isTimeServed]);
+
   const submitStep3 = async () => {
     setError("");
     const hasInsurance = !!existingDocs.insurance;
     const hasId = !!existingDocs.id;
     const hasQual = !!existingDocs.qualification;
-    if (uploadingDoc.insurance || uploadingDoc.id || uploadingDoc.qualification) {
-      setError("Hold on — a document is still uploading.");
+    if (uploadingDoc.insurance || uploadingDoc.id || uploadingDoc.qualification || uploadingPortfolio) {
+      setError("Hold on — a file is still uploading.");
       return;
     }
     if (!hasInsurance) { setError("Public liability insurance is required"); return; }
     if (!insuranceExpiry) { setError("Insurance expiry date is required"); return; }
     if (insuranceStatus === "expired") { setError("Your insurance has expired"); return; }
     if (!hasId) { setError("Photo ID is required"); return; }
-    if (qualMeta.required && !hasQual) { setError(`${qualMeta.label} is required for your trade`); return; }
+
+    if (isTimeServed) {
+      // Time-served: portfolio + references + years-in-trade required
+      if (!yearsExperience || parseInt(yearsExperience, 10) < 2) {
+        setError("Time-served route requires at least 2 years in the trade"); return;
+      }
+      if (portfolio.length < 5) {
+        setError("Please upload at least 5 portfolio photos of your own work"); return;
+      }
+      const validRefs = references.filter(r => r.contact_name.trim() && (r.phone.trim() || r.email.trim()));
+      if (validRefs.length < 2) {
+        setError("At least 2 references required — name + phone or email"); return;
+      }
+    } else if (qualMeta.required && !hasQual) {
+      setError(`${qualMeta.label} is required for your trade`); return;
+    }
     setStep(4);
   };
 
@@ -699,8 +817,25 @@ const SignupTrade = () => {
     setError("");
     setLoading(true);
     try {
+      // Persist references for time-served route (idempotent: wipe + insert)
+      if (isTimeServed && createdTradeId) {
+        await supabase.from("trade_references").delete().eq("trade_id", createdTradeId);
+        const rows = references
+          .filter(r => r.contact_name.trim() && (r.phone.trim() || r.email.trim()))
+          .map(r => ({
+            trade_id: createdTradeId,
+            contact_name: r.contact_name.trim(),
+            relationship: r.relationship,
+            phone: r.phone.trim() || null,
+            email: r.email.trim() || null,
+          }));
+        if (rows.length) await supabase.from("trade_references").insert(rows as any);
+      }
+
       await supabase.from("trades").update({
-        verification_status: "pending",
+        verification_status: isTimeServed ? "pending_assessment" : "pending_verification",
+        verification_route: chosenRoute || "registered",
+        years_in_trade: yearsExperience ? parseInt(yearsExperience, 10) : null,
         submitted_for_review_at: new Date().toISOString(),
       } as any).eq("id", createdTradeId!);
 
@@ -735,7 +870,7 @@ const SignupTrade = () => {
         });
       } catch (e) { console.warn("trade-signup admin (review) notification failed", e); }
 
-      navigate("/signup/trade/under-review", { replace: true });
+      navigate(isTimeServed ? "/signup/trade/assessment-pending" : "/signup/trade/under-review", { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Submission failed");
     } finally {
@@ -1072,8 +1207,47 @@ const SignupTrade = () => {
             </div>
           )}
 
+          {/* ROUTE CHOICE — Band 3 only */}
+          {showRouteChoice && bandConfig.band === "competence_assessed" && (
+            <div>
+              <h2 className="font-heading text-cream text-[40px] leading-none mb-3">
+                How will you <span className="text-teal">prove it?</span>
+              </h2>
+              <p className="font-body text-cream/60 text-sm mb-6">
+                {tradeType} isn't legally gated. Pick the route that matches your background — both lead to the same verified badge.
+              </p>
+              <div className="space-y-4">
+                <button
+                  type="button"
+                  onClick={() => { setChosenRoute("qualified"); setShowRouteChoice(false); setStep(3); }}
+                  className="w-full text-left p-5 rounded-xl border border-cream/15 hover:border-teal bg-cream/5 transition-colors"
+                >
+                  <p className="font-mono text-xs text-teal uppercase tracking-widest mb-2">Route A — Qualified</p>
+                  <p className="font-heading text-cream text-lg mb-1">I hold a trade qualification</p>
+                  <p className="font-body text-cream/60 text-sm">
+                    NVQ / City &amp; Guilds / apprenticeship certificate. Upload it as your trade qualification.
+                  </p>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setChosenRoute("time_served"); setShowRouteChoice(false); setStep(3); }}
+                  className="w-full text-left p-5 rounded-xl border border-cream/15 hover:border-teal bg-cream/5 transition-colors"
+                >
+                  <p className="font-mono text-xs text-teal uppercase tracking-widest mb-2">Route B — Time-Served</p>
+                  <p className="font-heading text-cream text-lg mb-1">I've earned it on the tools</p>
+                  <p className="font-body text-cream/60 text-sm">
+                    No formal qualification — proven by 2+ years in the trade, a portfolio of at least 5 photos of your own work, 2 references we phone, plus a short competence interview.
+                  </p>
+                </button>
+              </div>
+              <div className="flex gap-3 mt-8">
+                <button onClick={() => { setShowRouteChoice(false); setStep(2); }} className="flex-1 border border-cream/20 text-cream/80 font-mono text-sm py-3 rounded-xl hover:bg-cream/5 transition-colors">← Back</button>
+              </div>
+            </div>
+          )}
+
           {/* STEP 3 */}
-          {step === 3 && (
+          {step === 3 && !showRouteChoice && (
             <div>
               <div className="flex items-baseline justify-between gap-3 mb-3">
                 <h2 className="font-heading text-cream text-[40px] leading-none">
@@ -1162,6 +1336,67 @@ const SignupTrade = () => {
                     </Suspense>
                   </div>
                 </div>
+
+                {/* Time-served: portfolio + references */}
+                {isTimeServed && (
+                  <>
+                    <div className="p-4 rounded-xl border border-teal/30 bg-teal/5 space-y-3">
+                      <p className="font-mono text-xs text-teal uppercase tracking-widest">Portfolio of your work *</p>
+                      <p className="text-xs text-cream/60 font-body">
+                        At least 5 photos of jobs you've delivered yourself. Add an area/postcode + approx. month for each so we can spot-check.
+                      </p>
+                      <input
+                        type="file" multiple accept="image/jpeg,image/png,image/webp"
+                        onChange={(e) => e.target.files && uploadPortfolioFiles(e.target.files)}
+                        className="text-cream text-sm file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-teal file:text-cream file:font-mono file:text-xs file:cursor-pointer"
+                      />
+                      {uploadingPortfolio && <p className="text-xs text-teal font-body">Uploading…</p>}
+                      <p className="text-xs text-cream/60 font-body">{portfolio.length} / 5+ photos</p>
+                      <div className="space-y-3">
+                        {portfolio.map((p, i) => (
+                          <div key={i} className="p-3 rounded-lg border border-cream/10 bg-cream/5 space-y-2">
+                            <div className="flex items-center justify-between gap-2">
+                              <p className="text-xs text-cream/70 font-body truncate">📷 {p.preview_name}</p>
+                              <button type="button" onClick={() => removePortfolio(i)} className="text-xs text-red-400 hover:underline">Remove</button>
+                            </div>
+                            <input className={inputClass} placeholder="Area / postcode (e.g. SW11)" value={p.area_or_address} onChange={(e) => updatePortfolio(i, { area_or_address: e.target.value })} />
+                            <div className="grid grid-cols-2 gap-2">
+                              <input type="month" className={inputClass} value={p.approx_date} onChange={(e) => updatePortfolio(i, { approx_date: e.target.value })} />
+                              <input className={inputClass} placeholder="Caption (optional)" value={p.caption} onChange={(e) => updatePortfolio(i, { caption: e.target.value })} />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="p-4 rounded-xl border border-teal/30 bg-teal/5 space-y-3">
+                      <p className="font-mono text-xs text-teal uppercase tracking-widest">References — we phone these *</p>
+                      <p className="text-xs text-cream/60 font-body">At least 2. Name + phone or email per reference.</p>
+                      {references.map((r, i) => (
+                        <div key={i} className="p-3 rounded-lg border border-cream/10 bg-cream/5 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <p className="font-mono text-[10px] text-teal uppercase">Reference {i + 1}</p>
+                            {references.length > 2 && (
+                              <button type="button" onClick={() => setReferences(rs => rs.filter((_, k) => k !== i))} className="text-xs text-red-400 hover:underline">Remove</button>
+                            )}
+                          </div>
+                          <input className={inputClass} placeholder="Contact name" value={r.contact_name} onChange={(e) => setReferences(rs => rs.map((x, k) => k === i ? { ...x, contact_name: e.target.value } : x))} />
+                          <select className={inputClass} value={r.relationship} onChange={(e) => setReferences(rs => rs.map((x, k) => k === i ? { ...x, relationship: e.target.value as any } : x))}>
+                            <option value="past_customer">Past customer</option>
+                            <option value="trade_contact">Trade contact</option>
+                            <option value="supplier">Supplier</option>
+                            <option value="other">Other</option>
+                          </select>
+                          <div className="grid grid-cols-2 gap-2">
+                            <input className={inputClass} placeholder="Phone" value={r.phone} onChange={(e) => setReferences(rs => rs.map((x, k) => k === i ? { ...x, phone: e.target.value } : x))} />
+                            <input className={inputClass} placeholder="Email" value={r.email} onChange={(e) => setReferences(rs => rs.map((x, k) => k === i ? { ...x, email: e.target.value } : x))} />
+                          </div>
+                        </div>
+                      ))}
+                      <button type="button" onClick={() => setReferences(rs => [...rs, blankRef()])} className="text-sm text-teal hover:underline">+ Add another reference</button>
+                    </div>
+                  </>
+                )}
 
                 {docsConfirmed && (
                   <div className="flex items-start gap-3 p-4 rounded-xl bg-teal/10 border border-teal/40">

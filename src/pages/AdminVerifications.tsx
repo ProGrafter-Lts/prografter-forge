@@ -6,6 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import SEO from "@/components/SEO";
 
+import { classifyTrade, REGISTER_URLS, SCHEME_LABEL, type RegistrationScheme } from "@/lib/tradeBanding";
+
 interface PendingTrade {
   id: string;
   user_id: string | null;
@@ -26,6 +28,26 @@ interface PendingTrade {
   companies_house_status: string | null;
   companies_house_registered_name: string | null;
   companies_house_checked_at: string | null;
+  band: string | null;
+  verification_route: string | null;
+  years_in_trade: number | null;
+  assessor_name: string | null;
+  assessment_notes: string | null;
+  assessment_evidence_complete: boolean;
+  references_called: boolean;
+  site_assessment_done: boolean;
+  competence_interview_done: boolean;
+  gas_safe_number: string | null;
+  cps_registration_number: string | null;
+  mcs_number: string | null;
+}
+
+interface PortfolioItem {
+  id: string;
+  storage_path: string;
+  area_or_address: string | null;
+  approx_date: string | null;
+  caption: string | null;
 }
 
 interface VerificationDoc {
@@ -70,9 +92,12 @@ const REFERENCE_RELATIONSHIP_LABEL: Record<ReferenceRelationship, string> = {
 
 
 const STATUS_FILTERS = [
-  { key: "pending", label: "Pending review" },
+  { key: "pending", label: "Pending (legacy)" },
+  { key: "pending_verification", label: "Pending verification" },
+  { key: "pending_assessment", label: "Pending assessment" },
   { key: "info_requested", label: "Info requested" },
   { key: "approved", label: "Approved" },
+  { key: "verified", label: "Verified" },
   { key: "rejected", label: "Rejected" },
 ] as const;
 
@@ -97,6 +122,8 @@ const AdminVerifications = () => {
   const [docUrls, setDocUrls] = useState<Record<string, string>>({});
   const [references, setReferences] = useState<TradeReference[]>([]);
   const [refUpdating, setRefUpdating] = useState<string | null>(null);
+  const [portfolio, setPortfolio] = useState<PortfolioItem[]>([]);
+  const [portfolioUrls, setPortfolioUrls] = useState<Record<string, string>>({});
 
   const [working, setWorking] = useState(false);
   const [queryMessage, setQueryMessage] = useState("");
@@ -134,7 +161,7 @@ const AdminVerifications = () => {
     const { data, error } = await supabase
       .from("trades")
       .select(
-        "id,user_id,name,company_name,trade_type,trade_type_other,postcode,phone,verification_status,verified,submitted_for_review_at,created_at,insurance_expiry,business_structure,companies_house_number,companies_house_status,companies_house_registered_name,companies_house_checked_at"
+        "id,user_id,name,company_name,trade_type,trade_type_other,postcode,phone,verification_status,verified,submitted_for_review_at,created_at,insurance_expiry,business_structure,companies_house_number,companies_house_status,companies_house_registered_name,companies_house_checked_at,band,verification_route,years_in_trade,assessor_name,assessment_notes,assessment_evidence_complete,references_called,site_assessment_done,competence_interview_done,gas_safe_number,cps_registration_number,mcs_number"
       )
       .eq("verification_status", filter)
       .order("submitted_for_review_at", { ascending: true, nullsFirst: false })
@@ -183,6 +210,8 @@ const AdminVerifications = () => {
     setDocs([]);
     setDocUrls({});
     setReferences([]);
+    setPortfolio([]);
+    setPortfolioUrls({});
     const trade = trades.find((t) => t.id === tradeId);
     const { data } = await supabase
       .from("trade_verification_documents")
@@ -201,7 +230,30 @@ const AdminVerifications = () => {
     }
     setDocUrls(urls);
     await loadReferences(tradeId, trade?.email || null);
+    // Portfolio (time-served)
+    const { data: pData } = await supabase
+      .from("trade_portfolio_items")
+      .select("id,storage_path,area_or_address,approx_date,caption")
+      .eq("trade_id", tradeId)
+      .order("created_at", { ascending: true });
+    const pList = (pData as PortfolioItem[]) || [];
+    setPortfolio(pList);
+    const pUrls: Record<string, string> = {};
+    for (const p of pList) {
+      const { data: signed } = await supabase.storage
+        .from("trade-verification-documents")
+        .createSignedUrl(p.storage_path, 600);
+      if (signed?.signedUrl) pUrls[p.id] = signed.signedUrl;
+    }
+    setPortfolioUrls(pUrls);
   };
+
+  const updateChecklist = async (tradeId: string, field: string, value: boolean) => {
+    const { error } = await supabase.from("trades").update({ [field]: value } as any).eq("id", tradeId);
+    if (error) { toast.error(error.message); return; }
+    setTrades(prev => prev.map(t => t.id === tradeId ? { ...t, [field]: value } as any : t));
+  };
+
 
   const updateReferenceStatus = async (refId: string, status: ReferenceStatus) => {
     setRefUpdating(refId);
@@ -286,14 +338,16 @@ const AdminVerifications = () => {
 
   const approve = async (trade: PendingTrade) => {
     setWorking(true);
-    const { error } = await supabase
-      .from("trades")
-      .update({ verified: true, verification_status: "approved" } as any)
-      .eq("id", trade.id);
-    if (error) {
-      toast.error(error.message);
-      setWorking(false);
-      return;
+    // Time-served goes through the RPC which enforces the 4-item checklist.
+    if (trade.verification_route === "time_served") {
+      const { error } = await supabase.rpc("admin_approve_trade", { _trade_id: trade.id } as any);
+      if (error) { toast.error(error.message); setWorking(false); return; }
+    } else {
+      const { error } = await supabase
+        .from("trades")
+        .update({ verified: true, verification_status: "verified" } as any)
+        .eq("id", trade.id);
+      if (error) { toast.error(error.message); setWorking(false); return; }
     }
     await sendVerifiedEmail(trade);
     toast.success(`${trade.company_name || trade.name} approved — email sent`);
@@ -764,6 +818,87 @@ const AdminVerifications = () => {
               })()}
             </div>
 
+            {/* Route-aware verification panel */}
+            <div className="px-6 py-5 border-b border-navy/10">
+              {(() => {
+                const cfg = classifyTrade(activeTrade.trade_type);
+                const route = activeTrade.verification_route || (cfg.band === "competence_assessed" ? "—" : "registered");
+                const number = activeTrade.gas_safe_number || activeTrade.cps_registration_number || activeTrade.mcs_number || "";
+                return (
+                  <>
+                    <h3 className="font-mono text-xs uppercase tracking-wider text-secondary-text mb-3">
+                      Band & route
+                    </h3>
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      <Badge className="bg-navy/10 text-navy">Band: {cfg.band}</Badge>
+                      <Badge className="bg-teal/10 text-teal">Route: {route}</Badge>
+                      {activeTrade.years_in_trade != null && (
+                        <Badge className="bg-navy/10 text-navy font-mono">{activeTrade.years_in_trade}y in trade</Badge>
+                      )}
+                    </div>
+                    {cfg.required && cfg.required.length > 0 && (
+                      <div className="text-sm space-y-1 mb-3">
+                        <div className="font-mono text-xs uppercase text-secondary-text">Public register check (one click):</div>
+                        <div className="flex flex-wrap gap-2">
+                          {cfg.required.map((scheme) => (
+                            <a
+                              key={scheme}
+                              href={REGISTER_URLS[scheme as RegistrationScheme](number || "")}
+                              target="_blank" rel="noopener noreferrer"
+                              className="font-mono text-xs uppercase tracking-wider text-teal underline"
+                            >
+                              {SCHEME_LABEL[scheme as RegistrationScheme]} ↗
+                            </a>
+                          ))}
+                        </div>
+                        <div className="font-mono text-xs text-secondary-text">Number on file: {number || "—"}</div>
+                      </div>
+                    )}
+
+                    {activeTrade.verification_route === "time_served" && (
+                      <div className="mt-4 p-3 rounded-xl bg-amber-50 border border-amber-200 space-y-2">
+                        <div className="font-mono text-xs uppercase text-amber-800 mb-1">Time-served checklist — all 4 required to approve</div>
+                        {[
+                          ["assessment_evidence_complete", "Evidence reviewed (portfolio + years)"],
+                          ["references_called", "Both references called"],
+                          ["site_assessment_done", "Site / work assessment done"],
+                          ["competence_interview_done", "Competence interview done"],
+                        ].map(([field, label]) => (
+                          <label key={field} className="flex items-center gap-2 text-sm text-navy">
+                            <input
+                              type="checkbox"
+                              checked={!!(activeTrade as any)[field]}
+                              onChange={(e) => updateChecklist(activeTrade.id, field, e.target.checked)}
+                            />
+                            {label}
+                          </label>
+                        ))}
+                      </div>
+                    )}
+
+                    {portfolio.length > 0 && (
+                      <div className="mt-4">
+                        <div className="font-mono text-xs uppercase text-secondary-text mb-2">Portfolio ({portfolio.length})</div>
+                        <div className="grid grid-cols-3 gap-2">
+                          {portfolio.map((p) => (
+                            <a key={p.id} href={portfolioUrls[p.id]} target="_blank" rel="noopener noreferrer"
+                               className="block border border-navy/10 rounded-lg overflow-hidden hover:border-teal">
+                              {portfolioUrls[p.id]
+                                ? <img src={portfolioUrls[p.id]} alt={p.caption || "portfolio"} className="w-full h-24 object-cover" />
+                                : <div className="h-24 bg-navy/5" />}
+                              <div className="p-1 text-[10px] font-mono text-secondary-text truncate">
+                                {p.area_or_address || "—"}
+                              </div>
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
+            </div>
+
             <div className="px-6 py-5">
               <h3 className="font-mono text-xs uppercase tracking-wider text-secondary-text mb-3">
                 Documents ({docs.length})
@@ -871,7 +1006,7 @@ const AdminVerifications = () => {
 
               {/* Actions */}
 
-              {activeTrade.verification_status !== "approved" && (
+              {!["approved","verified","rejected"].includes(activeTrade.verification_status || "") && (
                 <div className="mt-6 pt-5 border-t border-navy/10">
                   {!queryOpen ? (
                     <div className="flex flex-wrap gap-2">
