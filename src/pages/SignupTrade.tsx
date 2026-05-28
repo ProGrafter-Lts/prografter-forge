@@ -33,6 +33,24 @@ import { saveTradeSpecialisms } from "@/lib/specialisms";
 import { useSetupRedirect, SetupRedirectLoader } from "@/hooks/useSetupRedirect";
 import { useAuthReady } from "@/hooks/useAuthReady";
 import TradeVerificationExplainer from "@/components/TradeVerificationExplainer";
+import { classifyTrade, type VerificationRoute, SCHEME_LABEL } from "@/lib/tradeBanding";
+
+type ReferenceDraft = {
+  contact_name: string;
+  relationship: "past_customer" | "trade_contact" | "supplier" | "other";
+  phone: string;
+  email: string;
+};
+const blankRef = (): ReferenceDraft => ({ contact_name: "", relationship: "past_customer", phone: "", email: "" });
+
+type PortfolioDraft = {
+  id?: string;
+  storage_path: string;
+  preview_name: string;
+  area_or_address: string;
+  approx_date: string; // YYYY-MM
+  caption: string;
+};
 
 const SpecialismsPicker = lazy(() => import("@/components/SpecialismsPicker"));
 const TradeDateField = lazy(() => import("@/components/trade/TradeDateField"));
