@@ -68,6 +68,8 @@ type Lead = {
   homeowner_contacted_at: string | null;
   homeowner_contact_methods: string[] | null;
   homeowner_interested: "yes" | "no" | "unknown" | null;
+  outreach_status: string | null;
+  letter_sent_at: string | null;
 };
 
 const CONTACT_METHODS = [
@@ -122,6 +124,58 @@ const daysSince = (dateStr: string | null) => {
   return Math.max(0, Math.floor(ms / 86400000));
 };
 
+// ---- Auto next-action (PART 1) ----
+// Computes a suggested next action from existing data. Never overrides a human-set next_action.
+const suggestedNextAction = (lead: Lead, agent?: Agent): string | null => {
+  const os = lead.outreach_status || "not_contacted";
+  const firm = agent?.company_name || agent?.contact_name || lead.agent_name || "agent";
+  if (lead.agent_id && (os === "not_contacted" || os === "no_next_action")) {
+    return `Email agent — ${firm}`;
+  }
+  if (!lead.agent_id && lead.applicant_address && os === "not_contacted") {
+    return `Send letter to homeowner — ${lead.applicant_address}`;
+  }
+  if (!lead.agent_id && !lead.applicant_address) {
+    return "Skip — insufficient contact data";
+  }
+  if (os === "letter_sent" && lead.letter_sent_at && daysSince(lead.letter_sent_at) > 14) {
+    return `Follow up letter — sent ${daysSince(lead.letter_sent_at)}d ago`;
+  }
+  return null;
+};
+
+// ---- Value bands + sort (PART 2) ----
+const VALUE_BANDS = [
+  { id: "all", label: "All", min: 0 },
+  { id: "40k", label: "£40k+", min: 40000 },
+  { id: "80k", label: "£80k+", min: 80000 },
+  { id: "150k", label: "£150k+", min: 150000 },
+];
+const SORT_OPTIONS = [
+  { id: "newest", label: "Newest" },
+  { id: "value_desc", label: "Value (high to low)" },
+  { id: "value_asc", label: "Value (low to high)" },
+  { id: "deadline", label: "Closest deadline" },
+];
+const LS_BAND = "pp_value_band";
+const LS_SORT = "pp_sort";
+
+// ---- Homeowner search launchers (PART 3) ----
+// Best-effort town extraction from a free-text site address (last comma segment, postcode stripped).
+const guessTown = (lead: Lead): string => {
+  const parts = (lead.site_address || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const pc = (lead.postcode || "").trim();
+  let last = parts[parts.length - 1] || "";
+  if (pc && last.toUpperCase().includes(pc.toUpperCase()) && parts.length >= 2) {
+    last = parts[parts.length - 2];
+  }
+  // strip any embedded postcode-looking token from the town string
+  return last.replace(/[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}/gi, "").trim();
+};
+
 const inp = (): CSSProperties => ({
   width: "100%", padding: "8px 10px", borderRadius: 7,
   border: `1px solid ${C.darkBorder}`, background: "rgba(255,255,255,0.05)",
@@ -156,20 +210,23 @@ const PriorityBar = ({ score }: { score: number }) => {
   );
 };
 
-const LeadCard = ({ lead, onSelect, selected, agent }: {
+const LeadCard = ({ lead, onSelect, selected, agent, onSkip }: {
   lead: Lead; onSelect: (l: Lead) => void; selected: boolean; agent?: Agent;
+  onSkip: (l: Lead, skip: boolean) => void;
 }) => {
   const days = daysSince(lead.submitted_date);
   const overdue = isOverdue(lead.pipeline_status, days);
-  const noNextAction = !lead.next_action || !lead.next_action.trim();
+  const manual = (lead.next_action || "").trim();
+  const suggested = manual ? null : suggestedNextAction(lead, agent);
   const nonDomestic = isNonDomestic(lead);
+  const skipped = lead.outreach_status === "skipped";
   return (
     <div onClick={() => onSelect(lead)}
       style={{
         background: selected ? C.darkCard : "rgba(255,255,255,0.04)",
         border: `1px solid ${selected ? C.teal : C.darkBorder}`,
         borderRadius: 10, padding: "10px 14px", cursor: "pointer",
-        marginBottom: 6, transition: "all 0.15s",
+        marginBottom: 6, transition: "all 0.15s", opacity: skipped ? 0.6 : 1,
       }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6, gap: 8 }}>
         <div style={{ minWidth: 0 }}>
@@ -190,20 +247,13 @@ const LeadCard = ({ lead, onSelect, selected, agent }: {
       <div style={{ marginBottom: 6 }}>
         <PriorityBar score={lead.priority_score} />
       </div>
-      {(overdue || noNextAction || nonDomestic) && (
+      {(overdue || nonDomestic) && (
         <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 6 }}>
           {overdue && (
             <span style={{ fontSize: 9, fontWeight: 700, color: C.amber,
               background: "rgba(217,119,6,0.18)", border: `1px solid ${C.amberBorder}`,
               borderRadius: 4, padding: "1px 6px", letterSpacing: "0.04em" }}>
               ⚠ FOLLOW-UP OVERDUE
-            </span>
-          )}
-          {noNextAction && (
-            <span style={{ fontSize: 9, fontWeight: 700, color: C.amber,
-              background: "rgba(217,119,6,0.18)", border: `1px solid ${C.amberBorder}`,
-              borderRadius: 4, padding: "1px 6px", letterSpacing: "0.04em" }}>
-              ⚠ NO NEXT ACTION
             </span>
           )}
           {nonDomestic && (
@@ -215,17 +265,43 @@ const LeadCard = ({ lead, onSelect, selected, agent }: {
           )}
         </div>
       )}
+      {/* Next action — always shown: manual in white, or suggested in teal with an 'auto' tag */}
+      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+        <span style={{ fontSize: 9, color: C.dimText, flexShrink: 0 }}>▸</span>
+        <span style={{
+          fontSize: 10, fontWeight: 600, lineHeight: 1.3,
+          color: manual ? C.brightText : C.teal,
+          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+        }}>
+          {manual || suggested || "No suggestion"}
+        </span>
+        {!manual && suggested && (
+          <span style={{ fontSize: 8, fontWeight: 700, color: C.teal, background: "rgba(13,148,136,0.18)",
+            border: `1px solid rgba(13,148,136,0.4)`, borderRadius: 4, padding: "0 5px", letterSpacing: "0.06em", flexShrink: 0 }}>
+            AUTO
+          </span>
+        )}
+      </div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 6 }}>
         <SBadge status={lead.pipeline_status} />
-        <span style={{ fontSize: 9, color: C.dimText, textAlign: "right" }}>
-          {agent ? `🏛️ ${agent.company_name || agent.contact_name}` : "No agent"}
-        </span>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <span style={{ fontSize: 9, color: C.dimText, textAlign: "right" }}>
+            {agent ? `🏛️ ${agent.company_name || agent.contact_name}` : "No agent"}
+          </span>
+          <button
+            onClick={(e) => { e.stopPropagation(); onSkip(lead, !skipped); }}
+            title={skipped ? "Restore this lead" : "Skip this lead (reversible)"}
+            style={{ background: "transparent", border: `1px solid ${C.darkBorder}`, color: skipped ? C.teal : C.dimText,
+              borderRadius: 5, padding: "1px 7px", fontSize: 9, fontWeight: 700, cursor: "pointer", flexShrink: 0 }}>
+            {skipped ? "↺ Restore" : "Skip"}
+          </button>
+        </div>
       </div>
     </div>
   );
 };
 
-const LeadDetail = ({ lead, agent, onSaved }: { lead: Lead; agent?: Agent; onSaved: () => void }) => {
+const LeadDetail = ({ lead, agent, onSaved, onSkip }: { lead: Lead; agent?: Agent; onSaved: () => void; onSkip: (l: Lead, skip: boolean) => void }) => {
   const [notes, setNotes] = useState(lead.notes || "");
   const [nextAction, setNextAction] = useState(lead.next_action || "");
   const [pipelineStatus, setPipelineStatus] = useState(lead.pipeline_status);
@@ -298,6 +374,20 @@ const LeadDetail = ({ lead, agent, onSaved }: { lead: Lead; agent?: Agent; onSav
       toast({ title: "Save failed", description: error.message, variant: "destructive" });
     } else {
       toast({ title: "Lead updated" });
+      onSaved();
+    }
+  };
+
+  const acceptSuggested = async (text: string) => {
+    setNextAction(text);
+    const { error } = await supabase
+      .from("planning_leads")
+      .update({ next_action: text } as never)
+      .eq("id", lead.id);
+    if (error) {
+      toast({ title: "Save failed", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Next action set", description: text });
       onSaved();
     }
   };
@@ -419,7 +509,39 @@ const LeadDetail = ({ lead, agent, onSaved }: { lead: Lead; agent?: Agent; onSav
           )}
           {!agent && !lead.agent_name && (
             <div style={{ marginTop: 8, padding: "8px 10px", background: "rgba(217,119,6,0.12)", border: `1px solid rgba(217,119,6,0.3)`, borderRadius: 7 }}>
-              <p style={{ fontSize: 11, color: C.amber, margin: 0 }}>⚠️ No agent listed — read the PDF form or contact homeowner directly</p>
+              <p style={{ fontSize: 11, color: C.amber, margin: "0 0 8px" }}>⚠️ No agent listed — read the PDF form or contact homeowner directly</p>
+              {/* PART 3 — homeowner search launchers (open-in-new-tab only; nothing is scraped or stored) */}
+              <p style={{ fontSize: 10, fontWeight: 700, color: C.amber, textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 6px" }}>Find homeowner contact:</p>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                {(() => {
+                  const town = guessTown(lead);
+                  const pc = (lead.postcode || "").trim();
+                  const links = [
+                    {
+                      label: "🔎 192.com search",
+                      url: `https://www.192.com/people/search/?initial=&surname=&town=${encodeURIComponent(town)}&postcode=${encodeURIComponent(pc)}`,
+                    },
+                    {
+                      label: "🏷️ Land Registry",
+                      url: "https://search-property-information.service.gov.uk/",
+                    },
+                    {
+                      label: "🌐 Google: occupier",
+                      url: `https://www.google.com/search?q=${encodeURIComponent(`occupier of ${lead.site_address}`)}`,
+                    },
+                  ];
+                  return links.map((l) => (
+                    <a key={l.label} href={l.url} target="_blank" rel="noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      style={{ display: "inline-flex", alignItems: "center", background: "rgba(255,255,255,0.06)", color: C.amber, border: `1px solid ${C.amberBorder}`, borderRadius: 6, padding: "5px 10px", fontSize: 10, fontWeight: 700, textDecoration: "none" }}>
+                      {l.label} ↗
+                    </a>
+                  ));
+                })()}
+              </div>
+              <p style={{ fontSize: 9, color: C.dimText, margin: "6px 0 0", lineHeight: 1.5 }}>
+                Convenience launchers only — ProGrafter does not fetch or store anything from these services.
+              </p>
             </div>
           )}
         </div>
@@ -543,9 +665,25 @@ const LeadDetail = ({ lead, agent, onSaved }: { lead: Lead; agent?: Agent; onSav
             {PIPELINE_STAGES.map((s) => <option key={s.id} value={s.id} style={{ color: C.body }}>{s.label}</option>)}
           </select>
           <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={4} placeholder="Notes on this lead — conversations, outcomes…" style={{ ...inp(), resize: "vertical", marginBottom: 8 }} />
+          {/* PART 1 — one-click accept of the system-suggested next action */}
+          {(() => {
+            const sug = suggestedNextAction(lead, agent);
+            if (!sug) return null;
+            return (
+              <div style={{ display: "flex", alignItems: "center", gap: 8, background: "rgba(13,148,136,0.10)", border: `1px solid rgba(13,148,136,0.3)`, borderRadius: 8, padding: "8px 10px", marginBottom: 8 }}>
+                <span style={{ fontSize: 8, fontWeight: 700, color: C.teal, background: "rgba(13,148,136,0.18)", border: `1px solid rgba(13,148,136,0.4)`, borderRadius: 4, padding: "1px 5px", letterSpacing: "0.06em", flexShrink: 0 }}>AUTO</span>
+                <span style={{ fontSize: 11, color: C.teal, fontWeight: 600, flex: 1, lineHeight: 1.3 }}>{sug}</span>
+                <button onClick={() => acceptSuggested(sug)} style={{ background: C.teal, color: C.white, border: "none", borderRadius: 6, padding: "4px 12px", fontSize: 11, fontWeight: 700, cursor: "pointer", flexShrink: 0 }}>Accept</button>
+              </div>
+            );
+          })()}
           <input value={nextAction} onChange={(e) => setNextAction(e.target.value)} placeholder="Next action — e.g. 'Call agent back after 20 May'" style={{ ...inp(), marginBottom: 8 }} />
-          <button onClick={save} disabled={saving} style={{ width: "100%", background: C.teal, color: C.white, border: "none", borderRadius: 8, padding: "9px", fontSize: 12, fontWeight: 700, cursor: saving ? "not-allowed" : "pointer", opacity: saving ? 0.6 : 1 }}>
+          <button onClick={save} disabled={saving} style={{ width: "100%", background: C.teal, color: C.white, border: "none", borderRadius: 8, padding: "9px", fontSize: 12, fontWeight: 700, cursor: saving ? "not-allowed" : "pointer", opacity: saving ? 0.6 : 1, marginBottom: 8 }}>
             {saving ? "Saving…" : "Save changes"}
+          </button>
+          {/* PART 2 — reversible skip from the detail page */}
+          <button onClick={() => onSkip(lead, lead.outreach_status !== "skipped")} style={{ width: "100%", background: "transparent", color: lead.outreach_status === "skipped" ? C.teal : C.dimText, border: `1px solid ${C.darkBorder}`, borderRadius: 8, padding: "8px", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>
+            {lead.outreach_status === "skipped" ? "↺ Restore this lead" : "Skip this lead"}
           </button>
         </div>
       </div>
@@ -597,7 +735,13 @@ export default function PlanningPipeline() {
   const [filterPipeline, setFilterPipeline] = useState("all");
   const [search, setSearch] = useState("");
   const [ingesting, setIngesting] = useState(false);
+  const [valueBand, setValueBand] = useState<string>(() => localStorage.getItem(LS_BAND) || "40k");
+  const [sortBy, setSortBy] = useState<string>(() => localStorage.getItem(LS_SORT) || "value_desc");
+  const [showSkipped, setShowSkipped] = useState(false);
   const isMobile = useIsMobile();
+
+  useEffect(() => { localStorage.setItem(LS_BAND, valueBand); }, [valueBand]);
+  useEffect(() => { localStorage.setItem(LS_SORT, sortBy); }, [sortBy]);
 
   const load = async () => {
     setLoading(true);
@@ -641,19 +785,53 @@ export default function PlanningPipeline() {
   }, [leads]);
   const selectedLead = leads.find((l) => l.id === selectedLeadId) || leads[0] || null;
 
-  const filteredLeads = useMemo(() => leads.filter((l) => {
-    if (filterStatus !== "all" && l.status !== filterStatus) return false;
-    if (filterPipeline !== "all" && l.pipeline_status !== filterPipeline) return false;
-    if (search) {
-      const s = search.toLowerCase();
-      const agent = l.agent_id ? agentsById[l.agent_id] : null;
-      if (!l.site_address.toLowerCase().includes(s)
-        && !(l.description || "").toLowerCase().includes(s)
-        && !(agent?.contact_name || "").toLowerCase().includes(s)
-        && !(l.applicant_name || "").toLowerCase().includes(s)) return false;
+  const bandMin = useMemo(() => VALUE_BANDS.find((b) => b.id === valueBand)?.min ?? 0, [valueBand]);
+
+  const filteredLeads = useMemo(() => {
+    const out = leads.filter((l) => {
+      // Skipped leads are hidden from default views unless toggled on
+      if (!showSkipped && l.outreach_status === "skipped") return false;
+      if (bandMin > 0 && (Number(l.estimated_value_max) || 0) < bandMin) return false;
+      if (filterStatus !== "all" && l.status !== filterStatus) return false;
+      if (filterPipeline !== "all" && l.pipeline_status !== filterPipeline) return false;
+      if (search) {
+        const s = search.toLowerCase();
+        const agent = l.agent_id ? agentsById[l.agent_id] : null;
+        if (!l.site_address.toLowerCase().includes(s)
+          && !(l.description || "").toLowerCase().includes(s)
+          && !(agent?.contact_name || "").toLowerCase().includes(s)
+          && !(l.applicant_name || "").toLowerCase().includes(s)) return false;
+      }
+      return true;
+    });
+    const val = (l: Lead) => Number(l.estimated_value_max) || 0;
+    const sub = (l: Lead) => (l.submitted_date ? new Date(l.submitted_date).getTime() : 0);
+    out.sort((a, b) => {
+      switch (sortBy) {
+        case "value_asc": return val(a) - val(b);
+        case "value_desc": return val(b) - val(a);
+        case "newest": return sub(b) - sub(a);
+        case "deadline": return sub(a) - sub(b); // oldest submission = closest decision deadline
+        default: return 0;
+      }
+    });
+    return out;
+  }, [leads, filterStatus, filterPipeline, search, agentsById, bandMin, showSkipped, sortBy]);
+
+  const skippedCount = useMemo(() => leads.filter((l) => l.outreach_status === "skipped").length, [leads]);
+
+  const skipLead = async (l: Lead, skip: boolean) => {
+    const { error } = await supabase
+      .from("planning_leads")
+      .update({ outreach_status: skip ? "skipped" : "not_contacted" } as never)
+      .eq("id", l.id);
+    if (error) {
+      toast({ title: "Update failed", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: skip ? "Lead skipped" : "Lead restored" });
+      load();
     }
-    return true;
-  }), [leads, filterStatus, filterPipeline, search, agentsById]);
+  };
 
   const hotLeads = leads.filter((l) => l.pipeline_status === "new" && daysSince(l.submitted_date) <= 14).length;
   const totalValue = leads.reduce((s, l) => s + (Number(l.estimated_value_max) || 0), 0);
@@ -697,6 +875,7 @@ export default function PlanningPipeline() {
           <div style={{ textAlign: "center", flex: isMobile ? "1 1 60px" : "none" }}>
             <p style={{ fontSize: 16, fontWeight: 700, color: C.brightText, margin: 0 }}>{leads.length}</p>
             <p style={{ fontSize: 9, color: C.dimText, margin: 0 }}>TOTAL</p>
+            <p style={{ fontSize: 9, color: C.teal, margin: 0, fontWeight: 700 }}>({filteredLeads.length} visible)</p>
           </div>
           <div style={{ textAlign: "center", flex: isMobile ? "1 1 60px" : "none" }}>
             <p style={{ fontSize: 16, fontWeight: 700, color: C.teal, margin: 0 }}>{agents.length}</p>
@@ -730,8 +909,21 @@ export default function PlanningPipeline() {
           {(!isMobile || !selectedLeadId) && (
             <div style={{ width: isMobile ? "100%" : 320, flexShrink: 0, borderRight: isMobile ? "none" : `1px solid ${C.darkBorder}`, borderBottom: isMobile ? `1px solid ${C.darkBorder}` : "none", display: "flex", flexDirection: "column", overflow: "hidden" }}>
               <div style={{ padding: 12, borderBottom: `1px solid ${C.darkBorder}` }}>
+                {/* PART 2 — value band pills */}
+                <div style={{ display: "flex", gap: 6, marginBottom: 8, flexWrap: "wrap" }}>
+                  {VALUE_BANDS.map((b) => {
+                    const on = valueBand === b.id;
+                    return (
+                      <button key={b.id} type="button" onClick={() => setValueBand(b.id)} style={{
+                        background: on ? C.teal : "transparent", color: on ? C.white : C.dimText,
+                        border: `1px solid ${on ? C.teal : C.darkBorder}`, borderRadius: 20,
+                        padding: "4px 12px", fontSize: 11, fontWeight: 700, cursor: "pointer",
+                      }}>{b.label}</button>
+                    );
+                  })}
+                </div>
                 <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search address, applicant, agent…" style={{ ...inp(), marginBottom: 8 }} />
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 8 }}>
                   <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} style={inp()}>
                     <option value="all" style={{ color: C.body }}>All statuses</option>
                     <option value="submitted" style={{ color: C.body }}>🔥 Submitted</option>
@@ -743,11 +935,22 @@ export default function PlanningPipeline() {
                     {PIPELINE_STAGES.map((s) => <option key={s.id} value={s.id} style={{ color: C.body }}>{s.label}</option>)}
                   </select>
                 </div>
+                {/* PART 2 — sort dropdown + show-skipped toggle */}
+                <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                  <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} style={{ ...inp(), flex: 1 }}>
+                    {SORT_OPTIONS.map((s) => <option key={s.id} value={s.id} style={{ color: C.body }}>{s.label}</option>)}
+                  </select>
+                  <button type="button" onClick={() => setShowSkipped((v) => !v)} title="Toggle skipped leads" style={{
+                    background: showSkipped ? C.teal : "transparent", color: showSkipped ? C.white : C.dimText,
+                    border: `1px solid ${showSkipped ? C.teal : C.darkBorder}`, borderRadius: 7,
+                    padding: "8px 10px", fontSize: 10, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap",
+                  }}>{showSkipped ? "Hide" : "Show"} skipped{skippedCount ? ` (${skippedCount})` : ""}</button>
+                </div>
               </div>
               <div style={{ flex: 1, overflowY: "auto", padding: "10px 12px", maxHeight: isMobile ? "none" : undefined }}>
                 {filteredLeads.map((lead) => (
                   <LeadCard key={lead.id} lead={lead} agent={lead.agent_id ? agentsById[lead.agent_id] : undefined}
-                    selected={selectedLead?.id === lead.id} onSelect={(l) => setSelectedLeadId(l.id)} />
+                    selected={selectedLead?.id === lead.id} onSelect={(l) => setSelectedLeadId(l.id)} onSkip={skipLead} />
                 ))}
                 {filteredLeads.length === 0 && (
                   <p style={{ color: C.dimText, fontSize: 12, textAlign: "center", marginTop: 20 }}>No leads match your filters.</p>
@@ -763,7 +966,7 @@ export default function PlanningPipeline() {
                 </button>
               )}
               {selectedLead ? (
-                <LeadDetail lead={selectedLead} agent={selectedLead.agent_id ? agentsById[selectedLead.agent_id] : undefined} onSaved={load} />
+                <LeadDetail lead={selectedLead} agent={selectedLead.agent_id ? agentsById[selectedLead.agent_id] : undefined} onSaved={load} onSkip={skipLead} />
               ) : (
                 !isMobile && <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: C.dimText, fontSize: 13 }}>Select a lead to review</div>
               )}
