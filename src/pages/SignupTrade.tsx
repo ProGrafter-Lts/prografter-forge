@@ -1336,6 +1336,67 @@ const SignupTrade = () => {
                   </div>
                 </div>
 
+                {/* Time-served: portfolio + references */}
+                {isTimeServed && (
+                  <>
+                    <div className="p-4 rounded-xl border border-teal/30 bg-teal/5 space-y-3">
+                      <p className="font-mono text-xs text-teal uppercase tracking-widest">Portfolio of your work *</p>
+                      <p className="text-xs text-cream/60 font-body">
+                        At least 5 photos of jobs you've delivered yourself. Add an area/postcode + approx. month for each so we can spot-check.
+                      </p>
+                      <input
+                        type="file" multiple accept="image/jpeg,image/png,image/webp"
+                        onChange={(e) => e.target.files && uploadPortfolioFiles(e.target.files)}
+                        className="text-cream text-sm file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-teal file:text-cream file:font-mono file:text-xs file:cursor-pointer"
+                      />
+                      {uploadingPortfolio && <p className="text-xs text-teal font-body">Uploading…</p>}
+                      <p className="text-xs text-cream/60 font-body">{portfolio.length} / 5+ photos</p>
+                      <div className="space-y-3">
+                        {portfolio.map((p, i) => (
+                          <div key={i} className="p-3 rounded-lg border border-cream/10 bg-cream/5 space-y-2">
+                            <div className="flex items-center justify-between gap-2">
+                              <p className="text-xs text-cream/70 font-body truncate">📷 {p.preview_name}</p>
+                              <button type="button" onClick={() => removePortfolio(i)} className="text-xs text-red-400 hover:underline">Remove</button>
+                            </div>
+                            <input className={inputClass} placeholder="Area / postcode (e.g. SW11)" value={p.area_or_address} onChange={(e) => updatePortfolio(i, { area_or_address: e.target.value })} />
+                            <div className="grid grid-cols-2 gap-2">
+                              <input type="month" className={inputClass} value={p.approx_date} onChange={(e) => updatePortfolio(i, { approx_date: e.target.value })} />
+                              <input className={inputClass} placeholder="Caption (optional)" value={p.caption} onChange={(e) => updatePortfolio(i, { caption: e.target.value })} />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="p-4 rounded-xl border border-teal/30 bg-teal/5 space-y-3">
+                      <p className="font-mono text-xs text-teal uppercase tracking-widest">References — we phone these *</p>
+                      <p className="text-xs text-cream/60 font-body">At least 2. Name + phone or email per reference.</p>
+                      {references.map((r, i) => (
+                        <div key={i} className="p-3 rounded-lg border border-cream/10 bg-cream/5 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <p className="font-mono text-[10px] text-teal uppercase">Reference {i + 1}</p>
+                            {references.length > 2 && (
+                              <button type="button" onClick={() => setReferences(rs => rs.filter((_, k) => k !== i))} className="text-xs text-red-400 hover:underline">Remove</button>
+                            )}
+                          </div>
+                          <input className={inputClass} placeholder="Contact name" value={r.contact_name} onChange={(e) => setReferences(rs => rs.map((x, k) => k === i ? { ...x, contact_name: e.target.value } : x))} />
+                          <select className={inputClass} value={r.relationship} onChange={(e) => setReferences(rs => rs.map((x, k) => k === i ? { ...x, relationship: e.target.value as any } : x))}>
+                            <option value="past_customer">Past customer</option>
+                            <option value="trade_contact">Trade contact</option>
+                            <option value="supplier">Supplier</option>
+                            <option value="other">Other</option>
+                          </select>
+                          <div className="grid grid-cols-2 gap-2">
+                            <input className={inputClass} placeholder="Phone" value={r.phone} onChange={(e) => setReferences(rs => rs.map((x, k) => k === i ? { ...x, phone: e.target.value } : x))} />
+                            <input className={inputClass} placeholder="Email" value={r.email} onChange={(e) => setReferences(rs => rs.map((x, k) => k === i ? { ...x, email: e.target.value } : x))} />
+                          </div>
+                        </div>
+                      ))}
+                      <button type="button" onClick={() => setReferences(rs => [...rs, blankRef()])} className="text-sm text-teal hover:underline">+ Add another reference</button>
+                    </div>
+                  </>
+                )}
+
                 {docsConfirmed && (
                   <div className="flex items-start gap-3 p-4 rounded-xl bg-teal/10 border border-teal/40">
                     <CheckCircle2 className="w-5 h-5 text-teal flex-none mt-0.5" strokeWidth={2} />
