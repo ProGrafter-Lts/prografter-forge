@@ -715,20 +715,99 @@ const SignupTrade = () => {
     }
   };
 
+  // ---- Time-served portfolio upload ----
+  const uploadPortfolioFiles = async (files: FileList) => {
+    if (!createdUserId || !createdTradeId) return;
+    setUploadingPortfolio(true);
+    try {
+      const newItems: PortfolioDraft[] = [];
+      for (const file of Array.from(files)) {
+        if (file.size > MAX_DOC_BYTES) { setError(`${file.name} over 10MB`); continue; }
+        const ext = file.name.split(".").pop() ?? "jpg";
+        const path = `${createdUserId}/portfolio-${Date.now()}-${Math.random().toString(36).slice(2,7)}.${ext}`;
+        const { error: upErr } = await supabase.storage
+          .from("trade-verification-documents").upload(path, file, { upsert: false });
+        if (upErr) { setError(upErr.message); continue; }
+        const { data: ins, error: insErr } = await supabase.from("trade_portfolio_items").insert({
+          trade_id: createdTradeId,
+          storage_path: path,
+        } as any).select("id").single();
+        if (insErr) { console.warn(insErr); continue; }
+        newItems.push({ id: (ins as any).id, storage_path: path, preview_name: file.name, area_or_address: "", approx_date: "", caption: "" });
+      }
+      setPortfolio((p) => [...p, ...newItems]);
+    } finally { setUploadingPortfolio(false); }
+  };
+
+  const updatePortfolio = (idx: number, patch: Partial<PortfolioDraft>) => {
+    setPortfolio((p) => p.map((it, i) => i === idx ? { ...it, ...patch } : it));
+    const item = portfolio[idx];
+    if (item?.id) {
+      void supabase.from("trade_portfolio_items").update({
+        area_or_address: patch.area_or_address ?? item.area_or_address,
+        approx_date: (patch.approx_date ?? item.approx_date) ? `${patch.approx_date ?? item.approx_date}-01` : null,
+        caption: patch.caption ?? item.caption,
+      } as any).eq("id", item.id);
+    }
+  };
+
+  const removePortfolio = async (idx: number) => {
+    const item = portfolio[idx];
+    if (item?.id) await supabase.from("trade_portfolio_items").delete().eq("id", item.id);
+    if (item?.storage_path) await supabase.storage.from("trade-verification-documents").remove([item.storage_path]);
+    setPortfolio((p) => p.filter((_, i) => i !== idx));
+  };
+
+  // Hydrate portfolio rows on resume
+  useEffect(() => {
+    if (!createdTradeId || !isTimeServed) return;
+    (async () => {
+      const { data } = await supabase
+        .from("trade_portfolio_items")
+        .select("id, storage_path, area_or_address, approx_date, caption")
+        .eq("trade_id", createdTradeId)
+        .order("created_at", { ascending: true });
+      if (data && data.length) {
+        setPortfolio(data.map((d: any) => ({
+          id: d.id, storage_path: d.storage_path,
+          preview_name: d.storage_path.split("/").pop() ?? "photo",
+          area_or_address: d.area_or_address ?? "",
+          approx_date: d.approx_date ? String(d.approx_date).slice(0, 7) : "",
+          caption: d.caption ?? "",
+        })));
+      }
+    })();
+  }, [createdTradeId, isTimeServed]);
+
   const submitStep3 = async () => {
     setError("");
     const hasInsurance = !!existingDocs.insurance;
     const hasId = !!existingDocs.id;
     const hasQual = !!existingDocs.qualification;
-    if (uploadingDoc.insurance || uploadingDoc.id || uploadingDoc.qualification) {
-      setError("Hold on — a document is still uploading.");
+    if (uploadingDoc.insurance || uploadingDoc.id || uploadingDoc.qualification || uploadingPortfolio) {
+      setError("Hold on — a file is still uploading.");
       return;
     }
     if (!hasInsurance) { setError("Public liability insurance is required"); return; }
     if (!insuranceExpiry) { setError("Insurance expiry date is required"); return; }
     if (insuranceStatus === "expired") { setError("Your insurance has expired"); return; }
     if (!hasId) { setError("Photo ID is required"); return; }
-    if (qualMeta.required && !hasQual) { setError(`${qualMeta.label} is required for your trade`); return; }
+
+    if (isTimeServed) {
+      // Time-served: portfolio + references + years-in-trade required
+      if (!yearsExperience || parseInt(yearsExperience, 10) < 2) {
+        setError("Time-served route requires at least 2 years in the trade"); return;
+      }
+      if (portfolio.length < 5) {
+        setError("Please upload at least 5 portfolio photos of your own work"); return;
+      }
+      const validRefs = references.filter(r => r.contact_name.trim() && (r.phone.trim() || r.email.trim()));
+      if (validRefs.length < 2) {
+        setError("At least 2 references required — name + phone or email"); return;
+      }
+    } else if (qualMeta.required && !hasQual) {
+      setError(`${qualMeta.label} is required for your trade`); return;
+    }
     setStep(4);
   };
 
