@@ -587,7 +587,13 @@ const SignupTrade = () => {
           console.warn("Specialisms save failed (non-blocking)", e);
         }
       }
-      setStep(3);
+      // Band 3 trades pick their route before moving to documents.
+      if (bandConfig.band === "competence_assessed" && !chosenRoute) {
+        setShowRouteChoice(true);
+      } else {
+        if (bandConfig.band !== "competence_assessed") setChosenRoute("registered");
+        setStep(3);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Couldn't save your details");
     } finally {
