@@ -25,15 +25,16 @@ const CHECKS = [
   },
   {
     icon: Award,
-    label: "Qualifications",
+    label: "Proven competence",
     description:
-      "Verified with the issuing body (NICEIC, NAPIT, ELECSA, Gas Safe, or trade equivalent)",
+      "Verified qualifications, or assessed time-served experience",
   },
   {
     icon: Phone,
     label: "References",
     description: "Recent customers called personally",
   },
+
 ];
 
 const VerificationStandards = () => {
