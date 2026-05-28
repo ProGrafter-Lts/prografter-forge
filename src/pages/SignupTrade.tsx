@@ -869,7 +869,7 @@ const SignupTrade = () => {
         });
       } catch (e) { console.warn("trade-signup admin (review) notification failed", e); }
 
-      navigate("/signup/trade/under-review", { replace: true });
+      navigate(isTimeServed ? "/signup/trade/assessment-pending" : "/signup/trade/under-review", { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Submission failed");
     } finally {
