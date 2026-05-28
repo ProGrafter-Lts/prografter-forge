@@ -966,7 +966,7 @@ export default function PlanningPipeline() {
                 </button>
               )}
               {selectedLead ? (
-                <LeadDetail lead={selectedLead} agent={selectedLead.agent_id ? agentsById[selectedLead.agent_id] : undefined} onSaved={load} />
+                <LeadDetail lead={selectedLead} agent={selectedLead.agent_id ? agentsById[selectedLead.agent_id] : undefined} onSaved={load} onSkip={skipLead} />
               ) : (
                 !isMobile && <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: C.dimText, fontSize: 13 }}>Select a lead to review</div>
               )}
