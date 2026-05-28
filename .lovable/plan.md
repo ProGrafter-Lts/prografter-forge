@@ -1,57 +1,78 @@
-# Email pipeline review — pre-launch hardening
+# Trade Verification Rebuild — Banding + Dual Routes
 
-This is a sizeable change (4 separate items, 3 new templates, 3+ new trigger sites, 1 cron job, plus an investigation). Plan first so we don't half-wire anything before money flows.
+Big scope. Splitting into 4 phases so you can review/approve as we go. Phase 1 (DB + classification) lands first because everything else depends on it.
 
-## 1. Auth email logging — investigate the "0 sends" rows
+## Phase 1 — Data model & trade classification
 
-The 4 auth rows in the panel all read from `email_send_log` rows where `template_name = 'auth_emails'`. If Lee fired real signup/reset emails and they aren't showing, one of three things is true:
+**Migration** (`supabase/migrations/<ts>_trade_banding.sql`):
 
-1. `auth-email-hook` is using the **old direct-send pattern** (`@lovable.dev/email-js`) instead of `enqueue_email` — bypassing the log entirely.
-2. The hook is enqueuing under a different `template_name` (e.g. `signup`, `recovery`) so it never matches the `auth_emails` filter.
-3. The hook isn't being invoked at all (Supabase Auth webhook not pointed at it).
+- Enums:
+  - `trade_band`: `legally_gated | scheme_preferred | competence_assessed`
+  - `verification_route`: `registered | qualified | time_served`
+  - Extend `verification_status` to include `pending_docs | pending_verification | pending_assessment | verified | rejected` (migrate existing `pending`/`approved` → `pending_verification`/`verified`).
+- New columns on `trades`: `band`, `verification_route`, `assessment_evidence_complete bool`, `references_called bool`, `site_assessment_done bool`, `competence_interview_done bool`, `on_probation bool`, `probation_jobs_remaining int default 0`, `assessor_name text`, `assessment_notes text`, `years_in_trade int`.
+- Trigger `enforce_trade_admin_only_columns`: blocks non-admin / non-service updates to the 4 checklist booleans, `on_probation`, `probation_jobs_remaining`, `assessor_name`, `assessment_notes`, `verification_status`, `verification_route`, `band`. Trade can only set these via signup INSERT or admin RPC.
+- Storage bucket `trade_verification_documents` (private) — RLS: trade owns folder `<user_id>/*`, admins read all. (Bucket may already exist; will use `INSERT ... ON CONFLICT`.)
+- `public.trade_band_for_type(text)` SQL helper returning band + required scheme(s), used by client + server.
 
-**Action:** Read `supabase/functions/auth-email-hook/index.ts`, query `email_send_log` for the last 7 days grouped by `template_name`, and check `auth_logs` for actual send events. Fix whichever of the three is broken. If pattern (1), re-scaffold the hook so it queues properly.
+**Frontend lib** `src/lib/tradeBanding.ts`: canonical map of trade type → band, required registrations, scheme options (Gas Safe / NICEIC|NAPIT|ELECSA / MCS / OZEV / OFTEC / FENSA|CERTASS), and the public-register URLs for admin links.
 
-## 2. New template + trigger: `payment-milestone-released`
+## Phase 2 — Signup flow rewrite (`src/pages/SignupTrade.tsx`)
 
-Two recipients, two distinct emails, one trigger.
+Insert after trade-type step:
 
-- Create `supabase/functions/_shared/transactional-email-templates/payment-released-trade.tsx`
-- Create `supabase/functions/_shared/transactional-email-templates/payment-released-homeowner.tsx`
-- Register both in `registry.ts`
-- Add to `REGISTERED_TEMPLATES` + `EMAIL_CATALOG` (new category: `payments`) in `AdminEmailStatus.tsx`
-- **Trigger site:** wherever a stage's `payment_status` flips to `paid`. Current code reads `payment_status === "paid"` in `EarningsView` and `TradeDashboard` but I haven't located the write site yet — likely admin action or a Stripe webhook that doesn't exist yet. **Need to confirm with you where this flip happens today** (manual admin toggle? Stripe webhook? Not implemented?).
+1. **Band 1 (gated)** — show registration-number field(s) inline. Validation rules per scheme (Gas Safe 7 digits, MCS pattern, etc.). No route-choice screen, no time-served option ever reachable.
+2. **Band 2 (windows/doors)** — FENSA/CERTASS number OR checkbox "I notify building control per job" with attestation text.
+3. **Band 3** — new **Route Choice screen**: two large cards (qualified vs time-served) + honest sub-line.
+4. Plumber overlays: if "gas work" toggle → also collect Gas Safe; if "unvented hot water" → require G3 qualification upload.
 
-## 3. New template + trigger: `quote-received` (homeowner)
+**Qualified path**: existing cert/qualification uploads.
 
-- Create `quote-received.tsx` template + register
-- **Trigger site:** `src/components/trade/QuoteSubmitForm.tsx` line ~108 (`from("quotes").insert(...)`) — after successful insert, fetch the job's homeowner email and invoke `send-transactional-email` with `idempotencyKey: quote-received-${quoteId}`.
-- Also wire the QuickBuild quote submission path.
-- Add to catalog under new `quotes` category.
+**Time-Served path** (`src/pages/SignupTradeTimeServed.tsx` or step inside SignupTrade):
+- Years in trade (number) + evidence upload (multi-file) — stored to `trade_verification_documents` doc_type `years_evidence`.
+- Portfolio: min 5 photos, each with address/area + approx date (stored as JSONB on `trade_portfolio_items` — new small table).
+- References: existing `trade_references` table reused, min 2 customer + optional contractor (extend `relationship` enum if needed).
+- PL insurance upload (mandatory).
+- Photo ID upload (mandatory).
+- On submit: `verification_status='pending_assessment'`, `verification_route='time_served'`, redirect to Pending Assessment page.
 
-## 4. New template + trigger: `project-overdue` (both parties)
+All other routes submit → `pending_verification` (existing under-review page).
 
-Two emails, one cron-triggered scan.
+## Phase 3 — Pending Assessment page + admin dashboard
 
-- Create `project-overdue-trade.tsx` + `project-overdue-homeowner.tsx` templates
-- Create new edge function `scan-overdue-projects` (verify_jwt = false, cron-invoked)
-- Logic: select projects where `planned_completion_date < now()` AND status != complete AND no `project-overdue` row in `email_send_log` for that project in the last 14 days (dedupe so we don't spam daily)
-- Schedule via `pg_cron` daily at 09:00 UTC
-- Add to catalog under `project` category
+**`src/pages/SignupTradeAssessmentPending.tsx`**: distinct from existing under-review. Honest copy, "log in & browse, can't quote until verified", typical 3–7 working days.
 
-## 5. Contract email triggers — confirm timeline
+**TradeDashboard banner**: if `verification_status='pending_assessment'`, show "Your experience is being assessed — we'll be in touch shortly." (mutually exclusive with verified badge — already enforced via single source of truth, keep that.)
 
-The 7 contract templates exist in the registry but are not invoked anywhere. I'll add a `// TODO: wire to contract signing flow (target June 2026)` comment in `ContractPanel.tsx` and a banner note in the admin panel so this stays visible. No new code wired until the signing feature ships — agreed.
+**`src/pages/AdminVerifications.tsx`** route-aware drawer:
+- Show **band** + **route** badges at top.
+- Registered/Qualified: registration number + "View on register ↗" link (Gas Safe / NICEIC / NAPIT / ELECSA / MCS / OFTEC / FENSA register URLs). Approve / Request info / Reject buttons.
+- Time-served: 4-item checklist (`assessment_evidence_complete`, `references_called`, `site_assessment_done`, `competence_interview_done`) + assessor name + notes textarea. **Approve button disabled until all 4 ticked.** On approve: `verification_status='verified'`, `verified=true`, `on_probation=true`, `probation_jobs_remaining=3`.
+- Approve calls new RPC `admin_approve_trade(trade_id)` (SECURITY DEFINER, `has_role(auth.uid(),'admin')` check) — same RPC triggers existing `trade_verified` email path.
+- For registered/qualified: probation defaults to `false`, `0`.
 
-## Database changes
+## Phase 4 — Probation + copy fixes
 
-- No new tables required.
-- New cron job (pg_cron) for the overdue scan — added via `insert` tool (not migration) since it embeds the function URL + anon key per the cron guide.
+**Probation decrement** — trigger on `jobs.stage` transition to `completed`: for each trade on the job's contracts with `on_probation=true`, decrement `probation_jobs_remaining`; when it hits 0, set `on_probation=false` and enqueue "fully-established" email via existing email queue.
 
-## Open questions before I build
+**Internal admin flag**: `ActiveProjectsList` / admin job views show small "Probation" pill when trade is on probation. Public profile never shows it.
 
-1. **Payment release trigger:** Where does `payment_status` flip to `paid` today — manual admin, Stripe webhook, or not yet implemented? This determines whether item 2 is a code change in an existing flow or needs a placeholder for a future Stripe webhook.
-2. **Overdue cadence:** Daily scan with a 14-day re-notify suppression — does that match your intent, or do you want a one-shot notification only?
-3. Confirm category labels: I'm proposing `payments`, `quotes`, `project` as three new chips alongside `auth`, `onboarding`, `contract`.
+**Homepage copy** (`src/components/VerificationStandards.tsx` or wherever "Five checks. Every trade." lives — will grep):
+- Replace 5th check with: "Proven competence — verified qualifications, or assessed time-served experience".
+- Add line below the five: "Where the law requires registration — gas, electrical self-certification — we require it. Everywhere else, a great trade with genuine experience has a real route in."
 
-Once you confirm those three, I'll build everything in one pass.
+**`/verification`** (`src/pages/Vetting.tsx` likely) — add "Two routes to verified" section: Route A (qualified/registered) + Route B (time-served, assessed), plain language.
+
+## Constraints enforced
+- Band 1 trades cannot reach time-served path (frontend gate + DB trigger rejects `verification_route='time_served'` when band='legally_gated').
+- DB trigger blocks `verification_status='verified'` if band='legally_gated' AND required registration number is null.
+- Checklist booleans + probation fields admin-only via trigger.
+- Homeowner flow untouched.
+
+## Out of scope (won't do unless asked)
+- Live API calls to Gas Safe / NICEIC / MCS registers (one-click link only, same pattern as Companies House).
+- Automated reference phone calls — admin records outcome manually via existing `trade_references.status`.
+
+---
+
+**Approve to start with Phase 1 (migration).** I'll pause after the migration runs so you can sanity-check the schema, then proceed through Phase 2 → 4. Total estimate: ~4 migrations, ~8 new/edited files per phase.

@@ -2667,6 +2667,51 @@ export type Database = {
         }
         Relationships: []
       }
+      trade_portfolio_items: {
+        Row: {
+          approx_date: string | null
+          area_or_address: string | null
+          caption: string | null
+          created_at: string
+          id: string
+          storage_path: string
+          trade_id: string
+        }
+        Insert: {
+          approx_date?: string | null
+          area_or_address?: string | null
+          caption?: string | null
+          created_at?: string
+          id?: string
+          storage_path: string
+          trade_id: string
+        }
+        Update: {
+          approx_date?: string | null
+          area_or_address?: string | null
+          caption?: string | null
+          created_at?: string
+          id?: string
+          storage_path?: string
+          trade_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trade_portfolio_items_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "trades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trade_portfolio_items_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "trades_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trade_references: {
         Row: {
           admin_notes: string | null
@@ -2820,8 +2865,13 @@ export type Database = {
       }
       trades: {
         Row: {
+          assessment_evidence_complete: boolean
+          assessment_notes: string | null
+          assessor_name: string | null
           avg_rating: number | null
+          band: string | null
           bio: string | null
+          building_control_self_notify: boolean
           business_logo_path: string | null
           business_structure: string | null
           calendar_token: string
@@ -2831,6 +2881,7 @@ export type Database = {
           companies_house_registered_name: string | null
           companies_house_status: string
           company_name: string
+          competence_interview_done: boolean
           completed_jobs_count: number
           cps_registration_number: string | null
           cps_scheme: string | null
@@ -2848,11 +2899,13 @@ export type Database = {
           mcs_number: string | null
           mcs_verified: boolean
           name: string
+          on_probation: boolean
           ozev_approved: boolean
           pas_2030_accredited: boolean
           pas_2035_coordinator: boolean
           phone: string
           postcode: string
+          probation_jobs_remaining: number
           professional_indemnity_cover_pence: number | null
           professional_indemnity_expiry: string | null
           professional_indemnity_insurer: string | null
@@ -2861,9 +2914,11 @@ export type Database = {
           public_liability_expiry: string | null
           public_liability_insurer: string | null
           public_liability_policy_number: string | null
+          references_called: boolean
           rejected_at: string | null
           rejection_reason: string | null
           review_count: number
+          site_assessment_done: boolean
           specialisms_prompt_seen: boolean
           submitted_for_review_at: string | null
           tier: string
@@ -2877,15 +2932,22 @@ export type Database = {
           vat_registered: boolean
           verification_notes: string | null
           verification_reminder_count: number
+          verification_route: string | null
           verification_status: string
           verified: boolean
           verified_on_prografter_at: string | null
           website: string | null
           years_experience: number | null
+          years_in_trade: number | null
         }
         Insert: {
+          assessment_evidence_complete?: boolean
+          assessment_notes?: string | null
+          assessor_name?: string | null
           avg_rating?: number | null
+          band?: string | null
           bio?: string | null
+          building_control_self_notify?: boolean
           business_logo_path?: string | null
           business_structure?: string | null
           calendar_token?: string
@@ -2895,6 +2957,7 @@ export type Database = {
           companies_house_registered_name?: string | null
           companies_house_status?: string
           company_name: string
+          competence_interview_done?: boolean
           completed_jobs_count?: number
           cps_registration_number?: string | null
           cps_scheme?: string | null
@@ -2912,11 +2975,13 @@ export type Database = {
           mcs_number?: string | null
           mcs_verified?: boolean
           name: string
+          on_probation?: boolean
           ozev_approved?: boolean
           pas_2030_accredited?: boolean
           pas_2035_coordinator?: boolean
           phone: string
           postcode: string
+          probation_jobs_remaining?: number
           professional_indemnity_cover_pence?: number | null
           professional_indemnity_expiry?: string | null
           professional_indemnity_insurer?: string | null
@@ -2925,9 +2990,11 @@ export type Database = {
           public_liability_expiry?: string | null
           public_liability_insurer?: string | null
           public_liability_policy_number?: string | null
+          references_called?: boolean
           rejected_at?: string | null
           rejection_reason?: string | null
           review_count?: number
+          site_assessment_done?: boolean
           specialisms_prompt_seen?: boolean
           submitted_for_review_at?: string | null
           tier?: string
@@ -2941,15 +3008,22 @@ export type Database = {
           vat_registered?: boolean
           verification_notes?: string | null
           verification_reminder_count?: number
+          verification_route?: string | null
           verification_status?: string
           verified?: boolean
           verified_on_prografter_at?: string | null
           website?: string | null
           years_experience?: number | null
+          years_in_trade?: number | null
         }
         Update: {
+          assessment_evidence_complete?: boolean
+          assessment_notes?: string | null
+          assessor_name?: string | null
           avg_rating?: number | null
+          band?: string | null
           bio?: string | null
+          building_control_self_notify?: boolean
           business_logo_path?: string | null
           business_structure?: string | null
           calendar_token?: string
@@ -2959,6 +3033,7 @@ export type Database = {
           companies_house_registered_name?: string | null
           companies_house_status?: string
           company_name?: string
+          competence_interview_done?: boolean
           completed_jobs_count?: number
           cps_registration_number?: string | null
           cps_scheme?: string | null
@@ -2976,11 +3051,13 @@ export type Database = {
           mcs_number?: string | null
           mcs_verified?: boolean
           name?: string
+          on_probation?: boolean
           ozev_approved?: boolean
           pas_2030_accredited?: boolean
           pas_2035_coordinator?: boolean
           phone?: string
           postcode?: string
+          probation_jobs_remaining?: number
           professional_indemnity_cover_pence?: number | null
           professional_indemnity_expiry?: string | null
           professional_indemnity_insurer?: string | null
@@ -2989,9 +3066,11 @@ export type Database = {
           public_liability_expiry?: string | null
           public_liability_insurer?: string | null
           public_liability_policy_number?: string | null
+          references_called?: boolean
           rejected_at?: string | null
           rejection_reason?: string | null
           review_count?: number
+          site_assessment_done?: boolean
           specialisms_prompt_seen?: boolean
           submitted_for_review_at?: string | null
           tier?: string
@@ -3005,11 +3084,13 @@ export type Database = {
           vat_registered?: boolean
           verification_notes?: string | null
           verification_reminder_count?: number
+          verification_route?: string | null
           verification_status?: string
           verified?: boolean
           verified_on_prografter_at?: string | null
           website?: string | null
           years_experience?: number | null
+          years_in_trade?: number | null
         }
         Relationships: []
       }
@@ -3219,6 +3300,7 @@ export type Database = {
         Args: { _contract_id: string; _terms: string }
         Returns: undefined
       }
+      admin_approve_trade: { Args: { _trade_id: string }; Returns: Json }
       compute_contract_hash: { Args: { _contract_id: string }; Returns: string }
       count_verified_trades: { Args: never; Returns: number }
       delete_email: {

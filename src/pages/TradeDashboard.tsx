@@ -286,7 +286,7 @@ const TradeDashboard = () => {
             </div>
           )}
           {/* Verification banner */}
-          {trade?.verification_status && trade.verification_status !== "approved" && trade?.submitted_for_review_at && (() => {
+          {trade?.verification_status && trade.verification_status !== "approved" && trade.verification_status !== "verified" && trade?.submitted_for_review_at && (() => {
             const status = trade.verification_status;
             const palette =
               status === "info_requested"
@@ -294,6 +294,7 @@ const TradeDashboard = () => {
                 : status === "rejected"
                 ? { bg: "rgba(248,113,113,0.10)", border: "rgba(248,113,113,0.35)", accent: "#FCA5A5", text: "#FECACA" }
                 : { bg: "rgba(96,165,250,0.10)", border: "rgba(96,165,250,0.35)", accent: "#93C5FD", text: "#DBEAFE" };
+            const isAssessment = status === "pending_assessment";
             return (
               <div
                 className="mt-10 md:mt-0 p-4 rounded-xl font-body text-sm"
@@ -302,16 +303,17 @@ const TradeDashboard = () => {
                 <div className="flex items-center justify-between gap-4 flex-wrap">
                   <div>
                     <p className="font-mono text-xs uppercase tracking-widest mb-1" style={{ color: palette.accent }}>
-                      Verification {status.replace("_"," ")}
+                      {isAssessment ? "Experience assessment" : `Verification ${status.replace(/_/g," ")}`}
                     </p>
                     <p>
-                      {status === "pending" && "Your application is being reviewed. We typically respond within 1 business day."}
+                      {isAssessment && "Your experience is being assessed — we'll be in touch shortly."}
+                      {(status === "pending" || status === "pending_verification" || status === "pending_docs") && "Your application is being reviewed. We typically respond within 1 business day."}
                       {status === "info_requested" && "We need a little more info before we can verify you."}
                       {status === "rejected" && "Your application wasn't approved. See details on the status page."}
                     </p>
                   </div>
                   <a
-                    href="/signup/trade/under-review"
+                    href={isAssessment ? "/signup/trade/assessment-pending" : "/signup/trade/under-review"}
                     className="inline-block font-mono text-xs px-4 py-2 rounded-lg hover:opacity-90 transition-opacity"
                     style={{ backgroundColor: palette.accent, color: "#0F2238" }}
                   >
@@ -321,6 +323,7 @@ const TradeDashboard = () => {
               </div>
             );
           })()}
+
           {/* Welcome header */}
           <div className="flex items-center gap-3 pt-10 md:pt-0">
             <div>

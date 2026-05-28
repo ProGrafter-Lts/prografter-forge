@@ -16,6 +16,8 @@ const Privacy = lazy(() => import("./pages/Privacy.tsx"));
 const TradeRegister = lazy(() => import("./pages/TradeRegister.tsx"));
 const SignupTrade = lazy(() => import("./pages/SignupTrade.tsx"));
 const SignupTradeUnderReview = lazy(() => import("./pages/SignupTradeUnderReview.tsx"));
+const SignupTradeAssessmentPending = lazy(() => import("./pages/SignupTradeAssessmentPending.tsx"));
+const Verification = lazy(() => import("./pages/Verification.tsx"));
 const PostAJob = lazy(() => import("./pages/PostAJob.tsx"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword.tsx"));
 const TradeDashboard = lazy(() => import("./pages/TradeDashboard.tsx"));
@@ -159,7 +161,9 @@ const App = () => (
             />
             <Route path="/signup/homeowner" element={<SignupHomeowner />} />
             <Route path="/signup/homeowner/next" element={<SignupHomeownerNext />} />
-            <Route path="/signup/homeowner/check-email" element={<SignupCheckEmail />} />
+            <Route path="/signup/trade/under-review" element={<ProtectedRoute><SignupTradeUnderReview /></ProtectedRoute>} />
+            <Route path="/signup/trade/assessment-pending" element={<ProtectedRoute><SignupTradeAssessmentPending /></ProtectedRoute>} />
+            <Route path="/verification" element={<Verification />} />
             <Route path="/signup/trade" element={<SignupTradeRedirect />} />
             <Route path="/signup/trade/under-review" element={<ProtectedRoute><SignupTradeUnderReview /></ProtectedRoute>} />
             <Route path="/admin/verifications" element={<AdminRoute><AdminVerifications /></AdminRoute>} />
