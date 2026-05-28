@@ -124,6 +124,58 @@ const daysSince = (dateStr: string | null) => {
   return Math.max(0, Math.floor(ms / 86400000));
 };
 
+// ---- Auto next-action (PART 1) ----
+// Computes a suggested next action from existing data. Never overrides a human-set next_action.
+const suggestedNextAction = (lead: Lead, agent?: Agent): string | null => {
+  const os = lead.outreach_status || "not_contacted";
+  const firm = agent?.company_name || agent?.contact_name || lead.agent_name || "agent";
+  if (lead.agent_id && (os === "not_contacted" || os === "no_next_action")) {
+    return `Email agent — ${firm}`;
+  }
+  if (!lead.agent_id && lead.applicant_address && os === "not_contacted") {
+    return `Send letter to homeowner — ${lead.applicant_address}`;
+  }
+  if (!lead.agent_id && !lead.applicant_address) {
+    return "Skip — insufficient contact data";
+  }
+  if (os === "letter_sent" && lead.letter_sent_at && daysSince(lead.letter_sent_at) > 14) {
+    return `Follow up letter — sent ${daysSince(lead.letter_sent_at)}d ago`;
+  }
+  return null;
+};
+
+// ---- Value bands + sort (PART 2) ----
+const VALUE_BANDS = [
+  { id: "all", label: "All", min: 0 },
+  { id: "40k", label: "£40k+", min: 40000 },
+  { id: "80k", label: "£80k+", min: 80000 },
+  { id: "150k", label: "£150k+", min: 150000 },
+];
+const SORT_OPTIONS = [
+  { id: "newest", label: "Newest" },
+  { id: "value_desc", label: "Value (high to low)" },
+  { id: "value_asc", label: "Value (low to high)" },
+  { id: "deadline", label: "Closest deadline" },
+];
+const LS_BAND = "pp_value_band";
+const LS_SORT = "pp_sort";
+
+// ---- Homeowner search launchers (PART 3) ----
+// Best-effort town extraction from a free-text site address (last comma segment, postcode stripped).
+const guessTown = (lead: Lead): string => {
+  const parts = (lead.site_address || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const pc = (lead.postcode || "").trim();
+  let last = parts[parts.length - 1] || "";
+  if (pc && last.toUpperCase().includes(pc.toUpperCase()) && parts.length >= 2) {
+    last = parts[parts.length - 2];
+  }
+  // strip any embedded postcode-looking token from the town string
+  return last.replace(/[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}/gi, "").trim();
+};
+
 const inp = (): CSSProperties => ({
   width: "100%", padding: "8px 10px", borderRadius: 7,
   border: `1px solid ${C.darkBorder}`, background: "rgba(255,255,255,0.05)",
