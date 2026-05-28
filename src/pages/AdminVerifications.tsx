@@ -230,7 +230,30 @@ const AdminVerifications = () => {
     }
     setDocUrls(urls);
     await loadReferences(tradeId, trade?.email || null);
+    // Portfolio (time-served)
+    const { data: pData } = await supabase
+      .from("trade_portfolio_items")
+      .select("id,storage_path,area_or_address,approx_date,caption")
+      .eq("trade_id", tradeId)
+      .order("created_at", { ascending: true });
+    const pList = (pData as PortfolioItem[]) || [];
+    setPortfolio(pList);
+    const pUrls: Record<string, string> = {};
+    for (const p of pList) {
+      const { data: signed } = await supabase.storage
+        .from("trade-verification-documents")
+        .createSignedUrl(p.storage_path, 600);
+      if (signed?.signedUrl) pUrls[p.id] = signed.signedUrl;
+    }
+    setPortfolioUrls(pUrls);
   };
+
+  const updateChecklist = async (tradeId: string, field: string, value: boolean) => {
+    const { error } = await supabase.from("trades").update({ [field]: value } as any).eq("id", tradeId);
+    if (error) { toast.error(error.message); return; }
+    setTrades(prev => prev.map(t => t.id === tradeId ? { ...t, [field]: value } as any : t));
+  };
+
 
   const updateReferenceStatus = async (refId: string, status: ReferenceStatus) => {
     setRefUpdating(refId);
