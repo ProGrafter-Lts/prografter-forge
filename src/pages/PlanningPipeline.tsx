@@ -785,19 +785,53 @@ export default function PlanningPipeline() {
   }, [leads]);
   const selectedLead = leads.find((l) => l.id === selectedLeadId) || leads[0] || null;
 
-  const filteredLeads = useMemo(() => leads.filter((l) => {
-    if (filterStatus !== "all" && l.status !== filterStatus) return false;
-    if (filterPipeline !== "all" && l.pipeline_status !== filterPipeline) return false;
-    if (search) {
-      const s = search.toLowerCase();
-      const agent = l.agent_id ? agentsById[l.agent_id] : null;
-      if (!l.site_address.toLowerCase().includes(s)
-        && !(l.description || "").toLowerCase().includes(s)
-        && !(agent?.contact_name || "").toLowerCase().includes(s)
-        && !(l.applicant_name || "").toLowerCase().includes(s)) return false;
+  const bandMin = useMemo(() => VALUE_BANDS.find((b) => b.id === valueBand)?.min ?? 0, [valueBand]);
+
+  const filteredLeads = useMemo(() => {
+    const out = leads.filter((l) => {
+      // Skipped leads are hidden from default views unless toggled on
+      if (!showSkipped && l.outreach_status === "skipped") return false;
+      if (bandMin > 0 && (Number(l.estimated_value_max) || 0) < bandMin) return false;
+      if (filterStatus !== "all" && l.status !== filterStatus) return false;
+      if (filterPipeline !== "all" && l.pipeline_status !== filterPipeline) return false;
+      if (search) {
+        const s = search.toLowerCase();
+        const agent = l.agent_id ? agentsById[l.agent_id] : null;
+        if (!l.site_address.toLowerCase().includes(s)
+          && !(l.description || "").toLowerCase().includes(s)
+          && !(agent?.contact_name || "").toLowerCase().includes(s)
+          && !(l.applicant_name || "").toLowerCase().includes(s)) return false;
+      }
+      return true;
+    });
+    const val = (l: Lead) => Number(l.estimated_value_max) || 0;
+    const sub = (l: Lead) => (l.submitted_date ? new Date(l.submitted_date).getTime() : 0);
+    out.sort((a, b) => {
+      switch (sortBy) {
+        case "value_asc": return val(a) - val(b);
+        case "value_desc": return val(b) - val(a);
+        case "newest": return sub(b) - sub(a);
+        case "deadline": return sub(a) - sub(b); // oldest submission = closest decision deadline
+        default: return 0;
+      }
+    });
+    return out;
+  }, [leads, filterStatus, filterPipeline, search, agentsById, bandMin, showSkipped, sortBy]);
+
+  const skippedCount = useMemo(() => leads.filter((l) => l.outreach_status === "skipped").length, [leads]);
+
+  const skipLead = async (l: Lead, skip: boolean) => {
+    const { error } = await supabase
+      .from("planning_leads")
+      .update({ outreach_status: skip ? "skipped" : "not_contacted" } as never)
+      .eq("id", l.id);
+    if (error) {
+      toast({ title: "Update failed", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: skip ? "Lead skipped" : "Lead restored" });
+      load();
     }
-    return true;
-  }), [leads, filterStatus, filterPipeline, search, agentsById]);
+  };
 
   const hotLeads = leads.filter((l) => l.pipeline_status === "new" && daysSince(l.submitted_date) <= 14).length;
   const totalValue = leads.reduce((s, l) => s + (Number(l.estimated_value_max) || 0), 0);
