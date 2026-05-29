@@ -401,7 +401,16 @@ const LeadDetail = ({ lead, agent, onSaved, onSkip }: { lead: Lead; agent?: Agen
     });
     setEnriching(false);
     if (error) {
-      toast({ title: "PDF enrich failed", description: error.message, variant: "destructive" });
+      // supabase.functions.invoke puts non-2xx response bodies in error.context, not data.
+      let detail = error.message;
+      try {
+        const ctx = (error as { context?: Response }).context;
+        if (ctx && typeof ctx.json === "function") {
+          const body = await ctx.json();
+          if (body?.error) detail = body.error;
+        }
+      } catch { /* keep generic message */ }
+      toast({ title: "PDF enrich failed", description: detail, variant: "destructive" });
       return;
     }
     const r = data as { ok?: boolean; error?: string };
