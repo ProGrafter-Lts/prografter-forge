@@ -811,40 +811,7 @@ export default function Apply() {
       </InfoBox>
     </div>,
 
-    // 5 — References
-    <div key="5">
-      <div style={{ marginBottom: 20 }}>
-        <h2 style={{ fontSize: 17, fontWeight: 700, color: C.deep, margin: "0 0 4px" }}>References</h2>
-        <p style={{ fontSize: 13, color: C.secondary, margin: 0 }}>Provide at least two references. We need a contact name, the relationship, and at least one way to reach them.</p>
-      </div>
-      <InfoBox variant="teal">
-        We call references personally. Please let them know to expect our call. Once submitted, your reference checks are tracked in your verification record — every call is logged against your application.
-      </InfoBox>
-      {references.map((r, i) => (
-        <RefBlock
-          key={i}
-          n={i + 1}
-          entry={r}
-          errors={errors}
-          onChange={(patch) => updateRef(i, patch)}
-          onRemove={() => removeRef(i)}
-          canRemove={references.length > 2}
-        />
-      ))}
-      {errors.references_count && (
-        <p style={{ fontSize: 13, color: C.error, margin: "0 0 12px" }}>{errors.references_count}</p>
-      )}
-      <button
-        type="button"
-        onClick={addRef}
-        style={{ background: "transparent", border: `1.5px dashed ${C.border}`, color: C.teal, padding: "10px 14px", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: "pointer", width: "100%" }}
-      >
-        + Add another reference
-      </button>
-    </div>,
-
-
-    // 6 — Declaration
+    // 5 — Declaration
     <div key="6">
       <div style={{ marginBottom: 20 }}>
         <h2 style={{ fontSize: 17, fontWeight: 700, color: C.deep, margin: "0 0 4px" }}>Declaration</h2>
