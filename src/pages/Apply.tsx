@@ -363,8 +363,8 @@ export default function Apply() {
   // Keep latest form/errors/upd accessible without recreating I/S/T each render.
   // Defining these inline as components caused React to remount the <input> on
   // every keystroke (new component type per render) → lost focus / one char at a time.
-  const stateRef = useRef({ form, errors, upd });
-  stateRef.current = { form, errors, upd };
+  const stateRef = useRef({ form, errors, upd, files });
+  stateRef.current = { form, errors, upd, files };
 
   const I = useCallback(({ f, type = "text", ...p }: { f: string; type?: string; placeholder?: string; maxLength?: number }) => {
     const { form, errors, upd } = stateRef.current;
