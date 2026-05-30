@@ -329,14 +329,18 @@ export default function Apply() {
   const next = () => { const e = validate(step); setErrors(e); if (!Object.keys(e).length) setStep(s => s + 1); };
   const back = () => { setErrors({}); setStep(s => s - 1); };
 
+  // References are only collected on the Time-served route (Step 3). Regulated
+  // and Qualified routes never provide references, so nothing is persisted.
   const persistReferences = async (applicantEmail: string) => {
     if (!applicantEmail) return;
-    const rows = references.map(r => ({
+    if (form.qualification_path !== "time_served") return;
+    const str = (k: string) => String(form[k] ?? "").trim();
+    const rows = ([1, 2] as const).map((rn) => ({
       applicant_email: applicantEmail,
-      contact_name: r.contact_name.trim(),
-      relationship: r.relationship || "other",
-      phone: r.phone.trim() || null,
-      email: r.email.trim() || null,
+      contact_name: str(`ts_ref${rn}_name`),
+      relationship: str(`ts_ref${rn}_role`) || "other",
+      phone: str(`ts_ref${rn}_phone`) || null,
+      email: str(`ts_ref${rn}_email`) || null,
     }));
     const { error } = await supabase.from("trade_references").insert(rows);
     if (error) throw error;
