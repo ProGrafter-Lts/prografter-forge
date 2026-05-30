@@ -422,7 +422,7 @@ const GreenGrantsPage = () => {
               {/* Disclaimer */}
               <div className="bg-cream/[0.06] border border-cream/15 rounded-xl px-6 py-5">
                 <p className="font-body text-cream/60 text-xs leading-relaxed">
-                  These results are a guide based on the information you provided. Your exact eligibility will be confirmed by a certified installer during a free assessment. ProGrafter provides information only — not financial advice. For official guidance visit{" "}
+                  These results are a guide based on the information you provided. Your exact eligibility will be confirmed by an MCS-certified installer during a free assessment. ProGrafter provides information only — not financial advice. For official guidance visit{" "}
                   <a href="https://www.gov.uk" target="_blank" rel="noopener noreferrer" className="text-teal underline">gov.uk</a>.
                 </p>
               </div>
