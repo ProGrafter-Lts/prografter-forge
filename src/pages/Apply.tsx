@@ -719,6 +719,7 @@ export default function Apply() {
           <li>All information I have provided is accurate and truthful. Misrepresentation results in immediate rejection or removal.</li>
           <li>I hold valid public liability insurance and will notify ProGrafter immediately if this lapses.</li>
           <li>For regulated trades: my registration is current and I am authorised to carry out the work described.</li>
+          <li>For time-served trades: the references provided are genuine and may be contacted, and the years of experience stated are accurate.</li>
           <li>I consent to ProGrafter verifying my details with Companies House, my registration body, my insurers, and the references I have provided.</li>
           <li>I agree to ProGrafter's commission structure (7.5% of job value, capped at £900) and the platform's dispute and review processes.</li>
           <li>I understand that reviews are bilateral and immutable — neither side can remove them once submitted.</li>
