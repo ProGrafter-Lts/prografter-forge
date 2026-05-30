@@ -103,6 +103,14 @@ const BLANK: FormState = {
   registration_number: "", registration_expiry: "", cps_scheme: "", portfolio_description: "",
   insurance_provider: "", insurance_policy_number: "", insurance_expiry: "",
   public_liability_cover: "", employers_liability_cover: "",
+  // Qualifications step
+  qualification_path: "",
+  qual_scheme_name: "", qual_reg_number: "", qual_reg_expiry: "", qual_card_doc: "",
+  qual_type: "", qual_awarding_body: "", qual_year: "", qual_cert_doc: "",
+  ts_years: "", ts_specialism: "",
+  ts_ref1_name: "", ts_ref1_role: "", ts_ref1_phone: "", ts_ref1_email: "",
+  ts_ref2_name: "", ts_ref2_role: "", ts_ref2_phone: "", ts_ref2_email: "",
+  ts_consent: false,
   declaration_accepted: false,
 };
 
