@@ -635,6 +635,14 @@ export default function Apply() {
           <p style={{ textAlign: "center", fontSize: 12, color: C.secondary, margin: "16px 0 0" }}>
             Step {step + 1} of {STEPS.length} — {STEPS[step]}
           </p>
+          <p style={{ textAlign: "center", fontSize: 12, color: C.secondary, margin: "8px 0 0" }}>
+            <a href="/privacy" style={{ color: C.secondary }}>Privacy</a>
+            {" · "}
+            <a href="/terms" style={{ color: C.secondary }}>Terms</a>
+            {" · "}
+            <a href="/cookies" style={{ color: C.secondary }}>Cookies</a>
+          </p>
+
 
         </div>
       </div>
