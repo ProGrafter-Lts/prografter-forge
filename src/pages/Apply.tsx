@@ -68,7 +68,13 @@ const TRADES = [
 ] as const;
 
 
-const STEPS = ["Your details", "Your trade", "Qualifications", "Insurance", "References", "Declaration"];
+const STEPS = ["Your details", "Your trade", "Qualifications", "Portfolio of work", "Insurance", "References", "Declaration"];
+
+const QUAL_PATHS = [
+  { value: "regulated", label: "Regulated trade (electrical, gas, renewables, etc.) — I hold a current scheme card" },
+  { value: "qualified", label: "Qualified trade — I have an NVQ, City & Guilds, or completed apprenticeship" },
+  { value: "time_served", label: "Time-served — I have years of experience but no formal qualification on file" },
+] as const;
 
 const RELATIONSHIP_OPTIONS = [
   { value: "past_customer", label: "Past customer" },
