@@ -674,8 +674,8 @@ export default function Apply() {
       </InfoBox>
     </div>,
 
-    // 4 — References
-    <div key="4">
+    // 5 — References
+    <div key="5">
       <div style={{ marginBottom: 20 }}>
         <h2 style={{ fontSize: 17, fontWeight: 700, color: C.deep, margin: "0 0 4px" }}>References</h2>
         <p style={{ fontSize: 13, color: C.secondary, margin: 0 }}>Provide at least two references. We need a contact name, the relationship, and at least one way to reach them.</p>
