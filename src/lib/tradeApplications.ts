@@ -110,12 +110,12 @@ export async function logApplicationEvent(
   const { data: userData } = await supabase.auth.getUser();
   const user = userData?.user;
   if (!user) throw new Error("Not authenticated");
-  const { error } = await supabase.from("trade_application_events").insert({
+  const { error } = await supabase.from("trade_application_events").insert([{
     application_id: applicationId,
     event_type: eventType,
     actor_user_id: user.id,
     actor_email: user.email ?? null,
     detail,
-  });
+  }]);
   if (error) throw error;
 }
