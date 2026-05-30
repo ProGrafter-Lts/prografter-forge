@@ -602,7 +602,7 @@ export default function Apply() {
             <Field label="Registration number" req err={errors.qual_reg_number}><I f="qual_reg_number" placeholder="123456" /></Field>
             <Field label="Expiry date" req err={errors.qual_reg_expiry}><I f="qual_reg_expiry" type="date" /></Field>
           </Grid>
-          <Field label="Upload your scheme card / certificate" hint="A photo or PDF of your current card or certificate.">
+          <Field label="Upload your scheme card / certificate" req err={errors.qual_card_doc} hint="A photo or PDF of your current card or certificate.">
             <F f="qual_card_doc" />
           </Field>
         </>
