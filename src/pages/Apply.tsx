@@ -329,8 +329,7 @@ export default function Apply() {
   const next = () => { const e = validate(step); setErrors(e); if (!Object.keys(e).length) setStep(s => s + 1); };
   const back = () => { setErrors({}); setStep(s => s - 1); };
 
-  const persistReferences = async () => {
-    const applicantEmail = (form.email as string).trim().toLowerCase();
+  const persistReferences = async (applicantEmail: string) => {
     if (!applicantEmail) return;
     const rows = references.map(r => ({
       applicant_email: applicantEmail,
@@ -343,16 +342,58 @@ export default function Apply() {
     if (error) throw error;
   };
 
+  // Upload every selected file to the private application bucket and return a
+  // map of field -> array of stored object paths.
+  const uploadDocuments = async (applicationId: string): Promise<Record<string, string[]>> => {
+    const paths: Record<string, string[]> = {};
+    const safe = (name: string) => name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(-120);
+    for (const [field, list] of Object.entries(files)) {
+      if (!list?.length) continue;
+      paths[field] = [];
+      for (let i = 0; i < list.length; i++) {
+        const file = list[i];
+        const objectPath = `${applicationId}/${field}/${Date.now()}-${i}-${safe(file.name)}`;
+        const { error } = await supabase.storage
+          .from("trade-application-docs")
+          .upload(objectPath, file, { contentType: file.type || undefined, upsert: false });
+        if (error) throw error;
+        paths[field].push(objectPath);
+      }
+    }
+    return paths;
+  };
+
   const submit = async () => {
     const e = validate(6);
     setErrors(e);
     if (Object.keys(e).length) return;
     setSubmitting(true);
     try {
-      await persistReferences();
+      const applicationId = crypto.randomUUID();
+      const applicantEmail = (form.email as string).trim().toLowerCase();
+
+      // 1. Upload all documents/photos to Cloud storage.
+      const documentPaths = await uploadDocuments(applicationId);
+
+      // 2. Persist the application record (form data + document locations).
+      const { error: appError } = await supabase.from("trade_applications").insert({
+        id: applicationId,
+        applicant_email: applicantEmail || null,
+        full_name: (form.full_name as string)?.trim() || null,
+        business_name: (form.business_name as string)?.trim() || null,
+        trade_category_id: (form.trade_category_id as string) || null,
+        qualification_path: (form.qualification_path as string) || null,
+        form_data: { ...form, references },
+        document_paths: documentPaths,
+      });
+      if (appError) throw appError;
+
+      // 3. Persist references for admin follow-up.
+      await persistReferences(applicantEmail);
+
       setDone(true);
     } catch (err: any) {
-      console.error("Reference persistence failed", err);
+      console.error("Application submission failed", err);
       setErrors({ submit: err?.message || "Could not save your application. Please try again." });
     } finally {
       setSubmitting(false);

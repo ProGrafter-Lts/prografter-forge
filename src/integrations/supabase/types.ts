@@ -2673,6 +2673,48 @@ export type Database = {
         }
         Relationships: []
       }
+      trade_applications: {
+        Row: {
+          applicant_email: string | null
+          business_name: string | null
+          created_at: string
+          document_paths: Json
+          form_data: Json
+          full_name: string | null
+          id: string
+          qualification_path: string | null
+          status: string
+          trade_category_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          applicant_email?: string | null
+          business_name?: string | null
+          created_at?: string
+          document_paths?: Json
+          form_data?: Json
+          full_name?: string | null
+          id?: string
+          qualification_path?: string | null
+          status?: string
+          trade_category_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          applicant_email?: string | null
+          business_name?: string | null
+          created_at?: string
+          document_paths?: Json
+          form_data?: Json
+          full_name?: string | null
+          id?: string
+          qualification_path?: string | null
+          status?: string
+          trade_category_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       trade_portfolio_items: {
         Row: {
           approx_date: string | null
