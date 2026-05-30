@@ -329,7 +329,7 @@ export default function Apply() {
   const next = () => { const e = validate(step); setErrors(e); if (!Object.keys(e).length) setStep(s => s + 1); };
   const back = () => { setErrors({}); setStep(s => s - 1); };
 
-  const persistReferences = async (applicationId: string, applicantEmail: string) => {
+  const persistReferences = async (applicantEmail: string) => {
     if (!applicantEmail) return;
     const rows = references.map(r => ({
       applicant_email: applicantEmail,
