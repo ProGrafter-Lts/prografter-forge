@@ -69,7 +69,7 @@ const TRADES = [
 ] as const;
 
 
-const STEPS = ["Your details", "Your trade", "Qualifications", "Portfolio of work", "Insurance", "References", "Declaration"];
+const STEPS = ["Your details", "Your trade", "Qualifications", "Portfolio of work", "Insurance", "Declaration"];
 
 const QUAL_PATHS = [
   { value: "regulated", label: "Regulated trade (electrical, gas, renewables, etc.) — I hold a current scheme card" },
