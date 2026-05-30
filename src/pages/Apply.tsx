@@ -469,7 +469,7 @@ export default function Apply() {
             accept={accept}
             onChange={(ev) => {
               const file = ev.target.files?.[0];
-              setFieldFiles(f, file ? [file] : []);
+              setFieldFiles(f, file ? filterBySize([file], f) : []);
             }}
             style={{ display: "none" }}
           />
