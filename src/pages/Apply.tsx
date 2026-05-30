@@ -360,25 +360,35 @@ export default function Apply() {
   };
 
   // Upload every selected file to the private application bucket and return a
-  // map of field -> array of stored object paths.
-  const uploadDocuments = async (applicationId: string): Promise<Record<string, string[]>> => {
-    const paths: Record<string, string[]> = {};
+  // map of field -> array of stored document metadata objects.
+  const uploadDocuments = async (applicationId: string): Promise<Record<string, DocMeta[]>> => {
+    const paths: Record<string, DocMeta[]> = {};
     const safe = (name: string) => name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(-120);
     for (const [field, list] of Object.entries(files)) {
       if (!list?.length) continue;
       paths[field] = [];
       for (let i = 0; i < list.length; i++) {
         const file = list[i];
-        const objectPath = `${applicationId}/${field}/${Date.now()}-${i}-${safe(file.name)}`;
+        if (file.size > MAX_FILE_BYTES) {
+          throw new Error(`"${file.name}" exceeds the 10MB limit. Please upload a smaller file.`);
+        }
+        const objectPath = `trade-applications/${applicationId}/${field}/${Date.now()}-${i}-${safe(file.name)}`;
         const { error } = await supabase.storage
           .from("trade-application-docs")
           .upload(objectPath, file, { contentType: file.type || undefined, upsert: false });
-        if (error) throw error;
-        paths[field].push(objectPath);
+        if (error) throw new Error(`Failed to upload "${file.name}": ${error.message}`);
+        paths[field].push({
+          path: objectPath,
+          filename: file.name,
+          size: file.size,
+          mime: file.type || "application/octet-stream",
+          uploaded_at: new Date().toISOString(),
+        });
       }
     }
     return paths;
   };
+
 
   const submit = async () => {
     const e = validate(6);
