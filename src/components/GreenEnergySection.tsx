@@ -33,7 +33,7 @@ const GreenEnergySection = () => {
             CUT THE COST OF YOUR HOME IMPROVEMENTS
           </h2>
           <p className="font-body text-body-text max-w-2xl mx-auto text-base leading-relaxed">
-            As a homeowner, you could save thousands on solar panels, heat pumps, insulation, and EV chargers thanks to UK government grants and 0% VAT. We'll help you check what you qualify for — then match you with certified local installers through ProGrafter.
+            As a homeowner, you could save thousands on solar panels, heat pumps, insulation, and EV chargers thanks to UK government grants and 0% VAT. We'll help you check what you qualify for — then match you with MCS-certified local installers through ProGrafter.
           </p>
         </div>
 

@@ -288,7 +288,7 @@ const PostAJob = () => {
     password.length >= 8;
 
   const stepTitles: Record<Exclude<Step, 3.5>, { white: string; teal: string }> = {
-    1: { white: isGreenFlow ? "Find a Certified" : "What Do You", teal: isGreenFlow ? "Green Energy Installer" : "Need Done?" },
+    1: { white: isGreenFlow ? "Find an MCS-certified" : "What Do You", teal: isGreenFlow ? "green energy installer" : "Need Done?" },
     2: { white: "Tell Us", teal: "More." },
     3: { white: "Where's The", teal: "Job?" },
     4: { white: "Your", teal: "Details." },
@@ -361,7 +361,7 @@ const PostAJob = () => {
                   </h2>
                   {isGreenFlow && (
                     <p className="font-body text-cream/60 text-sm mb-6 leading-relaxed">
-                      Based on your eligibility results, these are the certified trade types relevant to your project:
+                      Based on your eligibility results, these are the trade types relevant to your project:
                     </p>
                   )}
                   <div className="space-y-6">

@@ -551,8 +551,8 @@ export default function PostJobBrief() {
           <div style={{ marginTop: 20, padding: "12px 16px", background: C.tealLight,
             borderRadius: 10, fontSize: 12, color: "#0F766E", lineHeight: 1.6 }}>
             <strong>What to expect:</strong> Trades have 48 hours to respond to your brief.
-            You'll be notified for each quote received. All trades on ProGrafter are
-            personally vetted — qualifications verified, references called, interview conducted.
+            You'll be notified for each quote received. Every trade is verified before they go
+            live on the platform — trades who pass our five-check verification.
           </div>
         </div>
       </div>

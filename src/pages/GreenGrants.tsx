@@ -422,7 +422,7 @@ const GreenGrantsPage = () => {
               {/* Disclaimer */}
               <div className="bg-cream/[0.06] border border-cream/15 rounded-xl px-6 py-5">
                 <p className="font-body text-cream/60 text-xs leading-relaxed">
-                  These results are a guide based on the information you provided. Your exact eligibility will be confirmed by a certified installer during a free assessment. ProGrafter provides information only — not financial advice. For official guidance visit{" "}
+                  These results are a guide based on the information you provided. Your exact eligibility will be confirmed by an MCS-certified installer during a free assessment. ProGrafter provides information only — not financial advice. For official guidance visit{" "}
                   <a href="https://www.gov.uk" target="_blank" rel="noopener noreferrer" className="text-teal underline">gov.uk</a>.
                 </p>
               </div>
@@ -433,7 +433,7 @@ const GreenGrantsPage = () => {
                   to={`/post-a-job?green=1&schemes=${schemeIds.join(",")}`}
                   className="inline-block bg-[#16A34A] text-white font-mono text-sm py-4 px-10 rounded-xl hover:bg-[#15803D] transition-colors tracking-wider uppercase shadow-lg shadow-[#16A34A]/20"
                 >
-                  Match Me With a Certified Local Installer — Free →
+                  Get Matched With a Verified Local Trade — Free →
                 </Link>
               </div>
 

@@ -236,7 +236,7 @@ const CheckatradeAlternative = () => {
             </Link>
           </Button>
           <p className="font-mono text-cream/40 text-xs mt-6">
-            Doing green work? See <Link to="/green" className="text-teal underline">green grants &amp; certified trades</Link>.
+            Doing green work? See <Link to="/green" className="text-teal underline">green grants &amp; MCS-certified installers</Link>.
           </p>
         </div>
       </section>
