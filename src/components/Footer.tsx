@@ -12,6 +12,7 @@ const Footer = () => {
             <a href="/about" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">About</a>
             <a href="/privacy" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">Privacy</a>
             <a href="/terms" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">Terms</a>
+            <a href="/cookies" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">Cookies</a>
             <a href="/contact" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">Contact</a>
             <a href="/suppliers" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">For suppliers →</a>
             <a href="#" className="termly-display-preferences font-mono text-xs text-secondary-text hover:text-teal transition-colors">Consent Preferences</a>
