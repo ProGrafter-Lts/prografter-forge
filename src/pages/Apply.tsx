@@ -226,6 +226,23 @@ export default function Apply() {
 
   const setFieldFiles = (key: string, list: File[]) => setFiles((p) => ({ ...p, [key]: list }));
 
+  // Reject files over 10MB before they are accepted into state.
+  const MAX_FILE_BYTES = 10 * 1024 * 1024;
+  const filterBySize = (incoming: File[], field: string): File[] => {
+    const ok: File[] = [];
+    const tooBig: string[] = [];
+    for (const f of incoming) {
+      if (f.size > MAX_FILE_BYTES) tooBig.push(f.name);
+      else ok.push(f);
+    }
+    if (tooBig.length) {
+      setErrors((p) => ({ ...p, [field]: `File too large (max 10MB): ${tooBig.join(", ")}` }));
+    } else {
+      setErrors((p) => { const { [field]: _omit, ...rest } = p; return rest; });
+    }
+    return ok;
+  };
+
   const upd: UpdFn = (k) => (e) => {
     const target = e.target as HTMLInputElement;
     setForm(p => ({ ...p, [k]: target.type === "checkbox" ? target.checked : target.value }));
