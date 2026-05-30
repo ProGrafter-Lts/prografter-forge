@@ -1,14 +1,17 @@
-import { useEffect, useState } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import SEO from "@/components/SEO";
+import {
+  TradeApplication, STATUS_OPTIONS, STATUS_LABEL, STATUS_COLOR, QUAL_LABEL,
+} from "@/lib/tradeApplications";
 
 const C = {
-  cream: "#F5F0E8", deep: "#0F2238", navy: "#1B3A5C", teal: "#0D9488",
+  cream: "#F5F0E8", deep: "#0F2238", teal: "#0D9488",
   dimText: "rgba(245,240,232,0.78)", darkBorder: "rgba(245,240,232,0.22)",
-  white: "#FFFFFF", red: "#DC2626", border: "#E2E0DA", secondary: "#6B6B6B",
+  white: "#FFFFFF", border: "#E2E0DA", secondary: "#6B6B6B",
 };
 
 const ADMIN_NAV = [
@@ -35,134 +38,142 @@ function AdminNav() {
   );
 }
 
-type DocMeta = { path: string; filename: string; size: number; mime: string; uploaded_at: string };
-
-interface Application {
-  id: string;
-  applicant_email: string | null;
-  full_name: string | null;
-  business_name: string | null;
-  trade_category_id: string | null;
-  qualification_path: string | null;
-  status: string;
-  created_at: string;
-  document_paths: Record<string, DocMeta[]> | null;
-  form_data: Record<string, unknown> | null;
-}
-
-const FIELD_LABELS: Record<string, string> = {
-  qual_card_doc: "Scheme card / certificate",
-  qual_cert_doc: "Qualification certificate",
-  insurance_certificate: "Certificate of Insurance",
-  portfolio_photos: "Portfolio photos",
-};
+type SortKey = "full_name" | "business_name" | "trade_category_id" | "qualification_path" | "created_at" | "verification_status";
 
 export default function AdminApplications() {
-  const [apps, setApps] = useState<Application[]>([]);
+  const navigate = useNavigate();
+  const [apps, setApps] = useState<TradeApplication[]>([]);
   const [loading, setLoading] = useState(true);
-  const [deleting, setDeleting] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [tradeFilter, setTradeFilter] = useState("all");
+  const [qualFilter, setQualFilter] = useState("all");
+  const [sortKey, setSortKey] = useState<SortKey>("created_at");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
 
-  const load = async () => {
-    setLoading(true);
-    const { data, error } = await supabase
-      .from("trade_applications")
-      .select("*")
-      .order("created_at", { ascending: false });
-    if (error) toast.error(error.message);
-    setApps(((data as unknown) as Application[]) ?? []);
-    setLoading(false);
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("trade_applications")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) toast.error(error.message);
+      setApps(((data as unknown) as TradeApplication[]) ?? []);
+      setLoading(false);
+    })();
+  }, []);
+
+  const trades = useMemo(() => {
+    const s = new Set<string>();
+    apps.forEach((a) => a.trade_category_id && s.add(a.trade_category_id));
+    return Array.from(s).sort();
+  }, [apps]);
+
+  const toggleSort = (k: SortKey) => {
+    if (sortKey === k) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    else { setSortKey(k); setSortDir(k === "created_at" ? "desc" : "asc"); }
   };
 
-  useEffect(() => { load(); }, []);
-
-  const viewDoc = async (path: string) => {
-    const { data, error } = await supabase.storage
-      .from("trade-application-docs")
-      .createSignedUrl(path, 600);
-    if (error || !data?.signedUrl) {
-      toast.error(error?.message || "Could not generate a link for this file");
-      return;
-    }
-    window.open(data.signedUrl, "_blank", "noopener,noreferrer");
-  };
-
-  const deleteApp = async (app: Application) => {
-    if (!confirm(`Delete application from ${app.full_name || app.applicant_email || "this trade"}? This also removes their uploaded files.`)) return;
-    setDeleting(app.id);
-    try {
-      // Collect every stored object path and remove the files first.
-      const paths = Object.values(app.document_paths ?? {}).flat().map((d) => d.path);
-      if (paths.length) {
-        const { error: rmErr } = await supabase.storage.from("trade-application-docs").remove(paths);
-        if (rmErr) throw rmErr;
+  const rows = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    let list = apps.filter((a) => {
+      if (statusFilter !== "all" && a.verification_status !== statusFilter) return false;
+      if (tradeFilter !== "all" && a.trade_category_id !== tradeFilter) return false;
+      if (qualFilter !== "all" && a.qualification_path !== qualFilter) return false;
+      if (q) {
+        const pc = String((a.form_data?.postcode as string) ?? "");
+        const hay = [a.full_name, a.applicant_email, a.business_name, pc].join(" ").toLowerCase();
+        if (!hay.includes(q)) return false;
       }
-      const { error: delErr } = await supabase.from("trade_applications").delete().eq("id", app.id);
-      if (delErr) throw delErr;
-      toast.success("Application and files deleted");
-      setApps((p) => p.filter((a) => a.id !== app.id));
-    } catch (err: any) {
-      toast.error(err?.message || "Delete failed");
-    } finally {
-      setDeleting(null);
-    }
-  };
+      return true;
+    });
+    list = [...list].sort((a, b) => {
+      const av = String((a[sortKey] as string) ?? "").toLowerCase();
+      const bv = String((b[sortKey] as string) ?? "").toLowerCase();
+      if (av < bv) return sortDir === "asc" ? -1 : 1;
+      if (av > bv) return sortDir === "asc" ? 1 : -1;
+      return 0;
+    });
+    return list;
+  }, [apps, search, statusFilter, tradeFilter, qualFilter, sortKey, sortDir]);
 
-  const fmtSize = (b: number) => (b >= 1024 * 1024 ? `${(b / 1024 / 1024).toFixed(1)} MB` : `${Math.round(b / 1024)} KB`);
+  const th = (label: string, key: SortKey) => (
+    <th onClick={() => toggleSort(key)} style={{ textAlign: "left", padding: "10px 12px", fontSize: 12, fontWeight: 700, color: C.deep, cursor: "pointer", whiteSpace: "nowrap", borderBottom: `2px solid ${C.border}` }}>
+      {label}{sortKey === key ? (sortDir === "asc" ? " ▲" : " ▼") : ""}
+    </th>
+  );
+
+  const selStyle: React.CSSProperties = { fontSize: 13, padding: "8px 10px", border: `1px solid ${C.border}`, borderRadius: 8, background: C.white, color: C.deep };
 
   return (
     <div style={{ minHeight: "100vh", background: C.cream }}>
-      <SEO title="Trade Applications — Admin" description="Admin review of submitted trade applications and uploaded documents." path="/admin/applications" />
+      <SEO title="Trade Applications — Admin" description="Admin review of submitted trade applications." path="/admin/applications" />
       <AdminNav />
-      <div style={{ maxWidth: 900, margin: "0 auto", padding: "28px 20px" }}>
+      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "28px 20px" }}>
         <h1 style={{ fontSize: 22, fontWeight: 800, color: C.deep, margin: "0 0 4px" }}>Trade Applications</h1>
-        <p style={{ fontSize: 13, color: C.secondary, margin: "0 0 24px" }}>
-          {loading ? "Loading…" : `${apps.length} application${apps.length === 1 ? "" : "s"}`}
+        <p style={{ fontSize: 13, color: C.secondary, margin: "0 0 18px" }}>
+          {loading ? "Loading…" : `${rows.length} of ${apps.length} application${apps.length === 1 ? "" : "s"}`}
         </p>
 
-        {!loading && apps.length === 0 && (
-          <p style={{ fontSize: 14, color: C.secondary }}>No applications yet.</p>
-        )}
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 16 }}>
+          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search name, email, business, postcode…"
+            style={{ ...selStyle, flex: "1 1 260px", minWidth: 200 }} />
+          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} style={selStyle}>
+            <option value="all">All statuses</option>
+            {STATUS_OPTIONS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
+          </select>
+          <select value={qualFilter} onChange={(e) => setQualFilter(e.target.value)} style={selStyle}>
+            <option value="all">All routes</option>
+            <option value="regulated">Regulated</option>
+            <option value="qualified">Qualified</option>
+            <option value="time-served">Time-served</option>
+          </select>
+          <select value={tradeFilter} onChange={(e) => setTradeFilter(e.target.value)} style={selStyle}>
+            <option value="all">All trades</option>
+            {trades.map((t) => <option key={t} value={t}>{t}</option>)}
+          </select>
+        </div>
 
-        {apps.map((app) => {
-          const docGroups = Object.entries(app.document_paths ?? {});
-          return (
-            <div key={app.id} style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 12, padding: 18, marginBottom: 16 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
-                <div>
-                  <div style={{ fontSize: 16, fontWeight: 700, color: C.deep }}>{app.full_name || "—"}</div>
-                  <div style={{ fontSize: 13, color: C.secondary }}>{app.business_name || "—"} · {app.applicant_email || "no email"}</div>
-                  <div style={{ fontSize: 12, color: C.secondary, marginTop: 2 }}>
-                    {app.trade_category_id || "—"} · {app.qualification_path || "—"} · {format(new Date(app.created_at), "d MMM yyyy, HH:mm")}
-                  </div>
-                </div>
-                <button onClick={() => deleteApp(app)} disabled={deleting === app.id}
-                  style={{ alignSelf: "flex-start", background: "none", border: `1px solid ${C.red}`, color: C.red, fontSize: 12, fontWeight: 700, padding: "6px 12px", borderRadius: 8, cursor: "pointer", opacity: deleting === app.id ? 0.5 : 1 }}>
-                  {deleting === app.id ? "Deleting…" : "Delete"}
-                </button>
-              </div>
-
-              <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 12 }}>
-                {docGroups.length === 0 && <div style={{ fontSize: 13, color: C.secondary }}>No documents uploaded.</div>}
-                {docGroups.map(([field, docs]) => (
-                  <div key={field}>
-                    <div style={{ fontSize: 12, fontWeight: 700, color: C.deep, marginBottom: 6 }}>{FIELD_LABELS[field] || field}</div>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                      {docs.map((d) => (
-                        <div key={d.path} style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", fontSize: 12, color: C.secondary }}>
-                          <button onClick={() => viewDoc(d.path)} style={{ background: C.teal, color: C.white, border: "none", padding: "4px 12px", borderRadius: 6, fontSize: 12, fontWeight: 700, cursor: "pointer" }}>View</button>
-                          <span style={{ color: C.deep, fontWeight: 600 }}>{d.filename}</span>
-                          <span>{fmtSize(d.size)}</span>
-                          <span>{d.mime}</span>
-                          <span>{d.uploaded_at ? format(new Date(d.uploaded_at), "d MMM HH:mm") : ""}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          );
-        })}
+        <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 12, overflow: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 760 }}>
+            <thead>
+              <tr>
+                {th("Applicant", "full_name")}
+                {th("Business", "business_name")}
+                {th("Trade", "trade_category_id")}
+                {th("Route", "qualification_path")}
+                {th("Submitted", "created_at")}
+                {th("Status", "verification_status")}
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((a) => (
+                <tr key={a.id} onClick={() => navigate(`/admin/applications/${a.id}`)}
+                  style={{ cursor: "pointer", borderBottom: `1px solid ${C.border}` }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = "#FAFAF7")}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}>
+                  <td style={{ padding: "11px 12px", fontSize: 13, fontWeight: 600, color: C.deep }}>
+                    {a.full_name || "—"}
+                    <div style={{ fontSize: 11, fontWeight: 400, color: C.secondary }}>{a.applicant_email || ""}</div>
+                  </td>
+                  <td style={{ padding: "11px 12px", fontSize: 13, color: C.deep }}>{a.business_name || "—"}</td>
+                  <td style={{ padding: "11px 12px", fontSize: 13, color: C.deep }}>{a.trade_category_id || "—"}</td>
+                  <td style={{ padding: "11px 12px", fontSize: 13, color: C.deep }}>{QUAL_LABEL[a.qualification_path ?? ""] || a.qualification_path || "—"}</td>
+                  <td style={{ padding: "11px 12px", fontSize: 13, color: C.secondary, whiteSpace: "nowrap" }}>{format(new Date(a.created_at), "d MMM yyyy")}</td>
+                  <td style={{ padding: "11px 12px" }}>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: C.white, background: STATUS_COLOR[a.verification_status] || C.secondary, padding: "3px 9px", borderRadius: 999, whiteSpace: "nowrap" }}>
+                      {STATUS_LABEL[a.verification_status] || a.verification_status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+              {!loading && rows.length === 0 && (
+                <tr><td colSpan={6} style={{ padding: 24, textAlign: "center", fontSize: 14, color: C.secondary }}>No applications match your filters.</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
