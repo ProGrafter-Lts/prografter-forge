@@ -615,7 +615,7 @@ export default function Apply() {
             <Field label="Awarding body" req err={errors.qual_awarding_body}><I f="qual_awarding_body" placeholder="City & Guilds" /></Field>
           </Grid>
           <Field label="Year obtained" req err={errors.qual_year}><I f="qual_year" placeholder="2014" maxLength={4} /></Field>
-          <Field label="Upload your certificate" hint="A photo or PDF of your qualification certificate.">
+          <Field label="Upload your certificate" req err={errors.qual_cert_doc} hint="A photo or PDF of your qualification certificate.">
             <F f="qual_cert_doc" />
           </Field>
         </>
