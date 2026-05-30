@@ -644,8 +644,8 @@ export default function Apply() {
       )}
     </div>,
 
-    // 3 — Insurance
-    <div key="3">
+    // 4 — Insurance
+    <div key="4">
       <div style={{ marginBottom: 20 }}>
         <h2 style={{ fontSize: 17, fontWeight: 700, color: C.deep, margin: "0 0 4px" }}>Insurance details</h2>
         <p style={{ fontSize: 13, color: C.secondary, margin: 0 }}>We verify insurance directly with your provider. Lapsed insurance = immediate suspension.</p>
