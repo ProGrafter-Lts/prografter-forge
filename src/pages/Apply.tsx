@@ -338,7 +338,7 @@ export default function Apply() {
     const rows = ([1, 2] as const).map((rn) => ({
       applicant_email: applicantEmail,
       contact_name: str(`ts_ref${rn}_name`),
-      relationship: str(`ts_ref${rn}_role`) || "other",
+      relationship: "trade_contact" as const,
       phone: str(`ts_ref${rn}_phone`) || null,
       email: str(`ts_ref${rn}_email`) || null,
     }));
