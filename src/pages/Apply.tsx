@@ -148,14 +148,14 @@ type UpdFn = (k: string) => (e: ChangeEvent<HTMLInputElement | HTMLSelectElement
 
 const RefBlock = ({
   n,
-  ref,
+  entry,
   errors,
   onChange,
   onRemove,
   canRemove,
 }: {
   n: number;
-  ref: ReferenceEntry;
+  entry: ReferenceEntry;
   errors: Record<string, string>;
   onChange: (patch: Partial<ReferenceEntry>) => void;
   onRemove: () => void;
