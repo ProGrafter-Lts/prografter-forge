@@ -120,7 +120,7 @@ export default function AdminApplicationDetail() {
     const { data: userData } = await supabase.auth.getUser();
     const merged = { ...r, ...patch };
     const { error } = await supabase.from("trade_references").update({
-      status: merged.status,
+      status: merged.status as never,
       admin_notes: merged.admin_notes,
       status_updated_at: merged.status_updated_at,
       status_updated_by: userData?.user?.id ?? null,
