@@ -253,11 +253,6 @@ export default function Apply() {
     setForm(p => ({ ...p, [k]: target.type === "checkbox" ? target.checked : target.value }));
   };
 
-  const updateRef = (i: number, patch: Partial<ReferenceEntry>) => {
-    setReferences(prev => prev.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
-  };
-  const addRef = () => setReferences(prev => [...prev, blankRef()]);
-  const removeRef = (i: number) => setReferences(prev => prev.filter((_, idx) => idx !== i));
 
   const cat = TRADES.find(t => t.id === form.trade_category_id);
   const reg = cat?.lane === "regulated";
