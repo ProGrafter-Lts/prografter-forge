@@ -13,6 +13,7 @@ const Index = lazy(() => import("./pages/Index.tsx"));
 const Login = lazy(() => import("./pages/Login.tsx"));
 const Terms = lazy(() => import("./pages/Terms.tsx"));
 const Privacy = lazy(() => import("./pages/Privacy.tsx"));
+const Cookies = lazy(() => import("./pages/Cookies.tsx"));
 const TradeRegister = lazy(() => import("./pages/TradeRegister.tsx"));
 const SignupTrade = lazy(() => import("./pages/SignupTrade.tsx"));
 const SignupTradeUnderReview = lazy(() => import("./pages/SignupTradeUnderReview.tsx"));
@@ -90,6 +91,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
+            <Route path="/cookies" element={<Cookies />} />
             <Route path="/register" element={<TradeRegister />} />
             <Route path="/register/trade" element={<SignupTradeRedirect />} />
             <Route path="/post-a-job" element={<Navigate to="/post-job-brief" replace />} />
