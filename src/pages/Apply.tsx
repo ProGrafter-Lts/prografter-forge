@@ -397,7 +397,7 @@ export default function Apply() {
         business_name: (form.business_name as string)?.trim() || null,
         trade_category_id: (form.trade_category_id as string) || null,
         qualification_path: (form.qualification_path as string) || null,
-        form_data: { ...form, references },
+        form_data: { ...form },
         document_paths: documentPaths,
       });
       if (appError) throw appError;
