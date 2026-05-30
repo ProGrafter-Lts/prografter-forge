@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState, type CSSProperties, type ReactNode, type ChangeEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { processImageFile, ACCEPTED_FORMATS_LABEL } from "@/lib/portfolioImage";
 
 
 // ── ProGrafter Brand Palette ──────────────────────────────────────────────────
@@ -68,7 +69,7 @@ const TRADES = [
 ] as const;
 
 
-const STEPS = ["Your details", "Your trade", "Qualifications", "Portfolio of work", "Insurance", "References", "Declaration"];
+const STEPS = ["Your details", "Your trade", "Qualifications", "Portfolio of work", "Insurance", "Declaration"];
 
 const QUAL_PATHS = [
   { value: "regulated", label: "Regulated trade (electrical, gas, renewables, etc.) — I hold a current scheme card" },
@@ -220,7 +221,8 @@ const RefBlock = ({
 export default function Apply() {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<FormState>(BLANK);
-  const [references, setReferences] = useState<ReferenceEntry[]>([blankRef(), blankRef()]);
+  // Per-field inline rejection messages for image uploads (named by filename).
+  const [imageRejections, setImageRejections] = useState<Record<string, string[]>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [done, setDone] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -251,11 +253,6 @@ export default function Apply() {
     setForm(p => ({ ...p, [k]: target.type === "checkbox" ? target.checked : target.value }));
   };
 
-  const updateRef = (i: number, patch: Partial<ReferenceEntry>) => {
-    setReferences(prev => prev.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
-  };
-  const addRef = () => setReferences(prev => [...prev, blankRef()]);
-  const removeRef = (i: number) => setReferences(prev => prev.filter((_, idx) => idx !== i));
 
   const cat = TRADES.find(t => t.id === form.trade_category_id);
   const reg = cat?.lane === "regulated";
@@ -325,38 +322,25 @@ export default function Apply() {
       if (!form.public_liability_cover) e.public_liability_cover = "Required";
       if (!(files.insurance_certificate?.length)) e.insurance_certificate = "Please upload your Certificate of Insurance";
     }
-    if (n === 5) {
-      if (references.length < 2) {
-        e.references_count = "Please provide at least 2 references";
-      }
-      references.forEach((r, i) => {
-        const n2 = i + 1;
-        const k = (f: string) => `ref${n2}_${f}`;
-        if (!r.contact_name.trim()) e[k("contact_name")] = "Required";
-        if (!r.relationship) e[k("relationship")] = "Required";
-        const phone = r.phone.trim();
-        const email = r.email.trim();
-        if (!phone && !email) {
-          e[k("contact_method")] = "Provide at least a phone number or email";
-        }
-        if (email && !/\S+@\S+\.\S+/.test(email)) e[k("email")] = "Invalid email";
-      });
-    }
-    if (n === 6 && !form.declaration_accepted) e.declaration_accepted = "You must accept the declaration to proceed";
+    if (n === 5 && !form.declaration_accepted) e.declaration_accepted = "You must accept the declaration to proceed";
     return e;
   };
 
   const next = () => { const e = validate(step); setErrors(e); if (!Object.keys(e).length) setStep(s => s + 1); };
   const back = () => { setErrors({}); setStep(s => s - 1); };
 
+  // References are only collected on the Time-served route (Step 3). Regulated
+  // and Qualified routes never provide references, so nothing is persisted.
   const persistReferences = async (applicantEmail: string) => {
     if (!applicantEmail) return;
-    const rows = references.map(r => ({
+    if (form.qualification_path !== "time_served") return;
+    const str = (k: string) => String(form[k] ?? "").trim();
+    const rows = ([1, 2] as const).map((rn) => ({
       applicant_email: applicantEmail,
-      contact_name: r.contact_name.trim(),
-      relationship: r.relationship || "other",
-      phone: r.phone.trim() || null,
-      email: r.email.trim() || null,
+      contact_name: str(`ts_ref${rn}_name`),
+      relationship: "trade_contact" as const,
+      phone: str(`ts_ref${rn}_phone`) || null,
+      email: str(`ts_ref${rn}_email`) || null,
     }));
     const { error } = await supabase.from("trade_references").insert(rows);
     if (error) throw error;
@@ -394,7 +378,7 @@ export default function Apply() {
 
 
   const submit = async () => {
-    const e = validate(6);
+    const e = validate(5);
     setErrors(e);
     if (Object.keys(e).length) return;
     setSubmitting(true);
@@ -413,7 +397,7 @@ export default function Apply() {
         business_name: (form.business_name as string)?.trim() || null,
         trade_category_id: (form.trade_category_id as string) || null,
         qualification_path: (form.qualification_path as string) || null,
-        form_data: { ...form, references },
+        form_data: { ...form },
         document_paths: documentPaths,
       });
       if (appError) throw appError;
@@ -434,8 +418,8 @@ export default function Apply() {
   // Keep latest form/errors/upd accessible without recreating I/S/T each render.
   // Defining these inline as components caused React to remount the <input> on
   // every keystroke (new component type per render) → lost focus / one char at a time.
-  const stateRef = useRef({ form, errors, upd, files });
-  stateRef.current = { form, errors, upd, files };
+  const stateRef = useRef({ form, errors, upd, files, imageRejections });
+  stateRef.current = { form, errors, upd, files, imageRejections };
 
   const I = useCallback(({ f, type = "text", ...p }: { f: string; type?: string; placeholder?: string; maxLength?: number }) => {
     const { form, errors, upd } = stateRef.current;
@@ -486,8 +470,9 @@ export default function Apply() {
 
   // Multi-file photo upload (portfolio). Accepts images, supports add/remove.
   const Photos = useCallback(({ f }: { f: string }) => {
-    const { files } = stateRef.current;
+    const { files, imageRejections } = stateRef.current;
     const list = files[f] ?? [];
+    const rejections = imageRejections[f] ?? [];
     return (
       <div>
         <label
@@ -499,20 +484,40 @@ export default function Apply() {
         >
           <span style={{ display: "block", fontSize: 22, color: C.teal, marginBottom: 6 }}>⬆</span>
           Add photos of completed work
-          <span style={{ display: "block", fontSize: 12, fontWeight: 400, color: C.secondary, marginTop: 4 }}>JPG or PNG — you can select several at once</span>
+          <span style={{ display: "block", fontSize: 12, fontWeight: 400, color: C.secondary, marginTop: 4 }}>
+            {ACCEPTED_FORMATS_LABEL} (iPhone HEIC photos accepted) — up to 10MB each. You can select several at once.
+          </span>
           <input
             type="file"
-            accept="image/*"
+            accept="image/jpeg,image/png,image/heic,image/heif,.jpg,.jpeg,.png,.heic,.heif"
             multiple
-            onChange={(ev) => {
-              const incoming = filterBySize(Array.from(ev.target.files ?? []), f);
-              if (!incoming.length) return;
-              setFiles((p) => ({ ...p, [f]: [...(p[f] ?? []), ...incoming] }));
+            onChange={async (ev) => {
+              const incoming = Array.from(ev.target.files ?? []);
               ev.target.value = "";
+              if (!incoming.length) return;
+              const accepted: File[] = [];
+              const rejected: string[] = [];
+              for (const file of incoming) {
+                const res = await processImageFile(file);
+                if (res.ok === true) accepted.push(res.file);
+                else rejected.push(res.reason);
+              }
+              setImageRejections((p) => ({ ...p, [f]: rejected }));
+              if (accepted.length) {
+                setFiles((p) => ({ ...p, [f]: [...(p[f] ?? []), ...accepted] }));
+                setErrors((p) => { const { [f]: _omit, ...rest } = p; return rest; });
+              }
             }}
             style={{ display: "none" }}
           />
         </label>
+        {rejections.length > 0 && (
+          <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 6 }}>
+            {rejections.map((msg, i) => (
+              <p key={i} style={{ fontSize: 12, color: C.error, margin: 0, lineHeight: 1.45 }}>⚠ {msg}</p>
+            ))}
+          </div>
+        )}
         {list.length > 0 && (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8, marginTop: 12 }}>
             {list.map((file, idx) => (
@@ -827,40 +832,7 @@ export default function Apply() {
       </InfoBox>
     </div>,
 
-    // 5 — References
-    <div key="5">
-      <div style={{ marginBottom: 20 }}>
-        <h2 style={{ fontSize: 17, fontWeight: 700, color: C.deep, margin: "0 0 4px" }}>References</h2>
-        <p style={{ fontSize: 13, color: C.secondary, margin: 0 }}>Provide at least two references. We need a contact name, the relationship, and at least one way to reach them.</p>
-      </div>
-      <InfoBox variant="teal">
-        We call references personally. Please let them know to expect our call. Once submitted, your reference checks are tracked in your verification record — every call is logged against your application.
-      </InfoBox>
-      {references.map((r, i) => (
-        <RefBlock
-          key={i}
-          n={i + 1}
-          entry={r}
-          errors={errors}
-          onChange={(patch) => updateRef(i, patch)}
-          onRemove={() => removeRef(i)}
-          canRemove={references.length > 2}
-        />
-      ))}
-      {errors.references_count && (
-        <p style={{ fontSize: 13, color: C.error, margin: "0 0 12px" }}>{errors.references_count}</p>
-      )}
-      <button
-        type="button"
-        onClick={addRef}
-        style={{ background: "transparent", border: `1.5px dashed ${C.border}`, color: C.teal, padding: "10px 14px", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: "pointer", width: "100%" }}
-      >
-        + Add another reference
-      </button>
-    </div>,
-
-
-    // 6 — Declaration
+    // 5 — Declaration
     <div key="6">
       <div style={{ marginBottom: 20 }}>
         <h2 style={{ fontSize: 17, fontWeight: 700, color: C.deep, margin: "0 0 4px" }}>Declaration</h2>
