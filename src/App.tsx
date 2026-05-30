@@ -62,6 +62,7 @@ const AdminDisputes = lazy(() => import("./pages/AdminDisputes.tsx"));
 const PlanningPipeline = lazy(() => import("./pages/PlanningPipeline.tsx"));
 const AdminTradeScraper = lazy(() => import("./pages/AdminTradeScraper.tsx"));
 const AdminApplications = lazy(() => import("./pages/AdminApplications.tsx"));
+const AdminApplicationDetail = lazy(() => import("./pages/AdminApplicationDetail.tsx"));
 import AdminRoute from "./components/AdminRoute.tsx";
 
 const queryClient = new QueryClient({
