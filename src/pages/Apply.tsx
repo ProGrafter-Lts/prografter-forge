@@ -826,7 +826,7 @@ export default function Apply() {
         </div>
         <h1 style={{ fontSize: 22, fontWeight: 700, color: C.deep, margin: "0 0 10px" }}>Application received</h1>
         <p style={{ fontSize: 14, color: C.secondary, lineHeight: 1.6, margin: "0 0 16px" }}>
-          Thank you for applying to ProGrafter. We review every application personally — you'll hear from us within 1 working day about the next steps.
+          Thank you for applying to ProGrafter. We review every application personally — you'll hear from us within 1 working day with confirmation and next steps. Verification itself takes 1–2 working days for regulated trades, 5–7 for time-served applications.
         </p>
         <p style={{ fontSize: 13, color: C.body, margin: 0 }}>We'll be in touch at <strong>{form.email as string}</strong></p>
       </div>
