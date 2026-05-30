@@ -115,7 +115,7 @@ export async function logApplicationEvent(
     event_type: eventType,
     actor_user_id: user.id,
     actor_email: user.email ?? null,
-    detail,
+    detail: detail as never,
   }]);
   if (error) throw error;
 }
