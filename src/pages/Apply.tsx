@@ -266,10 +266,12 @@ export default function Apply() {
         if (!v("qual_scheme_name")) e.qual_scheme_name = "Required";
         if (!v("qual_reg_number")) e.qual_reg_number = "Required";
         if (!form.qual_reg_expiry) e.qual_reg_expiry = "Required";
+        if (!(files.qual_card_doc?.length)) e.qual_card_doc = "Please upload your scheme card or certificate";
       } else if (path === "qualified") {
         if (!v("qual_type")) e.qual_type = "Required";
         if (!v("qual_awarding_body")) e.qual_awarding_body = "Required";
         if (!v("qual_year")) e.qual_year = "Required";
+        if (!(files.qual_cert_doc?.length)) e.qual_cert_doc = "Please upload your certificate";
       } else if (path === "time_served") {
         const years = Number(form.ts_years);
         if (form.ts_years === "" || Number.isNaN(years)) e.ts_years = "Required";
@@ -294,12 +296,14 @@ export default function Apply() {
       } else {
         if (!v("portfolio_description")) e.portfolio_description = "Required";
       }
+      if ((files.portfolio_photos?.length ?? 0) < 3) e.portfolio_photos = "Please upload at least 3 photos of completed work";
     }
     if (n === 4) {
       if (!v("insurance_provider")) e.insurance_provider = "Required";
       if (!v("insurance_policy_number")) e.insurance_policy_number = "Required";
       if (!form.insurance_expiry) e.insurance_expiry = "Required";
       if (!form.public_liability_cover) e.public_liability_cover = "Required";
+      if (!(files.insurance_certificate?.length)) e.insurance_certificate = "Please upload your Certificate of Insurance";
     }
     if (n === 5) {
       if (references.length < 2) {
