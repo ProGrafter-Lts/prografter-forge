@@ -69,7 +69,7 @@ export default function AdminApplications() {
       .select("*")
       .order("created_at", { ascending: false });
     if (error) toast.error(error.message);
-    setApps((data as Application[]) ?? []);
+    setApps(((data as unknown) as Application[]) ?? []);
     setLoading(false);
   };
 
