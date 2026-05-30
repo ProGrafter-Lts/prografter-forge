@@ -288,7 +288,7 @@ const PostAJob = () => {
     password.length >= 8;
 
   const stepTitles: Record<Exclude<Step, 3.5>, { white: string; teal: string }> = {
-    1: { white: isGreenFlow ? "Find a Certified" : "What Do You", teal: isGreenFlow ? "Green Energy Installer" : "Need Done?" },
+    1: { white: isGreenFlow ? "Find an MCS-certified" : "What Do You", teal: isGreenFlow ? "green energy installer" : "Need Done?" },
     2: { white: "Tell Us", teal: "More." },
     3: { white: "Where's The", teal: "Job?" },
     4: { white: "Your", teal: "Details." },
