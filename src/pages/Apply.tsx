@@ -221,6 +221,10 @@ export default function Apply() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [done, setDone] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  // Uploaded files. Single-file fields hold a one-element array; portfolio holds many.
+  const [files, setFiles] = useState<Record<string, File[]>>({});
+
+  const setFieldFiles = (key: string, list: File[]) => setFiles((p) => ({ ...p, [key]: list }));
 
   const upd: UpdFn = (k) => (e) => {
     const target = e.target as HTMLInputElement;
@@ -262,10 +266,12 @@ export default function Apply() {
         if (!v("qual_scheme_name")) e.qual_scheme_name = "Required";
         if (!v("qual_reg_number")) e.qual_reg_number = "Required";
         if (!form.qual_reg_expiry) e.qual_reg_expiry = "Required";
+        if (!(files.qual_card_doc?.length)) e.qual_card_doc = "Please upload your scheme card or certificate";
       } else if (path === "qualified") {
         if (!v("qual_type")) e.qual_type = "Required";
         if (!v("qual_awarding_body")) e.qual_awarding_body = "Required";
         if (!v("qual_year")) e.qual_year = "Required";
+        if (!(files.qual_cert_doc?.length)) e.qual_cert_doc = "Please upload your certificate";
       } else if (path === "time_served") {
         const years = Number(form.ts_years);
         if (form.ts_years === "" || Number.isNaN(years)) e.ts_years = "Required";
@@ -290,12 +296,14 @@ export default function Apply() {
       } else {
         if (!v("portfolio_description")) e.portfolio_description = "Required";
       }
+      if ((files.portfolio_photos?.length ?? 0) < 3) e.portfolio_photos = "Please upload at least 3 photos of completed work";
     }
     if (n === 4) {
       if (!v("insurance_provider")) e.insurance_provider = "Required";
       if (!v("insurance_policy_number")) e.insurance_policy_number = "Required";
       if (!form.insurance_expiry) e.insurance_expiry = "Required";
       if (!form.public_liability_cover) e.public_liability_cover = "Required";
+      if (!(files.insurance_certificate?.length)) e.insurance_certificate = "Please upload your Certificate of Insurance";
     }
     if (n === 5) {
       if (references.length < 2) {
@@ -355,8 +363,8 @@ export default function Apply() {
   // Keep latest form/errors/upd accessible without recreating I/S/T each render.
   // Defining these inline as components caused React to remount the <input> on
   // every keystroke (new component type per render) → lost focus / one char at a time.
-  const stateRef = useRef({ form, errors, upd });
-  stateRef.current = { form, errors, upd };
+  const stateRef = useRef({ form, errors, upd, files });
+  stateRef.current = { form, errors, upd, files };
 
   const I = useCallback(({ f, type = "text", ...p }: { f: string; type?: string; placeholder?: string; maxLength?: number }) => {
     const { form, errors, upd } = stateRef.current;
@@ -370,19 +378,87 @@ export default function Apply() {
     const { form, errors, upd } = stateRef.current;
     return <textarea style={{ ...inputBase(errors[f]), resize: "vertical", minHeight: 96 }} value={form[f] as string} onChange={upd(f)} {...p} />;
   }, []);
-  const F = useCallback(({ f }: { f: string }) => {
-    const current = stateRef.current.form[f] as string;
+  // Single-file upload (scheme card, certificate, insurance certificate).
+  const F = useCallback(({ f, accept = "application/pdf,image/*" }: { f: string; accept?: string }) => {
+    const { files, errors } = stateRef.current;
+    const selected = files[f]?.[0];
     return (
       <div>
-        <input
-          type="file"
-          onChange={(ev) => {
-            const name = ev.target.files?.[0]?.name ?? "";
-            setForm((p) => ({ ...p, [f]: name }));
+        <label
+          style={{
+            display: "inline-flex", alignItems: "center", gap: 8, cursor: "pointer",
+            border: `1.5px solid ${errors[f] ? C.error : C.border}`, borderRadius: 8,
+            padding: "10px 14px", fontSize: 13, fontWeight: 600, color: C.deep, background: C.white,
           }}
-          style={{ fontSize: 13, color: C.body }}
-        />
-        {current && <p style={{ fontSize: 12, color: C.secondary, margin: "6px 0 0" }}>Selected: {current}</p>}
+        >
+          <span style={{ color: C.teal }}>⬆</span>
+          {selected ? "Replace file" : "Choose file"}
+          <input
+            type="file"
+            accept={accept}
+            onChange={(ev) => {
+              const file = ev.target.files?.[0];
+              setFieldFiles(f, file ? [file] : []);
+            }}
+            style={{ display: "none" }}
+          />
+        </label>
+        {selected && (
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8 }}>
+            <span style={{ fontSize: 12, color: C.secondary }}>✓ {selected.name} ({Math.round(selected.size / 1024)} KB)</span>
+            <button type="button" onClick={() => setFieldFiles(f, [])} style={{ background: "none", border: "none", color: C.error, fontSize: 12, fontWeight: 600, cursor: "pointer" }}>Remove</button>
+          </div>
+        )}
+      </div>
+    );
+  }, []);
+
+  // Multi-file photo upload (portfolio). Accepts images, supports add/remove.
+  const Photos = useCallback(({ f }: { f: string }) => {
+    const { files } = stateRef.current;
+    const list = files[f] ?? [];
+    return (
+      <div>
+        <label
+          style={{
+            display: "block", cursor: "pointer", textAlign: "center",
+            border: `1.5px dashed ${C.border}`, borderRadius: 10, padding: "20px 14px",
+            fontSize: 13, fontWeight: 600, color: C.deep, background: C.white,
+          }}
+        >
+          <span style={{ display: "block", fontSize: 22, color: C.teal, marginBottom: 6 }}>⬆</span>
+          Add photos of completed work
+          <span style={{ display: "block", fontSize: 12, fontWeight: 400, color: C.secondary, marginTop: 4 }}>JPG or PNG — you can select several at once</span>
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={(ev) => {
+              const incoming = Array.from(ev.target.files ?? []);
+              if (!incoming.length) return;
+              setFiles((p) => ({ ...p, [f]: [...(p[f] ?? []), ...incoming] }));
+              ev.target.value = "";
+            }}
+            style={{ display: "none" }}
+          />
+        </label>
+        {list.length > 0 && (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8, marginTop: 12 }}>
+            {list.map((file, idx) => (
+              <div key={idx} style={{ position: "relative", borderRadius: 8, overflow: "hidden", border: `1px solid ${C.border}`, aspectRatio: "1 / 1", background: C.cream }}>
+                <img src={URL.createObjectURL(file)} alt={`Work photo ${idx + 1}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                <button
+                  type="button"
+                  onClick={() => setFiles((p) => ({ ...p, [f]: (p[f] ?? []).filter((_, i) => i !== idx) }))}
+                  style={{ position: "absolute", top: 4, right: 4, width: 22, height: 22, borderRadius: "50%", border: "none", background: "rgba(0,0,0,0.6)", color: "#fff", fontSize: 13, cursor: "pointer", lineHeight: 1 }}
+                >×</button>
+              </div>
+            ))}
+          </div>
+        )}
+        <p style={{ fontSize: 12, color: list.length >= 3 ? C.success : C.secondary, margin: "8px 0 0", fontWeight: 600 }}>
+          {list.length} uploaded — minimum 3 required
+        </p>
       </div>
     );
   }, []);
@@ -526,7 +602,7 @@ export default function Apply() {
             <Field label="Registration number" req err={errors.qual_reg_number}><I f="qual_reg_number" placeholder="123456" /></Field>
             <Field label="Expiry date" req err={errors.qual_reg_expiry}><I f="qual_reg_expiry" type="date" /></Field>
           </Grid>
-          <Field label="Upload your scheme card / certificate" hint="A photo or PDF of your current card or certificate.">
+          <Field label="Upload your scheme card / certificate" req err={errors.qual_card_doc} hint="A photo or PDF of your current card or certificate.">
             <F f="qual_card_doc" />
           </Field>
         </>
@@ -539,7 +615,7 @@ export default function Apply() {
             <Field label="Awarding body" req err={errors.qual_awarding_body}><I f="qual_awarding_body" placeholder="City & Guilds" /></Field>
           </Grid>
           <Field label="Year obtained" req err={errors.qual_year}><I f="qual_year" placeholder="2014" maxLength={4} /></Field>
-          <Field label="Upload your certificate" hint="A photo or PDF of your qualification certificate.">
+          <Field label="Upload your certificate" req err={errors.qual_cert_doc} hint="A photo or PDF of your qualification certificate.">
             <F f="qual_cert_doc" />
           </Field>
         </>
@@ -627,6 +703,9 @@ export default function Apply() {
           <Field label="Registration expiry date" req err={errors.registration_expiry}>
             <I f="registration_expiry" type="date" />
           </Field>
+          <Field label="Photos of completed work" req err={errors.portfolio_photos} hint="Upload at least 3 photos of recent jobs. Clear, well-lit shots of finished work.">
+            <Photos f="portfolio_photos" />
+          </Field>
         </>
       ) : (
         <>
@@ -637,9 +716,9 @@ export default function Apply() {
           <Field label="Describe 3–5 recent jobs" req err={errors.portfolio_description} hint="Include scope, value, location (town only), duration, and any challenges.">
             <T f="portfolio_description" rows={8} placeholder="1. Full bathroom refurb, Didsbury M20, £8,400, 9 days — replaced rotten subfloor we discovered on day 2..." />
           </Field>
-          <InfoBox variant="blue">
-            In production: connect a Lovable Cloud file upload here. Minimum 3 photos of completed work required before submission.
-          </InfoBox>
+          <Field label="Photos of completed work" req err={errors.portfolio_photos} hint="Upload at least 3 photos of recent jobs. Clear, well-lit shots of finished work.">
+            <Photos f="portfolio_photos" />
+          </Field>
         </>
       )}
     </div>,
@@ -648,7 +727,7 @@ export default function Apply() {
     <div key="4">
       <div style={{ marginBottom: 20 }}>
         <h2 style={{ fontSize: 17, fontWeight: 700, color: C.deep, margin: "0 0 4px" }}>Insurance details</h2>
-        <p style={{ fontSize: 13, color: C.secondary, margin: 0 }}>We verify insurance directly with your provider. Lapsed insurance = immediate suspension.</p>
+        <p style={{ fontSize: 13, color: C.secondary, margin: 0 }}>We verify insurance by reviewing your certificate of insurance. Lapsed or invalid cover results in immediate suspension.</p>
       </div>
       <Grid>
         <Field label="Insurance provider" req err={errors.insurance_provider}><I f="insurance_provider" placeholder="Hiscox / Direct Line / etc." /></Field>
@@ -669,8 +748,11 @@ export default function Apply() {
           {["£1,000,000", "£2,000,000", "£5,000,000", "£10,000,000+"].map(o => <option key={o} value={o}>{o}</option>)}
         </S>
       </Field>
+      <Field label="Upload your Certificate of Insurance (PDF or photo)" req err={errors.insurance_certificate} hint="Must clearly show your name or company name, cover amounts, and a current expiry date.">
+        <F f="insurance_certificate" />
+      </Field>
       <InfoBox variant="blue">
-        ProGrafter will contact your insurer directly to verify this policy before your application is approved. We also set a renewal reminder — updated documentation must be provided before expiry or your listing is automatically suspended.
+        We will visually verify your certificate before your application is approved. We set a renewal reminder — updated documentation must be uploaded before expiry, or your listing is automatically suspended.
       </InfoBox>
     </div>,
 
@@ -744,7 +826,7 @@ export default function Apply() {
         </div>
         <h1 style={{ fontSize: 22, fontWeight: 700, color: C.deep, margin: "0 0 10px" }}>Application received</h1>
         <p style={{ fontSize: 14, color: C.secondary, lineHeight: 1.6, margin: "0 0 16px" }}>
-          Thank you for applying to ProGrafter. We review every application personally — you'll hear from us within 1 working day about the next steps.
+          Thank you for applying to ProGrafter. We review every application personally — you'll hear from us within 1 working day with confirmation and next steps. Verification itself takes 1–2 working days for regulated trades, 5–7 for time-served applications.
         </p>
         <p style={{ fontSize: 13, color: C.body, margin: 0 }}>We'll be in touch at <strong>{form.email as string}</strong></p>
       </div>
