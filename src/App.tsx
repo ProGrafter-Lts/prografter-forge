@@ -61,6 +61,7 @@ const DisputeDetail = lazy(() => import("./pages/DisputeDetail.tsx"));
 const AdminDisputes = lazy(() => import("./pages/AdminDisputes.tsx"));
 const PlanningPipeline = lazy(() => import("./pages/PlanningPipeline.tsx"));
 const AdminTradeScraper = lazy(() => import("./pages/AdminTradeScraper.tsx"));
+const AdminApplications = lazy(() => import("./pages/AdminApplications.tsx"));
 import AdminRoute from "./components/AdminRoute.tsx";
 
 const queryClient = new QueryClient({
@@ -187,6 +188,7 @@ const App = () => (
             <Route path="/admin/disputes" element={<AdminRoute><AdminDisputes /></AdminRoute>} />
             <Route path="/admin/planning-pipeline" element={<AdminRoute><PlanningPipeline /></AdminRoute>} />
             <Route path="/admin/trade-scraper" element={<AdminRoute><AdminTradeScraper /></AdminRoute>} />
+            <Route path="/admin/applications" element={<AdminRoute><AdminApplications /></AdminRoute>} />
             <Route
               path="/quote-builder/quickbuild"
               element={

@@ -96,6 +96,9 @@ const blankRef = (): ReferenceEntry => ({ contact_name: "", relationship: "", ph
 
 type FormState = Record<string, string | boolean>;
 
+// Metadata stored in trade_applications.document_paths for each uploaded file.
+type DocMeta = { path: string; filename: string; size: number; mime: string; uploaded_at: string };
+
 const BLANK: FormState = {
   full_name: "", business_name: "", business_type: "", companies_house_number: "",
   email: "", phone: "", address_line1: "", address_line2: "", city: "", postcode: "",
@@ -226,6 +229,23 @@ export default function Apply() {
 
   const setFieldFiles = (key: string, list: File[]) => setFiles((p) => ({ ...p, [key]: list }));
 
+  // Reject files over 10MB before they are accepted into state.
+  const MAX_FILE_BYTES = 10 * 1024 * 1024;
+  const filterBySize = (incoming: File[], field: string): File[] => {
+    const ok: File[] = [];
+    const tooBig: string[] = [];
+    for (const f of incoming) {
+      if (f.size > MAX_FILE_BYTES) tooBig.push(f.name);
+      else ok.push(f);
+    }
+    if (tooBig.length) {
+      setErrors((p) => ({ ...p, [field]: `File too large (max 10MB): ${tooBig.join(", ")}` }));
+    } else {
+      setErrors((p) => { const { [field]: _omit, ...rest } = p; return rest; });
+    }
+    return ok;
+  };
+
   const upd: UpdFn = (k) => (e) => {
     const target = e.target as HTMLInputElement;
     setForm(p => ({ ...p, [k]: target.type === "checkbox" ? target.checked : target.value }));
@@ -343,25 +363,35 @@ export default function Apply() {
   };
 
   // Upload every selected file to the private application bucket and return a
-  // map of field -> array of stored object paths.
-  const uploadDocuments = async (applicationId: string): Promise<Record<string, string[]>> => {
-    const paths: Record<string, string[]> = {};
+  // map of field -> array of stored document metadata objects.
+  const uploadDocuments = async (applicationId: string): Promise<Record<string, DocMeta[]>> => {
+    const paths: Record<string, DocMeta[]> = {};
     const safe = (name: string) => name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(-120);
     for (const [field, list] of Object.entries(files)) {
       if (!list?.length) continue;
       paths[field] = [];
       for (let i = 0; i < list.length; i++) {
         const file = list[i];
-        const objectPath = `${applicationId}/${field}/${Date.now()}-${i}-${safe(file.name)}`;
+        if (file.size > MAX_FILE_BYTES) {
+          throw new Error(`"${file.name}" exceeds the 10MB limit. Please upload a smaller file.`);
+        }
+        const objectPath = `trade-applications/${applicationId}/${field}/${Date.now()}-${i}-${safe(file.name)}`;
         const { error } = await supabase.storage
           .from("trade-application-docs")
           .upload(objectPath, file, { contentType: file.type || undefined, upsert: false });
-        if (error) throw error;
-        paths[field].push(objectPath);
+        if (error) throw new Error(`Failed to upload "${file.name}": ${error.message}`);
+        paths[field].push({
+          path: objectPath,
+          filename: file.name,
+          size: file.size,
+          mime: file.type || "application/octet-stream",
+          uploaded_at: new Date().toISOString(),
+        });
       }
     }
     return paths;
   };
+
 
   const submit = async () => {
     const e = validate(6);
@@ -439,7 +469,7 @@ export default function Apply() {
             accept={accept}
             onChange={(ev) => {
               const file = ev.target.files?.[0];
-              setFieldFiles(f, file ? [file] : []);
+              setFieldFiles(f, file ? filterBySize([file], f) : []);
             }}
             style={{ display: "none" }}
           />
@@ -475,7 +505,7 @@ export default function Apply() {
             accept="image/*"
             multiple
             onChange={(ev) => {
-              const incoming = Array.from(ev.target.files ?? []);
+              const incoming = filterBySize(Array.from(ev.target.files ?? []), f);
               if (!incoming.length) return;
               setFiles((p) => ({ ...p, [f]: [...(p[f] ?? []), ...incoming] }));
               ev.target.value = "";
