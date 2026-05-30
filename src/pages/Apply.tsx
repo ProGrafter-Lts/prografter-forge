@@ -703,6 +703,9 @@ export default function Apply() {
           <Field label="Registration expiry date" req err={errors.registration_expiry}>
             <I f="registration_expiry" type="date" />
           </Field>
+          <Field label="Photos of completed work" req err={errors.portfolio_photos} hint="Upload at least 3 photos of recent jobs. Clear, well-lit shots of finished work.">
+            <Photos f="portfolio_photos" />
+          </Field>
         </>
       ) : (
         <>
@@ -713,9 +716,9 @@ export default function Apply() {
           <Field label="Describe 3–5 recent jobs" req err={errors.portfolio_description} hint="Include scope, value, location (town only), duration, and any challenges.">
             <T f="portfolio_description" rows={8} placeholder="1. Full bathroom refurb, Didsbury M20, £8,400, 9 days — replaced rotten subfloor we discovered on day 2..." />
           </Field>
-          <InfoBox variant="blue">
-            In production: connect a Lovable Cloud file upload here. Minimum 3 photos of completed work required before submission.
-          </InfoBox>
+          <Field label="Photos of completed work" req err={errors.portfolio_photos} hint="Upload at least 3 photos of recent jobs. Clear, well-lit shots of finished work.">
+            <Photos f="portfolio_photos" />
+          </Field>
         </>
       )}
     </div>,
