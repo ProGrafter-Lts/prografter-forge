@@ -96,6 +96,9 @@ const blankRef = (): ReferenceEntry => ({ contact_name: "", relationship: "", ph
 
 type FormState = Record<string, string | boolean>;
 
+// Metadata stored in trade_applications.document_paths for each uploaded file.
+type DocMeta = { path: string; filename: string; size: number; mime: string; uploaded_at: string };
+
 const BLANK: FormState = {
   full_name: "", business_name: "", business_type: "", companies_house_number: "",
   email: "", phone: "", address_line1: "", address_line2: "", city: "", postcode: "",
