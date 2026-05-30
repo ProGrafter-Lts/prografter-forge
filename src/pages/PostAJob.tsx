@@ -361,7 +361,7 @@ const PostAJob = () => {
                   </h2>
                   {isGreenFlow && (
                     <p className="font-body text-cream/60 text-sm mb-6 leading-relaxed">
-                      Based on your eligibility results, these are the certified trade types relevant to your project:
+                      Based on your eligibility results, these are the trade types relevant to your project:
                     </p>
                   )}
                   <div className="space-y-6">
