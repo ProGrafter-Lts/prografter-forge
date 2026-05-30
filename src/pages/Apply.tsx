@@ -530,7 +530,7 @@ export default function Apply() {
         <RefBlock
           key={i}
           n={i + 1}
-          ref={r}
+          entry={r}
           errors={errors}
           onChange={(patch) => updateRef(i, patch)}
           onRemove={() => removeRef(i)}
