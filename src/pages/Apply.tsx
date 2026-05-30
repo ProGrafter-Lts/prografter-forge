@@ -148,14 +148,14 @@ type UpdFn = (k: string) => (e: ChangeEvent<HTMLInputElement | HTMLSelectElement
 
 const RefBlock = ({
   n,
-  ref,
+  entry,
   errors,
   onChange,
   onRemove,
   canRemove,
 }: {
   n: number;
-  ref: ReferenceEntry;
+  entry: ReferenceEntry;
   errors: Record<string, string>;
   onChange: (patch: Partial<ReferenceEntry>) => void;
   onRemove: () => void;
@@ -176,20 +176,20 @@ const RefBlock = ({
         )}
       </div>
       <Field label="Contact name" req err={errors[k("contact_name")]}>
-        <input style={inputBase(errors[k("contact_name")])} value={ref.contact_name} onChange={(e) => onChange({ contact_name: e.target.value })} placeholder="Sarah Mitchell" />
+        <input style={inputBase(errors[k("contact_name")])} value={entry.contact_name} onChange={(e) => onChange({ contact_name: e.target.value })} placeholder="Sarah Mitchell" />
       </Field>
       <Field label="Relationship" req err={errors[k("relationship")]}>
-        <select style={inputBase(errors[k("relationship")])} value={ref.relationship} onChange={(e) => onChange({ relationship: e.target.value as RelationshipValue })}>
+        <select style={inputBase(errors[k("relationship")])} value={entry.relationship} onChange={(e) => onChange({ relationship: e.target.value as RelationshipValue })}>
           <option value="">Select...</option>
           {RELATIONSHIP_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
         </select>
       </Field>
       <Grid>
         <Field label="Phone" err={errors[k("phone")]}>
-          <input style={inputBase(errors[k("phone")])} value={ref.phone} onChange={(e) => onChange({ phone: e.target.value })} placeholder="07700 900000" />
+          <input style={inputBase(errors[k("phone")])} value={entry.phone} onChange={(e) => onChange({ phone: e.target.value })} placeholder="07700 900000" />
         </Field>
         <Field label="Email" err={errors[k("email")]}>
-          <input style={inputBase(errors[k("email")])} value={ref.email} onChange={(e) => onChange({ email: e.target.value })} placeholder="sarah@example.co.uk" />
+          <input style={inputBase(errors[k("email")])} value={entry.email} onChange={(e) => onChange({ email: e.target.value })} placeholder="sarah@example.co.uk" />
         </Field>
       </Grid>
       {errors[k("contact_method")] && (
@@ -530,7 +530,7 @@ export default function Apply() {
         <RefBlock
           key={i}
           n={i + 1}
-          ref={r}
+          entry={r}
           errors={errors}
           onChange={(patch) => updateRef(i, patch)}
           onRemove={() => removeRef(i)}
