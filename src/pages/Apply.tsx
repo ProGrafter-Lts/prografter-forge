@@ -221,6 +221,10 @@ export default function Apply() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [done, setDone] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  // Uploaded files. Single-file fields hold a one-element array; portfolio holds many.
+  const [files, setFiles] = useState<Record<string, File[]>>({});
+
+  const setFieldFiles = (key: string, list: File[]) => setFiles((p) => ({ ...p, [key]: list }));
 
   const upd: UpdFn = (k) => (e) => {
     const target = e.target as HTMLInputElement;
