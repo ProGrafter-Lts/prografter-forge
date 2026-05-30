@@ -487,8 +487,107 @@ export default function Apply() {
       )}
     </div>,
 
-    // 2 — Qualifications / Portfolio
+    // 2 — Qualifications
     <div key="2">
+      <div style={{ marginBottom: 20 }}>
+        <h2 style={{ fontSize: 17, fontWeight: 700, color: C.deep, margin: "0 0 4px" }}>Qualifications</h2>
+        <p style={{ fontSize: 13, color: C.secondary, margin: 0 }}>Tell us how you qualified. This sets the verification route we use for your application.</p>
+      </div>
+      <Field label="Which best describes you?" req err={errors.qualification_path}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {QUAL_PATHS.map((o) => {
+            const active = form.qualification_path === o.value;
+            return (
+              <label key={o.value} style={{ display: "flex", gap: 10, alignItems: "flex-start", cursor: "pointer", padding: 12, border: `1.5px solid ${active ? C.teal : C.border}`, borderRadius: 8, background: active ? C.successBg : C.white }}>
+                <input
+                  type="radio"
+                  name="qualification_path"
+                  value={o.value}
+                  checked={active}
+                  onChange={() => setForm((p) => ({ ...p, qualification_path: o.value }))}
+                  style={{ marginTop: 3 }}
+                />
+                <span style={{ fontSize: 13, color: C.body, lineHeight: 1.5 }}>{o.label}</span>
+              </label>
+            );
+          })}
+        </div>
+      </Field>
+
+      {form.qualification_path === "regulated" && (
+        <>
+          <Field label="Scheme name" req err={errors.qual_scheme_name}>
+            <S f="qual_scheme_name">
+              <option value="">Select scheme...</option>
+              {["NICEIC", "NAPIT", "ELECSA", "Gas Safe", "MCS", "FENSA", "TrustMark", "Other"].map((o) => <option key={o} value={o}>{o}</option>)}
+            </S>
+          </Field>
+          <Grid>
+            <Field label="Registration number" req err={errors.qual_reg_number}><I f="qual_reg_number" placeholder="123456" /></Field>
+            <Field label="Expiry date" req err={errors.qual_reg_expiry}><I f="qual_reg_expiry" type="date" /></Field>
+          </Grid>
+          <Field label="Upload your scheme card / certificate" hint="A photo or PDF of your current card or certificate.">
+            <F f="qual_card_doc" />
+          </Field>
+        </>
+      )}
+
+      {form.qualification_path === "qualified" && (
+        <>
+          <Grid>
+            <Field label="Qualification type" req err={errors.qual_type} hint="e.g. NVQ Level 3, City & Guilds, apprenticeship"><I f="qual_type" placeholder="NVQ Level 3 Plumbing" /></Field>
+            <Field label="Awarding body" req err={errors.qual_awarding_body}><I f="qual_awarding_body" placeholder="City & Guilds" /></Field>
+          </Grid>
+          <Field label="Year obtained" req err={errors.qual_year}><I f="qual_year" placeholder="2014" maxLength={4} /></Field>
+          <Field label="Upload your certificate" hint="A photo or PDF of your qualification certificate.">
+            <F f="qual_cert_doc" />
+          </Field>
+        </>
+      )}
+
+      {form.qualification_path === "time_served" && (
+        <>
+          <Field label="Years on the tools" req err={errors.ts_years} hint="Minimum 5 years to apply via this route.">
+            <I f="ts_years" type="number" placeholder="12" />
+          </Field>
+          <Field label="Specialism" req err={errors.ts_specialism} hint="What kind of work specifically?">
+            <T f="ts_specialism" rows={3} placeholder="Domestic plastering and rendering — mostly Victorian terraces and period restoration." />
+          </Field>
+
+          <h3 style={{ fontSize: 15, fontWeight: 700, color: C.deep, margin: "20px 0 6px" }}>Two trade references</h3>
+          <p style={{ fontSize: 13, color: C.secondary, margin: "0 0 14px" }}>Both references are required. We contact each one by phone.</p>
+
+          {([1, 2] as const).map((rn) => (
+            <div key={rn} style={{ border: `1px solid ${C.border}`, borderRadius: 10, padding: 16, marginBottom: 16, background: C.white }}>
+              <h4 style={{ fontSize: 14, fontWeight: 700, color: C.deep, margin: "0 0 12px" }}>Reference {rn}</h4>
+              <Grid>
+                <Field label="Name" req err={errors[`ts_ref${rn}_name`]}><I f={`ts_ref${rn}_name`} placeholder="Sarah Mitchell" /></Field>
+                <Field label="Role / company" req err={errors[`ts_ref${rn}_role`]}><I f={`ts_ref${rn}_role`} placeholder="Site manager, Mitchell Builds" /></Field>
+              </Grid>
+              <Grid>
+                <Field label="Phone" req err={errors[`ts_ref${rn}_phone`]}><I f={`ts_ref${rn}_phone`} placeholder="07700 900000" /></Field>
+                <Field label="Email" req err={errors[`ts_ref${rn}_email`]}><I f={`ts_ref${rn}_email`} type="email" placeholder="sarah@example.co.uk" /></Field>
+              </Grid>
+            </div>
+          ))}
+
+          <label style={{ display: "flex", gap: 10, alignItems: "flex-start", cursor: "pointer", padding: 12, border: `1.5px solid ${errors.ts_consent ? C.error : C.border}`, borderRadius: 8, background: C.white, marginBottom: 12 }}>
+            <input type="checkbox" checked={form.ts_consent as boolean} onChange={upd("ts_consent")} style={{ marginTop: 3 }} />
+            <span style={{ fontSize: 13, color: C.body, lineHeight: 1.5 }}>
+              I understand that ProGrafter will contact both references by phone before my application is approved, and that a site visit may be carried out during my first booked job.
+            </span>
+          </label>
+          {errors.ts_consent && <p style={{ fontSize: 12, color: C.error, margin: "-4px 0 12px" }}>{errors.ts_consent}</p>}
+
+          <InfoBox variant="amber">
+            We verify time-served applications by phone call to your references and we may request a site visit on your first booked job. This usually takes 5–7 working days vs 1–2 for regulated trades.
+          </InfoBox>
+        </>
+      )}
+    </div>,
+
+    // 3 — Portfolio of work
+    <div key="3">
       {reg ? (
         <>
           <div style={{ marginBottom: 20 }}>
