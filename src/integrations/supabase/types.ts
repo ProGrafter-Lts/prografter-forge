@@ -2673,11 +2673,53 @@ export type Database = {
         }
         Relationships: []
       }
+      trade_application_events: {
+        Row: {
+          actor_email: string | null
+          actor_user_id: string | null
+          application_id: string
+          created_at: string
+          detail: Json
+          event_type: string
+          id: string
+        }
+        Insert: {
+          actor_email?: string | null
+          actor_user_id?: string | null
+          application_id: string
+          created_at?: string
+          detail?: Json
+          event_type: string
+          id?: string
+        }
+        Update: {
+          actor_email?: string | null
+          actor_user_id?: string | null
+          application_id?: string
+          created_at?: string
+          detail?: Json
+          event_type?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trade_application_events_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "trade_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trade_applications: {
         Row: {
+          admin_notes: string | null
           applicant_email: string | null
           business_name: string | null
           created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          decision_reason: string | null
           document_paths: Json
           form_data: Json
           full_name: string | null
@@ -2686,11 +2728,17 @@ export type Database = {
           status: string
           trade_category_id: string | null
           updated_at: string
+          verification_checks: Json
+          verification_status: string
         }
         Insert: {
+          admin_notes?: string | null
           applicant_email?: string | null
           business_name?: string | null
           created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_reason?: string | null
           document_paths?: Json
           form_data?: Json
           full_name?: string | null
@@ -2699,11 +2747,17 @@ export type Database = {
           status?: string
           trade_category_id?: string | null
           updated_at?: string
+          verification_checks?: Json
+          verification_status?: string
         }
         Update: {
+          admin_notes?: string | null
           applicant_email?: string | null
           business_name?: string | null
           created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_reason?: string | null
           document_paths?: Json
           form_data?: Json
           full_name?: string | null
@@ -2712,6 +2766,8 @@ export type Database = {
           status?: string
           trade_category_id?: string | null
           updated_at?: string
+          verification_checks?: Json
+          verification_status?: string
         }
         Relationships: []
       }
