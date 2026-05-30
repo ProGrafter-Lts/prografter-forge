@@ -470,8 +470,9 @@ export default function Apply() {
 
   // Multi-file photo upload (portfolio). Accepts images, supports add/remove.
   const Photos = useCallback(({ f }: { f: string }) => {
-    const { files } = stateRef.current;
+    const { files, imageRejections } = stateRef.current;
     const list = files[f] ?? [];
+    const rejections = imageRejections[f] ?? [];
     return (
       <div>
         <label
@@ -483,20 +484,40 @@ export default function Apply() {
         >
           <span style={{ display: "block", fontSize: 22, color: C.teal, marginBottom: 6 }}>⬆</span>
           Add photos of completed work
-          <span style={{ display: "block", fontSize: 12, fontWeight: 400, color: C.secondary, marginTop: 4 }}>JPG or PNG — you can select several at once</span>
+          <span style={{ display: "block", fontSize: 12, fontWeight: 400, color: C.secondary, marginTop: 4 }}>
+            {ACCEPTED_FORMATS_LABEL} (iPhone HEIC photos accepted) — up to 10MB each. You can select several at once.
+          </span>
           <input
             type="file"
-            accept="image/*"
+            accept="image/jpeg,image/png,image/heic,image/heif,.jpg,.jpeg,.png,.heic,.heif"
             multiple
-            onChange={(ev) => {
-              const incoming = filterBySize(Array.from(ev.target.files ?? []), f);
-              if (!incoming.length) return;
-              setFiles((p) => ({ ...p, [f]: [...(p[f] ?? []), ...incoming] }));
+            onChange={async (ev) => {
+              const incoming = Array.from(ev.target.files ?? []);
               ev.target.value = "";
+              if (!incoming.length) return;
+              const accepted: File[] = [];
+              const rejected: string[] = [];
+              for (const file of incoming) {
+                const res = await processImageFile(file);
+                if (res.ok) accepted.push(res.file);
+                else rejected.push(res.reason);
+              }
+              setImageRejections((p) => ({ ...p, [f]: rejected }));
+              if (accepted.length) {
+                setFiles((p) => ({ ...p, [f]: [...(p[f] ?? []), ...accepted] }));
+                setErrors((p) => { const { [f]: _omit, ...rest } = p; return rest; });
+              }
             }}
             style={{ display: "none" }}
           />
         </label>
+        {rejections.length > 0 && (
+          <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 6 }}>
+            {rejections.map((msg, i) => (
+              <p key={i} style={{ fontSize: 12, color: C.error, margin: 0, lineHeight: 1.45 }}>⚠ {msg}</p>
+            ))}
+          </div>
+        )}
         {list.length > 0 && (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8, marginTop: 12 }}>
             {list.map((file, idx) => (
