@@ -36,7 +36,7 @@ const SCHEMES: Scheme[] = [
       "Insulation (loft, cavity wall, solid wall), heat pumps, solar panels, heating controls, double glazing in some cases",
     maxValue: "Up to £18,000",
     maxValueSub: "Average job value: £6,000–£15,000",
-    note: "ProGrafter requires a PAS 2035 Retrofit Coordinator assessment before any ECO4 work begins. All installers verified before they appear on the platform.",
+    note: "ProGrafter requires a PAS 2035 Retrofit Coordinator assessment before any ECO4 work begins. Every trade is verified before they go live on the platform.",
     badge: "amber",
     badgeLabel: "Means-tested",
   },
