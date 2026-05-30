@@ -505,7 +505,7 @@ export default function Apply() {
             accept="image/*"
             multiple
             onChange={(ev) => {
-              const incoming = Array.from(ev.target.files ?? []);
+              const incoming = filterBySize(Array.from(ev.target.files ?? []), f);
               if (!incoming.length) return;
               setFiles((p) => ({ ...p, [f]: [...(p[f] ?? []), ...incoming] }));
               ev.target.value = "";
