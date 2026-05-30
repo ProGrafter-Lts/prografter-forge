@@ -322,24 +322,7 @@ export default function Apply() {
       if (!form.public_liability_cover) e.public_liability_cover = "Required";
       if (!(files.insurance_certificate?.length)) e.insurance_certificate = "Please upload your Certificate of Insurance";
     }
-    if (n === 5) {
-      if (references.length < 2) {
-        e.references_count = "Please provide at least 2 references";
-      }
-      references.forEach((r, i) => {
-        const n2 = i + 1;
-        const k = (f: string) => `ref${n2}_${f}`;
-        if (!r.contact_name.trim()) e[k("contact_name")] = "Required";
-        if (!r.relationship) e[k("relationship")] = "Required";
-        const phone = r.phone.trim();
-        const email = r.email.trim();
-        if (!phone && !email) {
-          e[k("contact_method")] = "Provide at least a phone number or email";
-        }
-        if (email && !/\S+@\S+\.\S+/.test(email)) e[k("email")] = "Invalid email";
-      });
-    }
-    if (n === 6 && !form.declaration_accepted) e.declaration_accepted = "You must accept the declaration to proceed";
+    if (n === 5 && !form.declaration_accepted) e.declaration_accepted = "You must accept the declaration to proceed";
     return e;
   };
 
