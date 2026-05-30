@@ -727,7 +727,7 @@ export default function Apply() {
     <div key="4">
       <div style={{ marginBottom: 20 }}>
         <h2 style={{ fontSize: 17, fontWeight: 700, color: C.deep, margin: "0 0 4px" }}>Insurance details</h2>
-        <p style={{ fontSize: 13, color: C.secondary, margin: 0 }}>We verify insurance directly with your provider. Lapsed insurance = immediate suspension.</p>
+        <p style={{ fontSize: 13, color: C.secondary, margin: 0 }}>We verify insurance by reviewing your certificate of insurance. Lapsed or invalid cover results in immediate suspension.</p>
       </div>
       <Grid>
         <Field label="Insurance provider" req err={errors.insurance_provider}><I f="insurance_provider" placeholder="Hiscox / Direct Line / etc." /></Field>
@@ -748,8 +748,11 @@ export default function Apply() {
           {["£1,000,000", "£2,000,000", "£5,000,000", "£10,000,000+"].map(o => <option key={o} value={o}>{o}</option>)}
         </S>
       </Field>
+      <Field label="Upload your Certificate of Insurance (PDF or photo)" req err={errors.insurance_certificate} hint="Must clearly show your name or company name, cover amounts, and a current expiry date.">
+        <F f="insurance_certificate" />
+      </Field>
       <InfoBox variant="blue">
-        ProGrafter will contact your insurer directly to verify this policy before your application is approved. We also set a renewal reminder — updated documentation must be provided before expiry or your listing is automatically suspended.
+        We will visually verify your certificate before your application is approved. We set a renewal reminder — updated documentation must be uploaded before expiry, or your listing is automatically suspended.
       </InfoBox>
     </div>,
 
