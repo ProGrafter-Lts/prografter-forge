@@ -378,7 +378,7 @@ export default function Apply() {
 
 
   const submit = async () => {
-    const e = validate(6);
+    const e = validate(5);
     setErrors(e);
     if (Object.keys(e).length) return;
     setSubmitting(true);
