@@ -707,8 +707,8 @@ export default function Apply() {
     </div>,
 
 
-    // 5 — Declaration
-    <div key="5">
+    // 6 — Declaration
+    <div key="6">
       <div style={{ marginBottom: 20 }}>
         <h2 style={{ fontSize: 17, fontWeight: 700, color: C.deep, margin: "0 0 4px" }}>Declaration</h2>
         <p style={{ fontSize: 13, color: C.secondary, margin: 0 }}>Please read carefully before submitting your application.</p>
