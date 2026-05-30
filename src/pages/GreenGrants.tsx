@@ -433,7 +433,7 @@ const GreenGrantsPage = () => {
                   to={`/post-a-job?green=1&schemes=${schemeIds.join(",")}`}
                   className="inline-block bg-[#16A34A] text-white font-mono text-sm py-4 px-10 rounded-xl hover:bg-[#15803D] transition-colors tracking-wider uppercase shadow-lg shadow-[#16A34A]/20"
                 >
-                  Match Me With a Certified Local Installer — Free →
+                  Get Matched With a Verified Local Trade — Free →
                 </Link>
               </div>
 
