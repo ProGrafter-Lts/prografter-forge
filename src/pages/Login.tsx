@@ -228,8 +228,17 @@ const Login = () => {
               <a href="/post-a-job" className="text-teal hover:underline">Post a Job</a>
             </p>
           </div>
+
+          <p className="mt-6 text-center font-mono text-xs text-secondary-text">
+            <a href="/privacy" className="hover:underline">Privacy</a>
+            {" · "}
+            <a href="/terms" className="hover:underline">Terms</a>
+            {" · "}
+            <a href="/cookies" className="hover:underline">Cookies</a>
+          </p>
         </div>
       </div>
+
 
       {showForgot && (
         <div
