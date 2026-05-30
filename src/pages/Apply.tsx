@@ -378,19 +378,87 @@ export default function Apply() {
     const { form, errors, upd } = stateRef.current;
     return <textarea style={{ ...inputBase(errors[f]), resize: "vertical", minHeight: 96 }} value={form[f] as string} onChange={upd(f)} {...p} />;
   }, []);
-  const F = useCallback(({ f }: { f: string }) => {
-    const current = stateRef.current.form[f] as string;
+  // Single-file upload (scheme card, certificate, insurance certificate).
+  const F = useCallback(({ f, accept = "application/pdf,image/*" }: { f: string; accept?: string }) => {
+    const { files, errors } = stateRef.current;
+    const selected = files[f]?.[0];
     return (
       <div>
-        <input
-          type="file"
-          onChange={(ev) => {
-            const name = ev.target.files?.[0]?.name ?? "";
-            setForm((p) => ({ ...p, [f]: name }));
+        <label
+          style={{
+            display: "inline-flex", alignItems: "center", gap: 8, cursor: "pointer",
+            border: `1.5px solid ${errors[f] ? C.error : C.border}`, borderRadius: 8,
+            padding: "10px 14px", fontSize: 13, fontWeight: 600, color: C.deep, background: C.white,
           }}
-          style={{ fontSize: 13, color: C.body }}
-        />
-        {current && <p style={{ fontSize: 12, color: C.secondary, margin: "6px 0 0" }}>Selected: {current}</p>}
+        >
+          <span style={{ color: C.teal }}>⬆</span>
+          {selected ? "Replace file" : "Choose file"}
+          <input
+            type="file"
+            accept={accept}
+            onChange={(ev) => {
+              const file = ev.target.files?.[0];
+              setFieldFiles(f, file ? [file] : []);
+            }}
+            style={{ display: "none" }}
+          />
+        </label>
+        {selected && (
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8 }}>
+            <span style={{ fontSize: 12, color: C.secondary }}>✓ {selected.name} ({Math.round(selected.size / 1024)} KB)</span>
+            <button type="button" onClick={() => setFieldFiles(f, [])} style={{ background: "none", border: "none", color: C.error, fontSize: 12, fontWeight: 600, cursor: "pointer" }}>Remove</button>
+          </div>
+        )}
+      </div>
+    );
+  }, []);
+
+  // Multi-file photo upload (portfolio). Accepts images, supports add/remove.
+  const Photos = useCallback(({ f }: { f: string }) => {
+    const { files } = stateRef.current;
+    const list = files[f] ?? [];
+    return (
+      <div>
+        <label
+          style={{
+            display: "block", cursor: "pointer", textAlign: "center",
+            border: `1.5px dashed ${C.border}`, borderRadius: 10, padding: "20px 14px",
+            fontSize: 13, fontWeight: 600, color: C.deep, background: C.white,
+          }}
+        >
+          <span style={{ display: "block", fontSize: 22, color: C.teal, marginBottom: 6 }}>⬆</span>
+          Add photos of completed work
+          <span style={{ display: "block", fontSize: 12, fontWeight: 400, color: C.secondary, marginTop: 4 }}>JPG or PNG — you can select several at once</span>
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={(ev) => {
+              const incoming = Array.from(ev.target.files ?? []);
+              if (!incoming.length) return;
+              setFiles((p) => ({ ...p, [f]: [...(p[f] ?? []), ...incoming] }));
+              ev.target.value = "";
+            }}
+            style={{ display: "none" }}
+          />
+        </label>
+        {list.length > 0 && (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8, marginTop: 12 }}>
+            {list.map((file, idx) => (
+              <div key={idx} style={{ position: "relative", borderRadius: 8, overflow: "hidden", border: `1px solid ${C.border}`, aspectRatio: "1 / 1", background: C.cream }}>
+                <img src={URL.createObjectURL(file)} alt={`Work photo ${idx + 1}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                <button
+                  type="button"
+                  onClick={() => setFiles((p) => ({ ...p, [f]: (p[f] ?? []).filter((_, i) => i !== idx) }))}
+                  style={{ position: "absolute", top: 4, right: 4, width: 22, height: 22, borderRadius: "50%", border: "none", background: "rgba(0,0,0,0.6)", color: "#fff", fontSize: 13, cursor: "pointer", lineHeight: 1 }}
+                >×</button>
+              </div>
+            ))}
+          </div>
+        )}
+        <p style={{ fontSize: 12, color: list.length >= 3 ? C.success : C.secondary, margin: "8px 0 0", fontWeight: 600 }}>
+          {list.length} uploaded — minimum 3 required
+        </p>
       </div>
     );
   }, []);
