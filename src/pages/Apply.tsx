@@ -389,7 +389,7 @@ export default function Apply() {
       if (appError) throw appError;
 
       // 3. Persist references for admin follow-up.
-      await persistReferences(applicationId, applicantEmail);
+      await persistReferences(applicantEmail);
 
       setDone(true);
     } catch (err: any) {
