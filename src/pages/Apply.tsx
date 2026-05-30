@@ -499,7 +499,7 @@ export default function Apply() {
               const rejected: string[] = [];
               for (const file of incoming) {
                 const res = await processImageFile(file);
-                if (res.ok) accepted.push(res.file);
+                if (res.ok === true) accepted.push(res.file);
                 else rejected.push(res.reason);
               }
               setImageRejections((p) => ({ ...p, [f]: rejected }));
