@@ -370,6 +370,22 @@ export default function Apply() {
     const { form, errors, upd } = stateRef.current;
     return <textarea style={{ ...inputBase(errors[f]), resize: "vertical", minHeight: 96 }} value={form[f] as string} onChange={upd(f)} {...p} />;
   }, []);
+  const F = useCallback(({ f }: { f: string }) => {
+    const current = stateRef.current.form[f] as string;
+    return (
+      <div>
+        <input
+          type="file"
+          onChange={(ev) => {
+            const name = ev.target.files?.[0]?.name ?? "";
+            setForm((p) => ({ ...p, [f]: name }));
+          }}
+          style={{ fontSize: 13, color: C.body }}
+        />
+        {current && <p style={{ fontSize: 12, color: C.secondary, margin: "6px 0 0" }}>Selected: {current}</p>}
+      </div>
+    );
+  }, []);
 
   const pages = [
     // 0 — Details
