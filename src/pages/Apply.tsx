@@ -255,6 +255,34 @@ export default function Apply() {
       if (!reg && !v("trading_history_description")) e.trading_history_description = "Required";
     }
     if (n === 2) {
+      const path = form.qualification_path as string;
+      if (!path) {
+        e.qualification_path = "Please choose the option that best describes you";
+      } else if (path === "regulated") {
+        if (!v("qual_scheme_name")) e.qual_scheme_name = "Required";
+        if (!v("qual_reg_number")) e.qual_reg_number = "Required";
+        if (!form.qual_reg_expiry) e.qual_reg_expiry = "Required";
+      } else if (path === "qualified") {
+        if (!v("qual_type")) e.qual_type = "Required";
+        if (!v("qual_awarding_body")) e.qual_awarding_body = "Required";
+        if (!v("qual_year")) e.qual_year = "Required";
+      } else if (path === "time_served") {
+        const years = Number(form.ts_years);
+        if (form.ts_years === "" || Number.isNaN(years)) e.ts_years = "Required";
+        else if (years < 5) e.ts_years = "You need at least 5 years on the tools to apply via this route";
+        if (!v("ts_specialism")) e.ts_specialism = "Required";
+        ([1, 2] as const).forEach((rn) => {
+          if (!v(`ts_ref${rn}_name`)) e[`ts_ref${rn}_name`] = "Required";
+          if (!v(`ts_ref${rn}_role`)) e[`ts_ref${rn}_role`] = "Required";
+          if (!v(`ts_ref${rn}_phone`)) e[`ts_ref${rn}_phone`] = "Required";
+          const email = v(`ts_ref${rn}_email`);
+          if (!email) e[`ts_ref${rn}_email`] = "Required";
+          else if (!/\S+@\S+\.\S+/.test(email)) e[`ts_ref${rn}_email`] = "Invalid email";
+        });
+        if (!form.ts_consent) e.ts_consent = "You must confirm this to proceed";
+      }
+    }
+    if (n === 3) {
       if (reg) {
         if (!v("registration_number")) e.registration_number = "Required";
         if (!form.registration_expiry) e.registration_expiry = "Required";
@@ -263,13 +291,13 @@ export default function Apply() {
         if (!v("portfolio_description")) e.portfolio_description = "Required";
       }
     }
-    if (n === 3) {
+    if (n === 4) {
       if (!v("insurance_provider")) e.insurance_provider = "Required";
       if (!v("insurance_policy_number")) e.insurance_policy_number = "Required";
       if (!form.insurance_expiry) e.insurance_expiry = "Required";
       if (!form.public_liability_cover) e.public_liability_cover = "Required";
     }
-    if (n === 4) {
+    if (n === 5) {
       if (references.length < 2) {
         e.references_count = "Please provide at least 2 references";
       }
@@ -286,7 +314,7 @@ export default function Apply() {
         if (email && !/\S+@\S+\.\S+/.test(email)) e[k("email")] = "Invalid email";
       });
     }
-    if (n === 5 && !form.declaration_accepted) e.declaration_accepted = "You must accept the declaration to proceed";
+    if (n === 6 && !form.declaration_accepted) e.declaration_accepted = "You must accept the declaration to proceed";
     return e;
   };
 
