@@ -221,7 +221,8 @@ const RefBlock = ({
 export default function Apply() {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<FormState>(BLANK);
-  const [references, setReferences] = useState<ReferenceEntry[]>([blankRef(), blankRef()]);
+  // Per-field inline rejection messages for image uploads (named by filename).
+  const [imageRejections, setImageRejections] = useState<Record<string, string[]>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [done, setDone] = useState(false);
   const [submitting, setSubmitting] = useState(false);
