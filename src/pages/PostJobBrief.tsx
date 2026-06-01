@@ -532,14 +532,37 @@ export default function PostJobBrief() {
       <p style={{ fontSize: 13, color: C.secondary, margin: "0 0 20px" }}>
         Help trades understand exactly what's involved before they quote.
       </p>
-      <F label="Scope of works" hint="List specific items if you can. Bullet points are fine.">
-        <T f="scope_items" rows={5}
-          placeholder={"- Strip and remove existing loft boarding\n- Install steel beam (engineer spec to be provided)\n- Frame dormer structure to rear\n- Install 4 Velux windows to front\n- First and second fix carpentry throughout"} />
-      </F>
-      <F label="Known issues or constraints" hint="Anything the trade needs to know — asbestos, awkward access, listed building status, party wall, existing damage">
-        <T f="known_issues" rows={3}
-          placeholder="Asbestos survey has been completed — clear. Party wall agreement with next door is in progress." />
-      </F>
+      <label style={{ display: "flex", gap: 10, alignItems: "flex-start",
+        background: C.tealDim, border: `1.5px solid #99F6E4`, borderRadius: 10,
+        padding: "12px 14px", marginBottom: 16, cursor: "pointer" }}>
+        <input type="checkbox" checked={needsScoping}
+          onChange={e => setNeedsScoping(e.target.checked)}
+          style={{ width: 18, height: 18, marginTop: 1, accentColor: C.teal, flexShrink: 0 }} />
+        <span style={{ fontSize: 12, color: "#0F766E", lineHeight: 1.6 }}>
+          <strong>I'd like ProGrafter to help me scope this out before it goes to trades.</strong>
+          <br />Tick this if you're not sure exactly what's involved — we'll arrange a quick
+          scoping call and prepare a clear scope before any trades see your brief.
+        </span>
+      </label>
+
+      {needsScoping ? (
+        <InfoBox variant="teal">
+          <strong>We'll be in touch to scope this with you.</strong> Your brief will be held with
+          our team and won't be shared with trades until we've helped you define the scope of works
+          on a short follow-up call. No need to fill in the scope details below.
+        </InfoBox>
+      ) : (
+        <>
+          <F label="Scope of works" hint="Optional — list specific items if you can. Bullet points are fine.">
+            <T f="scope_items" rows={5}
+              placeholder={"- Strip and remove existing loft boarding\n- Install steel beam (engineer spec to be provided)\n- Frame dormer structure to rear\n- Install 4 Velux windows to front\n- First and second fix carpentry throughout"} />
+          </F>
+          <F label="Known issues or constraints" hint="Optional — anything the trade needs to know — asbestos, awkward access, listed building status, party wall, existing damage">
+            <T f="known_issues" rows={3}
+              placeholder="Asbestos survey has been completed — clear. Party wall agreement with next door is in progress." />
+          </F>
+        </>
+      )}
       <F label="Access arrangement" req err={errors.access_arrangement}>
         <S f="access_arrangement">
           <option value="">Select...</option>
