@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { UserCircle, Save, Sparkles } from "lucide-react";
+import { UserCircle, Save, Sparkles, MapPin } from "lucide-react";
 import { GreenSpecialistBanner, CertificationsSection } from "@/components/GreenCertBadges";
 import VerifiedTradeBadge from "@/components/trade/VerifiedTradeBadge";
 import SpecialismsPicker from "@/components/SpecialismsPicker";
+import { Switch } from "@/components/ui/switch";
+import { Slider } from "@/components/ui/slider";
 import {
   Specialism,
   fetchSpecialisms,
