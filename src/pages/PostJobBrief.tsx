@@ -173,7 +173,7 @@ const StepBar = ({ current }: { current: number }) => (
 
 const BriefPreview = ({ form }: { form: typeof BLANK }) => {
   const trade = TRADES.find(t => t.id === form.trade_category_id);
-  const ref = `PG-${Date.now().toString(36).toUpperCase().slice(-6)}`;
+  const ref = "Assigned on submission";
 
   const Section = ({ title, children }: any) => (
     <div style={{ marginBottom: 16 }}>
