@@ -366,6 +366,7 @@ const QuoteChecker = () => {
               return;
             }
             setResult({ id: quoteId, email, lookupToken });
+            trackEvent("quote_check", { method: "paid" });
             window.history.replaceState({}, "", "/quote-checker");
           } else {
             toast({ title: "Payment not confirmed", description: "Please try again.", variant: "destructive" });

@@ -191,6 +191,7 @@ export default function ReviewSubmit() {
     }
     setSubmitting(false);
     setSubmitted(true);
+    trackEvent("review_submit", {});
   };
 
   if (!isReady || loading) {

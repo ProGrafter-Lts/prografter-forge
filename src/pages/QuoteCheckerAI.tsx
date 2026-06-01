@@ -251,6 +251,7 @@ ${form.quote_text}`;
         .trim();
       setResult(cleaned);
       setStreaming("");
+      trackEvent("quote_check", { method: "ai" });
     } catch (err) {
       setResult("Unable to analyse this quote right now. Please try again in a moment.");
       setVerdict("UNKNOWN");
