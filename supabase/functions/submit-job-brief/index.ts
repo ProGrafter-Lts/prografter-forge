@@ -162,6 +162,8 @@ Deno.serve(async (req) => {
           scopeItems: record.scope_items,
           knownIssues: record.known_issues,
           notes: record.additional_notes,
+          needsScoping: record.needs_scoping,
+          needsPlanningGuidance: record.needs_planning_guidance,
           adminUrl: ADMIN_URL,
         },
       },
