@@ -343,15 +343,7 @@ export default function PostJobBrief() {
   const back = () => { setErrors({}); setStep(s => s - 1); };
   const submit = () => setSubmitted(true);
 
-  const I = ({ f, type = "text", ...p }: any) => (
-    <input type={type} style={inp(errors[f])} value={(form as any)[f]} onChange={upd(f)} {...p} />
-  );
-  const S = ({ f, children }: any) => (
-    <select style={sel(errors[f])} value={(form as any)[f]} onChange={upd(f)}>{children}</select>
-  );
-  const T = ({ f, rows = 4, ...p }: any) => (
-    <textarea rows={rows} style={ta(errors[f])} value={(form as any)[f]} onChange={upd(f)} {...p} />
-  );
+
 
   const pages = [
     <>
