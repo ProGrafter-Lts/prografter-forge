@@ -406,6 +406,7 @@ export default function Apply() {
       await persistReferences(applicantEmail);
 
       setDone(true);
+      trackEvent("sign_up", { method: "trade_application" });
     } catch (err: any) {
       console.error("Application submission failed", err);
       setErrors({ submit: err?.message || "Could not save your application. Please try again." });

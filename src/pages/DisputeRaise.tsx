@@ -118,6 +118,7 @@ export default function DisputeRaise() {
 
     if (dErr || !dispute) { setError(dErr?.message || "Failed to raise dispute"); setSubmitting(false); return; }
     void supabase.functions.invoke("notify-dispute-raised", { body: { dispute_id: dispute.id } });
+    trackEvent("dispute_raise", { reason: form.reason });
     nav(`/disputes/${dispute.id}`);
   };
 
