@@ -99,6 +99,13 @@ Deno.serve(async (req) => {
     timeline: clean(body.timeline),
     quotes_received: clean(body.quotes_received),
     decision_criteria: clean(body.decision_criteria),
+    // Admin flags. needs_planning_guidance is recomputed server-side from the
+    // answers ("I'm not sure — guide me") so it can't be spoofed/omitted.
+    needs_scoping: body.needs_scoping === true,
+    needs_planning_guidance:
+      body.needs_planning_guidance === true ||
+      /guide me/i.test(String(body.planning_permission ?? '')) ||
+      /guide me/i.test(String(body.building_regs ?? '')),
     is_test: body.is_test === true,
   }
 
@@ -155,6 +162,8 @@ Deno.serve(async (req) => {
           scopeItems: record.scope_items,
           knownIssues: record.known_issues,
           notes: record.additional_notes,
+          needsScoping: record.needs_scoping,
+          needsPlanningGuidance: record.needs_planning_guidance,
           adminUrl: ADMIN_URL,
         },
       },

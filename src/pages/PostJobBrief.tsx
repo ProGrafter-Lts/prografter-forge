@@ -1,4 +1,4 @@
-import { useState, createContext, useContext } from "react";
+import { useState, useEffect, createContext, useContext } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 // ── ProGrafter Brand Palette ──────────────────────────────────────────────────
@@ -32,6 +32,29 @@ const TRADES = [
   { id: "plumber",         name: "Plumber",             icon: "🔧" },
   { id: "landscaper",      name: "Landscaper",          icon: "🌿" },
 ];
+
+// Step 2 planning / building-regs visibility is trade-conditional.
+// planning      → whether the "planning permission" question is shown
+// buildingRegs  → which framing of the building-regs question is shown
+//                 ("generic" | "partp" | "gas" | false to hide entirely)
+type RegMode = "generic" | "partp" | "gas" | false;
+const PLANNING_CONFIG: Record<string, { planning: boolean; buildingRegs: RegMode }> = {
+  general_builder: { planning: true,  buildingRegs: "generic" }, // structural / extensions / lofts
+  roofer:          { planning: true,  buildingRegs: "generic" },
+  electrician:     { planning: false, buildingRegs: "partp" },   // Part P
+  gas_engineer:    { planning: false, buildingRegs: "gas" },     // Gas Safe / Building Notice
+  plumber:         { planning: false, buildingRegs: "gas" },
+  decorator:       { planning: false, buildingRegs: false },     // hidden entirely
+  tiler:           { planning: false, buildingRegs: false },
+  plasterer:       { planning: false, buildingRegs: false },
+  landscaper:      { planning: false, buildingRegs: false },
+  carpenter:       { planning: false, buildingRegs: false },     // non-structural carpentry
+};
+const planningCfgFor = (tradeId: string) =>
+  PLANNING_CONFIG[tradeId] ?? { planning: true, buildingRegs: "generic" as RegMode };
+
+// Any answer of "I'm not sure — guide me" flags the brief for admin guidance.
+const GUIDE_ME = "I'm not sure — guide me";
 
 const PROPERTY_TYPES = [
   "Detached house", "Semi-detached house", "Terraced house", "End-of-terrace house",
@@ -323,8 +346,21 @@ export default function PostJobBrief() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [ref, setRef] = useState(() => generateBriefRef());
+  const [needsScoping, setNeedsScoping] = useState(false);
+  const [consent, setConsent] = useState(false);
 
   const upd = (k: string) => (e: any) => setForm(p => ({ ...p, [k]: e.target.value }));
+
+  // When the trade changes, clear any planning/building-regs answers so values
+  // from a previously selected trade can never carry over to a trade that
+  // hides those questions.
+  useEffect(() => {
+    setForm(p => ({ ...p, planning_permission: "", building_regs: "" }));
+  }, [form.trade_category_id]);
+
+  const planningCfg = planningCfgFor(form.trade_category_id);
+  const needsPlanningGuidance =
+    form.planning_permission === GUIDE_ME || form.building_regs === GUIDE_ME;
 
   const validate = (n: number) => {
     const e: Record<string, string> = {};
@@ -359,11 +395,21 @@ export default function PostJobBrief() {
   };
   const back = () => { setErrors({}); setStep(s => s - 1); };
   const submit = async () => {
-    if (submitting) return;
+    if (submitting || !consent) return;
     setSubmitError("");
     setSubmitting(true);
     try {
-      const { data, error } = await supabase.functions.invoke("submit-job-brief", { body: { ...form, ref } });
+      // If the homeowner asked ProGrafter to scope the job, don't send the
+      // (now hidden) scope / known-issues fields to trades.
+      const payload = {
+        ...form,
+        ref,
+        scope_items: needsScoping ? "" : form.scope_items,
+        known_issues: needsScoping ? "" : form.known_issues,
+        needs_scoping: needsScoping,
+        needs_planning_guidance: needsPlanningGuidance,
+      };
+      const { data, error } = await supabase.functions.invoke("submit-job-brief", { body: payload });
       if (error || !data?.ref) throw error || new Error("No reference returned");
       setRef(data.ref);
       setSubmitted(true);
@@ -428,26 +474,57 @@ export default function PostJobBrief() {
         <T f="job_description" rows={5}
           placeholder="We have a 1930s semi-detached house in Nottingham. The loft is currently boarded but uninsulated — we want to convert it into a double bedroom with an en-suite shower room..." />
       </F>
-      <F label="Is planning permission required or already granted?" hint="If you're unsure, ProGrafter's Planning Intelligence tool can check for you">
-        <S f="planning_permission">
-          <option value="">Select...</option>
-          <option value="Not required — permitted development">Not required — permitted development</option>
-          <option value="Already granted — reference available">Already granted — reference available</option>
-          <option value="Application submitted — pending">Application submitted — pending</option>
-          <option value="Not yet checked — need advice">Not yet checked — need advice</option>
-          <option value="Not applicable">Not applicable</option>
-        </S>
-      </F>
-      <F label="Building regulations" hint="Most structural and electrical work requires Building Regs approval">
-        <S f="building_regs">
-          <option value="">Select...</option>
-          <option value="Building regs required — not yet applied">Building regs required — not yet applied</option>
-          <option value="Building regs approved — notice submitted">Building regs approved — notice submitted</option>
-          <option value="Completion certificate already held">Completion certificate already held</option>
-          <option value="Not required for this work">Not required for this work</option>
-          <option value="Not sure — need guidance">Not sure — need guidance</option>
-        </S>
-      </F>
+      {planningCfg.planning && (
+        <F label="Is planning permission required or already granted?" hint="If you're unsure, ProGrafter's Planning Intelligence tool can check for you">
+          <S f="planning_permission">
+            <option value="">Select...</option>
+            <option value="Not required — permitted development">Not required — permitted development</option>
+            <option value="Already granted — reference available">Already granted — reference available</option>
+            <option value="Application submitted — pending">Application submitted — pending</option>
+            <option value="Not applicable">Not applicable</option>
+            <option value={GUIDE_ME}>{GUIDE_ME}</option>
+          </S>
+        </F>
+      )}
+
+      {planningCfg.buildingRegs === "generic" && (
+        <F label="Building regulations" hint="Most structural and extension work requires Building Regs approval">
+          <S f="building_regs">
+            <option value="">Select...</option>
+            <option value="Building regs required — not yet applied">Building regs required — not yet applied</option>
+            <option value="Building regs approved — notice submitted">Building regs approved — notice submitted</option>
+            <option value="Completion certificate already held">Completion certificate already held</option>
+            <option value="Not required for this work">Not required for this work</option>
+            <option value={GUIDE_ME}>{GUIDE_ME}</option>
+          </S>
+        </F>
+      )}
+
+      {planningCfg.buildingRegs === "partp" && (
+        <F label="Part P (electrical Building Regulations)" hint="Notifiable electrical work must be certified under Part P of the Building Regulations">
+          <S f="building_regs">
+            <option value="">Select...</option>
+            <option value="Not notifiable — minor electrical works">Not notifiable — minor electrical works</option>
+            <option value="Notifiable — registered electrician will self-certify">Notifiable — registered electrician will self-certify</option>
+            <option value="Notifiable — building notice to be submitted">Notifiable — building notice to be submitted</option>
+            <option value="Part P completion certificate already held">Part P completion certificate already held</option>
+            <option value={GUIDE_ME}>{GUIDE_ME}</option>
+          </S>
+        </F>
+      )}
+
+      {planningCfg.buildingRegs === "gas" && (
+        <F label="Gas Safe / Building Notice" hint="Gas and heating work must be carried out by a Gas Safe registered engineer">
+          <S f="building_regs">
+            <option value="">Select...</option>
+            <option value="Gas Safe engineer will self-certify">Gas Safe engineer will self-certify</option>
+            <option value="Building notice required — not yet submitted">Building notice required — not yet submitted</option>
+            <option value="Completion certificate already held">Completion certificate already held</option>
+            <option value="Not applicable to this work">Not applicable to this work</option>
+            <option value={GUIDE_ME}>{GUIDE_ME}</option>
+          </S>
+        </F>
+      )}
     </>,
 
     <>
@@ -455,14 +532,40 @@ export default function PostJobBrief() {
       <p style={{ fontSize: 13, color: C.secondary, margin: "0 0 20px" }}>
         Help trades understand exactly what's involved before they quote.
       </p>
-      <F label="Scope of works" hint="List specific items if you can. Bullet points are fine.">
-        <T f="scope_items" rows={5}
-          placeholder={"- Strip and remove existing loft boarding\n- Install steel beam (engineer spec to be provided)\n- Frame dormer structure to rear\n- Install 4 Velux windows to front\n- First and second fix carpentry throughout"} />
-      </F>
-      <F label="Known issues or constraints" hint="Anything the trade needs to know — asbestos, awkward access, listed building status, party wall, existing damage">
-        <T f="known_issues" rows={3}
-          placeholder="Asbestos survey has been completed — clear. Party wall agreement with next door is in progress." />
-      </F>
+      <label style={{ display: "flex", gap: 10, alignItems: "flex-start",
+        background: C.tealDim, border: `1.5px solid #99F6E4`, borderRadius: 10,
+        padding: "12px 14px", marginBottom: 16, cursor: "pointer" }}>
+        <input type="checkbox" checked={needsScoping}
+          onChange={e => {
+            setNeedsScoping(e.target.checked);
+            if (e.target.checked) setForm(p => ({ ...p, scope_items: "", known_issues: "" }));
+          }}
+          style={{ width: 18, height: 18, marginTop: 1, accentColor: C.teal, flexShrink: 0 }} />
+        <span style={{ fontSize: 12, color: "#0F766E", lineHeight: 1.6 }}>
+          <strong>I'd like ProGrafter to help me scope this out before it goes to trades.</strong>
+          <br />Tick this if you're not sure exactly what's involved — we'll arrange a quick
+          scoping call and prepare a clear scope before any trades see your brief.
+        </span>
+      </label>
+
+      {needsScoping ? (
+        <InfoBox variant="teal">
+          <strong>We'll be in touch to scope this with you.</strong> Your brief will be held with
+          our team and won't be shared with trades until we've helped you define the scope of works
+          on a short follow-up call. No need to fill in the scope details below.
+        </InfoBox>
+      ) : (
+        <>
+          <F label="Scope of works" hint="Optional — list specific items if you can. Bullet points are fine.">
+            <T f="scope_items" rows={5}
+              placeholder={"- Strip and remove existing loft boarding\n- Install steel beam (engineer spec to be provided)\n- Frame dormer structure to rear\n- Install 4 Velux windows to front\n- First and second fix carpentry throughout"} />
+          </F>
+          <F label="Known issues or constraints" hint="Optional — anything the trade needs to know — asbestos, awkward access, listed building status, party wall, existing damage">
+            <T f="known_issues" rows={3}
+              placeholder="Asbestos survey has been completed — clear. Party wall agreement with next door is in progress." />
+          </F>
+        </>
+      )}
       <F label="Access arrangement" req err={errors.access_arrangement}>
         <S f="access_arrangement">
           <option value="">Select...</option>
@@ -563,6 +666,24 @@ export default function PostJobBrief() {
           </ul>
         </InfoBox>
       </div>
+
+      {needsScoping && (
+        <InfoBox variant="teal">
+          <strong>Scoping requested.</strong> You've asked ProGrafter to help scope this job.
+          We'll review your brief and arrange a follow-up call before sharing it with any trades.
+        </InfoBox>
+      )}
+
+      <label style={{ display: "flex", gap: 10, alignItems: "flex-start",
+        background: C.white, border: `1.5px solid ${consent ? C.teal : C.border}`,
+        borderRadius: 10, padding: "12px 14px", marginTop: 16, cursor: "pointer" }}>
+        <input type="checkbox" checked={consent}
+          onChange={e => setConsent(e.target.checked)}
+          style={{ width: 18, height: 18, marginTop: 1, accentColor: C.teal, flexShrink: 0 }} />
+        <span style={{ fontSize: 13, color: C.body, lineHeight: 1.6, fontWeight: 600 }}>
+          I have read and accept the terms above.
+        </span>
+      </label>
     </>,
   ];
 
@@ -647,7 +768,10 @@ export default function PostJobBrief() {
 
             {step < STEPS.length - 1
               ? <button style={btnPrimary} onClick={next}>Continue →</button>
-              : <button style={{ ...btnNavy, opacity: submitting ? 0.6 : 1, cursor: submitting ? "wait" : "pointer" }} onClick={submit} disabled={submitting}>
+              : <button
+                  style={{ ...btnNavy, opacity: (submitting || !consent) ? 0.5 : 1, cursor: submitting ? "wait" : (!consent ? "not-allowed" : "pointer") }}
+                  onClick={submit}
+                  disabled={submitting || !consent}>
                   {submitting ? "Submitting…" : "Submit brief"}
                 </button>}
           </div>
