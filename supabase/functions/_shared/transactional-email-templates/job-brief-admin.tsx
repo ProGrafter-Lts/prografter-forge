@@ -22,6 +22,8 @@ interface Props {
   knownIssues?: string
   notes?: string
   adminUrl?: string
+  needsScoping?: boolean
+  needsPlanningGuidance?: boolean
 }
 
 const JobBriefAdminEmail = (p: Props) => (
