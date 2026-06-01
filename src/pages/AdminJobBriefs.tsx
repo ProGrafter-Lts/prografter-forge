@@ -45,6 +45,7 @@ interface Brief {
   budget_band: string | null; timeline: string | null; quotes_received: string | null;
   decision_criteria: string | null; status: string; is_test: boolean; created_at: string;
   published_at?: string | null; matched_trade_count?: number | null;
+  needs_scoping?: boolean | null; needs_planning_guidance?: boolean | null;
 }
 
 const Field = ({ label, value }: { label: string; value: any }) =>
