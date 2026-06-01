@@ -56,6 +56,18 @@ const ACCESS = [
 
 const STEPS = ["Your details", "The job", "Scope & access", "Budget & timing", "Review & submit"];
 
+// Generate the job-brief reference ONCE on the client, at the moment the form is
+// first opened. The same reference is shown in the preview, the confirmation
+// screen, the emails and the admin dashboard — it is never regenerated.
+function generateBriefRef(): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const bytes = new Uint8Array(6);
+  crypto.getRandomValues(bytes);
+  let r = "PG-";
+  for (let i = 0; i < 6; i++) r += chars[bytes[i] % chars.length];
+  return r;
+}
+
 const BLANK = {
   full_name: "", email: "", phone: "", address_line1: "",
   address_line2: "", city: "", postcode: "", property_type: "",
@@ -171,9 +183,10 @@ const StepBar = ({ current }: { current: number }) => (
   </div>
 );
 
-const BriefPreview = ({ form }: { form: typeof BLANK }) => {
+const BriefPreview = ({ form, briefRef }: { form: typeof BLANK; briefRef: string }) => {
   const trade = TRADES.find(t => t.id === form.trade_category_id);
-  const ref = "Assigned on submission";
+  const ref = briefRef;
+
 
   const Section = ({ title, children }: any) => (
     <div style={{ marginBottom: 16 }}>
@@ -309,7 +322,7 @@ export default function PostJobBrief() {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
-  const [ref, setRef] = useState("");
+  const [ref, setRef] = useState(() => generateBriefRef());
 
   const upd = (k: string) => (e: any) => setForm(p => ({ ...p, [k]: e.target.value }));
 
@@ -350,7 +363,7 @@ export default function PostJobBrief() {
     setSubmitError("");
     setSubmitting(true);
     try {
-      const { data, error } = await supabase.functions.invoke("submit-job-brief", { body: form });
+      const { data, error } = await supabase.functions.invoke("submit-job-brief", { body: { ...form, ref } });
       if (error || !data?.ref) throw error || new Error("No reference returned");
       setRef(data.ref);
       setSubmitted(true);
@@ -537,7 +550,7 @@ export default function PostJobBrief() {
       <p style={{ fontSize: 13, color: C.secondary, margin: "0 0 20px" }}>
         This is exactly what vetted trades will see. Check it over before submitting.
       </p>
-      <BriefPreview form={form} />
+      <BriefPreview form={form} briefRef={ref} />
       <div style={{ marginTop: 16 }}>
         <InfoBox variant="navy">
           <strong>By submitting this brief you agree that:</strong>
