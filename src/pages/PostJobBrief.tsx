@@ -33,6 +33,29 @@ const TRADES = [
   { id: "landscaper",      name: "Landscaper",          icon: "🌿" },
 ];
 
+// Step 2 planning / building-regs visibility is trade-conditional.
+// planning      → whether the "planning permission" question is shown
+// buildingRegs  → which framing of the building-regs question is shown
+//                 ("generic" | "partp" | "gas" | false to hide entirely)
+type RegMode = "generic" | "partp" | "gas" | false;
+const PLANNING_CONFIG: Record<string, { planning: boolean; buildingRegs: RegMode }> = {
+  general_builder: { planning: true,  buildingRegs: "generic" }, // structural / extensions / lofts
+  roofer:          { planning: true,  buildingRegs: "generic" },
+  electrician:     { planning: false, buildingRegs: "partp" },   // Part P
+  gas_engineer:    { planning: false, buildingRegs: "gas" },     // Gas Safe / Building Notice
+  plumber:         { planning: false, buildingRegs: "gas" },
+  decorator:       { planning: false, buildingRegs: false },     // hidden entirely
+  tiler:           { planning: false, buildingRegs: false },
+  plasterer:       { planning: false, buildingRegs: false },
+  landscaper:      { planning: false, buildingRegs: false },
+  carpenter:       { planning: false, buildingRegs: false },     // non-structural carpentry
+};
+const planningCfgFor = (tradeId: string) =>
+  PLANNING_CONFIG[tradeId] ?? { planning: true, buildingRegs: "generic" as RegMode };
+
+// Any answer of "I'm not sure — guide me" flags the brief for admin guidance.
+const GUIDE_ME = "I'm not sure — guide me";
+
 const PROPERTY_TYPES = [
   "Detached house", "Semi-detached house", "Terraced house", "End-of-terrace house",
   "Flat / Apartment", "Bungalow", "Maisonette", "Other",
