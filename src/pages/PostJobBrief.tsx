@@ -363,7 +363,7 @@ export default function PostJobBrief() {
     setSubmitError("");
     setSubmitting(true);
     try {
-      const { data, error } = await supabase.functions.invoke("submit-job-brief", { body: form });
+      const { data, error } = await supabase.functions.invoke("submit-job-brief", { body: { ...form, ref } });
       if (error || !data?.ref) throw error || new Error("No reference returned");
       setRef(data.ref);
       setSubmitted(true);
