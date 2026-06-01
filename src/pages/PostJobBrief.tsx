@@ -322,7 +322,7 @@ export default function PostJobBrief() {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
-  const [ref, setRef] = useState("");
+  const [ref, setRef] = useState(() => generateBriefRef());
 
   const upd = (k: string) => (e: any) => setForm(p => ({ ...p, [k]: e.target.value }));
 
