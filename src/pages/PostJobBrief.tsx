@@ -554,7 +554,6 @@ export default function PostJobBrief() {
   ];
 
   if (submitted) {
-    const ref = `PG-${Date.now().toString(36).toUpperCase().slice(-6)}`;
     return (
       <div style={{ minHeight: "100vh", background: C.cream, display: "flex",
         alignItems: "center", justifyContent: "center", fontFamily: "'DM Sans', system-ui, sans-serif", padding: "2rem 1rem" }}>
