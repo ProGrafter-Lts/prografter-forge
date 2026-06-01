@@ -346,8 +346,21 @@ export default function PostJobBrief() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [ref, setRef] = useState(() => generateBriefRef());
+  const [needsScoping, setNeedsScoping] = useState(false);
+  const [consent, setConsent] = useState(false);
 
   const upd = (k: string) => (e: any) => setForm(p => ({ ...p, [k]: e.target.value }));
+
+  // When the trade changes, clear any planning/building-regs answers so values
+  // from a previously selected trade can never carry over to a trade that
+  // hides those questions.
+  useEffect(() => {
+    setForm(p => ({ ...p, planning_permission: "", building_regs: "" }));
+  }, [form.trade_category_id]);
+
+  const planningCfg = planningCfgFor(form.trade_category_id);
+  const needsPlanningGuidance =
+    form.planning_permission === GUIDE_ME || form.building_regs === GUIDE_ME;
 
   const validate = (n: number) => {
     const e: Record<string, string> = {};
@@ -382,11 +395,21 @@ export default function PostJobBrief() {
   };
   const back = () => { setErrors({}); setStep(s => s - 1); };
   const submit = async () => {
-    if (submitting) return;
+    if (submitting || !consent) return;
     setSubmitError("");
     setSubmitting(true);
     try {
-      const { data, error } = await supabase.functions.invoke("submit-job-brief", { body: { ...form, ref } });
+      // If the homeowner asked ProGrafter to scope the job, don't send the
+      // (now hidden) scope / known-issues fields to trades.
+      const payload = {
+        ...form,
+        ref,
+        scope_items: needsScoping ? "" : form.scope_items,
+        known_issues: needsScoping ? "" : form.known_issues,
+        needs_scoping: needsScoping,
+        needs_planning_guidance: needsPlanningGuidance,
+      };
+      const { data, error } = await supabase.functions.invoke("submit-job-brief", { body: payload });
       if (error || !data?.ref) throw error || new Error("No reference returned");
       setRef(data.ref);
       setSubmitted(true);
