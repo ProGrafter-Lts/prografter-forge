@@ -82,16 +82,12 @@ const RouteFallback = () => (
   </div>
 );
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <PWAInstallBanner />
-        <Chatbot />
-        <Suspense fallback={<RouteFallback />}>
-          <Routes>
+const AppRoutes = () => {
+  usePageTracking();
+  return (
+    <Suspense fallback={<RouteFallback />}>
+      <Routes>
+
             <Route path="/" element={<Index />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
