@@ -413,6 +413,7 @@ export default function PostJobBrief() {
       if (error || !data?.ref) throw error || new Error("No reference returned");
       setRef(data.ref);
       setSubmitted(true);
+      trackEvent("generate_lead", { reference: data.ref, needs_scoping: needsScoping });
     } catch (err) {
       console.error("Job brief submission failed", err);
       setSubmitError("Something went wrong submitting your brief. Please try again.");
