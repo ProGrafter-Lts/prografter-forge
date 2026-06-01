@@ -275,7 +275,74 @@ const TradeProfileSection = ({ tradeId }: TradeProfileSectionProps) => {
         </div>
       </div>
 
+      {/* Job availability */}
+      <div className="bg-card rounded-2xl p-6 border border-border space-y-5">
+        <div className="flex items-center gap-3">
+          <div className="bg-secondary text-secondary-foreground rounded-xl p-2.5">
+            <MapPin className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="font-heading text-primary text-xl">Job availability</h3>
+            <p className="font-mono text-xs text-muted-foreground mt-0.5">
+              Control whether you receive new job alerts and how far you'll travel
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between gap-4 rounded-xl border border-border bg-background px-4 py-3">
+          <div>
+            <p className="font-mono text-sm text-foreground">Accepting new jobs</p>
+            <p className="font-mono text-xs text-muted-foreground mt-0.5">
+              {acceptingJobs
+                ? "You'll be notified about matching jobs in your area"
+                : "You won't receive new job alerts"}
+            </p>
+          </div>
+          <Switch
+            checked={acceptingJobs}
+            onCheckedChange={(v) => {
+              setAcceptingJobs(v);
+              setAvailabilityDirty(true);
+            }}
+          />
+        </div>
+
+        <div className="rounded-xl border border-border bg-background px-4 py-3 space-y-3">
+          <div className="flex items-center justify-between">
+            <p className="font-mono text-sm text-foreground">Service radius</p>
+            <span className="font-mono text-sm text-primary font-semibold">
+              {serviceRadius} miles
+            </span>
+          </div>
+          <Slider
+            value={[serviceRadius]}
+            min={5}
+            max={50}
+            step={1}
+            onValueChange={(v) => {
+              setServiceRadius(v[0]);
+              setAvailabilityDirty(true);
+            }}
+          />
+          <p className="font-mono text-xs text-muted-foreground">
+            Only jobs within this distance of your postcode will be sent to you (5–50 miles).
+          </p>
+        </div>
+
+        <div className="flex justify-end pt-2">
+          <button
+            onClick={handleSaveAvailability}
+            disabled={!availabilityDirty || savingAvailability}
+            className="flex items-center gap-2 bg-primary text-primary-foreground font-mono text-sm px-5 py-2.5 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-40"
+          >
+            <Save className="w-4 h-4" />
+            {savingAvailability ? "Saving…" : "Save availability"}
+          </button>
+        </div>
+      </div>
+
       {/* Specialisms */}
+
       <div className="bg-card rounded-2xl p-6 border border-border space-y-5">
         <div className="flex items-center gap-3">
           <div className="bg-secondary text-secondary-foreground rounded-xl p-2.5">
