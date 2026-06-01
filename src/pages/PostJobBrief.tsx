@@ -765,7 +765,10 @@ export default function PostJobBrief() {
 
             {step < STEPS.length - 1
               ? <button style={btnPrimary} onClick={next}>Continue →</button>
-              : <button style={{ ...btnNavy, opacity: submitting ? 0.6 : 1, cursor: submitting ? "wait" : "pointer" }} onClick={submit} disabled={submitting}>
+              : <button
+                  style={{ ...btnNavy, opacity: (submitting || !consent) ? 0.5 : 1, cursor: submitting ? "wait" : (!consent ? "not-allowed" : "pointer") }}
+                  onClick={submit}
+                  disabled={submitting || !consent}>
                   {submitting ? "Submitting…" : "Submit brief"}
                 </button>}
           </div>
