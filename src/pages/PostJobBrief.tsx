@@ -183,9 +183,10 @@ const StepBar = ({ current }: { current: number }) => (
   </div>
 );
 
-const BriefPreview = ({ form }: { form: typeof BLANK }) => {
+const BriefPreview = ({ form, briefRef }: { form: typeof BLANK; briefRef: string }) => {
   const trade = TRADES.find(t => t.id === form.trade_category_id);
-  const ref = "Assigned on submission";
+  const ref = briefRef;
+
 
   const Section = ({ title, children }: any) => (
     <div style={{ marginBottom: 16 }}>
