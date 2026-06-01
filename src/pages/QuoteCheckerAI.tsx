@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 // ── ProGrafter Brand Palette ──────────────────────────────────────────────────
 const C = {
@@ -187,6 +188,12 @@ ${form.quote_text}`;
     try {
       const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
       const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        throw new Error("Please sign in to use the AI Quote Checker.");
+      }
+
       const response = await fetch(
         `https://${projectId}.supabase.co/functions/v1/analyse-quote-ai`,
         {
@@ -194,15 +201,17 @@ ${form.quote_text}`;
           headers: {
             "Content-Type": "application/json",
             apikey: anonKey,
-            Authorization: `Bearer ${anonKey}`,
+            Authorization: `Bearer ${session.access_token}`,
           },
           body: JSON.stringify({
-            max_tokens: 1500,
             system: systemPrompt,
             messages: [{ role: "user", content: userMessage }],
           }),
         },
       );
+      if (response.status === 401) {
+        throw new Error("Please sign in to use the AI Quote Checker.");
+      }
       if (!response.ok || !response.body) {
         throw new Error(`Proxy error ${response.status}`);
       }
