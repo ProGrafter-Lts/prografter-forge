@@ -1,4 +1,5 @@
 import { useState, createContext, useContext } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 // ── ProGrafter Brand Palette ──────────────────────────────────────────────────
 const C = {
@@ -172,7 +173,7 @@ const StepBar = ({ current }: { current: number }) => (
 
 const BriefPreview = ({ form }: { form: typeof BLANK }) => {
   const trade = TRADES.find(t => t.id === form.trade_category_id);
-  const ref = `PG-${Date.now().toString(36).toUpperCase().slice(-6)}`;
+  const ref = "Assigned on submission";
 
   const Section = ({ title, children }: any) => (
     <div style={{ marginBottom: 16 }}>
@@ -306,6 +307,9 @@ export default function PostJobBrief() {
   const [form, setForm] = useState(BLANK);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  const [ref, setRef] = useState("");
 
   const upd = (k: string) => (e: any) => setForm(p => ({ ...p, [k]: e.target.value }));
 
@@ -341,7 +345,22 @@ export default function PostJobBrief() {
     if (!Object.keys(e).length) setStep(s => s + 1);
   };
   const back = () => { setErrors({}); setStep(s => s - 1); };
-  const submit = () => setSubmitted(true);
+  const submit = async () => {
+    if (submitting) return;
+    setSubmitError("");
+    setSubmitting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("submit-job-brief", { body: form });
+      if (error || !data?.ref) throw error || new Error("No reference returned");
+      setRef(data.ref);
+      setSubmitted(true);
+    } catch (err) {
+      console.error("Job brief submission failed", err);
+      setSubmitError("Something went wrong submitting your brief. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
 
 
@@ -535,7 +554,6 @@ export default function PostJobBrief() {
   ];
 
   if (submitted) {
-    const ref = `PG-${Date.now().toString(36).toUpperCase().slice(-6)}`;
     return (
       <div style={{ minHeight: "100vh", background: C.cream, display: "flex",
         alignItems: "center", justifyContent: "center", fontFamily: "'DM Sans', system-ui, sans-serif", padding: "2rem 1rem" }}>
@@ -616,8 +634,14 @@ export default function PostJobBrief() {
 
             {step < STEPS.length - 1
               ? <button style={btnPrimary} onClick={next}>Continue →</button>
-              : <button style={btnNavy} onClick={submit}>Submit brief</button>}
+              : <button style={{ ...btnNavy, opacity: submitting ? 0.6 : 1, cursor: submitting ? "wait" : "pointer" }} onClick={submit} disabled={submitting}>
+                  {submitting ? "Submitting…" : "Submit brief"}
+                </button>}
           </div>
+
+          {submitError && (
+            <p style={{ textAlign: "center", fontSize: 12, color: C.error, marginTop: 12 }}>{submitError}</p>
+          )}
 
           <p style={{ textAlign: "center", fontSize: 11, color: C.secondary, marginTop: 12 }}>
             Step {step + 1} of {STEPS.length} — {STEPS[step]}

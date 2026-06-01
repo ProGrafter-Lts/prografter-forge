@@ -915,6 +915,99 @@ export type Database = {
         }
         Relationships: []
       }
+      job_briefs: {
+        Row: {
+          access_arrangement: string | null
+          additional_notes: string | null
+          address_line1: string
+          address_line2: string | null
+          budget_band: string | null
+          building_regs: string | null
+          city: string
+          created_at: string
+          decision_criteria: string | null
+          email: string
+          full_name: string
+          id: string
+          is_test: boolean
+          job_description: string | null
+          job_title: string | null
+          known_issues: string | null
+          parking_available: string | null
+          phone: string
+          planning_permission: string | null
+          postcode: string
+          preferred_days: string | null
+          property_type: string | null
+          quotes_received: string | null
+          ref: string
+          scope_items: string | null
+          status: string
+          timeline: string | null
+          trade_category_id: string | null
+        }
+        Insert: {
+          access_arrangement?: string | null
+          additional_notes?: string | null
+          address_line1: string
+          address_line2?: string | null
+          budget_band?: string | null
+          building_regs?: string | null
+          city: string
+          created_at?: string
+          decision_criteria?: string | null
+          email: string
+          full_name: string
+          id?: string
+          is_test?: boolean
+          job_description?: string | null
+          job_title?: string | null
+          known_issues?: string | null
+          parking_available?: string | null
+          phone: string
+          planning_permission?: string | null
+          postcode: string
+          preferred_days?: string | null
+          property_type?: string | null
+          quotes_received?: string | null
+          ref: string
+          scope_items?: string | null
+          status?: string
+          timeline?: string | null
+          trade_category_id?: string | null
+        }
+        Update: {
+          access_arrangement?: string | null
+          additional_notes?: string | null
+          address_line1?: string
+          address_line2?: string | null
+          budget_band?: string | null
+          building_regs?: string | null
+          city?: string
+          created_at?: string
+          decision_criteria?: string | null
+          email?: string
+          full_name?: string
+          id?: string
+          is_test?: boolean
+          job_description?: string | null
+          job_title?: string | null
+          known_issues?: string | null
+          parking_available?: string | null
+          phone?: string
+          planning_permission?: string | null
+          postcode?: string
+          preferred_days?: string | null
+          property_type?: string | null
+          quotes_received?: string | null
+          ref?: string
+          scope_items?: string | null
+          status?: string
+          timeline?: string | null
+          trade_category_id?: string | null
+        }
+        Relationships: []
+      }
       job_matches: {
         Row: {
           created_at: string

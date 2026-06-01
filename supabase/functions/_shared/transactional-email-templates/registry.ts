@@ -35,6 +35,8 @@ import { template as paymentReleasedHomeowner } from './payment-released-homeown
 import { template as quoteReceived } from './quote-received.tsx'
 import { template as projectOverdueTrade } from './project-overdue-trade.tsx'
 import { template as projectOverdueHomeowner } from './project-overdue-homeowner.tsx'
+import { template as jobBriefHomeowner } from './job-brief-homeowner.tsx'
+import { template as jobBriefAdmin } from './job-brief-admin.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'waitlist-admin-notification': waitlistAdminNotification,
@@ -64,4 +66,6 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'quote-received': quoteReceived,
   'project-overdue-trade': projectOverdueTrade,
   'project-overdue-homeowner': projectOverdueHomeowner,
+  'job-brief-homeowner': jobBriefHomeowner,
+  'job-brief-admin': jobBriefAdmin,
 }
