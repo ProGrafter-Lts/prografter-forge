@@ -934,6 +934,8 @@ export type Database = {
           job_title: string | null
           known_issues: string | null
           matched_trade_count: number | null
+          needs_planning_guidance: boolean
+          needs_scoping: boolean
           parking_available: string | null
           phone: string
           planning_permission: string | null
@@ -966,6 +968,8 @@ export type Database = {
           job_title?: string | null
           known_issues?: string | null
           matched_trade_count?: number | null
+          needs_planning_guidance?: boolean
+          needs_scoping?: boolean
           parking_available?: string | null
           phone: string
           planning_permission?: string | null
@@ -998,6 +1002,8 @@ export type Database = {
           job_title?: string | null
           known_issues?: string | null
           matched_trade_count?: number | null
+          needs_planning_guidance?: boolean
+          needs_scoping?: boolean
           parking_available?: string | null
           phone?: string
           planning_permission?: string | null
