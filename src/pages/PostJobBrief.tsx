@@ -604,7 +604,7 @@ export default function PostJobBrief() {
           border: `1.5px solid ${C.border}`,
           padding: "1.75rem",
           boxShadow: "0 2px 16px rgba(15,34,56,0.05)" }}>
-          {pages[step]}
+          <FormCtx.Provider value={{ form, errors, upd }}>{pages[step]}</FormCtx.Provider>
 
           <div style={{ display: "flex", alignItems: "center",
             justifyContent: "space-between",
