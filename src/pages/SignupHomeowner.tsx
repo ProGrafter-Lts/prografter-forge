@@ -130,6 +130,7 @@ const SignupHomeowner = () => {
 
       // If a session was returned (auto-confirm on), go to next-step page.
       // Otherwise show check-inbox.
+      trackEvent("sign_up", { method: "homeowner" });
       if (signUpData.session) {
         navigate("/signup/homeowner/next", { replace: true });
       } else {
