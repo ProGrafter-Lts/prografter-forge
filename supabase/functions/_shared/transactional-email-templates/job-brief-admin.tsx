@@ -63,6 +63,13 @@ const JobBriefAdminEmail = (p: Props) => (
       <strong>Notes:</strong> {p.notes || '—'}
     </InfoCard>
 
+    {(p.needsScoping || p.needsPlanningGuidance) && (
+      <InfoCard title="⚠️ Action flags">
+        {p.needsScoping ? <><strong>Needs scoping</strong> — homeowner requested a scoping call. Do NOT publish to trades until reviewed.<br /></> : null}
+        {p.needsPlanningGuidance ? <><strong>Needs planning guidance</strong> — homeowner was unsure on planning / building regs.</> : null}
+      </InfoCard>
+    )}
+
     <CTA href={p.adminUrl || 'https://prografter.co.uk/admin/job-briefs'} label="Open in admin dashboard" />
   </ProGrafterShell>
 )
