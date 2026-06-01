@@ -13,6 +13,8 @@ project_id = "xryinqaxjclcmhebdcex"
     verify_jwt = false
   [functions.handle-email-suppression]
     verify_jwt = false
+  [functions.submit-job-brief]
+    verify_jwt = false
   [functions.ics-feed]
     verify_jwt = false
   [functions.read-quote-check]
