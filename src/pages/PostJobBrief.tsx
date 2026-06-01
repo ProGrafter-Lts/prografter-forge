@@ -634,8 +634,14 @@ export default function PostJobBrief() {
 
             {step < STEPS.length - 1
               ? <button style={btnPrimary} onClick={next}>Continue →</button>
-              : <button style={btnNavy} onClick={submit}>Submit brief</button>}
+              : <button style={{ ...btnNavy, opacity: submitting ? 0.6 : 1, cursor: submitting ? "wait" : "pointer" }} onClick={submit} disabled={submitting}>
+                  {submitting ? "Submitting…" : "Submit brief"}
+                </button>}
           </div>
+
+          {submitError && (
+            <p style={{ textAlign: "center", fontSize: 12, color: C.error, marginTop: 12 }}>{submitError}</p>
+          )}
 
           <p style={{ textAlign: "center", fontSize: 11, color: C.secondary, marginTop: 12 }}>
             Step {step + 1} of {STEPS.length} — {STEPS[step]}
