@@ -550,7 +550,7 @@ export default function PostJobBrief() {
       <p style={{ fontSize: 13, color: C.secondary, margin: "0 0 20px" }}>
         This is exactly what vetted trades will see. Check it over before submitting.
       </p>
-      <BriefPreview form={form} />
+      <BriefPreview form={form} briefRef={ref} />
       <div style={{ marginTop: 16 }}>
         <InfoBox variant="navy">
           <strong>By submitting this brief you agree that:</strong>
