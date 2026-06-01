@@ -536,7 +536,10 @@ export default function PostJobBrief() {
         background: C.tealDim, border: `1.5px solid #99F6E4`, borderRadius: 10,
         padding: "12px 14px", marginBottom: 16, cursor: "pointer" }}>
         <input type="checkbox" checked={needsScoping}
-          onChange={e => setNeedsScoping(e.target.checked)}
+          onChange={e => {
+            setNeedsScoping(e.target.checked);
+            if (e.target.checked) setForm(p => ({ ...p, scope_items: "", known_issues: "" }));
+          }}
           style={{ width: 18, height: 18, marginTop: 1, accentColor: C.teal, flexShrink: 0 }} />
         <span style={{ fontSize: 12, color: "#0F766E", lineHeight: 1.6 }}>
           <strong>I'd like ProGrafter to help me scope this out before it goes to trades.</strong>
