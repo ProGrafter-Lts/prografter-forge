@@ -70,6 +70,21 @@ export default function AdminJobBriefs() {
     })();
   }, []);
 
+  const [publishing, setPublishing] = useState<string | null>(null);
+  const publish = async (b: Brief) => {
+    setPublishing(b.id);
+    const { data, error } = await supabase.functions.invoke("publish-job-brief", {
+      body: { brief_id: b.id },
+    });
+    setPublishing(null);
+    if (error) { alert("Publish failed: " + error.message); return; }
+    const matched = (data as any)?.matched ?? 0;
+    alert(`Published to trades. ${matched} matched trade(s) notified.`);
+    setBriefs((prev) => prev.map((x) => x.id === b.id
+      ? { ...x, status: "published", published_at: new Date().toISOString(), matched_trade_count: matched }
+      : x));
+  };
+
   return (
     <div style={{ minHeight: "100vh", background: C.cream }}>
       <SEO title="Job briefs — Admin" description="Review submitted homeowner job briefs" noindex />
