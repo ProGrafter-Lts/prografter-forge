@@ -933,12 +933,14 @@ export type Database = {
           job_description: string | null
           job_title: string | null
           known_issues: string | null
+          matched_trade_count: number | null
           parking_available: string | null
           phone: string
           planning_permission: string | null
           postcode: string
           preferred_days: string | null
           property_type: string | null
+          published_at: string | null
           quotes_received: string | null
           ref: string
           scope_items: string | null
@@ -963,12 +965,14 @@ export type Database = {
           job_description?: string | null
           job_title?: string | null
           known_issues?: string | null
+          matched_trade_count?: number | null
           parking_available?: string | null
           phone: string
           planning_permission?: string | null
           postcode: string
           preferred_days?: string | null
           property_type?: string | null
+          published_at?: string | null
           quotes_received?: string | null
           ref: string
           scope_items?: string | null
@@ -993,12 +997,14 @@ export type Database = {
           job_description?: string | null
           job_title?: string | null
           known_issues?: string | null
+          matched_trade_count?: number | null
           parking_available?: string | null
           phone?: string
           planning_permission?: string | null
           postcode?: string
           preferred_days?: string | null
           property_type?: string | null
+          published_at?: string | null
           quotes_received?: string | null
           ref?: string
           scope_items?: string | null
@@ -3062,6 +3068,7 @@ export type Database = {
       }
       trades: {
         Row: {
+          accepting_jobs: boolean
           assessment_evidence_complete: boolean
           assessment_notes: string | null
           assessor_name: string | null
@@ -3115,6 +3122,7 @@ export type Database = {
           rejected_at: string | null
           rejection_reason: string | null
           review_count: number
+          service_radius_miles: number
           site_assessment_done: boolean
           specialisms_prompt_seen: boolean
           submitted_for_review_at: string | null
@@ -3138,6 +3146,7 @@ export type Database = {
           years_in_trade: number | null
         }
         Insert: {
+          accepting_jobs?: boolean
           assessment_evidence_complete?: boolean
           assessment_notes?: string | null
           assessor_name?: string | null
@@ -3191,6 +3200,7 @@ export type Database = {
           rejected_at?: string | null
           rejection_reason?: string | null
           review_count?: number
+          service_radius_miles?: number
           site_assessment_done?: boolean
           specialisms_prompt_seen?: boolean
           submitted_for_review_at?: string | null
@@ -3214,6 +3224,7 @@ export type Database = {
           years_in_trade?: number | null
         }
         Update: {
+          accepting_jobs?: boolean
           assessment_evidence_complete?: boolean
           assessment_notes?: string | null
           assessor_name?: string | null
@@ -3267,6 +3278,7 @@ export type Database = {
           rejected_at?: string | null
           rejection_reason?: string | null
           review_count?: number
+          service_radius_miles?: number
           site_assessment_done?: boolean
           specialisms_prompt_seen?: boolean
           submitted_for_review_at?: string | null
