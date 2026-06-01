@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
 import PWAInstallBanner from "./components/PWAInstallBanner.tsx";
 import Chatbot from "./components/Chatbot.tsx";
+import { usePageTracking } from "./hooks/usePageTracking.ts";
 
 // Lazy-load every non-landing route so the initial bundle stays small
 const Index = lazy(() => import("./pages/Index.tsx"));
