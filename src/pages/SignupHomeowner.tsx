@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
+import { trackEvent } from "@/lib/analytics";
 import SEO from "@/components/SEO";
 import Navbar from "@/components/Navbar";
 
@@ -130,6 +131,7 @@ const SignupHomeowner = () => {
 
       // If a session was returned (auto-confirm on), go to next-step page.
       // Otherwise show check-inbox.
+      trackEvent("sign_up", { method: "homeowner" });
       if (signUpData.session) {
         navigate("/signup/homeowner/next", { replace: true });
       } else {

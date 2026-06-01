@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { trackEvent } from "@/lib/analytics";
 
 // ── ProGrafter Brand Palette ──────────────────────────────────────────────────
 const C = {
@@ -251,6 +252,7 @@ ${form.quote_text}`;
         .trim();
       setResult(cleaned);
       setStreaming("");
+      trackEvent("quote_check", { method: "ai" });
     } catch (err) {
       setResult("Unable to analyse this quote right now. Please try again in a moment.");
       setVerdict("UNKNOWN");

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { trackEvent } from "@/lib/analytics";
 import { useAuthReady } from "@/hooks/useAuthReady";
 import SEO from "@/components/SEO";
 
@@ -191,6 +192,7 @@ export default function ReviewSubmit() {
     }
     setSubmitting(false);
     setSubmitted(true);
+    trackEvent("review_submit", {});
   };
 
   if (!isReady || loading) {

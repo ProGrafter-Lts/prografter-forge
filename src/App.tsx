@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
 import PWAInstallBanner from "./components/PWAInstallBanner.tsx";
 import Chatbot from "./components/Chatbot.tsx";
+import { usePageTracking } from "./hooks/usePageTracking.ts";
 
 // Lazy-load every non-landing route so the initial bundle stays small
 const Index = lazy(() => import("./pages/Index.tsx"));
@@ -64,6 +65,7 @@ const AdminTradeScraper = lazy(() => import("./pages/AdminTradeScraper.tsx"));
 const AdminApplications = lazy(() => import("./pages/AdminApplications.tsx"));
 const AdminApplicationDetail = lazy(() => import("./pages/AdminApplicationDetail.tsx"));
 const AdminJobBriefs = lazy(() => import("./pages/AdminJobBriefs.tsx"));
+const AdminAnalytics = lazy(() => import("./pages/AdminAnalytics.tsx"));
 import AdminRoute from "./components/AdminRoute.tsx";
 
 const queryClient = new QueryClient({
@@ -81,16 +83,12 @@ const RouteFallback = () => (
   </div>
 );
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <PWAInstallBanner />
-        <Chatbot />
-        <Suspense fallback={<RouteFallback />}>
-          <Routes>
+const AppRoutes = () => {
+  usePageTracking();
+  return (
+    <Suspense fallback={<RouteFallback />}>
+      <Routes>
+
             <Route path="/" element={<Index />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
@@ -202,9 +200,22 @@ const App = () => (
               }
             />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="/admin/analytics" element={<AdminRoute><AdminAnalytics /></AdminRoute>} />
             <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Suspense>
+      </Routes>
+    </Suspense>
+  );
+};
+
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <PWAInstallBanner />
+        <Chatbot />
+        <AppRoutes />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

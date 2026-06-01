@@ -1,78 +1,45 @@
-# Trade Verification Rebuild — Banding + Dual Routes
+# GA4 Tracking + In-App Analytics Dashboard
 
-Big scope. Splitting into 4 phases so you can review/approve as we go. Phase 1 (DB + classification) lands first because everything else depends on it.
+GA4 is already embedded in `index.html` (measurement ID `G-G8KF4CMYVT`), but because this is a single-page React app it currently only records the very first page load. Navigating between routes and key actions (job posts, signups, quote checker, etc.) are not tracked. This plan fixes tracking and adds a private dashboard inside the app to review traffic and conversions.
 
-## Phase 1 — Data model & trade classification
+## Part 1 — Fix SPA page-view tracking
 
-**Migration** (`supabase/migrations/<ts>_trade_banding.sql`):
+- Add a small analytics helper `src/lib/analytics.ts` that safely calls `window.gtag(...)` (typed, no-ops if gtag/consent is absent so it respects the existing Termly cookie banner).
+- Add a `usePageTracking` hook (or inline effect) inside `<BrowserRouter>` in `App.tsx` that fires a `page_view` event on every route change using `useLocation()`.
 
-- Enums:
-  - `trade_band`: `legally_gated | scheme_preferred | competence_assessed`
-  - `verification_route`: `registered | qualified | time_served`
-  - Extend `verification_status` to include `pending_docs | pending_verification | pending_assessment | verified | rejected` (migrate existing `pending`/`approved` → `pending_verification`/`verified`).
-- New columns on `trades`: `band`, `verification_route`, `assessment_evidence_complete bool`, `references_called bool`, `site_assessment_done bool`, `competence_interview_done bool`, `on_probation bool`, `probation_jobs_remaining int default 0`, `assessor_name text`, `assessment_notes text`, `years_in_trade int`.
-- Trigger `enforce_trade_admin_only_columns`: blocks non-admin / non-service updates to the 4 checklist booleans, `on_probation`, `probation_jobs_remaining`, `assessor_name`, `assessment_notes`, `verification_status`, `verification_route`, `band`. Trade can only set these via signup INSERT or admin RPC.
-- Storage bucket `trade_verification_documents` (private) — RLS: trade owns folder `<user_id>/*`, admins read all. (Bucket may already exist; will use `INSERT ... ON CONFLICT`.)
-- `public.trade_band_for_type(text)` SQL helper returning band + required scheme(s), used by client + server.
+## Part 2 — Conversion event tracking (all key actions)
 
-**Frontend lib** `src/lib/tradeBanding.ts`: canonical map of trade type → band, required registrations, scheme options (Gas Safe / NICEIC|NAPIT|ELECSA / MCS / OZEV / OFTEC / FENSA|CERTASS), and the public-register URLs for admin links.
+Fire named GA4 events (and mark them as conversions in the GA4 UI) at each key success point:
 
-## Phase 2 — Signup flow rewrite (`src/pages/SignupTrade.tsx`)
+```text
+generate_lead        → job brief submitted (PostJobBrief success)
+sign_up (homeowner)  → homeowner signup completed
+sign_up (trade)      → trade application submitted
+quote_check          → Quote Checker / Quote Checker AI run
+contact_submit       → contact form sent
+review_submit        → review submitted
+dispute_raise        → dispute raised
+```
 
-Insert after trade-type step:
+Each call goes through the analytics helper at the existing success handlers in the relevant page components — no business-logic changes, only an added tracking call.
 
-1. **Band 1 (gated)** — show registration-number field(s) inline. Validation rules per scheme (Gas Safe 7 digits, MCS pattern, etc.). No route-choice screen, no time-served option ever reachable.
-2. **Band 2 (windows/doors)** — FENSA/CERTASS number OR checkbox "I notify building control per job" with attestation text.
-3. **Band 3** — new **Route Choice screen**: two large cards (qualified vs time-served) + honest sub-line.
-4. Plumber overlays: if "gas work" toggle → also collect Gas Safe; if "unvented hot water" → require G3 qualification upload.
+## Part 3 — In-app analytics dashboard
 
-**Qualified path**: existing cert/qualification uploads.
+A new admin-only page at `/admin/analytics` (guarded by the existing `AdminRoute`) showing traffic + conversion metrics: users, sessions, page views, top pages, and conversion counts over a selectable date range (7/28/90 days).
 
-**Time-Served path** (`src/pages/SignupTradeTimeServed.tsx` or step inside SignupTrade):
-- Years in trade (number) + evidence upload (multi-file) — stored to `trade_verification_documents` doc_type `years_evidence`.
-- Portfolio: min 5 photos, each with address/area + approx date (stored as JSONB on `trade_portfolio_items` — new small table).
-- References: existing `trade_references` table reused, min 2 customer + optional contractor (extend `relationship` enum if needed).
-- PL insurance upload (mandatory).
-- Photo ID upload (mandatory).
-- On submit: `verification_status='pending_assessment'`, `verification_route='time_served'`, redirect to Pending Assessment page.
+Because GA4 reporting data lives in Google's servers, the dashboard reads it through the **GA4 Data API** via a new backend (Edge) function `ga4-report` so credentials never touch the browser:
 
-All other routes submit → `pending_verification` (existing under-review page).
+```text
+Dashboard page → supabase.functions.invoke("ga4-report") → GA4 Data API → metrics
+```
 
-## Phase 3 — Pending Assessment page + admin dashboard
+### Credential needed
+The GA4 Data API requires a Google Cloud **service account** (JSON key) that has Viewer access on the GA4 property, plus the GA4 **property ID** (numeric, different from the `G-` measurement ID). I will request these as backend secrets (`GA4_SERVICE_ACCOUNT_JSON`, `GA4_PROPERTY_ID`) before building the function. I'll give step-by-step instructions for creating the service account and granting it property access.
 
-**`src/pages/SignupTradeAssessmentPending.tsx`**: distinct from existing under-review. Honest copy, "log in & browse, can't quote until verified", typical 3–7 working days.
+If you'd rather not set up the Data API, the alternative is a dashboard page that simply deep-links to the relevant GA4 reports — but it won't show live numbers inside the app. The plan above assumes the full Data API dashboard.
 
-**TradeDashboard banner**: if `verification_status='pending_assessment'`, show "Your experience is being assessed — we'll be in touch shortly." (mutually exclusive with verified badge — already enforced via single source of truth, keep that.)
-
-**`src/pages/AdminVerifications.tsx`** route-aware drawer:
-- Show **band** + **route** badges at top.
-- Registered/Qualified: registration number + "View on register ↗" link (Gas Safe / NICEIC / NAPIT / ELECSA / MCS / OFTEC / FENSA register URLs). Approve / Request info / Reject buttons.
-- Time-served: 4-item checklist (`assessment_evidence_complete`, `references_called`, `site_assessment_done`, `competence_interview_done`) + assessor name + notes textarea. **Approve button disabled until all 4 ticked.** On approve: `verification_status='verified'`, `verified=true`, `on_probation=true`, `probation_jobs_remaining=3`.
-- Approve calls new RPC `admin_approve_trade(trade_id)` (SECURITY DEFINER, `has_role(auth.uid(),'admin')` check) — same RPC triggers existing `trade_verified` email path.
-- For registered/qualified: probation defaults to `false`, `0`.
-
-## Phase 4 — Probation + copy fixes
-
-**Probation decrement** — trigger on `jobs.stage` transition to `completed`: for each trade on the job's contracts with `on_probation=true`, decrement `probation_jobs_remaining`; when it hits 0, set `on_probation=false` and enqueue "fully-established" email via existing email queue.
-
-**Internal admin flag**: `ActiveProjectsList` / admin job views show small "Probation" pill when trade is on probation. Public profile never shows it.
-
-**Homepage copy** (`src/components/VerificationStandards.tsx` or wherever "Five checks. Every trade." lives — will grep):
-- Replace 5th check with: "Proven competence — verified qualifications, or assessed time-served experience".
-- Add line below the five: "Where the law requires registration — gas, electrical self-certification — we require it. Everywhere else, a great trade with genuine experience has a real route in."
-
-**`/verification`** (`src/pages/Vetting.tsx` likely) — add "Two routes to verified" section: Route A (qualified/registered) + Route B (time-served, assessed), plain language.
-
-## Constraints enforced
-- Band 1 trades cannot reach time-served path (frontend gate + DB trigger rejects `verification_route='time_served'` when band='legally_gated').
-- DB trigger blocks `verification_status='verified'` if band='legally_gated' AND required registration number is null.
-- Checklist booleans + probation fields admin-only via trigger.
-- Homeowner flow untouched.
-
-## Out of scope (won't do unless asked)
-- Live API calls to Gas Safe / NICEIC / MCS registers (one-click link only, same pattern as Companies House).
-- Automated reference phone calls — admin records outcome manually via existing `trade_references.status`.
-
----
-
-**Approve to start with Phase 1 (migration).** I'll pause after the migration runs so you can sanity-check the schema, then proceed through Phase 2 → 4. Total estimate: ~4 migrations, ~8 new/edited files per phase.
+## Technical notes / files touched
+- New: `src/lib/analytics.ts`, `src/hooks/usePageTracking.ts`, `src/pages/AdminAnalytics.tsx`, `supabase/functions/ga4-report/index.ts`.
+- Edited: `src/App.tsx` (page tracking hook + `/admin/analytics` route), and success handlers in `PostJobBrief.tsx`, `SignupHomeowner*`, `SignupTrade*`/`Apply.tsx`, `QuoteChecker.tsx`, `QuoteCheckerAI.tsx`, `Contact.tsx`, `ReviewSubmit.tsx`, `DisputeRaise.tsx` for conversion events.
+- All events respect the existing Termly consent banner (gtag no-ops if consent/gtag unavailable).
+- After deploy, mark the events as Key Events/Conversions in the GA4 interface (one-time, in Google's UI).
