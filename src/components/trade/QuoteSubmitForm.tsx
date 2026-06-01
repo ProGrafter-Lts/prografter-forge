@@ -107,7 +107,7 @@ const QuoteSubmitForm = ({ jobId, tradeId, onQuoteSubmitted, quickBuildPrefill }
     const { data: quoteRow, error } = await supabase
       .from("quotes")
       .insert(insertData)
-      .select("id")
+      .select("id, reference")
       .single();
 
     if (error || !quoteRow) {
@@ -187,6 +187,23 @@ const QuoteSubmitForm = ({ jobId, tradeId, onQuoteSubmitted, quickBuildPrefill }
             },
           });
         }
+
+        // Admin spot-check notification (same event).
+        void supabase.functions.invoke("send-transactional-email", {
+          body: {
+            templateName: "new-quote-admin",
+            recipientEmail: "hello@prografter.co.uk",
+            idempotencyKey: `new-quote-admin-${quoteRow.id}`,
+            templateData: {
+              reference: quoteRow.reference || quoteRow.id,
+              projectTitle: jobRow.title || jobRow.job_type || "a project",
+              amount: `£${baseAmount.toLocaleString("en-GB", { minimumFractionDigits: 2 })}`,
+              tradeName: tradeRow?.company_name || tradeRow?.name || "A trade",
+              homeownerName: ownerRow?.name || undefined,
+              adminUrl: "https://prografter.co.uk/admin/job-briefs",
+            },
+          },
+        });
       }
     } catch (e) {
       console.warn("quote-received email dispatch failed (non-blocking)", e);

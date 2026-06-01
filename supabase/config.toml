@@ -35,4 +35,10 @@ project_id = "xryinqaxjclcmhebdcex"
     verify_jwt = false
   [functions.scan-overdue-projects]
     verify_jwt = false
+  [functions.notify-quote-accepted]
+    verify_jwt = false
+  [functions.notify-dispute-raised]
+    verify_jwt = false
+  [functions.publish-job-brief]
+    verify_jwt = false
 

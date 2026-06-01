@@ -37,6 +37,14 @@ import { template as projectOverdueTrade } from './project-overdue-trade.tsx'
 import { template as projectOverdueHomeowner } from './project-overdue-homeowner.tsx'
 import { template as jobBriefHomeowner } from './job-brief-homeowner.tsx'
 import { template as jobBriefAdmin } from './job-brief-admin.tsx'
+import { template as quoteAcceptedTrade } from './quote-accepted-trade.tsx'
+import { template as quoteAcceptedHomeowner } from './quote-accepted-homeowner.tsx'
+import { template as quoteAcceptedAdmin } from './quote-accepted-admin.tsx'
+import { template as newJobInArea } from './new-job-in-area.tsx'
+import { template as newQuoteAdmin } from './new-quote-admin.tsx'
+import { template as disputeRaisedOtherParty } from './dispute-raised-other-party.tsx'
+import { template as disputeRaisedClaimant } from './dispute-raised-claimant.tsx'
+import { template as disputeRaisedAdmin } from './dispute-raised-admin.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'waitlist-admin-notification': waitlistAdminNotification,
@@ -68,4 +76,15 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'project-overdue-homeowner': projectOverdueHomeowner,
   'job-brief-homeowner': jobBriefHomeowner,
   'job-brief-admin': jobBriefAdmin,
+  // Quote accepted (3)
+  'quote-accepted-trade': quoteAcceptedTrade,
+  'quote-accepted-homeowner': quoteAcceptedHomeowner,
+  'quote-accepted-admin': quoteAcceptedAdmin,
+  // New job in area + new quote admin
+  'new-job-in-area': newJobInArea,
+  'new-quote-admin': newQuoteAdmin,
+  // Dispute raised (3)
+  'dispute-raised-other-party': disputeRaisedOtherParty,
+  'dispute-raised-claimant': disputeRaisedClaimant,
+  'dispute-raised-admin': disputeRaisedAdmin,
 }

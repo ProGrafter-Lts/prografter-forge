@@ -44,6 +44,7 @@ interface Brief {
   parking_available: string | null; preferred_days: string | null; additional_notes: string | null;
   budget_band: string | null; timeline: string | null; quotes_received: string | null;
   decision_criteria: string | null; status: string; is_test: boolean; created_at: string;
+  published_at?: string | null; matched_trade_count?: number | null;
 }
 
 const Field = ({ label, value }: { label: string; value: any }) =>
@@ -69,6 +70,21 @@ export default function AdminJobBriefs() {
       setLoading(false);
     })();
   }, []);
+
+  const [publishing, setPublishing] = useState<string | null>(null);
+  const publish = async (b: Brief) => {
+    setPublishing(b.id);
+    const { data, error } = await supabase.functions.invoke("publish-job-brief", {
+      body: { brief_id: b.id },
+    });
+    setPublishing(null);
+    if (error) { alert("Publish failed: " + error.message); return; }
+    const matched = (data as any)?.matched ?? 0;
+    alert(`Published to trades. ${matched} matched trade(s) notified.`);
+    setBriefs((prev) => prev.map((x) => x.id === b.id
+      ? { ...x, status: "published", published_at: new Date().toISOString(), matched_trade_count: matched }
+      : x));
+  };
 
   return (
     <div style={{ minHeight: "100vh", background: C.cream }}>
@@ -123,6 +139,17 @@ export default function AdminJobBriefs() {
                     <Field label="Quotes received" value={b.quotes_received} />
                     <Field label="Decision criteria" value={b.decision_criteria} />
                     <Field label="Notes" value={b.additional_notes} />
+                    <Field label="Status" value={b.status} />
+                    <Field label="Matched trades" value={b.matched_trade_count} />
+                    <div style={{ marginTop: 12 }}>
+                      <button
+                        onClick={() => publish(b)}
+                        disabled={publishing === b.id}
+                        style={{ background: C.teal, color: C.white, border: "none", borderRadius: 8, padding: "9px 16px", fontSize: 13, fontWeight: 700, cursor: "pointer", opacity: publishing === b.id ? 0.6 : 1 }}
+                      >
+                        {publishing === b.id ? "Publishing…" : b.published_at ? "Re-publish to matched trades" : "Approve & publish to trades"}
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>

@@ -143,6 +143,11 @@ const QuotesReceived = ({ quotes, onQuoteAccepted }: QuotesReceivedProps) => {
       return;
     }
 
+    // Fire quote-accepted notifications (trade + homeowner + admin). Non-blocking.
+    void supabase.functions.invoke("notify-quote-accepted", {
+      body: { quote_id: pendingAccept.id },
+    });
+
     toast.success(`Quote accepted. ${acceptedTradeName} will be in touch. Review and sign your contract now.`);
     const targetJobId = pendingAccept.job_id;
     setPendingAccept(null);
