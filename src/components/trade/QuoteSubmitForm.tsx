@@ -107,7 +107,7 @@ const QuoteSubmitForm = ({ jobId, tradeId, onQuoteSubmitted, quickBuildPrefill }
     const { data: quoteRow, error } = await supabase
       .from("quotes")
       .insert(insertData)
-      .select("id")
+      .select("id, reference")
       .single();
 
     if (error || !quoteRow) {
