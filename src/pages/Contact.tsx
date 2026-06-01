@@ -4,6 +4,7 @@ import { z } from "zod";
 import AppShell from "@/components/AppShell";
 import SEO from "@/components/SEO";
 import { supabase } from "@/integrations/supabase/client";
+import { trackEvent } from "@/lib/analytics";
 import { toast } from "sonner";
 
 const contactSchema = z.object({
