@@ -56,6 +56,10 @@ const TradeProfileSection = ({ tradeId }: TradeProfileSectionProps) => {
   const [selectedSpecialisms, setSelectedSpecialisms] = useState<string[]>([]);
   const [primarySpecialism, setPrimarySpecialism] = useState<string | null>(null);
   const [specialismsDirty, setSpecialismsDirty] = useState(false);
+  const [acceptingJobs, setAcceptingJobs] = useState(true);
+  const [serviceRadius, setServiceRadius] = useState(25);
+  const [availabilityDirty, setAvailabilityDirty] = useState(false);
+  const [savingAvailability, setSavingAvailability] = useState(false);
 
   useEffect(() => {
     const load = async () => {
