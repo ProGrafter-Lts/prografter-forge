@@ -91,6 +91,8 @@ const TradeProfileSection = ({ tradeId }: TradeProfileSectionProps) => {
         setCpsScheme((data as any).cps_scheme ?? null);
         setCpsRegistrationNumber((data as any).cps_registration_number ?? null);
         setGasSafeNumber((data as any).gas_safe_number ?? null);
+        setAcceptingJobs((data as any).accepting_jobs ?? true);
+        setServiceRadius((data as any).service_radius_miles ?? 25);
         setGreen({
           is_green_trade: data.is_green_trade,
           mcs_number: data.mcs_number,
