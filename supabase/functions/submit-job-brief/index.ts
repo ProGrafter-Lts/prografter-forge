@@ -66,7 +66,11 @@ Deno.serve(async (req) => {
     })
   }
 
-  const ref = generateRef()
+  // Use the reference generated on the client when the brief was first opened,
+  // so preview / confirmation / emails / admin all share ONE identifier.
+  // Only fall back to generating here if the client did not supply a valid ref.
+  const providedRef = clean(body.ref)
+  const ref = providedRef && /^PG-[A-HJ-NP-Z2-9]{6}$/.test(providedRef) ? providedRef : generateRef()
   const trade_category_id = clean(body.trade_category_id)
   const tradeName = (trade_category_id && TRADE_NAMES[trade_category_id]) || trade_category_id || '—'
 
