@@ -594,7 +594,7 @@ export default function PostJobBrief() {
             Post your job brief
           </p>
           <p style={{ fontSize: 13, color: C.secondary }}>
-            Every trade who sees this brief is verified and insured. Takes about 5 minutes.
+            Every trade who sees this brief has been verified and insured by ProGrafter before going live. Takes about 5 minutes.
           </p>
         </div>
 
