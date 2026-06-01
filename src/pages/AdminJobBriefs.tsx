@@ -44,6 +44,7 @@ interface Brief {
   parking_available: string | null; preferred_days: string | null; additional_notes: string | null;
   budget_band: string | null; timeline: string | null; quotes_received: string | null;
   decision_criteria: string | null; status: string; is_test: boolean; created_at: string;
+  published_at?: string | null; matched_trade_count?: number | null;
 }
 
 const Field = ({ label, value }: { label: string; value: any }) =>
