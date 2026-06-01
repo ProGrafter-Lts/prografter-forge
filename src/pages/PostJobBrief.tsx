@@ -306,6 +306,9 @@ export default function PostJobBrief() {
   const [form, setForm] = useState(BLANK);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  const [ref, setRef] = useState("");
 
   const upd = (k: string) => (e: any) => setForm(p => ({ ...p, [k]: e.target.value }));
 
@@ -341,7 +344,22 @@ export default function PostJobBrief() {
     if (!Object.keys(e).length) setStep(s => s + 1);
   };
   const back = () => { setErrors({}); setStep(s => s - 1); };
-  const submit = () => setSubmitted(true);
+  const submit = async () => {
+    if (submitting) return;
+    setSubmitError("");
+    setSubmitting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("submit-job-brief", { body: form });
+      if (error || !data?.ref) throw error || new Error("No reference returned");
+      setRef(data.ref);
+      setSubmitted(true);
+    } catch (err) {
+      console.error("Job brief submission failed", err);
+      setSubmitError("Something went wrong submitting your brief. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
 
 
