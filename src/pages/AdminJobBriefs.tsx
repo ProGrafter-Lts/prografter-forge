@@ -144,9 +144,19 @@ export default function AdminJobBriefs() {
                     <Field label="Notes" value={b.additional_notes} />
                     <Field label="Status" value={b.status} />
                     <Field label="Matched trades" value={b.matched_trade_count} />
+                    <Field label="Needs scoping" value={b.needs_scoping ? "Yes — homeowner requested scoping call" : null} />
+                    <Field label="Planning guidance" value={b.needs_planning_guidance ? "Yes — homeowner unsure on planning/regs" : null} />
+                    {b.needs_scoping && (
+                      <div style={{ marginTop: 10, background: "#CCFBF1", border: "1px solid #99F6E4", color: "#0F766E", borderRadius: 8, padding: "10px 12px", fontSize: 12, lineHeight: 1.5 }}>
+                        <strong>Scoping requested.</strong> This brief should be scoped with the homeowner before publishing to trades.
+                      </div>
+                    )}
                     <div style={{ marginTop: 12 }}>
                       <button
-                        onClick={() => publish(b)}
+                        onClick={() => {
+                          if (b.needs_scoping && !confirm("This brief is flagged NEEDS SCOPING. Publish to trades anyway?")) return;
+                          publish(b);
+                        }}
                         disabled={publishing === b.id}
                         style={{ background: C.teal, color: C.white, border: "none", borderRadius: 8, padding: "9px 16px", fontSize: 13, fontWeight: 700, cursor: "pointer", opacity: publishing === b.id ? 0.6 : 1 }}
                       >
