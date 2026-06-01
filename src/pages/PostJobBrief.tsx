@@ -474,26 +474,57 @@ export default function PostJobBrief() {
         <T f="job_description" rows={5}
           placeholder="We have a 1930s semi-detached house in Nottingham. The loft is currently boarded but uninsulated — we want to convert it into a double bedroom with an en-suite shower room..." />
       </F>
-      <F label="Is planning permission required or already granted?" hint="If you're unsure, ProGrafter's Planning Intelligence tool can check for you">
-        <S f="planning_permission">
-          <option value="">Select...</option>
-          <option value="Not required — permitted development">Not required — permitted development</option>
-          <option value="Already granted — reference available">Already granted — reference available</option>
-          <option value="Application submitted — pending">Application submitted — pending</option>
-          <option value="Not yet checked — need advice">Not yet checked — need advice</option>
-          <option value="Not applicable">Not applicable</option>
-        </S>
-      </F>
-      <F label="Building regulations" hint="Most structural and electrical work requires Building Regs approval">
-        <S f="building_regs">
-          <option value="">Select...</option>
-          <option value="Building regs required — not yet applied">Building regs required — not yet applied</option>
-          <option value="Building regs approved — notice submitted">Building regs approved — notice submitted</option>
-          <option value="Completion certificate already held">Completion certificate already held</option>
-          <option value="Not required for this work">Not required for this work</option>
-          <option value="Not sure — need guidance">Not sure — need guidance</option>
-        </S>
-      </F>
+      {planningCfg.planning && (
+        <F label="Is planning permission required or already granted?" hint="If you're unsure, ProGrafter's Planning Intelligence tool can check for you">
+          <S f="planning_permission">
+            <option value="">Select...</option>
+            <option value="Not required — permitted development">Not required — permitted development</option>
+            <option value="Already granted — reference available">Already granted — reference available</option>
+            <option value="Application submitted — pending">Application submitted — pending</option>
+            <option value="Not applicable">Not applicable</option>
+            <option value={GUIDE_ME}>{GUIDE_ME}</option>
+          </S>
+        </F>
+      )}
+
+      {planningCfg.buildingRegs === "generic" && (
+        <F label="Building regulations" hint="Most structural and extension work requires Building Regs approval">
+          <S f="building_regs">
+            <option value="">Select...</option>
+            <option value="Building regs required — not yet applied">Building regs required — not yet applied</option>
+            <option value="Building regs approved — notice submitted">Building regs approved — notice submitted</option>
+            <option value="Completion certificate already held">Completion certificate already held</option>
+            <option value="Not required for this work">Not required for this work</option>
+            <option value={GUIDE_ME}>{GUIDE_ME}</option>
+          </S>
+        </F>
+      )}
+
+      {planningCfg.buildingRegs === "partp" && (
+        <F label="Part P (electrical Building Regulations)" hint="Notifiable electrical work must be certified under Part P of the Building Regulations">
+          <S f="building_regs">
+            <option value="">Select...</option>
+            <option value="Not notifiable — minor electrical works">Not notifiable — minor electrical works</option>
+            <option value="Notifiable — registered electrician will self-certify">Notifiable — registered electrician will self-certify</option>
+            <option value="Notifiable — building notice to be submitted">Notifiable — building notice to be submitted</option>
+            <option value="Part P completion certificate already held">Part P completion certificate already held</option>
+            <option value={GUIDE_ME}>{GUIDE_ME}</option>
+          </S>
+        </F>
+      )}
+
+      {planningCfg.buildingRegs === "gas" && (
+        <F label="Gas Safe / Building Notice" hint="Gas and heating work must be carried out by a Gas Safe registered engineer">
+          <S f="building_regs">
+            <option value="">Select...</option>
+            <option value="Gas Safe engineer will self-certify">Gas Safe engineer will self-certify</option>
+            <option value="Building notice required — not yet submitted">Building notice required — not yet submitted</option>
+            <option value="Completion certificate already held">Completion certificate already held</option>
+            <option value="Not applicable to this work">Not applicable to this work</option>
+            <option value={GUIDE_ME}>{GUIDE_ME}</option>
+          </S>
+        </F>
+      )}
     </>,
 
     <>
