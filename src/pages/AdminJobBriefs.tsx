@@ -139,6 +139,17 @@ export default function AdminJobBriefs() {
                     <Field label="Quotes received" value={b.quotes_received} />
                     <Field label="Decision criteria" value={b.decision_criteria} />
                     <Field label="Notes" value={b.additional_notes} />
+                    <Field label="Status" value={b.status} />
+                    <Field label="Matched trades" value={b.matched_trade_count} />
+                    <div style={{ marginTop: 12 }}>
+                      <button
+                        onClick={() => publish(b)}
+                        disabled={publishing === b.id}
+                        style={{ background: C.teal, color: C.white, border: "none", borderRadius: 8, padding: "9px 16px", fontSize: 13, fontWeight: 700, cursor: "pointer", opacity: publishing === b.id ? 0.6 : 1 }}
+                      >
+                        {publishing === b.id ? "Publishing…" : b.published_at ? "Re-publish to matched trades" : "Approve & publish to trades"}
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
