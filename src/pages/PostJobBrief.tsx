@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, createContext, useContext } from "react";
 
 // ── ProGrafter Brand Palette ──────────────────────────────────────────────────
 const C = {
@@ -64,6 +64,29 @@ const BLANK = {
   parking_available: "", preferred_days: "", additional_notes: "",
   budget_band: "", timeline: "", quotes_received: "",
   decision_criteria: "",
+};
+
+// Form context so field components can read state without being redefined per render.
+// Defining input components inside the render path remounts them every keystroke,
+// which dismisses the mobile keyboard — so these live at module scope.
+type FormCtxValue = {
+  form: Record<string, any>;
+  errors: Record<string, string>;
+  upd: (k: string) => (e: any) => void;
+};
+const FormCtx = createContext<FormCtxValue>({ form: BLANK, errors: {}, upd: () => () => {} });
+
+const I = ({ f, type = "text", ...p }: any) => {
+  const { form, errors, upd } = useContext(FormCtx);
+  return <input type={type} style={inp(errors[f])} value={form[f]} onChange={upd(f)} {...p} />;
+};
+const S = ({ f, children }: any) => {
+  const { form, errors, upd } = useContext(FormCtx);
+  return <select style={sel(errors[f])} value={form[f]} onChange={upd(f)}>{children}</select>;
+};
+const T = ({ f, rows = 4, ...p }: any) => {
+  const { form, errors, upd } = useContext(FormCtx);
+  return <textarea rows={rows} style={ta(errors[f])} value={form[f]} onChange={upd(f)} {...p} />;
 };
 
 const inp = (err?: string): React.CSSProperties => ({
@@ -320,15 +343,7 @@ export default function PostJobBrief() {
   const back = () => { setErrors({}); setStep(s => s - 1); };
   const submit = () => setSubmitted(true);
 
-  const I = ({ f, type = "text", ...p }: any) => (
-    <input type={type} style={inp(errors[f])} value={(form as any)[f]} onChange={upd(f)} {...p} />
-  );
-  const S = ({ f, children }: any) => (
-    <select style={sel(errors[f])} value={(form as any)[f]} onChange={upd(f)}>{children}</select>
-  );
-  const T = ({ f, rows = 4, ...p }: any) => (
-    <textarea rows={rows} style={ta(errors[f])} value={(form as any)[f]} onChange={upd(f)} {...p} />
-  );
+
 
   const pages = [
     <>
@@ -589,7 +604,7 @@ export default function PostJobBrief() {
           border: `1.5px solid ${C.border}`,
           padding: "1.75rem",
           boxShadow: "0 2px 16px rgba(15,34,56,0.05)" }}>
-          {pages[step]}
+          <FormCtx.Provider value={{ form, errors, upd }}>{pages[step]}</FormCtx.Provider>
 
           <div style={{ display: "flex", alignItems: "center",
             justifyContent: "space-between",
