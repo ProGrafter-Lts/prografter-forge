@@ -66,6 +66,29 @@ const BLANK = {
   decision_criteria: "",
 };
 
+// Form context so field components can read state without being redefined per render.
+// Defining input components inside the render path remounts them every keystroke,
+// which dismisses the mobile keyboard — so these live at module scope.
+type FormCtxValue = {
+  form: Record<string, any>;
+  errors: Record<string, string>;
+  upd: (k: string) => (e: any) => void;
+};
+const FormCtx = createContext<FormCtxValue>({ form: BLANK, errors: {}, upd: () => () => {} });
+
+const I = ({ f, type = "text", ...p }: any) => {
+  const { form, errors, upd } = useContext(FormCtx);
+  return <input type={type} style={inp(errors[f])} value={form[f]} onChange={upd(f)} {...p} />;
+};
+const S = ({ f, children }: any) => {
+  const { form, errors, upd } = useContext(FormCtx);
+  return <select style={sel(errors[f])} value={form[f]} onChange={upd(f)}>{children}</select>;
+};
+const T = ({ f, rows = 4, ...p }: any) => {
+  const { form, errors, upd } = useContext(FormCtx);
+  return <textarea rows={rows} style={ta(errors[f])} value={form[f]} onChange={upd(f)} {...p} />;
+};
+
 const inp = (err?: string): React.CSSProperties => ({
   width: "100%", padding: "10px 12px", borderRadius: 8,
   border: `1.5px solid ${err ? C.error : C.border}`,
