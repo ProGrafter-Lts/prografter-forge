@@ -143,6 +143,22 @@ const TradeProfileSection = ({ tradeId }: TradeProfileSectionProps) => {
     }
   };
 
+  const handleSaveAvailability = async () => {
+    setSavingAvailability(true);
+    const clamped = Math.min(50, Math.max(5, serviceRadius));
+    const { error } = await supabase
+      .from("trades")
+      .update({ accepting_jobs: acceptingJobs, service_radius_miles: clamped } as any)
+      .eq("id", tradeId);
+    setSavingAvailability(false);
+    if (error) {
+      toast.error("Failed to save availability");
+    } else {
+      setAvailabilityDirty(false);
+      toast.success("Availability updated");
+    }
+  };
+
   const handleSave = async () => {
     setSaving(true);
     const { error } = await supabase
