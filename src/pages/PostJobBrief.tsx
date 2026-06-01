@@ -56,6 +56,18 @@ const ACCESS = [
 
 const STEPS = ["Your details", "The job", "Scope & access", "Budget & timing", "Review & submit"];
 
+// Generate the job-brief reference ONCE on the client, at the moment the form is
+// first opened. The same reference is shown in the preview, the confirmation
+// screen, the emails and the admin dashboard — it is never regenerated.
+function generateBriefRef(): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const bytes = new Uint8Array(6);
+  crypto.getRandomValues(bytes);
+  let r = "PG-";
+  for (let i = 0; i < 6; i++) r += chars[bytes[i] % chars.length];
+  return r;
+}
+
 const BLANK = {
   full_name: "", email: "", phone: "", address_line1: "",
   address_line2: "", city: "", postcode: "", property_type: "",
