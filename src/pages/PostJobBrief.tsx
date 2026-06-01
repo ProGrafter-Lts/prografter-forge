@@ -663,6 +663,24 @@ export default function PostJobBrief() {
           </ul>
         </InfoBox>
       </div>
+
+      {needsScoping && (
+        <InfoBox variant="teal">
+          <strong>Scoping requested.</strong> You've asked ProGrafter to help scope this job.
+          We'll review your brief and arrange a follow-up call before sharing it with any trades.
+        </InfoBox>
+      )}
+
+      <label style={{ display: "flex", gap: 10, alignItems: "flex-start",
+        background: C.white, border: `1.5px solid ${consent ? C.teal : C.border}`,
+        borderRadius: 10, padding: "12px 14px", marginTop: 16, cursor: "pointer" }}>
+        <input type="checkbox" checked={consent}
+          onChange={e => setConsent(e.target.checked)}
+          style={{ width: 18, height: 18, marginTop: 1, accentColor: C.teal, flexShrink: 0 }} />
+        <span style={{ fontSize: 13, color: C.body, lineHeight: 1.6, fontWeight: 600 }}>
+          I have read and accept the terms above.
+        </span>
+      </label>
     </>,
   ];
 
