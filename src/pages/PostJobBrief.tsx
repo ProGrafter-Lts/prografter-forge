@@ -93,6 +93,24 @@ function generateBriefRef(): string {
   return r;
 }
 
+// Title-case a free-text address line, preserving common UK separators.
+function titleCaseAddress(v: string): string {
+  return (v || "")
+    .trim()
+    .toLowerCase()
+    .replace(/\b([a-z])/g, (m) => m.toUpperCase());
+}
+// Strip a duplicated town/city that was accidentally appended to a line.
+function dedupeLine(line: string, town: string): string {
+  if (!line || !town) return line;
+  const t = town.trim().toLowerCase();
+  return line
+    .split(",")
+    .map((s) => s.trim())
+    .filter((s) => s && s.toLowerCase() !== t)
+    .join(", ");
+}
+
 const BLANK = {
   full_name: "", email: "", phone: "", address_line1: "",
   address_line2: "", city: "", postcode: "", property_type: "",
