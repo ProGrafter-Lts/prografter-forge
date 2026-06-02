@@ -188,6 +188,10 @@ Deno.serve(async (req) => {
       /guide me/i.test(String(body.planning_permission ?? '')) ||
       /guide me/i.test(String(body.building_regs ?? '')),
     is_test: body.is_test === true,
+    homeowner_user_id: homeownerUserId,
+    homeowner_id: homeownerId,
+    existing_quotes_count,
+    status: 'under_review',
   }
 
   const { error: insertErr } = await supabase.from('job_briefs').insert(record)
