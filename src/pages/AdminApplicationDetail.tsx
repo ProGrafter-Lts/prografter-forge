@@ -145,12 +145,29 @@ export default function AdminApplicationDetail() {
     }).eq("id", app.id);
     if (error) { toast.error(error.message); return; }
     await logApplicationEvent(app.id, `decision_${decision}`, { reason: reason.trim() });
-    if (decision === "approved" || decision === "rejected") {
-      await logApplicationEvent(app.id, "email_queued", { type: decision, note: "template pending" });
+    let emailSent = false;
+    if ((decision === "approved" || decision === "rejected") && app.applicant_email) {
+      const firstName = (app.full_name || "").trim().split(/\s+/)[0] || "";
+      try {
+        const { error: emailError } = await supabase.functions.invoke("send-transactional-email", {
+          body: {
+            templateName: decision === "approved" ? "trade-verified" : "trade-rejected",
+            recipientEmail: app.applicant_email,
+            idempotencyKey: `application-${decision}-${app.id}`,
+            templateData: decision === "approved" ? { firstName } : { firstName, reason: reason.trim() },
+          },
+        });
+        if (emailError) throw emailError;
+        emailSent = true;
+        await logApplicationEvent(app.id, "email_queued", { type: decision });
+      } catch (e) {
+        console.warn("application decision email failed", e);
+        await logApplicationEvent(app.id, "email_failed", { type: decision });
+      }
     }
     setApp({ ...app, verification_status: decision, decision_reason: reason.trim(), decided_at: new Date().toISOString() });
     await refreshEvents(app.id);
-    toast.success(`Application ${STATUS_LABEL[decision].toLowerCase()}${decision !== "held" ? " — applicant email will send once the template is configured" : ""}`);
+    toast.success(`Application ${STATUS_LABEL[decision].toLowerCase()}${decision !== "held" ? (emailSent ? " — applicant email sent" : " — but email could not be sent") : ""}`);
   };
 
   if (loading) return <div style={{ minHeight: "100vh", background: C.cream, padding: 40, color: C.deep }}>Loading…</div>;
