@@ -239,13 +239,11 @@ const footerWrap = {
   textAlign: 'center' as const,
   marginTop: '24px',
 }
-const footerLogo = {
-  fontSize: '16px',
-  fontWeight: 900 as const,
-  color: '#ffffff',
-  letterSpacing: '0.1em',
-  margin: '0 0 12px',
-  fontFamily: SAFE_DISPLAY,
+const footerLogoImg = {
+  display: 'block',
+  margin: '0 auto 12px',
+  height: 'auto',
+  opacity: 0.95,
 }
 const footerLinks = {
   fontSize: '12px',
