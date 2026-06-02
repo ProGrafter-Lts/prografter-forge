@@ -93,6 +93,24 @@ function generateBriefRef(): string {
   return r;
 }
 
+// Title-case a free-text address line, preserving common UK separators.
+function titleCaseAddress(v: string): string {
+  return (v || "")
+    .trim()
+    .toLowerCase()
+    .replace(/\b([a-z])/g, (m) => m.toUpperCase());
+}
+// Strip a duplicated town/city that was accidentally appended to a line.
+function dedupeLine(line: string, town: string): string {
+  if (!line || !town) return line;
+  const t = town.trim().toLowerCase();
+  return line
+    .split(",")
+    .map((s) => s.trim())
+    .filter((s) => s && s.toLowerCase() !== t)
+    .join(", ");
+}
+
 const BLANK = {
   full_name: "", email: "", phone: "", address_line1: "",
   address_line2: "", city: "", postcode: "", property_type: "",
@@ -349,6 +367,8 @@ export default function PostJobBrief() {
   const [ref, setRef] = useState(() => generateBriefRef());
   const [needsScoping, setNeedsScoping] = useState(false);
   const [consent, setConsent] = useState(false);
+  const [marketing, setMarketing] = useState(false);
+  const [loginUrl, setLoginUrl] = useState("");
 
   const upd = (k: string) => (e: any) => setForm(p => ({ ...p, [k]: e.target.value }));
 
@@ -400,19 +420,31 @@ export default function PostJobBrief() {
     setSubmitError("");
     setSubmitting(true);
     try {
+      // Clean, Title-Cased, de-duplicated address (fixes town printed multiple times).
+      const town = titleCaseAddress(form.city);
+      const line1 = dedupeLine(titleCaseAddress(form.address_line1), town);
+      const line2 = dedupeLine(titleCaseAddress(form.address_line2), town);
+
       // If the homeowner asked ProGrafter to scope the job, don't send the
       // (now hidden) scope / known-issues fields to trades.
       const payload = {
         ...form,
+        address_line1: line1,
+        address_line2: line2,
+        city: town,
+        postcode: form.postcode.trim().toUpperCase(),
         ref,
         scope_items: needsScoping ? "" : form.scope_items,
         known_issues: needsScoping ? "" : form.known_issues,
         needs_scoping: needsScoping,
         needs_planning_guidance: needsPlanningGuidance,
+        marketing_opt_in: marketing,
+        user_agent: typeof navigator !== "undefined" ? navigator.userAgent : "",
       };
       const { data, error } = await supabase.functions.invoke("submit-job-brief", { body: payload });
       if (error || !data?.ref) throw error || new Error("No reference returned");
       setRef(data.ref);
+      if (data.loginUrl) setLoginUrl(data.loginUrl);
       setSubmitted(true);
       trackEvent("generate_lead", { reference: data.ref, needs_scoping: needsScoping });
     } catch (err) {
@@ -686,6 +718,22 @@ export default function PostJobBrief() {
           I have read and accept the terms above.
         </span>
       </label>
+
+      <label style={{ display: "flex", gap: 10, alignItems: "flex-start",
+        background: C.white, border: `1.5px solid ${C.border}`,
+        borderRadius: 10, padding: "12px 14px", marginTop: 10, cursor: "pointer" }}>
+        <input type="checkbox" checked={marketing}
+          onChange={e => setMarketing(e.target.checked)}
+          style={{ width: 18, height: 18, marginTop: 1, accentColor: C.teal, flexShrink: 0 }} />
+        <span style={{ fontSize: 12, color: C.secondary, lineHeight: 1.6 }}>
+          Keep me updated with helpful tips and ProGrafter news (optional). You can opt out anytime.
+        </span>
+      </label>
+
+      <p style={{ fontSize: 11, color: C.secondary, marginTop: 12, lineHeight: 1.6 }}>
+        Submitting creates your free ProGrafter homeowner account so you can track your
+        brief and quotes — no password needed, we'll email you a secure sign-in link.
+      </p>
     </>,
   ];
 
@@ -704,10 +752,10 @@ export default function PostJobBrief() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h2 style={{ fontSize: 20, fontWeight: 700, color: C.deep, marginBottom: 8 }}>Brief submitted</h2>
+          <h2 style={{ fontSize: 20, fontWeight: 700, color: C.deep, marginBottom: 8 }}>Received — under review</h2>
           <p style={{ fontSize: 14, color: C.secondary, lineHeight: 1.65, marginBottom: 16 }}>
-            Your job brief has been received. ProGrafter will review it and match you with
-            vetted trades in your area. You'll hear from us within 24 hours.
+            Your brief is in and your free homeowner account is ready. We're reviewing it now
+            and will notify you when verified trades quote.
           </p>
           <div style={{ background: C.cream, borderRadius: 10, padding: "12px 16px", marginBottom: 16 }}>
             <p style={{ fontSize: 11, color: C.secondary, margin: "0 0 4px" }}>Your reference number</p>
@@ -724,8 +772,8 @@ export default function PostJobBrief() {
             live on the platform — trades who pass our five-check verification.
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 24 }}>
-            <a href="/signup/homeowner" style={{ ...btnNavy, textDecoration: "none", display: "block", textAlign: "center" }}>
-              Create an account to track your quotes →
+            <a href={loginUrl || "/login"} style={{ ...btnNavy, textDecoration: "none", display: "block", textAlign: "center" }}>
+              Go to my dashboard →
             </a>
             <a href="/" style={{ ...btnBack, textDecoration: "none", display: "block", textAlign: "center" }}>
               ← Back to home

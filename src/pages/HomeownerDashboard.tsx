@@ -30,6 +30,8 @@ const HomeownerDashboard = () => {
   const [quotes, setQuotes] = useState<any[]>([]);
   const [variations, setVariations] = useState<any[]>([]);
   const [siteUpdates, setSiteUpdates] = useState<any[]>([]);
+  const [briefs, setBriefs] = useState<any[]>([]);
+  const [freeChecks, setFreeChecks] = useState(0);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const lastLoadedUserIdRef = useRef<string | null>(null);
@@ -87,6 +89,23 @@ const HomeownerDashboard = () => {
     }
     setHomeownerName(ho.name);
     setLoading(false);
+
+    // Job briefs (the account-less-to-account spine) + free quote-check entitlements.
+    const [briefRes, entRes] = await Promise.all([
+      supabase
+        .from("job_briefs" as any)
+        .select("id, ref, job_title, trade_category_id, status, existing_quotes_count, created_at")
+        .eq("homeowner_user_id", userId)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("quote_check_entitlements" as any)
+        .select("id")
+        .eq("user_id", userId)
+        .is("consumed_at", null),
+    ]);
+    setBriefs((briefRes.data as any) || []);
+    setFreeChecks(((entRes.data as any) || []).length);
+
 
     // Fetch jobs first so we can scope subsequent queries server-side.
     // Exclude is_test seed data (e.g. "Past electrical work — review #1") from production accounts.
@@ -188,6 +207,23 @@ const HomeownerDashboard = () => {
     }
     return jobs.filter(isActiveJob);
   }, [jobs, activeJobIds]);
+
+  // Quote Checker prompt: surface when a brief says they already have outside quotes.
+  const TRADE_TO_PROJECT_TYPE: Record<string, string> = {
+    electrician: "Full Rewire",
+    plumber: "Bathroom",
+    gas_engineer: "Boiler/Heating Replacement",
+    roofer: "Roofing",
+    general_builder: "Rear Extension",
+  };
+  const quoteCheckerPrompt = useMemo(() => {
+    const b = briefs.find((x: any) => (x.existing_quotes_count ?? 0) > 0);
+    if (!b) return null;
+    const projectType = TRADE_TO_PROJECT_TYPE[b.trade_category_id] || "Other";
+    return { href: `/quote-checker?project_type=${encodeURIComponent(projectType)}`, jobTitle: b.job_title };
+  }, [briefs]);
+
+
 
   return (
     <div className="min-h-screen dashboard-dark flex">
@@ -343,6 +379,28 @@ const HomeownerDashboard = () => {
           {activeNav === "overview" && (
             <>
               <VariationAlert variations={variations} />
+
+              {quoteCheckerPrompt && (
+                <div className="bg-card rounded-2xl p-6 border border-border shadow-sm flex items-start justify-between gap-4 flex-wrap">
+                  <div className="max-w-lg">
+                    <h3 className="font-heading text-primary text-lg flex items-center gap-2">
+                      <SearchCheck className="w-5 h-5 text-secondary" /> Already got a quote? Check it's fair
+                    </h3>
+                    <p className="font-mono text-xs text-muted-foreground mt-1">
+                      You told us you've received quotes{quoteCheckerPrompt.jobTitle ? ` for "${quoteCheckerPrompt.jobTitle}"` : ""}.
+                      Upload one and our AI flags missing line items and compares it to fair-market rates.
+                      {freeChecks > 0 && <strong className="text-secondary"> Your first check is free.</strong>}
+                    </p>
+                  </div>
+                  <a
+                    href={quoteCheckerPrompt.href}
+                    className="inline-flex items-center gap-1.5 bg-secondary text-secondary-foreground font-mono text-xs px-4 py-2 rounded-xl hover:opacity-90 transition-opacity shadow-sm whitespace-nowrap"
+                  >
+                    {freeChecks > 0 ? "Run free Quote Check" : "Run Quote Checker"}
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </a>
+                </div>
+              )}
 
               <ActiveProjectsSection jobs={jobs} quoteCounts={quoteCounts} activeJobs={activeJobs} />
 

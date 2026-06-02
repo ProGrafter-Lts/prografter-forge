@@ -7,6 +7,7 @@ import {
   Heading,
   Hr,
   Html,
+  Img,
   Preview,
   Section,
   Text,
@@ -22,6 +23,9 @@ import {
 
 export const SITE_NAME = 'ProGrafter'
 export const SITE_URL = 'https://prografter.co.uk'
+// White-on-transparent ProGrafter logo, hosted on the live domain so it
+// renders in email clients (no local imports available at send time).
+export const LOGO_LIGHT_URL = `${SITE_URL}/__l5e/assets-v1/0144c99a-d42a-49a6-ba26-f7e99a94c714/prografter-logo-light.png`
 
 interface ShellProps {
   preview: string
@@ -38,11 +42,10 @@ export const ProGrafterShell = ({ preview, heading, children, signoff }: ShellPr
       <Container style={outer}>
         {/* Branded navy header banner */}
         <Section style={headerBanner}>
-          <Text style={logoMark}>
-            PRO<span style={{ color: '#5EE3D4' }}>GRAFTER</span>
-          </Text>
+          <Img src={LOGO_LIGHT_URL} alt="ProGrafter" width="190" style={logoImg} />
           <Text style={tagline}>VERIFIED UK TRADES · FAIR CONTRACTS</Text>
         </Section>
+
 
         {/* Teal accent bar */}
         <div style={accentBar} />
@@ -55,9 +58,7 @@ export const ProGrafterShell = ({ preview, heading, children, signoff }: ShellPr
 
         {/* Footer */}
         <Section style={footerWrap}>
-          <Text style={footerLogo}>
-            PRO<span style={{ color: '#0D9488' }}>GRAFTER</span>
-          </Text>
+          <Img src={LOGO_LIGHT_URL} alt="ProGrafter" width="130" style={footerLogoImg} />
           <Text style={footerLinks}>
             <Link href={`${SITE_URL}`} style={footerLink}>prografter.co.uk</Link>
             {' · '}
@@ -166,14 +167,10 @@ const headerBanner = {
   padding: '28px 32px 24px',
   textAlign: 'center' as const,
 }
-const logoMark = {
-  fontSize: '32px',
-  fontWeight: 900 as const,
-  color: '#ffffff',
-  letterSpacing: '0.12em',
-  margin: '0',
-  fontFamily: SAFE_DISPLAY,
-  lineHeight: '1',
+const logoImg = {
+  display: 'block',
+  margin: '0 auto',
+  height: 'auto',
 }
 const tagline = {
   fontSize: '10px',
@@ -242,13 +239,11 @@ const footerWrap = {
   textAlign: 'center' as const,
   marginTop: '24px',
 }
-const footerLogo = {
-  fontSize: '16px',
-  fontWeight: 900 as const,
-  color: '#ffffff',
-  letterSpacing: '0.1em',
-  margin: '0 0 12px',
-  fontFamily: SAFE_DISPLAY,
+const footerLogoImg = {
+  display: 'block',
+  margin: '0 auto 12px',
+  height: 'auto',
+  opacity: 0.95,
 }
 const footerLinks = {
   fontSize: '12px',

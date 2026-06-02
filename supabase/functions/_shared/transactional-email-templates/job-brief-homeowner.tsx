@@ -10,6 +10,7 @@ interface Props {
   budget?: string
   timeline?: string
   description?: string
+  loginUrl?: string
 }
 
 const JobBriefHomeownerEmail = ({
@@ -20,6 +21,7 @@ const JobBriefHomeownerEmail = ({
   budget,
   timeline,
   description,
+  loginUrl,
 }: Props) => (
   <ProGrafterShell
     preview={`Your job brief ${reference || ''} has been received`}
@@ -54,7 +56,12 @@ const JobBriefHomeownerEmail = ({
       who to work with.
     </Para>
 
-    <CTA href="https://prografter.co.uk" label="Visit ProGrafter" />
+    <Para>
+      We've set up your free homeowner account so you can track your brief and
+      quotes. Tap below to sign in securely — no password needed.
+    </Para>
+
+    <CTA href={loginUrl || 'https://prografter.co.uk/login'} label="View my dashboard" />
   </ProGrafterShell>
 )
 
@@ -71,5 +78,6 @@ export const template = {
     budget: '£2,500–£5,000',
     timeline: 'Within a month',
     description: 'Full kitchen rewire with 6 new double sockets and under-cabinet lighting.',
+    loginUrl: 'https://prografter.co.uk/login',
   },
 } satisfies TemplateEntry

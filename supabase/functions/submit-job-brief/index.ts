@@ -21,6 +21,33 @@ const TRADE_NAMES: Record<string, string> = {
 
 const ADMIN_EMAIL = 'hello@prografter.co.uk'
 const ADMIN_URL = 'https://prografter.co.uk/admin/job-briefs'
+const SITE_URL = 'https://prografter.co.uk'
+const DASHBOARD_PATH = '/dashboard/homeowner'
+// TOGGLE: grant each homeowner ONE free Quote Check on their first job post.
+// Set to false to charge £49 from the very first check.
+const GRANT_FREE_FIRST_CHECK = true
+
+// Parse a free-text "quotes received" answer (e.g. "0", "1-2", "3+") to an int.
+function parseQuotesCount(v: unknown): number {
+  if (typeof v === 'number' && Number.isFinite(v)) return Math.max(0, Math.trunc(v))
+  if (typeof v !== 'string') return 0
+  const m = v.match(/\d+/)
+  return m ? parseInt(m[0], 10) : 0
+}
+
+// Title-case a free-text address line.
+function titleCase(v: string | null): string | null {
+  if (!v) return v
+  return v.trim().toLowerCase().replace(/\b([a-z])/g, (m) => m.toUpperCase())
+}
+// Remove a duplicated town/city accidentally appended to a line.
+function dedupeLine(line: string | null, town: string | null): string | null {
+  if (!line || !town) return line
+  const t = town.trim().toLowerCase()
+  const out = line.split(',').map((s) => s.trim()).filter((s) => s && s.toLowerCase() !== t).join(', ')
+  return out || null
+}
+
 
 function generateRef(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
@@ -75,15 +102,82 @@ Deno.serve(async (req) => {
   const trade_category_id = clean(body.trade_category_id)
   const tradeName = (trade_category_id && TRADE_NAMES[trade_category_id]) || trade_category_id || '—'
 
+  const marketingOptIn = body.marketing_opt_in === true
+  const existing_quotes_count = parseQuotesCount(body.existing_quotes_count ?? body.quotes_received)
+
+  // --- Passwordless account creation (brief submission IS the sign-up) ---
+  // Find or create the auth user for this email, then ensure profile + homeowner.
+  let homeownerUserId: string | null = null
+  let homeownerId: string | null = null
+  try {
+    const emailLower = email.toLowerCase()
+    // Try to create; if the user already exists we look them up instead.
+    const { data: created, error: createErr } = await supabase.auth.admin.createUser({
+      email: emailLower,
+      email_confirm: true,
+      user_metadata: { user_type: 'homeowner', full_name, phone, postcode },
+    })
+    if (createErr) {
+      // Likely already registered — find the existing user by paging the list.
+      let page = 1
+      while (page <= 20 && !homeownerUserId) {
+        const { data: list } = await supabase.auth.admin.listUsers({ page, perPage: 200 })
+        const found = list?.users?.find((u) => (u.email ?? '').toLowerCase() === emailLower)
+        if (found) homeownerUserId = found.id
+        if (!list || list.users.length < 200) break
+        page++
+      }
+    } else {
+      homeownerUserId = created.user?.id ?? null
+    }
+  } catch (e) {
+    console.error('[submit-job-brief] account creation failed', e)
+  }
+
+  if (homeownerUserId) {
+    // The handle_new_user trigger creates profile + homeowner for new users.
+    // For pre-existing users (or trigger gaps) ensure rows exist.
+    await supabase.from('profiles').upsert(
+      { user_id: homeownerUserId, email, full_name, user_type: 'homeowner', postcode, phone },
+      { onConflict: 'user_id' },
+    )
+    const { data: ho } = await supabase
+      .from('homeowners').select('id').eq('user_id', homeownerUserId).maybeSingle()
+    if (ho?.id) {
+      homeownerId = ho.id
+    } else {
+      const { data: newHo } = await supabase
+        .from('homeowners').insert({ user_id: homeownerUserId, name: full_name, email, phone })
+        .select('id').single()
+      homeownerId = newHo?.id ?? null
+    }
+
+    // Consent log (terms always; marketing per opt-in)
+    await supabase.from('consents_log').insert([
+      { user_id: homeownerUserId, consent_type: 'terms', consented: true, user_agent: clean(body.user_agent) },
+      { user_id: homeownerUserId, consent_type: 'marketing', consented: marketingOptIn, user_agent: clean(body.user_agent) },
+    ])
+
+    // Grant ONE free quote-check entitlement on first job post (if none yet).
+    if (GRANT_FREE_FIRST_CHECK) {
+      const { data: existingEnt } = await supabase
+        .from('quote_check_entitlements').select('id').eq('user_id', homeownerUserId).limit(1)
+      if (!existingEnt || existingEnt.length === 0) {
+        await supabase.from('quote_check_entitlements').insert({ user_id: homeownerUserId, source: 'first_job_post' })
+      }
+    }
+  }
+
   const record = {
+
     ref,
     full_name,
     email,
     phone,
-    address_line1,
-    address_line2: clean(body.address_line2),
-    city,
-    postcode,
+    address_line1: dedupeLine(titleCase(address_line1), titleCase(city)),
+    address_line2: dedupeLine(titleCase(clean(body.address_line2)), titleCase(city)),
+    city: titleCase(city),
+    postcode: postcode.toUpperCase(),
     property_type: clean(body.property_type),
     trade_category_id,
     job_title: clean(body.job_title),
@@ -108,6 +202,10 @@ Deno.serve(async (req) => {
       /guide me/i.test(String(body.planning_permission ?? '')) ||
       /guide me/i.test(String(body.building_regs ?? '')),
     is_test: body.is_test === true,
+    homeowner_user_id: homeownerUserId,
+    homeowner_id: homeownerId,
+    existing_quotes_count,
+    status: 'under_review',
   }
 
   const { error: insertErr } = await supabase.from('job_briefs').insert(record)
@@ -119,6 +217,22 @@ Deno.serve(async (req) => {
   }
 
   const fullAddress = [address_line1, clean(body.address_line2), city].filter(Boolean).join(', ')
+
+  // Generate a magic-link login that lands the homeowner on their dashboard.
+  let loginUrl = `${SITE_URL}/login`
+  if (homeownerUserId) {
+    try {
+      const { data: linkData } = await supabase.auth.admin.generateLink({
+        type: 'magiclink',
+        email: email.toLowerCase(),
+        options: { redirectTo: `${SITE_URL}${DASHBOARD_PATH}` },
+      })
+      if (linkData?.properties?.action_link) loginUrl = linkData.properties.action_link
+    } catch (e) {
+      console.error('[submit-job-brief] magic link failed', e)
+    }
+  }
+
 
   // Send homeowner confirmation + admin notification. Failures here must not
   // lose the brief — it is already saved.
@@ -135,6 +249,7 @@ Deno.serve(async (req) => {
         budget: record.budget_band,
         timeline: record.timeline,
         description: record.job_description,
+        loginUrl,
       },
     }),
     enqueueTransactionalEmail(supabase, {
@@ -174,7 +289,7 @@ Deno.serve(async (req) => {
     else if (r.value.error) console.error(`[submit-job-brief] ${which} email error`, r.value.error)
   })
 
-  return new Response(JSON.stringify({ ref }), {
+  return new Response(JSON.stringify({ ref, loginUrl, accountCreated: !!homeownerUserId }), {
     status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   })
 })

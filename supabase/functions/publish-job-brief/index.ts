@@ -84,9 +84,11 @@ Deno.serve(async (req) => {
   }
 
   let briefId: string
+  let overrideReason: string | null = null
   try {
     const body = await req.json()
     briefId = String(body.brief_id || body.briefId || '')
+    overrideReason = body.override_reason ? String(body.override_reason) : null
   } catch {
     return new Response(JSON.stringify({ error: 'Invalid JSON' }), {
       status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -173,7 +175,13 @@ Deno.serve(async (req) => {
   })
 
   await supabase.from('job_briefs')
-    .update({ status: 'published', published_at: new Date().toISOString(), matched_trade_count: matched.length })
+    .update({
+      status: 'published_to_trades',
+      published_at: new Date().toISOString(),
+      matched_trade_count: matched.length,
+      published_by: userId,
+      ...(overrideReason ? { override_reason: overrideReason } : {}),
+    })
     .eq('id', brief.id)
 
   return new Response(JSON.stringify({ ok: true, matched: matched.length, emailed: sends.length }), {

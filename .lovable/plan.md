@@ -1,45 +1,81 @@
-# GA4 Tracking + In-App Analytics Dashboard
+## STEP 0 — Audit findings (current state)
 
-GA4 is already embedded in `index.html` (measurement ID `G-G8KF4CMYVT`), but because this is a single-page React app it currently only records the very first page load. Navigating between routes and key actions (job posts, signups, quote checker, etc.) are not tracked. This plan fixes tracking and adds a private dashboard inside the app to review traffic and conversions.
+**Where homeowner records / briefs can be created today**
+- `/post-job-brief` (`PostJobBrief.tsx`) — the live brief form. Calls the `submit-job-brief` edge function. **Plain text address fields** (Address line 1/2, Town/City, Postcode) — there is **no postcode autocomplete anywhere in the codebase**.
+- `/post-a-job` (`PostAJob.tsx`) — **dead route**: `App.tsx` redirects `/post-a-job` → `/post-job-brief`. Component is effectively unused.
+- `/signup/homeowner` (`SignupHomeowner.tsx`) — a **separate** email + **password** signup → `supabase.auth.signUp` → writes `consents_log` + sends `homeowner-welcome` → `/dashboard/homeowner`.
 
-## Part 1 — Fix SPA page-view tracking
+**What brief submission writes today**
+- Inserts **one** row into `job_briefs` only. **No `auth.users`, no `homeowners` row, no link.** Then enqueues `job-brief-homeowner` + `job-brief-admin` emails. So a homeowner who posts a job gets **no account** — exactly the gap you flagged.
 
-- Add a small analytics helper `src/lib/analytics.ts` that safely calls `window.gtag(...)` (typed, no-ops if gtag/consent is absent so it respects the existing Termly cookie banner).
-- Add a `usePageTracking` hook (or inline effect) inside `<BrowserRouter>` in `App.tsx` that fires a `page_view` event on every route change using `useLocation()`.
+**Tables (existing)**
+- `job_briefs`: has `status` (default `'new'`, **no CHECK constraint**), `is_test`, `needs_scoping`, `needs_planning_guidance`, `quotes_received`. **No `user_id`/`homeowner_id`.**
+- `homeowners` (id, user_id, name, email, phone, is_test), `consents_log` (user_id, consent_type, consented, ip_address, user_agent), `profiles` (user_type default 'trade'), `quote_checks`, `user_roles`. No entitlements table.
 
-## Part 2 — Conversion event tracking (all key actions)
+**Admin brief actions today** (`AdminJobBriefs.tsx`)
+- Only one action: **Approve & publish to trades** (`publish-job-brief`). Flags `NEEDS SCOPING` / `PLANNING GUIDANCE` are shown but publish only does a `confirm()` warning — no real gate, no scoping/planning recording, no status lifecycle.
 
-Fire named GA4 events (and mark them as conversions in the GA4 UI) at each key success point:
+**Address bug (PG-J2N4XW)**
+- Stored as `line1 = "22 COWPASTURE LANE, SUTTON-IN-ASHFIELD"`, `line2 = "Sutton-in-Ashfield"`, `city = "Sutton-in-Ashfield"` — town tripled, line1 all-caps. Since there is no autocomplete, this came from manual/test entry. Fix = clean the record + add Title-Case normalisation + de-duplication on submit.
 
-```text
-generate_lead        → job brief submitted (PostJobBrief success)
-sign_up (homeowner)  → homeowner signup completed
-sign_up (trade)      → trade application submitted
-quote_check          → Quote Checker / Quote Checker AI run
-contact_submit       → contact form sent
-review_submit        → review submitted
-dispute_raise        → dispute raised
-```
+**Address/wordmark in emails & site**
+- A prior global replace mangled the footer address: `Contact.tsx`, `seoSchemas.ts`, and email `_brand.tsx` now literally read `"66 ln, London ln"`. Needs a correct address.
+- `job-brief-homeowner.tsx` CTA: `Visit ProGrafter` → `https://prografter.co.uk` (homepage dead-end). Brand header uses a text wordmark, not the logo image.
 
-Each call goes through the analytics helper at the existing success handlers in the relevant page components — no business-logic changes, only an added tracking call.
+---
 
-## Part 3 — In-app analytics dashboard
+## Decisions needed before I build
+1. **Correct company address** to replace the broken `66 ln, London ln` everywhere (emails, footer, Contact, legal/schema). I cannot guess this.
+2. **Free Quote Check entitlement**: prompt default = grant **one free** on first job post. I'll implement that with a toggle constant to switch to "charge £49 from first check".
 
-A new admin-only page at `/admin/analytics` (guarded by the existing `AdminRoute`) showing traffic + conversion metrics: users, sessions, page views, top pages, and conversion counts over a selectable date range (7/28/90 days).
+---
 
-Because GA4 reporting data lives in Google's servers, the dashboard reads it through the **GA4 Data API** via a new backend (Edge) function `ga4-report` so credentials never touch the browser:
+## Implementation plan
 
-```text
-Dashboard page → supabase.functions.invoke("ga4-report") → GA4 Data API → metrics
-```
+### 1. Database (one migration)
+- `job_briefs`: add `homeowner_user_id uuid`, `homeowner_id uuid`, `existing_quotes_count int`, plus lifecycle columns: `scoping_notes text`, `scoped_by uuid`, `scoped_at timestamptz`, `planning_notes text`, `planning_guidance_by uuid`, `planning_guidance_at timestamptz`, `published_by uuid`, `override_reason text`. Add a `status` CHECK for `new | under_review | awaiting_scoping | scoped | approved | published_to_trades`.
+- New `quote_check_entitlements` (user_id, source, granted_at, consumed_at, quote_check_id) with RLS (owner read) + service_role full; admins read.
+- Add homeowner-owned RLS to `job_briefs` (a homeowner can read their own briefs via `homeowner_user_id = auth.uid()`), keep admin policies.
+- `consents_log`: allow service_role insert (used by edge fn).
 
-### Credential needed
-The GA4 Data API requires a Google Cloud **service account** (JSON key) that has Viewer access on the GA4 property, plus the GA4 **property ID** (numeric, different from the `G-` measurement ID). I will request these as backend secrets (`GA4_SERVICE_ACCOUNT_JSON`, `GA4_PROPERTY_ID`) before building the function. I'll give step-by-step instructions for creating the service account and granting it property access.
+### 2. Account-on-submit (passwordless) — `submit-job-brief`
+- On submit: create/find `auth.users` by email via admin API with `user_metadata.user_type='homeowner'` (email auto-treated as confirmed for magic-link), insert `homeowners` + `profiles(user_type='homeowner')` if missing, insert `consents_log` (terms + marketing) with IP + user agent, insert `job_briefs` linked to the user with `status='under_review'`, grant one `quote_check_entitlements` row (free, toggle constant).
+- Generate a **magic-link / OTP** action link to `/dashboard/homeowner` and return enough for the client to continue. Homeowner email CTA links to this magic link (item E), not the homepage.
 
-If you'd rather not set up the Data API, the alternative is a dashboard page that simply deep-links to the relevant GA4 reports — but it won't show live numbers inside the app. The plan above assumes the full Data API dashboard.
+### 3. Frontend brief form (`PostJobBrief.tsx`)
+- Remove the password concept entirely (there isn't one here already). Add a **marketing opt-in** checkbox alongside the existing terms consent. Add Title-Case + de-dupe normalisation of address fields before submit (fixes F going forward).
+- Fold the green-energy questions in as **conditional fields** within the one form (single spine).
+- After submit: redirect signed-in homeowner to `/dashboard/homeowner` with an "Under review" banner; keep the confirmation/reference visible. (The dead-end buttons I already added stay as fallback for not-yet-authed.)
+- Keep `existing_quotes_count` ("have you received quotes / how many") as a **stored segmentation field** — no payment/branching in the brief.
 
-## Technical notes / files touched
-- New: `src/lib/analytics.ts`, `src/hooks/usePageTracking.ts`, `src/pages/AdminAnalytics.tsx`, `supabase/functions/ga4-report/index.ts`.
-- Edited: `src/App.tsx` (page tracking hook + `/admin/analytics` route), and success handlers in `PostJobBrief.tsx`, `SignupHomeowner*`, `SignupTrade*`/`Apply.tsx`, `QuoteChecker.tsx`, `QuoteCheckerAI.tsx`, `Contact.tsx`, `ReviewSubmit.tsx`, `DisputeRaise.tsx` for conversion events.
-- All events respect the existing Termly consent banner (gtag no-ops if consent/gtag unavailable).
-- After deploy, mark the events as Key Events/Conversions in the GA4 interface (one-time, in Google's UI).
+### 4. Unify sign-up
+- Redirect `/signup/homeowner` → `/post-job-brief` (brief submission becomes the single account-creation event). Keep `/login` + magic-link for returning users.
+
+### 5. Admin lifecycle gate (`AdminJobBriefs.tsx` + edge support)
+- Show new status pill. Add **"Record scoping call"** (editable Scope items / Known issues + notes → clears `needs_scoping`, sets `status='scoped'`, logs `scoped_by`/`scoped_at`).
+- Add **"Record planning guidance given"** (notes → clears `needs_planning_guidance`, logs admin + timestamp).
+- **"Approve & publish to trades"** runs clean only when no blocking flags remain; otherwise a deliberate **"Publish anyway"** override that **requires a reason** (stored in `override_reason`) and is logged. `publish-job-brief` updated to set `status='published_to_trades'` and accept/record the override reason.
+
+### 6. Dashboard Quote Checker card (`HomeownerDashboard`)
+- If the homeowner's brief has `existing_quotes_count > 0`, show a Quote Checker card → `/quote-checker` with `project_type` pre-filled.
+- If they hold an unconsumed free entitlement, the `/quote-checker` flow **skips Stripe** and consumes the entitlement; standalone/repeat checks stay £49. Standalone `/quote-checker` page left as-is.
+
+### 7. Email content (`_brand.tsx`, `job-brief-homeowner.tsx`)
+- Replace text wordmark with the uploaded **logo image asset** in the email shell.
+- Homeowner CTA → magic-link login landing on `/dashboard/homeowner`.
+- Replace `66 ln, London ln` with the confirmed address (emails + `Contact.tsx` + `seoSchemas.ts` + footer). Admin "Open in Admin Dashboard" left untouched.
+- Redeploy all touched edge functions.
+
+### 8. Data hygiene
+- Tag/clean PG-J2N4XW: set `is_test=true`, fix the address to clean line1/line2/town/county Title-Case. Keep `is_test` enforced as default false on real submits.
+
+### Reporting back after build
+Tables written on submit; magic-link end-to-end; admin scoping action clearing the flag + moving state; the dashboard Quote Checker card; and a screenshot of the homeowner dashboard after a fresh test brief.
+
+---
+
+### Technical notes
+- Magic-link uses Supabase admin `generateLink({ type: 'magiclink' })` inside the edge function (service role); the link target is `/dashboard/homeowner`.
+- `existing_quotes_count` parsed from the existing "quotes received" answer.
+- Entitlement consumption is transactional in the quote-checkout/verify path with a toggle constant `GRANT_FREE_FIRST_CHECK = true`.
+- All new public tables get GRANTs + RLS in the same migration.

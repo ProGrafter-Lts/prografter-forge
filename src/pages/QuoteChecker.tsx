@@ -55,8 +55,30 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
   const [description, setDescription] = useState("");
   const [website, setWebsite] = useState(""); // honeypot — must stay empty
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [freeAvailable, setFreeAvailable] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const [formParams] = useSearchParams();
+
+  // Prefill project type from the dashboard deep-link, and detect a free
+  // quote-check entitlement for the signed-in homeowner.
+  useEffect(() => {
+    const pt = formParams.get("project_type");
+    if (pt) setProjectType(pt);
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      if (user.email) setEmail(user.email);
+      const { data: ent } = await supabase
+        .from("quote_check_entitlements" as any)
+        .select("id")
+        .eq("user_id", user.id)
+        .is("consumed_at", null)
+        .limit(1);
+      setFreeAvailable(((ent as any) || []).length > 0);
+    })();
+  }, [formParams]);
+
 
   const ACCEPTED_TYPES = ["application/pdf", "image/jpeg", "image/png"];
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -101,12 +123,29 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
         .single();
       if (insertError) throw insertError;
 
+      // Free entitlement path — skip Stripe entirely.
+      if (freeAvailable) {
+        const { data: redeemData, error: redeemError } = await supabase.functions.invoke(
+          "redeem-quote-check-entitlement",
+          { body: { quoteCheckId: record.id } }
+        );
+        if (!redeemError && (redeemData as any)?.redeemed) {
+          trackEvent("quote_check", { method: "free_entitlement" });
+          setFreeAvailable(false);
+          onSubmitted(record.id, email, (record as any).lookup_token);
+          return;
+        }
+        // If redemption failed, fall through to the paid flow.
+        console.warn("Free entitlement redemption failed, falling back to payment", redeemError);
+      }
+
       // Create Stripe checkout session (passes honeypot through)
       const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke(
         "create-quote-checkout",
         { body: { quoteCheckId: record.id, email, website } }
       );
       if (checkoutError) throw checkoutError;
+
 
       if (checkoutData?.url) {
         // Store quote ID + lookup token for when they return
@@ -228,9 +267,9 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
           className="w-full h-12 bg-teal text-white font-mono text-sm rounded-xl hover:bg-teal-hover transition-colors shadow-lg shadow-teal/20 disabled:bg-muted disabled:text-muted-foreground/70 disabled:shadow-none disabled:opacity-100"
         >
           {isSubmitting ? (
-            <span className="flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" />Preparing checkout...</span>
+            <span className="flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" />{freeAvailable ? "Starting your free check..." : "Preparing checkout..."}</span>
           ) : (
-            "Check My Quote — £49"
+            freeAvailable ? "Run My Free Quote Check" : "Check My Quote — £49"
           )}
         </Button>
         <p className="text-center font-mono text-[11px] italic text-muted-foreground/80 leading-relaxed">

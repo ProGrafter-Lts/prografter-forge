@@ -927,7 +927,10 @@ export type Database = {
           created_at: string
           decision_criteria: string | null
           email: string
+          existing_quotes_count: number
           full_name: string
+          homeowner_id: string | null
+          homeowner_user_id: string | null
           id: string
           is_test: boolean
           job_description: string | null
@@ -936,16 +939,24 @@ export type Database = {
           matched_trade_count: number | null
           needs_planning_guidance: boolean
           needs_scoping: boolean
+          override_reason: string | null
           parking_available: string | null
           phone: string
+          planning_guidance_at: string | null
+          planning_guidance_by: string | null
+          planning_notes: string | null
           planning_permission: string | null
           postcode: string
           preferred_days: string | null
           property_type: string | null
           published_at: string | null
+          published_by: string | null
           quotes_received: string | null
           ref: string
           scope_items: string | null
+          scoped_at: string | null
+          scoped_by: string | null
+          scoping_notes: string | null
           status: string
           timeline: string | null
           trade_category_id: string | null
@@ -961,7 +972,10 @@ export type Database = {
           created_at?: string
           decision_criteria?: string | null
           email: string
+          existing_quotes_count?: number
           full_name: string
+          homeowner_id?: string | null
+          homeowner_user_id?: string | null
           id?: string
           is_test?: boolean
           job_description?: string | null
@@ -970,16 +984,24 @@ export type Database = {
           matched_trade_count?: number | null
           needs_planning_guidance?: boolean
           needs_scoping?: boolean
+          override_reason?: string | null
           parking_available?: string | null
           phone: string
+          planning_guidance_at?: string | null
+          planning_guidance_by?: string | null
+          planning_notes?: string | null
           planning_permission?: string | null
           postcode: string
           preferred_days?: string | null
           property_type?: string | null
           published_at?: string | null
+          published_by?: string | null
           quotes_received?: string | null
           ref: string
           scope_items?: string | null
+          scoped_at?: string | null
+          scoped_by?: string | null
+          scoping_notes?: string | null
           status?: string
           timeline?: string | null
           trade_category_id?: string | null
@@ -995,7 +1017,10 @@ export type Database = {
           created_at?: string
           decision_criteria?: string | null
           email?: string
+          existing_quotes_count?: number
           full_name?: string
+          homeowner_id?: string | null
+          homeowner_user_id?: string | null
           id?: string
           is_test?: boolean
           job_description?: string | null
@@ -1004,16 +1029,24 @@ export type Database = {
           matched_trade_count?: number | null
           needs_planning_guidance?: boolean
           needs_scoping?: boolean
+          override_reason?: string | null
           parking_available?: string | null
           phone?: string
+          planning_guidance_at?: string | null
+          planning_guidance_by?: string | null
+          planning_notes?: string | null
           planning_permission?: string | null
           postcode?: string
           preferred_days?: string | null
           property_type?: string | null
           published_at?: string | null
+          published_by?: string | null
           quotes_received?: string | null
           ref?: string
           scope_items?: string | null
+          scoped_at?: string | null
+          scoped_by?: string | null
+          scoping_notes?: string | null
           status?: string
           timeline?: string | null
           trade_category_id?: string | null
@@ -1965,6 +1998,33 @@ export type Database = {
           updated_at?: string
           was_sent?: boolean
           won_lost?: string | null
+        }
+        Relationships: []
+      }
+      quote_check_entitlements: {
+        Row: {
+          consumed_at: string | null
+          granted_at: string
+          id: string
+          quote_check_id: string | null
+          source: string
+          user_id: string
+        }
+        Insert: {
+          consumed_at?: string | null
+          granted_at?: string
+          id?: string
+          quote_check_id?: string | null
+          source?: string
+          user_id: string
+        }
+        Update: {
+          consumed_at?: string | null
+          granted_at?: string
+          id?: string
+          quote_check_id?: string | null
+          source?: string
+          user_id?: string
         }
         Relationships: []
       }
