@@ -27,10 +27,10 @@ export default {
         foreground: "hsl(var(--foreground))",
         cream: "#F5F0E8",
         deep: "#0F2238",
-        navy: "#1B3A5C",
+        navy: "#27396A",
         teal: {
-          DEFAULT: "#0D9488",
-          hover: "#14B8A8",
+          DEFAULT: "#14A8A1",
+          hover: "#1AC2BA",
         },
         "body-text": "#1F2937",
         "secondary-text": "#4B5563",
