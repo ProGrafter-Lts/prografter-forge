@@ -42,6 +42,10 @@ Deno.serve(async (req) => {
   const supabaseUrl = Deno.env.get('SUPABASE_URL')!
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
   const supabase = createClient(supabaseUrl, serviceKey)
+  const functionInvoker = createClient(
+    supabaseUrl,
+    Deno.env.get('SUPABASE_ANON_KEY') || Deno.env.get('SUPABASE_PUBLISHABLE_KEY') || serviceKey,
+  )
 
   let body: Record<string, unknown>
   try {
@@ -122,7 +126,7 @@ Deno.serve(async (req) => {
   // Send homeowner confirmation + admin notification. Failures here must not
   // lose the brief — it is already saved.
   const sends = [
-    supabase.functions.invoke('send-transactional-email', {
+    functionInvoker.functions.invoke('send-transactional-email', {
       body: {
         templateName: 'job-brief-homeowner',
         recipientEmail: email,
@@ -138,7 +142,7 @@ Deno.serve(async (req) => {
         },
       },
     }),
-    supabase.functions.invoke('send-transactional-email', {
+    functionInvoker.functions.invoke('send-transactional-email', {
       body: {
         templateName: 'job-brief-admin',
         recipientEmail: ADMIN_EMAIL,
