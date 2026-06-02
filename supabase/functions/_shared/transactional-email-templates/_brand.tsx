@@ -167,14 +167,10 @@ const headerBanner = {
   padding: '28px 32px 24px',
   textAlign: 'center' as const,
 }
-const logoMark = {
-  fontSize: '32px',
-  fontWeight: 900 as const,
-  color: '#ffffff',
-  letterSpacing: '0.12em',
-  margin: '0',
-  fontFamily: SAFE_DISPLAY,
-  lineHeight: '1',
+const logoImg = {
+  display: 'block',
+  margin: '0 auto',
+  height: 'auto',
 }
 const tagline = {
   fontSize: '10px',
