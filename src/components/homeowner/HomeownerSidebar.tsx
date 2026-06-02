@@ -52,9 +52,7 @@ const HomeownerSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen
        }`}
       >
         <div className="p-6 border-b border-white/10">
-          <a href="/" aria-label="ProGrafter">
-            <Logo variant="light" className="h-10 w-auto" />
-          </a>
+          <Logo variant="light" className="h-10 w-auto" />
           <p className="font-mono text-[10px] mt-1 tracking-wider uppercase" style={{ color: "rgba(255,255,255,0.65)" }}>
             Homeowner
           </p>

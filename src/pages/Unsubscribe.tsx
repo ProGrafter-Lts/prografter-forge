@@ -89,9 +89,7 @@ const Unsubscribe = () => {
 
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <a href="/" className="font-heading text-[32px] leading-none tracking-wider">
-            <Logo variant="dark" className="h-9 w-auto inline-block" />
-          </a>
+          <Logo variant="dark" className="h-9 w-auto inline-block" />
         </div>
 
         <div className="bg-white rounded-2xl p-8 shadow-lg border border-navy/10">

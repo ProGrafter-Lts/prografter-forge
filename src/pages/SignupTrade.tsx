@@ -886,9 +886,7 @@ const SignupTrade = () => {
       <div className="min-h-screen flex flex-col" style={{ backgroundColor: "hsl(var(--deep))" }}>
         <SEO title="Before you start — Join ProGrafter" description="What you'll need to apply as a trade on ProGrafter." path="/register/trade" noindex />
         <header className="py-6 px-6">
-          <Link to="/" className="font-heading text-2xl tracking-wider">
-            <Logo variant="light" className="h-9 w-auto inline-block" />
-          </Link>
+          <Logo variant="light" className="h-9 w-auto inline-block" />
         </header>
         <div className="flex-1 flex items-center justify-center px-6 py-8">
           <div className="w-full max-w-lg">
@@ -948,9 +946,7 @@ const SignupTrade = () => {
         })}
       />
       <header className="py-6 px-6">
-        <Link to="/" className="font-heading text-2xl tracking-wider">
-          <Logo variant="light" className="h-9 w-auto inline-block" />
-        </Link>
+        <Logo variant="light" className="h-9 w-auto inline-block" />
       </header>
 
       <div className="flex-1 flex items-start justify-center px-6 py-8">

@@ -83,9 +83,7 @@ const TradeSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen }: 
         }`}
       >
         <div className="p-6 border-b border-white/10">
-          <a href="/" aria-label="ProGrafter">
-            <Logo variant="light" className="h-10 w-auto" />
-          </a>
+          <Logo variant="light" className="h-10 w-auto" />
         </div>
 
         <nav className="flex-1 p-4 space-y-1">

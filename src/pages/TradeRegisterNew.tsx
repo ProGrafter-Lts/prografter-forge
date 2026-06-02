@@ -270,9 +270,7 @@ const TradeRegisterNew = () => {
         path="/register/trade"
       />
       <header className="py-6 px-6">
-        <Link to="/" className="font-heading text-2xl tracking-wider">
-          <Logo variant="light" className="h-9 w-auto inline-block" />
-        </Link>
+        <Logo variant="light" className="h-9 w-auto inline-block" />
       </header>
 
       <div className="flex-1 flex items-center justify-center px-6 py-12">
@@ -298,9 +296,9 @@ const TradeRegisterNew = () => {
 
           {success ? (
             <div className="bg-teal/10 border border-teal/30 rounded-xl p-8 text-center">
-              <a href="/" className="font-heading text-[32px] leading-none tracking-wider inline-block mb-6">
-                <Logo variant="light" className="h-9 w-auto inline-block" />
-              </a>
+              <div className="font-heading text-[32px] leading-none tracking-wider inline-block mb-6">
+              <Logo variant="light" className="h-9 w-auto inline-block" />
+            </div>
               <h2 className="font-heading text-teal text-4xl mb-2">Application Received.</h2>
               <p className="font-body text-cream/70 text-sm mb-6">
                 We will verify your details within 24 hours and email you at the address provided.
