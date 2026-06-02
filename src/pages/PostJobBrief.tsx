@@ -1,6 +1,7 @@
 import { useState, useEffect, createContext, useContext } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { trackEvent } from "@/lib/analytics";
+import Logo from "@/components/Logo";
 
 // ── ProGrafter Brand Palette ──────────────────────────────────────────────────
 const C = {
@@ -235,8 +236,7 @@ const BriefPreview = ({ form, briefRef }: { form: typeof BLANK; briefRef: string
         display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div>
           <div className="font-heading tracking-wider" style={{ fontSize: 22, fontWeight: 700 }}>
-            <span style={{ color: C.cream }}>PRO</span>
-            <span style={{ color: C.teal }}>GRAFTER</span>
+            <Logo variant="light" className="h-9 w-auto inline-block" />
           </div>
           <p style={{ color: "rgba(245,240,232,0.6)", fontSize: 11,
             margin: "2px 0 0", letterSpacing: "0.05em" }}>JOB BRIEF</p>
@@ -734,8 +734,7 @@ export default function PostJobBrief() {
         display: "flex", alignItems: "center", justifyContent: "space-between",
         position: "sticky", top: 0, zIndex: 10 }}>
         <div className="font-heading tracking-wider" style={{ fontSize: 24, fontWeight: 700 }}>
-          <span style={{ color: C.cream }}>PRO</span>
-          <span style={{ color: C.teal }}>GRAFTER</span>
+          <Logo variant="light" className="h-9 w-auto inline-block" />
         </div>
         <span style={{ fontSize: 12, color: "rgba(245,240,232,0.5)", letterSpacing: "0.06em" }}>
           POST A JOB

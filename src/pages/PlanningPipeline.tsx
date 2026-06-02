@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
+import Logo from "@/components/Logo";
 
 const C = {
   cream: "#F5F0E8", deep: "#0F2238", navy: "#1B3A5C",
@@ -870,8 +871,7 @@ export default function PlanningPipeline() {
       <div style={{ background: C.deep, borderBottom: `1px solid ${C.darkBorder}`, padding: isMobile ? "10px 14px" : "0 20px", minHeight: 56, display: "flex", flexDirection: isMobile ? "column" : "row", alignItems: isMobile ? "stretch" : "center", justifyContent: "space-between", gap: isMobile ? 10 : 0, flexShrink: 0 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
           <div className="font-heading tracking-wider" style={{ fontSize: isMobile ? 18 : 22, fontWeight: 700 }}>
-            <span style={{ color: C.brightText }}>PRO</span>
-            <span style={{ color: C.teal }}>GRAFTER</span>
+            <Logo variant="light" className="h-9 w-auto inline-block" />
           </div>
           <span style={{ color: C.darkBorder }}>|</span>
           <span style={{ fontSize: isMobile ? 10 : 12, color: C.dimText, fontWeight: 500, letterSpacing: "0.05em" }}>PLANNING PIPELINE</span>

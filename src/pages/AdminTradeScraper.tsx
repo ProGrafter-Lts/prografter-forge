@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import Logo from "@/components/Logo";
 
 type Stage = "new" | "contacted" | "follow_up" | "interested" | "not_interested" | "converted";
 
@@ -209,8 +210,7 @@ export default function AdminTradeScraper() {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, flexWrap: "wrap", gap: 12 }}>
         <div>
           <div className="font-heading tracking-wider" style={{ fontSize: 22, fontWeight: 700 }}>
-            <span style={{ color: C.bright }}>PRO</span>
-            <span style={{ color: C.teal }}>GRAFTER</span>
+            <Logo variant="light" className="h-9 w-auto inline-block" />
             <span style={{ color: C.dim, fontSize: 12, marginLeft: 12 }}>OUTREACH PIPELINE</span>
           </div>
           <p style={{ fontSize: 12, color: C.dim, margin: "4px 0 0" }}>
