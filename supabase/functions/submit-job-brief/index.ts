@@ -204,6 +204,22 @@ Deno.serve(async (req) => {
 
   const fullAddress = [address_line1, clean(body.address_line2), city].filter(Boolean).join(', ')
 
+  // Generate a magic-link login that lands the homeowner on their dashboard.
+  let loginUrl = `${SITE_URL}/login`
+  if (homeownerUserId) {
+    try {
+      const { data: linkData } = await supabase.auth.admin.generateLink({
+        type: 'magiclink',
+        email: email.toLowerCase(),
+        options: { redirectTo: `${SITE_URL}${DASHBOARD_PATH}` },
+      })
+      if (linkData?.properties?.action_link) loginUrl = linkData.properties.action_link
+    } catch (e) {
+      console.error('[submit-job-brief] magic link failed', e)
+    }
+  }
+
+
   // Send homeowner confirmation + admin notification. Failures here must not
   // lose the brief — it is already saved.
   const sends = [
