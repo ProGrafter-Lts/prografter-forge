@@ -718,6 +718,22 @@ export default function PostJobBrief() {
           I have read and accept the terms above.
         </span>
       </label>
+
+      <label style={{ display: "flex", gap: 10, alignItems: "flex-start",
+        background: C.white, border: `1.5px solid ${C.border}`,
+        borderRadius: 10, padding: "12px 14px", marginTop: 10, cursor: "pointer" }}>
+        <input type="checkbox" checked={marketing}
+          onChange={e => setMarketing(e.target.checked)}
+          style={{ width: 18, height: 18, marginTop: 1, accentColor: C.teal, flexShrink: 0 }} />
+        <span style={{ fontSize: 12, color: C.secondary, lineHeight: 1.6 }}>
+          Keep me updated with helpful tips and ProGrafter news (optional). You can opt out anytime.
+        </span>
+      </label>
+
+      <p style={{ fontSize: 11, color: C.secondary, marginTop: 12, lineHeight: 1.6 }}>
+        Submitting creates your free ProGrafter homeowner account so you can track your
+        brief and quotes — no password needed, we'll email you a secure sign-in link.
+      </p>
     </>,
   ];
 
