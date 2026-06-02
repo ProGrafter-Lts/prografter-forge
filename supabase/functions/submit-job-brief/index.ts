@@ -1,4 +1,5 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
+import { enqueueTransactionalEmail } from '../_shared/enqueue-transactional-email.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -42,10 +43,6 @@ Deno.serve(async (req) => {
   const supabaseUrl = Deno.env.get('SUPABASE_URL')!
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
   const supabase = createClient(supabaseUrl, serviceKey)
-  const functionInvoker = createClient(
-    supabaseUrl,
-    Deno.env.get('SUPABASE_ANON_KEY') || Deno.env.get('SUPABASE_PUBLISHABLE_KEY') || serviceKey,
-  )
 
   let body: Record<string, unknown>
   try {
@@ -126,50 +123,46 @@ Deno.serve(async (req) => {
   // Send homeowner confirmation + admin notification. Failures here must not
   // lose the brief — it is already saved.
   const sends = [
-    functionInvoker.functions.invoke('send-transactional-email', {
-      body: {
-        templateName: 'job-brief-homeowner',
-        recipientEmail: email,
-        idempotencyKey: `job-brief-homeowner-${ref}`,
-        templateData: {
-          name: full_name,
-          reference: ref,
-          jobTitle: record.job_title,
-          trade: tradeName,
-          budget: record.budget_band,
-          timeline: record.timeline,
-          description: record.job_description,
-        },
+    enqueueTransactionalEmail(supabase, {
+      templateName: 'job-brief-homeowner',
+      recipientEmail: email,
+      idempotencyKey: `job-brief-homeowner-${ref}`,
+      templateData: {
+        name: full_name,
+        reference: ref,
+        jobTitle: record.job_title,
+        trade: tradeName,
+        budget: record.budget_band,
+        timeline: record.timeline,
+        description: record.job_description,
       },
     }),
-    functionInvoker.functions.invoke('send-transactional-email', {
-      body: {
-        templateName: 'job-brief-admin',
-        recipientEmail: ADMIN_EMAIL,
-        idempotencyKey: `job-brief-admin-${ref}`,
-        templateData: {
-          reference: ref,
-          name: full_name,
-          email,
-          phone,
-          address: fullAddress,
-          postcode,
-          propertyType: record.property_type,
-          jobTitle: record.job_title,
-          trade: tradeName,
-          description: record.job_description,
-          budget: record.budget_band,
-          timeline: record.timeline,
-          access: record.access_arrangement,
-          planningPermission: record.planning_permission,
-          buildingRegs: record.building_regs,
-          scopeItems: record.scope_items,
-          knownIssues: record.known_issues,
-          notes: record.additional_notes,
-          needsScoping: record.needs_scoping,
-          needsPlanningGuidance: record.needs_planning_guidance,
-          adminUrl: ADMIN_URL,
-        },
+    enqueueTransactionalEmail(supabase, {
+      templateName: 'job-brief-admin',
+      recipientEmail: ADMIN_EMAIL,
+      idempotencyKey: `job-brief-admin-${ref}`,
+      templateData: {
+        reference: ref,
+        name: full_name,
+        email,
+        phone,
+        address: fullAddress,
+        postcode,
+        propertyType: record.property_type,
+        jobTitle: record.job_title,
+        trade: tradeName,
+        description: record.job_description,
+        budget: record.budget_band,
+        timeline: record.timeline,
+        access: record.access_arrangement,
+        planningPermission: record.planning_permission,
+        buildingRegs: record.building_regs,
+        scopeItems: record.scope_items,
+        knownIssues: record.known_issues,
+        notes: record.additional_notes,
+        needsScoping: record.needs_scoping,
+        needsPlanningGuidance: record.needs_planning_guidance,
+        adminUrl: ADMIN_URL,
       },
     }),
   ]
