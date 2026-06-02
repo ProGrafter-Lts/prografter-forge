@@ -1,4 +1,5 @@
 import { useState, type CSSProperties } from "react";
+import Logo from "@/components/Logo";
 
 const C = {
   cream: "#F5F0E8",
@@ -159,7 +160,7 @@ export default function Vetting() {
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: C.deep, borderBottom: `1px solid ${C.darkBorder}`, padding: "0 20px", height: 56, flexShrink: 0 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <div className="font-heading tracking-wider" style={{ fontSize: 22, fontWeight: 700 }}>
-            <span style={{ color: C.cream }}>PRO</span><span style={{ color: C.teal }}>GRAFTER</span>
+            <Logo variant="light" className="h-9 w-auto inline-block" />
           </div>
           <span style={{ color: C.darkBorder, fontSize: 16 }}>|</span>
           <span style={{ fontSize: 12, color: C.dimText, fontWeight: 500, letterSpacing: "0.05em" }}>VETTING DASHBOARD</span>

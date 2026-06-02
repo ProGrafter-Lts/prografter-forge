@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import SEO from "@/components/SEO";
+import Logo from "@/components/Logo";
 
 const C = {
   cream:"#F5F0E8", deep:"#0F2238", navy:"#1B3A5C",
@@ -223,8 +224,7 @@ export default function TraderReviews() {
 
       <div style={{ background:C.deep, padding:"14px 24px", display:"flex", alignItems:"center", justifyContent:"space-between", position:"sticky", top:0, zIndex:10 }}>
         <Link to="/" className="font-heading tracking-wider" style={{ fontSize:24, textDecoration:"none" }}>
-          <span style={{ color:C.brightText }}>PRO</span>
-          <span style={{ color:C.teal }}>GRAFTER</span>
+          <Logo variant="light" className="h-9 w-auto inline-block" />
         </Link>
         <span style={{ fontSize:12, color:C.dimText, fontWeight:500, letterSpacing:"0.05em" }}>TRADER PROFILE</span>
       </div>

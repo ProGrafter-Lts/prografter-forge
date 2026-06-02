@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Award, Phone, ShieldCheck, ClipboardCheck } from "lucide-react";
 import SEO from "@/components/SEO";
+import Logo from "@/components/Logo";
 
 const Verification = () => {
   return (
@@ -12,8 +13,7 @@ const Verification = () => {
       />
       <header className="py-6 px-6">
         <Link to="/" className="font-heading text-2xl tracking-wider">
-          <span className="text-cream">PRO</span>
-          <span className="text-teal">GRAFTER</span>
+          <Logo variant="light" className="h-9 w-auto inline-block" />
         </Link>
       </header>
 

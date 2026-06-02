@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import SEO from "@/components/SEO";
 import Navbar from "@/components/Navbar";
+import Logo from "@/components/Logo";
 
 const SignupHomeownerNext = () => {
   return (
@@ -10,8 +11,7 @@ const SignupHomeownerNext = () => {
       <main className="pt-24 pb-16 px-6">
         <div className="max-w-2xl mx-auto text-center">
           <a href="/" className="font-heading text-[32px] leading-none tracking-wider inline-block mb-6">
-            <span className="text-navy">PRO</span>
-            <span className="text-teal">GRAFTER</span>
+            <Logo variant="dark" className="h-9 w-auto inline-block" />
           </a>
           <div>
             <span className="font-mono text-xs text-teal uppercase tracking-widest">Account created</span>

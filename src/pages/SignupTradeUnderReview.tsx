@@ -4,6 +4,7 @@ import { Clock, CheckCircle2, AlertCircle, XCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthReady } from "@/hooks/useAuthReady";
 import SEO from "@/components/SEO";
+import Logo from "@/components/Logo";
 
 type Status = "pending" | "approved" | "info_requested" | "rejected" | null;
 
@@ -58,8 +59,7 @@ const SignupTradeUnderReview = () => {
       <SEO title="Application under review — ProGrafter" description="Your trade application is being reviewed." path="/signup/trade/under-review" />
       <header className="py-6 px-6">
         <Link to="/" className="font-heading text-2xl tracking-wider">
-          <span className="text-cream">PRO</span>
-          <span className="text-teal">GRAFTER</span>
+          <Logo variant="light" className="h-9 w-auto inline-block" />
         </Link>
       </header>
       <main className="flex-1 flex items-center justify-center px-6 py-12">
@@ -100,8 +100,7 @@ const SignupTradeUnderReview = () => {
           ) : (
             <>
               <a href="/" className="font-heading text-[32px] leading-none tracking-wider inline-block mb-6">
-                <span className="text-cream">PRO</span>
-                <span className="text-teal">GRAFTER</span>
+                <Logo variant="light" className="h-9 w-auto inline-block" />
               </a>
               <Icon className={`${tone} w-16 h-16 mx-auto mb-4`} strokeWidth={1.5} />
               <h1 className="font-heading text-cream text-4xl mb-3">Application <span className="text-teal">received.</span></h1>

@@ -14,6 +14,7 @@ import {
 } from "@/lib/greenTrades";
 import { saveTradeSpecialisms } from "@/lib/specialisms";
 import { useSetupRedirect, SetupRedirectLoader } from "@/hooks/useSetupRedirect";
+import Logo from "@/components/Logo";
 
 const SpecialismsPicker = lazy(() => import("@/components/SpecialismsPicker"));
 const TradeDateField = lazy(() => import("@/components/trade/TradeDateField"));
@@ -270,8 +271,7 @@ const TradeRegisterNew = () => {
       />
       <header className="py-6 px-6">
         <Link to="/" className="font-heading text-2xl tracking-wider">
-          <span className="text-cream">PRO</span>
-          <span className="text-teal">GRAFTER</span>
+          <Logo variant="light" className="h-9 w-auto inline-block" />
         </Link>
       </header>
 
@@ -299,8 +299,7 @@ const TradeRegisterNew = () => {
           {success ? (
             <div className="bg-teal/10 border border-teal/30 rounded-xl p-8 text-center">
               <a href="/" className="font-heading text-[32px] leading-none tracking-wider inline-block mb-6">
-                <span className="text-cream">PRO</span>
-                <span className="text-teal">GRAFTER</span>
+                <Logo variant="light" className="h-9 w-auto inline-block" />
               </a>
               <h2 className="font-heading text-teal text-4xl mb-2">Application Received.</h2>
               <p className="font-body text-cream/70 text-sm mb-6">

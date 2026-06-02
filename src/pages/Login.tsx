@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import SEO from "@/components/SEO";
 import { useAuthReady } from "@/hooks/useAuthReady";
+import Logo from "@/components/Logo";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -157,8 +158,7 @@ const Login = () => {
         </div>
         <div className="text-center mb-8">
           <a href="/" className="font-heading text-[32px] leading-none tracking-wider">
-            <span className="text-navy">PRO</span>
-            <span className="text-teal">GRAFTER</span>
+            <Logo variant="dark" className="h-9 w-auto inline-block" />
           </a>
           <p className="font-mono text-sm text-secondary-text mt-2">Sign in — trade or homeowner</p>
         </div>

@@ -2,6 +2,7 @@ import { useCallback, useRef, useState, type CSSProperties, type ReactNode, type
 import { supabase } from "@/integrations/supabase/client";
 import { trackEvent } from "@/lib/analytics";
 import { processImageFile, ACCEPTED_FORMATS_LABEL } from "@/lib/portfolioImage";
+import Logo from "@/components/Logo";
 
 
 // ── ProGrafter Brand Palette ──────────────────────────────────────────────────
@@ -882,7 +883,7 @@ export default function Apply() {
     <div style={{ minHeight: "100vh", background: C.cream }}>
       <div style={{ background: C.deep, color: C.white, padding: "14px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div className="font-heading tracking-wider" style={{ fontSize: 22, fontWeight: 700, letterSpacing: 0.3 }}>
-          <span>PRO</span><span style={{ color: C.tealHover }}>GRAFTER</span>
+          <Logo variant="light" className="h-9 w-auto inline-block" />
         </div>
         <div style={{ fontSize: 11, letterSpacing: 1.2, color: C.tealLight, fontWeight: 600 }}>TRADE APPLICATION</div>
       </div>

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { trackEvent } from "@/lib/analytics";
+import Logo from "@/components/Logo";
 
 // ── ProGrafter Brand Palette ──────────────────────────────────────────────────
 const C = {
@@ -279,8 +280,7 @@ ${form.quote_text}`;
         display:"flex", alignItems:"center", justifyContent:"space-between",
         position:"sticky", top:0, zIndex:10 }}>
         <div className="font-heading tracking-wider" style={{ fontSize:24, fontWeight:700 }}>
-          <span style={{ color:C.cream }}>PRO</span>
-          <span style={{ color:C.teal }}>GRAFTER</span>
+          <Logo variant="light" className="h-9 w-auto inline-block" />
         </div>
         <div style={{ display:"flex", alignItems:"center", gap:8 }}>
           <span style={{ fontSize:11, color:C.teal, background:"rgba(13,148,136,0.15)",

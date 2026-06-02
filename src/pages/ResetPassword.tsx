@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import SEO from "@/components/SEO";
+import Logo from "@/components/Logo";
 
 type Status = "verifying" | "verified" | "failed";
 
@@ -82,8 +83,7 @@ const ResetPassword = () => {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <a href="/" className="font-heading text-[32px] leading-none tracking-wider">
-            <span className="text-navy">PRO</span>
-            <span className="text-teal">GRAFTER</span>
+            <Logo variant="dark" className="h-9 w-auto inline-block" />
           </a>
           <div className="mt-3">
             <a

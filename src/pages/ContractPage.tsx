@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import SEO from "@/components/SEO";
 import { toast } from "sonner";
+import Logo from "@/components/Logo";
 
 interface ContractRow {
   id: string;
@@ -269,8 +270,7 @@ const ContractPage = () => {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center px-4 bg-background">
         <a href="/" className="font-heading text-[32px] leading-none tracking-wider mb-8">
-          <span className="text-navy">PRO</span>
-          <span className="text-teal">GRAFTER</span>
+          <Logo variant="dark" className="h-9 w-auto inline-block" />
         </a>
         <div className="text-center max-w-md bg-card border border-border rounded-2xl p-8 shadow-sm">
           <ShieldAlert className="w-10 h-10 text-muted-foreground mx-auto mb-3" />

@@ -11,6 +11,7 @@ import ManualMaintenance from "@/components/manual/ManualMaintenance";
 import ManualContacts from "@/components/manual/ManualContacts";
 import ManualGreenSections from "@/components/manual/ManualGreenSections";
 import ManualProModal from "@/components/manual/ManualProModal";
+import Logo from "@/components/Logo";
 
 interface ManualData {
   job: any;
@@ -181,8 +182,7 @@ const HomeownerManual = () => {
                 Homeowner Manual
               </p>
               <h1 className="font-heading text-3xl md:text-4xl tracking-wider">
-                <span className="text-primary-foreground">PRO</span>
-                <span className="text-secondary">GRAFTER</span>
+                <Logo variant="light" className="h-10 w-auto inline-block" />
               </h1>
             </div>
             <button

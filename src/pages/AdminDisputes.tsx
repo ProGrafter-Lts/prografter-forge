@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import Logo from "@/components/Logo";
 
 const C = {
   cream:"#F5F0E8", deep:"#0F2238", navy:"#1B3A5C",
@@ -144,7 +145,7 @@ export default function AdminDisputes() {
       <div style={{ background:C.deep, padding:"14px 24px",
         display:"flex", alignItems:"center", gap:12 }}>
         <div className="font-heading tracking-wider" style={{ fontSize:24, fontWeight:700 }}>
-          <span style={{ color:C.cream }}>PRO</span><span style={{ color:C.teal }}>GRAFTER</span>
+          <Logo variant="light" className="h-9 w-auto inline-block" />
         </div>
         <span style={{ color:"rgba(245,240,232,0.45)" }}>|</span>
         <span style={{ fontSize:12, color:"rgba(245,240,232,0.78)", letterSpacing:"0.05em" }}>

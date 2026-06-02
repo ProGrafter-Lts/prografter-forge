@@ -1,4 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
+import Logo from "@/components/Logo";
 import { supabase } from "@/integrations/supabase/client";
 import { useVerificationStatus } from "@/hooks/useVerificationStatus";
 import {
@@ -82,9 +83,8 @@ const TradeSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen }: 
         }`}
       >
         <div className="p-6 border-b border-white/10">
-          <a href="/" className="font-heading text-[24px] leading-none tracking-wider">
-            <span className="text-white">PRO</span>
-            <span className="text-teal">GRAFTER</span>
+          <a href="/" aria-label="ProGrafter">
+            <Logo variant="light" className="h-10 w-auto" />
           </a>
         </div>
 
