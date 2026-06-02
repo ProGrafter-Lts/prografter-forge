@@ -21,6 +21,19 @@ const TRADE_NAMES: Record<string, string> = {
 
 const ADMIN_EMAIL = 'hello@prografter.co.uk'
 const ADMIN_URL = 'https://prografter.co.uk/admin/job-briefs'
+const SITE_URL = 'https://prografter.co.uk'
+const DASHBOARD_PATH = '/dashboard/homeowner'
+// TOGGLE: grant each homeowner ONE free Quote Check on their first job post.
+// Set to false to charge £49 from the very first check.
+const GRANT_FREE_FIRST_CHECK = true
+
+// Parse a free-text "quotes received" answer (e.g. "0", "1-2", "3+") to an int.
+function parseQuotesCount(v: unknown): number {
+  if (typeof v === 'number' && Number.isFinite(v)) return Math.max(0, Math.trunc(v))
+  if (typeof v !== 'string') return 0
+  const m = v.match(/\d+/)
+  return m ? parseInt(m[0], 10) : 0
+}
 
 function generateRef(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
