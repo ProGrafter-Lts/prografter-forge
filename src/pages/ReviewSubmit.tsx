@@ -220,9 +220,7 @@ export default function ReviewSubmit() {
 
       <div style={{ background:C.deep, padding:"14px 24px", display:"flex", alignItems:"center", justifyContent:"space-between", position:"sticky", top:0, zIndex:10 }}>
         <div style={{ display:"flex", alignItems:"center", gap:12 }}>
-          <Link to="/" className="font-heading tracking-wider" style={{ fontSize:24, textDecoration:"none" }}>
-            <Logo variant="light" className="h-9 w-auto inline-block" />
-          </Link>
+          <Logo variant="light" className="h-9 w-auto inline-block" />
           <span style={{ color:"rgba(245,240,232,0.45)", fontSize:16 }}>|</span>
           <span style={{ fontSize:12, color:C.dimText, fontWeight:500, letterSpacing:"0.05em" }}>REVIEW</span>
         </div>
