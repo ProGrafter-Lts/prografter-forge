@@ -752,10 +752,10 @@ export default function PostJobBrief() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h2 style={{ fontSize: 20, fontWeight: 700, color: C.deep, marginBottom: 8 }}>Brief submitted</h2>
+          <h2 style={{ fontSize: 20, fontWeight: 700, color: C.deep, marginBottom: 8 }}>Received — under review</h2>
           <p style={{ fontSize: 14, color: C.secondary, lineHeight: 1.65, marginBottom: 16 }}>
-            Your job brief has been received. ProGrafter will review it and match you with
-            vetted trades in your area. You'll hear from us within 24 hours.
+            Your brief is in and your free homeowner account is ready. We're reviewing it now
+            and will notify you when verified trades quote.
           </p>
           <div style={{ background: C.cream, borderRadius: 10, padding: "12px 16px", marginBottom: 16 }}>
             <p style={{ fontSize: 11, color: C.secondary, margin: "0 0 4px" }}>Your reference number</p>
