@@ -56,7 +56,12 @@ const JobBriefHomeownerEmail = ({
       who to work with.
     </Para>
 
-    <CTA href="https://prografter.co.uk" label="Visit ProGrafter" />
+    <Para>
+      We've set up your free homeowner account so you can track your brief and
+      quotes. Tap below to sign in securely — no password needed.
+    </Para>
+
+    <CTA href={loginUrl || 'https://prografter.co.uk/login'} label="View my dashboard" />
   </ProGrafterShell>
 )
 
