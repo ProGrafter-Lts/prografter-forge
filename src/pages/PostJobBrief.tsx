@@ -349,6 +349,8 @@ export default function PostJobBrief() {
   const [ref, setRef] = useState(() => generateBriefRef());
   const [needsScoping, setNeedsScoping] = useState(false);
   const [consent, setConsent] = useState(false);
+  const [marketing, setMarketing] = useState(false);
+  const [loginUrl, setLoginUrl] = useState("");
 
   const upd = (k: string) => (e: any) => setForm(p => ({ ...p, [k]: e.target.value }));
 
