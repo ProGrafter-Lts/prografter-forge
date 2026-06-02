@@ -7,8 +7,8 @@ import Logo from "@/components/Logo";
 const C = {
   cream:      "#F5F0E8",
   deep:       "#0F2238",
-  navy:       "#1B3A5C",
-  teal:       "#0D9488",
+  navy:       "#27396A",
+  teal:       "#14A8A1",
   tealHover:  "#14B8A8",
   tealLight:  "#CCFBF1",
   tealDim:    "rgba(13,148,136,0.12)",

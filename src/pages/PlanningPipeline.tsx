@@ -5,14 +5,14 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import Logo from "@/components/Logo";
 
 const C = {
-  cream: "#F5F0E8", deep: "#0F2238", navy: "#1B3A5C",
-  teal: "#0D9488", tealHover: "#14B8A8", tealLight: "#CCFBF1",
+  cream: "#F5F0E8", deep: "#0F2238", navy: "#27396A",
+  teal: "#14A8A1", tealHover: "#14B8A8", tealLight: "#CCFBF1",
   body: "#1F2937", secondary: "#4B5563", border: "#D1CBB8", white: "#FFFFFF",
   amber: "#D97706", amberBg: "#FFFBEB", amberBorder: "#FDE68A",
   green: "#16A34A", greenBg: "#F0FDF4", greenBorder: "#BBF7D0",
   red: "#DC2626", redBg: "#FEF2F2", redBorder: "#FECACA",
   purple: "#7C3AED", purpleBg: "#F5F3FF", purpleBorder: "#DDD6FE",
-  darkSurface: "#152C45", darkCard: "#1B3A5C",
+  darkSurface: "#152C45", darkCard: "#27396A",
   darkBorder: "rgba(245,240,232,0.1)", dimText: "rgba(245,240,232,0.5)",
   brightText: "#F5F0E8",
 };

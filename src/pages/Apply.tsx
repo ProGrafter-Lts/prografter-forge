@@ -9,8 +9,8 @@ import Logo from "@/components/Logo";
 const C = {
   cream: "#F5F0E8",
   deep: "#0F2238",
-  navy: "#1B3A5C",
-  teal: "#0D9488",
+  navy: "#27396A",
+  teal: "#14A8A1",
   tealHover: "#14B8A8",
   tealLight: "#CCFBF1",
   body: "#1F2937",
@@ -20,7 +20,7 @@ const C = {
   error: "#DC2626",
   errorBg: "#FEF2F2",
   successBg: "#F0FDF9",
-  success: "#0D9488",
+  success: "#14A8A1",
 };
 
 const FAQItem = ({ q, a }: { q: string; a: string }) => {

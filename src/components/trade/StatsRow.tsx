@@ -33,14 +33,14 @@ const StatsRow = ({ jobsWon, earningsThisMonth, activeProjectCount, rating }: St
           }}
         >
           <div className="flex items-center justify-between mb-2">
-            <stat.icon className="w-5 h-5" style={{ color: stat.accent ? "#0D9488" : "rgba(255,255,255,0.65)" }} />
+            <stat.icon className="w-5 h-5" style={{ color: stat.accent ? "#14A8A1" : "rgba(255,255,255,0.65)" }} />
           </div>
           <p
             className="font-heading"
             style={{
               fontSize: "36px",
               letterSpacing: "0.04em",
-              color: stat.accent ? "#0D9488" : "#FFFFFF",
+              color: stat.accent ? "#14A8A1" : "#FFFFFF",
               lineHeight: 1.05,
             }}
           >

@@ -21,7 +21,7 @@ const Hero = () => {
   return (
     <section
       className="relative min-h-screen flex items-center overflow-hidden bg-navy"
-      style={{ background: "linear-gradient(135deg, #1B3A5C 0%, #0F1F38 100%)" }}
+      style={{ background: "linear-gradient(135deg, #27396A 0%, #0F1F38 100%)" }}
     >
       {/* Ghost GRAFT text */}
       <span className="absolute bottom-8 left-8 font-heading text-[120px] craft:text-[240px] text-cream select-none pointer-events-none leading-none" style={{ opacity: 0.03 }}>
@@ -90,14 +90,14 @@ const Hero = () => {
             style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.12)" }}
           >
             <div className="flex items-center gap-3 mb-5">
-              <div className="w-8 h-[2px]" style={{ backgroundColor: "#0D9488" }} />
-              <span className="font-mono text-[11px] uppercase tracking-widest" style={{ color: "#0D9488" }}>
+              <div className="w-8 h-[2px]" style={{ backgroundColor: "#14A8A1" }} />
+              <span className="font-mono text-[11px] uppercase tracking-widest" style={{ color: "#14A8A1" }}>
                 For Homeowners
               </span>
             </div>
             <h2
               className="font-heading text-[32px] craft:text-[36px] leading-[1] mb-4"
-              style={{ color: "#1B3A5C" }}
+              style={{ color: "#27396A" }}
             >
               Your project. Fully visible. Fully protected.
             </h2>
@@ -113,20 +113,20 @@ const Hero = () => {
                 className="homeowner-cta inline-flex items-center justify-center w-full font-mono text-base px-8 py-4 rounded-xl transition-all duration-200 shadow-md"
                 style={{
                   backgroundColor: "transparent",
-                  border: "2px solid #1B3A5C",
-                  color: "#1B3A5C",
+                  border: "2px solid #27396A",
+                  color: "#27396A",
                   fontWeight: 700,
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = "#0D9488";
-                  e.currentTarget.style.borderColor = "#0D9488";
+                  e.currentTarget.style.backgroundColor = "#14A8A1";
+                  e.currentTarget.style.borderColor = "#14A8A1";
                   e.currentTarget.style.color = "#FFFFFF";
                   e.currentTarget.style.transform = "translateY(-2px)";
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.backgroundColor = "transparent";
-                  e.currentTarget.style.borderColor = "#1B3A5C";
-                  e.currentTarget.style.color = "#1B3A5C";
+                  e.currentTarget.style.borderColor = "#27396A";
+                  e.currentTarget.style.color = "#27396A";
                   e.currentTarget.style.transform = "translateY(0)";
                 }}
               >
@@ -137,18 +137,18 @@ const Hero = () => {
                 className="inline-flex items-center justify-center w-full font-mono text-sm px-8 py-3 rounded-xl transition-all duration-200"
                 style={{
                   backgroundColor: "transparent",
-                  border: "2px solid #1B3A5C",
-                  color: "#1B3A5C",
+                  border: "2px solid #27396A",
+                  color: "#27396A",
                   fontWeight: 500,
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = "#1B3A5C";
+                  e.currentTarget.style.backgroundColor = "#27396A";
                   e.currentTarget.style.color = "#FFFFFF";
                   e.currentTarget.style.transform = "translateY(-2px)";
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.backgroundColor = "transparent";
-                  e.currentTarget.style.color = "#1B3A5C";
+                  e.currentTarget.style.color = "#27396A";
                   e.currentTarget.style.transform = "translateY(0)";
                 }}
               >

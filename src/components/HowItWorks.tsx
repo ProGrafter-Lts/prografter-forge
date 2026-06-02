@@ -4,7 +4,7 @@ const steps = [
     title: "Sign Up",
     desc: "Create your free profile in under two minutes. No card required, no commitment.",
     icon: (
-      <svg width="32" height="32" fill="none" stroke="#0D9488" strokeWidth="1.5" viewBox="0 0 24 24">
+      <svg width="32" height="32" fill="none" stroke="#14A8A1" strokeWidth="1.5" viewBox="0 0 24 24">
         <path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4-4v2" strokeLinecap="round" strokeLinejoin="round" />
         <circle cx="9" cy="7" r="4" />
         <path d="M19 8v6M22 11h-6" strokeLinecap="round" />
@@ -16,7 +16,7 @@ const steps = [
     title: "Get Matched",
     desc: "We connect you with homeowners in your area who need your specific trade skills.",
     icon: (
-      <svg width="32" height="32" fill="none" stroke="#0D9488" strokeWidth="1.5" viewBox="0 0 24 24">
+      <svg width="32" height="32" fill="none" stroke="#14A8A1" strokeWidth="1.5" viewBox="0 0 24 24">
         <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
         <circle cx="12" cy="10" r="3" />
       </svg>
@@ -27,7 +27,7 @@ const steps = [
     title: "Get Paid",
     desc: "Complete the job, get paid directly. We only take 7.5% — capped at £900 per job.",
     icon: (
-      <svg width="32" height="32" fill="none" stroke="#0D9488" strokeWidth="1.5" viewBox="0 0 24 24">
+      <svg width="32" height="32" fill="none" stroke="#14A8A1" strokeWidth="1.5" viewBox="0 0 24 24">
         <path d="M9 11h8M7 15h8M14.5 4c-3 0-5 1.5-5 4.5v11" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     ),
