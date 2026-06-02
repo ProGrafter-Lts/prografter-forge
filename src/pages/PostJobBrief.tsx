@@ -420,19 +420,31 @@ export default function PostJobBrief() {
     setSubmitError("");
     setSubmitting(true);
     try {
+      // Clean, Title-Cased, de-duplicated address (fixes town printed multiple times).
+      const town = titleCaseAddress(form.city);
+      const line1 = dedupeLine(titleCaseAddress(form.address_line1), town);
+      const line2 = dedupeLine(titleCaseAddress(form.address_line2), town);
+
       // If the homeowner asked ProGrafter to scope the job, don't send the
       // (now hidden) scope / known-issues fields to trades.
       const payload = {
         ...form,
+        address_line1: line1,
+        address_line2: line2,
+        city: town,
+        postcode: form.postcode.trim().toUpperCase(),
         ref,
         scope_items: needsScoping ? "" : form.scope_items,
         known_issues: needsScoping ? "" : form.known_issues,
         needs_scoping: needsScoping,
         needs_planning_guidance: needsPlanningGuidance,
+        marketing_opt_in: marketing,
+        user_agent: typeof navigator !== "undefined" ? navigator.userAgent : "",
       };
       const { data, error } = await supabase.functions.invoke("submit-job-brief", { body: payload });
       if (error || !data?.ref) throw error || new Error("No reference returned");
       setRef(data.ref);
+      if (data.loginUrl) setLoginUrl(data.loginUrl);
       setSubmitted(true);
       trackEvent("generate_lead", { reference: data.ref, needs_scoping: needsScoping });
     } catch (err) {
