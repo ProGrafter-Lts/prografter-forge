@@ -88,7 +88,74 @@ Deno.serve(async (req) => {
   const trade_category_id = clean(body.trade_category_id)
   const tradeName = (trade_category_id && TRADE_NAMES[trade_category_id]) || trade_category_id || '—'
 
+  const marketingOptIn = body.marketing_opt_in === true
+  const existing_quotes_count = parseQuotesCount(body.existing_quotes_count ?? body.quotes_received)
+
+  // --- Passwordless account creation (brief submission IS the sign-up) ---
+  // Find or create the auth user for this email, then ensure profile + homeowner.
+  let homeownerUserId: string | null = null
+  let homeownerId: string | null = null
+  try {
+    const emailLower = email.toLowerCase()
+    // Try to create; if the user already exists we look them up instead.
+    const { data: created, error: createErr } = await supabase.auth.admin.createUser({
+      email: emailLower,
+      email_confirm: true,
+      user_metadata: { user_type: 'homeowner', full_name, phone, postcode },
+    })
+    if (createErr) {
+      // Likely already registered — find the existing user by paging the list.
+      let page = 1
+      while (page <= 20 && !homeownerUserId) {
+        const { data: list } = await supabase.auth.admin.listUsers({ page, perPage: 200 })
+        const found = list?.users?.find((u) => (u.email ?? '').toLowerCase() === emailLower)
+        if (found) homeownerUserId = found.id
+        if (!list || list.users.length < 200) break
+        page++
+      }
+    } else {
+      homeownerUserId = created.user?.id ?? null
+    }
+  } catch (e) {
+    console.error('[submit-job-brief] account creation failed', e)
+  }
+
+  if (homeownerUserId) {
+    // The handle_new_user trigger creates profile + homeowner for new users.
+    // For pre-existing users (or trigger gaps) ensure rows exist.
+    await supabase.from('profiles').upsert(
+      { user_id: homeownerUserId, email, full_name, user_type: 'homeowner', postcode, phone },
+      { onConflict: 'user_id' },
+    )
+    const { data: ho } = await supabase
+      .from('homeowners').select('id').eq('user_id', homeownerUserId).maybeSingle()
+    if (ho?.id) {
+      homeownerId = ho.id
+    } else {
+      const { data: newHo } = await supabase
+        .from('homeowners').insert({ user_id: homeownerUserId, name: full_name, email, phone })
+        .select('id').single()
+      homeownerId = newHo?.id ?? null
+    }
+
+    // Consent log (terms always; marketing per opt-in)
+    await supabase.from('consents_log').insert([
+      { user_id: homeownerUserId, consent_type: 'terms', consented: true, user_agent: clean(body.user_agent) },
+      { user_id: homeownerUserId, consent_type: 'marketing', consented: marketingOptIn, user_agent: clean(body.user_agent) },
+    ])
+
+    // Grant ONE free quote-check entitlement on first job post (if none yet).
+    if (GRANT_FREE_FIRST_CHECK) {
+      const { data: existingEnt } = await supabase
+        .from('quote_check_entitlements').select('id').eq('user_id', homeownerUserId).limit(1)
+      if (!existingEnt || existingEnt.length === 0) {
+        await supabase.from('quote_check_entitlements').insert({ user_id: homeownerUserId, source: 'first_job_post' })
+      }
+    }
+  }
+
   const record = {
+
     ref,
     full_name,
     email,
