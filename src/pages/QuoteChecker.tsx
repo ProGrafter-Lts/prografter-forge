@@ -55,8 +55,30 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
   const [description, setDescription] = useState("");
   const [website, setWebsite] = useState(""); // honeypot — must stay empty
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [freeAvailable, setFreeAvailable] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const [formParams] = useSearchParams();
+
+  // Prefill project type from the dashboard deep-link, and detect a free
+  // quote-check entitlement for the signed-in homeowner.
+  useEffect(() => {
+    const pt = formParams.get("project_type");
+    if (pt) setProjectType(pt);
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      if (user.email) setEmail(user.email);
+      const { data: ent } = await supabase
+        .from("quote_check_entitlements" as any)
+        .select("id")
+        .eq("user_id", user.id)
+        .is("consumed_at", null)
+        .limit(1);
+      setFreeAvailable(((ent as any) || []).length > 0);
+    })();
+  }, [formParams]);
+
 
   const ACCEPTED_TYPES = ["application/pdf", "image/jpeg", "image/png"];
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
