@@ -199,6 +199,7 @@ export default function AdminJobBriefs() {
                   <div>
                     <span style={{ fontFamily: "monospace", color: C.teal, fontWeight: 700, fontSize: 13 }}>{b.ref}</span>
                     {b.is_test && <span style={{ marginLeft: 8, fontSize: 10, background: "#FEF3C7", color: "#92400E", padding: "2px 6px", borderRadius: 4 }}>TEST</span>}
+                    <span style={{ marginLeft: 8 }}><StatusPill status={b.status} /></span>
                     {b.needs_scoping && <span style={{ marginLeft: 8, fontSize: 10, background: "#CCFBF1", color: "#0F766E", padding: "2px 6px", borderRadius: 4, fontWeight: 700 }}>NEEDS SCOPING</span>}
                     {b.needs_planning_guidance && <span style={{ marginLeft: 8, fontSize: 10, background: "#FEE2E2", color: "#991B1B", padding: "2px 6px", borderRadius: 4, fontWeight: 700 }}>PLANNING GUIDANCE</span>}
                     <div style={{ fontSize: 13, color: C.deep, marginTop: 2 }}>
