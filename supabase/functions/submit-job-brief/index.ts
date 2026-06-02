@@ -35,6 +35,20 @@ function parseQuotesCount(v: unknown): number {
   return m ? parseInt(m[0], 10) : 0
 }
 
+// Title-case a free-text address line.
+function titleCase(v: string | null): string | null {
+  if (!v) return v
+  return v.trim().toLowerCase().replace(/\b([a-z])/g, (m) => m.toUpperCase())
+}
+// Remove a duplicated town/city accidentally appended to a line.
+function dedupeLine(line: string | null, town: string | null): string | null {
+  if (!line || !town) return line
+  const t = town.trim().toLowerCase()
+  const out = line.split(',').map((s) => s.trim()).filter((s) => s && s.toLowerCase() !== t).join(', ')
+  return out || null
+}
+
+
 function generateRef(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
   let r = 'PG-'
