@@ -46,7 +46,29 @@ interface Brief {
   decision_criteria: string | null; status: string; is_test: boolean; created_at: string;
   published_at?: string | null; matched_trade_count?: number | null;
   needs_scoping?: boolean | null; needs_planning_guidance?: boolean | null;
+  existing_quotes_count?: number | null;
+  scoping_notes?: string | null; scoped_at?: string | null;
+  planning_notes?: string | null; planning_guidance_at?: string | null;
+  override_reason?: string | null;
 }
+
+const STATUS_LABELS: Record<string, { label: string; bg: string; fg: string }> = {
+  new: { label: "New", bg: "#E5E7EB", fg: "#374151" },
+  under_review: { label: "Under review", bg: "#DBEAFE", fg: "#1E40AF" },
+  awaiting_scoping: { label: "Awaiting scoping", bg: "#FEF3C7", fg: "#92400E" },
+  scoped: { label: "Scoped", bg: "#CCFBF1", fg: "#0F766E" },
+  approved: { label: "Approved", bg: "#DCFCE7", fg: "#166534" },
+  published_to_trades: { label: "Published to trades", bg: "#D1FAE5", fg: "#065F46" },
+};
+
+const StatusPill = ({ status }: { status: string }) => {
+  const s = STATUS_LABELS[status] || { label: status, bg: "#E5E7EB", fg: "#374151" };
+  return (
+    <span style={{ fontSize: 10, background: s.bg, color: s.fg, padding: "2px 8px", borderRadius: 999, fontWeight: 700, letterSpacing: "0.02em" }}>
+      {s.label}
+    </span>
+  );
+};
 
 const Field = ({ label, value }: { label: string; value: any }) =>
   value ? (
