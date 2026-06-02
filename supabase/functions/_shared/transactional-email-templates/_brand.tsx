@@ -42,11 +42,10 @@ export const ProGrafterShell = ({ preview, heading, children, signoff }: ShellPr
       <Container style={outer}>
         {/* Branded navy header banner */}
         <Section style={headerBanner}>
-          <Text style={logoMark}>
-            PRO<span style={{ color: '#5EE3D4' }}>GRAFTER</span>
-          </Text>
+          <Img src={LOGO_LIGHT_URL} alt="ProGrafter" width="190" style={logoImg} />
           <Text style={tagline}>VERIFIED UK TRADES · FAIR CONTRACTS</Text>
         </Section>
+
 
         {/* Teal accent bar */}
         <div style={accentBar} />
