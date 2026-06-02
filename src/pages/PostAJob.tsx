@@ -6,6 +6,7 @@ import { buildServiceJsonLd } from "@/lib/seoSchemas";
 import { isGreenTrade } from "@/lib/greenTrades";
 import { Specialism, fetchSpecialisms } from "@/lib/specialisms";
 import { useSetupRedirect, SetupRedirectLoader } from "@/hooks/useSetupRedirect";
+import Logo from "@/components/Logo";
 
 type JobTypeItem = { label: string; icon: string; green: boolean };
 
@@ -312,8 +313,7 @@ const PostAJob = () => {
       />
       <header className="py-6 px-6">
         <Link to="/" className="font-heading text-2xl tracking-wider">
-          <span className="text-cream">PRO</span>
-          <span className="text-teal">GRAFTER</span>
+          <Logo variant="light" className="h-9 w-auto inline-block" />
         </Link>
       </header>
 
