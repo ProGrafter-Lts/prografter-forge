@@ -97,9 +97,9 @@ const SignupTradeUnderReview = () => {
             </>
           ) : (
             <>
-              <a href="/" className="font-heading text-[32px] leading-none tracking-wider inline-block mb-6">
+              <div className="font-heading text-[32px] leading-none tracking-wider inline-block mb-6">
                 <Logo variant="light" className="h-9 w-auto inline-block" />
-              </a>
+              </div>
               <Icon className={`${tone} w-16 h-16 mx-auto mb-4`} strokeWidth={1.5} />
               <h1 className="font-heading text-cream text-4xl mb-3">Application <span className="text-teal">received.</span></h1>
               <p className="font-body text-cream/80 mb-3">
