@@ -123,12 +123,29 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
         .single();
       if (insertError) throw insertError;
 
+      // Free entitlement path — skip Stripe entirely.
+      if (freeAvailable) {
+        const { data: redeemData, error: redeemError } = await supabase.functions.invoke(
+          "redeem-quote-check-entitlement",
+          { body: { quoteCheckId: record.id } }
+        );
+        if (!redeemError && (redeemData as any)?.redeemed) {
+          trackEvent("quote_check", { method: "free_entitlement" });
+          setFreeAvailable(false);
+          onSubmitted(record.id, email, (record as any).lookup_token);
+          return;
+        }
+        // If redemption failed, fall through to the paid flow.
+        console.warn("Free entitlement redemption failed, falling back to payment", redeemError);
+      }
+
       // Create Stripe checkout session (passes honeypot through)
       const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke(
         "create-quote-checkout",
         { body: { quoteCheckId: record.id, email, website } }
       );
       if (checkoutError) throw checkoutError;
+
 
       if (checkoutData?.url) {
         // Store quote ID + lookup token for when they return
