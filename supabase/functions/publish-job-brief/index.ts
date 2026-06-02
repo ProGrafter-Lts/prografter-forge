@@ -175,7 +175,13 @@ Deno.serve(async (req) => {
   })
 
   await supabase.from('job_briefs')
-    .update({ status: 'published', published_at: new Date().toISOString(), matched_trade_count: matched.length })
+    .update({
+      status: 'published_to_trades',
+      published_at: new Date().toISOString(),
+      matched_trade_count: matched.length,
+      published_by: userId,
+      ...(overrideReason ? { override_reason: overrideReason } : {}),
+    })
     .eq('id', brief.id)
 
   return new Response(JSON.stringify({ ok: true, matched: matched.length, emailed: sends.length }), {
