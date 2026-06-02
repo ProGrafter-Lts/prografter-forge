@@ -90,6 +90,23 @@ const HomeownerDashboard = () => {
     setHomeownerName(ho.name);
     setLoading(false);
 
+    // Job briefs (the account-less-to-account spine) + free quote-check entitlements.
+    const [briefRes, entRes] = await Promise.all([
+      supabase
+        .from("job_briefs" as any)
+        .select("id, ref, job_title, trade_category_id, status, existing_quotes_count, created_at")
+        .eq("homeowner_user_id", userId)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("quote_check_entitlements" as any)
+        .select("id")
+        .eq("user_id", userId)
+        .is("consumed_at", null),
+    ]);
+    setBriefs((briefRes.data as any) || []);
+    setFreeChecks(((entRes.data as any) || []).length);
+
+
     // Fetch jobs first so we can scope subsequent queries server-side.
     // Exclude is_test seed data (e.g. "Past electrical work — review #1") from production accounts.
     const { data: jobData } = await supabase
