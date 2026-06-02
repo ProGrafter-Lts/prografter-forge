@@ -23,6 +23,9 @@ import {
 
 export const SITE_NAME = 'ProGrafter'
 export const SITE_URL = 'https://prografter.co.uk'
+// White-on-transparent ProGrafter logo, hosted on the live domain so it
+// renders in email clients (no local imports available at send time).
+export const LOGO_LIGHT_URL = `${SITE_URL}/__l5e/assets-v1/0144c99a-d42a-49a6-ba26-f7e99a94c714/prografter-logo-light.png`
 
 interface ShellProps {
   preview: string
