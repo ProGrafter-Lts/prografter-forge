@@ -723,6 +723,14 @@ export default function PostJobBrief() {
             You'll be notified for each quote received. Every trade is verified before they go
             live on the platform — trades who pass our five-check verification.
           </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 24 }}>
+            <a href="/signup/homeowner" style={{ ...btnNavy, textDecoration: "none", display: "block", textAlign: "center" }}>
+              Create an account to track your quotes →
+            </a>
+            <a href="/" style={{ ...btnBack, textDecoration: "none", display: "block", textAlign: "center" }}>
+              ← Back to home
+            </a>
+          </div>
         </div>
       </div>
     );
