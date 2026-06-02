@@ -267,9 +267,9 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
           className="w-full h-12 bg-teal text-white font-mono text-sm rounded-xl hover:bg-teal-hover transition-colors shadow-lg shadow-teal/20 disabled:bg-muted disabled:text-muted-foreground/70 disabled:shadow-none disabled:opacity-100"
         >
           {isSubmitting ? (
-            <span className="flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" />Preparing checkout...</span>
+            <span className="flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" />{freeAvailable ? "Starting your free check..." : "Preparing checkout..."}</span>
           ) : (
-            "Check My Quote — £49"
+            freeAvailable ? "Run My Free Quote Check" : "Check My Quote — £49"
           )}
         </Button>
         <p className="text-center font-mono text-[11px] italic text-muted-foreground/80 leading-relaxed">
