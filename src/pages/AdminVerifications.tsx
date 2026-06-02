@@ -345,7 +345,7 @@ const AdminVerifications = () => {
     } else {
       const { error } = await supabase
         .from("trades")
-        .update({ verified: true, verification_status: "verified" } as any)
+        .update({ verified: true, verification_status: "approved" } as any)
         .eq("id", trade.id);
       if (error) { toast.error(error.message); setWorking(false); return; }
     }
