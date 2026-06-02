@@ -1,11 +1,12 @@
+import Logo from "@/components/Logo";
+
 const Footer = () => {
   return (
     <footer className="bg-deep border-t border-cream/5 py-8 px-6">
       <div className="max-w-[1800px] mx-auto flex flex-col gap-6">
         <div className="flex flex-col craft:flex-row items-center justify-between gap-4">
-          <a href="#" className="font-heading text-[22px] leading-none tracking-wider">
-            <span className="text-cream">PRO</span>
-            <span className="text-teal">GRAFTER</span>
+          <a href="#" aria-label="ProGrafter">
+            <Logo variant="light" className="h-10 w-auto" />
           </a>
 
           <div className="flex gap-6">
