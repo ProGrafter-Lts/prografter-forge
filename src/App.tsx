@@ -163,8 +163,9 @@ const AppRoutes = () => {
                 </ProtectedRoute>
               }
             />
-            <Route path="/signup/homeowner" element={<SignupHomeowner />} />
-            <Route path="/signup/homeowner/next" element={<SignupHomeownerNext />} />
+            {/* Unified spine: posting a brief IS the homeowner sign-up (passwordless). */}
+            <Route path="/signup/homeowner" element={<Navigate to="/post-job-brief" replace />} />
+            <Route path="/signup/homeowner/next" element={<Navigate to="/dashboard/homeowner" replace />} />
             <Route path="/signup/trade/under-review" element={<ProtectedRoute><SignupTradeUnderReview /></ProtectedRoute>} />
             <Route path="/signup/trade/assessment-pending" element={<ProtectedRoute><SignupTradeAssessmentPending /></ProtectedRoute>} />
             <Route path="/verification" element={<Verification />} />
