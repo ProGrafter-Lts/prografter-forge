@@ -30,6 +30,8 @@ const HomeownerDashboard = () => {
   const [quotes, setQuotes] = useState<any[]>([]);
   const [variations, setVariations] = useState<any[]>([]);
   const [siteUpdates, setSiteUpdates] = useState<any[]>([]);
+  const [briefs, setBriefs] = useState<any[]>([]);
+  const [freeChecks, setFreeChecks] = useState(0);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const lastLoadedUserIdRef = useRef<string | null>(null);
