@@ -10,6 +10,7 @@ interface Props {
   budget?: string
   timeline?: string
   description?: string
+  loginUrl?: string
 }
 
 const JobBriefHomeownerEmail = ({
