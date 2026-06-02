@@ -201,6 +201,7 @@ const AppRoutes = () => {
               }
             />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="/admin" element={<AdminRoute><AdminHome /></AdminRoute>} />
             <Route path="/admin/analytics" element={<AdminRoute><AdminAnalytics /></AdminRoute>} />
             <Route path="*" element={<NotFound />} />
       </Routes>
