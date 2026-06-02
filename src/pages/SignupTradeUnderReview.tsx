@@ -58,9 +58,7 @@ const SignupTradeUnderReview = () => {
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: "hsl(var(--deep))" }}>
       <SEO title="Application under review — ProGrafter" description="Your trade application is being reviewed." path="/signup/trade/under-review" />
       <header className="py-6 px-6">
-        <Link to="/" className="font-heading text-2xl tracking-wider">
-          <Logo variant="light" className="h-9 w-auto inline-block" />
-        </Link>
+        <Logo variant="light" className="h-9 w-auto inline-block" />
       </header>
       <main className="flex-1 flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-lg text-center">
