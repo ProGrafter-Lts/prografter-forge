@@ -4,9 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import Logo from "@/components/Logo";
 
 const C = {
-  cream:"#F5F0E8", deep:"#0F2238", navy:"#1B3A5C",
-  teal:"#0D9488", brightText:"#F5F0E8", dimText:"rgba(245,240,232,0.78)",
-  darkSurface:"#152C45", darkCard:"#1B3A5C", darkBorder:"rgba(245,240,232,0.22)",
+  cream:"#F5F0E8", deep:"#0F2238", navy:"#27396A",
+  teal:"#14A8A1", brightText:"#F5F0E8", dimText:"rgba(245,240,232,0.78)",
+  darkSurface:"#152C45", darkCard:"#27396A", darkBorder:"rgba(245,240,232,0.22)",
   white:"#FFFFFF", red:"#DC2626", redBorder:"#FECACA", amber:"#D97706", amberBorder:"#FDE68A",
   green:"#16A34A", greenBorder:"#BBF7D0", purple:"#7C3AED", purpleBorder:"#DDD6FE",
   amberBg:"#FFFBEB", redBg:"#FEF2F2", greenBg:"#F0FDF4", purpleBg:"#F5F3FF",

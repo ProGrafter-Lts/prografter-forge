@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import SEO from "@/components/SEO";
 
 const C = {
-  cream: "#F5F0E8", deep: "#0F2238", teal: "#0D9488", white: "#FFFFFF",
+  cream: "#F5F0E8", deep: "#0F2238", teal: "#14A8A1", white: "#FFFFFF",
   border: "#E2E0DA", secondary: "#6B6B6B", dark: "#0A1A2E",
 };
 

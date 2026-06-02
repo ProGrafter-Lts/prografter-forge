@@ -272,7 +272,7 @@ const Chatbot = () => {
         <button
           onClick={() => setOpen(true)}
           aria-label="Open ProGrafter chat assistant"
-          className="fixed bottom-20 right-5 sm:bottom-5 z-[70] h-[55px] w-[55px] rounded-full bg-[#0D9488] text-white shadow-lg hover:bg-[#0B7F74] transition-colors flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-[#0D9488] focus:ring-offset-2"
+          className="fixed bottom-20 right-5 sm:bottom-5 z-[70] h-[55px] w-[55px] rounded-full bg-[#14A8A1] text-white shadow-lg hover:bg-[#0B7F74] transition-colors flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-[#14A8A1] focus:ring-offset-2"
         >
           <MessageCircle className="h-6 w-6" strokeWidth={2.2} />
         </button>
@@ -288,9 +288,9 @@ const Chatbot = () => {
           aria-label="ProGrafter chat assistant"
         >
           {/* Header */}
-          <div className="bg-[#1B3A5C] text-white px-4 py-3 flex items-center justify-between">
+          <div className="bg-[#27396A] text-white px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="h-9 w-9 rounded-full bg-[#0D9488] flex items-center justify-center font-heading text-base">
+              <div className="h-9 w-9 rounded-full bg-[#14A8A1] flex items-center justify-center font-heading text-base">
                 PG
               </div>
               <div className="leading-tight">
@@ -317,8 +317,8 @@ const Chatbot = () => {
                 <div
                   className={`max-w-[85%] px-3 py-2 text-sm rounded-2xl whitespace-pre-wrap leading-snug ${
                     m.role === "user"
-                      ? "bg-[#0D9488] text-white rounded-br-sm"
-                      : "bg-white border border-black/5 text-[#1B3A5C] rounded-bl-sm"
+                      ? "bg-[#14A8A1] text-white rounded-br-sm"
+                      : "bg-white border border-black/5 text-[#27396A] rounded-bl-sm"
                   }`}
                 >
                   {m.content}
@@ -330,9 +330,9 @@ const Chatbot = () => {
               <div className="flex justify-start">
                 <div className="bg-white border border-black/5 px-3 py-2 rounded-2xl rounded-bl-sm">
                   <div className="flex gap-1">
-                    <span className="h-2 w-2 rounded-full bg-[#0D9488] animate-bounce" style={{ animationDelay: "0ms" }} />
-                    <span className="h-2 w-2 rounded-full bg-[#0D9488] animate-bounce" style={{ animationDelay: "150ms" }} />
-                    <span className="h-2 w-2 rounded-full bg-[#0D9488] animate-bounce" style={{ animationDelay: "300ms" }} />
+                    <span className="h-2 w-2 rounded-full bg-[#14A8A1] animate-bounce" style={{ animationDelay: "0ms" }} />
+                    <span className="h-2 w-2 rounded-full bg-[#14A8A1] animate-bounce" style={{ animationDelay: "150ms" }} />
+                    <span className="h-2 w-2 rounded-full bg-[#14A8A1] animate-bounce" style={{ animationDelay: "300ms" }} />
                   </div>
                 </div>
               </div>
@@ -343,13 +343,13 @@ const Chatbot = () => {
               <div className="flex flex-wrap gap-2 pt-1">
                 <button
                   onClick={() => handleTypePick("trade")}
-                  className="px-3 py-1.5 text-xs font-medium rounded-full border border-[#0D9488] text-[#0D9488] hover:bg-[#0D9488] hover:text-white transition-colors"
+                  className="px-3 py-1.5 text-xs font-medium rounded-full border border-[#14A8A1] text-[#14A8A1] hover:bg-[#14A8A1] hover:text-white transition-colors"
                 >
                   I'm a Tradesperson
                 </button>
                 <button
                   onClick={() => handleTypePick("homeowner")}
-                  className="px-3 py-1.5 text-xs font-medium rounded-full border border-[#0D9488] text-[#0D9488] hover:bg-[#0D9488] hover:text-white transition-colors"
+                  className="px-3 py-1.5 text-xs font-medium rounded-full border border-[#14A8A1] text-[#14A8A1] hover:bg-[#14A8A1] hover:text-white transition-colors"
                 >
                   I'm a Homeowner
                 </button>
@@ -363,7 +363,7 @@ const Chatbot = () => {
                   <button
                     key={q}
                     onClick={() => sendMessage(q)}
-                    className="px-3 py-1.5 text-xs rounded-full border border-[#0D9488] text-[#0D9488] hover:bg-[#0D9488] hover:text-white transition-colors text-left"
+                    className="px-3 py-1.5 text-xs rounded-full border border-[#14A8A1] text-[#14A8A1] hover:bg-[#14A8A1] hover:text-white transition-colors text-left"
                   >
                     {q}
                   </button>
@@ -385,13 +385,13 @@ const Chatbot = () => {
               onChange={(e) => setInput(e.target.value)}
               placeholder="Type your question…"
               disabled={loading}
-              className="flex-1 px-3 py-2 text-sm rounded-md border border-black/10 focus:outline-none focus:border-[#0D9488] focus:ring-1 focus:ring-[#0D9488] bg-white"
+              className="flex-1 px-3 py-2 text-sm rounded-md border border-black/10 focus:outline-none focus:border-[#14A8A1] focus:ring-1 focus:ring-[#14A8A1] bg-white"
             />
             <button
               type="submit"
               disabled={loading || !input.trim()}
               aria-label="Send message"
-              className="h-9 w-9 rounded-md bg-[#0D9488] text-white flex items-center justify-center disabled:opacity-50 hover:bg-[#0B7F74] transition-colors"
+              className="h-9 w-9 rounded-md bg-[#14A8A1] text-white flex items-center justify-center disabled:opacity-50 hover:bg-[#0B7F74] transition-colors"
             >
               <Send className="h-4 w-4" />
             </button>

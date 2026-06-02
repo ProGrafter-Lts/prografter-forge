@@ -5,8 +5,8 @@ import { trackEvent } from "@/lib/analytics";
 import Logo from "@/components/Logo";
 
 const C = {
-  cream:"#F5F0E8", deep:"#0F2238", navy:"#1B3A5C",
-  teal:"#0D9488", tealDim:"rgba(13,148,136,0.12)",
+  cream:"#F5F0E8", deep:"#0F2238", navy:"#27396A",
+  teal:"#14A8A1", tealDim:"rgba(13,148,136,0.12)",
   body:"#1F2937", secondary:"#4B5563", border:"#D1CBB8", white:"#FFFFFF",
   amber:"#D97706", amberBg:"#FFFBEB", amberBorder:"#FDE68A",
   red:"#DC2626", redBg:"#FEF2F2", redBorder:"#FECACA",

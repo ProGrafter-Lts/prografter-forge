@@ -144,7 +144,7 @@ section[class*="bg-navy"] .font-mono {
 }
 .bg-deep .bg-white .font-mono.text-teal,
 .bg-navy .bg-white .font-mono.text-teal {
-  color: #0D9488;
+  color: #14A8A1;
 }
 /* Floor low-opacity white/cream text on dark backgrounds at 0.85 */
 .bg-deep [class*="text-cream/"],
@@ -162,14 +162,14 @@ section[class*="bg-navy"] [class*="text-white/"] {
 .bg-navy a.inline-link,
 section[class*="bg-deep"] a.inline-link,
 section[class*="bg-navy"] a.inline-link {
-  color: #0D9488;
+  color: #14A8A1;
   text-decoration: underline;
 }
 .bg-deep a.inline-link:hover,
 .bg-navy a.inline-link:hover,
 section[class*="bg-deep"] a.inline-link:hover,
 section[class*="bg-navy"] a.inline-link:hover {
-  color: #14B8A6;
+  color: #1AC2BA;
 }
 /* Placeholders on dark backgrounds */
 .bg-deep input::placeholder,
@@ -193,7 +193,7 @@ section[class*="bg-navy"] textarea::placeholder {
 .bg-card h1, .bg-card h2, .bg-card h3,
 .bg-background h1, .bg-background h2, .bg-background h3,
 .bg-white h1, .bg-white h2, .bg-white h3 {
-  color: #1B3A5C;
+  color: #27396A;
 }
 /* Dark sections must keep their light heading colour */
 .bg-navy h1, .bg-navy h2, .bg-navy h3,
@@ -447,7 +447,7 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
 
 /* Dashboard sidebar (navy) */
 .dashboard-sidebar {
-  background-color: #1B3A5C !important;
+  background-color: #27396A !important;
   border-right: 1px solid rgba(255, 255, 255, 0.08);
 }
 .dashboard-sidebar a,
@@ -456,7 +456,7 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
 }
 .dashboard-sidebar .nav-active {
   background-color: rgba(13, 148, 136, 0.18);
-  color: #14B8A6;
+  color: #1AC2BA;
 }
 
 /* Opt-out: light marketing sections embedded inside dashboards keep their original styling */

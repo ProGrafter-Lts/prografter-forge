@@ -67,7 +67,7 @@ const AddSpecialismsBanner = ({ tradeId, promptSeen, onAdd }: AddSpecialismsBann
       <div className="flex items-start gap-4 pr-8">
         <div
           className="rounded-xl p-2.5 flex-shrink-0"
-          style={{ backgroundColor: "#0D9488", color: "#FFFFFF" }}
+          style={{ backgroundColor: "#14A8A1", color: "#FFFFFF" }}
         >
           <Sparkles className="w-5 h-5" />
         </div>
@@ -84,7 +84,7 @@ const AddSpecialismsBanner = ({ tradeId, promptSeen, onAdd }: AddSpecialismsBann
               type="button"
               onClick={onAdd}
               className="font-mono text-xs uppercase tracking-wider px-4 py-2 rounded-xl hover:opacity-90 transition-opacity"
-              style={{ backgroundColor: "#0D9488", color: "#FFFFFF" }}
+              style={{ backgroundColor: "#14A8A1", color: "#FFFFFF" }}
             >
               Add specialisms
             </button>

@@ -96,7 +96,7 @@ const TradeSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen }: 
                 className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-mono text-sm transition-colors"
                 style={{
                   backgroundColor: isActive ? "rgba(13,148,136,0.18)" : "transparent",
-                  color: isActive ? "#14B8A6" : "rgba(255,255,255,0.75)",
+                  color: isActive ? "#1AC2BA" : "rgba(255,255,255,0.75)",
                 }}
               >
                 <item.icon className="w-4 h-4" />
@@ -129,14 +129,14 @@ const TradeSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen }: 
                     className="h-full rounded-full transition-all"
                     style={{
                       width: `${(verification.completed / verification.total) * 100}%`,
-                      backgroundColor: "#14B8A6",
+                      backgroundColor: "#1AC2BA",
                     }}
                   />
                 </div>
                 <button
                   onClick={() => handleNavClick("profile")}
                   className="font-mono text-xs hover:underline"
-                  style={{ color: "#14B8A6" }}
+                  style={{ color: "#1AC2BA" }}
                 >
                   Complete verification →
                 </button>

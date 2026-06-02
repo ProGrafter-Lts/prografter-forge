@@ -9,7 +9,7 @@ import {
 } from "@/lib/tradeApplications";
 
 const C = {
-  cream: "#F5F0E8", deep: "#0F2238", teal: "#0D9488",
+  cream: "#F5F0E8", deep: "#0F2238", teal: "#14A8A1",
   dimText: "rgba(245,240,232,0.78)", darkBorder: "rgba(245,240,232,0.22)",
   white: "#FFFFFF", border: "#E2E0DA", secondary: "#6B6B6B",
 };

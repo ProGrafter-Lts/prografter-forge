@@ -31,8 +31,8 @@ type Scraped = {
 };
 
 const C = {
-  cream: "#F5F0E8", deep: "#0F2238", navy: "#1B3A5C",
-  teal: "#0D9488", red: "#DC2626", green: "#16A34A", amber: "#D97706",
+  cream: "#F5F0E8", deep: "#0F2238", navy: "#27396A",
+  teal: "#14A8A1", red: "#DC2626", green: "#16A34A", amber: "#D97706",
   border: "rgba(245,240,232,0.1)", dim: "rgba(245,240,232,0.55)", bright: "#F5F0E8",
 };
 
