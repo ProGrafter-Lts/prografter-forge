@@ -21,6 +21,7 @@ const JobBriefHomeownerEmail = ({
   budget,
   timeline,
   description,
+  loginUrl,
 }: Props) => (
   <ProGrafterShell
     preview={`Your job brief ${reference || ''} has been received`}
