@@ -208,6 +208,23 @@ const HomeownerDashboard = () => {
     return jobs.filter(isActiveJob);
   }, [jobs, activeJobIds]);
 
+  // Quote Checker prompt: surface when a brief says they already have outside quotes.
+  const TRADE_TO_PROJECT_TYPE: Record<string, string> = {
+    electrician: "Full Rewire",
+    plumber: "Bathroom",
+    gas_engineer: "Boiler/Heating Replacement",
+    roofer: "Roofing",
+    general_builder: "Rear Extension",
+  };
+  const quoteCheckerPrompt = useMemo(() => {
+    const b = briefs.find((x: any) => (x.existing_quotes_count ?? 0) > 0);
+    if (!b) return null;
+    const projectType = TRADE_TO_PROJECT_TYPE[b.trade_category_id] || "Other";
+    return { href: `/quote-checker?project_type=${encodeURIComponent(projectType)}`, jobTitle: b.job_title };
+  }, [briefs]);
+
+
+
   return (
     <div className="min-h-screen dashboard-dark flex">
       <HomeownerSidebar
