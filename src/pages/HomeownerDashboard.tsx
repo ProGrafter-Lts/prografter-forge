@@ -380,6 +380,28 @@ const HomeownerDashboard = () => {
             <>
               <VariationAlert variations={variations} />
 
+              {quoteCheckerPrompt && (
+                <div className="bg-card rounded-2xl p-6 border border-border shadow-sm flex items-start justify-between gap-4 flex-wrap">
+                  <div className="max-w-lg">
+                    <h3 className="font-heading text-primary text-lg flex items-center gap-2">
+                      <SearchCheck className="w-5 h-5 text-secondary" /> Already got a quote? Check it's fair
+                    </h3>
+                    <p className="font-mono text-xs text-muted-foreground mt-1">
+                      You told us you've received quotes{quoteCheckerPrompt.jobTitle ? ` for "${quoteCheckerPrompt.jobTitle}"` : ""}.
+                      Upload one and our AI flags missing line items and compares it to fair-market rates.
+                      {freeChecks > 0 && <strong className="text-secondary"> Your first check is free.</strong>}
+                    </p>
+                  </div>
+                  <a
+                    href={quoteCheckerPrompt.href}
+                    className="inline-flex items-center gap-1.5 bg-secondary text-secondary-foreground font-mono text-xs px-4 py-2 rounded-xl hover:opacity-90 transition-opacity shadow-sm whitespace-nowrap"
+                  >
+                    {freeChecks > 0 ? "Run free Quote Check" : "Run Quote Checker"}
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </a>
+                </div>
+              )}
+
               <ActiveProjectsSection jobs={jobs} quoteCounts={quoteCounts} activeJobs={activeJobs} />
 
               <QuotesReceived quotes={quotes} onSelectTier={handleSelectTier} onQuoteAccepted={reloadCurrentSession} />
