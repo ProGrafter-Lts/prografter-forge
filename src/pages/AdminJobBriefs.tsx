@@ -95,19 +95,86 @@ export default function AdminJobBriefs() {
   }, []);
 
   const [publishing, setPublishing] = useState<string | null>(null);
-  const publish = async (b: Brief) => {
+  const [busy, setBusy] = useState<string | null>(null);
+
+  const patchBrief = (id: string, patch: Partial<Brief>) =>
+    setBriefs((prev) => prev.map((x) => (x.id === id ? { ...x, ...patch } : x)));
+
+  const publish = async (b: Brief, overrideReason?: string) => {
     setPublishing(b.id);
     const { data, error } = await supabase.functions.invoke("publish-job-brief", {
-      body: { brief_id: b.id },
+      body: { brief_id: b.id, override_reason: overrideReason || null },
     });
     setPublishing(null);
     if (error) { alert("Publish failed: " + error.message); return; }
     const matched = (data as any)?.matched ?? 0;
     alert(`Published to trades. ${matched} matched trade(s) notified.`);
-    setBriefs((prev) => prev.map((x) => x.id === b.id
-      ? { ...x, status: "published", published_at: new Date().toISOString(), matched_trade_count: matched }
-      : x));
+    patchBrief(b.id, {
+      status: "published_to_trades",
+      published_at: new Date().toISOString(),
+      matched_trade_count: matched,
+      override_reason: overrideReason || null,
+    });
   };
+
+  // Record a scoping call: capture notes + editable scope fields, clear the flag.
+  const recordScoping = async (b: Brief) => {
+    const notes = prompt("Scoping call notes (what was agreed):", b.scoping_notes || "");
+    if (notes === null) return;
+    const scopeItems = prompt("Scope of works (edit/confirm):", b.scope_items || "");
+    if (scopeItems === null) return;
+    const knownIssues = prompt("Known issues (edit/confirm):", b.known_issues || "");
+    if (knownIssues === null) return;
+    setBusy(b.id);
+    const { data: u } = await supabase.auth.getUser();
+    const { error } = await supabase.from("job_briefs" as any).update({
+      scoping_notes: notes,
+      scope_items: scopeItems,
+      known_issues: knownIssues,
+      needs_scoping: false,
+      status: "scoped",
+      scoped_by: u.user?.id ?? null,
+      scoped_at: new Date().toISOString(),
+    }).eq("id", b.id);
+    setBusy(null);
+    if (error) { alert("Save failed: " + error.message); return; }
+    patchBrief(b.id, {
+      scoping_notes: notes, scope_items: scopeItems, known_issues: knownIssues,
+      needs_scoping: false, status: "scoped", scoped_at: new Date().toISOString(),
+    });
+  };
+
+  // Record planning guidance given: capture notes, clear the flag.
+  const recordPlanning = async (b: Brief) => {
+    const notes = prompt("Planning guidance given (notes):", b.planning_notes || "");
+    if (notes === null) return;
+    setBusy(b.id);
+    const { data: u } = await supabase.auth.getUser();
+    const { error } = await supabase.from("job_briefs" as any).update({
+      planning_notes: notes,
+      needs_planning_guidance: false,
+      planning_guidance_by: u.user?.id ?? null,
+      planning_guidance_at: new Date().toISOString(),
+    }).eq("id", b.id);
+    setBusy(null);
+    if (error) { alert("Save failed: " + error.message); return; }
+    patchBrief(b.id, {
+      planning_notes: notes, needs_planning_guidance: false,
+      planning_guidance_at: new Date().toISOString(),
+    });
+  };
+
+  const approveAndPublish = (b: Brief) => {
+    const blocked = b.needs_scoping || b.needs_planning_guidance;
+    if (!blocked) { publish(b); return; }
+    // Deliberate override path — requires a reason and is logged.
+    const flags = [b.needs_scoping ? "NEEDS SCOPING" : null, b.needs_planning_guidance ? "PLANNING GUIDANCE" : null].filter(Boolean).join(" + ");
+    const reason = prompt(`This brief still has blocking flag(s): ${flags}.\nPublishing now is an override. Enter a reason to proceed (required):`, "");
+    if (reason === null) return;
+    if (!reason.trim()) { alert("An override reason is required to publish a flagged brief."); return; }
+    publish(b, reason.trim());
+  };
+
 
   return (
     <div style={{ minHeight: "100vh", background: C.cream }}>
