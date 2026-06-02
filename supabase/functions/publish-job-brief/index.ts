@@ -84,9 +84,11 @@ Deno.serve(async (req) => {
   }
 
   let briefId: string
+  let overrideReason: string | null = null
   try {
     const body = await req.json()
     briefId = String(body.brief_id || body.briefId || '')
+    overrideReason = body.override_reason ? String(body.override_reason) : null
   } catch {
     return new Response(JSON.stringify({ error: 'Invalid JSON' }), {
       status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
