@@ -58,9 +58,7 @@ export const ProGrafterShell = ({ preview, heading, children, signoff }: ShellPr
 
         {/* Footer */}
         <Section style={footerWrap}>
-          <Text style={footerLogo}>
-            PRO<span style={{ color: '#0D9488' }}>GRAFTER</span>
-          </Text>
+          <Img src={LOGO_LIGHT_URL} alt="ProGrafter" width="130" style={footerLogoImg} />
           <Text style={footerLinks}>
             <Link href={`${SITE_URL}`} style={footerLink}>prografter.co.uk</Link>
             {' · '}
