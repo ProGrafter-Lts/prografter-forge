@@ -275,7 +275,7 @@ Deno.serve(async (req) => {
     else if (r.value.error) console.error(`[submit-job-brief] ${which} email error`, r.value.error)
   })
 
-  return new Response(JSON.stringify({ ref }), {
+  return new Response(JSON.stringify({ ref, loginUrl, accountCreated: !!homeownerUserId }), {
     status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   })
 })
