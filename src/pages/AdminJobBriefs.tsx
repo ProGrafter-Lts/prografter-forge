@@ -232,25 +232,56 @@ export default function AdminJobBriefs() {
                     <Field label="Quotes received" value={b.quotes_received} />
                     <Field label="Decision criteria" value={b.decision_criteria} />
                     <Field label="Notes" value={b.additional_notes} />
-                    <Field label="Status" value={b.status} />
+                    <Field label="Status" value={(STATUS_LABELS[b.status]?.label) || b.status} />
+                    <Field label="Existing quotes" value={b.existing_quotes_count ?? null} />
                     <Field label="Matched trades" value={b.matched_trade_count} />
                     <Field label="Needs scoping" value={b.needs_scoping ? "Yes — homeowner requested scoping call" : null} />
                     <Field label="Planning guidance" value={b.needs_planning_guidance ? "Yes — homeowner unsure on planning/regs" : null} />
-                    {b.needs_scoping && (
-                      <div style={{ marginTop: 10, background: "#CCFBF1", border: "1px solid #99F6E4", color: "#0F766E", borderRadius: 8, padding: "10px 12px", fontSize: 12, lineHeight: 1.5 }}>
-                        <strong>Scoping requested.</strong> This brief should be scoped with the homeowner before publishing to trades.
+                    <Field label="Scoping notes" value={b.scoping_notes} />
+                    <Field label="Planning notes" value={b.planning_notes} />
+                    <Field label="Override reason" value={b.override_reason} />
+
+                    <div style={{ marginTop: 14, display: "flex", flexWrap: "wrap", gap: 8 }}>
+                      {b.needs_scoping && (
+                        <button
+                          onClick={() => recordScoping(b)}
+                          disabled={busy === b.id}
+                          style={{ background: "#0F766E", color: C.white, border: "none", borderRadius: 8, padding: "9px 14px", fontSize: 13, fontWeight: 700, cursor: "pointer", opacity: busy === b.id ? 0.6 : 1 }}
+                        >
+                          {busy === b.id ? "Saving…" : "Record scoping call"}
+                        </button>
+                      )}
+                      {b.needs_planning_guidance && (
+                        <button
+                          onClick={() => recordPlanning(b)}
+                          disabled={busy === b.id}
+                          style={{ background: "#991B1B", color: C.white, border: "none", borderRadius: 8, padding: "9px 14px", fontSize: 13, fontWeight: 700, cursor: "pointer", opacity: busy === b.id ? 0.6 : 1 }}
+                        >
+                          {busy === b.id ? "Saving…" : "Record planning guidance given"}
+                        </button>
+                      )}
+                    </div>
+
+                    {(b.needs_scoping || b.needs_planning_guidance) && (
+                      <div style={{ marginTop: 10, background: "#FEF3C7", border: "1px solid #FDE68A", color: "#92400E", borderRadius: 8, padding: "10px 12px", fontSize: 12, lineHeight: 1.5 }}>
+                        <strong>Blocking flag present.</strong> Clear the flag(s) above before a clean publish.
+                        Publishing now requires a logged override reason.
                       </div>
                     )}
+
                     <div style={{ marginTop: 12 }}>
                       <button
-                        onClick={() => {
-                          if (b.needs_scoping && !confirm("This brief is flagged NEEDS SCOPING. Publish to trades anyway?")) return;
-                          publish(b);
-                        }}
+                        onClick={() => approveAndPublish(b)}
                         disabled={publishing === b.id}
                         style={{ background: C.teal, color: C.white, border: "none", borderRadius: 8, padding: "9px 16px", fontSize: 13, fontWeight: 700, cursor: "pointer", opacity: publishing === b.id ? 0.6 : 1 }}
                       >
-                        {publishing === b.id ? "Publishing…" : b.published_at ? "Re-publish to matched trades" : "Approve & publish to trades"}
+                        {publishing === b.id
+                          ? "Publishing…"
+                          : b.published_at
+                            ? "Re-publish to matched trades"
+                            : (b.needs_scoping || b.needs_planning_guidance)
+                              ? "Publish anyway (override)"
+                              : "Approve & publish to trades"}
                       </button>
                     </div>
                   </div>
