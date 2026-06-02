@@ -78,5 +78,6 @@ export const template = {
     budget: '£2,500–£5,000',
     timeline: 'Within a month',
     description: 'Full kitchen rewire with 6 new double sockets and under-cabinet lighting.',
+    loginUrl: 'https://prografter.co.uk/login',
   },
 } satisfies TemplateEntry
