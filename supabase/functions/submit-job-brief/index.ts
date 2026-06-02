@@ -235,6 +235,7 @@ Deno.serve(async (req) => {
         budget: record.budget_band,
         timeline: record.timeline,
         description: record.job_description,
+        loginUrl,
       },
     }),
     enqueueTransactionalEmail(supabase, {
