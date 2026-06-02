@@ -7,9 +7,7 @@ const Navbar = () => {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-[12px]" style={{ backgroundColor: "rgba(245, 240, 232, 0.92)" }}>
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between h-16">
-        <a href="/" className="flex items-center" aria-label="ProGrafter home">
-          <Logo className="h-11 w-auto" />
-        </a>
+        <Logo className="h-11 w-auto" />
 
         <div className="hidden craft:flex items-center gap-6">
           <a href="/#how-it-works" className="font-mono text-sm text-body-text hover:text-teal transition-colors">How It Works</a>

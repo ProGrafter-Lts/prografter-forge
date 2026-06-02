@@ -5,9 +5,7 @@ const Footer = () => {
     <footer className="bg-deep border-t border-cream/5 py-8 px-6">
       <div className="max-w-[1800px] mx-auto flex flex-col gap-6">
         <div className="flex flex-col craft:flex-row items-center justify-between gap-4">
-          <a href="#" aria-label="ProGrafter">
-            <Logo variant="light" className="h-10 w-auto" />
-          </a>
+          <Logo variant="light" className="h-10 w-auto" />
 
           <div className="flex gap-6">
             <a href="/about" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">About</a>
