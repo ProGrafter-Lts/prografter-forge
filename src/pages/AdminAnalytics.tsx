@@ -89,11 +89,16 @@ export default function AdminAnalytics() {
         )}
 
         {isError && (
-          <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-6 text-sm text-foreground">
-            <p className="font-medium">Couldn’t load analytics.</p>
+          <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-6 text-sm text-foreground">
+            <p className="font-medium">Analytics backend not set up yet.</p>
             <p className="mt-1 text-muted-foreground">
-              {(error as Error)?.message ??
-                "Make sure the GA4 service account and property ID are configured."}
+              Page-view and conversion tracking is already live on the site, but
+              this in-app dashboard needs a Google Cloud service account and your
+              GA4 property ID before it can pull reports. Ask Lovable to finish
+              the analytics setup and provide those credentials to enable it.
+            </p>
+            <p className="mt-2 text-xs text-muted-foreground/80">
+              Details: {(error as Error)?.message ?? "ga4-report function unavailable"}
             </p>
           </div>
         )}
