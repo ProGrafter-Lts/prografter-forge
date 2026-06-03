@@ -8,33 +8,35 @@ interface WaitlistOutOfAreaProps {
 
 const WaitlistOutOfAreaEmail = ({ name }: WaitlistOutOfAreaProps) => (
   <ProGrafterShell
-    preview={`A quick update on your ${SITE_NAME} signup`}
-    heading={name ? `Hi ${name},` : `A quick update`}
+    preview={`${SITE_NAME} is coming soon to your area`}
+    heading={name ? `Hi ${name},` : `Great news`}
     signoff={`— The ${SITE_NAME} Team`}
   >
     <Para>
-      Thanks so much for signing up to {SITE_NAME}. We really appreciate your interest.
+      Thanks so much for signing up to {SITE_NAME} — we'd genuinely love to have tradespeople
+      like you on board.
     </Para>
     <Para>
-      Right now we're operating in <strong>Nottinghamshire and the East Midlands only</strong>{' '}
-      while we get established. Your postcode falls outside that launch area, so we're not
-      able to send you verified job leads just yet.
+      We're launching in <strong>Nottinghamshire and the East Midlands first</strong>, and your
+      postcode is just outside that initial area. The good news: if things go well here (and we
+      think they will), we'll be rolling out to more areas soon.
     </Para>
-    <InfoCard title="What happens next?">
-      • We've kept your details on file.<br />
-      • As soon as {SITE_NAME} expands to your area, we'll be in touch.<br />
-      • No further action is needed from you for now.
+    <InfoCard title="May we keep your details?">
+      • We'd like to hold your details on file so you're first in the queue.<br />
+      • As soon as {SITE_NAME} goes live in your area, we'll get in touch.<br />
+      • Happy with that? You don't need to do a thing — you're on the list.
     </InfoCard>
     <Para>
-      If you believe you're within the Nottinghamshire / East Midlands area and have received
-      this in error, just reply to this email and we'll sort it out.
+      If you'd rather we didn't keep your details, just reply to this email and we'll remove them.
+      And if you believe you're already within the Nottinghamshire / East Midlands area, reply and
+      we'll get you set up straight away.
     </Para>
   </ProGrafterShell>
 )
 
 export const template = {
   component: WaitlistOutOfAreaEmail,
-  subject: `An update on your ${SITE_NAME} signup`,
-  displayName: 'Waitlist — out of area',
+  subject: `${SITE_NAME} is coming to your area soon`,
+  displayName: 'Waitlist — coming soon (out of area)',
   previewData: { name: 'David' },
 } satisfies TemplateEntry
