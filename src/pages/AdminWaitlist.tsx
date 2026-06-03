@@ -146,7 +146,8 @@ const AdminWaitlist = () => {
         <h1 className="font-heading text-navy text-4xl mb-2">Waitlist Signups</h1>
         <p className="font-body text-secondary-text mb-6 max-w-2xl">
           Early-access waitlist signups. Out-of-area people (outside Nottinghamshire / East Midlands)
-          can be emailed a "Nottinghamshire only" note and dismissed from your feed.
+          can be emailed a friendly "coming soon — we'll keep your details and contact you when we
+          launch in your area" note, then archived from your active feed (their details stay on file).
         </p>
 
         <div className="flex flex-wrap gap-2 mb-6">
