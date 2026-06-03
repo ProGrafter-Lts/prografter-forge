@@ -106,7 +106,7 @@ const AdminWaitlist = () => {
         },
       });
       if (error) throw error;
-      toast.success(`Nottinghamshire-only email sent to ${row.email}`);
+      toast.success(`"Coming soon" email sent to ${row.email}`);
       if (alsoDismiss) {
         await supabase
           .from("early_signups" as any)
