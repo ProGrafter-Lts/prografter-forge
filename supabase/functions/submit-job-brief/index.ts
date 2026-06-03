@@ -109,23 +109,30 @@ Deno.serve(async (req) => {
   // Find or create the auth user for this email, then ensure profile + homeowner.
   let homeownerUserId: string | null = null
   let homeownerId: string | null = null
+  // Magic-link captured during account resolution so we never rely on the
+  // platform's listUsers endpoint (which can 500 on NULL confirmation_token).
+  let homeownerMagicLink: string | null = null
+  const emailLower = email.toLowerCase()
   try {
-    const emailLower = email.toLowerCase()
-    // Try to create; if the user already exists we look them up instead.
+    // Try to create; if the user already exists we resolve them via generateLink.
     const { data: created, error: createErr } = await supabase.auth.admin.createUser({
       email: emailLower,
       email_confirm: true,
       user_metadata: { user_type: 'homeowner', full_name, phone, postcode },
     })
     if (createErr) {
-      // Likely already registered — find the existing user by paging the list.
-      let page = 1
-      while (page <= 20 && !homeownerUserId) {
-        const { data: list } = await supabase.auth.admin.listUsers({ page, perPage: 200 })
-        const found = list?.users?.find((u) => (u.email ?? '').toLowerCase() === emailLower)
-        if (found) homeownerUserId = found.id
-        if (!list || list.users.length < 200) break
-        page++
+      // Likely already registered. generateLink returns BOTH the existing user
+      // and a fresh magic link — avoiding the buggy listUsers lookup entirely.
+      const { data: linkData, error: linkErr } = await supabase.auth.admin.generateLink({
+        type: 'magiclink',
+        email: emailLower,
+        options: { redirectTo: `${SITE_URL}${DASHBOARD_PATH}` },
+      })
+      if (linkErr) {
+        console.error('[submit-job-brief] generateLink (existing user) failed', linkErr)
+      } else {
+        homeownerUserId = linkData?.user?.id ?? null
+        homeownerMagicLink = linkData?.properties?.action_link ?? null
       }
     } else {
       homeownerUserId = created.user?.id ?? null
@@ -220,11 +227,14 @@ Deno.serve(async (req) => {
 
   // Generate a magic-link login that lands the homeowner on their dashboard.
   let loginUrl = `${SITE_URL}/login`
-  if (homeownerUserId) {
+  if (homeownerMagicLink) {
+    // Reuse the link captured while resolving an existing account.
+    loginUrl = homeownerMagicLink
+  } else if (homeownerUserId) {
     try {
       const { data: linkData } = await supabase.auth.admin.generateLink({
         type: 'magiclink',
-        email: email.toLowerCase(),
+        email: emailLower,
         options: { redirectTo: `${SITE_URL}${DASHBOARD_PATH}` },
       })
       if (linkData?.properties?.action_link) loginUrl = linkData.properties.action_link
