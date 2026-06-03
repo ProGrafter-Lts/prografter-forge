@@ -118,9 +118,7 @@ const Contact = () => {
           email: "hello@prografter.co.uk",
           address: {
             "@type": "PostalAddress",
-            streetAddress: "66 Paul Street",
-            addressLocality: "London",
-            postalCode: "EC2A 4NA",
+            addressRegion: "Nottinghamshire",
             addressCountry: "GB",
           },
           identifier: { "@type": "PropertyValue", propertyID: "Companies House", value: "17124130" },
@@ -326,9 +324,9 @@ const Contact = () => {
                 </div>
                 <div>
                   <dt className="text-secondary-text uppercase tracking-wider text-xs mb-1">
-                    Registered Address
+                    Registered Office
                   </dt>
-                  <dd className="text-cream">66 Paul Street, London, EC2A 4NA</dd>
+                  <dd className="text-cream">Nottinghamshire, UK — full registered address available on request</dd>
                 </div>
                 <div>
                   <dt className="text-secondary-text uppercase tracking-wider text-xs mb-1">

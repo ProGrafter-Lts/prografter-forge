@@ -8,9 +8,7 @@ export const localBusinessJsonLd = {
   founder: { "@type": "Person", name: "Lee Palfreeman" },
   address: {
     "@type": "PostalAddress",
-    streetAddress: "66 Paul Street",
-    addressLocality: "London",
-    postalCode: "EC2A 4NA",
+    addressRegion: "Nottinghamshire",
     addressCountry: "GB",
   },
   identifier: { "@type": "PropertyValue", propertyID: "Companies House", value: "17124130" },
