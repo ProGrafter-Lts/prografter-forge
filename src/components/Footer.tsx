@@ -7,7 +7,7 @@ const Footer = () => {
         <div className="flex flex-col craft:flex-row items-center justify-between gap-4">
           <Logo variant="light" className="h-10 w-auto" />
 
-          <div className="flex gap-6">
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
             <a href="/about" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">About</a>
             <a href="/privacy" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">Privacy</a>
             <a href="/terms" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">Terms</a>
