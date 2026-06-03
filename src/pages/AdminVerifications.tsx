@@ -569,8 +569,8 @@ const AdminVerifications = () => {
         </div>
 
         {filter === "pending" && (() => {
-          const awaitingCount = trades.filter((t) => !t.submitted_for_review_at).length;
-          const readyCount = trades.length - awaitingCount;
+          const awaitingCount = visibleTrades.filter((t) => !t.submitted_for_review_at).length;
+          const readyCount = visibleTrades.length - awaitingCount;
           return (
             <div className="bg-white rounded-2xl border border-navy/10 p-4 mb-4 flex flex-wrap items-center justify-between gap-3">
               <p className="font-mono text-xs text-secondary-text">
