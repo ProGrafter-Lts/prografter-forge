@@ -211,7 +211,7 @@ const AdminWaitlist = () => {
                           onClick={() => emailOutOfArea(row, true)}
                           className="px-3 py-2 rounded-lg text-xs font-mono uppercase tracking-widest bg-teal text-cream hover:bg-teal-hover disabled:opacity-50"
                         >
-                          Email "Notts only" + dismiss
+                          Email "coming soon" + archive
                         </button>
                       )}
                       {!dismissed && !inArea && (
