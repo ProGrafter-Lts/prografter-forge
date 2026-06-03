@@ -117,6 +117,7 @@ const isInternalEmail = (email: string | null) =>
 const AdminVerifications = () => {
   const [filter, setFilter] = useState<FilterKey>("pending");
   const [sortMode, setSortMode] = useState<"wait" | "recent">("wait");
+  const [showTest, setShowTest] = useState(false);
   const [trades, setTrades] = useState<PendingTrade[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeId, setActiveId] = useState<string | null>(null);
