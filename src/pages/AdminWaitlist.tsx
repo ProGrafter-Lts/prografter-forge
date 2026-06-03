@@ -16,6 +16,7 @@ interface EarlySignup {
   admin_notes: string | null;
   status_updated_at: string | null;
   created_at: string;
+  is_test: boolean;
 }
 
 // Launch area = Nottinghamshire & East Midlands
