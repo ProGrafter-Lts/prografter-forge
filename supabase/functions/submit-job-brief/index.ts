@@ -227,11 +227,14 @@ Deno.serve(async (req) => {
 
   // Generate a magic-link login that lands the homeowner on their dashboard.
   let loginUrl = `${SITE_URL}/login`
-  if (homeownerUserId) {
+  if (homeownerMagicLink) {
+    // Reuse the link captured while resolving an existing account.
+    loginUrl = homeownerMagicLink
+  } else if (homeownerUserId) {
     try {
       const { data: linkData } = await supabase.auth.admin.generateLink({
         type: 'magiclink',
-        email: email.toLowerCase(),
+        email: emailLower,
         options: { redirectTo: `${SITE_URL}${DASHBOARD_PATH}` },
       })
       if (linkData?.properties?.action_link) loginUrl = linkData.properties.action_link
