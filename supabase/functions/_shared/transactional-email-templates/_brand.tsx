@@ -68,7 +68,7 @@ export const ProGrafterShell = ({ preview, heading, children, signoff }: ShellPr
           </Text>
           <Text style={footerLegal}>
             ProGrafter Ltd · Company 17124130<br />
-            66 Paul Street, London EC2A 4NA · ICO ZC114018
+            Nottinghamshire, UK · ICO ZC114018
           </Text>
         </Section>
       </Container>
