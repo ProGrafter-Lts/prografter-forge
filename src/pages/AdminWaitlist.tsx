@@ -216,6 +216,9 @@ const AdminWaitlist = () => {
                         {dismissed && (
                           <Badge className="bg-secondary-text/15 text-secondary-text border-0 font-mono text-[10px] uppercase">Archived</Badge>
                         )}
+                        {row.is_test && (
+                          <Badge className="bg-purple-100 text-purple-700 border-0 font-mono text-[10px] uppercase">Test</Badge>
+                        )}
                       </div>
                       <div className="mt-1 font-body text-sm text-secondary-text break-all">
                         <a href={`mailto:${row.email}`} className="text-navy hover:text-teal underline">{row.email}</a>
@@ -262,6 +265,13 @@ const AdminWaitlist = () => {
                           Restore
                         </button>
                       )}
+                      <button
+                        disabled={busy}
+                        onClick={() => toggleTest(row)}
+                        className="px-3 py-2 rounded-lg text-xs font-mono uppercase tracking-widest bg-white border border-navy/15 text-secondary-text hover:border-purple-400 disabled:opacity-50"
+                      >
+                        {row.is_test ? "Mark real" : "Mark test"}
+                      </button>
                     </div>
                   </div>
                 </div>
