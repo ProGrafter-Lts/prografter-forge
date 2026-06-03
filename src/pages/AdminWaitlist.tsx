@@ -32,7 +32,7 @@ const FILTERS: { key: FilterKey; label: string }[] = [
   { key: "all", label: "All active" },
   { key: "in_area", label: "In area" },
   { key: "out_of_area", label: "Out of area" },
-  { key: "dismissed", label: "Dismissed" },
+  { key: "dismissed", label: "Archived" },
 ];
 
 const AdminWaitlist = () => {
@@ -106,7 +106,7 @@ const AdminWaitlist = () => {
         },
       });
       if (error) throw error;
-      toast.success(`Nottinghamshire-only email sent to ${row.email}`);
+      toast.success(`"Coming soon" email sent to ${row.email}`);
       if (alsoDismiss) {
         await supabase
           .from("early_signups" as any)
@@ -146,7 +146,8 @@ const AdminWaitlist = () => {
         <h1 className="font-heading text-navy text-4xl mb-2">Waitlist Signups</h1>
         <p className="font-body text-secondary-text mb-6 max-w-2xl">
           Early-access waitlist signups. Out-of-area people (outside Nottinghamshire / East Midlands)
-          can be emailed a "Nottinghamshire only" note and dismissed from your feed.
+          can be emailed a friendly "coming soon — we'll keep your details and contact you when we
+          launch in your area" note, then archived from your active feed (their details stay on file).
         </p>
 
         <div className="flex flex-wrap gap-2 mb-6">
@@ -191,7 +192,7 @@ const AdminWaitlist = () => {
                           <Badge className="bg-navy/10 text-navy border-0 font-mono text-[10px] uppercase">Contacted</Badge>
                         )}
                         {dismissed && (
-                          <Badge className="bg-secondary-text/15 text-secondary-text border-0 font-mono text-[10px] uppercase">Dismissed</Badge>
+                          <Badge className="bg-secondary-text/15 text-secondary-text border-0 font-mono text-[10px] uppercase">Archived</Badge>
                         )}
                       </div>
                       <div className="mt-1 font-body text-sm text-secondary-text break-all">
@@ -210,7 +211,7 @@ const AdminWaitlist = () => {
                           onClick={() => emailOutOfArea(row, true)}
                           className="px-3 py-2 rounded-lg text-xs font-mono uppercase tracking-widest bg-teal text-cream hover:bg-teal-hover disabled:opacity-50"
                         >
-                          Email "Notts only" + dismiss
+                          Email "coming soon" + archive
                         </button>
                       )}
                       {!dismissed && !inArea && (
@@ -228,7 +229,7 @@ const AdminWaitlist = () => {
                           onClick={() => setStatus(row, "dismissed")}
                           className="px-3 py-2 rounded-lg text-xs font-mono uppercase tracking-widest bg-white border border-navy/15 text-secondary-text hover:border-navy disabled:opacity-50"
                         >
-                          Dismiss
+                          Archive
                         </button>
                       ) : (
                         <button
