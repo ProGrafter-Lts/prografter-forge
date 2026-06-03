@@ -85,29 +85,29 @@ const VerificationStandards = () => {
               </div>
             );
           })}
-        {/* Honest sub-line */}
-        <p className="font-body text-cream/80 text-sm md:text-base mb-6 fade-up max-w-3xl">
-          Where the law requires registration — gas, electrical self-certification — we
-          require it. Everywhere else, a great trade with genuine experience has a real
-          route in.
-        </p>
+        </div>
 
-        {/* Footer line + link */}
-        <div className="fade-up flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
-          <p className="font-body text-cream/70 text-sm">
-            We don&apos;t require a CSCS card — that&apos;s a commercial-site
-            requirement, not a domestic one. We verify what actually matters.
+        {/* Closing prose — two matched columns */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-4 max-w-5xl">
+          <p className="font-body text-cream/75 text-base leading-relaxed fade-up">
+            Where the law requires registration — gas, electrical self-certification — we
+            require it. Everywhere else, a great trade with genuine experience has a real
+            route in.
           </p>
-          <a
-            href="/verification"
-            className="inline-flex items-center gap-2 font-mono text-sm text-teal hover:text-teal-hover transition-colors group shrink-0"
-          >
-            How we verify
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-          </a>
+          <p className="font-body text-cream/75 text-base leading-relaxed fade-up">
+            We don&apos;t require a CSCS card — that&apos;s a commercial-site requirement,
+            not a domestic one. We verify what actually matters.
+          </p>
         </div>
 
-        </div>
+        {/* CTA link */}
+        <a
+          href="/verification"
+          className="fade-up mt-8 inline-flex items-center gap-2 font-body text-base text-teal hover:text-teal-hover transition-colors group"
+        >
+          How we verify
+          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+        </a>
       </div>
     </section>
   );
