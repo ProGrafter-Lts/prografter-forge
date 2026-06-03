@@ -430,6 +430,50 @@ const AdminVerifications = () => {
     load();
   };
 
+  // Warmly archive an out-of-area trade: send the "coming soon" email with the
+  // full verification checklist (both routes incl. time-served), then move them
+  // out of the active queue with a coming_soon status.
+  const comingSoon = async (trade: PendingTrade, alsoEmail: boolean) => {
+    setWorking(true);
+    if (alsoEmail && trade.email) {
+      const firstName = (trade.name || "").trim().split(/\s+/)[0] || "";
+      try {
+        await supabase.functions.invoke("send-transactional-email", {
+          body: {
+            templateName: "trade-coming-soon",
+            recipientEmail: trade.email,
+            idempotencyKey: `trade-coming-soon-${trade.id}`,
+            templateData: { name: firstName },
+          },
+        });
+      } catch (e) {
+        console.warn("trade-coming-soon email failed", e);
+      }
+    }
+    const { error } = await supabase
+      .from("trades")
+      .update({ verification_status: "coming_soon" } as any)
+      .eq("id", trade.id);
+    if (error) { toast.error(error.message); setWorking(false); return; }
+    toast.success(alsoEmail ? "\"Coming soon\" email sent — archived" : "Archived as coming soon");
+    setActiveId(null);
+    setWorking(false);
+    load();
+  };
+
+  const toggleTest = async (trade: PendingTrade) => {
+    const next = !trade.is_test;
+    const { error } = await supabase
+      .from("trades")
+      .update({ is_test: next } as any)
+      .eq("id", trade.id);
+    if (error) { toast.error(error.message); return; }
+    setTrades((prev) => prev.map((t) => (t.id === trade.id ? { ...t, is_test: next } : t)));
+    toast.success(next ? "Marked as test account" : "Marked as real signup");
+  };
+
+
+
   const activeTrade = trades.find((t) => t.id === activeId) || null;
 
   return (
