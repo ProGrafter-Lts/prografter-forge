@@ -40,6 +40,7 @@ interface PendingTrade {
   gas_safe_number: string | null;
   cps_registration_number: string | null;
   mcs_number: string | null;
+  is_test: boolean | null;
 }
 
 interface PortfolioItem {
@@ -96,6 +97,7 @@ const STATUS_FILTERS = [
   { key: "pending_verification", label: "Pending verification" },
   { key: "pending_assessment", label: "Pending assessment" },
   { key: "info_requested", label: "Info requested" },
+  { key: "coming_soon", label: "Coming soon (out of area)" },
   { key: "approved", label: "Approved" },
   { key: "verified", label: "Verified" },
   { key: "rejected", label: "Rejected" },
@@ -115,6 +117,7 @@ const isInternalEmail = (email: string | null) =>
 const AdminVerifications = () => {
   const [filter, setFilter] = useState<FilterKey>("pending");
   const [sortMode, setSortMode] = useState<"wait" | "recent">("wait");
+  const [showTest, setShowTest] = useState(false);
   const [trades, setTrades] = useState<PendingTrade[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -161,7 +164,7 @@ const AdminVerifications = () => {
     const { data, error } = await supabase
       .from("trades")
       .select(
-        "id,user_id,name,company_name,trade_type,trade_type_other,postcode,phone,verification_status,verified,submitted_for_review_at,created_at,insurance_expiry,business_structure,companies_house_number,companies_house_status,companies_house_registered_name,companies_house_checked_at,band,verification_route,years_in_trade,assessor_name,assessment_notes,assessment_evidence_complete,references_called,site_assessment_done,competence_interview_done,gas_safe_number,cps_registration_number,mcs_number"
+        "id,user_id,name,company_name,trade_type,trade_type_other,postcode,phone,verification_status,verified,submitted_for_review_at,created_at,insurance_expiry,business_structure,companies_house_number,companies_house_status,companies_house_registered_name,companies_house_checked_at,band,verification_route,years_in_trade,assessor_name,assessment_notes,assessment_evidence_complete,references_called,site_assessment_done,competence_interview_done,gas_safe_number,cps_registration_number,mcs_number,is_test"
       )
       .eq("verification_status", filter)
       .order("submitted_for_review_at", { ascending: true, nullsFirst: false })
@@ -427,7 +430,53 @@ const AdminVerifications = () => {
     load();
   };
 
+  // Warmly archive an out-of-area trade: send the "coming soon" email with the
+  // full verification checklist (both routes incl. time-served), then move them
+  // out of the active queue with a coming_soon status.
+  const comingSoon = async (trade: PendingTrade, alsoEmail: boolean) => {
+    setWorking(true);
+    if (alsoEmail && trade.email) {
+      const firstName = (trade.name || "").trim().split(/\s+/)[0] || "";
+      try {
+        await supabase.functions.invoke("send-transactional-email", {
+          body: {
+            templateName: "trade-coming-soon",
+            recipientEmail: trade.email,
+            idempotencyKey: `trade-coming-soon-${trade.id}`,
+            templateData: { name: firstName },
+          },
+        });
+      } catch (e) {
+        console.warn("trade-coming-soon email failed", e);
+      }
+    }
+    const { error } = await supabase
+      .from("trades")
+      .update({ verification_status: "coming_soon" } as any)
+      .eq("id", trade.id);
+    if (error) { toast.error(error.message); setWorking(false); return; }
+    toast.success(alsoEmail ? "\"Coming soon\" email sent — archived" : "Archived as coming soon");
+    setActiveId(null);
+    setWorking(false);
+    load();
+  };
+
+  const toggleTest = async (trade: PendingTrade) => {
+    const next = !trade.is_test;
+    const { error } = await supabase
+      .from("trades")
+      .update({ is_test: next } as any)
+      .eq("id", trade.id);
+    if (error) { toast.error(error.message); return; }
+    setTrades((prev) => prev.map((t) => (t.id === trade.id ? { ...t, is_test: next } : t)));
+    toast.success(next ? "Marked as test account" : "Marked as real signup");
+  };
+
+
+
   const activeTrade = trades.find((t) => t.id === activeId) || null;
+  const visibleTrades = trades.filter((t) => (showTest ? !!t.is_test : !t.is_test));
+  const testCount = trades.filter((t) => !!t.is_test).length;
 
   return (
     <div className="min-h-screen bg-cream">
@@ -493,7 +542,7 @@ const AdminVerifications = () => {
           </div>
         )}
 
-        <div className="flex flex-wrap gap-2 mb-4">
+        <div className="flex flex-wrap gap-2 mb-4 items-center">
           {STATUS_FILTERS.map((f) => (
             <button
               key={f.key}
@@ -507,11 +556,21 @@ const AdminVerifications = () => {
               {f.label}
             </button>
           ))}
+          <button
+            onClick={() => setShowTest((v) => !v)}
+            className={`ml-auto px-4 py-2 rounded-xl font-mono text-xs uppercase tracking-wider border transition-colors ${
+              showTest
+                ? "bg-purple-600 text-white border-purple-600"
+                : "bg-white text-purple-700 border-purple-200 hover:bg-purple-50"
+            }`}
+          >
+            {showTest ? `Showing test (${testCount})` : `Show test (${testCount})`}
+          </button>
         </div>
 
         {filter === "pending" && (() => {
-          const awaitingCount = trades.filter((t) => !t.submitted_for_review_at).length;
-          const readyCount = trades.length - awaitingCount;
+          const awaitingCount = visibleTrades.filter((t) => !t.submitted_for_review_at).length;
+          const readyCount = visibleTrades.length - awaitingCount;
           return (
             <div className="bg-white rounded-2xl border border-navy/10 p-4 mb-4 flex flex-wrap items-center justify-between gap-3">
               <p className="font-mono text-xs text-secondary-text">
@@ -538,13 +597,13 @@ const AdminVerifications = () => {
 
         {loading ? (
           <p className="font-mono text-sm text-secondary-text">Loading…</p>
-        ) : trades.length === 0 ? (
+        ) : visibleTrades.length === 0 ? (
           <div className="bg-white rounded-2xl p-10 text-center border border-navy/10">
             <p className="font-body text-secondary-text">No trades in this state.</p>
           </div>
         ) : (
           <div className="space-y-3">
-            {[...trades]
+            {[...visibleTrades]
               .sort((a, b) => {
                 const ta = new Date(a.created_at).getTime();
                 const tb = new Date(b.created_at).getTime();
@@ -578,6 +637,11 @@ const AdminVerifications = () => {
                         {outOfArea && (
                           <Badge className="bg-orange-100 text-orange-700 font-mono text-[10px] uppercase">
                             Out of area
+                          </Badge>
+                        )}
+                        {t.is_test && (
+                          <Badge className="bg-purple-100 text-purple-700 font-mono text-[10px] uppercase">
+                            Test
                           </Badge>
                         )}
                       </div>
@@ -672,6 +736,40 @@ const AdminVerifications = () => {
                         Nudge to finish
                       </a>
                     )}
+                    {t.verification_status !== "coming_soon" && outOfArea && (
+                      <button
+                        onClick={() => comingSoon(t, true)}
+                        disabled={working}
+                        className="bg-teal text-white font-mono text-xs uppercase tracking-wider px-4 py-2 rounded-xl hover:bg-teal-hover disabled:opacity-50"
+                        title="Send the friendly 'coming soon' email (full verification checklist incl. time-served) and move out of the active queue"
+                      >
+                        Email "coming soon" + archive
+                      </button>
+                    )}
+                    {t.verification_status === "coming_soon" && (
+                      <button
+                        onClick={async () => {
+                          const { error } = await supabase
+                            .from("trades")
+                            .update({ verification_status: "pending" } as any)
+                            .eq("id", t.id);
+                          if (error) { toast.error(error.message); return; }
+                          toast.success("Restored to pending");
+                          load();
+                        }}
+                        disabled={working}
+                        className="bg-white border border-navy/15 text-navy font-mono text-xs uppercase tracking-wider px-4 py-2 rounded-xl hover:border-teal disabled:opacity-50"
+                      >
+                        Restore
+                      </button>
+                    )}
+                    <button
+                      onClick={() => toggleTest(t)}
+                      disabled={working}
+                      className="bg-white border border-navy/15 text-secondary-text font-mono text-xs uppercase tracking-wider px-4 py-2 rounded-xl hover:border-purple-400 disabled:opacity-50"
+                    >
+                      {t.is_test ? "Mark real" : "Mark test"}
+                    </button>
                   </div>
                 </div>
               );

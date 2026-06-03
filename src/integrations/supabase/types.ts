@@ -610,6 +610,7 @@ export type Database = {
           created_at: string
           email: string
           id: string
+          is_test: boolean
           name: string
           postcode: string
           status: string
@@ -621,6 +622,7 @@ export type Database = {
           created_at?: string
           email: string
           id?: string
+          is_test?: boolean
           name: string
           postcode: string
           status?: string
@@ -632,6 +634,7 @@ export type Database = {
           created_at?: string
           email?: string
           id?: string
+          is_test?: boolean
           name?: string
           postcode?: string
           status?: string
