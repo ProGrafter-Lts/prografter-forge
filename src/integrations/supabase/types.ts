@@ -606,27 +606,36 @@ export type Database = {
       }
       early_signups: {
         Row: {
+          admin_notes: string | null
           created_at: string
           email: string
           id: string
           name: string
           postcode: string
+          status: string
+          status_updated_at: string | null
           user_type: string
         }
         Insert: {
+          admin_notes?: string | null
           created_at?: string
           email: string
           id?: string
           name: string
           postcode: string
+          status?: string
+          status_updated_at?: string | null
           user_type?: string
         }
         Update: {
+          admin_notes?: string | null
           created_at?: string
           email?: string
           id?: string
           name?: string
           postcode?: string
+          status?: string
+          status_updated_at?: string | null
           user_type?: string
         }
         Relationships: []

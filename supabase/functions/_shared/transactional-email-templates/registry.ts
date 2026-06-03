@@ -10,6 +10,7 @@ export interface TemplateEntry {
 }
 
 import { template as waitlistAdminNotification } from './waitlist-admin-notification.tsx'
+import { template as waitlistOutOfArea } from './waitlist-out-of-area.tsx'
 import { template as waitlistWelcome } from './waitlist-welcome.tsx'
 import { template as contactMessage } from './contact-message.tsx'
 import { template as homeownerWelcome } from './homeowner-welcome.tsx'
@@ -49,6 +50,7 @@ import { template as disputeRaisedAdmin } from './dispute-raised-admin.tsx'
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'waitlist-admin-notification': waitlistAdminNotification,
   'waitlist-welcome': waitlistWelcome,
+  'waitlist-out-of-area': waitlistOutOfArea,
   'contact-message': contactMessage,
   'homeowner-welcome': homeownerWelcome,
   'trade-welcome': tradeWelcome,
