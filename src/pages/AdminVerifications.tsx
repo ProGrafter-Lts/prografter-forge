@@ -597,13 +597,13 @@ const AdminVerifications = () => {
 
         {loading ? (
           <p className="font-mono text-sm text-secondary-text">Loading…</p>
-        ) : trades.length === 0 ? (
+        ) : visibleTrades.length === 0 ? (
           <div className="bg-white rounded-2xl p-10 text-center border border-navy/10">
             <p className="font-body text-secondary-text">No trades in this state.</p>
           </div>
         ) : (
           <div className="space-y-3">
-            {[...trades]
+            {[...visibleTrades]
               .sort((a, b) => {
                 const ta = new Date(a.created_at).getTime();
                 const tb = new Date(b.created_at).getTime();
