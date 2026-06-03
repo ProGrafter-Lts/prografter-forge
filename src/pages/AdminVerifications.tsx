@@ -736,6 +736,48 @@ const AdminVerifications = () => {
                         Nudge to finish
                       </a>
                     )}
+                    {t.verification_status === "coming_soon" ? (
+                      <button
+                        onClick={() => comingSoon({ ...t }, false) /* placeholder */}
+                        disabled={working}
+                        className="hidden"
+                      />
+                    ) : (
+                      outOfArea && (
+                        <button
+                          onClick={() => comingSoon(t, true)}
+                          disabled={working}
+                          className="bg-teal text-white font-mono text-xs uppercase tracking-wider px-4 py-2 rounded-xl hover:bg-teal-hover disabled:opacity-50"
+                          title="Send the friendly 'coming soon' email (full verification checklist incl. time-served) and move out of the active queue"
+                        >
+                          Email "coming soon" + archive
+                        </button>
+                      )
+                    )}
+                    {t.verification_status === "coming_soon" && (
+                      <button
+                        onClick={async () => {
+                          const { error } = await supabase
+                            .from("trades")
+                            .update({ verification_status: "pending" } as any)
+                            .eq("id", t.id);
+                          if (error) { toast.error(error.message); return; }
+                          toast.success("Restored to pending");
+                          load();
+                        }}
+                        disabled={working}
+                        className="bg-white border border-navy/15 text-navy font-mono text-xs uppercase tracking-wider px-4 py-2 rounded-xl hover:border-teal disabled:opacity-50"
+                      >
+                        Restore
+                      </button>
+                    )}
+                    <button
+                      onClick={() => toggleTest(t)}
+                      disabled={working}
+                      className="bg-white border border-navy/15 text-secondary-text font-mono text-xs uppercase tracking-wider px-4 py-2 rounded-xl hover:border-purple-400 disabled:opacity-50"
+                    >
+                      {t.is_test ? "Mark real" : "Mark test"}
+                    </button>
                   </div>
                 </div>
               );
