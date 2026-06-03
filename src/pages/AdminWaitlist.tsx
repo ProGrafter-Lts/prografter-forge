@@ -192,7 +192,7 @@ const AdminWaitlist = () => {
                           <Badge className="bg-navy/10 text-navy border-0 font-mono text-[10px] uppercase">Contacted</Badge>
                         )}
                         {dismissed && (
-                          <Badge className="bg-secondary-text/15 text-secondary-text border-0 font-mono text-[10px] uppercase">Dismissed</Badge>
+                          <Badge className="bg-secondary-text/15 text-secondary-text border-0 font-mono text-[10px] uppercase">Archived</Badge>
                         )}
                       </div>
                       <div className="mt-1 font-body text-sm text-secondary-text break-all">
