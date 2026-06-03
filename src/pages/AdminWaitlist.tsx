@@ -32,7 +32,7 @@ const FILTERS: { key: FilterKey; label: string }[] = [
   { key: "all", label: "All active" },
   { key: "in_area", label: "In area" },
   { key: "out_of_area", label: "Out of area" },
-  { key: "dismissed", label: "Dismissed" },
+  { key: "dismissed", label: "Archived" },
 ];
 
 const AdminWaitlist = () => {
