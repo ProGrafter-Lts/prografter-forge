@@ -27,13 +27,14 @@ const isInLaunchArea = (postcode: string | null) => {
   return LAUNCH_AREA_PREFIXES.some((pre) => p.startsWith(pre));
 };
 
-type FilterKey = "all" | "in_area" | "out_of_area" | "dismissed";
+type FilterKey = "all" | "in_area" | "out_of_area" | "dismissed" | "test";
 
 const FILTERS: { key: FilterKey; label: string }[] = [
   { key: "all", label: "All active" },
   { key: "in_area", label: "In area" },
   { key: "out_of_area", label: "Out of area" },
   { key: "dismissed", label: "Archived" },
+  { key: "test", label: "Test accounts" },
 ];
 
 const AdminWaitlist = () => {
@@ -46,7 +47,7 @@ const AdminWaitlist = () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("early_signups" as any)
-      .select("id,name,email,postcode,user_type,status,admin_notes,status_updated_at,created_at")
+      .select("id,name,email,postcode,user_type,status,admin_notes,status_updated_at,created_at,is_test")
       .order("created_at", { ascending: false });
     if (error) {
       toast.error("Failed to load signups");
@@ -60,6 +61,8 @@ const AdminWaitlist = () => {
 
   const filtered = useMemo(() => {
     return rows.filter((r) => {
+      if (filter === "test") return r.is_test;
+      if (r.is_test) return false;
       const dismissed = r.status === "dismissed";
       if (filter === "dismissed") return dismissed;
       if (dismissed) return false;
@@ -70,14 +73,32 @@ const AdminWaitlist = () => {
   }, [rows, filter]);
 
   const counts = useMemo(() => {
-    const active = rows.filter((r) => r.status !== "dismissed");
+    const real = rows.filter((r) => !r.is_test);
+    const active = real.filter((r) => r.status !== "dismissed");
     return {
       all: active.length,
       in_area: active.filter((r) => isInLaunchArea(r.postcode)).length,
       out_of_area: active.filter((r) => !isInLaunchArea(r.postcode)).length,
-      dismissed: rows.filter((r) => r.status === "dismissed").length,
+      dismissed: real.filter((r) => r.status === "dismissed").length,
+      test: rows.filter((r) => r.is_test).length,
     };
   }, [rows]);
+
+  const toggleTest = async (row: EarlySignup) => {
+    setWorking(row.id);
+    const next = !row.is_test;
+    const { error } = await supabase
+      .from("early_signups" as any)
+      .update({ is_test: next } as any)
+      .eq("id", row.id);
+    if (error) {
+      toast.error(error.message);
+    } else {
+      setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, is_test: next } : r)));
+      toast.success(next ? "Marked as test account" : "Marked as real signup");
+    }
+    setWorking(null);
+  };
 
   const setStatus = async (row: EarlySignup, status: string) => {
     setWorking(row.id);
