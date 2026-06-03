@@ -639,6 +639,11 @@ const AdminVerifications = () => {
                             Out of area
                           </Badge>
                         )}
+                        {t.is_test && (
+                          <Badge className="bg-purple-100 text-purple-700 font-mono text-[10px] uppercase">
+                            Test
+                          </Badge>
+                        )}
                       </div>
                       {t.company_name && t.name && t.name !== t.company_name && (
                         <div className="font-body text-sm text-body-text">{t.name}</div>
