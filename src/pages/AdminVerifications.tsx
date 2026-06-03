@@ -475,6 +475,8 @@ const AdminVerifications = () => {
 
 
   const activeTrade = trades.find((t) => t.id === activeId) || null;
+  const visibleTrades = trades.filter((t) => (showTest ? !!t.is_test : !t.is_test));
+  const testCount = trades.filter((t) => !!t.is_test).length;
 
   return (
     <div className="min-h-screen bg-cream">
