@@ -299,7 +299,7 @@ const GreenGrantsPage = () => {
       <GreenSchemesBreakdown onCheckEligibility={scrollToChecker} />
 
       {/* SECTION 3 — THE 4-STEP CHECKER */}
-      <section className="px-6 pb-24" ref={checkerRef}>
+      <section className="px-6 pt-16 pb-24 bg-navy" ref={checkerRef}>
         <div className="max-w-2xl mx-auto">
           {step >= 0 && !showResults && (
             <>
