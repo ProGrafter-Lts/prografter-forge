@@ -229,7 +229,7 @@ const AdminWaitlist = () => {
                           onClick={() => setStatus(row, "dismissed")}
                           className="px-3 py-2 rounded-lg text-xs font-mono uppercase tracking-widest bg-white border border-navy/15 text-secondary-text hover:border-navy disabled:opacity-50"
                         >
-                          Dismiss
+                          Archive
                         </button>
                       ) : (
                         <button
