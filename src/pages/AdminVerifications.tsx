@@ -40,6 +40,7 @@ interface PendingTrade {
   gas_safe_number: string | null;
   cps_registration_number: string | null;
   mcs_number: string | null;
+  is_test: boolean | null;
 }
 
 interface PortfolioItem {
@@ -96,6 +97,7 @@ const STATUS_FILTERS = [
   { key: "pending_verification", label: "Pending verification" },
   { key: "pending_assessment", label: "Pending assessment" },
   { key: "info_requested", label: "Info requested" },
+  { key: "coming_soon", label: "Coming soon (out of area)" },
   { key: "approved", label: "Approved" },
   { key: "verified", label: "Verified" },
   { key: "rejected", label: "Rejected" },
@@ -161,7 +163,7 @@ const AdminVerifications = () => {
     const { data, error } = await supabase
       .from("trades")
       .select(
-        "id,user_id,name,company_name,trade_type,trade_type_other,postcode,phone,verification_status,verified,submitted_for_review_at,created_at,insurance_expiry,business_structure,companies_house_number,companies_house_status,companies_house_registered_name,companies_house_checked_at,band,verification_route,years_in_trade,assessor_name,assessment_notes,assessment_evidence_complete,references_called,site_assessment_done,competence_interview_done,gas_safe_number,cps_registration_number,mcs_number"
+        "id,user_id,name,company_name,trade_type,trade_type_other,postcode,phone,verification_status,verified,submitted_for_review_at,created_at,insurance_expiry,business_structure,companies_house_number,companies_house_status,companies_house_registered_name,companies_house_checked_at,band,verification_route,years_in_trade,assessor_name,assessment_notes,assessment_evidence_complete,references_called,site_assessment_done,competence_interview_done,gas_safe_number,cps_registration_number,mcs_number,is_test"
       )
       .eq("verification_status", filter)
       .order("submitted_for_review_at", { ascending: true, nullsFirst: false })
