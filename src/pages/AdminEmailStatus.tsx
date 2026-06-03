@@ -48,6 +48,7 @@ const REGISTERED_TEMPLATES = new Set([
   "trade-verified",
   "trade-rejected",
   "trade-verification-query",
+  "trade-coming-soon",
   "waitlist-welcome",
   "waitlist-admin-notification",
   "waitlist-out-of-area",

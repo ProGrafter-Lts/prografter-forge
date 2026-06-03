@@ -20,6 +20,7 @@ import { template as tradeSignupAdminNotification } from './trade-signup-admin-n
 import { template as tradeVerified } from './trade-verified.tsx'
 import { template as tradeRejected } from './trade-rejected.tsx'
 import { template as tradeVerificationQuery } from './trade-verification-query.tsx'
+import { template as tradeComingSoon } from './trade-coming-soon.tsx'
 import { template as finishTradeRegistration } from './finish-trade-registration.tsx'
 import { template as tradeFinishVerification } from './trade-finish-verification.tsx'
 import { template as contractGenerated } from './contract-generated.tsx'
@@ -59,6 +60,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'trade-verified': tradeVerified,
   'trade-rejected': tradeRejected,
   'trade-verification-query': tradeVerificationQuery,
+  'trade-coming-soon': tradeComingSoon,
   'finish-trade-registration': finishTradeRegistration,
   'trade-finish-verification': tradeFinishVerification,
   // Contract lifecycle (7)
