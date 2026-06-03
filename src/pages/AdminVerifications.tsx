@@ -542,7 +542,7 @@ const AdminVerifications = () => {
           </div>
         )}
 
-        <div className="flex flex-wrap gap-2 mb-4">
+        <div className="flex flex-wrap gap-2 mb-4 items-center">
           {STATUS_FILTERS.map((f) => (
             <button
               key={f.key}
@@ -556,6 +556,16 @@ const AdminVerifications = () => {
               {f.label}
             </button>
           ))}
+          <button
+            onClick={() => setShowTest((v) => !v)}
+            className={`ml-auto px-4 py-2 rounded-xl font-mono text-xs uppercase tracking-wider border transition-colors ${
+              showTest
+                ? "bg-purple-600 text-white border-purple-600"
+                : "bg-white text-purple-700 border-purple-200 hover:bg-purple-50"
+            }`}
+          >
+            {showTest ? `Showing test (${testCount})` : `Show test (${testCount})`}
+          </button>
         </div>
 
         {filter === "pending" && (() => {
