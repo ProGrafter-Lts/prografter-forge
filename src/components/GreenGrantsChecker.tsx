@@ -13,7 +13,7 @@ const SCHEMES: Record<string, { name: string; full: string; max: string; covers:
     covers: ["Insulation (loft, cavity, solid wall)", "Heat pumps", "Solar PV", "Boiler upgrades", "Heating controls"],
     who: "Low income households, benefits recipients, or properties rated EPC D–G",
     deadline: "March 2026", funded_by: "Energy suppliers (obligated by government)",
-    url: "https://www.gov.uk/apply-eco4",
+    url: "https://www.gov.uk/energy-company-obligation",
   },
   bus: {
     name: "BUS", full: "Boiler Upgrade Scheme", max: "£7,500",
@@ -34,7 +34,7 @@ const SCHEMES: Record<string, { name: string; full: string; max: string; covers:
     covers: ["Insulation", "Heating upgrades", "Renewable energy", "Draught proofing"],
     who: "Determined by your local authority — often broader than ECO4",
     deadline: "Ongoing — varies by council", funded_by: "Local authority + energy suppliers",
-    url: "https://www.gov.uk/guidance/local-authority-flexible-eligibility",
+    url: "https://www.gov.uk/improve-energy-efficiency",
   },
 };
 
@@ -372,7 +372,7 @@ export default function GreenGrantsChecker() {
           style={{ background: G.g50, borderColor: G.g200 }}
         >
           {results.map(r => (
-            <SchemeResult key={r.scheme} result={r} onPostJob={() => window.location.href = "/post-job"} />
+            <SchemeResult key={r.scheme} result={r} onPostJob={() => window.location.href = "/post-job-brief"} />
           ))}
           <div
             className="rounded-xl px-4 py-2.5 mb-3.5 font-body text-xs leading-relaxed"
