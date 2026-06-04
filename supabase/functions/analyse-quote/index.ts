@@ -262,6 +262,33 @@ Deno.serve(async (req) => {
       .update({ report_json: reportJson, status: "complete" })
       .eq("id", quoteCheckId);
 
+    // Email the homeowner a secure link to their report (best effort).
+    try {
+      const isErrorReport =
+        reportJson && typeof reportJson === "object" && "error" in (reportJson as Record<string, unknown>);
+      if (!isErrorReport) {
+        const { data: row } = await supabase
+          .from("quote_checks")
+          .select("email, lookup_token, report_json")
+          .eq("id", quoteCheckId)
+          .single();
+        if (row?.email && row?.lookup_token) {
+          const reportUrl = `https://prografter.co.uk/report/${quoteCheckId}?t=${encodeURIComponent(row.lookup_token)}`;
+          const projectType =
+            (row.report_json as { project?: { type?: string } } | null)?.project?.type || "";
+          await enqueueTransactionalEmail(supabase, {
+            templateName: "quote-health-check-ready",
+            recipientEmail: row.email,
+            idempotencyKey: `quote-health-check-ready:${quoteCheckId}`,
+            templateData: { reportUrl, projectType },
+          });
+        }
+      }
+    } catch (emailErr) {
+      console.error("analyse-quote: failed to enqueue report email", emailErr);
+    }
+
+
     return new Response(JSON.stringify({ success: true, reportJson }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
