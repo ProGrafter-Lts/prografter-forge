@@ -57,6 +57,7 @@ Deno.serve(async (req) => {
         id: data.id,
         status: data.status,
         report_html: data.report_html,
+        report_json: data.report_json,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
