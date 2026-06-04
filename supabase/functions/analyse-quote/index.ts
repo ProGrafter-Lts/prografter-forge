@@ -48,6 +48,10 @@ UK REGS CONTEXT (apply only where relevant): Building Control sign-off, Part L, 
 STEP 4 — BUILD THE COST PICTURE (ranges only)
 Start from the quoted total. List each additional or excluded element the homeowner will likely need to budget for, each as an indicative low–high range appropriate to project SIZE and REGION. Give an overall completion range (low–high). Add a one-line framing that this is budgeting guidance, not a quotation. If VAT is "unclear" or "exclusive", include the illustrative inc-VAT figure at 20%. Never present a single point figure for completion; if unsure, widen the range.
 
+Err on the wider side of every cost range. A homeowner whose actual cost lands inside your range trusts ProGrafter; a homeowner whose cost overshoots your range never uses us again. Tight bands feel decisive but cost more in trust than they earn in polish. Never present a band tighter than ±25% of its midpoint.
+
+For a typical UK full single-storey extension in 2026, use these as MINIMUM bands and widen further for larger or more complex projects: electrical first+second fix with Part P certification £2,500–5,000; heating extension with radiators, pipework and commissioning £1,500–3,000; structural engineer's calculations £600–1,500; plastering walls and ceiling for a 25–35m² room £2,500–4,500; second-fix joinery, doors, skirting £1,000–2,000; decorating £1,200–2,500. Scale up proportionally for larger projects, down for smaller ones, but do not present numbers below these floors for a full extension.
+
 STEP 5 — SCORE & VERDICT
 completeness_score: 0–100, reflecting completeness FOR ITS OWN SCOPE. verdict_line: one honest plain sentence.
 
@@ -56,6 +60,8 @@ If the quote lacks protections ProGrafter provides (payment protection/escrow, c
 
 IF THE INPUT IS NOT A BUILDING QUOTE
 Return exactly: {"error": "This doesn't look like a building quote. Please upload a builder's quotation or estimate."}
+
+SCHEMA DISCIPLINE: Each item appears in EITHER questions_to_ask OR excluded_by_design, never both. If an item is a budget consideration, it always appears in cost_picture.additional_items. The same item must not be listed in both 'questions to ask' and 'not included' — pick one. Use questions_to_ask if the homeowner should be checking whether it's actually in the quote; use excluded_by_design if it's clearly outside scope and just needs budgeting separately.
 
 OUTPUT SCHEMA (return ONLY this JSON object — use these exact keys):
 {
@@ -199,6 +205,7 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         model: "claude-sonnet-4-20250514",
         max_tokens: 8000,
+        temperature: 0.2,
         messages: [
           {
             role: "user",

@@ -212,7 +212,15 @@ const QuoteReport = () => {
               </span>
             )}
             {project.vat_status && (
-              <span className="bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full">
+              <span
+                className={`px-2.5 py-1 rounded-full ${
+                  project.vat_status === "inclusive"
+                    ? "bg-[#E4F5F3] text-[#0E837D]"
+                    : project.vat_status === "exclusive"
+                      ? "bg-[#FBF1DC] text-[#B07A12]"
+                      : "bg-rose-100 text-rose-700"
+                }`}
+              >
                 VAT: {project.vat_status}
               </span>
             )}
@@ -240,7 +248,9 @@ const QuoteReport = () => {
                 </p>
               )}
               {report.verdict_line && (
-                <p className="font-heading text-lg text-navy leading-snug">{report.verdict_line}</p>
+                <p className="font-body text-[16px] text-navy leading-snug font-medium">
+                  {report.verdict_line}
+                </p>
               )}
             </div>
           </div>
@@ -267,7 +277,7 @@ const QuoteReport = () => {
           )}
         </div>
 
-        <DisclaimerBanner />
+
 
         {/* Strengths */}
         {report.strengths && report.strengths.length > 0 && (
@@ -305,16 +315,16 @@ const QuoteReport = () => {
                   key={i}
                   className={`rounded-xl border p-4 ${
                     q.severity === "action"
-                      ? "border-rose-200 bg-rose-50/60"
-                      : "border-amber-200 bg-amber-50/60"
+                      ? "border-[#EBD9AE] bg-[#FBF1DC]/50"
+                      : "border-[#E3DECE] bg-[#F1EEE7]/60"
                   }`}
                 >
                   <div className="flex items-center gap-2 mb-1.5">
                     <span
                       className={`font-mono text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full ${
                         q.severity === "action"
-                          ? "bg-rose-100 text-rose-700"
-                          : "bg-amber-100 text-amber-800"
+                          ? "bg-[#FBF1DC] text-[#B07A12]"
+                          : "bg-[#F1EEE7] text-secondary-text"
                       }`}
                     >
                       {q.severity === "action" ? "Worth confirming" : "Clarify"}
