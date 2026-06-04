@@ -12,38 +12,53 @@ import {
   ShieldCheck,
 } from "lucide-react";
 
-interface QuestionItem {
-  severity: "action" | "clarify";
-  reason: string;
-  question: string;
+interface Strength {
+  title: string;
+  detail: string;
 }
 
-interface CostItem {
+interface QuestionItem {
+  severity: "action" | "clarify";
+  title: string;
+  detail: string;
+  ask: string;
+}
+
+interface AdditionalItem {
   label: string;
   low: number;
   high: number;
+  note?: string | null;
 }
 
 interface ReportJson {
   error?: string;
-  project_type?: string;
-  location?: string;
-  headline_total?: string;
-  vat_position?: "inclusive" | "exclusive" | "unclear";
-  scope?: string;
-  strengths?: string[];
-  questions_to_ask?: QuestionItem[];
-  excluded_by_design?: string[];
-  cost_picture?: {
-    quoted_total?: string;
-    items?: CostItem[];
-    completion_low?: number;
-    completion_high?: number;
-    vat_note?: string | null;
-    framing?: string;
+  project?: {
+    type?: string;
+    location?: string;
+    quote_total?: number;
+    currency?: string;
+    vat_status?: "inclusive" | "exclusive" | "unclear";
+    vat_illustration?: string | null;
+  };
+  scope?: {
+    detected?: string;
+    summary?: string;
+    covered?: string[];
   };
   completeness_score?: number;
   verdict_line?: string;
+  strengths?: Strength[];
+  questions_to_ask?: QuestionItem[];
+  excluded_by_design?: string[];
+  cost_picture?: {
+    quoted?: number;
+    vat_note?: string | null;
+    additional_items?: AdditionalItem[];
+    completion_low?: number;
+    completion_high?: number;
+    framing?: string;
+  };
   bridge?: string | null;
 }
 
@@ -60,7 +75,7 @@ const gbp = (n: number) =>
     style: "currency",
     currency: "GBP",
     maximumFractionDigits: 0,
-  }).format(n);
+  }).format(n || 0);
 
 const DisclaimerBanner = () => (
   <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex gap-3 items-start">
@@ -96,7 +111,9 @@ const QuoteReport = () => {
     }
 
     if (!token) {
-      setAccessError("This report link is missing its secure access token. Please use the link from your confirmation or email.");
+      setAccessError(
+        "This report link is missing its secure access token. Please use the link from your confirmation or email.",
+      );
       return;
     }
 
@@ -172,6 +189,8 @@ const QuoteReport = () => {
       );
     }
 
+    const project = report.project || {};
+    const scope = report.scope || {};
     const cp = report.cost_picture;
     const actions = (report.questions_to_ask || []).filter((q) => q.severity === "action");
     const clarifications = (report.questions_to_ask || []).filter((q) => q.severity === "clarify");
@@ -181,20 +200,20 @@ const QuoteReport = () => {
         {/* Header / verdict */}
         <div className="bg-card rounded-2xl border border-border p-6 md:p-8 shadow-sm">
           <div className="flex flex-wrap items-center gap-2 mb-4 font-mono text-xs">
-            {report.project_type && (
-              <span className="bg-navy/5 text-navy px-2.5 py-1 rounded-full">{report.project_type}</span>
+            {project.type && (
+              <span className="bg-navy/5 text-navy px-2.5 py-1 rounded-full">{project.type}</span>
             )}
-            {report.location && (
-              <span className="bg-navy/5 text-navy px-2.5 py-1 rounded-full">{report.location}</span>
+            {project.location && (
+              <span className="bg-navy/5 text-navy px-2.5 py-1 rounded-full">{project.location}</span>
             )}
-            {report.scope && (
+            {scope.detected && (
               <span className="bg-teal/10 text-teal px-2.5 py-1 rounded-full">
-                {SCOPE_LABELS[report.scope] || report.scope}
+                {SCOPE_LABELS[scope.detected] || scope.detected}
               </span>
             )}
-            {report.vat_position && (
+            {project.vat_status && (
               <span className="bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full">
-                VAT: {report.vat_position}
+                VAT: {project.vat_status}
               </span>
             )}
           </div>
@@ -211,9 +230,13 @@ const QuoteReport = () => {
               </div>
             )}
             <div>
-              {report.headline_total && (
+              {typeof project.quote_total === "number" && (
                 <p className="font-mono text-xs text-muted-foreground mb-1">
-                  Quoted total: <span className="text-navy font-semibold">{report.headline_total}</span>
+                  Quoted total:{" "}
+                  <span className="text-navy font-semibold">{gbp(project.quote_total)}</span>
+                  {project.vat_illustration ? (
+                    <span className="text-amber-700"> · {project.vat_illustration}</span>
+                  ) : null}
                 </p>
               )}
               {report.verdict_line && (
@@ -221,6 +244,24 @@ const QuoteReport = () => {
               )}
             </div>
           </div>
+
+          {scope.summary && (
+            <p className="font-mono text-sm text-muted-foreground leading-relaxed mt-4 pt-4 border-t border-border">
+              {scope.summary}
+            </p>
+          )}
+          {scope.covered && scope.covered.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mt-3">
+              {scope.covered.map((c, i) => (
+                <span
+                  key={i}
+                  className="font-mono text-[11px] bg-muted text-muted-foreground px-2 py-0.5 rounded"
+                >
+                  {c}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
 
         <DisclaimerBanner />
@@ -231,11 +272,18 @@ const QuoteReport = () => {
             <h3 className="font-heading text-lg text-navy mb-3 flex items-center gap-2">
               <CheckCircle2 className="h-5 w-5 text-emerald-600" /> What this quote does well
             </h3>
-            <ul className="space-y-2">
+            <ul className="space-y-3">
               {report.strengths.map((s, i) => (
-                <li key={i} className="flex gap-2 font-mono text-sm text-foreground/90">
+                <li key={i} className="flex gap-2">
                   <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
-                  <span>{s}</span>
+                  <div>
+                    <p className="font-mono text-sm text-navy font-semibold leading-snug">{s.title}</p>
+                    {s.detail && (
+                      <p className="font-mono text-xs text-muted-foreground leading-relaxed">
+                        {s.detail}
+                      </p>
+                    )}
+                  </div>
                 </li>
               ))}
             </ul>
@@ -258,7 +306,7 @@ const QuoteReport = () => {
                       : "border-amber-200 bg-amber-50/60"
                   }`}
                 >
-                  <div className="flex items-center gap-2 mb-1">
+                  <div className="flex items-center gap-2 mb-1.5">
                     <span
                       className={`font-mono text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full ${
                         q.severity === "action"
@@ -268,11 +316,20 @@ const QuoteReport = () => {
                     >
                       {q.severity === "action" ? "Worth confirming" : "Clarify"}
                     </span>
+                    {q.title && (
+                      <span className="font-mono text-xs text-navy font-semibold">{q.title}</span>
+                    )}
                   </div>
-                  <p className="font-mono text-sm text-navy font-semibold leading-snug mb-1">
-                    “{q.question}”
-                  </p>
-                  <p className="font-mono text-xs text-muted-foreground leading-relaxed">{q.reason}</p>
+                  {q.detail && (
+                    <p className="font-mono text-xs text-muted-foreground leading-relaxed mb-2">
+                      {q.detail}
+                    </p>
+                  )}
+                  {q.ask && (
+                    <p className="font-mono text-sm text-navy leading-snug border-l-2 border-navy/20 pl-3">
+                      “{q.ask}”
+                    </p>
+                  )}
                 </div>
               ))}
             </div>
@@ -306,20 +363,31 @@ const QuoteReport = () => {
             {cp.framing && (
               <p className="font-mono text-xs text-muted-foreground mb-4 leading-relaxed">{cp.framing}</p>
             )}
-            {cp.quoted_total && (
+            {typeof cp.quoted === "number" && (
               <div className="flex justify-between font-mono text-sm border-b border-border py-2">
                 <span className="text-muted-foreground">Quoted total</span>
-                <span className="text-navy font-semibold">{cp.quoted_total}</span>
+                <span className="text-navy font-semibold">{gbp(cp.quoted)}</span>
               </div>
             )}
-            {cp.items && cp.items.length > 0 && (
-              <div className="mt-3 space-y-2">
-                {cp.items.map((item, i) => (
-                  <div key={i} className="flex justify-between font-mono text-sm">
-                    <span className="text-foreground/90">{item.label}</span>
-                    <span className="text-navy whitespace-nowrap">
-                      {gbp(item.low)} – {gbp(item.high)}
-                    </span>
+            {cp.vat_note && (
+              <p className="font-mono text-xs text-amber-700 mt-2 leading-relaxed">{cp.vat_note}</p>
+            )}
+            {cp.additional_items && cp.additional_items.length > 0 && (
+              <div className="mt-3 space-y-3">
+                <p className="font-mono text-[11px] uppercase tracking-wide text-muted-foreground">
+                  Likely additional / excluded elements
+                </p>
+                {cp.additional_items.map((item, i) => (
+                  <div key={i} className="font-mono text-sm">
+                    <div className="flex justify-between gap-3">
+                      <span className="text-foreground/90">{item.label}</span>
+                      <span className="text-navy whitespace-nowrap">
+                        {gbp(item.low)} – {gbp(item.high)}
+                      </span>
+                    </div>
+                    {item.note && (
+                      <p className="text-xs text-muted-foreground leading-relaxed mt-0.5">{item.note}</p>
+                    )}
                   </div>
                 ))}
               </div>
@@ -331,9 +399,6 @@ const QuoteReport = () => {
                   {gbp(cp.completion_low || 0)} – {gbp(cp.completion_high || 0)}
                 </span>
               </div>
-            )}
-            {cp.vat_note && (
-              <p className="font-mono text-xs text-amber-700 mt-3 leading-relaxed">{cp.vat_note}</p>
             )}
           </section>
         )}
