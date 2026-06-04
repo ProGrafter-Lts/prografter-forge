@@ -56,28 +56,40 @@ If the quote lacks protections ProGrafter provides (payment protection/escrow, c
 IF THE INPUT IS NOT A BUILDING QUOTE
 Return exactly: {"error": "This doesn't look like a building quote. Please upload a builder's quotation or estimate."}
 
-OUTPUT SCHEMA (return ONLY this JSON object):
+OUTPUT SCHEMA (return ONLY this JSON object — use these exact keys):
 {
-  "project_type": string,
-  "location": string,
-  "headline_total": string,
-  "vat_position": "inclusive" | "exclusive" | "unclear",
-  "scope": "shell_only" | "full_build" | "internals_only" | "single_trade" | "unclear",
-  "strengths": string[],
-  "questions_to_ask": [ { "severity": "action" | "clarify", "reason": string, "question": string } ],
-  "excluded_by_design": string[],
-  "cost_picture": {
-    "quoted_total": string,
-    "items": [ { "label": string, "low": number, "high": number } ],
-    "completion_low": number,
-    "completion_high": number,
-    "vat_note": string | null,
-    "framing": string
+  "project": {
+    "type": string,
+    "location": string,
+    "quote_total": number,
+    "currency": "GBP",
+    "vat_status": "inclusive" | "exclusive" | "unclear",
+    "vat_illustration": string | null
+  },
+  "scope": {
+    "detected": "shell_only" | "full_build" | "internals_only" | "single_trade" | "unclear",
+    "summary": string,
+    "covered": string[]
   },
   "completeness_score": number,
   "verdict_line": string,
+  "strengths": [ { "title": string, "detail": string } ],
+  "questions_to_ask": [ { "severity": "action" | "clarify", "title": string, "detail": string, "ask": string } ],
+  "excluded_by_design": string[],
+  "cost_picture": {
+    "quoted": number,
+    "vat_note": string | null,
+    "additional_items": [ { "label": string, "low": number, "high": number, "note": string | null } ],
+    "completion_low": number,
+    "completion_high": number,
+    "framing": string
+  },
   "bridge": string | null
 }
+
+Notes: quote_total and quoted are numeric (no currency symbol). vat_illustration is a short string like "≈ £45,565 inc VAT at 20%" when VAT is unclear/exclusive, otherwise null. framing should read like "Indicative budget to be aware of, not a quotation."
+
+If the input is not a building quote, return exactly: {"error": "This doesn't look like a building quote. Please upload a builder's quotation or estimate."}
 
 Return ONLY the JSON object. Nothing else.`;
 
