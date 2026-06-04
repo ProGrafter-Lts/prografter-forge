@@ -3590,6 +3590,19 @@ export type Database = {
       admin_approve_trade: { Args: { _trade_id: string }; Returns: Json }
       compute_contract_hash: { Args: { _contract_id: string }; Returns: string }
       count_verified_trades: { Args: never; Returns: number }
+      create_quote_check: {
+        Args: {
+          _description: string
+          _email: string
+          _pdf_url: string
+          _postcode: string
+          _project_type: string
+        }
+        Returns: {
+          id: string
+          lookup_token: string
+        }[]
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
