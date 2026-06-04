@@ -49,7 +49,12 @@ const AdminRoute = ({ children }: AdminRouteProps) => {
       </div>
     );
   }
-  return <>{children}</>;
+  return (
+    <>
+      <AdminNav />
+      {children}
+    </>
+  );
 };
 
 export default AdminRoute;
