@@ -9,6 +9,7 @@ import {
   Head,
   Heading,
   Html,
+  Img,
   Link,
   Preview,
   Section,
@@ -34,7 +35,7 @@ export const SignupEmail = ({
     <Body style={main}>
       <Container style={container}>
         <Section style={header}>
-          <Text style={logo}>Pro<span style={{ color: '#0D9488' }}>Grafter</span></Text>
+          <Img src="https://prografter.co.uk/__l5e/assets-v1/fb47262a-98d3-4c68-ad52-a5ddf87fc48a/prografter-email-dark.png" alt="ProGrafter" width="170" style={logo} />
         </Section>
         <Heading style={h1}>Confirm your email</Heading>
         <Text style={text}>
