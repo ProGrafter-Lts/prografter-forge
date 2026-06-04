@@ -29,6 +29,15 @@ const FounderNote = () => {
             signed off. Every one of those has a structural fix — and that's
             what this platform is.
           </p>
+
+          {/* Read the full story */}
+          <a
+            href="/about"
+            className="group inline-flex items-center gap-2 mt-8 font-mono text-sm text-teal hover:text-teal-hover transition-colors"
+          >
+            Read the full story
+            <span aria-hidden="true" className="inline-block transition-transform group-hover:translate-x-1">→</span>
+          </a>
         </div>
       </div>
     </section>
