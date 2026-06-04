@@ -476,11 +476,8 @@ const QuoteChecker = () => {
               </p>
             </div>
 
-            {result ? (
-              <QuoteCheckerResult quoteCheckId={result.id} email={result.email} lookupToken={result.lookupToken} />
-            ) : (
-              <QuoteCheckerForm onSubmitted={(id, email, lookupToken) => setResult({ id, email, lookupToken })} />
-            )}
+            <QuoteCheckerForm onSubmitted={(id, _email, lookupToken) => goToReport(id, lookupToken)} />
+
           </div>
         </div>
       </div>
