@@ -61,6 +61,8 @@ If the quote lacks protections ProGrafter provides (payment protection/escrow, c
 IF THE INPUT IS NOT A BUILDING QUOTE
 Return exactly: {"error": "This doesn't look like a building quote. Please upload a builder's quotation or estimate."}
 
+SCHEMA DISCIPLINE: Each item appears in EITHER questions_to_ask OR excluded_by_design, never both. If an item is a budget consideration, it always appears in cost_picture.additional_items. The same item must not be listed in both 'questions to ask' and 'not included' — pick one. Use questions_to_ask if the homeowner should be checking whether it's actually in the quote; use excluded_by_design if it's clearly outside scope and just needs budgeting separately.
+
 OUTPUT SCHEMA (return ONLY this JSON object — use these exact keys):
 {
   "project": {
