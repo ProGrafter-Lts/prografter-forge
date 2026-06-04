@@ -115,13 +115,18 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
         .upload(fileName, file, { contentType: file.type || "application/octet-stream" });
       if (uploadError) throw uploadError;
 
-      // Create record
-      const { data: record, error: insertError } = await supabase
-        .from("quote_checks")
-        .insert({ email, project_type: projectType, postcode, description, pdf_url: fileName })
-        .select("id, lookup_token")
-        .single();
+      // Create record via a security-definer RPC so the lookup token can be
+      // returned without granting public SELECT on the quote_checks table.
+      const { data: rpcData, error: insertError } = await supabase.rpc("create_quote_check" as any, {
+        _email: email,
+        _project_type: projectType,
+        _postcode: postcode,
+        _description: description,
+        _pdf_url: fileName,
+      });
       if (insertError) throw insertError;
+      const record = (Array.isArray(rpcData) ? rpcData[0] : rpcData) as { id: string; lookup_token: string };
+      if (!record?.id) throw new Error("Could not create quote check record");
 
       // Free entitlement path — skip Stripe entirely.
       if (freeAvailable) {
