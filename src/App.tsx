@@ -35,6 +35,7 @@ const HomeownerManual = lazy(() => import("./pages/HomeownerManual.tsx"));
 const Unsubscribe = lazy(() => import("./pages/Unsubscribe.tsx"));
 const Contact = lazy(() => import("./pages/Contact.tsx"));
 const About = lazy(() => import("./pages/About.tsx"));
+const HowItWorksPage = lazy(() => import("./pages/HowItWorksPage.tsx"));
 const SignupHomeowner = lazy(() => import("./pages/SignupHomeowner.tsx"));
 const SignupHomeownerNext = lazy(() => import("./pages/SignupHomeownerNext.tsx"));
 const SignupCheckEmail = lazy(() => import("./pages/SignupCheckEmail.tsx"));
@@ -105,6 +106,7 @@ const AppRoutes = () => {
             <Route path="/unsubscribe" element={<Unsubscribe />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/about" element={<About />} />
+            <Route path="/how-it-works" element={<HowItWorksPage />} />
             <Route path="/checkatrade-alternative" element={<CheckatradeAlternative />} />
             <Route path="/is-checkatrade-worth-it" element={<IsCheckatradeWorthIt />} />
             <Route path="/planning-alerts" element={<PlanningAlertsPage />} />
