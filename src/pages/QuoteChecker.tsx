@@ -398,8 +398,9 @@ const QuoteChecker = () => {
           if (data?.paid) {
             const stored = localStorage.getItem("pendingQuoteCheck");
             const parsed = stored ? JSON.parse(stored) : {};
-            const email = parsed.email || "";
-            const lookupToken = parsed.lookupToken || "";
+            // Prefer values returned by the server; fall back to localStorage.
+            const email = data.email || parsed.email || "";
+            const lookupToken = data.lookupToken || parsed.lookupToken || "";
             localStorage.removeItem("pendingQuoteCheck");
             if (!lookupToken) {
               toast({
