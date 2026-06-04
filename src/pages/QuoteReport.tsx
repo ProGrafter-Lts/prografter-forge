@@ -251,15 +251,20 @@ const QuoteReport = () => {
             </p>
           )}
           {scope.covered && scope.covered.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mt-3">
-              {scope.covered.map((c, i) => (
-                <span
-                  key={i}
-                  className="font-mono text-[11px] bg-muted text-muted-foreground px-2 py-0.5 rounded"
-                >
-                  {c}
-                </span>
-              ))}
+            <div className="mt-3">
+              <p className="font-mono text-[11px] uppercase tracking-wide text-muted-foreground mb-2">
+                Covered by this quote
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {scope.covered.map((c, i) => (
+                  <span
+                    key={i}
+                    className="font-mono text-[11px] bg-navy/5 text-navy border border-navy/10 px-2 py-0.5 rounded"
+                  >
+                    {c}
+                  </span>
+                ))}
+              </div>
             </div>
           )}
         </div>
