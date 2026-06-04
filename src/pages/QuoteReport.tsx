@@ -251,20 +251,18 @@ const QuoteReport = () => {
             </p>
           )}
           {scope.covered && scope.covered.length > 0 && (
-            <div className="mt-3">
-              <p className="font-mono text-[11px] uppercase tracking-wide text-muted-foreground mb-2">
+            <div className="mt-4 pt-4 border-t border-border">
+              <p className="font-mono text-[11px] uppercase tracking-wide text-muted-foreground mb-3">
                 Covered by this quote
               </p>
-              <div className="flex flex-wrap gap-1.5">
+              <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-2">
                 {scope.covered.map((c, i) => (
-                  <span
-                    key={i}
-                    className="font-mono text-[11px] bg-navy/5 text-navy border border-navy/10 px-2 py-0.5 rounded"
-                  >
-                    {c}
-                  </span>
+                  <li key={i} className="flex gap-2 items-start">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
+                    <span className="font-mono text-xs text-navy leading-snug">{c}</span>
+                  </li>
                 ))}
-              </div>
+              </ul>
             </div>
           )}
         </div>
