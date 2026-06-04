@@ -33,7 +33,7 @@ Deno.serve(async (req) => {
 
     const { data, error } = await supabase
       .from("quote_checks")
-      .select("id, status, report_html, lookup_token")
+      .select("id, status, report_html, report_json, lookup_token")
       .eq("id", quoteCheckId)
       .single();
 
