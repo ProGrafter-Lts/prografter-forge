@@ -248,7 +248,9 @@ const QuoteReport = () => {
                 </p>
               )}
               {report.verdict_line && (
-                <p className="font-heading text-lg text-navy leading-snug">{report.verdict_line}</p>
+                <p className="font-body text-[16px] text-navy leading-snug font-medium">
+                  {report.verdict_line}
+                </p>
               )}
             </div>
           </div>
