@@ -214,15 +214,42 @@ Deno.serve(async (req) => {
     }
 
     const aiResult = await aiResponse.json();
-    const reportHtml = aiResult.content?.[0]?.text || "Analysis failed.";
+    const rawText = aiResult.content?.[0]?.text || "";
 
-    // Update the record with the report
+    // The model is instructed to return a single JSON object. Strip any
+    // accidental code fences, then extract the outermost {...} block.
+    let jsonText = rawText.trim();
+    if (jsonText.startsWith("```")) {
+      jsonText = jsonText.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/i, "").trim();
+    }
+    const first = jsonText.indexOf("{");
+    const last = jsonText.lastIndexOf("}");
+    if (first !== -1 && last !== -1) {
+      jsonText = jsonText.slice(first, last + 1);
+    }
+
+    let reportJson: unknown;
+    try {
+      reportJson = JSON.parse(jsonText);
+    } catch (e) {
+      console.error("analyse-quote: failed to parse model JSON", e, rawText.slice(0, 500));
+      await supabase
+        .from("quote_checks")
+        .update({ status: "error" })
+        .eq("id", quoteCheckId);
+      return new Response(JSON.stringify({ error: "The analysis could not be formatted. Please try again." }), {
+        status: 502,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Update the record with the structured report.
     await supabase
       .from("quote_checks")
-      .update({ report_html: reportHtml, status: "complete" })
+      .update({ report_json: reportJson, status: "complete" })
       .eq("id", quoteCheckId);
 
-    return new Response(JSON.stringify({ success: true, reportHtml }), {
+    return new Response(JSON.stringify({ success: true, reportJson }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
