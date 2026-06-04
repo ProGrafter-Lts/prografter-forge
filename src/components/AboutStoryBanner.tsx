@@ -1,7 +1,7 @@
 const AboutStoryBanner = () => {
   return (
     <a
-      href="/about"
+      href="/#why-i-built-it"
       className="group block w-full bg-navy hover:bg-navy/90 transition-colors border-y border-teal/20"
       style={{ minHeight: "60px" }}
     >
