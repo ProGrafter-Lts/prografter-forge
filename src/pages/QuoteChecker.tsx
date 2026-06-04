@@ -15,7 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import AppShell from "@/components/AppShell";
 import SEO from "@/components/SEO";
 import { buildServiceJsonLd } from "@/lib/seoSchemas";
-import { Upload, FileText, Loader2, ShieldCheck, AlertTriangle, Check } from "lucide-react";
+import { Upload, FileText, Loader2, ShieldCheck, Check } from "lucide-react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 
 
