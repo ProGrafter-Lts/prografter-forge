@@ -369,10 +369,15 @@ const QuoteCheckerResult = ({
 };
 
 const QuoteChecker = () => {
-  const [result, setResult] = useState<{ id: string; email: string; lookupToken: string } | null>(null);
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [verifying, setVerifying] = useState(false);
+
+  const goToReport = (id: string, lookupToken: string) => {
+    navigate(`/report/${id}?t=${encodeURIComponent(lookupToken)}`);
+  };
+
 
   // Handle return from Stripe checkout
   useEffect(() => {
