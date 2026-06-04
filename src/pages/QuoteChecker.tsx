@@ -16,7 +16,7 @@ import AppShell from "@/components/AppShell";
 import SEO from "@/components/SEO";
 import { buildServiceJsonLd } from "@/lib/seoSchemas";
 import { Upload, FileText, Loader2, ShieldCheck, AlertTriangle, Check } from "lucide-react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import DOMPurify from "dompurify";
 
 const PROJECT_TYPES = [
