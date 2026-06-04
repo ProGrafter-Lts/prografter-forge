@@ -1,7 +1,16 @@
 const AboutStoryBanner = () => {
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    const el = document.getElementById("why-i-built-it");
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   return (
     <a
-      href="/#why-i-built-it"
+      href="#why-i-built-it"
+      onClick={handleClick}
       className="group block w-full bg-navy hover:bg-navy/90 transition-colors border-y border-teal/20"
       style={{ minHeight: "60px" }}
     >
