@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import AdminNav from "@/components/AdminNav";
 
 interface AdminRouteProps {
   children: React.ReactNode;
