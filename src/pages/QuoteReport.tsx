@@ -315,16 +315,16 @@ const QuoteReport = () => {
                   key={i}
                   className={`rounded-xl border p-4 ${
                     q.severity === "action"
-                      ? "border-rose-200 bg-rose-50/60"
-                      : "border-amber-200 bg-amber-50/60"
+                      ? "border-[#EBD9AE] bg-[#FBF1DC]/50"
+                      : "border-[#E3DECE] bg-[#F1EEE7]/60"
                   }`}
                 >
                   <div className="flex items-center gap-2 mb-1.5">
                     <span
                       className={`font-mono text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full ${
                         q.severity === "action"
-                          ? "bg-rose-100 text-rose-700"
-                          : "bg-amber-100 text-amber-800"
+                          ? "bg-[#FBF1DC] text-[#B07A12]"
+                          : "bg-[#F1EEE7] text-secondary-text"
                       }`}
                     >
                       {q.severity === "action" ? "Worth confirming" : "Clarify"}
