@@ -181,9 +181,17 @@ Deno.serve(async (req) => {
       throw new Error("Failed to download PDF: " + downloadError?.message);
     }
 
-    // Convert PDF to base64
+    // Convert PDF to base64 in chunks. Spreading the whole byte array into
+    // String.fromCharCode overflows the call stack for large PDFs, so we
+    // process it in fixed-size slices instead.
     const pdfBytes = await pdfData.arrayBuffer();
-    const pdfBase64 = btoa(String.fromCharCode(...new Uint8Array(pdfBytes)));
+    const bytes = new Uint8Array(pdfBytes);
+    let binary = "";
+    const CHUNK = 0x8000; // 32KB per chunk
+    for (let i = 0; i < bytes.length; i += CHUNK) {
+      binary += String.fromCharCode(...bytes.subarray(i, i + CHUNK));
+    }
+    const pdfBase64 = btoa(binary);
 
     // Build the prompt
     const prompt = CHECKLIST_PROMPT
