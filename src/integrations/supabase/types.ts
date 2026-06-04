@@ -2051,6 +2051,7 @@ export type Database = {
           postcode: string
           project_type: string
           report_html: string | null
+          report_json: Json | null
           status: string
           stripe_payment_id: string | null
           updated_at: string
@@ -2065,6 +2066,7 @@ export type Database = {
           postcode?: string
           project_type: string
           report_html?: string | null
+          report_json?: Json | null
           status?: string
           stripe_payment_id?: string | null
           updated_at?: string
@@ -2079,6 +2081,7 @@ export type Database = {
           postcode?: string
           project_type?: string
           report_html?: string | null
+          report_json?: Json | null
           status?: string
           stripe_payment_id?: string | null
           updated_at?: string
