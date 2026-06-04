@@ -46,20 +46,30 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    // Update quote check with payment ID
-    await supabase
+    // Update quote check with payment ID and return the lookup token so the
+    // client can read the report even if its localStorage was lost (e.g. the
+    // Stripe redirect landed in a new tab / different browsing context).
+    const { data: updated } = await supabase
       .from("quote_checks")
       .update({ stripe_payment_id: session.payment_intent as string })
-      .eq("id", quoteCheckId);
+      .eq("id", quoteCheckId)
+      .select("lookup_token, email")
+      .single();
 
     // Trigger the analysis
     const analyseResponse = await supabase.functions.invoke("analyse-quote", {
       body: { quoteCheckId },
     });
 
-    return new Response(JSON.stringify({ paid: true, analysisStarted: true }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({
+        paid: true,
+        analysisStarted: true,
+        lookupToken: updated?.lookup_token ?? null,
+        email: updated?.email ?? null,
+      }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
   } catch (err) {
     console.error("verify-quote-payment error:", err);
     return new Response(JSON.stringify({ error: "An unexpected error occurred. Please try again." }), {
