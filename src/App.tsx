@@ -29,6 +29,7 @@ const ProjectDetail = lazy(() => import("./pages/ProjectDetail.tsx"));
 const CompareQuotes = lazy(() => import("./pages/CompareQuotes.tsx"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 const QuoteChecker = lazy(() => import("./pages/QuoteChecker.tsx"));
+const QuoteReport = lazy(() => import("./pages/QuoteReport.tsx"));
 const GreenGrants = lazy(() => import("./pages/GreenGrants.tsx"));
 const PlanningAlertsPage = lazy(() => import("./pages/PlanningAlerts.tsx"));
 const HomeownerManual = lazy(() => import("./pages/HomeownerManual.tsx"));
@@ -100,6 +101,7 @@ const AppRoutes = () => {
             <Route path="/register/trade" element={<SignupTradeRedirect />} />
             <Route path="/post-a-job" element={<Navigate to="/post-job-brief" replace />} />
             <Route path="/quote-checker" element={<QuoteChecker />} />
+            <Route path="/report/:id" element={<QuoteReport />} />
             <Route path="/green" element={<GreenGrants />} />
             <Route path="/login" element={<Login />} />
             <Route path="/reset-password" element={<ResetPassword />} />

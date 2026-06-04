@@ -33,7 +33,7 @@ Deno.serve(async (req) => {
 
     const { data, error } = await supabase
       .from("quote_checks")
-      .select("id, status, report_html, lookup_token")
+      .select("id, status, report_html, report_json, lookup_token")
       .eq("id", quoteCheckId)
       .single();
 
@@ -57,6 +57,7 @@ Deno.serve(async (req) => {
         id: data.id,
         status: data.status,
         report_html: data.report_html,
+        report_json: data.report_json,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );

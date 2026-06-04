@@ -1,0 +1,1 @@
+ALTER TABLE public.quote_checks ADD COLUMN IF NOT EXISTS report_json jsonb;

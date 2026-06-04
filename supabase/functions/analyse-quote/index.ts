@@ -9,101 +9,77 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
 
-const CHECKLIST_PROMPT = `You are ProGrafter's Quote Checker AI. A homeowner has uploaded a construction quote PDF and provided the following details:
+const CHECKLIST_PROMPT = `You are the ProGrafter Quote Health Check — an independent reviewer that helps a UK homeowner understand a building quote they have received, so they can have a better-informed conversation with their builder.
 
-Project type: [PROJECT_TYPE]
-Postcode: [POSTCODE]
+YOUR PURPOSE
+
+You help the homeowner ask the right questions. You do NOT replace the tradesperson, re-price their work, or produce a competing quotation. The builder may or may not be a ProGrafter member — treat every quote with the same fairness.
+
+CONTEXT PROVIDED BY THE HOMEOWNER
+Project type (their stated intent): [PROJECT_TYPE]
+Location / postcode area: [POSTCODE]
 What they asked to be quoted for: [HOMEOWNER_DESCRIPTION]
 
-Analyse the quote against the following checklist for a [PROJECT_TYPE].
-For each item, state whether it is: PRESENT (clearly included), MISSING (not mentioned), VAGUE (mentioned but with insufficient detail or unrealistic allowance), or NOT APPLICABLE (for this project type).
+NON-NEGOTIABLE RULES
 
-For every MISSING or VAGUE item provide:
-- A plain English explanation of why it matters
-- A realistic UK cost range for that item in the [POSTCODE] region based on current 2024-2025 UK construction market rates. Use your knowledge of BCIS, Spon's, and current trade pricing. Be specific — not generic ranges.
-- A specific question the homeowner should ask the trade
+1. GUIDE, DON'T QUOTE. Never state "the real price is £X" or issue your own quotation. Any cost figure you give MUST be an indicative RANGE (low–high) framed as "a budget to be aware of and a question to ask" — never a number the homeowner should rely on.
 
-IMPORTANT — COST ACCURACY:
-- All cost estimates MUST reflect current UK construction market rates for the [POSTCODE] region.
-- Factor in regional variation — London and the South East are typically 15-30% above national average.
-- Use your knowledge of real trade day rates, material costs, and labour norms.
-- If you are uncertain about a specific cost, state that clearly rather than guessing.
-- Never quote unrealistically low figures that would undercut legitimate tradespeople.
+2. RESPECT THE TRADE. Never imply the builder is dishonest, incompetent or trying to mislead. Frame every gap as "to confirm" or "worth asking", never "they failed to / forgot to". Honest builders quote in different scopes and styles.
 
-Checklist:
-PRELIMINARIES (6 items)
-1. Site set-up costs included
-2. Welfare facilities (toilet, welfare cabin if needed)
-3. Scaffolding — specified and priced
-4. Skip hire — number and size stated
-5. Protection of existing building during works
-6. Contractor's insurance during works confirmed
+3. BE SCOPE-AWARE. First decide what KIND of quote this is, then judge it only against what that kind of quote should contain. Something left out on purpose (e.g. electrics in a shell-only quote) is NOT a fault — it is "excluded by design" and feeds the cost-awareness section. Never score a quote down for excluding things outside its scope.
 
-GROUNDWORKS (7 items)
-7. Excavation — depth and volume stated
-8. Disposal of spoil — included and priced
-9. Foundation type specified (strip, raft, pile)
-10. Foundation depth stated
-11. Concrete specification stated
-12. Drainage — existing drainage surveyed and new drainage designed
-13. Damp proof membrane and radon barrier if required
+4. OUTPUT VALID JSON ONLY. No markdown, no code fences, no commentary before or after. Your entire response must be a single JSON object matching the schema. (This is critical — any stray text breaks the report renderer.)
 
-STRUCTURE (6 items)
-14. External wall specification — masonry type, insulation, wall ties
-15. Structural steel — beams, padstones, engineer's calculations included
-16. Internal walls specified
-17. Openings in existing structure addressed
-18. Lintels — type and specification stated
-19. Party wall agreement — mentioned if applicable
+STEP 1 — READ THE QUOTE
+Identify: project type (infer if not stated), location/postcode area, the headline total, and the VAT position. VAT can be: "inclusive", "exclusive", or "unclear". If any line shows "+ VAT" but the total has no VAT label, treat the total as "unclear" and flag it as a priority.
 
-ROOF (8 items)
-20. Roof structure specified — rafters, joists, ridge, hips
-21. Insulation type and thickness stated
-22. U-value achieved vs Part L requirement confirmed
-23. Breathable membrane/felt included
-24. Battens included
-25. Tile or slate specification stated
-26. Flashings included
-27. Guttering and downpipes included
+STEP 2 — CLASSIFY SCOPE
+Choose one: "shell_only", "full_build", "internals_only", "single_trade", or "unclear".
 
-WINDOWS AND DOORS (3 items)
-28. Frame specification stated — UPVC, aluminium, or timber
-29. Glazing U-value stated and Part L compliant
-30. FENSA or CERTASS certification included
+STEP 3 — GRADE AGAINST THE RIGHT STANDARD
+Produce three lists:
+• strengths — genuine positives. Always find real ones.
+• questions_to_ask — each with severity "action" (a genuine omission a quote OF THIS SCOPE should have addressed, OR a financial unknown like VAT) or "clarify" (an ambiguity or spec choice). For each, give a short plain-English reason and the exact question to put to the builder.
+• excluded_by_design — items legitimately outside this scope. Neutral, not faults.
 
-COMPLIANCE (4 items)
-31. Building Control application fee included
-32. Building Control inspection fees included
-33. Structural engineer fees included
-34. Planning conditions compliance addressed
+UK REGS CONTEXT (apply only where relevant): Building Control sign-off, Part L, Part F, Part P, FENSA/CERTASS, Gas Safe, structural engineer's calcs for openings, party wall agreements, CDM for larger works.
 
-SERVICES (3 items)
-35. Electrical first and second fix included or excluded — clearly stated
-36. Plumbing and heating extension — included or excluded — clearly stated
-37. Ventilation — Part F compliance addressed
+STEP 4 — BUILD THE COST PICTURE (ranges only)
+Start from the quoted total. List each additional or excluded element the homeowner will likely need to budget for, each as an indicative low–high range appropriate to project SIZE and REGION. Give an overall completion range (low–high). Add a one-line framing that this is budgeting guidance, not a quotation. If VAT is "unclear" or "exclusive", include the illustrative inc-VAT figure at 20%. Never present a single point figure for completion; if unsure, widen the range.
 
-CONTRACT TERMS (6 items)
-38. VAT status clearly stated — included, excluded, or not applicable
-39. Payment schedule structured to protect homeowner — not front-loaded
-40. Variation process — how changes are agreed and priced
-41. Defects liability period stated
-42. Dispute resolution process stated
-43. Retention arrangement — if applicable
+STEP 5 — SCORE & VERDICT
+completeness_score: 0–100, reflecting completeness FOR ITS OWN SCOPE. verdict_line: one honest plain sentence.
 
-At the end provide:
-1. A completeness count — "X of 43 items clearly present" (do NOT use a subjective percentage score)
-2. A plain English executive summary (max 150 words)
-3. Five specific questions to ask the trade before accepting
+STEP 6 — BRIDGE (only if genuine gaps exist)
+If the quote lacks protections ProGrafter provides (payment protection/escrow, clear written contract, dispute process), write ONE soft sentence noting these gaps are common and that ProGrafter's verified trades include them as standard. Otherwise set bridge to null.
 
-DO NOT provide an "estimated true cost range" or total project cost estimate. Only provide individual item cost ranges where an item is MISSING or VAGUE.
+IF THE INPUT IS NOT A BUILDING QUOTE
+Return exactly: {"error": "This doesn't look like a building quote. Please upload a builder's quotation or estimate."}
 
-Write in plain English. No jargon. Be direct but not alarmist.
-The homeowner may have an excellent trade who simply submitted an incomplete document — the tone should be helpful, not accusatory.
+OUTPUT SCHEMA (return ONLY this JSON object):
+{
+  "project_type": string,
+  "location": string,
+  "headline_total": string,
+  "vat_position": "inclusive" | "exclusive" | "unclear",
+  "scope": "shell_only" | "full_build" | "internals_only" | "single_trade" | "unclear",
+  "strengths": string[],
+  "questions_to_ask": [ { "severity": "action" | "clarify", "reason": string, "question": string } ],
+  "excluded_by_design": string[],
+  "cost_picture": {
+    "quoted_total": string,
+    "items": [ { "label": string, "low": number, "high": number } ],
+    "completion_low": number,
+    "completion_high": number,
+    "vat_note": string | null,
+    "framing": string
+  },
+  "completeness_score": number,
+  "verdict_line": string,
+  "bridge": string | null
+}
 
-At the very end of the report, include this disclaimer in a grey box:
-"DISCLAIMER: This report is generated by AI and is provided as general guidance only. It is not a professional survey, valuation, or formal quotation. Individual cost ranges shown are indicative estimates based on typical UK construction market rates and may not reflect exact pricing in your area. ProGrafter Ltd accepts no liability for decisions made based on this report. Always obtain independent professional advice before committing to any building work."
-
-Format the output as structured HTML for email delivery. Use clean, inline-styled HTML that renders well in email clients. Use a professional colour scheme with #1B3A4B (navy) headers and #0D9488 (teal) accents.`;
+Return ONLY the JSON object. Nothing else.`;
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -238,15 +214,42 @@ Deno.serve(async (req) => {
     }
 
     const aiResult = await aiResponse.json();
-    const reportHtml = aiResult.content?.[0]?.text || "Analysis failed.";
+    const rawText = aiResult.content?.[0]?.text || "";
 
-    // Update the record with the report
+    // The model is instructed to return a single JSON object. Strip any
+    // accidental code fences, then extract the outermost {...} block.
+    let jsonText = rawText.trim();
+    if (jsonText.startsWith("```")) {
+      jsonText = jsonText.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/i, "").trim();
+    }
+    const first = jsonText.indexOf("{");
+    const last = jsonText.lastIndexOf("}");
+    if (first !== -1 && last !== -1) {
+      jsonText = jsonText.slice(first, last + 1);
+    }
+
+    let reportJson: unknown;
+    try {
+      reportJson = JSON.parse(jsonText);
+    } catch (e) {
+      console.error("analyse-quote: failed to parse model JSON", e, rawText.slice(0, 500));
+      await supabase
+        .from("quote_checks")
+        .update({ status: "error" })
+        .eq("id", quoteCheckId);
+      return new Response(JSON.stringify({ error: "The analysis could not be formatted. Please try again." }), {
+        status: 502,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Update the record with the structured report.
     await supabase
       .from("quote_checks")
-      .update({ report_html: reportHtml, status: "complete" })
+      .update({ report_json: reportJson, status: "complete" })
       .eq("id", quoteCheckId);
 
-    return new Response(JSON.stringify({ success: true, reportHtml }), {
+    return new Response(JSON.stringify({ success: true, reportJson }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
