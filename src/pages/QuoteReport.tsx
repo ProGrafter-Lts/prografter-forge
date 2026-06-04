@@ -212,7 +212,15 @@ const QuoteReport = () => {
               </span>
             )}
             {project.vat_status && (
-              <span className="bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full">
+              <span
+                className={`px-2.5 py-1 rounded-full ${
+                  project.vat_status === "inclusive"
+                    ? "bg-[#E4F5F3] text-[#0E837D]"
+                    : project.vat_status === "exclusive"
+                      ? "bg-[#FBF1DC] text-[#B07A12]"
+                      : "bg-rose-100 text-rose-700"
+                }`}
+              >
                 VAT: {project.vat_status}
               </span>
             )}
