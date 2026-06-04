@@ -416,9 +416,8 @@ const QuoteChecker = () => {
               window.history.replaceState({}, "", "/quote-checker");
               return;
             }
-            setResult({ id: quoteId, email, lookupToken });
             trackEvent("quote_check", { method: "paid" });
-            window.history.replaceState({}, "", "/quote-checker");
+            goToReport(quoteId, lookupToken);
           } else {
             toast({ title: "Payment not confirmed", description: "Please try again.", variant: "destructive" });
           }
