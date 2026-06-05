@@ -34,6 +34,10 @@ RULE ON SCOPE — describe only what is itemised.
 - If a trade or element (electrical, plumbing, heating, etc.) is NOT itemised, you may NOT call it included, partial, "rough-in", or "basic". Flag it instead: "No [X] work is itemised — confirm whether it is meant to be included."
 - If it is not written on the page, it is a question, not a fact. Never invent or infer scope.
 
+RULE — GIVE THE REASON, NOT JUST THE QUESTION.
+For any item that carries genuine hidden risk (foundations, structural openings, beams/lintels, drainage, anything assumed or relied upon), the clarify note must FIRST explain WHY it matters in plain builder's English (what could go wrong, or what cost/delay it could cause), THEN ask the specific question. Awareness with a reason — never a blank prompt. Routine, low-risk items can stay as a short question.
+
+
 STEP 1 — Analyse the quote against the 43-point checklist for a [PROJECT_TYPE].
 The 43 points cover the full lifecycle of such a project, including (adapt sensibly to the project type): preliminaries & welfare; site setup, access & protection; demolition/strip-out; muck-away & skips; setting out; excavation; foundation type & depth; building control / inspections; structural engineer's calcs; party wall matters; drainage (foul & surface water); DPC/DPM & damp proofing; substructure brick/block; ground floor build-up & insulation; superstructure walls; cavity insulation; lintels & openings; structural steel/beams; roof structure; roof covering & flashings; rainwater goods; external doors & windows (incl. FENSA/CERTASS); plastering & rendering; screeding; first-fix carpentry; first-fix electrics (incl. Part P); first-fix plumbing & heating (incl. Gas Safe); ventilation (Part F); insulation to meet Part L; second-fix electrics; second-fix plumbing & heating; second-fix carpentry; kitchen supply & fit; bathroom/sanitaryware supply & fit; tiling; decoration; flooring; external works/landscaping; making good; waste removal & clean; testing & commissioning; certificates & handover documents; warranties/guarantees; payment schedule & contract terms.
 For each item state one of:
