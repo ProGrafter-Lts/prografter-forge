@@ -2054,7 +2054,11 @@ export type Database = {
           report_json: Json | null
           status: string
           stripe_payment_id: string | null
+          subtotal_text: string | null
+          total_text: string | null
           updated_at: string
+          user_id: string | null
+          vat_text: string | null
         }
         Insert: {
           created_at?: string
@@ -2069,7 +2073,11 @@ export type Database = {
           report_json?: Json | null
           status?: string
           stripe_payment_id?: string | null
+          subtotal_text?: string | null
+          total_text?: string | null
           updated_at?: string
+          user_id?: string | null
+          vat_text?: string | null
         }
         Update: {
           created_at?: string
@@ -2084,7 +2092,11 @@ export type Database = {
           report_json?: Json | null
           status?: string
           stripe_payment_id?: string | null
+          subtotal_text?: string | null
+          total_text?: string | null
           updated_at?: string
+          user_id?: string | null
+          vat_text?: string | null
         }
         Relationships: []
       }
