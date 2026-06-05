@@ -33,6 +33,16 @@ interface AdditionalItem {
 
 interface ReportJson {
   error?: string;
+  // New QS-style report (HTML body + verbatim figures)
+  figures?: {
+    subtotal?: string;
+    vat?: string;
+    total?: string;
+  };
+  score_addressed?: number;
+  assessment?: "Ready to Accept" | "Needs Clarification" | "Significant Concerns";
+  report_html?: string;
+  // Legacy structured report
   project?: {
     type?: string;
     location?: string;
