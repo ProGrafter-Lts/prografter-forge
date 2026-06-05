@@ -30,6 +30,8 @@ const CompareQuotes = lazy(() => import("./pages/CompareQuotes.tsx"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 const QuoteChecker = lazy(() => import("./pages/QuoteChecker.tsx"));
 const QuoteReport = lazy(() => import("./pages/QuoteReport.tsx"));
+const MyQuoteChecks = lazy(() => import("./pages/MyQuoteChecks.tsx"));
+const QuoteCheckDetail = lazy(() => import("./pages/QuoteCheckDetail.tsx"));
 const GreenGrants = lazy(() => import("./pages/GreenGrants.tsx"));
 const PlanningAlertsPage = lazy(() => import("./pages/PlanningAlerts.tsx"));
 const HomeownerManual = lazy(() => import("./pages/HomeownerManual.tsx"));
@@ -133,6 +135,22 @@ const AppRoutes = () => {
               element={
                 <ProtectedRoute>
                   <HomeownerDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/quote-checks"
+              element={
+                <ProtectedRoute>
+                  <MyQuoteChecks />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/quote-checks/:id"
+              element={
+                <ProtectedRoute>
+                  <QuoteCheckDetail />
                 </ProtectedRoute>
               }
             />
