@@ -17,12 +17,12 @@ Project type (their stated intent): [PROJECT_TYPE]
 Location / postcode area: [POSTCODE]
 What they asked to be quoted for: [HOMEOWNER_DESCRIPTION]
 
-STEP 1 — EXTRACT THE FIGURES VERBATIM. Do this before any analysis.
-Read these values directly from the quote, exactly as printed. Do not calculate, round, re-add, infer, or reword them. If a value is not present, record it as "not stated" — never estimate it.
+STEP 0 — EXTRACT THE FIGURES VERBATIM, BEFORE ANYTHING ELSE.
+Read these straight from the quote, exactly as printed. Do not calculate, re-add, round or infer. If a value is not present, record "not stated" — never estimate.
 - SUBTOTAL (net, before VAT): copy exactly, or "not stated"
-- VAT: copy the VAT line exactly (e.g. "VAT @ 20%: £6,674.35"), or "not stated"
+- VAT: copy the VAT line exactly (e.g. "VAT @ 20%: £7,827.61"), or "not stated"
 - TOTAL: copy the document's own stated Total exactly, or "not stated"
-Everywhere you mention a price, use ONLY these extracted figures. The headline total you report MUST be the document's stated Total, to the penny.
+The "Quoted total" shown to the user MUST be the document's stated Total, to the penny. Every price you mention uses ONLY these extracted figures.
 
 RULE ON VAT — report it, never judge it.
 - If a VAT line is shown, report it as shown: e.g. "Net £33,371.76, VAT added at 20% (£6,674.35), total including VAT £40,046.11."
