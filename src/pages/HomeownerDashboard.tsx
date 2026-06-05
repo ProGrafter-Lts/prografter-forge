@@ -367,6 +367,23 @@ const HomeownerDashboard = () => {
                 </a>
               </div>
 
+              <a
+                href="/dashboard/quote-checks"
+                className="block bg-card rounded-2xl p-6 border border-border shadow-sm hover:border-secondary/40 hover:shadow-sm transition-all"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <h3 className="font-heading text-primary text-lg flex items-center gap-2">
+                      <SearchCheck className="w-5 h-5" /> My Quote Checks
+                    </h3>
+                    <p className="font-mono text-xs text-muted-foreground mt-1">
+                      View and download PDFs of every Quote Health Check saved to your account.
+                    </p>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-muted-foreground" />
+                </div>
+              </a>
+
               <QuotesReceived
                 quotes={quotes}
                 onSelectTier={handleSelectTier}
