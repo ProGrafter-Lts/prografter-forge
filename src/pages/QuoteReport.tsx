@@ -199,7 +199,45 @@ const QuoteReport = () => {
       );
     }
 
-    const project = report.project || {};
+    // New QS-style report: render the model's HTML body with scoped styling.
+    if (report.report_html) {
+      const assessment = report.assessment;
+      const assessmentClass =
+        assessment === "Ready to Accept"
+          ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+          : assessment === "Significant Concerns"
+            ? "bg-[#FBF1DC] text-[#B07A12] border border-[#EBD9AE]"
+            : "bg-[#F1EEE7] text-navy border border-[#E3DECE]";
+      return (
+        <div className="space-y-6">
+          <div className="bg-card rounded-2xl border border-border p-6 md:p-8 shadow-sm">
+            <div className="flex flex-wrap items-center gap-3 mb-5">
+              {typeof report.score_addressed === "number" && (
+                <div className="shrink-0 text-center">
+                  <div className="font-heading text-4xl text-navy leading-none">
+                    {report.score_addressed}
+                  </div>
+                  <div className="font-mono text-[10px] uppercase tracking-wide text-muted-foreground mt-1">
+                    / 43 addressed
+                  </div>
+                </div>
+              )}
+              {assessment && (
+                <span className={`font-mono text-xs px-3 py-1.5 rounded-full ${assessmentClass}`}>
+                  {assessment}
+                </span>
+              )}
+            </div>
+            <div
+              className="qr-report"
+              dangerouslySetInnerHTML={{ __html: report.report_html }}
+            />
+          </div>
+          <DisclaimerBanner />
+        </div>
+      );
+    }
+
     const scope = report.scope || {};
     const cp = report.cost_picture;
     const actions = (report.questions_to_ask || []).filter((q) => q.severity === "action");
