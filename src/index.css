@@ -578,3 +578,49 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
 }
 .qr-report li.missing::before { content: "!"; color: #B07A12; }
 .qr-report .qr-checklist li strong { color: inherit; }
+
+/* ============================================================
+   Print stylesheet — window.print() produces a clean PDF of the
+   Quote Health Check. Hides nav/sidebar/buttons/footer chrome and
+   prints only the report card (.qr-print-area), keeping the
+   ProGrafter navy/teal styling, the score, all sections and the
+   disclaimer footer. The printed PDF == the on-screen report.
+   ============================================================ */
+@media print {
+  /* Hide everything by default, then reveal only the report area */
+  body * {
+    visibility: hidden;
+  }
+  .qr-print-area,
+  .qr-print-area * {
+    visibility: visible;
+  }
+  .qr-print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+  /* Explicitly drop interactive chrome and app shells */
+  .no-print,
+  .dashboard-sidebar,
+  nav,
+  footer,
+  button {
+    display: none !important;
+  }
+  /* Neutralise the dark dashboard background so the report prints on white */
+  .dashboard-dark {
+    background: #ffffff !important;
+  }
+  /* Ensure colours/backgrounds (score, checklist chips) render in print */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  @page {
+    margin: 14mm;
+  }
+}
