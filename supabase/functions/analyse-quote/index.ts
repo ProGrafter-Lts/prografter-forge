@@ -267,33 +267,73 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Update the record with the structured report.
+    const isErrorReport =
+      reportJson && typeof reportJson === "object" && "error" in (reportJson as Record<string, unknown>);
+
+    // Verbatim figures extracted by the model (STEP 0 of the prompt).
+    const figures =
+      (reportJson as { figures?: { subtotal?: string; vat?: string; total?: string } })?.figures || {};
+    const reportHtml =
+      typeof (reportJson as { report_html?: string })?.report_html === "string"
+        ? (reportJson as { report_html?: string }).report_html ?? null
+        : null;
+
+    // ACCOUNT ON PURCHASE — before saving the report, ensure the homeowner has
+    // an auth account, then tie the report to it and prepare a magic link.
+    let userId: string | null = null;
+    let magicLink: string | null = null;
+    if (!isErrorReport && record.email) {
+      try {
+        // Create the user if they don't already exist (no password, confirmed).
+        await supabase.auth.admin
+          .createUser({
+            email: record.email,
+            email_confirm: true,
+            user_metadata: { user_type: "homeowner" },
+          })
+          .catch(() => {/* already registered — fine */});
+
+        // Generate a magic link that lands on their Quote Checks list.
+        const { data: linkData, error: linkErr } = await supabase.auth.admin.generateLink({
+          type: "magiclink",
+          email: record.email,
+          options: { redirectTo: "https://prografter.co.uk/dashboard/quote-checks" },
+        });
+        if (linkErr) console.error("analyse-quote: generateLink failed", linkErr);
+        userId = linkData?.user?.id ?? null;
+        magicLink =
+          (linkData?.properties as { action_link?: string } | undefined)?.action_link ?? null;
+      } catch (acctErr) {
+        console.error("analyse-quote: account creation failed", acctErr);
+      }
+    }
+
+    // Save the report row WITH the user_id and the verbatim figures.
     await supabase
       .from("quote_checks")
-      .update({ report_json: reportJson, status: "complete" })
+      .update({
+        report_json: reportJson,
+        report_html: reportHtml,
+        status: "complete",
+        user_id: userId,
+        subtotal_text: figures.subtotal ?? null,
+        vat_text: figures.vat ?? null,
+        total_text: figures.total ?? null,
+      })
       .eq("id", quoteCheckId);
 
-    // Email the homeowner a secure link to their report (best effort).
+    // Notification email (NOT the report itself) — a short branded message with
+    // a magic link to the homeowner's account, where they can read & print it.
     try {
-      const isErrorReport =
-        reportJson && typeof reportJson === "object" && "error" in (reportJson as Record<string, unknown>);
-      if (!isErrorReport) {
-        const { data: row } = await supabase
-          .from("quote_checks")
-          .select("email, lookup_token, report_json")
-          .eq("id", quoteCheckId)
-          .single();
-        if (row?.email && row?.lookup_token) {
-          const reportUrl = `https://prografter.co.uk/report/${quoteCheckId}?t=${encodeURIComponent(row.lookup_token)}`;
-          const projectType =
-            (row.report_json as { project?: { type?: string } } | null)?.project?.type || "";
-          await enqueueTransactionalEmail(supabase, {
-            templateName: "quote-health-check-ready",
-            recipientEmail: row.email,
-            idempotencyKey: `quote-health-check-ready:${quoteCheckId}`,
-            templateData: { reportUrl, projectType },
-          });
-        }
+      if (!isErrorReport && record.email) {
+        const projectType = record.project_type || "";
+        const reportUrl = magicLink || "https://prografter.co.uk/dashboard/quote-checks";
+        await enqueueTransactionalEmail(supabase, {
+          templateName: "quote-health-check-ready",
+          recipientEmail: record.email,
+          idempotencyKey: `quote-health-check-ready:${quoteCheckId}`,
+          templateData: { reportUrl, projectType },
+        });
       }
     } catch (emailErr) {
       console.error("analyse-quote: failed to enqueue report email", emailErr);
