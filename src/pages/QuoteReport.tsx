@@ -238,6 +238,7 @@ const QuoteReport = () => {
       );
     }
 
+    const project = report.project || {};
     const scope = report.scope || {};
     const cp = report.cost_picture;
     const actions = (report.questions_to_ask || []).filter((q) => q.severity === "action");
