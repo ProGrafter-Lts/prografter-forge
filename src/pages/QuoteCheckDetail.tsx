@@ -40,7 +40,7 @@ const QuoteCheckDetail = () => {
       }
       setStatus(data.status);
       if (data.status === "complete" && data.report_json) {
-        setReport(data.report_json as ReportJson);
+        setReport(data.report_json as unknown as ReportJson);
       }
     })();
   }, [isReady, id, user, navigate]);
