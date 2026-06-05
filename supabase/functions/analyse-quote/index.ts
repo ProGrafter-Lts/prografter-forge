@@ -205,7 +205,7 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         model: "claude-sonnet-4-20250514",
         max_tokens: 8000,
-        temperature: 0.2,
+        temperature: 0,
         messages: [
           {
             role: "user",
