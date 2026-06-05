@@ -493,3 +493,88 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
 .dashboard-dark .grants-light-section span {
   color: revert !important;
 }
+
+/* ============================================================
+   Quote Health Check — QS-style HTML report styling (.qr-report)
+   ============================================================ */
+.qr-report .qr-section {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid hsl(var(--border));
+}
+.qr-report .qr-section:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+.qr-report h2 {
+  font-family: var(--font-heading, inherit);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: hsl(var(--navy, var(--foreground)));
+  margin-bottom: 0.75rem;
+}
+.qr-report p {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 0.5rem;
+}
+.qr-report ul,
+.qr-report ol {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.qr-report ol {
+  list-style: decimal;
+  padding-left: 1.25rem;
+}
+.qr-report ol li {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: hsl(var(--foreground));
+  padding-left: 0.25rem;
+}
+.qr-report .qr-figures li {
+  font-size: 0.9rem;
+  color: hsl(var(--foreground));
+}
+.qr-report strong {
+  color: hsl(var(--navy, var(--foreground)));
+  font-weight: 600;
+}
+/* Checklist status items */
+.qr-report .qr-checklist li {
+  position: relative;
+  padding: 0.55rem 0.75rem 0.55rem 2rem;
+  border-radius: 0.6rem;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  border: 1px solid transparent;
+}
+.qr-report .qr-checklist li::before {
+  position: absolute;
+  left: 0.7rem;
+  top: 0.55rem;
+  font-weight: 700;
+}
+.qr-report li.addressed {
+  background: #ECFDF5;
+  border-color: #BBF7D0;
+  color: #047857;
+}
+.qr-report li.addressed::before { content: "✓"; color: #10B981; }
+.qr-report li.unclear {
+  background: #F1EEE7;
+  border-color: #E3DECE;
+  color: #4B463B;
+}
+.qr-report li.unclear::before { content: "?"; color: #8A7B4F; }
+.qr-report li.missing {
+  background: #FBF1DC;
+  border-color: #EBD9AE;
+  color: #B07A12;
+}
+.qr-report li.missing::before { content: "!"; color: #B07A12; }
+.qr-report .qr-checklist li strong { color: inherit; }
