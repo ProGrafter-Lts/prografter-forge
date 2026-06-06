@@ -432,10 +432,11 @@ const AppDetail = ({ app, onClose, isMobile }: { app: PlanningApp; onClose: () =
   if (isMobile) {
     return (
       <div onClick={onClose} className="fixed inset-0 bg-primary/60 z-[1000] flex items-stretch justify-center">
-        <div onClick={e => e.stopPropagation()} className="w-full h-full bg-card flex flex-col">
+        <div onClick={e => e.stopPropagation()} style={{ backgroundColor: "#0F1F38" }} className="w-full h-full flex flex-col">
           {panel}
         </div>
       </div>
+
     );
   }
 
