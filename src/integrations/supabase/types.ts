@@ -3677,6 +3677,24 @@ export type Database = {
           total_trades: number
         }[]
       }
+      get_trade_for_homeowner: {
+        Args: { _trade_id: string }
+        Returns: {
+          avg_rating: number
+          company_name: string
+          completed_jobs_count: number
+          id: string
+          is_green_trade: boolean
+          mcs_verified: boolean
+          name: string
+          phone: string
+          review_count: number
+          tier: string
+          trade_type: string
+          trustmark_verified: boolean
+          verified: boolean
+        }[]
+      }
       get_trade_for_job: {
         Args: { _job_id: string }
         Returns: {
