@@ -86,10 +86,10 @@ const HomeownerManual = () => {
     let trade = null, homeowner = null;
     if (contractRes.data) {
       const [tradeRes, hoRes] = await Promise.all([
-        supabase.from("trades").select("*").eq("id", (contractRes.data as any).trade_id).single(),
+        supabase.rpc("get_trade_for_homeowner", { _trade_id: (contractRes.data as any).trade_id }),
         supabase.from("homeowners").select("*").eq("id", (contractRes.data as any).homeowner_id).single(),
       ]);
-      trade = tradeRes.data;
+      trade = Array.isArray(tradeRes.data) ? tradeRes.data[0] : tradeRes.data;
       homeowner = hoRes.data;
     }
 
