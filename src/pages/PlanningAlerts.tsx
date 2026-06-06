@@ -316,9 +316,12 @@ const AppDetail = ({ app, onClose, isMobile }: { app: PlanningApp; onClose: () =
   }, [isMobile]);
 
   const panel = (
-    <div className={`bg-card overflow-hidden flex flex-col ${
-      isMobile ? "h-full rounded-none border-0" : "rounded-2xl border-2 border-secondary sticky top-20 max-h-[calc(100vh-100px)]"
-    }`}>
+    <div
+      style={{ backgroundColor: "#0F1F38" }}
+      className={`overflow-hidden flex flex-col ${
+        isMobile ? "h-full rounded-none border-0" : "rounded-2xl border-2 border-secondary sticky top-20 max-h-[calc(100vh-100px)]"
+      }`}
+    >
       {/* Header */}
       <div className="bg-primary px-5 py-4 flex items-center justify-between gap-3 flex-shrink-0">
         <div className="min-w-0 flex-1">
@@ -429,10 +432,11 @@ const AppDetail = ({ app, onClose, isMobile }: { app: PlanningApp; onClose: () =
   if (isMobile) {
     return (
       <div onClick={onClose} className="fixed inset-0 bg-primary/60 z-[1000] flex items-stretch justify-center">
-        <div onClick={e => e.stopPropagation()} className="w-full h-full bg-card flex flex-col">
+        <div onClick={e => e.stopPropagation()} style={{ backgroundColor: "#0F1F38" }} className="w-full h-full flex flex-col">
           {panel}
         </div>
       </div>
+
     );
   }
 
