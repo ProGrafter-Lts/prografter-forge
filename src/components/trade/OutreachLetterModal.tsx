@@ -69,7 +69,7 @@ const OutreachLetterModal = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-card rounded-2xl border border-border shadow-xl max-w-lg w-full max-h-[90vh] flex flex-col">
+      <div className="dashboard-modal-surface bg-card rounded-2xl border border-border shadow-xl max-w-lg w-full max-h-[90vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-border">
           <div className="flex items-center gap-2">
