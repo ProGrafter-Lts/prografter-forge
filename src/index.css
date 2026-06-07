@@ -306,6 +306,10 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
   border-color: rgba(255, 255, 255, 0.08) !important;
   color: rgba(255, 255, 255, 0.92);
 }
+.dashboard-dark .dashboard-modal-surface {
+  background-color: hsl(214 58% 14%) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
 .dashboard-dark .border-border,
 .dashboard-dark .border-primary\/10,
 .dashboard-dark .border-input {
