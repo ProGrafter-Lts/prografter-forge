@@ -167,7 +167,18 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
 
   return (
     <div className="space-y-6">
-      <div className="bg-card rounded-2xl border border-border p-6 md:p-8 space-y-6 shadow-sm">
+      <div className="relative bg-card rounded-2xl border border-border p-6 md:p-8 space-y-6 shadow-xl shadow-navy/5 overflow-hidden">
+        {/* Gradient top edge */}
+        <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-teal via-teal/70 to-navy" />
+        <div className="flex items-center gap-3 pt-1">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-teal to-navy text-white shadow-lg shadow-teal/30">
+            <FileText className="h-5 w-5" />
+          </div>
+          <div>
+            <p className="font-heading text-lg text-navy leading-tight">Upload Your Quote</p>
+            <p className="font-mono text-xs text-muted-foreground">Analysed against a 43-point checklist</p>
+          </div>
+        </div>
         <div className="space-y-2">
           <Label className="font-mono text-sm text-navy">Quote PDF *</Label>
           <div
