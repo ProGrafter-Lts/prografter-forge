@@ -277,6 +277,25 @@ export default function AdminTradeScraper() {
           <option value="all" style={{ color: "#000" }}>All trade types</option>
           {tradeTypes.map((t) => <option key={t} value={t} style={{ color: "#000" }}>{t}</option>)}
         </select>
+        <button
+          onClick={() => setFilterStage((prev) => (prev === "no_answer" ? "all" : "no_answer"))}
+          style={{
+            background: filterStage === "no_answer" ? "#0EA5E9" : "transparent",
+            color: filterStage === "no_answer" ? "#fff" : "#0EA5E9",
+            border: "1px solid #0EA5E9",
+            borderRadius: 999,
+            padding: "6px 14px",
+            fontSize: 12,
+            fontWeight: 700,
+            cursor: "pointer",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+          }}
+        >
+          <span style={{ fontSize: 14 }}>📞</span>
+          No answer only {counts["no_answer"] ? `(${counts["no_answer"]})` : ""}
+        </button>
         <label style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color: C.dim, cursor: "pointer" }}>
           <input type="checkbox" checked={hideContacted} onChange={(e) => setHideContacted(e.target.checked)} />
           Hide already-contacted
