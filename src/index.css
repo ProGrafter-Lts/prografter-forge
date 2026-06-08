@@ -336,6 +336,12 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
 .dashboard-dark textarea::placeholder {
   color: rgba(255, 255, 255, 0.65);
 }
+/* Native <select> dropdown options — force a dark popup with light text so
+   they remain visible (browsers default the option list to white-on-white). */
+.dashboard-dark select option {
+  background-color: #0F1F38;
+  color: #FFFFFF;
+}
 
 /* Light-tinted alert/status backgrounds inside dashboards → translucent dark equivalents */
 .dashboard-dark [class*="bg-amber-50"],

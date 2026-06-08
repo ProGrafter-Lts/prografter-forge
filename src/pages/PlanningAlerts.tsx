@@ -651,17 +651,7 @@ export default function PlanningAlerts() {
             </span>
           </div>
 
-          {/* Tab bar */}
-          <div className="bg-card border-b border-border px-4 flex items-stretch gap-2 flex-wrap overflow-x-auto">
-            <button className={tabClass(activeTab==="pipeline")} onClick={()=>setActiveTab("pipeline")}>
-              <Radio className="w-3.5 h-3.5 inline mr-1.5 -mt-0.5" /> Live pipeline
-            </button>
-            <button className={tabClass(activeTab==="checker")} onClick={()=>setActiveTab("checker")}>
-              <Search className="w-3.5 h-3.5 inline mr-1.5 -mt-0.5" /> Planning permission?
-            </button>
-          </div>
-
-          <div className={`mx-auto px-4 py-6 ${activeTab==="pipeline" ? "max-w-[1100px]" : "max-w-[700px]"}`}>
+          <div className="mx-auto px-4 py-6 max-w-[1100px]">
             {activeTab === "pipeline" && (
               <>
                 {/* Stats row */}
@@ -808,9 +798,8 @@ export default function PlanningAlerts() {
                 </div>
               </>
             )}
-
-            {activeTab === "checker" && <PDChecker />}
           </div>
+
         </div>
       </AppShell>
     </>
