@@ -1,0 +1,2 @@
+ALTER TABLE public.scraped_trades DROP CONSTRAINT IF EXISTS scraped_trades_outreach_stage_chk;
+ALTER TABLE public.scraped_trades ADD CONSTRAINT scraped_trades_outreach_stage_chk CHECK (outreach_stage = ANY (ARRAY['new'::text, 'contacted'::text, 'no_answer'::text, 'follow_up'::text, 'interested'::text, 'not_interested'::text, 'converted'::text]));
