@@ -554,10 +554,13 @@ Total: £2,585`} />
                 { n:"04", title:"Know what to ask", body:"Specific questions to put to the trade before you sign anything." },
               ].map(s => (
                 <div key={s.n} style={{ background:C.white, border:`1px solid ${C.border}`,
-                  borderRadius:12, padding:"14px 16px" }}>
-                  <div style={{ fontSize:10, fontWeight:700, color:C.teal,
-                    letterSpacing:"0.1em", marginBottom:6 }}>{s.n}</div>
-                  <p style={{ fontSize:13, fontWeight:600, color:C.navy, margin:"0 0 4px" }}>{s.title}</p>
+                  borderRadius:14, padding:"18px 16px", position:"relative", overflow:"hidden",
+                  boxShadow:"0 4px 16px rgba(15,34,56,0.05)" }}>
+                  <div style={{ width:36, height:36, borderRadius:10, marginBottom:10,
+                    display:"flex", alignItems:"center", justifyContent:"center",
+                    fontSize:13, fontWeight:700, color:C.white,
+                    background:`linear-gradient(135deg, ${C.navy}, ${C.teal})` }}>{s.n}</div>
+                  <p className="font-heading" style={{ fontSize:16, color:C.navy, margin:"0 0 4px", letterSpacing:"0.01em" }}>{s.title}</p>
                   <p style={{ fontSize:12, color:C.secondary, margin:0, lineHeight:1.55 }}>{s.body}</p>
                 </div>
               ))}
