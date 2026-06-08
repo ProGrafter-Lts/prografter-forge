@@ -378,8 +378,12 @@ export default function AdminTradeScraper() {
                       {isEditing ? (
                         <textarea value={draftNotes} onChange={(e) => setDraftNotes(e.target.value)} rows={3} style={{ ...inp, fontSize: 11 }} />
                       ) : (
-                        <div style={{ color: r.notes ? C.bright : C.dim, fontSize: 11, whiteSpace: "pre-wrap" }}>
-                          {r.notes || "—"}
+                        <div
+                          onClick={() => beginEdit(r)}
+                          title="Click to add or edit a note"
+                          style={{ color: r.notes ? C.bright : C.dim, fontSize: 11, whiteSpace: "pre-wrap", cursor: "pointer", minHeight: 18 }}
+                        >
+                          {r.notes || "✎ Add note…"}
                         </div>
                       )}
                     </td>
