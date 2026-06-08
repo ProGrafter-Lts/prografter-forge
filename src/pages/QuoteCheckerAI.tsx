@@ -278,39 +278,69 @@ ${form.quote_text}`;
 
       <div style={{ background:C.deep, padding:"16px 24px",
         display:"flex", alignItems:"center", justifyContent:"space-between",
-        position:"sticky", top:0, zIndex:10 }}>
+        position:"sticky", top:0, zIndex:10,
+        borderBottom:`1px solid rgba(20,168,161,0.25)` }}>
         <div className="font-heading tracking-wider" style={{ fontSize:24, fontWeight:700 }}>
           <Logo variant="light" className="h-9 w-auto inline-block" />
         </div>
         <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-          <span style={{ fontSize:11, color:C.teal, background:"rgba(13,148,136,0.15)",
-            padding:"3px 10px", borderRadius:20, fontWeight:600, letterSpacing:"0.05em" }}>
+          <span style={{ fontSize:11, color:C.white,
+            background:`linear-gradient(135deg, ${C.teal}, ${C.tealHover})`,
+            padding:"4px 11px", borderRadius:20, fontWeight:700, letterSpacing:"0.05em",
+            boxShadow:"0 2px 10px rgba(20,168,161,0.4)" }}>
             AI POWERED
           </span>
-          <span style={{ fontSize:12, color:"rgba(245,240,232,0.5)", letterSpacing:"0.06em" }}>
+          <span style={{ fontSize:12, color:"rgba(245,240,232,0.55)", letterSpacing:"0.06em" }}>
             QUOTE CHECKER
           </span>
         </div>
       </div>
 
-      <div style={{ maxWidth:700, margin:"0 auto", padding:"2rem 1rem" }}>
-
-        <div style={{ textAlign:"center", marginBottom:32 }}>
-          <h1 style={{ fontSize:26, fontWeight:700, color:C.deep, margin:"0 0 8px",
-            letterSpacing:"-0.5px" }}>
-            Is your quote fair?
+      {/* Hero band */}
+      <div style={{ position:"relative", overflow:"hidden",
+        background:`linear-gradient(160deg, ${C.deep} 0%, ${C.navy} 100%)`,
+        padding:"3rem 1rem 5.5rem", textAlign:"center" }}>
+        <div style={{ position:"absolute", top:-80, right:-60, width:260, height:260,
+          borderRadius:"50%", background:`radial-gradient(circle, rgba(20,168,161,0.35), transparent 70%)`,
+          pointerEvents:"none" }} />
+        <div style={{ position:"absolute", bottom:-120, left:-80, width:300, height:300,
+          borderRadius:"50%", background:`radial-gradient(circle, rgba(39,57,106,0.6), transparent 70%)`,
+          pointerEvents:"none" }} />
+        <div style={{ position:"relative", maxWidth:640, margin:"0 auto" }}>
+          <span style={{ display:"inline-block", fontSize:11, fontWeight:700,
+            color:C.tealLight, background:"rgba(20,168,161,0.18)",
+            border:"1px solid rgba(20,168,161,0.4)",
+            padding:"5px 14px", borderRadius:20, letterSpacing:"0.12em",
+            marginBottom:18 }}>
+            INSTANT AI ANALYSIS
+          </span>
+          <h1 className="font-heading" style={{ fontSize:48, color:C.white,
+            margin:"0 0 14px", letterSpacing:"0.01em", lineHeight:1.05 }}>
+            Is your quote{" "}
+            <span style={{ background:`linear-gradient(135deg, ${C.tealHover}, ${C.tealLight})`,
+              WebkitBackgroundClip:"text", backgroundClip:"text",
+              WebkitTextFillColor:"transparent" }}>fair?</span>
           </h1>
-          <p style={{ fontSize:14, color:C.secondary, maxWidth:480, margin:"0 auto", lineHeight:1.65 }}>
-            Paste in any quote you've received and our AI will analyse it against current
+          <p style={{ fontSize:15, color:"rgba(245,240,232,0.82)", maxWidth:500,
+            margin:"0 auto", lineHeight:1.7 }}>
+            Paste in any quote you've received and our AI analyses it against current
             regional UK market rates — telling you honestly whether it's fair, overpriced,
             or unusually low.
           </p>
-          <div style={{ display:"flex", justifyContent:"center", gap:20, marginTop:16, flexWrap:"wrap" }}>
+          <div style={{ display:"flex", justifyContent:"center", gap:10, marginTop:22, flexWrap:"wrap" }}>
             {["✅ Unbiased analysis","📊 Regional rates","🔍 Red flag detection","💷 Free to use"].map(t=>(
-              <span key={t} style={{ fontSize:12, color:C.secondary }}>{t}</span>
+              <span key={t} style={{ fontSize:12, color:C.white, fontWeight:500,
+                background:"rgba(255,255,255,0.08)", border:"1px solid rgba(255,255,255,0.14)",
+                padding:"6px 12px", borderRadius:20 }}>{t}</span>
             ))}
           </div>
-          <p style={{ fontSize:12, color:C.secondary, marginTop:14 }}>
+        </div>
+      </div>
+
+      <div style={{ maxWidth:700, margin:"-4rem auto 0", padding:"0 1rem 2rem", position:"relative", zIndex:1 }}>
+
+        <div style={{ textAlign:"center", marginBottom:20 }}>
+          <p style={{ fontSize:12, color:C.secondary }}>
             Got a PDF instead?{" "}
             <a href="/quote-checker" style={{ color:C.teal, fontWeight:600, textDecoration:"none" }}>
               Try the PDF Quote Checker →
@@ -389,16 +419,25 @@ ${form.quote_text}`;
 
         {!result && (
           <div style={{ background:C.white, borderRadius:16,
-            border:`1.5px solid ${C.border}`, padding:"1.75rem",
-            boxShadow:"0 2px 16px rgba(15,34,56,0.05)" }}>
+            border:`1.5px solid ${C.border}`, padding:0, overflow:"hidden",
+            boxShadow:"0 10px 40px rgba(15,34,56,0.10)" }}>
 
-            <div style={{ marginBottom:20 }}>
-              <h2 style={{ fontSize:16, fontWeight:700, color:C.deep, margin:"0 0 4px" }}>
-                Tell us about the quote
-              </h2>
-              <p style={{ fontSize:13, color:C.secondary, margin:0 }}>
-                The more detail you provide, the more accurate the analysis.
-              </p>
+            <div style={{ height:4, background:`linear-gradient(90deg, ${C.navy}, ${C.teal}, ${C.tealLight})` }} />
+
+            <div style={{ padding:"1.75rem" }}>
+            <div style={{ marginBottom:20, display:"flex", alignItems:"center", gap:12 }}>
+              <div style={{ width:42, height:42, borderRadius:12, flexShrink:0,
+                display:"flex", alignItems:"center", justifyContent:"center", fontSize:20,
+                background:`linear-gradient(135deg, ${C.navy}, ${C.teal})`,
+                boxShadow:"0 4px 14px rgba(20,168,161,0.35)" }}>📝</div>
+              <div>
+                <h2 className="font-heading" style={{ fontSize:22, color:C.deep, margin:"0 0 2px", letterSpacing:"0.01em" }}>
+                  Tell us about the quote
+                </h2>
+                <p style={{ fontSize:13, color:C.secondary, margin:0 }}>
+                  The more detail you provide, the more accurate the analysis.
+                </p>
+              </div>
             </div>
 
             <G2>
@@ -467,10 +506,12 @@ Total: £2,585`} />
             </div>
 
             <button onClick={analyse} disabled={loading}
-              style={{ width:"100%", background:loading ? "#9CA3AF" : C.teal,
-                color:C.white, border:"none", borderRadius:10,
-                padding:"14px 24px", fontSize:15, fontWeight:700,
+              style={{ width:"100%",
+                background:loading ? "#9CA3AF" : `linear-gradient(135deg, ${C.navy} 0%, ${C.teal} 100%)`,
+                color:C.white, border:"none", borderRadius:12,
+                padding:"16px 24px", fontSize:15, fontWeight:700, letterSpacing:"0.02em",
                 cursor:loading ? "not-allowed" : "pointer",
+                boxShadow:loading ? "none" : "0 8px 24px rgba(20,168,161,0.35)",
                 display:"flex", alignItems:"center", justifyContent:"center", gap:10 }}>
               {loading ? (
                 <>
@@ -494,6 +535,7 @@ Total: £2,585`} />
                 This usually takes about 60 seconds — please don&apos;t refresh.
               </p>
             )}
+            </div>
           </div>
         )}
 
@@ -512,10 +554,13 @@ Total: £2,585`} />
                 { n:"04", title:"Know what to ask", body:"Specific questions to put to the trade before you sign anything." },
               ].map(s => (
                 <div key={s.n} style={{ background:C.white, border:`1px solid ${C.border}`,
-                  borderRadius:12, padding:"14px 16px" }}>
-                  <div style={{ fontSize:10, fontWeight:700, color:C.teal,
-                    letterSpacing:"0.1em", marginBottom:6 }}>{s.n}</div>
-                  <p style={{ fontSize:13, fontWeight:600, color:C.navy, margin:"0 0 4px" }}>{s.title}</p>
+                  borderRadius:14, padding:"18px 16px", position:"relative", overflow:"hidden",
+                  boxShadow:"0 4px 16px rgba(15,34,56,0.05)" }}>
+                  <div style={{ width:36, height:36, borderRadius:10, marginBottom:10,
+                    display:"flex", alignItems:"center", justifyContent:"center",
+                    fontSize:13, fontWeight:700, color:C.white,
+                    background:`linear-gradient(135deg, ${C.navy}, ${C.teal})` }}>{s.n}</div>
+                  <p className="font-heading" style={{ fontSize:16, color:C.navy, margin:"0 0 4px", letterSpacing:"0.01em" }}>{s.title}</p>
                   <p style={{ fontSize:12, color:C.secondary, margin:0, lineHeight:1.55 }}>{s.body}</p>
                 </div>
               ))}
