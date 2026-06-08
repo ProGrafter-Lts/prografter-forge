@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import Logo from "@/components/Logo";
 
-type Stage = "new" | "contacted" | "follow_up" | "interested" | "not_interested" | "converted";
+type Stage = "new" | "contacted" | "no_answer" | "follow_up" | "interested" | "not_interested" | "converted";
 
 type Scraped = {
   id: string;
@@ -40,6 +40,7 @@ const STAGES: { value: Stage | "all"; label: string; color: string }[] = [
   { value: "all", label: "All", color: C.dim },
   { value: "new", label: "New", color: C.dim },
   { value: "contacted", label: "Contacted", color: C.teal },
+  { value: "no_answer", label: "No answer", color: "#0EA5E9" },
   { value: "follow_up", label: "Follow-up", color: C.amber },
   { value: "interested", label: "Interested", color: C.green },
   { value: "not_interested", label: "Not interested", color: C.red },
