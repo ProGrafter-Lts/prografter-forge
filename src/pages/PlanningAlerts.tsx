@@ -798,9 +798,8 @@ export default function PlanningAlerts() {
                 </div>
               </>
             )}
-
-            {activeTab === "checker" && <PDChecker />}
           </div>
+
         </div>
       </AppShell>
     </>
