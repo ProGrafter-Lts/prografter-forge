@@ -533,6 +533,7 @@ Total: £2,585`} />
                 This usually takes about 60 seconds — please don&apos;t refresh.
               </p>
             )}
+            </div>
           </div>
         )}
 
