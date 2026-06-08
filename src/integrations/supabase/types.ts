@@ -2799,6 +2799,57 @@ export type Database = {
         }
         Relationships: []
       }
+      supplier_waitlist: {
+        Row: {
+          also_a_trade: boolean
+          business_name: string
+          consent: boolean
+          contact_name: string | null
+          created_at: string
+          email: string
+          id: string
+          notes: string | null
+          phone: string | null
+          postcode: string | null
+          service_area: string | null
+          source: string | null
+          supplier_types: string[] | null
+          trade_type: string | null
+        }
+        Insert: {
+          also_a_trade?: boolean
+          business_name: string
+          consent?: boolean
+          contact_name?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          notes?: string | null
+          phone?: string | null
+          postcode?: string | null
+          service_area?: string | null
+          source?: string | null
+          supplier_types?: string[] | null
+          trade_type?: string | null
+        }
+        Update: {
+          also_a_trade?: boolean
+          business_name?: string
+          consent?: boolean
+          contact_name?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          notes?: string | null
+          phone?: string | null
+          postcode?: string | null
+          service_area?: string | null
+          source?: string | null
+          supplier_types?: string[] | null
+          trade_type?: string | null
+        }
+        Relationships: []
+      }
       suppressed_emails: {
         Row: {
           created_at: string
