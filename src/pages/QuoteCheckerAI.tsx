@@ -506,10 +506,12 @@ Total: £2,585`} />
             </div>
 
             <button onClick={analyse} disabled={loading}
-              style={{ width:"100%", background:loading ? "#9CA3AF" : C.teal,
-                color:C.white, border:"none", borderRadius:10,
-                padding:"14px 24px", fontSize:15, fontWeight:700,
+              style={{ width:"100%",
+                background:loading ? "#9CA3AF" : `linear-gradient(135deg, ${C.navy} 0%, ${C.teal} 100%)`,
+                color:C.white, border:"none", borderRadius:12,
+                padding:"16px 24px", fontSize:15, fontWeight:700, letterSpacing:"0.02em",
                 cursor:loading ? "not-allowed" : "pointer",
+                boxShadow:loading ? "none" : "0 8px 24px rgba(20,168,161,0.35)",
                 display:"flex", alignItems:"center", justifyContent:"center", gap:10 }}>
               {loading ? (
                 <>
