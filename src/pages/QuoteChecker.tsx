@@ -167,7 +167,18 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
 
   return (
     <div className="space-y-6">
-      <div className="bg-card rounded-2xl border border-border p-6 md:p-8 space-y-6 shadow-sm">
+      <div className="relative bg-card rounded-2xl border border-border p-6 md:p-8 space-y-6 shadow-xl shadow-navy/5 overflow-hidden">
+        {/* Gradient top edge */}
+        <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-teal via-teal/70 to-navy" />
+        <div className="flex items-center gap-3 pt-1">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-teal to-navy text-white shadow-lg shadow-teal/30">
+            <FileText className="h-5 w-5" />
+          </div>
+          <div>
+            <p className="font-heading text-lg text-navy leading-tight">Upload Your Quote</p>
+            <p className="font-mono text-xs text-muted-foreground">Analysed against a 43-point checklist</p>
+          </div>
+        </div>
         <div className="space-y-2">
           <Label className="font-mono text-sm text-navy">Quote PDF *</Label>
           <div
@@ -369,21 +380,33 @@ const QuoteChecker = () => {
             price: "49.00",
           })}
         />
-        <div className="pt-24 pb-16 px-6">
-          <div className="max-w-2xl mx-auto">
-            <div className="text-center mb-10">
-              <div className="inline-flex items-center gap-2 bg-teal/10 text-teal font-mono text-xs px-3 py-1.5 rounded-full mb-4">
-                <ShieldCheck className="h-3.5 w-3.5" />
-                43-Point Quote Analysis
-              </div>
-              <h1 className="font-heading text-4xl md:text-5xl text-navy mb-3">AI Quote Checker</h1>
-              <p className="text-muted-foreground font-mono text-sm max-w-md mx-auto leading-relaxed">
-                Upload any building quote. Our AI checks it against a 43-point checklist and tells you exactly what's missing. Report in your inbox within 2 minutes. <span className="font-semibold text-navy">£49.</span>
-              </p>
+        {/* Gradient hero band */}
+        <div className="relative overflow-hidden bg-gradient-to-br from-navy via-navy to-[hsl(var(--teal)/0.4)] pt-28 pb-32 px-6">
+          <div className="pointer-events-none absolute -top-20 -right-16 h-72 w-72 rounded-full bg-teal/30 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-28 -left-20 h-80 w-80 rounded-full bg-teal/20 blur-3xl" />
+          <div className="relative max-w-2xl mx-auto text-center">
+            <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-teal-foreground font-mono text-xs px-3 py-1.5 rounded-full mb-5 backdrop-blur-sm">
+              <ShieldCheck className="h-3.5 w-3.5" />
+              43-Point Quote Analysis
             </div>
+            <h1 className="font-heading text-4xl md:text-6xl text-white mb-4 leading-[1.05]">
+              AI Quote{" "}
+              <span className="bg-gradient-to-r from-teal to-[hsl(var(--teal))] bg-clip-text text-transparent">Checker</span>
+            </h1>
+            <p className="text-white/75 font-mono text-sm max-w-md mx-auto leading-relaxed">
+              Upload any building quote. Our AI checks it against a 43-point checklist and tells you exactly what's missing. Report in your inbox within 2 minutes. <span className="font-semibold text-white">£49.</span>
+            </p>
+            <div className="flex flex-wrap justify-center gap-2 mt-6">
+              {["✓ 43-point checklist", "✓ Market benchmarks", "✓ Red flag detection", "✓ Report in 2 mins"].map((t) => (
+                <span key={t} className="font-mono text-xs text-white/90 bg-white/8 border border-white/15 px-3 py-1.5 rounded-full">{t}</span>
+              ))}
+            </div>
+          </div>
+        </div>
 
+        <div className="pb-16 px-6">
+          <div className="max-w-2xl mx-auto -mt-16 relative z-10">
             <QuoteCheckerForm onSubmitted={(id, _email, lookupToken) => goToReport(id, lookupToken)} />
-
           </div>
         </div>
       </div>
