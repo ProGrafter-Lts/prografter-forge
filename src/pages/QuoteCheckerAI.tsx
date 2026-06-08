@@ -419,16 +419,25 @@ ${form.quote_text}`;
 
         {!result && (
           <div style={{ background:C.white, borderRadius:16,
-            border:`1.5px solid ${C.border}`, padding:"1.75rem",
-            boxShadow:"0 2px 16px rgba(15,34,56,0.05)" }}>
+            border:`1.5px solid ${C.border}`, padding:0, overflow:"hidden",
+            boxShadow:"0 10px 40px rgba(15,34,56,0.10)" }}>
 
-            <div style={{ marginBottom:20 }}>
-              <h2 style={{ fontSize:16, fontWeight:700, color:C.deep, margin:"0 0 4px" }}>
-                Tell us about the quote
-              </h2>
-              <p style={{ fontSize:13, color:C.secondary, margin:0 }}>
-                The more detail you provide, the more accurate the analysis.
-              </p>
+            <div style={{ height:4, background:`linear-gradient(90deg, ${C.navy}, ${C.teal}, ${C.tealLight})` }} />
+
+            <div style={{ padding:"1.75rem" }}>
+            <div style={{ marginBottom:20, display:"flex", alignItems:"center", gap:12 }}>
+              <div style={{ width:42, height:42, borderRadius:12, flexShrink:0,
+                display:"flex", alignItems:"center", justifyContent:"center", fontSize:20,
+                background:`linear-gradient(135deg, ${C.navy}, ${C.teal})`,
+                boxShadow:"0 4px 14px rgba(20,168,161,0.35)" }}>📝</div>
+              <div>
+                <h2 className="font-heading" style={{ fontSize:22, color:C.deep, margin:"0 0 2px", letterSpacing:"0.01em" }}>
+                  Tell us about the quote
+                </h2>
+                <p style={{ fontSize:13, color:C.secondary, margin:0 }}>
+                  The more detail you provide, the more accurate the analysis.
+                </p>
+              </div>
             </div>
 
             <G2>
