@@ -399,12 +399,13 @@ const TradeDashboard = () => {
             <QuickBuildDraftsList tradeId={trade.id} />
           )}
 
+          <QuotesList quotes={quotes} />
+
           {trade && <DashboardPlanningAlerts trade={trade} />}
           {trade && trade.is_green_trade && <CertificationsSection trade={trade} />}
-
-          <QuotesList quotes={quotes} />
           </>
           )}
+
             </>
           )}
         </div>
