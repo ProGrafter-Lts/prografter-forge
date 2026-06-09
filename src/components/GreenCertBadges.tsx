@@ -195,7 +195,7 @@ export const CertificationsSection = ({ trade }: { trade: TradeGreenData }) => {
   if (cards.length === 0 && expiry === "ok") return null;
 
   return (
-    <section className="bg-white rounded-2xl p-5 border border-navy/10 shadow-sm">
+    <section className="bg-card rounded-2xl p-5 border border-navy/10 shadow-sm">
       <h3 className="font-heading text-navy text-xl mb-4 flex items-center gap-2">
         <ShieldCheck className="w-5 h-5 text-[#16A34A]" />
         Certifications & Accreditations
