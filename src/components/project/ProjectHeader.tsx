@@ -65,7 +65,7 @@ const ProjectHeader = ({
   const statusLabel = formatStatusLabel(job.status);
 
   return (
-    <div className="bg-white rounded-2xl p-6 border border-navy/10 shadow-sm">
+    <div className="bg-card rounded-2xl p-6 border border-navy/10 shadow-sm">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="font-heading text-navy text-3xl md:text-4xl flex items-center gap-2">

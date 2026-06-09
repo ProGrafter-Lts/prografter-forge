@@ -135,7 +135,7 @@ const VariationsPanel = ({ variations, userRole, userId, jobId, onRefresh }: Var
           )}
         </div>
         {variations.length === 0 ? (
-          <div className="bg-white rounded-2xl p-6 border border-navy/10 text-center">
+          <div className="bg-card rounded-2xl p-6 border border-navy/10 text-center">
             <p className="font-mono text-sm text-secondary-text">No variations raised.</p>
           </div>
         ) : (
@@ -143,7 +143,7 @@ const VariationsPanel = ({ variations, userRole, userId, jobId, onRefresh }: Var
             {variations.map((v) => {
               const totalCost = Number(v.materials_cost) + Number(v.labour_cost);
               return (
-                <div key={v.id} className="bg-white rounded-2xl p-4 border border-navy/10 shadow-sm">
+                <div key={v.id} className="bg-card rounded-2xl p-4 border border-navy/10 shadow-sm">
                   <div className="flex items-center justify-between">
                     <h3 className="font-heading text-navy text-base">{v.title}</h3>
                     <Badge className={
@@ -171,7 +171,7 @@ const VariationsPanel = ({ variations, userRole, userId, jobId, onRefresh }: Var
       {/* Variation Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowModal(false)}>
-          <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-card rounded-2xl p-6 w-full max-w-md shadow-xl" onClick={(e) => e.stopPropagation()}>
             <h2 className="font-heading text-navy text-2xl mb-4">Raise Variation</h2>
             <div className="space-y-3">
               <input value={varForm.title} onChange={(e) => setVarForm({ ...varForm, title: e.target.value })}

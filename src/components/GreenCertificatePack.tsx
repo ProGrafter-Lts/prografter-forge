@@ -16,7 +16,7 @@ const isInsulation = (t: string) =>
   ["insulation", "ewi", "draught"].some((k) => t.toLowerCase().includes(k));
 
 const SectionCard = ({ title, icon: Icon, children }: { title: string; icon: any; children: React.ReactNode }) => (
-  <div className="bg-white rounded-2xl border border-green-200 shadow-sm overflow-hidden">
+  <div className="bg-card rounded-2xl border border-green-200 shadow-sm overflow-hidden">
     <div className="bg-green-50 px-5 py-3 border-b border-green-100 flex items-center gap-2">
       <Icon className="w-4 h-4 text-green-600" />
       <h3 className="font-heading text-navy text-lg">{title}</h3>
@@ -240,7 +240,7 @@ const GreenCertificatePack = ({ jobType, isComplete = false }: GreenCertPackProp
       {/* 5 — Maintenance Schedule */}
       {schedule && (
         <SectionCard title="Maintenance Schedule" icon={FileText}>
-          <div className="bg-white rounded-xl border border-navy/10 overflow-hidden">
+          <div className="bg-card rounded-xl border border-navy/10 overflow-hidden">
             <table className="w-full">
               <thead>
                 <tr className="bg-navy/5">

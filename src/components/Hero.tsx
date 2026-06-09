@@ -86,7 +86,7 @@ const Hero = () => {
         {/* Right column — HOMEOWNERS */}
         <div className="relative craft:pl-8 craft:mt-[175px]">
           <div
-            className="bg-white rounded-[12px] p-6 craft:p-8"
+            className="bg-cream rounded-[12px] p-6 craft:p-8"
             style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.12)" }}
           >
             <div className="flex items-center gap-3 mb-5">

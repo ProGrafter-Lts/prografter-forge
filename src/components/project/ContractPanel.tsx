@@ -99,7 +99,7 @@ const ContractPanel = ({ jobId, quotes, contract, userRole, userId, onRefresh }:
         </h2>
         <div className="space-y-3">
           {actionableQuotes.map((q) => (
-            <div key={q.id} className="bg-white rounded-2xl p-5 border border-navy/10 shadow-sm">
+            <div key={q.id} className="bg-card rounded-2xl p-5 border border-navy/10 shadow-sm">
               <div className="flex items-center justify-between">
                 <p className="font-heading text-teal text-xl">£{Number(q.amount).toLocaleString()}</p>
                 <Badge className="bg-amber-100 text-amber-700">Pending</Badge>
@@ -138,7 +138,7 @@ const ContractPanel = ({ jobId, quotes, contract, userRole, userId, onRefresh }:
         <h2 className="font-heading text-navy text-2xl mb-4 flex items-center gap-2">
           <FileText className="w-5 h-5" /> Digital Contract
         </h2>
-        <div className="bg-white rounded-2xl p-5 border border-navy/10 shadow-sm">
+        <div className="bg-card rounded-2xl p-5 border border-navy/10 shadow-sm">
           <div className="flex items-center justify-between mb-3">
             <p className="font-heading text-teal text-xl">£{Number(contract.agreed_price).toLocaleString()}</p>
             <Badge className={badge.cls}>{badge.label}</Badge>
