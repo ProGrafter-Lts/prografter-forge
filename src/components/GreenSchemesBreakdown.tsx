@@ -194,7 +194,7 @@ const GreenSchemesBreakdown = ({ onCheckEligibility }: GreenSchemesBreakdownProp
             return (
               <article
                 key={scheme.id}
-                className={`bg-white rounded-xl border border-navy/10 border-l-4 ${styles.border} p-6 md:p-7 shadow-sm hover:shadow-md transition-shadow flex flex-col ${scheme.closed ? "opacity-80" : ""}`}
+                className={`bg-card rounded-xl border border-navy/10 border-l-4 ${styles.border} p-6 md:p-7 shadow-sm hover:shadow-md transition-shadow flex flex-col ${scheme.closed ? "opacity-80" : ""}`}
               >
                 {/* Top row: badge */}
                 <div className="flex items-center justify-between mb-4 gap-3">
