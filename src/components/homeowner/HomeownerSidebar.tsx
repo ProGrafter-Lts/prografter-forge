@@ -14,7 +14,7 @@ import {
 const NAV_ITEMS = [
   { label: "Overview", icon: LayoutDashboard, id: "overview" },
   { label: "My Projects", icon: FolderKanban, id: "projects" },
-  { label: "Quote Checker", icon: SearchCheck, id: "quotes" },
+  { label: "Quotes & Checks", icon: SearchCheck, id: "quotes" },
   { label: "Green Grants", icon: Leaf, id: "grants" },
   { label: "Homeowner Manual", icon: BookOpen, id: "manual" },
   { label: "My Profile", icon: UserCircle, id: "profile" },
