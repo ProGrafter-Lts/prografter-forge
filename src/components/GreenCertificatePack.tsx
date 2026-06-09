@@ -240,7 +240,7 @@ const GreenCertificatePack = ({ jobType, isComplete = false }: GreenCertPackProp
       {/* 5 — Maintenance Schedule */}
       {schedule && (
         <SectionCard title="Maintenance Schedule" icon={FileText}>
-          <div className="bg-white rounded-xl border border-navy/10 overflow-hidden">
+          <div className="bg-card rounded-xl border border-navy/10 overflow-hidden">
             <table className="w-full">
               <thead>
                 <tr className="bg-navy/5">
