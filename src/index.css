@@ -475,13 +475,13 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
 .dashboard-dark .qr-report .qr-section {
   border-top-color: rgba(255, 255, 255, 0.10) !important;
 }
-/* Score number + neutral assessment chip use text-navy → make light */
-.dashboard-dark .qr-report .text-navy,
-.dashboard-dark .text-navy {
+/* Score number uses the .qr-score class so we can lighten just that. */
+.dashboard-dark .qr-score {
   color: #FFFFFF !important;
 }
 /* Checklist chips keep their own light backgrounds so their dark text
    stays readable. */
+
 
 /* Dashboard sidebar (navy) */
 .dashboard-sidebar {
