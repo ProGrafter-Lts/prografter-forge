@@ -16,7 +16,7 @@ const isInsulation = (t: string) =>
   ["insulation", "ewi", "draught"].some((k) => t.toLowerCase().includes(k));
 
 const SectionCard = ({ title, icon: Icon, children }: { title: string; icon: any; children: React.ReactNode }) => (
-  <div className="bg-white rounded-2xl border border-green-200 shadow-sm overflow-hidden">
+  <div className="bg-card rounded-2xl border border-green-200 shadow-sm overflow-hidden">
     <div className="bg-green-50 px-5 py-3 border-b border-green-100 flex items-center gap-2">
       <Icon className="w-4 h-4 text-green-600" />
       <h3 className="font-heading text-navy text-lg">{title}</h3>
