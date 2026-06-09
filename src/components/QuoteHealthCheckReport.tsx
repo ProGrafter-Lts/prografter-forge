@@ -39,7 +39,7 @@ const QuoteHealthCheckReport = ({ report }: { report: ReportJson }) => {
         <div className="flex flex-wrap items-center gap-3 mb-5">
           {typeof report.score_addressed === "number" && (
             <div className="shrink-0 text-center">
-              <div className="font-heading text-4xl text-navy leading-none">
+              <div className="qr-score font-heading text-4xl text-navy leading-none">
                 {report.score_addressed}
               </div>
               <div className="font-mono text-[10px] uppercase tracking-wide text-muted-foreground mt-1">
