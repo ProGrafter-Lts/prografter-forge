@@ -150,7 +150,7 @@ const Contact = () => {
             {CONTACT_CARDS.map((card, idx) => (
               <div
                 key={card.title}
-                className="bg-white border-2 border-navy/10 rounded-2xl p-6 flex flex-col hover:border-teal/40 transition-colors"
+                className="bg-card border-2 border-navy/10 rounded-2xl p-6 flex flex-col hover:border-teal/40 transition-colors"
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="w-10 h-10 rounded-lg bg-teal/10 flex items-center justify-center">
@@ -208,7 +208,7 @@ const Contact = () => {
             Drop us a line.
           </h2>
 
-          <form onSubmit={handleSubmit} className="bg-white border-2 border-navy/10 rounded-2xl p-6 craft:p-8 space-y-5">
+          <form onSubmit={handleSubmit} className="bg-card border-2 border-navy/10 rounded-2xl p-6 craft:p-8 space-y-5">
             <div className="grid craft:grid-cols-2 gap-5">
               <div>
                 <label htmlFor="name" className="block font-mono text-xs text-navy uppercase tracking-wider mb-2">
