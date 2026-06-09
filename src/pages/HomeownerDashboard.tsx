@@ -37,8 +37,22 @@ const HomeownerDashboard = () => {
   const [loadError, setLoadError] = useState<string | null>(null);
   const lastLoadedUserIdRef = useRef<string | null>(null);
 
-  const [activeNav, setActiveNav] = useState("overview");
+  const [searchParams] = useSearchParams();
+  const [activeNav, setActiveNav] = useState(() => {
+    const tab = searchParams.get("tab");
+    const valid = ["overview", "projects", "quotes", "grants", "manual", "profile"];
+    return tab && valid.includes(tab) ? tab : "overview";
+  });
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Keep the active tab in sync if the URL ?tab= changes (e.g. arriving from
+  // "Back to dashboard" on the Quote Checks page).
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    const valid = ["overview", "projects", "quotes", "grants", "manual", "profile"];
+    if (tab && valid.includes(tab)) setActiveNav(tab);
+  }, [searchParams]);
+
 
   useEffect(() => {
     if (!isReady) return;
