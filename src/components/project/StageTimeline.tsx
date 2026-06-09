@@ -157,7 +157,7 @@ const StageTimeline = ({ stages, updates, subAssignments = [], userRole, userId,
     <section>
       <h2 className="font-heading text-navy text-2xl mb-4">Stage Timeline</h2>
       {stages.length === 0 ? (
-        <div className="bg-white rounded-2xl p-8 border border-navy/10 text-center">
+        <div className="bg-card rounded-2xl p-8 border border-navy/10 text-center">
           <p className="font-mono text-sm text-secondary-text">No stages set up for this project yet.</p>
         </div>
       ) : (
@@ -182,7 +182,7 @@ const StageTimeline = ({ stages, updates, subAssignments = [], userRole, userId,
                         <Circle className="w-5 h-5 text-navy/20" />
                       )}
                     </div>
-                    <div className="flex-1 bg-white rounded-2xl p-4 border border-navy/10 shadow-sm">
+                    <div className="flex-1 bg-card rounded-2xl p-4 border border-navy/10 shadow-sm">
                       <div className="flex items-center justify-between">
                         <h3 className="font-heading text-navy text-lg">{stage.stage_name}</h3>
                         <div className="flex items-center gap-2">

@@ -40,7 +40,7 @@ const MessagingPanel = ({ messages, userId, msgText, onMsgTextChange, onSendMess
       <h2 className="font-heading text-navy text-2xl mb-4 flex items-center gap-2">
         <MessageSquare className="w-5 h-5" /> Messages
       </h2>
-      <div className="bg-white rounded-2xl border border-navy/10 shadow-sm flex flex-col" style={{ height: "400px" }}>
+      <div className="bg-card rounded-2xl border border-navy/10 shadow-sm flex flex-col" style={{ height: "400px" }}>
         <div className="flex-1 overflow-auto p-4 space-y-3">
           {messages.length === 0 && (
             <p className="font-mono text-sm text-secondary-text text-center mt-16">No messages yet. Start the conversation.</p>

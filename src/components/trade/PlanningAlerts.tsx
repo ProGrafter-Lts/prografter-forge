@@ -229,7 +229,7 @@ export const PlanningAlertsSection = ({
           {demoAlerts.map((alert) => (
             <div
               key={alert.id}
-              className="bg-white rounded-2xl p-5 border border-green-500/20 shadow-sm"
+              className="bg-card rounded-2xl p-5 border border-green-500/20 shadow-sm"
             >
               <div className="flex items-start justify-between mb-3">
                 <div>

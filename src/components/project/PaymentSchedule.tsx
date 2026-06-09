@@ -20,11 +20,11 @@ const PaymentSchedule = ({ stages, contractValue, userRole, onReleasePayment }: 
   <section>
     <h2 className="font-heading text-navy text-2xl mb-4">Payment Schedule</h2>
     {stages.length === 0 ? (
-      <div className="bg-white rounded-2xl p-6 border border-navy/10 text-center">
+      <div className="bg-card rounded-2xl p-6 border border-navy/10 text-center">
         <p className="font-mono text-sm text-secondary-text">No payment stages configured.</p>
       </div>
     ) : (
-      <div className="bg-white rounded-2xl border border-navy/10 shadow-sm divide-y divide-navy/5">
+      <div className="bg-card rounded-2xl border border-navy/10 shadow-sm divide-y divide-navy/5">
         {stages.map((s) => (
           <div key={s.id} className="p-4">
             <div className="flex items-center justify-between">
