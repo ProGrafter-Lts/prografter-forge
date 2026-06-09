@@ -42,9 +42,10 @@ const MyQuoteChecks = () => {
     <div className="min-h-screen dashboard-dark">
       <SEO title="My Quote Checks — ProGrafter" description="Your saved Quote Health Check reports." path="/dashboard/quote-checks" noindex />
       <main className="max-w-4xl mx-auto p-4 md:p-8 space-y-6">
-        <Link to="/dashboard/homeowner" className="inline-flex items-center gap-1.5 font-mono text-xs text-secondary hover:opacity-80">
+        <Link to="/dashboard/homeowner?tab=quotes" className="inline-flex items-center gap-1.5 font-mono text-xs text-secondary hover:opacity-80">
           <ArrowLeft className="w-3.5 h-3.5" /> Back to dashboard
         </Link>
+
 
         <div>
           <h1 className="font-heading text-primary text-3xl md:text-4xl flex items-center gap-2">
