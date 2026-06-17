@@ -381,7 +381,7 @@ const QuoteChecker = () => {
           })}
         />
         {/* Gradient hero band */}
-        <div className="relative overflow-hidden bg-gradient-to-br from-navy via-navy to-[hsl(var(--teal)/0.4)] pt-28 pb-32 px-6">
+        <div className="relative overflow-hidden bg-navy bg-gradient-to-br from-navy via-navy to-[hsl(var(--teal)/0.4)] pt-28 pb-32 px-6">
           <div className="pointer-events-none absolute -top-20 -right-16 h-72 w-72 rounded-full bg-teal/30 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-28 -left-20 h-80 w-80 rounded-full bg-teal/20 blur-3xl" />
           <div className="relative max-w-2xl mx-auto text-center">
