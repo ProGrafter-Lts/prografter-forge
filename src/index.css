@@ -4,33 +4,43 @@
 
 @layer base {
   :root {
+    /* === Fonts === */
     --font-sans: 'DM Sans', system-ui, sans-serif;
     --font-mono: 'DM Mono', ui-monospace, monospace;
     --font-heading: 'Bebas Neue', 'DM Sans', system-ui, sans-serif;
+    --font-wordmark: 'Poppins', 'DM Sans', system-ui, sans-serif;
+
+    /* === LOCKED BRAND PALETTE (single source of truth) ===
+       navy #1B3A5C · navy-deep #27396A · deep #0F2238
+       teal #14A8A1 · teal-deep #0D9488 · cream #F5F0E8        */
+    --navy: 211 55% 23%;        /* #1B3A5C primary brand */
+    --navy-deep: 224 46% 28%;   /* #27396A secondary navy */
+    --deep: 210 56% 14%;        /* #0F2238 deepest bg / footer */
+    --teal: 177 78% 37%;        /* #14A8A1 primary accent */
+    --teal-deep: 173 84% 32%;   /* #0D9488 hover / active accent */
+    --teal-hover: 173 84% 32%;  /* alias → teal-deep */
+    --cream: 37 39% 94%;        /* #F5F0E8 light bg / light text on dark */
+
     --background: 37 39% 94%;
     --foreground: 0 0% 18%;
     --card: 37 39% 94%;
     --card-foreground: 0 0% 18%;
     --popover: 37 39% 94%;
     --popover-foreground: 0 0% 18%;
-    --primary: 224 46% 28%;
+    --primary: 211 55% 23%;          /* navy #1B3A5C */
     --primary-foreground: 36 33% 93%;
-    --secondary: 177 79% 37%;
+    --secondary: 177 78% 37%;        /* teal #14A8A1 */
     --secondary-foreground: 0 0% 100%;
     --muted: 220 9% 46%;
     --muted-foreground: 220 9% 46%;
-    --accent: 177 79% 37%;
+    --accent: 177 78% 37%;           /* teal */
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
     --border: 210 20% 80%;
     --input: 210 20% 80%;
-    --ring: 177 79% 37%;
+    --ring: 177 78% 37%;
     --radius: 6px;
-    --deep: 210 56% 14%;
-    --teal: 177 79% 37%;
-    --teal-hover: 177 75% 44%;
-    --navy: 224 46% 28%;
     --body-text: 215 25% 17%;
     --secondary-text: 220 9% 35%;
 
