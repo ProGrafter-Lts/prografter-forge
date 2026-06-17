@@ -202,9 +202,69 @@ section[class*="bg-navy"] textarea::placeholder {
 .bg-card h1, .bg-card h2, .bg-card h3,
 .bg-background h1, .bg-background h2, .bg-background h3,
 .bg-white h1, .bg-white h2, .bg-white h3 {
-  color: #27396A;
+  color: #1B3A5C;
 }
-/* Dark sections must keep their light heading colour */
+
+/* ============================================================
+   LOCKED TYPE SCALE — every text element maps to one of these.
+   Bebas Neue → H1/H2 only · Poppins 800 → wordmark only
+   DM Sans → H3 and below, body, nav, buttons, labels
+   DM Mono → all numbers, prices, percentages, stats
+   ============================================================ */
+@layer components {
+  .wordmark {
+    font-family: var(--font-wordmark);
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+  .type-h1 {
+    font-family: var(--font-heading);
+    font-size: clamp(2.75rem, 6vw, 4.5rem);
+    line-height: 1.0;
+    letter-spacing: 0.01em;
+    font-weight: 400;
+  }
+  .type-h2 {
+    font-family: var(--font-heading);
+    font-size: clamp(2rem, 4vw, 3rem);
+    line-height: 1.05;
+    letter-spacing: 0.01em;
+    font-weight: 400;
+  }
+  .type-h3 {
+    font-family: var(--font-sans);
+    font-size: 1.375rem;
+    line-height: 1.25;
+    font-weight: 700;
+  }
+  .type-label {
+    font-family: var(--font-sans);
+    font-size: 1.0625rem;
+    font-weight: 600;
+  }
+  .type-body {
+    font-family: var(--font-sans);
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    font-weight: 400;
+  }
+  .type-small {
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    font-weight: 400;
+  }
+  .type-button {
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+  .type-data {
+    font-family: var(--font-mono);
+    font-weight: 500;
+  }
+}
 .bg-navy h1, .bg-navy h2, .bg-navy h3,
 .bg-deep h1, .bg-deep h2, .bg-deep h3,
 section[class*="bg-navy"] h1, section[class*="bg-navy"] h2, section[class*="bg-navy"] h3,
