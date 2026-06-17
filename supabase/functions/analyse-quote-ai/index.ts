@@ -10,7 +10,7 @@ const corsHeaders = {
 };
 
 // Server-controlled model + limits. Callers cannot override these.
-const MODEL = "claude-sonnet-4-20250514";
+const MODEL = "claude-sonnet-4-5-20250929";
 const MAX_TOKENS = 1500;
 const MAX_MESSAGES = 12;
 const MAX_CHARS = 24000;
