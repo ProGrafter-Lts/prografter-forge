@@ -15,6 +15,7 @@ export default {
     extend: {
       fontFamily: {
         heading: ['"Bebas Neue"', '"DM Sans"', 'system-ui', 'sans-serif'],
+        wordmark: ['"Poppins"', '"DM Sans"', 'system-ui', 'sans-serif'],
         body: ['"DM Sans"', 'system-ui', 'sans-serif'],
         sans: ['"DM Sans"', 'system-ui', 'sans-serif'],
         mono: ['"DM Mono"', 'ui-monospace', 'monospace'],
@@ -27,10 +28,14 @@ export default {
         foreground: "hsl(var(--foreground))",
         cream: "#F5F0E8",
         deep: "#0F2238",
-        navy: "#27396A",
+        navy: {
+          DEFAULT: "#1B3A5C",
+          deep: "#27396A",
+        },
         teal: {
           DEFAULT: "#14A8A1",
-          hover: "#1AC2BA",
+          deep: "#0D9488",
+          hover: "#0D9488",
         },
         "body-text": "#1F2937",
         "secondary-text": "#4B5563",
