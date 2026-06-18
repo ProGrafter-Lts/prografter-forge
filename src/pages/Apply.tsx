@@ -312,10 +312,9 @@ export default function Apply() {
         if (!v("registration_number")) e.registration_number = "Required";
         if (!form.registration_expiry) e.registration_expiry = "Required";
         if (cat?.id === "electrician" && !v("cps_scheme")) e.cps_scheme = "Required";
-      } else {
-        if (!v("portfolio_description")) e.portfolio_description = "Required";
       }
-      if ((files.portfolio_photos?.length ?? 0) < 3) e.portfolio_photos = "Please upload at least 3 photos of completed work";
+      // Portfolio (description + photos) is optional at sign-up. Proof of work is
+      // gathered at the verification stage, not as front-door friction.
     }
     if (n === 4) {
       if (!v("insurance_provider")) e.insurance_provider = "Required";
@@ -782,7 +781,7 @@ export default function Apply() {
           <Field label="Registration expiry date" req err={errors.registration_expiry}>
             <I f="registration_expiry" type="date" />
           </Field>
-          <Field label="Photos of completed work" req err={errors.portfolio_photos} hint="Upload at least 3 photos of recent jobs. Clear, well-lit shots of finished work.">
+          <Field label="Add photos of recent work (optional)" err={errors.portfolio_photos} hint="Optional — you can add photos of finished work now, or later at the verification stage.">
             <Photos f="portfolio_photos" />
           </Field>
         </>
@@ -790,12 +789,12 @@ export default function Apply() {
         <>
           <div style={{ marginBottom: 20 }}>
             <h2 style={{ fontSize: 17, fontWeight: 700, color: C.deep, margin: "0 0 4px" }}>Portfolio of work</h2>
-            <p style={{ fontSize: 13, color: C.secondary, margin: 0 }}>Describe a selection of completed jobs. This is reviewed personally — be specific.</p>
+            <p style={{ fontSize: 13, color: C.secondary, margin: 0 }}>Optional at this stage — proof of work is confirmed during verification, not before.</p>
           </div>
-          <Field label="Describe 3–5 recent jobs" req err={errors.portfolio_description} hint="Include scope, value, location (town only), duration, and any challenges.">
-            <T f="portfolio_description" rows={8} placeholder="1. Full bathroom refurb, Didsbury M20, £8,400, 9 days — replaced rotten subfloor we discovered on day 2..." />
+          <Field label="Describe recent work (optional)" err={errors.portfolio_description} hint="Optional — a short note on the kind of jobs you do. Include scope, value or location if you like.">
+            <T f="portfolio_description" rows={6} placeholder="e.g. Full bathroom refurb, Didsbury M20, £8,400, 9 days — replaced rotten subfloor we discovered on day 2..." />
           </Field>
-          <Field label="Photos of completed work" req err={errors.portfolio_photos} hint="Upload at least 3 photos of recent jobs. Clear, well-lit shots of finished work.">
+          <Field label="Add photos of recent work (optional)" err={errors.portfolio_photos} hint="Optional — you can add photos of finished work now, or later at the verification stage.">
             <Photos f="portfolio_photos" />
           </Field>
         </>
