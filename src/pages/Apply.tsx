@@ -874,6 +874,9 @@ export default function Apply() {
           Thank you for applying to ProGrafter. We review every application within 5–7 days and will email you with confirmation and next steps.
         </p>
         <p style={{ fontSize: 13, color: C.body, margin: 0 }}>We'll be in touch at <strong>{form.email as string}</strong></p>
+        <a href="/" style={{ display: "inline-block", marginTop: 24, background: C.teal, color: C.white, textDecoration: "none", padding: "12px 24px", borderRadius: 10, fontSize: 14, fontWeight: 700 }}>
+          ← Back to ProGrafter home
+        </a>
       </div>
     </div>
   );
