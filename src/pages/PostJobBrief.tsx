@@ -243,7 +243,8 @@ const BriefPreview = ({ form, briefRef }: { form: typeof BLANK; briefRef: string
     <div style={{ display: "flex", gap: 8, padding: "4px 0",
       borderBottom: `1px solid ${C.cream}` }}>
       <dt style={{ width: 140, flexShrink: 0, fontSize: 11, color: C.secondary }}>{label}</dt>
-      <dd style={{ fontSize: 11, color: C.body, flex: 1, margin: 0 }}>{value}</dd>
+      <dd style={{ fontSize: 11, color: C.body, flex: 1, minWidth: 0, margin: 0,
+        overflowWrap: "anywhere", wordBreak: "break-word" }}>{value}</dd>
     </div>
   ) : null;
 
@@ -284,7 +285,7 @@ const BriefPreview = ({ form, briefRef }: { form: typeof BLANK; briefRef: string
       )}
 
       <div style={{ padding: "16px 20px" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 20 }}>
           <div>
             <Section title="Homeowner">
               <Row label="Name" value={form.full_name} />
