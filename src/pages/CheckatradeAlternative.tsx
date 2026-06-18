@@ -28,7 +28,7 @@ const comparisonRows = [
 
 const faqs = [
   { q: "Is ProGrafter actually free?", a: "Yes. Registering, building your profile, getting verified and quoting are all free. There's no monthly fee, no credit packs and no lock-in. We only earn when you complete a job through the platform." },
-  { q: "How do I get verified?", a: "Upload photo ID, your public liability insurance certificate and any trade-specific qualifications (Gas Safe, NICEIC, etc.). Our team reviews submissions and you'll typically be live within 1 working day." },
+  { q: "How do I get verified?", a: "Upload photo ID, your public liability insurance certificate and any trade-specific qualifications (Gas Safe, NICEIC, etc.). Our team reviews submissions and you'll typically be live within 5–7 days." },
   { q: "What if I don't get any jobs?", a: "You pay nothing. There is no minimum spend, no \"visibility\" upgrade and no penalty for quiet months. Quoting is free, and 7.5% only applies to jobs that actually complete." },
   { q: "How is commission calculated?", a: "7.5% of the agreed job value, capped at £900 per job. So a £3,000 kitchen costs £225; a £20,000 extension is capped at £900 — never more, regardless of job size." },
   { q: "What happens with variations?", a: "Variations go through an in-platform approval flow: you log the change, the homeowner approves, and the agreed value updates. Commission is calculated on the final, signed-off value — no awkward conversations after the fact." },

@@ -108,7 +108,7 @@ const Contact = () => {
     <AppShell>
       <SEO
         title="Contact ProGrafter | Get in Touch"
-        description="Get in touch with the ProGrafter team. We respond to every enquiry within one working day."
+        description="Get in touch with the ProGrafter team. We respond to every enquiry within 5–7 days."
         path="/contact"
         jsonLd={{
           "@context": "https://schema.org",
@@ -140,7 +140,7 @@ const Contact = () => {
             <span className="text-teal">TOUCH.</span>
           </h1>
           <p className="font-body text-body-text text-lg max-w-xl font-light">
-            We aim to respond to all enquiries within 1 working day.
+            We aim to respond to all enquiries within 5–7 days.
           </p>
         </section>
 

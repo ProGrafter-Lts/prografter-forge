@@ -913,7 +913,7 @@ const SignupTrade = () => {
               ))}
             </ul>
             <p className="font-body text-cream/70 text-sm mb-6 px-1">
-              Uploading takes around 4 minutes. We review within 1 working day.
+              Uploading takes around 4 minutes. We review within 5–7 days.
             </p>
             <button
               onClick={() => setGatePassed(true)}

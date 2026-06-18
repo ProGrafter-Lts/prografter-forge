@@ -85,7 +85,7 @@ const LegalReview = () => {
               <a href="mailto:hello@prografter.co.uk" className="text-teal underline">
                 hello@prografter.co.uk
               </a>{" "}
-              and we'll get back to you within 1 working day.
+              and we'll get back to you within 5–7 days.
             </p>
           </div>
         </div>

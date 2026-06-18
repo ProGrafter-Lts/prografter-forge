@@ -106,7 +106,7 @@ const SignupTradeUnderReview = () => {
                 We have everything we need — your documents, details and qualifications are all with us.
               </p>
               <p className="font-body text-cream/70 mb-2">
-                Our team reviews every application within 1 working day. You'll receive an email the moment you're verified, at which point you can start quoting on jobs straight away.
+                Our team reviews every application within 5–7 days. You'll receive an email the moment you're verified, at which point you can start quoting on jobs straight away.
               </p>
               <p className="font-body text-cream/60 text-sm mb-8">There's nothing else you need to do.</p>
               <div className="flex flex-col gap-3 items-center">
