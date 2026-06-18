@@ -227,8 +227,16 @@ const StepBar = ({ current }: { current: number }) => (
 );
 
 const BriefPreview = ({ form, briefRef }: { form: typeof BLANK; briefRef: string }) => {
-  const trade = TRADES.find(t => t.id === form.trade_category_id);
+  const briefTradeIds = (form.trade_category_id || "").split(",").filter(Boolean);
+  const briefUnsure = briefTradeIds.includes("not_sure");
+  const briefTrades = briefTradeIds.map(id => TRADES.find(t => t.id === id)).filter(Boolean) as typeof TRADES;
+  const tradeIcon = briefUnsure ? "🧭" : (briefTrades[0]?.icon ?? "🛠️");
+  const tradeLabel = briefUnsure
+    ? "Not sure / more than one trade — general review"
+    : briefTrades.map(t => t.name).join(", ");
+  const hasTrade = briefUnsure || briefTrades.length > 0;
   const ref = briefRef;
+
 
 
   const Section = ({ title, children }: any) => (
@@ -243,7 +251,8 @@ const BriefPreview = ({ form, briefRef }: { form: typeof BLANK; briefRef: string
     <div style={{ display: "flex", gap: 8, padding: "4px 0",
       borderBottom: `1px solid ${C.cream}` }}>
       <dt style={{ width: 140, flexShrink: 0, fontSize: 11, color: C.secondary }}>{label}</dt>
-      <dd style={{ fontSize: 11, color: C.body, flex: 1, margin: 0 }}>{value}</dd>
+      <dd style={{ fontSize: 11, color: C.body, flex: 1, minWidth: 0, margin: 0,
+        overflowWrap: "anywhere", wordBreak: "break-word" }}>{value}</dd>
     </div>
   ) : null;
 
@@ -267,12 +276,12 @@ const BriefPreview = ({ form, briefRef }: { form: typeof BLANK; briefRef: string
         </div>
       </div>
 
-      {trade && (
+      {hasTrade && (
         <div style={{ background: C.tealDim, borderBottom: `1px solid #99F6E4`,
           padding: "10px 20px", display: "flex", alignItems: "center", gap: 10 }}>
-          <span style={{ fontSize: 20 }}>{trade.icon}</span>
+          <span style={{ fontSize: 20 }}>{tradeIcon}</span>
           <div>
-            <p style={{ fontSize: 13, fontWeight: 700, color: C.navy, margin: 0 }}>{trade.name}</p>
+            <p style={{ fontSize: 13, fontWeight: 700, color: C.navy, margin: 0 }}>{tradeLabel}</p>
             <p style={{ fontSize: 11, color: C.teal, margin: 0 }}>{form.job_title}</p>
           </div>
           <div style={{ marginLeft: "auto", background: C.teal,
@@ -284,7 +293,7 @@ const BriefPreview = ({ form, briefRef }: { form: typeof BLANK; briefRef: string
       )}
 
       <div style={{ padding: "16px 20px" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 20 }}>
           <div>
             <Section title="Homeowner">
               <Row label="Name" value={form.full_name} />
@@ -368,7 +377,7 @@ export default function PostJobBrief() {
   const [needsScoping, setNeedsScoping] = useState(false);
   const [consent, setConsent] = useState(false);
   const [marketing, setMarketing] = useState(false);
-  const [loginUrl, setLoginUrl] = useState("");
+  
 
   const upd = (k: string) => (e: any) => setForm(p => ({ ...p, [k]: e.target.value }));
 
@@ -379,7 +388,25 @@ export default function PostJobBrief() {
     setForm(p => ({ ...p, planning_permission: "", building_regs: "" }));
   }, [form.trade_category_id]);
 
-  const planningCfg = planningCfgFor(form.trade_category_id);
+  // Trades are stored as a comma-joined list of ids in trade_category_id so the
+  // homeowner can pick more than one — or "not_sure" for a general review.
+  const selectedTradeIds = (form.trade_category_id || "").split(",").filter(Boolean);
+  const isUnsureTrade = selectedTradeIds.includes("not_sure");
+  const multiTrade = isUnsureTrade || selectedTradeIds.length > 1;
+  const toggleTrade = (id: string) => setForm(p => {
+    const cur = (p.trade_category_id || "").split(",").filter(Boolean);
+    let next: string[];
+    if (id === "not_sure") {
+      next = cur.includes("not_sure") ? [] : ["not_sure"];
+    } else {
+      next = cur.includes(id) ? cur.filter(x => x !== id) : [...cur.filter(x => x !== "not_sure"), id];
+    }
+    return { ...p, trade_category_id: next.join(",") };
+  });
+
+  const planningCfg = multiTrade
+    ? { planning: true, buildingRegs: "generic" as RegMode }
+    : planningCfgFor(selectedTradeIds[0] ?? "");
   const needsPlanningGuidance =
     form.planning_permission === GUIDE_ME || form.building_regs === GUIDE_ME;
 
@@ -395,7 +422,7 @@ export default function PostJobBrief() {
       if (!form.property_type) e.property_type = "Required";
     }
     if (n === 1) {
-      if (!form.trade_category_id) e.trade_category_id = "Please select a trade";
+      if (!form.trade_category_id) e.trade_category_id = "Please select at least one trade";
       if (!form.job_title.trim()) e.job_title = "A brief title is required";
       if (form.job_description.trim().length < 50) e.job_description = "Please describe the job in at least 50 characters — trades need enough detail to quote accurately";
     }
@@ -425,10 +452,19 @@ export default function PostJobBrief() {
       const line1 = dedupeLine(titleCaseAddress(form.address_line1), town);
       const line2 = dedupeLine(titleCaseAddress(form.address_line2), town);
 
+      // Build a readable trade label for the brief — single id maps to a name
+      // server-side; multiple/unsure becomes a general-review label.
+      const tradeLabel = isUnsureTrade
+        ? "Not sure / more than one trade — general review"
+        : selectedTradeIds.length > 1
+          ? selectedTradeIds.map(id => TRADES.find(t => t.id === id)?.name || id).join(", ")
+          : (selectedTradeIds[0] ?? "");
+
       // If the homeowner asked ProGrafter to scope the job, don't send the
       // (now hidden) scope / known-issues fields to trades.
       const payload = {
         ...form,
+        trade_category_id: tradeLabel,
         address_line1: line1,
         address_line2: line2,
         city: town,
@@ -437,6 +473,7 @@ export default function PostJobBrief() {
         scope_items: needsScoping ? "" : form.scope_items,
         known_issues: needsScoping ? "" : form.known_issues,
         needs_scoping: needsScoping,
+        needs_general_review: multiTrade,
         needs_planning_guidance: needsPlanningGuidance,
         marketing_opt_in: marketing,
         user_agent: typeof navigator !== "undefined" ? navigator.userAgent : "",
@@ -444,7 +481,7 @@ export default function PostJobBrief() {
       const { data, error } = await supabase.functions.invoke("submit-job-brief", { body: payload });
       if (error || !data?.ref) throw error || new Error("No reference returned");
       setRef(data.ref);
-      if (data.loginUrl) setLoginUrl(data.loginUrl);
+      
       setSubmitted(true);
       trackEvent("generate_lead", { reference: data.ref, needs_scoping: needsScoping });
     } catch (err) {
@@ -493,11 +530,33 @@ export default function PostJobBrief() {
       <p style={{ fontSize: 13, color: C.secondary, margin: "0 0 20px" }}>
         The more detail you provide, the more accurate the quotes you'll receive.
       </p>
-      <F label="Trade required" req err={errors.trade_category_id}>
-        <S f="trade_category_id">
-          <option value="">Select the trade you need...</option>
-          {TRADES.map(t => <option key={t.id} value={t.id}>{t.icon} {t.name}</option>)}
-        </S>
+      <F label="Which trade(s) do you need?" req err={errors.trade_category_id}
+        hint="Pick as many as apply — or choose 'Not sure' and we'll work it out with you.">
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 8 }}>
+          {TRADES.map(t => {
+            const on = selectedTradeIds.includes(t.id);
+            return (
+              <button type="button" key={t.id} onClick={() => toggleTrade(t.id)}
+                style={{ display: "flex", alignItems: "center", gap: 8, textAlign: "left",
+                  padding: "10px 12px", borderRadius: 10, cursor: "pointer", fontSize: 13,
+                  fontFamily: "inherit", color: on ? "#0F766E" : C.body,
+                  background: on ? C.tealLight : C.white,
+                  border: `1.5px solid ${on ? C.teal : C.border}`, fontWeight: on ? 700 : 500 }}>
+                <span style={{ fontSize: 16 }}>{t.icon}</span>
+                <span>{t.name}</span>
+              </button>
+            );
+          })}
+        </div>
+        <button type="button" onClick={() => toggleTrade("not_sure")}
+          style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", textAlign: "left",
+            marginTop: 8, padding: "10px 12px", borderRadius: 10, cursor: "pointer", fontSize: 13,
+            fontFamily: "inherit", color: isUnsureTrade ? "#0F766E" : C.body,
+            background: isUnsureTrade ? C.tealLight : C.white,
+            border: `1.5px solid ${isUnsureTrade ? C.teal : C.border}`, fontWeight: isUnsureTrade ? 700 : 500 }}>
+          <span style={{ fontSize: 16 }}>🧭</span>
+          <span>Not sure / more than one trade — send for general review</span>
+        </button>
       </F>
       <F label="Job title" req err={errors.job_title}
         hint="A short headline — e.g. 'Full bathroom refurbishment' or 'Consumer unit upgrade'">
@@ -509,54 +568,30 @@ export default function PostJobBrief() {
           placeholder="We have a 1930s semi-detached house in Nottingham. The loft is currently boarded but uninsulated — we want to convert it into a double bedroom with an en-suite shower room..." />
       </F>
       {planningCfg.planning && (
-        <F label="Is planning permission required or already granted?" hint="If you're unsure, ProGrafter's Planning Intelligence tool can check for you">
+        <F label="Does this work need planning permission?">
           <S f="planning_permission">
             <option value="">Select...</option>
-            <option value="Not required — permitted development">Not required — permitted development</option>
-            <option value="Already granted — reference available">Already granted — reference available</option>
-            <option value="Application submitted — pending">Application submitted — pending</option>
-            <option value="Not applicable">Not applicable</option>
-            <option value={GUIDE_ME}>{GUIDE_ME}</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+            <option value={GUIDE_ME}>Not sure</option>
           </S>
+          <p style={{ fontSize: 11, color: "#0F766E", marginTop: 6, lineHeight: 1.6 }}>
+            Not sure? That's fine — ProGrafter helps you work this out as part of the job.
+          </p>
         </F>
       )}
 
-      {planningCfg.buildingRegs === "generic" && (
-        <F label="Building regulations" hint="Most structural and extension work requires Building Regs approval">
+      {planningCfg.buildingRegs !== false && (
+        <F label="Does this work need building regulations approval?">
           <S f="building_regs">
             <option value="">Select...</option>
-            <option value="Building regs required — not yet applied">Building regs required — not yet applied</option>
-            <option value="Building regs approved — notice submitted">Building regs approved — notice submitted</option>
-            <option value="Completion certificate already held">Completion certificate already held</option>
-            <option value="Not required for this work">Not required for this work</option>
-            <option value={GUIDE_ME}>{GUIDE_ME}</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+            <option value={GUIDE_ME}>Not sure</option>
           </S>
-        </F>
-      )}
-
-      {planningCfg.buildingRegs === "partp" && (
-        <F label="Part P (electrical Building Regulations)" hint="Notifiable electrical work must be certified under Part P of the Building Regulations">
-          <S f="building_regs">
-            <option value="">Select...</option>
-            <option value="Not notifiable — minor electrical works">Not notifiable — minor electrical works</option>
-            <option value="Notifiable — registered electrician will self-certify">Notifiable — registered electrician will self-certify</option>
-            <option value="Notifiable — building notice to be submitted">Notifiable — building notice to be submitted</option>
-            <option value="Part P completion certificate already held">Part P completion certificate already held</option>
-            <option value={GUIDE_ME}>{GUIDE_ME}</option>
-          </S>
-        </F>
-      )}
-
-      {planningCfg.buildingRegs === "gas" && (
-        <F label="Gas Safe / Building Notice" hint="Gas and heating work must be carried out by a Gas Safe registered engineer">
-          <S f="building_regs">
-            <option value="">Select...</option>
-            <option value="Gas Safe engineer will self-certify">Gas Safe engineer will self-certify</option>
-            <option value="Building notice required — not yet submitted">Building notice required — not yet submitted</option>
-            <option value="Completion certificate already held">Completion certificate already held</option>
-            <option value="Not applicable to this work">Not applicable to this work</option>
-            <option value={GUIDE_ME}>{GUIDE_ME}</option>
-          </S>
+          <p style={{ fontSize: 11, color: "#0F766E", marginTop: 6, lineHeight: 1.6 }}>
+            Not sure? That's fine — ProGrafter helps you work this out as part of the job.
+          </p>
         </F>
       )}
     </>,
@@ -772,11 +807,8 @@ export default function PostJobBrief() {
             live on the platform — trades who pass our five-check verification.
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 24 }}>
-            <a href={loginUrl || "/login"} style={{ ...btnNavy, textDecoration: "none", display: "block", textAlign: "center" }}>
-              Go to my dashboard →
-            </a>
-            <a href="/" style={{ ...btnBack, textDecoration: "none", display: "block", textAlign: "center" }}>
-              ← Back to home
+            <a href="/" style={{ ...btnPrimary, textDecoration: "none", display: "block", textAlign: "center" }}>
+              ← Back to ProGrafter home
             </a>
           </div>
         </div>

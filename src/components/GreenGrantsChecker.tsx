@@ -386,7 +386,7 @@ export default function GreenGrantsChecker() {
               Every installer on ProGrafter is personally vetted, insured, and qualified. Many are MCS-certified — required for grant-funded installations.
             </p>
             <button
-              onClick={() => window.location.href = "/post-job"}
+              onClick={() => window.location.href = "/post-job-brief"}
               className="inline-flex bg-white rounded-xl px-7 py-3.5 font-mono text-sm font-bold mb-2 hover:opacity-95 transition-opacity"
               style={{ color: G.g800 }}
             >
