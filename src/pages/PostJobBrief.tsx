@@ -444,10 +444,19 @@ export default function PostJobBrief() {
       const line1 = dedupeLine(titleCaseAddress(form.address_line1), town);
       const line2 = dedupeLine(titleCaseAddress(form.address_line2), town);
 
+      // Build a readable trade label for the brief — single id maps to a name
+      // server-side; multiple/unsure becomes a general-review label.
+      const tradeLabel = isUnsureTrade
+        ? "Not sure / more than one trade — general review"
+        : selectedTradeIds.length > 1
+          ? selectedTradeIds.map(id => TRADES.find(t => t.id === id)?.name || id).join(", ")
+          : (selectedTradeIds[0] ?? "");
+
       // If the homeowner asked ProGrafter to scope the job, don't send the
       // (now hidden) scope / known-issues fields to trades.
       const payload = {
         ...form,
+        trade_category_id: tradeLabel,
         address_line1: line1,
         address_line2: line2,
         city: town,
@@ -456,6 +465,7 @@ export default function PostJobBrief() {
         scope_items: needsScoping ? "" : form.scope_items,
         known_issues: needsScoping ? "" : form.known_issues,
         needs_scoping: needsScoping,
+        needs_general_review: multiTrade,
         needs_planning_guidance: needsPlanningGuidance,
         marketing_opt_in: marketing,
         user_agent: typeof navigator !== "undefined" ? navigator.userAgent : "",
