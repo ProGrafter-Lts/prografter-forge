@@ -380,7 +380,25 @@ export default function PostJobBrief() {
     setForm(p => ({ ...p, planning_permission: "", building_regs: "" }));
   }, [form.trade_category_id]);
 
-  const planningCfg = planningCfgFor(form.trade_category_id);
+  // Trades are stored as a comma-joined list of ids in trade_category_id so the
+  // homeowner can pick more than one — or "not_sure" for a general review.
+  const selectedTradeIds = (form.trade_category_id || "").split(",").filter(Boolean);
+  const isUnsureTrade = selectedTradeIds.includes("not_sure");
+  const multiTrade = isUnsureTrade || selectedTradeIds.length > 1;
+  const toggleTrade = (id: string) => setForm(p => {
+    const cur = (p.trade_category_id || "").split(",").filter(Boolean);
+    let next: string[];
+    if (id === "not_sure") {
+      next = cur.includes("not_sure") ? [] : ["not_sure"];
+    } else {
+      next = cur.includes(id) ? cur.filter(x => x !== id) : [...cur.filter(x => x !== "not_sure"), id];
+    }
+    return { ...p, trade_category_id: next.join(",") };
+  });
+
+  const planningCfg = multiTrade
+    ? { planning: true, buildingRegs: "generic" as RegMode }
+    : planningCfgFor(selectedTradeIds[0] ?? "");
   const needsPlanningGuidance =
     form.planning_permission === GUIDE_ME || form.building_regs === GUIDE_ME;
 
