@@ -368,7 +368,7 @@ export default function PostJobBrief() {
   const [needsScoping, setNeedsScoping] = useState(false);
   const [consent, setConsent] = useState(false);
   const [marketing, setMarketing] = useState(false);
-  const [loginUrl, setLoginUrl] = useState("");
+  
 
   const upd = (k: string) => (e: any) => setForm(p => ({ ...p, [k]: e.target.value }));
 
@@ -444,7 +444,7 @@ export default function PostJobBrief() {
       const { data, error } = await supabase.functions.invoke("submit-job-brief", { body: payload });
       if (error || !data?.ref) throw error || new Error("No reference returned");
       setRef(data.ref);
-      if (data.loginUrl) setLoginUrl(data.loginUrl);
+      
       setSubmitted(true);
       trackEvent("generate_lead", { reference: data.ref, needs_scoping: needsScoping });
     } catch (err) {
