@@ -414,7 +414,7 @@ export default function PostJobBrief() {
       if (!form.property_type) e.property_type = "Required";
     }
     if (n === 1) {
-      if (!form.trade_category_id) e.trade_category_id = "Please select a trade";
+      if (!form.trade_category_id) e.trade_category_id = "Please select at least one trade";
       if (!form.job_title.trim()) e.job_title = "A brief title is required";
       if (form.job_description.trim().length < 50) e.job_description = "Please describe the job in at least 50 characters — trades need enough detail to quote accurately";
     }
