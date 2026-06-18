@@ -227,8 +227,16 @@ const StepBar = ({ current }: { current: number }) => (
 );
 
 const BriefPreview = ({ form, briefRef }: { form: typeof BLANK; briefRef: string }) => {
-  const trade = TRADES.find(t => t.id === form.trade_category_id);
+  const briefTradeIds = (form.trade_category_id || "").split(",").filter(Boolean);
+  const briefUnsure = briefTradeIds.includes("not_sure");
+  const briefTrades = briefTradeIds.map(id => TRADES.find(t => t.id === id)).filter(Boolean) as typeof TRADES;
+  const tradeIcon = briefUnsure ? "🧭" : (briefTrades[0]?.icon ?? "🛠️");
+  const tradeLabel = briefUnsure
+    ? "Not sure / more than one trade — general review"
+    : briefTrades.map(t => t.name).join(", ");
+  const hasTrade = briefUnsure || briefTrades.length > 0;
   const ref = briefRef;
+
 
 
   const Section = ({ title, children }: any) => (
@@ -268,12 +276,12 @@ const BriefPreview = ({ form, briefRef }: { form: typeof BLANK; briefRef: string
         </div>
       </div>
 
-      {trade && (
+      {hasTrade && (
         <div style={{ background: C.tealDim, borderBottom: `1px solid #99F6E4`,
           padding: "10px 20px", display: "flex", alignItems: "center", gap: 10 }}>
-          <span style={{ fontSize: 20 }}>{trade.icon}</span>
+          <span style={{ fontSize: 20 }}>{tradeIcon}</span>
           <div>
-            <p style={{ fontSize: 13, fontWeight: 700, color: C.navy, margin: 0 }}>{trade.name}</p>
+            <p style={{ fontSize: 13, fontWeight: 700, color: C.navy, margin: 0 }}>{tradeLabel}</p>
             <p style={{ fontSize: 11, color: C.teal, margin: 0 }}>{form.job_title}</p>
           </div>
           <div style={{ marginLeft: "auto", background: C.teal,
