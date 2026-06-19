@@ -144,6 +144,61 @@ export default function DisputeRaise() {
     </div>
   );
 
+  if (submitted && createdDisputeId) {
+    return (
+      <div style={{ minHeight:"100vh", background:C.cream }}>
+        <div style={{ background:C.deep, padding:"14px 24px",
+          display:"flex", alignItems:"center", gap:12 }}>
+          <div className="font-heading tracking-wider" style={{ fontSize:24, fontWeight:700 }}>
+            <Logo variant="light" className="h-9 w-auto inline-block" />
+          </div>
+          <span style={{ color:"rgba(245,240,232,0.45)" }}>|</span>
+          <span style={{ fontSize:12, color:"rgba(245,240,232,0.78)", letterSpacing:"0.05em" }}>
+            DISPUTE RESOLUTION · {job.ref}
+          </span>
+        </div>
+
+        <div style={{ maxWidth:660, margin:"0 auto", padding:"2.5rem 1rem" }}>
+          <div style={{ textAlign:"center", marginBottom:28 }}>
+            <div style={{ width:64, height:64, borderRadius:"50%", background:C.tealDim,
+              display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 16px" }}>
+              <span style={{ fontSize:32 }}>🛡️</span>
+            </div>
+            <h1 style={{ fontSize:22, fontWeight:700, color:C.deep, margin:"0 0 8px" }}>
+              Dispute raised successfully
+            </h1>
+            <p style={{ fontSize:13, color:C.secondary, maxWidth:480, margin:"0 auto", lineHeight:1.65 }}>
+              Your dispute for <strong>{job.title || "this job"}</strong> has been logged and
+              pending escrow payments are now frozen.
+            </p>
+          </div>
+
+          <div style={{ background:C.white, border:`1.5px solid ${C.border}`, borderRadius:14, padding:"1.25rem 1.25rem" }}>
+            <div style={{ background:C.tealDim, border:`1px solid #99F6E4`,
+              borderRadius:10, padding:"14px 16px", marginBottom:20 }}>
+              <p style={{ fontSize:10, fontWeight:700, color:"#0F766E", letterSpacing:"0.08em",
+                textTransform:"uppercase", margin:"0 0 8px" }}>What happens next</p>
+              <p style={{ fontSize:12, color:"#0F766E", lineHeight:1.65, margin:0 }}>
+                We'll acknowledge your dispute within 1 working day. A ProGrafter mediator then reviews
+                the evidence from both sides and works toward a fair outcome — most cases are resolved
+                within 5–7 working days, with complex ones taking a little longer. You'll be kept updated
+                throughout.
+              </p>
+            </div>
+
+            <div style={{ display:"flex", justifyContent:"center" }}>
+              <button onClick={() => nav(`/disputes/${createdDisputeId}`)}
+                style={{ background:C.teal, color:C.white, border:"none", borderRadius:10,
+                  padding:"11px 28px", fontSize:14, fontWeight:700, cursor:"pointer" }}>
+                View dispute details →
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const inp = (err: boolean) => ({
     width:"100%", padding:"9px 12px", borderRadius:8,
     border:`1.5px solid ${err ? C.red : C.border}`,
