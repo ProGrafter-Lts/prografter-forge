@@ -166,7 +166,20 @@ export default function DisputeDetail() {
           )}
         </div>
 
-        {/* Statements */}
+        {/* What happens next */}
+        <div style={{ background:C.white, border:`1.5px solid ${C.border}`,
+          borderRadius:12, padding:"12px 14px", marginBottom:14 }}>
+          <p style={{ fontSize:10, fontWeight:700, color:C.teal, letterSpacing:"0.08em",
+            textTransform:"uppercase", margin:"0 0 8px" }}>What happens next</p>
+          <p style={{ fontSize:12, color:C.body, lineHeight:1.65, margin:0 }}>
+            We'll acknowledge your dispute within 1 working day. A ProGrafter mediator then reviews
+            the evidence from both sides and works toward a fair outcome — most cases are resolved
+            within 5–7 working days, with complex ones taking a little longer. You'll be kept updated
+            throughout.
+          </p>
+        </div>
+
+
         <div style={{ display:"grid", gridTemplateColumns:"1fr", gap:10, marginBottom:14 }}>
           <div style={{ background:C.white, border:`1.5px solid ${C.border}`,
             borderRadius:12, padding:"12px 14px" }}>
