@@ -44,6 +44,8 @@ export default function DisputeRaise() {
     reason:"", amount_pounds:"", statement:"", desired_outcome:"", evidence_notes:"",
   });
   const [errors, setErrors] = useState<Record<string,string>>({});
+  const [submitted, setSubmitted] = useState(false);
+  const [createdDisputeId, setCreatedDisputeId] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
