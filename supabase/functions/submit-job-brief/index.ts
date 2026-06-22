@@ -127,8 +127,8 @@ Deno.serve(async (req) => {
       .eq('email', emailLower)
       .maybeSingle()
     if (existingProfile?.user_id) {
-      if (existingProfile.user_type === 'trade') {
-        return new Response(JSON.stringify({ error: 'This email is registered as a trade account. Please use a different email for the homeowner brief.' }), {
+      if (existingProfile.user_type !== 'homeowner') {
+        return new Response(JSON.stringify({ error: 'This email is already registered for another ProGrafter account. Please use a different email for the homeowner brief.' }), {
           status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         })
       }
@@ -165,8 +165,8 @@ Deno.serve(async (req) => {
       if (linkErr) {
         console.error('[submit-job-brief] generateLink (existing user) failed', linkErr)
       } else {
-        if (linkData?.user?.user_metadata?.user_type === 'trade') {
-          return new Response(JSON.stringify({ error: 'This email is registered as a trade account. Please use a different email for the homeowner brief.' }), {
+        if (linkData?.user?.user_metadata?.user_type && linkData.user.user_metadata.user_type !== 'homeowner') {
+          return new Response(JSON.stringify({ error: 'This email is already registered for another ProGrafter account. Please use a different email for the homeowner brief.' }), {
             status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           })
         }
