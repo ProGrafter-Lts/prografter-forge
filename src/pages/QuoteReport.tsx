@@ -416,10 +416,13 @@ const QuoteReport = () => {
           </section>
         )}
 
-        {/* Cost picture */}
+        {/* Cost picture / indicative ranges */}
         {cp && (
           <section className="bg-card rounded-2xl border border-border p-6 shadow-sm">
-            <h3 className="font-heading text-lg text-navy mb-3">The cost picture</h3>
+            <h3 className="font-heading text-lg text-navy mb-1">Indicative ranges</h3>
+            <p className="font-mono text-xs text-muted-foreground mb-4 italic">
+              Ranges are a guide to help you ask better questions, not a quote.
+            </p>
             {cp.framing && (
               <p className="font-mono text-xs text-muted-foreground mb-4 leading-relaxed">{cp.framing}</p>
             )}
