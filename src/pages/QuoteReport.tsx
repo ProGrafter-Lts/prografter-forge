@@ -91,10 +91,8 @@ const DisclaimerBanner = () => (
   <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex gap-3 items-start">
     <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
     <div className="font-mono text-xs text-amber-800 leading-relaxed">
-      This is budgeting guidance to help you ask the right questions — not a survey,
-      valuation, or quotation. All figures are indicative ranges. Always confirm details
-      directly with your builder and obtain independent professional advice before
-      committing to any building work.
+      This is guidance to help you compare quotes. It is not a quote, a survey, or
+      professional advice.
     </div>
   </div>
 );
@@ -418,10 +416,13 @@ const QuoteReport = () => {
           </section>
         )}
 
-        {/* Cost picture */}
+        {/* Cost picture / indicative ranges */}
         {cp && (
           <section className="bg-card rounded-2xl border border-border p-6 shadow-sm">
-            <h3 className="font-heading text-lg text-navy mb-3">The cost picture</h3>
+            <h3 className="font-heading text-lg text-navy mb-1">Indicative ranges</h3>
+            <p className="font-mono text-xs text-muted-foreground mb-4 italic">
+              Ranges are a guide to help you ask better questions, not a quote.
+            </p>
             {cp.framing && (
               <p className="font-mono text-xs text-muted-foreground mb-4 leading-relaxed">{cp.framing}</p>
             )}
