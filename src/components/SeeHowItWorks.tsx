@@ -189,7 +189,7 @@ const HomeownersPanel = () => (
    MAIN SECTION
    ═══════════════════════════════════════ */
 const SeeHowItWorks = () => {
-  const [activeTab, setActiveTab] = useState<"trades" | "homeowners">("trades");
+  const [activeTab, setActiveTab] = useState<"trades" | "homeowners">("homeowners");
 
   return (
     <section id="see-how-it-works" className="hiw-section">
@@ -212,16 +212,16 @@ const SeeHowItWorks = () => {
         {/* Tabs */}
         <div className="hiw-tabs">
           <button
-            className={`hiw-tab ${activeTab === "trades" ? "active" : ""}`}
-            onClick={() => setActiveTab("trades")}
-          >
-            🔧 I'm a Tradesperson
-          </button>
-          <button
             className={`hiw-tab ${activeTab === "homeowners" ? "active" : ""}`}
             onClick={() => setActiveTab("homeowners")}
           >
             🏠 I'm a Homeowner
+          </button>
+          <button
+            className={`hiw-tab ${activeTab === "trades" ? "active" : ""}`}
+            onClick={() => setActiveTab("trades")}
+          >
+            🔧 I'm a Tradesperson
           </button>
         </div>
 
@@ -235,8 +235,8 @@ const SeeHowItWorks = () => {
             <div className="s">Free to register · Free to post · Pay only when work completes</div>
           </div>
           <div className="bs-btns">
-            <a href="/register/trade" className="btn-p">Register as a Trade</a>
-            <a href="/post-a-job" className="btn-s">Post a Job →</a>
+            <a href="/post-a-job" className="btn-p">Post a Job →</a>
+            <a href="/register/trade" className="btn-s">Register as a Trade</a>
           </div>
         </div>
       </div>
