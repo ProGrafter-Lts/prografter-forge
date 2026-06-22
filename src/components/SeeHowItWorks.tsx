@@ -235,8 +235,8 @@ const SeeHowItWorks = () => {
             <div className="s">Free to register · Free to post · Pay only when work completes</div>
           </div>
           <div className="bs-btns">
-            <a href="/register/trade" className="btn-p">Register as a Trade</a>
-            <a href="/post-a-job" className="btn-s">Post a Job →</a>
+            <a href="/post-a-job" className="btn-p">Post a Job →</a>
+            <a href="/register/trade" className="btn-s">Register as a Trade</a>
           </div>
         </div>
       </div>
