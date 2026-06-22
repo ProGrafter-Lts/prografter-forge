@@ -135,7 +135,7 @@ const PlatformPreview = () => {
                 src={homeownerQuotes}
                 alt="Side-by-side quote comparison"
                 url="prografter.co.uk/project/compare"
-                caption="Compare quotes side-by-side with fairness scoring built in."
+                caption="Weigh up your matched trades side-by-side — fairness scoring built in."
               />
               <BrowserFrame
                 src={homeownerManual}
