@@ -102,7 +102,7 @@ const Hero = () => {
               Your project. Fully visible. Fully protected.
             </h2>
             <p className="font-body text-[15px] mb-5 font-light" style={{ color: "#1F2937" }}>
-              Verified local trades, a proper contract, and your money protected until the job's done right. From idea to completion.
+              Up to three matched trades. Not thirty. Vetted, local, and actually available — you choose on the work, not just the lowest price.
             </p>
             <p className="font-body text-[14px] mb-6 leading-relaxed font-light" style={{ color: "#4B5563" }}>
               Anyone can hand you a cheap quote. ProGrafter gives you a verified trade, a written contract, daily photos from site, staged payments held safe, and every certificate and warranty at the end — the record you'll show friends.

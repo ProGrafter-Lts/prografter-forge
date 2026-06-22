@@ -712,7 +712,7 @@ export default function PostJobBrief() {
       </F>
       <InfoBox variant="amber">
         <strong>What happens next?</strong> Once submitted, your brief is reviewed by ProGrafter before being shared with
-        relevant vetted trades in your area. Trades must respond within 48 hours or the brief is passed to the next
+        up to three vetted, local, available trades — never broadcast to everyone. Trades must respond within 48 hours or the brief is passed to the next
         available trade. You are under no obligation to accept any quote.
       </InfoBox>
     </>,
@@ -790,7 +790,7 @@ export default function PostJobBrief() {
           <h2 style={{ fontSize: 20, fontWeight: 700, color: C.deep, marginBottom: 8 }}>Received — under review</h2>
           <p style={{ fontSize: 14, color: C.secondary, lineHeight: 1.65, marginBottom: 16 }}>
             Your brief is in and your free homeowner account is ready. We're reviewing it now
-            and will notify you when verified trades quote.
+            and will match you with up to three vetted, local, available trades — not thirty.
           </p>
           <div style={{ background: C.cream, borderRadius: 10, padding: "12px 16px", marginBottom: 16 }}>
             <p style={{ fontSize: 11, color: C.secondary, margin: "0 0 4px" }}>Your reference number</p>

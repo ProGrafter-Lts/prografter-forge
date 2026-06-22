@@ -42,7 +42,7 @@ const SignUpSection = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="font-mono text-xs uppercase tracking-widest opacity-80 mb-1">For Homeowners</p>
-                    <p className="font-heading text-xl">Post a job, get quotes</p>
+                    <p className="font-heading text-xl">Post a job, get matched</p>
                   </div>
                   <span className="font-mono text-2xl opacity-80 group-hover:translate-x-1 transition-transform">→</span>
                 </div>
@@ -55,7 +55,7 @@ const SignUpSection = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="font-mono text-xs uppercase tracking-widest text-teal mb-1">For Tradespeople</p>
-                    <p className="font-heading text-xl">Get verified job leads</p>
+                    <p className="font-heading text-xl">One of three, not one of thirty</p>
                   </div>
                   <span className="font-mono text-2xl text-teal group-hover:translate-x-1 transition-transform">→</span>
                 </div>
