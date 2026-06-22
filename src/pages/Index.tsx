@@ -5,13 +5,14 @@ import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import AboutStoryBanner from "@/components/AboutStoryBanner";
 import Ticker from "@/components/Ticker";
-import HomeownersHowItWorks from "@/components/HomeownersHowItWorks";
-import GreenGrantsChecker from "@/components/GreenGrantsChecker";
+import HowItWorks from "@/components/HowItWorks";
 import OldWayContrast from "@/components/OldWayContrast";
+import GreenEnergySection from "@/components/GreenEnergySection";
 import ContrastSection from "@/components/ContrastSection";
 import FeaturesGrid from "@/components/FeaturesGrid";
 import TradesHowItWorks from "@/components/TradesHowItWorks";
-import GreenEnergySection from "@/components/GreenEnergySection";
+import HomeownersHowItWorks from "@/components/HomeownersHowItWorks";
+import GreenGrantsChecker from "@/components/GreenGrantsChecker";
 import WhatYouGet from "@/components/WhatYouGet";
 import WhyDifferent from "@/components/WhyDifferent";
 import PlatformPreview from "@/components/PlatformPreview";
@@ -43,21 +44,22 @@ const Index = () => {
   return (
     <div className="min-h-screen">
       <SEO
-        title="ProGrafter — Verified Trades for Homeowners | Post a Job Free"
-        description="Post your job free on ProGrafter. Get quotes from verified UK tradespeople with a written contract, staged payments, and a complete Homeowner Manual. No upfront cost."
+        title="ProGrafter — Commission-Only Trades Marketplace | Zero Monthly Fees"
+        description="ProGrafter connects verified UK tradespeople with homeowners. Pay 7.5% only when a job completes — capped at £900. No monthly fees. Free to register. Free to post a job."
         path="/"
         jsonLd={[localBusinessJsonLd, homepageFaqJsonLd]}
       />
       <Navbar />
       <Hero />
-      <HomeownersHowItWorks />
       <GreenGrantsChecker />
       <AboutStoryBanner />
       <Ticker />
-      <TradesHowItWorks />
+      <HowItWorks />
       <OldWayContrast />
       <ContrastSection />
       <FeaturesGrid />
+      <TradesHowItWorks />
+      <HomeownersHowItWorks />
       <GreenEnergySection />
       <WhatYouGet />
       <WhyDifferent />
