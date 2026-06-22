@@ -369,12 +369,12 @@ const QuoteChecker = () => {
     <AppShell>
       <div className="min-h-screen bg-background">
         <SEO
-          title="AI Quote Checker — ProGrafter | Check Any Building Quote for £49"
-          description="Upload any building quote and our AI checks it against industry benchmarks. £49 one-off, no signup required."
+          title="Quote Health Check — ProGrafter | Read Your Building Quote for £49"
+          description="We help you read the quotes you've got — where the gaps are, what to ask, and what good looks like. £49 one-off."
           path="/quote-checker"
           jsonLd={buildServiceJsonLd({
-            name: "AI Quote Checker",
-            description: "AI-powered review of any UK building quote against a 43-point checklist.",
+            name: "Quote Health Check",
+            description: "An independent, plain-English review of your UK building quote to help you read it and ask the right questions.",
             url: "https://prografter.co.uk/quote-checker",
             serviceType: "Construction quote review",
             price: "49.00",
