@@ -58,10 +58,10 @@ const JobBriefHomeownerEmail = ({
 
     <Para>
       We've set up your free homeowner account so you can track your brief and
-      quotes. Tap below to sign in securely — no password needed.
+      quotes. Your secure sign-in link is sent separately — no password needed.
     </Para>
 
-    <CTA href={loginUrl || 'https://prografter.co.uk/login'} label="View my dashboard" />
+    <CTA href={loginUrl || 'https://prografter.co.uk/login'} label="Open ProGrafter" />
   </ProGrafterShell>
 )
 
@@ -78,6 +78,6 @@ export const template = {
     budget: '£2,500–£5,000',
     timeline: 'Within a month',
     description: 'Full kitchen rewire with 6 new double sockets and under-cabinet lighting.',
-    loginUrl: 'https://prografter.co.uk/login',
+    loginUrl: 'https://prografter.co.uk/dashboard/homeowner',
   },
 } satisfies TemplateEntry

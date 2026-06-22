@@ -64,6 +64,12 @@ function clean(v: unknown): string | null {
   return t.length ? t : null
 }
 
+function randomSessionPassword(): string {
+  const bytes = new Uint8Array(24)
+  crypto.getRandomValues(bytes)
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('') + 'Aa1!'
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders })
 
@@ -109,20 +115,48 @@ Deno.serve(async (req) => {
   // Find or create the auth user for this email, then ensure profile + homeowner.
   let homeownerUserId: string | null = null
   let homeownerId: string | null = null
-  // Magic-link captured during account resolution so we never rely on the
-  // platform's listUsers endpoint (which can 500 on NULL confirmation_token).
-  let homeownerMagicLink: string | null = null
+  // A one-use browser handoff password establishes day-one session access.
+  // The homeowner never sees or chooses a password; returning homeowners use
+  // the separate magic-link path.
+  const sessionPassword = randomSessionPassword()
   const emailLower = email.toLowerCase()
   try {
-    // Try to create; if the user already exists we resolve them via generateLink.
-    const { data: created, error: createErr } = await supabase.auth.admin.createUser({
-      email: emailLower,
-      email_confirm: true,
-      user_metadata: { user_type: 'homeowner', full_name, phone, postcode },
-    })
-    if (createErr) {
-      // Likely already registered. generateLink returns BOTH the existing user
-      // and a fresh magic link — avoiding the buggy listUsers lookup entirely.
+    const { data: existingProfile } = await supabase
+      .from('profiles')
+      .select('user_id, user_type')
+      .eq('email', emailLower)
+      .maybeSingle()
+    if (existingProfile?.user_id) {
+      if (existingProfile.user_type !== 'homeowner') {
+        return new Response(JSON.stringify({ error: 'This email is already registered for another ProGrafter account. Please use a different email for the homeowner brief.' }), {
+          status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+      homeownerUserId = existingProfile.user_id
+      const { error: updateErr } = await supabase.auth.admin.updateUserById(homeownerUserId, {
+        password: sessionPassword,
+        email_confirm: true,
+        user_metadata: { user_type: 'homeowner', full_name, phone, postcode },
+      })
+      if (updateErr) console.error('[submit-job-brief] existing homeowner password handoff failed', updateErr)
+    }
+
+    // Try to create if no existing profile was found. If the auth user already
+    // exists without a profile, fall back to a return link rather than touching
+    // an unknown/trade account.
+    let createErr: unknown = null
+    if (!homeownerUserId) {
+      const { data: created, error } = await supabase.auth.admin.createUser({
+        email: emailLower,
+        password: sessionPassword,
+        email_confirm: true,
+        user_metadata: { user_type: 'homeowner', full_name, phone, postcode },
+      })
+      createErr = error
+      if (!error) homeownerUserId = created.user?.id ?? null
+    }
+
+    if (!homeownerUserId && createErr) {
       const { data: linkData, error: linkErr } = await supabase.auth.admin.generateLink({
         type: 'magiclink',
         email: emailLower,
@@ -131,11 +165,21 @@ Deno.serve(async (req) => {
       if (linkErr) {
         console.error('[submit-job-brief] generateLink (existing user) failed', linkErr)
       } else {
+        if (linkData?.user?.user_metadata?.user_type && linkData.user.user_metadata.user_type !== 'homeowner') {
+          return new Response(JSON.stringify({ error: 'This email is already registered for another ProGrafter account. Please use a different email for the homeowner brief.' }), {
+            status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          })
+        }
         homeownerUserId = linkData?.user?.id ?? null
-        homeownerMagicLink = linkData?.properties?.action_link ?? null
+        if (homeownerUserId) {
+          const { error: updateErr } = await supabase.auth.admin.updateUserById(homeownerUserId, {
+            password: sessionPassword,
+            email_confirm: true,
+            user_metadata: { user_type: 'homeowner', full_name, phone, postcode },
+          })
+          if (updateErr) console.error('[submit-job-brief] fallback homeowner password handoff failed', updateErr)
+        }
       }
-    } else {
-      homeownerUserId = created.user?.id ?? null
     }
   } catch (e) {
     console.error('[submit-job-brief] account creation failed', e)
@@ -225,23 +269,9 @@ Deno.serve(async (req) => {
 
   const fullAddress = [address_line1, clean(body.address_line2), city].filter(Boolean).join(', ')
 
-  // Generate a magic-link login that lands the homeowner on their dashboard.
-  let loginUrl = `${SITE_URL}/login`
-  if (homeownerMagicLink) {
-    // Reuse the link captured while resolving an existing account.
-    loginUrl = homeownerMagicLink
-  } else if (homeownerUserId) {
-    try {
-      const { data: linkData } = await supabase.auth.admin.generateLink({
-        type: 'magiclink',
-        email: emailLower,
-        options: { redirectTo: `${SITE_URL}${DASHBOARD_PATH}` },
-      })
-      if (linkData?.properties?.action_link) loginUrl = linkData.properties.action_link
-    } catch (e) {
-      console.error('[submit-job-brief] magic link failed', e)
-    }
-  }
+  // The browser signs in immediately with the private one-use handoff above,
+  // then sends the separate return-path magic-link email from the signed-in session.
+  const loginUrl = `${SITE_URL}${DASHBOARD_PATH}`
 
 
   // Send homeowner confirmation + admin notification. Failures here must not
@@ -299,7 +329,13 @@ Deno.serve(async (req) => {
     else if (r.value.error) console.error(`[submit-job-brief] ${which} email error`, r.value.error)
   })
 
-  return new Response(JSON.stringify({ ref, loginUrl, accountCreated: !!homeownerUserId }), {
+  return new Response(JSON.stringify({
+    ref,
+    loginUrl,
+    sessionEmail: homeownerUserId ? emailLower : null,
+    sessionPassword: homeownerUserId ? sessionPassword : null,
+    accountCreated: !!homeownerUserId,
+  }), {
     status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   })
 })

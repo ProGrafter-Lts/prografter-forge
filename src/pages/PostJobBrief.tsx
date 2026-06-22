@@ -1,4 +1,5 @@
 import { useState, useEffect, createContext, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { trackEvent } from "@/lib/analytics";
 import Logo from "@/components/Logo";
@@ -367,6 +368,7 @@ const BriefPreview = ({ form, briefRef }: { form: typeof BLANK; briefRef: string
 };
 
 export default function PostJobBrief() {
+  const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [form, setForm] = useState(BLANK);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -481,12 +483,40 @@ export default function PostJobBrief() {
       const { data, error } = await supabase.functions.invoke("submit-job-brief", { body: payload });
       if (error || !data?.ref) throw error || new Error("No reference returned");
       setRef(data.ref);
-      
-      setSubmitted(true);
+
+      if (!data.sessionEmail || !data.sessionPassword) {
+        throw new Error("Your brief was saved, but automatic sign-in was not available. Please use the secure link we emailed you.");
+      }
+
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: data.sessionEmail,
+        password: data.sessionPassword,
+      });
+      if (signInError) throw signInError;
+
+      const burnPassword = `${crypto.randomUUID()}Aa1!`;
+      void supabase.auth.updateUser({ password: burnPassword }).then(({ error: burnError }) => {
+        if (burnError) console.warn("Homeowner one-time session password rotation failed", burnError);
+      });
+
+      void supabase.auth.signInWithOtp({
+        email: form.email.trim(),
+        options: {
+          emailRedirectTo: `${window.location.origin}/dashboard/homeowner`,
+          shouldCreateUser: false,
+        },
+      }).then(({ error: returnLinkError }) => {
+        if (returnLinkError) console.warn("Homeowner return magic link failed", returnLinkError);
+      });
+
       trackEvent("generate_lead", { reference: data.ref, needs_scoping: needsScoping });
+      navigate("/dashboard/homeowner", {
+        replace: true,
+        state: { authBypassUntil: Date.now() + 15_000 },
+      });
     } catch (err) {
       console.error("Job brief submission failed", err);
-      setSubmitError("Something went wrong submitting your brief. Please try again.");
+      setSubmitError(err instanceof Error ? err.message : "Something went wrong submitting your brief. Please try again.");
     } finally {
       setSubmitting(false);
     }
