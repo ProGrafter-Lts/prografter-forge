@@ -567,7 +567,7 @@ const PDChecker = () => {
           <p className="font-heading text-primary text-sm mb-2">Ready to find a vetted trader for this project?</p>
           <p className="font-sans text-xs text-muted-foreground leading-relaxed mb-3">
             Every trader on ProGrafter is personally vetted, insured, and referenced.
-            Post your job brief and get quotes from qualified tradespeople in your area.
+            Post your job brief and we'll match you with up to three vetted, local, available trades — not thirty.
           </p>
           <div className="flex flex-col sm:flex-row gap-2.5">
             <button className="flex-1 bg-secondary text-primary-foreground font-mono text-xs px-4 py-2.5 rounded-xl hover:bg-secondary/90 transition-colors uppercase tracking-wider">
