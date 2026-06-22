@@ -269,10 +269,8 @@ Deno.serve(async (req) => {
 
   const fullAddress = [address_line1, clean(body.address_line2), city].filter(Boolean).join(', ')
 
-  // The browser consumes the immediate token first, then sends the separate
-  // return-path magic-link email from the signed-in session. Do not generate a
-  // second server-side link here: auth only keeps one live token per user, so it
-  // would invalidate the immediate session token before the browser can use it.
+  // The browser signs in immediately with the private one-use handoff above,
+  // then sends the separate return-path magic-link email from the signed-in session.
   const loginUrl = `${SITE_URL}${DASHBOARD_PATH}`
 
 
