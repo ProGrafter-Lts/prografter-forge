@@ -38,7 +38,7 @@ const WelcomeBanner = ({ hasProjects }: WelcomeBannerProps) => {
             Welcome to ProGrafter!
           </h2>
           <p className="font-body text-sm text-body-text">
-            Post your first job to get matched with verified tradespeople in your area.
+            Post your first job to get matched with up to three vetted, local, available trades — not thirty.
           </p>
         </div>
         <Link

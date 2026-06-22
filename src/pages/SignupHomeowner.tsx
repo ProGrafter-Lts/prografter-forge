@@ -147,7 +147,7 @@ const SignupHomeowner = () => {
     <div className="min-h-screen bg-cream">
       <SEO
         title="Sign up as a homeowner — ProGrafter"
-        description="Create your free ProGrafter account to post home improvement projects and get quotes from verified UK tradespeople."
+        description="Create your free ProGrafter account and get matched with up to three vetted, local, available UK trades — never broadcast to everyone."
         path="/signup/homeowner"
       />
       <Navbar />
@@ -157,7 +157,7 @@ const SignupHomeowner = () => {
             <span className="font-mono text-xs text-teal uppercase tracking-widest">For Homeowners</span>
             <h1 className="font-heading text-navy text-4xl craft:text-5xl mt-2">Create your account</h1>
             <p className="font-body text-secondary-text mt-3">
-              Free to join. Free to post. Get quotes from verified UK tradespeople.
+              Free to post. No deposit. Up to three matched trades — not thirty — all vetted, local, and actually available.
             </p>
           </div>
 

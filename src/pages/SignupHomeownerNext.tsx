@@ -30,7 +30,7 @@ const SignupHomeownerNext = () => {
             >
               <div className="font-heading text-navy text-2xl mb-2">Post a project now</div>
               <p className="font-body text-sm text-secondary-text mb-4">
-                Tell us what you need and we'll match you with verified tradespeople in your area.
+                Tell us what you need and we'll match you with up to three vetted, local, available trades — not thirty.
               </p>
               <span className="inline-flex items-center font-mono text-sm text-teal">
                 Get started →

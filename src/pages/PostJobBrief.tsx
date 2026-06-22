@@ -712,7 +712,7 @@ export default function PostJobBrief() {
       </F>
       <InfoBox variant="amber">
         <strong>What happens next?</strong> Once submitted, your brief is reviewed by ProGrafter before being shared with
-        relevant vetted trades in your area. Trades must respond within 48 hours or the brief is passed to the next
+        up to three vetted, local, available trades — never broadcast to everyone. Trades must respond within 48 hours or the brief is passed to the next
         available trade. You are under no obligation to accept any quote.
       </InfoBox>
     </>,
