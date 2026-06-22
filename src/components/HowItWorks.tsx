@@ -14,7 +14,7 @@ const steps = [
   {
     num: "02",
     title: "Get Matched",
-    desc: "We connect you with homeowners in your area who need your specific trade skills.",
+    desc: "You're matched to local jobs that fit your trade — one of three, not one of thirty. You don't pay to quote.",
     icon: (
       <svg width="32" height="32" fill="none" stroke="#14A8A1" strokeWidth="1.5" viewBox="0 0 24 24">
         <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />

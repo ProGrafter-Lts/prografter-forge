@@ -1,5 +1,5 @@
 const features = [
-  { num: "01", title: "Local Lead Matching", desc: "Get connected with homeowners in your area who need your specific skills." },
+  { num: "01", title: "One of Three, Not Thirty", desc: "Jobs are matched to a maximum of three trades — never broadcast to everyone. You're on the shortlist because you earned it: your standard, your reviews, your availability." },
   { num: "02", title: "Instant Notifications", desc: "Be the first to respond to new jobs with real-time alerts on your phone." },
   { num: "03", title: "Review & Reputation", desc: "Build your online reputation with verified reviews from completed jobs." },
   { num: "04", title: "Simple Dashboard", desc: "Track leads, jobs, and earnings in one clean, no-nonsense interface." },

@@ -118,8 +118,8 @@ const HomeownersPanel = () => (
       </div>
       <div className="hiw-step">
         <div className="step-num">2</div>
-        <div className="step-title">Receive & Compare Quotes</div>
-        <div className="step-desc">Verified, insured local trades quote within 24 hours. Compare and choose with confidence.</div>
+        <div className="step-title">Your Matched Shortlist</div>
+        <div className="step-desc">Up to three matched trades. Not thirty. Vetted, local, and actually available — they quote within 24 hours. You choose on the work, not just the lowest price.</div>
       </div>
       <div className="hiw-step">
         <div className="step-num">3</div>
@@ -149,7 +149,7 @@ const HomeownersPanel = () => (
             <ScreenShot src={homeownerQuotes} alt="Side-by-side quote comparison" />
           </div>
           <div className="screen-label">
-            <div className="sl-title">Compare Quotes Side-by-Side</div>
+            <div className="sl-title">Up to Three Matched Trades</div>
             <div className="sl-sub">Price · Timeline · Certificates · Warranty</div>
           </div>
         </div>
