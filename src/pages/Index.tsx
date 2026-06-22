@@ -6,6 +6,7 @@ import Hero from "@/components/Hero";
 import AboutStoryBanner from "@/components/AboutStoryBanner";
 import Ticker from "@/components/Ticker";
 import HomeownersHowItWorks from "@/components/HomeownersHowItWorks";
+import GreenGrantsChecker from "@/components/GreenGrantsChecker";
 import OldWayContrast from "@/components/OldWayContrast";
 import ContrastSection from "@/components/ContrastSection";
 import FeaturesGrid from "@/components/FeaturesGrid";
