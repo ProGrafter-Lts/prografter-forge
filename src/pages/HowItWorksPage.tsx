@@ -129,9 +129,9 @@ const HowItWorksPage = () => {
               For Homeowners
             </div>
             <p className="font-body text-cream text-lg leading-relaxed mb-6">
-              Post your project free. Get quotes from verified, insured local
-              trades. Every job protected by the ProGrafter contract and escrow
-              payment system.
+              Post your project free. Get matched with up to three vetted, local,
+              available trades — not thirty. Every job protected by the ProGrafter
+              contract and escrow payment system.
             </p>
             <a
               href="/post-a-job"
