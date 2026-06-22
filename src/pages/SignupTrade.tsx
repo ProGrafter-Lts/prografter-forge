@@ -430,6 +430,12 @@ const SignupTrade = () => {
       setError(parsed.error.issues[0]?.message ?? "Please check the form");
       return;
     }
+    // Service-area gate: out-of-area trades go to the waitlist, not sign-up.
+    if (!isInLaunchArea(postcode)) {
+      setError("");
+      setOutOfArea(true);
+      return;
+    }
     setLoading(true);
     try {
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
