@@ -406,6 +406,28 @@ export default function Apply() {
       // 3. Persist references for admin follow-up.
       await persistReferences(applicantEmail);
 
+      // 4. Notify the ProGrafter team. This is non-blocking so the applicant
+      // still reaches the confirmation screen if email delivery is delayed.
+      try {
+        await supabase.functions.invoke("send-transactional-email", {
+          body: {
+            templateName: "trade-signup-admin-notification",
+            idempotencyKey: `trade-application-admin-${applicationId}`,
+            templateData: {
+              name: (form.full_name as string)?.trim(),
+              email: applicantEmail,
+              phone: (form.phone as string)?.trim(),
+              postcode: (form.postcode as string)?.trim().toUpperCase(),
+              companyName: (form.business_name as string)?.trim(),
+              tradeType: TRADES.find((t) => t.id === form.trade_category_id)?.name || (form.trade_category_id as string),
+              stage: "submitted_for_review",
+            },
+          },
+        });
+      } catch (notifyErr) {
+        console.warn("trade application admin notification failed (non-blocking)", notifyErr);
+      }
+
       setDone(true);
       trackEvent("sign_up", { method: "trade_application" });
     } catch (err: any) {
