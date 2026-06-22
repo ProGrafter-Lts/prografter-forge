@@ -901,7 +901,113 @@ const SignupTrade = () => {
     }
   };
 
+  // ---- Out-of-area trade waitlist capture ----
+  const submitWaitlist = async () => {
+    setError("");
+    if (!fullName.trim() || !waitlistTrade.trim() || !email.trim() || !postcode.trim()) {
+      setError("Please fill in your name, trade, email and postcode.");
+      return;
+    }
+    setWaitlistSubmitting(true);
+    try {
+      const { error: insertErr } = await supabase.from("early_signups").insert({
+        name: fullName.trim(),
+        email: email.trim(),
+        postcode: postcode.trim().toUpperCase(),
+        user_type: "trade",
+        admin_notes: `Trade: ${waitlistTrade.trim()}`,
+      } as any);
+      if (insertErr) throw insertErr;
+      setWaitlistDone(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong — please try again.");
+    } finally {
+      setWaitlistSubmitting(false);
+    }
+  };
+
   if (checkingExisting) return <SetupRedirectLoader />;
+
+  if (outOfArea) {
+    return (
+      <div className="min-h-screen flex flex-col" style={{ backgroundColor: "hsl(var(--deep))" }}>
+        <SEO title="Join the waitlist — ProGrafter" description="We're expanding across the UK. Join the ProGrafter trade waitlist." path="/register/trade" noindex />
+        <header className="py-6 px-6">
+          <Logo variant="light" className="h-9 w-auto inline-block" />
+        </header>
+        <div className="flex-1 flex items-center justify-center px-6 py-8">
+          <div className="w-full max-w-lg">
+            {waitlistDone ? (
+              <div className="text-center">
+                <span className="inline-flex w-14 h-14 rounded-full bg-teal/15 items-center justify-center mb-6">
+                  <CheckCircle2 className="w-8 h-8 text-teal" strokeWidth={2} />
+                </span>
+                <h2 className="font-heading text-cream text-[40px] leading-[1.05] mb-4">
+                  You're on the list — <span className="text-teal">we'll be in touch.</span>
+                </h2>
+                <p className="font-body text-cream/70 text-base mb-8">
+                  Thanks {fullName.trim().split(/\s+/)[0] || "there"}. We'll email you the day ProGrafter reaches {postcode.trim().toUpperCase()}.
+                </p>
+                <Link
+                  to="/"
+                  className="inline-block bg-teal text-cream font-mono text-sm px-8 py-4 rounded-xl hover:bg-teal-hover transition-colors"
+                >
+                  Back to home
+                </Link>
+              </div>
+            ) : (
+              <>
+                <p className="font-mono text-xs text-teal uppercase tracking-widest mb-3">Coming soon</p>
+                <h2 className="font-heading text-cream text-[40px] leading-[1.05] mb-5">
+                  We're not in your <span className="text-teal">area yet.</span>
+                </h2>
+                <p className="font-body text-cream/70 text-base mb-8">
+                  ProGrafter is live in Nottinghamshire and the East Midlands right now. Leave your details and we'll tell you the day we reach you.
+                </p>
+
+                {error && (
+                  <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-300 text-sm font-body">
+                    {error}
+                  </div>
+                )}
+
+                <div className="space-y-4">
+                  <div>
+                    <label className={labelClass}>Full Name *</label>
+                    <input className={inputClass} value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="John Smith" />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Your Trade *</label>
+                    <input className={inputClass} value={waitlistTrade} onChange={(e) => setWaitlistTrade(e.target.value)} placeholder="e.g. Electrician, Plumber, Builder" />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Email *</label>
+                    <input type="email" className={inputClass} value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.co.uk" autoComplete="email" />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Postcode *</label>
+                    <input className={`${inputClass} uppercase`} value={postcode} onChange={(e) => setPostcode(e.target.value)} placeholder="SW1A 1AA" autoComplete="postal-code" />
+                  </div>
+                </div>
+
+                <button
+                  onClick={submitWaitlist}
+                  disabled={waitlistSubmitting}
+                  className="w-full mt-6 bg-teal text-cream font-mono text-sm py-4 rounded-xl hover:bg-teal-hover transition-colors disabled:opacity-50"
+                >
+                  {waitlistSubmitting ? "Saving…" : "Join the waitlist"}
+                </button>
+                <p className="mt-4 text-center font-body text-sm text-cream/60">
+                  <Link to="/" className="text-teal underline">Back to home</Link>
+                </p>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
 
   if (!gatePassed) {
     return (
