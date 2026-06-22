@@ -212,16 +212,16 @@ const SeeHowItWorks = () => {
         {/* Tabs */}
         <div className="hiw-tabs">
           <button
-            className={`hiw-tab ${activeTab === "trades" ? "active" : ""}`}
-            onClick={() => setActiveTab("trades")}
-          >
-            🔧 I'm a Tradesperson
-          </button>
-          <button
             className={`hiw-tab ${activeTab === "homeowners" ? "active" : ""}`}
             onClick={() => setActiveTab("homeowners")}
           >
             🏠 I'm a Homeowner
+          </button>
+          <button
+            className={`hiw-tab ${activeTab === "trades" ? "active" : ""}`}
+            onClick={() => setActiveTab("trades")}
+          >
+            🔧 I'm a Tradesperson
           </button>
         </div>
 
