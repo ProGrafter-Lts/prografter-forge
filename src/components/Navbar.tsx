@@ -17,16 +17,16 @@ const Navbar = () => {
           <a href="/green" className="font-mono text-sm text-body-text hover:text-teal transition-colors">Green Grants</a>
           <a href="/login" className="font-mono text-sm text-body-text hover:text-teal transition-colors">Login</a>
           <a
-            href="/signup/trade"
-            className="border border-teal text-teal font-mono text-sm px-5 py-2 rounded-xl hover:bg-teal hover:text-cream transition-colors"
-          >
-            Join as a Trade
-          </a>
-          <a
             href="/signup/homeowner"
             className="bg-teal text-cream font-mono text-sm px-5 py-2.5 rounded-xl hover:bg-teal-hover transition-colors shadow-lg shadow-teal/20"
           >
             Post a Job
+          </a>
+          <a
+            href="/signup/trade"
+            className="border border-teal text-teal font-mono text-sm px-5 py-2 rounded-xl hover:bg-teal hover:text-cream transition-colors"
+          >
+            Join as a Trade
           </a>
         </div>
 
