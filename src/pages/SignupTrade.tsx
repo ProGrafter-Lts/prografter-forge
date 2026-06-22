@@ -109,6 +109,11 @@ const SignupTrade = () => {
   const checkingExisting = useSetupRedirect("trade");
   const { isReady, user } = useAuthReady();
   const [gatePassed, setGatePassed] = useState(false);
+  // Service-area gate state
+  const [outOfArea, setOutOfArea] = useState(false);
+  const [waitlistTrade, setWaitlistTrade] = useState("");
+  const [waitlistDone, setWaitlistDone] = useState(false);
+  const [waitlistSubmitting, setWaitlistSubmitting] = useState(false);
   const [step, setStep] = useState<Step>(1);
   const [resuming, setResuming] = useState(false);
   const [loading, setLoading] = useState(false);
