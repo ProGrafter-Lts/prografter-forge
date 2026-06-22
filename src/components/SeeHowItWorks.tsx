@@ -189,7 +189,7 @@ const HomeownersPanel = () => (
    MAIN SECTION
    ═══════════════════════════════════════ */
 const SeeHowItWorks = () => {
-  const [activeTab, setActiveTab] = useState<"trades" | "homeowners">("trades");
+  const [activeTab, setActiveTab] = useState<"trades" | "homeowners">("homeowners");
 
   return (
     <section id="see-how-it-works" className="hiw-section">
