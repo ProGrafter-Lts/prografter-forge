@@ -726,11 +726,15 @@ const AdminVerifications = () => {
                     )}
                     {t.email && nudgeEligible && (
                       <a
-                        href={`mailto:${t.email}?subject=${encodeURIComponent(
+                        href={`https://mail.google.com/mail/?view=cm&fs=1&authuser=hello@prografter.co.uk&to=${encodeURIComponent(
+                          t.email,
+                        )}&su=${encodeURIComponent(
                           "Finish your ProGrafter application",
                         )}&body=${encodeURIComponent(
                           `Hi ${(t.name || "").split(/\s+/)[0] || "there"},\n\nThanks for signing up to ProGrafter ${daysAgo} days ago. We noticed your verification application isn't quite finished yet — to start receiving job leads, please log in and complete the remaining steps (typically: upload your public liability insurance certificate and confirm your trade details):\n\nhttps://prografter.co.uk/apply\n\n${outOfArea ? "Heads up — we're currently in beta in the East Midlands (NG / DE / LE postcodes). We'll be in touch when we expand to your area.\n\n" : ""}If you've hit a snag or need a hand, just reply to this email.\n\nThanks,\nThe ProGrafter team`,
                         )}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="bg-amber-500 text-white font-mono text-xs uppercase tracking-wider px-4 py-2 rounded-xl hover:bg-amber-600"
                       >
                         Nudge to finish
