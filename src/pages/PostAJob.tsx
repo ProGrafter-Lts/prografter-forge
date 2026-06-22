@@ -300,12 +300,12 @@ const PostAJob = () => {
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: "hsl(var(--deep))" }}>
       <SEO
-        title="Post a Job Free — ProGrafter | Get Quotes from Verified Trades"
-        description="Post your project free in 4 steps. Get quotes from verified UK trades. No middleman, no monthly fees."
+        title="Post a Job Free — ProGrafter | Up to Three Matched Trades"
+        description="Post your project free. We match you with up to three vetted, local, available trades — never broadcast to everyone. No deposit, no monthly fees."
         path="/post-a-job"
         jsonLd={buildServiceJsonLd({
           name: "Post a Job",
-          description: "Post a home improvement job and receive quotes from verified UK trades.",
+          description: "Post a home improvement job and get matched with up to three vetted, local UK trades.",
           url: "https://prografter.co.uk/post-a-job",
           serviceType: "Home improvement job posting",
           price: "0.00",
@@ -340,7 +340,7 @@ const PostAJob = () => {
             <div className="bg-teal/10 border border-teal/30 rounded-xl p-8 text-center">
               <h2 className="font-heading text-teal text-4xl mb-2">Job Posted.</h2>
               <p className="font-body text-cream/70 text-sm mb-6">
-                We'll match you with verified local trades within 24 hours.
+                We'll match you with up to three vetted, local, available trades — not thirty — within 24 hours.
               </p>
               <Link
                 to="/"
@@ -573,7 +573,7 @@ const PostAJob = () => {
                         </p>
                       )}
                       <p className="font-body text-cream/50 text-xs mt-2 leading-relaxed">
-                        Not sure of your budget? Enter a rough estimate — your quotes from trades will give you the real number. You're not committing to anything here.
+                        Not sure of your budget? Enter a rough estimate — your matched trades' quotes will give you the real number. You're not committing to anything here.
                       </p>
                     </div>
                   </div>
@@ -609,8 +609,8 @@ const PostAJob = () => {
                   <p className="font-body text-cream/70 text-sm leading-relaxed mb-6">
                     Trades working on large projects often want confidence that funds are in
                     place before committing their time and team. Verifying your funds is
-                    completely optional — but jobs with a Funds Verified badge receive
-                    significantly more quotes and from higher-quality trades.
+                    completely optional — but jobs with a Funds Verified badge get stronger
+                    interest from your matched trades.
                   </p>
                   <p className="font-body text-cream/50 text-xs leading-relaxed mb-6">
                     Your documents are stored securely and never shown to trades — only a
