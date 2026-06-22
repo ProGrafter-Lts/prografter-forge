@@ -387,17 +387,17 @@ const QuoteChecker = () => {
           <div className="relative max-w-2xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-teal-foreground font-mono text-xs px-3 py-1.5 rounded-full mb-5 backdrop-blur-sm">
               <ShieldCheck className="h-3.5 w-3.5" />
-              43-Point Quote Analysis
+              Quote Health Check — £49
             </div>
             <h1 className="font-heading text-4xl md:text-6xl text-white mb-4 leading-[1.05]">
-              AI Quote{" "}
-              <span className="bg-gradient-to-r from-teal to-[hsl(var(--teal))] bg-clip-text text-transparent">Checker</span>
+              Quote Health{" "}
+              <span className="bg-gradient-to-r from-teal to-[hsl(var(--teal))] bg-clip-text text-transparent">Check</span>
             </h1>
             <p className="text-white/75 font-mono text-sm max-w-md mx-auto leading-relaxed">
-              Upload any building quote. Our AI checks it against a 43-point checklist and tells you exactly what's missing. Report in your inbox within 2 minutes. <span className="font-semibold text-white">£49.</span>
+              We don't quote your job. We help you read the quotes you've got — where the gaps are, what to ask, and what good looks like. <span className="font-semibold text-white">£49.</span>
             </p>
             <div className="flex flex-wrap justify-center gap-2 mt-6">
-              {["✓ 43-point checklist", "✓ Market benchmarks", "✓ Red flag detection", "✓ Report in 2 mins"].map((t) => (
+              {["✓ One clear product", "✓ Plain-English review", "✓ Questions to ask", "✓ Report in 2 mins"].map((t) => (
                 <span key={t} className="font-mono text-xs text-white/90 bg-white/8 border border-white/15 px-3 py-1.5 rounded-full">{t}</span>
               ))}
             </div>
