@@ -72,6 +72,17 @@ const GENERAL_TRADE_TYPES = [
 ] as const;
 
 const UK_POSTCODE = /^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}$/i;
+
+// ── Service-area gate ────────────────────────────────────────────────
+// We are only live in Nottinghamshire & the wider East Midlands. Trade
+// sign-ups from postcode areas outside this list are routed to a waitlist.
+// EDIT THIS SINGLE LIST to expand our launch area.
+const LAUNCH_AREA_PREFIXES = ["NG", "DE", "LE", "LN", "S", "DN", "NN"] as const;
+const isInLaunchArea = (postcode: string): boolean => {
+  // Match on the alphabetic postcode area (e.g. "SW1A 1AA" → "SW", "S1 2AB" → "S")
+  const area = postcode.trim().toUpperCase().replace(/\s+/g, "").match(/^[A-Z]+/)?.[0] ?? "";
+  return (LAUNCH_AREA_PREFIXES as readonly string[]).includes(area);
+};
 const COMPANIES_HOUSE_NUMBER = /^([A-Z]{2}\d{6}|\d{8})$/;
 const normaliseChNumber = (v: string) => v.replace(/\s+/g, "").toUpperCase();
 
