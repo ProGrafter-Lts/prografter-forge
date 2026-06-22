@@ -13,6 +13,10 @@ const Login = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+  const [homeownerEmail, setHomeownerEmail] = useState("");
+  const [homeownerLoading, setHomeownerLoading] = useState(false);
+  const [homeownerError, setHomeownerError] = useState("");
+  const [homeownerSent, setHomeownerSent] = useState(false);
 
   // Forgot password modal state
   const [showForgot, setShowForgot] = useState(false);
@@ -139,6 +143,30 @@ const Login = () => {
     setForgotLoading(false);
   };
 
+  const handleHomeownerMagicLink = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setHomeownerError("");
+    setHomeownerSent(false);
+    setHomeownerLoading(true);
+
+    const { error: otpError } = await supabase.auth.signInWithOtp({
+      email: homeownerEmail.trim(),
+      options: {
+        emailRedirectTo: `${window.location.origin}/dashboard/homeowner`,
+        shouldCreateUser: false,
+      },
+    });
+
+    if (otpError) {
+      setHomeownerError(otpError.message);
+      setHomeownerLoading(false);
+      return;
+    }
+
+    setHomeownerSent(true);
+    setHomeownerLoading(false);
+  };
+
   return (
     <div className="min-h-screen bg-cream flex items-center justify-center px-4">
       <SEO
@@ -217,6 +245,38 @@ const Login = () => {
           </form>
 
           <div className="mt-6 text-center space-y-2">
+            <div className="rounded-xl border border-navy/10 bg-cream/60 p-4 text-left">
+              <p className="font-mono text-xs font-semibold text-navy mb-3">
+                Already posted a job? Enter your email for a secure sign-in link.
+              </p>
+              <form onSubmit={handleHomeownerMagicLink} className="space-y-3">
+                {homeownerSent && (
+                  <div className="bg-teal/10 border border-teal/30 text-teal px-3 py-2 rounded-lg text-xs font-mono">
+                    Secure sign-in link sent. Check your inbox for the link to see your quotes.
+                  </div>
+                )}
+                {homeownerError && (
+                  <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg text-xs font-mono">
+                    {homeownerError}
+                  </div>
+                )}
+                <input
+                  type="email"
+                  value={homeownerEmail}
+                  onChange={(e) => setHomeownerEmail(e.target.value)}
+                  required
+                  className="w-full px-3 py-2 rounded-lg border border-navy/20 bg-white font-mono text-xs focus:outline-none focus:ring-2 focus:ring-teal/40 focus:border-teal"
+                  placeholder="you@example.com"
+                />
+                <button
+                  type="submit"
+                  disabled={homeownerLoading}
+                  className="w-full py-2 bg-navy text-cream font-mono text-xs rounded-lg hover:bg-navy/90 transition-colors disabled:opacity-50"
+                >
+                  {homeownerLoading ? "Sending..." : "Send secure sign-in link"}
+                </button>
+              </form>
+            </div>
             <p className="font-mono text-xs text-secondary-text">
               Don't have an account?{" "}
               <a href="/register/trade" className="text-teal hover:underline">Register as a Trade</a>

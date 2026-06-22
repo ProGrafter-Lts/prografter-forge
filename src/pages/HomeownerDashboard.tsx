@@ -238,6 +238,38 @@ const HomeownerDashboard = () => {
     return { href: `/quote-checker?project_type=${encodeURIComponent(projectType)}`, jobTitle: b.job_title };
   }, [briefs]);
 
+  const briefsUnderReview = useMemo(
+    () => briefs.filter((brief: any) => brief.status === "under_review" || !brief.status),
+    [briefs],
+  );
+
+  const BriefsUnderReview = () =>
+    briefsUnderReview.length > 0 ? (
+      <div className="bg-card rounded-2xl p-6 border border-border shadow-sm space-y-4">
+        <div>
+          <h3 className="font-heading text-primary text-lg">Received — under review</h3>
+          <p className="font-mono text-xs text-muted-foreground mt-1">
+            We're reviewing your brief before matching it with up to three vetted, local, available trades.
+          </p>
+        </div>
+        <div className="space-y-3">
+          {briefsUnderReview.map((brief: any) => (
+            <div key={brief.id} className="rounded-xl border border-border/80 bg-background/40 p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="font-heading text-primary text-base">{brief.job_title || "Job brief"}</p>
+                  <p className="font-mono text-xs text-muted-foreground mt-1">Reference {brief.ref}</p>
+                </div>
+                <span className="font-mono text-[11px] text-secondary border border-secondary/30 rounded-full px-3 py-1 whitespace-nowrap">
+                  Under review
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    ) : null;
+
 
 
   return (
@@ -349,6 +381,7 @@ const HomeownerDashboard = () => {
                   Every project you've posted, in flight or completed.
                 </p>
               </div>
+              <BriefsUnderReview />
               <ActiveProjectsSection jobs={jobs} quoteCounts={quoteCounts} activeJobs={activeJobs} />
               <MyJobs jobs={jobs} />
             </section>
@@ -435,6 +468,8 @@ const HomeownerDashboard = () => {
               )}
 
               <ActiveProjectsSection jobs={jobs} quoteCounts={quoteCounts} activeJobs={activeJobs} />
+
+              <BriefsUnderReview />
 
               <QuotesReceived quotes={quotes} onSelectTier={handleSelectTier} onQuoteAccepted={reloadCurrentSession} />
               <MyJobs jobs={jobs} />
