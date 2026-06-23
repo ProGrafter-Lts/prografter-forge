@@ -108,6 +108,7 @@ const AppRoutes = () => {
             <Route path="/green" element={<GreenGrants />} />
             <Route path="/login" element={<Login />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/unsubscribe" element={<Unsubscribe />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/about" element={<About />} />
