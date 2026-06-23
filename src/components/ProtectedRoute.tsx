@@ -18,9 +18,11 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
   useEffect(() => {
     if (isReady && !user) {
-      navigate("/login", { replace: true });
+      const returnTo = `${location.pathname}${location.search}${location.hash}`;
+      const redirectParam = encodeURIComponent(returnTo);
+      navigate(`/login?redirect=${redirectParam}`, { replace: true });
     }
-  }, [isReady, navigate, user]);
+  }, [isReady, navigate, user, location]);
 
   if (!isReady && !bypassActive) {
     return (
