@@ -17,6 +17,8 @@ const Login = () => {
   const [homeownerLoading, setHomeownerLoading] = useState(false);
   const [homeownerError, setHomeownerError] = useState("");
   const [homeownerSent, setHomeownerSent] = useState(false);
+  const [homeownerCode, setHomeownerCode] = useState("");
+  const [codeLoading, setCodeLoading] = useState(false);
 
   // Forgot password modal state
   const [showForgot, setShowForgot] = useState(false);
