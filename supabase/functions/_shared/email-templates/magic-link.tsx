@@ -18,11 +18,13 @@ import {
 interface MagicLinkEmailProps {
   siteName: string
   confirmationUrl: string
+  token?: string
 }
 
 export const MagicLinkEmail = ({
   siteName,
   confirmationUrl,
+  token,
 }: MagicLinkEmailProps) => (
   <Html lang="en" dir="ltr">
     <Head />
@@ -40,6 +42,15 @@ export const MagicLinkEmail = ({
         <Button style={button} href={confirmationUrl}>
           Log In
         </Button>
+        {token ? (
+          <>
+            <Text style={text}>
+              Or, if the button doesn't sign you in, enter this 6-digit code on the
+              sign-in screen:
+            </Text>
+            <Text style={code}>{token}</Text>
+          </>
+        ) : null}
         <Text style={footer}>
           If you didn't request this link, you can safely ignore this email.
         </Text>
@@ -57,4 +68,6 @@ const logo = { fontSize: '28px', fontFamily: "'Bebas Neue', Arial, sans-serif", 
 const h1 = { fontSize: '24px', fontWeight: '700' as const, color: '#1B3A4B', margin: '0 0 20px', fontFamily: "'DM Sans', Arial, sans-serif", letterSpacing: '-0.01em', lineHeight: '1.3' }
 const text = { fontSize: '14px', color: '#2E2E2E', lineHeight: '1.6', margin: '0 0 20px' }
 const button = { backgroundColor: '#0D9488', color: '#ffffff', fontSize: '14px', fontWeight: '600' as const, borderRadius: '8px', padding: '12px 24px', textDecoration: 'none' }
+const code = { fontSize: '30px', fontWeight: '700' as const, letterSpacing: '0.3em', color: '#1B3A4B', margin: '0 0 20px', fontFamily: "'DM Sans', Arial, sans-serif" }
 const footer = { fontSize: '12px', color: '#6B7280', margin: '30px 0 0', borderTop: '1px solid #E5E7EB', paddingTop: '16px' }
+

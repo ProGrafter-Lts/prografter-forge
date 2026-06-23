@@ -17,6 +17,8 @@ const Login = () => {
   const [homeownerLoading, setHomeownerLoading] = useState(false);
   const [homeownerError, setHomeownerError] = useState("");
   const [homeownerSent, setHomeownerSent] = useState(false);
+  const [homeownerCode, setHomeownerCode] = useState("");
+  const [codeLoading, setCodeLoading] = useState(false);
 
   // Forgot password modal state
   const [showForgot, setShowForgot] = useState(false);
@@ -167,6 +169,28 @@ const Login = () => {
     setHomeownerLoading(false);
   };
 
+  const handleHomeownerCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setHomeownerError("");
+    hasRedirectedRef.current = false;
+    setCodeLoading(true);
+
+    const { error: verifyError } = await supabase.auth.verifyOtp({
+      email: homeownerEmail.trim(),
+      token: homeownerCode.trim(),
+      type: "email",
+    });
+
+    if (verifyError) {
+      setHomeownerError(verifyError.message);
+      setCodeLoading(false);
+      return;
+    }
+
+    redirectToDashboard("homeowner");
+    setCodeLoading(false);
+  };
+
   return (
     <div className="min-h-screen bg-cream flex items-center justify-center px-4">
       <SEO
@@ -252,7 +276,7 @@ const Login = () => {
               <form onSubmit={handleHomeownerMagicLink} className="space-y-3">
                 {homeownerSent && (
                   <div className="bg-teal/10 border border-teal/30 text-teal px-3 py-2 rounded-lg text-xs font-mono">
-                    Secure sign-in link sent. Check your inbox for the link to see your quotes.
+                    Email sent. Click the link in your inbox, or enter the 6-digit code below.
                   </div>
                 )}
                 {homeownerError && (
@@ -273,9 +297,33 @@ const Login = () => {
                   disabled={homeownerLoading}
                   className="w-full py-2 bg-navy text-cream font-mono text-xs rounded-lg hover:bg-navy/90 transition-colors disabled:opacity-50"
                 >
-                  {homeownerLoading ? "Sending..." : "Send secure sign-in link"}
+                  {homeownerLoading ? "Sending..." : homeownerSent ? "Resend sign-in email" : "Send secure sign-in link"}
                 </button>
               </form>
+
+              {homeownerSent && (
+                <form onSubmit={handleHomeownerCode} className="space-y-3 mt-3 pt-3 border-t border-navy/10">
+                  <p className="font-mono text-xs text-navy">
+                    Enter the 6-digit code from the email:
+                  </p>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    value={homeownerCode}
+                    onChange={(e) => setHomeownerCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                    placeholder="123456"
+                    className="w-full px-3 py-2 rounded-lg border border-navy/20 bg-white font-mono text-sm tracking-[0.3em] text-center focus:outline-none focus:ring-2 focus:ring-teal/40 focus:border-teal"
+                  />
+                  <button
+                    type="submit"
+                    disabled={codeLoading || homeownerCode.length < 6}
+                    className="w-full py-2 bg-teal text-cream font-mono text-xs rounded-lg hover:bg-teal-hover transition-colors disabled:opacity-50"
+                  >
+                    {codeLoading ? "Verifying..." : "Sign in with code"}
+                  </button>
+                </form>
+              )}
             </div>
             <p className="font-mono text-xs text-secondary-text">
               Don't have an account?{" "}
