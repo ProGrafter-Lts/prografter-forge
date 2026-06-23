@@ -9,6 +9,7 @@ import WelcomeBanner from "@/components/homeowner/WelcomeBanner";
 import LegalReviewBanner from "@/components/LegalReviewBanner";
 import QuotesReceived from "@/components/homeowner/QuotesReceived";
 import MyJobs from "@/components/homeowner/MyJobs";
+import MyBriefs from "@/components/homeowner/MyBriefs";
 import RecentSiteUpdates from "@/components/homeowner/RecentSiteUpdates";
 import VariationAlert from "@/components/homeowner/VariationAlert";
 import GreenCertificatePack from "@/components/GreenCertificatePack";
