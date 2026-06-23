@@ -126,7 +126,7 @@ const HomeownerDashboard = () => {
     const [briefRes, entRes] = await Promise.all([
       supabase
         .from("job_briefs" as any)
-        .select("id, ref, job_title, trade_category_id, status, existing_quotes_count, created_at")
+        .select("id, ref, job_title, trade_category_id, status, existing_quotes_count, matched_trade_count, created_at")
         .eq("homeowner_user_id", userId)
         .order("created_at", { ascending: false }),
       supabase
