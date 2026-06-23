@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { format } from "date-fns";
 import SEO from "@/components/SEO";
+import AdminPageHeader from "@/components/admin/AdminPageHeader";
 
 interface SupplierRow {
   id: string;
@@ -130,12 +131,12 @@ const AdminSuppliers = () => {
   return (
     <div className="min-h-screen bg-cream">
       <SEO title="Supplier Interest — Admin" description="Admin queue of supplier interest registrations." path="/admin/suppliers" />
+      <AdminPageHeader
+        title="Supplier interest"
+        subtitle="Phase A registrations — contact each supplier personally."
+      />
 
-      <main className="max-w-6xl mx-auto px-6 py-8">
-        <h1 className="font-heading text-navy text-4xl mb-2">Supplier Interest</h1>
-        <p className="font-body text-secondary-text mb-6">
-          Phase A registrations — contact each supplier personally.
-        </p>
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
 
         <div className="bg-white rounded-2xl border border-navy/10 p-4 mb-6 grid grid-cols-2 md:grid-cols-6 gap-3">
           <Stat label="Total" value={total} />

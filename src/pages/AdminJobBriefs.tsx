@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { NavLink, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import SEO from "@/components/SEO";
+import AdminPageHeader from "@/components/admin/AdminPageHeader";
 
 const C = {
   cream: "#F5F0E8", deep: "#0F2238", teal: "#14A8A1",
@@ -10,30 +10,6 @@ const C = {
   white: "#FFFFFF", border: "#E2E0DA", secondary: "#6B6B6B",
 };
 
-const ADMIN_NAV = [
-  { to: "/admin", label: "← Admin" },
-  { to: "/admin/verifications", label: "Verifications" },
-  { to: "/admin/applications", label: "Applications" },
-  { to: "/admin/job-briefs", label: "Job briefs" },
-  { to: "/admin/suppliers", label: "Suppliers" },
-  { to: "/admin/disputes", label: "Disputes" },
-];
-
-function AdminNav() {
-  const { pathname } = useLocation();
-  return (
-    <div style={{ background: "#0A1A2E", padding: "8px 24px", display: "flex", gap: 4, flexWrap: "wrap", borderBottom: `1px solid ${C.darkBorder}` }}>
-      {ADMIN_NAV.map((n) => {
-        const active = pathname === n.to;
-        return (
-          <NavLink key={n.to} to={n.to} style={{ fontSize: 12, fontWeight: 600, padding: "6px 12px", borderRadius: 6, textDecoration: "none", letterSpacing: "0.03em", color: active ? C.deep : C.dimText, background: active ? C.teal : "transparent" }}>
-            {n.label}
-          </NavLink>
-        );
-      })}
-    </div>
-  );
-}
 
 interface Brief {
   id: string; ref: string; full_name: string; email: string; phone: string;
@@ -191,13 +167,13 @@ export default function AdminJobBriefs() {
 
 
   return (
-    <div style={{ minHeight: "100vh", background: C.cream }}>
+    <div className="min-h-screen bg-cream">
       <SEO title="Job briefs — Admin" description="Review submitted homeowner job briefs" noindex />
-      <div style={{ background: C.deep, padding: "16px 24px", color: C.white }}>
-        <div style={{ fontWeight: 700, fontSize: 18 }}>Job briefs</div>
-      </div>
-      <AdminNav />
-      <div style={{ maxWidth: 980, margin: "0 auto", padding: "24px 16px" }}>
+      <AdminPageHeader
+        title="Job briefs"
+        subtitle="Review homeowner job briefs, record scoping calls, and publish to matched trades."
+      />
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
         {loading ? (
           <p style={{ color: C.secondary }}>Loading…</p>
         ) : briefs.length === 0 ? (

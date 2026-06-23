@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import SEO from "@/components/SEO";
+import AdminPageHeader from "@/components/admin/AdminPageHeader";
 
 interface EarlySignup {
   id: string;
@@ -151,15 +152,12 @@ const AdminWaitlist = () => {
   return (
     <div className="min-h-screen bg-cream">
       <SEO title="Waitlist Signups — Admin" description="Admin view of early access waitlist signups." path="/admin/waitlist" noindex />
+      <AdminPageHeader
+        title="Waitlist signups"
+        subtitle="Early-access signups. Out-of-area people (outside Nottinghamshire / East Midlands) can be emailed a friendly “coming soon” note, then archived from your active feed (their details stay on file)."
+      />
 
-      <main className="max-w-6xl mx-auto px-6 py-8">
-        <h1 className="font-heading text-navy text-4xl mb-2">Waitlist Signups</h1>
-        <p className="font-body text-secondary-text mb-6 max-w-2xl">
-          Early-access waitlist signups. Out-of-area people (outside Nottinghamshire / East Midlands)
-          can be emailed a friendly "coming soon — we'll keep your details and contact you when we
-          launch in your area" note, then archived from your active feed (their details stay on file).
-        </p>
-
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
         <div className="flex flex-wrap gap-2 mb-6">
           {FILTERS.map((f) => (
             <button

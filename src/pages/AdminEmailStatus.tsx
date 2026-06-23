@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { supabase } from "@/integrations/supabase/client";
 import SEO from "@/components/SEO";
+import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import { format } from "date-fns";
 
 // Emails the platform sends, grouped by category.
@@ -156,23 +157,20 @@ const AdminEmailStatus = () => {
   return (
     <div className="min-h-screen bg-cream">
       <SEO title="Email Status — Admin" description="Admin monitor for transactional and auth email pipelines." path="/admin/email-status" />
-
-      <main className="max-w-7xl mx-auto px-6 py-8">
-        <div className="flex items-start justify-between mb-6">
-          <div>
-            <h1 className="font-heading text-navy text-4xl mb-2">Email Status</h1>
-            <p className="font-body text-secondary-text">
-              All transactional and auth email pipelines, last 30 days. Source:{" "}
-              <code className="font-mono text-xs">email_send_log</code>.
-            </p>
-          </div>
+      <AdminPageHeader
+        title="Email status"
+        subtitle={<>All transactional and auth email pipelines, last 30 days. Source: <code className="font-mono text-xs">email_send_log</code>.</>}
+        actions={
           <button
             onClick={() => setRefreshKey((k) => k + 1)}
             className="font-mono text-xs uppercase tracking-wider px-4 py-2 rounded-xl bg-white border border-navy/10 hover:bg-navy/5"
           >
             ↻ Refresh
           </button>
-        </div>
+        }
+      />
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
 
         {loading ? (
           <p className="font-mono text-sm text-secondary-text">Loading log entries…</p>
