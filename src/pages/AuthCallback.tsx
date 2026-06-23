@@ -30,6 +30,24 @@ const AuthCallback = () => {
       });
     };
 
+    /** Route by role: admins to /admin, everyone else to homeowner dashboard. */
+    const finishByRole = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: adminRole } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", user.id)
+          .eq("role", "admin")
+          .maybeSingle();
+        if (adminRole) {
+          finish("/admin");
+          return;
+        }
+      }
+      finish("/dashboard/homeowner");
+    };
+
     const fail = (message?: string) => {
       if (cancelled) return;
       if (message) setErrorMessage(message);
