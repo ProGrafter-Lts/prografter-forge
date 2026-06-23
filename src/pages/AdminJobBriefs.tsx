@@ -102,8 +102,22 @@ export default function AdminJobBriefs() {
 
   const publish = async (b: Brief, overrideReason?: string) => {
     setPublishing(b.id);
+    // Ensure a fresh, valid access token is attached before invoking the
+    // admin-only function — a stale/expiring token causes a 401.
+    const { data: sessionData } = await supabase.auth.getSession();
+    let accessToken = sessionData.session?.access_token;
+    if (!accessToken) {
+      const { data: refreshed } = await supabase.auth.refreshSession();
+      accessToken = refreshed.session?.access_token;
+    }
+    if (!accessToken) {
+      setPublishing(null);
+      alert("Your admin session has expired. Please sign in again, then retry.");
+      return;
+    }
     const { data, error } = await supabase.functions.invoke("publish-job-brief", {
       body: { brief_id: b.id, override_reason: overrideReason || null },
+      headers: { Authorization: `Bearer ${accessToken}` },
     });
     setPublishing(null);
     if (error) { alert("Publish failed: " + error.message); return; }
