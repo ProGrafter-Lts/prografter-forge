@@ -46,18 +46,41 @@ const Login = () => {
     return null;
   };
 
-  const redirectToDashboard = (userType?: string | null) => {
-    const nextPath = getSafeRedirect() ?? getDashboardPath(userType);
-
+  const goTo = (path: string) => {
     if (hasRedirectedRef.current) return;
     hasRedirectedRef.current = true;
-
-    navigate(nextPath, {
+    navigate(path, {
       replace: true,
       state: {
         authBypassUntil: Date.now() + 15_000,
       },
     });
+  };
+
+  /** Admins always land on the admin area, regardless of user_type. */
+  const isAdminUser = async (userId: string): Promise<boolean> => {
+    const { data } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId)
+      .eq("role", "admin")
+      .maybeSingle();
+    return !!data;
+  };
+
+  const redirectAfterAuth = async (userId: string, userType?: string | null) => {
+    if (hasRedirectedRef.current) return;
+    // An explicit safe redirect target always wins.
+    const safe = getSafeRedirect();
+    if (safe) {
+      goTo(safe);
+      return;
+    }
+    if (await isAdminUser(userId)) {
+      goTo("/admin");
+      return;
+    }
+    goTo(getDashboardPath(userType));
   };
 
   useEffect(() => {
@@ -78,7 +101,7 @@ const Login = () => {
         ? user.user_metadata.user_type
         : null;
 
-    redirectToDashboard(metadataUserType);
+    void redirectAfterAuth(user.id, metadataUserType);
   }, [isReady, user, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -104,28 +127,21 @@ const Login = () => {
         return;
       }
 
-      const metadataUserType =
+      let userType =
         typeof signedInUser.user_metadata?.user_type === "string"
           ? signedInUser.user_metadata.user_type
           : null;
 
-      if (metadataUserType) {
-        redirectToDashboard(metadataUserType);
-        return;
+      if (!userType) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("user_type")
+          .eq("user_id", signedInUser.id)
+          .maybeSingle();
+        userType = profile?.user_type ?? null;
       }
 
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles")
-        .select("user_type")
-        .eq("user_id", signedInUser.id)
-        .maybeSingle();
-
-      if (profileError) {
-        setError(profileError.message);
-        return;
-      }
-
-      redirectToDashboard(profile?.user_type ?? null);
+      await redirectAfterAuth(signedInUser.id, userType);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to sign in right now.");
     } finally {
@@ -201,7 +217,12 @@ const Login = () => {
       return;
     }
 
-    redirectToDashboard("homeowner");
+    const { data: { user: otpUser } } = await supabase.auth.getUser();
+    if (otpUser) {
+      await redirectAfterAuth(otpUser.id, "homeowner");
+    } else {
+      goTo("/dashboard/homeowner");
+    }
     setCodeLoading(false);
   };
 

@@ -30,6 +30,24 @@ const AuthCallback = () => {
       });
     };
 
+    /** Route by role: admins to /admin, everyone else to homeowner dashboard. */
+    const finishByRole = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: adminRole } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", user.id)
+          .eq("role", "admin")
+          .maybeSingle();
+        if (adminRole) {
+          finish("/admin");
+          return;
+        }
+      }
+      finish("/dashboard/homeowner");
+    };
+
     const fail = (message?: string) => {
       if (cancelled) return;
       if (message) setErrorMessage(message);
@@ -66,7 +84,7 @@ const AuthCallback = () => {
           fail("This link has expired or was already used — request a new one.");
           return;
         }
-        finish("/dashboard/homeowner");
+        await finishByRole();
         return;
       }
 
@@ -78,7 +96,7 @@ const AuthCallback = () => {
           const { data } = await supabase.auth.getSession();
           if (cancelled) return;
           if (data.session) {
-            finish("/dashboard/homeowner");
+            await finishByRole();
             return;
           }
           await new Promise((r) => setTimeout(r, 250));
@@ -90,7 +108,7 @@ const AuthCallback = () => {
       // No code, no tokens, no error — maybe already signed in.
       const { data } = await supabase.auth.getSession();
       if (data.session) {
-        finish("/dashboard/homeowner");
+        await finishByRole();
         return;
       }
       fail("This sign-in link is missing its security token — request a new one.");
