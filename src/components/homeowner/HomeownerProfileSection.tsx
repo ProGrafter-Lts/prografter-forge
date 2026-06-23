@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { UserCircle, Save } from "lucide-react";
+import { UserCircle, Save, KeyRound } from "lucide-react";
+
 
 const HomeownerProfileSection = () => {
   const [loading, setLoading] = useState(true);
