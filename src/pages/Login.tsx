@@ -127,28 +127,21 @@ const Login = () => {
         return;
       }
 
-      const metadataUserType =
+      let userType =
         typeof signedInUser.user_metadata?.user_type === "string"
           ? signedInUser.user_metadata.user_type
           : null;
 
-      if (metadataUserType) {
-        redirectToDashboard(metadataUserType);
-        return;
+      if (!userType) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("user_type")
+          .eq("user_id", signedInUser.id)
+          .maybeSingle();
+        userType = profile?.user_type ?? null;
       }
 
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles")
-        .select("user_type")
-        .eq("user_id", signedInUser.id)
-        .maybeSingle();
-
-      if (profileError) {
-        setError(profileError.message);
-        return;
-      }
-
-      redirectToDashboard(profile?.user_type ?? null);
+      await redirectAfterAuth(signedInUser.id, userType);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to sign in right now.");
     } finally {
