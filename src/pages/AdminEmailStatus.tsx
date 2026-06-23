@@ -156,22 +156,6 @@ const AdminEmailStatus = () => {
   return (
     <div className="min-h-screen bg-cream">
       <SEO title="Email Status — Admin" description="Admin monitor for transactional and auth email pipelines." path="/admin/email-status" />
-      <header className="border-b border-navy/10 bg-white">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link to="/" className="font-heading text-2xl text-navy">
-            Pro<span className="text-teal">Grafter</span>
-            <span className="ml-3 text-xs font-mono uppercase tracking-widest text-secondary-text">
-              admin
-            </span>
-          </Link>
-          <Link
-            to="/admin/verifications"
-            className="font-mono text-xs uppercase tracking-widest text-teal hover:underline"
-          >
-            Verifications →
-          </Link>
-        </div>
-      </header>
 
       <main className="max-w-7xl mx-auto px-6 py-8">
         <div className="flex items-start justify-between mb-6">

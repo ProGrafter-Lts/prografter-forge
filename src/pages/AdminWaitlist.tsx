@@ -151,18 +151,6 @@ const AdminWaitlist = () => {
   return (
     <div className="min-h-screen bg-cream">
       <SEO title="Waitlist Signups — Admin" description="Admin view of early access waitlist signups." path="/admin/waitlist" noindex />
-      <header className="border-b border-navy/10 bg-white">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link to="/" className="font-heading text-2xl text-navy">
-            Pro<span className="text-teal">Grafter</span>
-            <span className="ml-3 text-xs font-mono uppercase tracking-widest text-secondary-text">admin</span>
-          </Link>
-          <nav className="flex gap-4 font-mono text-xs uppercase tracking-widest">
-            <Link to="/admin" className="text-navy hover:text-teal">← Admin home</Link>
-            <Link to="/admin/verifications" className="text-navy hover:text-teal">Verifications</Link>
-          </nav>
-        </div>
-      </header>
 
       <main className="max-w-6xl mx-auto px-6 py-8">
         <h1 className="font-heading text-navy text-4xl mb-2">Waitlist Signups</h1>

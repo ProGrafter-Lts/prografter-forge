@@ -481,21 +481,6 @@ const AdminVerifications = () => {
   return (
     <div className="min-h-screen bg-cream">
       <SEO title="Trade Verifications — Admin" description="Admin review of pending trade verification applications." path="/admin/verifications" />
-      <header className="border-b border-navy/10 bg-white">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link to="/" className="font-heading text-2xl text-navy">
-            Pro<span className="text-teal">Grafter</span>
-            <span className="ml-3 text-xs font-mono uppercase tracking-widest text-secondary-text">
-              admin
-            </span>
-          </Link>
-          <nav className="flex gap-4 font-mono text-xs uppercase tracking-widest">
-            <Link to="/admin/verifications" className="text-teal underline">Verifications</Link>
-            <Link to="/admin/suppliers" className="text-navy hover:text-teal">Suppliers</Link>
-            <Link to="/admin/email-status" className="text-navy hover:text-teal">Email status →</Link>
-          </nav>
-        </div>
-      </header>
 
       <main className="max-w-6xl mx-auto px-6 py-8">
         <h1 className="font-heading text-navy text-4xl mb-2">Trade Verifications</h1>
