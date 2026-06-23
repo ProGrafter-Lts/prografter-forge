@@ -46,18 +46,41 @@ const Login = () => {
     return null;
   };
 
-  const redirectToDashboard = (userType?: string | null) => {
-    const nextPath = getSafeRedirect() ?? getDashboardPath(userType);
-
+  const goTo = (path: string) => {
     if (hasRedirectedRef.current) return;
     hasRedirectedRef.current = true;
-
-    navigate(nextPath, {
+    navigate(path, {
       replace: true,
       state: {
         authBypassUntil: Date.now() + 15_000,
       },
     });
+  };
+
+  /** Admins always land on the admin area, regardless of user_type. */
+  const isAdminUser = async (userId: string): Promise<boolean> => {
+    const { data } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId)
+      .eq("role", "admin")
+      .maybeSingle();
+    return !!data;
+  };
+
+  const redirectAfterAuth = async (userId: string, userType?: string | null) => {
+    if (hasRedirectedRef.current) return;
+    // An explicit safe redirect target always wins.
+    const safe = getSafeRedirect();
+    if (safe) {
+      goTo(safe);
+      return;
+    }
+    if (await isAdminUser(userId)) {
+      goTo("/admin");
+      return;
+    }
+    goTo(getDashboardPath(userType));
   };
 
   useEffect(() => {
