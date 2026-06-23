@@ -102,7 +102,7 @@ Deno.serve(async (req) => {
 
   const { data: brief } = await supabase
     .from('job_briefs')
-    .select('id, ref, city, postcode, trade_category_id, job_title, job_description, budget_band')
+    .select('id, ref, city, postcode, address_line1, address_line2, trade_category_id, job_title, job_description, budget_band, homeowner_id, job_id')
     .eq('id', briefId)
     .maybeSingle()
   if (!brief) {
@@ -130,14 +130,76 @@ Deno.serve(async (req) => {
   const tradePostcodes = (candidates || []).map((t) => t.postcode || '').filter(Boolean)
   const tradeGeo = await geocode(tradePostcodes)
 
-  const matched: typeof candidates = []
+  // Score every in-range candidate by distance, then keep the three closest.
+  // Matching doctrine: never surface a job to more than three trades.
+  const MAX_MATCHES = 3
+  const scored: { trade: NonNullable<typeof candidates>[number]; dist: number }[] = []
   for (const t of candidates || []) {
     if (!t.postcode || !briefPoint) continue
     const pt = tradeGeo[key(t.postcode)]
     if (!pt) continue
     const dist = milesBetween(briefPoint, pt)
-    if (dist <= (t.service_radius_miles ?? 25)) matched.push(t)
+    if (dist <= (t.service_radius_miles ?? 25)) scored.push({ trade: t, dist })
   }
+  scored.sort((a, b) => a.dist - b.dist)
+  const matched = scored.slice(0, MAX_MATCHES).map((s) => s.trade)
+
+  // Ensure a live `jobs` row exists so matched trades can see it on their
+  // dashboards (trade dashboard reads job_matches -> jobs). Idempotent via
+  // job_briefs.job_id so re-publishing never creates duplicates.
+  let jobId = brief.job_id as string | null
+  if (!jobId && brief.homeowner_id) {
+    const address = [brief.address_line1, brief.address_line2, brief.city]
+      .filter(Boolean).join(', ') || brief.city || brief.postcode || 'Address on file'
+    const { data: createdJob, error: jobErr } = await supabase
+      .from('jobs')
+      .insert({
+        homeowner_id: brief.homeowner_id,
+        title: brief.job_title || 'Home project',
+        job_type: acceptedTypes[0] || brief.trade_category_id || 'General',
+        description: brief.job_description || brief.job_title || 'See brief for details.',
+        address,
+        postcode: brief.postcode || '',
+        budget: brief.budget_band || null,
+        status: 'awaiting_quotes',
+        stage: 'quoting',
+        is_test: false,
+      })
+      .select('id')
+      .maybeSingle()
+    if (jobErr) {
+      console.error('[publish-job-brief] failed to create job', jobErr)
+    } else {
+      jobId = createdJob?.id ?? null
+      if (jobId) {
+        await supabase.from('job_briefs').update({ job_id: jobId }).eq('id', brief.id)
+      }
+    }
+  }
+
+  // Write job_matches so each matched trade sees the job on their dashboard.
+  if (jobId && matched.length) {
+    const rows = matched.filter((t) => t.id).map((t) => ({
+      job_id: jobId,
+      trade_id: t.id,
+      status: 'notified',
+      notified_at: new Date().toISOString(),
+      estimated_value: brief.budget_band || null,
+      is_test: false,
+    }))
+    // Avoid duplicate matches on re-publish.
+    const { data: existing } = await supabase
+      .from('job_matches')
+      .select('trade_id')
+      .eq('job_id', jobId)
+    const existingIds = new Set((existing || []).map((r: any) => r.trade_id))
+    const newRows = rows.filter((r) => !existingIds.has(r.trade_id))
+    if (newRows.length) {
+      const { error: matchErr } = await supabase.from('job_matches').insert(newRows)
+      if (matchErr) console.error('[publish-job-brief] failed to insert job_matches', matchErr)
+    }
+  }
+
 
   const reference = brief.ref
   const jobTitle = brief.job_title || 'A new job'
