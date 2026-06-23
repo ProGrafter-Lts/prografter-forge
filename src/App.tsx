@@ -42,6 +42,7 @@ const HowItWorksPage = lazy(() => import("./pages/HowItWorksPage.tsx"));
 const SignupHomeowner = lazy(() => import("./pages/SignupHomeowner.tsx"));
 const SignupHomeownerNext = lazy(() => import("./pages/SignupHomeownerNext.tsx"));
 const SignupCheckEmail = lazy(() => import("./pages/SignupCheckEmail.tsx"));
+const AuthCallback = lazy(() => import("./pages/AuthCallback.tsx"));
 const SignupTradeRedirect = lazy(() => import("./pages/SignupTradeRedirect.tsx"));
 const AdminVerifications = lazy(() => import("./pages/AdminVerifications.tsx"));
 const AdminWaitlist = lazy(() => import("./pages/AdminWaitlist.tsx"));
@@ -107,6 +108,7 @@ const AppRoutes = () => {
             <Route path="/green" element={<GreenGrants />} />
             <Route path="/login" element={<Login />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/unsubscribe" element={<Unsubscribe />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/about" element={<About />} />

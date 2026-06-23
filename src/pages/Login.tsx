@@ -152,7 +152,7 @@ const Login = () => {
     const { error: otpError } = await supabase.auth.signInWithOtp({
       email: homeownerEmail.trim(),
       options: {
-        emailRedirectTo: `${window.location.origin}/dashboard/homeowner`,
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
         shouldCreateUser: false,
       },
     });

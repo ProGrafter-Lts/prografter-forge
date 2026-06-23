@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { UserCircle, Save } from "lucide-react";
+import { UserCircle, Save, KeyRound } from "lucide-react";
+
 
 const HomeownerProfileSection = () => {
   const [loading, setLoading] = useState(true);
@@ -9,6 +10,33 @@ const HomeownerProfileSection = () => {
   const [email, setEmail] = useState("");
   const [homeownerId, setHomeownerId] = useState<string | null>(null);
   const [form, setForm] = useState({ name: "", phone: "" });
+
+  // Optional password — the durable way back in.
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [savingPassword, setSavingPassword] = useState(false);
+
+  const handleSetPassword = async () => {
+    if (password.length < 8) {
+      toast.error("Password must be at least 8 characters");
+      return;
+    }
+    if (password !== confirmPassword) {
+      toast.error("Passwords don't match");
+      return;
+    }
+    setSavingPassword(true);
+    const { error } = await supabase.auth.updateUser({ password });
+    setSavingPassword(false);
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success("Password set — you can now sign in with email and password");
+      setPassword("");
+      setConfirmPassword("");
+    }
+  };
+
 
   useEffect(() => {
     const load = async () => {
@@ -94,6 +122,58 @@ const HomeownerProfileSection = () => {
           >
             <Save className="w-4 h-4" />
             {saving ? "Saving…" : "Save changes"}
+          </button>
+        </div>
+      </div>
+
+      <div id="set-password" className="bg-card rounded-2xl p-6 border border-border space-y-5">
+        <div className="flex items-center gap-3">
+          <div className="bg-secondary text-secondary-foreground rounded-xl p-2.5">
+            <KeyRound className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="font-heading text-primary text-lg">Set a password — skip the email next time</h3>
+            <p className="font-mono text-xs text-muted-foreground mt-0.5">
+              Optional. Add a password so you can sign in without waiting for a link. Magic links still work too.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-4">
+          <div>
+            <label className="block font-mono text-xs text-muted-foreground mb-1.5 uppercase tracking-wider">
+              New password
+            </label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="At least 8 characters"
+              className="w-full bg-background border border-border rounded-xl px-4 py-2.5 font-mono text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-secondary/30"
+            />
+          </div>
+          <div>
+            <label className="block font-mono text-xs text-muted-foreground mb-1.5 uppercase tracking-wider">
+              Confirm password
+            </label>
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Re-enter password"
+              className="w-full bg-background border border-border rounded-xl px-4 py-2.5 font-mono text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-secondary/30"
+            />
+          </div>
+        </div>
+
+        <div className="flex justify-end">
+          <button
+            onClick={handleSetPassword}
+            disabled={savingPassword || !password}
+            className="flex items-center gap-2 bg-secondary text-secondary-foreground font-mono text-sm px-5 py-2.5 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50"
+          >
+            <KeyRound className="w-4 h-4" />
+            {savingPassword ? "Saving…" : "Set password"}
           </button>
         </div>
       </div>
