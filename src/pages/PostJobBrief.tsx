@@ -502,7 +502,7 @@ export default function PostJobBrief() {
       void supabase.auth.signInWithOtp({
         email: form.email.trim(),
         options: {
-          emailRedirectTo: `${window.location.origin}/dashboard/homeowner`,
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
           shouldCreateUser: false,
         },
       }).then(({ error: returnLinkError }) => {
