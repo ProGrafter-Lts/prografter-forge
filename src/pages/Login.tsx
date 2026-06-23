@@ -169,6 +169,28 @@ const Login = () => {
     setHomeownerLoading(false);
   };
 
+  const handleHomeownerCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setHomeownerError("");
+    hasRedirectedRef.current = false;
+    setCodeLoading(true);
+
+    const { error: verifyError } = await supabase.auth.verifyOtp({
+      email: homeownerEmail.trim(),
+      token: homeownerCode.trim(),
+      type: "email",
+    });
+
+    if (verifyError) {
+      setHomeownerError(verifyError.message);
+      setCodeLoading(false);
+      return;
+    }
+
+    redirectToDashboard("homeowner");
+    setCodeLoading(false);
+  };
+
   return (
     <div className="min-h-screen bg-cream flex items-center justify-center px-4">
       <SEO
