@@ -42,6 +42,7 @@ const HowItWorksPage = lazy(() => import("./pages/HowItWorksPage.tsx"));
 const SignupHomeowner = lazy(() => import("./pages/SignupHomeowner.tsx"));
 const SignupHomeownerNext = lazy(() => import("./pages/SignupHomeownerNext.tsx"));
 const SignupCheckEmail = lazy(() => import("./pages/SignupCheckEmail.tsx"));
+const AuthCallback = lazy(() => import("./pages/AuthCallback.tsx"));
 const SignupTradeRedirect = lazy(() => import("./pages/SignupTradeRedirect.tsx"));
 const AdminVerifications = lazy(() => import("./pages/AdminVerifications.tsx"));
 const AdminWaitlist = lazy(() => import("./pages/AdminWaitlist.tsx"));
