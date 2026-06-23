@@ -1,47 +1,17 @@
 import { useEffect, useState } from "react";
-import { NavLink, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import Logo from "@/components/Logo";
+import SEO from "@/components/SEO";
+import AdminPageHeader from "@/components/admin/AdminPageHeader";
 
 const C = {
   cream:"#F5F0E8", deep:"#0F2238", navy:"#27396A",
-  teal:"#14A8A1", brightText:"#F5F0E8", dimText:"rgba(245,240,232,0.78)",
-  darkSurface:"#152C45", darkCard:"#27396A", darkBorder:"rgba(245,240,232,0.22)",
+  teal:"#14A8A1", brightText:"#0F2238", dimText:"#5B6470",
+  darkSurface:"#FFFFFF", darkCard:"#F2EFE8", darkBorder:"#E2E0DA",
   white:"#FFFFFF", red:"#DC2626", redBorder:"#FECACA", amber:"#D97706", amberBorder:"#FDE68A",
   green:"#16A34A", greenBorder:"#BBF7D0", purple:"#7C3AED", purpleBorder:"#DDD6FE",
   amberBg:"#FFFBEB", redBg:"#FEF2F2", greenBg:"#F0FDF4", purpleBg:"#F5F3FF",
 };
 
-const ADMIN_NAV = [
-  { to: "/admin", label: "← Admin" },
-  { to: "/vetting", label: "Vetting" },
-  { to: "/admin/verifications", label: "Verifications" },
-  { to: "/admin/suppliers", label: "Suppliers" },
-  { to: "/admin/email-status", label: "Email Status" },
-  { to: "/admin/disputes", label: "Disputes" },
-  { to: "/admin/testimonials", label: "Testimonials" },
-];
-
-function AdminNav() {
-  const { pathname } = useLocation();
-  return (
-    <div style={{ background:"#0A1A2E", padding:"8px 24px", display:"flex",
-      gap:4, flexWrap:"wrap", borderBottom:`1px solid ${C.darkBorder}` }}>
-      {ADMIN_NAV.map(n => {
-        const active = pathname === n.to;
-        return (
-          <NavLink key={n.to} to={n.to}
-            style={{ fontSize:12, fontWeight:600, padding:"6px 12px", borderRadius:6,
-              textDecoration:"none", letterSpacing:"0.03em",
-              color: active ? C.deep : C.dimText,
-              background: active ? C.teal : "transparent" }}>
-            {n.label}
-          </NavLink>
-        );
-      })}
-    </div>
-  );
-}
 
 const FILTERS = [
   { key: "all",               label: "All" },
@@ -141,21 +111,14 @@ export default function AdminDisputes() {
   };
 
   return (
-    <div style={{ minHeight:"100vh", background:C.cream }}>
-      <div style={{ background:C.deep, padding:"14px 24px",
-        display:"flex", alignItems:"center", gap:12 }}>
-        <div className="font-heading tracking-wider" style={{ fontSize:24, fontWeight:700 }}>
-          <Logo variant="light" className="h-9 w-auto inline-block" />
-        </div>
-        <span style={{ color:"rgba(245,240,232,0.45)" }}>|</span>
-        <span style={{ fontSize:12, color:"rgba(245,240,232,0.78)", letterSpacing:"0.05em" }}>
-          ADMIN · DISPUTE MANAGEMENT
-        </span>
-      </div>
+    <div className="min-h-screen bg-cream">
+      <SEO title="Disputes — Admin" description="Admin dispute management queue." path="/admin/disputes" noindex />
+      <AdminPageHeader
+        title="Dispute management"
+        subtitle="Acknowledge, investigate and resolve project disputes between homeowners and trades."
+      />
 
-      <AdminNav />
-
-      <div style={{ maxWidth:1100, margin:"0 auto", padding:"1.5rem 1rem" }}>
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
         {/* Resolution workflow — collapsible operational reference */}
         <div style={{ background:"#FFFBEB", border:`1px solid ${C.amberBorder}`,
           borderRadius:12, padding:"12px 14px", marginBottom:14 }}>
@@ -197,7 +160,7 @@ export default function AdminDisputes() {
           </div>
         )}
 
-        <div style={{ background:C.deep, borderRadius:16,
+        <div style={{ background:C.white, borderRadius:16,
           border:`1px solid ${C.darkBorder}`, padding:"1.25rem" }}>
           <p style={{ fontSize:10, fontWeight:700, color:C.teal,
             letterSpacing:"0.1em", textTransform:"uppercase", margin:"0 0 14px" }}>
@@ -357,7 +320,7 @@ export default function AdminDisputes() {
                     onChange={e => setRecommendation(e.target.value)}
                     placeholder="Set out ProGrafter's recommended resolution with full reasoning…"
                     style={{ width:"100%", padding:"8px 10px", borderRadius:7,
-                      border:`1px solid ${C.darkBorder}`, background:"rgba(255,255,255,0.05)",
+                      border:`1px solid ${C.darkBorder}`, background:"#FFFFFF",
                       color:C.brightText, fontSize:12, fontFamily:"inherit",
                       resize:"vertical", boxSizing:"border-box", marginBottom:10, outline:"none" }} />
                   <div style={{ display:"flex", gap:8 }}>

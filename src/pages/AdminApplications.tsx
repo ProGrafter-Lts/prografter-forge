@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import SEO from "@/components/SEO";
+import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import {
   TradeApplication, STATUS_OPTIONS, STATUS_LABEL, STATUS_COLOR, QUAL_LABEL,
 } from "@/lib/tradeApplications";
@@ -14,29 +15,6 @@ const C = {
   white: "#FFFFFF", border: "#E2E0DA", secondary: "#6B6B6B",
 };
 
-const ADMIN_NAV = [
-  { to: "/admin", label: "← Admin" },
-  { to: "/admin/verifications", label: "Verifications" },
-  { to: "/admin/applications", label: "Applications" },
-  { to: "/admin/suppliers", label: "Suppliers" },
-  { to: "/admin/disputes", label: "Disputes" },
-];
-
-function AdminNav() {
-  const { pathname } = useLocation();
-  return (
-    <div style={{ background: "#0A1A2E", padding: "8px 24px", display: "flex", gap: 4, flexWrap: "wrap", borderBottom: `1px solid ${C.darkBorder}` }}>
-      {ADMIN_NAV.map((n) => {
-        const active = pathname === n.to;
-        return (
-          <NavLink key={n.to} to={n.to} style={{ fontSize: 12, fontWeight: 600, padding: "6px 12px", borderRadius: 6, textDecoration: "none", letterSpacing: "0.03em", color: active ? C.deep : C.dimText, background: active ? C.teal : "transparent" }}>
-            {n.label}
-          </NavLink>
-        );
-      })}
-    </div>
-  );
-}
 
 type SortKey = "full_name" | "business_name" | "trade_category_id" | "qualification_path" | "created_at" | "verification_status";
 
@@ -107,14 +85,13 @@ export default function AdminApplications() {
   const selStyle: React.CSSProperties = { fontSize: 13, padding: "8px 10px", border: `1px solid ${C.border}`, borderRadius: 8, background: C.white, color: C.deep };
 
   return (
-    <div style={{ minHeight: "100vh", background: C.cream }}>
+    <div className="min-h-screen bg-cream">
       <SEO title="Trade Applications — Admin" description="Admin review of submitted trade applications." path="/admin/applications" />
-      <AdminNav />
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "28px 20px" }}>
-        <h1 style={{ fontSize: 22, fontWeight: 800, color: C.deep, margin: "0 0 4px" }}>Trade Applications</h1>
-        <p style={{ fontSize: 13, color: C.secondary, margin: "0 0 18px" }}>
-          {loading ? "Loading…" : `${rows.length} of ${apps.length} application${apps.length === 1 ? "" : "s"}`}
-        </p>
+      <AdminPageHeader
+        title="Trade applications"
+        subtitle={loading ? "Loading…" : `${rows.length} of ${apps.length} application${apps.length === 1 ? "" : "s"}`}
+      />
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
 
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 16 }}>
           <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search name, email, business, postcode…"

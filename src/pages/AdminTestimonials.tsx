@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+
 import { toast } from "sonner";
 import { Star, Pencil, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,6 +21,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import SEO from "@/components/SEO";
+import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import { TestimonialCard, type Testimonial } from "@/components/Testimonials";
 
 type Row = Testimonial & { approved: boolean; created_at: string };
@@ -173,13 +174,11 @@ const AdminTestimonials = () => {
   return (
     <div className="min-h-screen bg-cream">
       <SEO title="Admin · Testimonials — ProGrafter" description="Manage homepage testimonials." path="/admin/testimonials" noindex />
-      <div className="max-w-6xl mx-auto px-6 py-12">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="font-heading text-navy text-4xl">Testimonials</h1>
-          <Link to="/admin/verifications" className="font-mono text-xs text-teal underline">
-            ← Admin
-          </Link>
-        </div>
+      <AdminPageHeader
+        title="Testimonials"
+        subtitle="Review, edit and publish homepage testimonials."
+      />
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
           <form onSubmit={submit} className="rounded-md border border-border bg-background p-6 space-y-4">

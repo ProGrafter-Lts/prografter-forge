@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import SEO from "@/components/SEO";
+import AdminPageHeader from "@/components/admin/AdminPageHeader";
 
 import { classifyTrade, REGISTER_URLS, SCHEME_LABEL, type RegistrationScheme } from "@/lib/tradeBanding";
 
@@ -481,12 +482,12 @@ const AdminVerifications = () => {
   return (
     <div className="min-h-screen bg-cream">
       <SEO title="Trade Verifications — Admin" description="Admin review of pending trade verification applications." path="/admin/verifications" />
+      <AdminPageHeader
+        title="Trade verifications"
+        subtitle="Review applications and approve, reject, or request more information."
+      />
 
-      <main className="max-w-6xl mx-auto px-6 py-8">
-        <h1 className="font-heading text-navy text-4xl mb-2">Trade Verifications</h1>
-        <p className="font-body text-secondary-text mb-3">
-          Review applications and approve, reject, or request more information.
-        </p>
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
         <div className="bg-teal/5 border border-teal/20 rounded-xl p-3 mb-6 text-sm text-navy/80 flex flex-wrap items-center gap-x-2 gap-y-1">
           <strong className="text-teal">Pre-submission queue.</strong>
           <span>Trades who started signup but haven't completed document upload appear here. For submitted 6-step applications in active vetting, use the</span>

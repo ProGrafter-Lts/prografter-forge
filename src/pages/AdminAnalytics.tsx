@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import SEO from "@/components/SEO";
+import AdminPageHeader from "@/components/admin/AdminPageHeader";
 
 type Ga4Report = {
   totals: {
@@ -51,17 +52,13 @@ export default function AdminAnalytics() {
   const maxUsers = Math.max(1, ...(data?.timeseries.map((d) => d.activeUsers) ?? [0]));
 
   return (
-    <div className="min-h-screen bg-background px-4 py-10 md:px-8">
+    <div className="min-h-screen bg-cream">
       <SEO title="Analytics — Admin" description="Traffic and conversion analytics" noindex />
-      <div className="mx-auto max-w-5xl">
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-semibold text-foreground">Analytics</h1>
-            <p className="text-sm text-muted-foreground">
-              Traffic and conversions from Google Analytics 4.
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
+      <AdminPageHeader
+        title="Analytics"
+        subtitle="Traffic and conversions from Google Analytics 4."
+        actions={
+          <>
             <select
               value={days}
               onChange={(e) => setDays(e.target.value)}
@@ -79,8 +76,10 @@ export default function AdminAnalytics() {
             >
               {isFetching ? "Refreshing…" : "Refresh"}
             </button>
-          </div>
-        </div>
+          </>
+        }
+      />
+      <div className="mx-auto max-w-5xl px-4 sm:px-6 py-8">
 
         {isLoading && (
           <div className="rounded-lg border border-border bg-card p-8 text-center text-muted-foreground">
