@@ -946,6 +946,7 @@ export type Database = {
           id: string
           is_test: boolean
           job_description: string | null
+          job_id: string | null
           job_title: string | null
           known_issues: string | null
           matched_trade_count: number | null
@@ -991,6 +992,7 @@ export type Database = {
           id?: string
           is_test?: boolean
           job_description?: string | null
+          job_id?: string | null
           job_title?: string | null
           known_issues?: string | null
           matched_trade_count?: number | null
@@ -1036,6 +1038,7 @@ export type Database = {
           id?: string
           is_test?: boolean
           job_description?: string | null
+          job_id?: string | null
           job_title?: string | null
           known_issues?: string | null
           matched_trade_count?: number | null
@@ -1063,7 +1066,15 @@ export type Database = {
           timeline?: string | null
           trade_category_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "job_briefs_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       job_matches: {
         Row: {
