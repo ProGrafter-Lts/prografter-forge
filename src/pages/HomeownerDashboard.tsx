@@ -395,7 +395,7 @@ const HomeownerDashboard = () => {
                   Every project you've posted, in flight or completed.
                 </p>
               </div>
-              <BriefsUnderReview />
+              <MyBriefs briefs={briefs} />
               <ActiveProjectsSection jobs={jobs} quoteCounts={quoteCounts} activeJobs={activeJobs} />
               <MyJobs jobs={jobs} />
             </section>
@@ -483,7 +483,7 @@ const HomeownerDashboard = () => {
 
               <ActiveProjectsSection jobs={jobs} quoteCounts={quoteCounts} activeJobs={activeJobs} />
 
-              <BriefsUnderReview />
+              <MyBriefs briefs={briefs} />
 
               <QuotesReceived quotes={quotes} onSelectTier={handleSelectTier} onQuoteAccepted={reloadCurrentSession} />
               <MyJobs jobs={jobs} />
