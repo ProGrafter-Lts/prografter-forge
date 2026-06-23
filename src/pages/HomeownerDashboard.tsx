@@ -319,6 +319,33 @@ const HomeownerDashboard = () => {
             </p>
           </div>
 
+          {showPasswordNudge && (
+            <div className="flex items-start gap-4 bg-secondary/10 border border-secondary/30 rounded-2xl p-4">
+              <div className="flex-1">
+                <p className="font-mono text-sm text-primary">
+                  Want to skip the email next time?{" "}
+                  <button
+                    onClick={() => {
+                      setActiveNav("profile");
+                      dismissPasswordNudge();
+                    }}
+                    className="text-secondary underline underline-offset-2 hover:opacity-80"
+                  >
+                    Set a password
+                  </button>
+                  .
+                </p>
+              </div>
+              <button
+                onClick={dismissPasswordNudge}
+                aria-label="Dismiss"
+                className="font-mono text-xs text-muted-foreground hover:text-primary"
+              >
+                Dismiss
+              </button>
+            </div>
+          )}
+
           <LegalReviewBanner />
           <WelcomeBanner hasProjects={jobs.length > 0} />
 
