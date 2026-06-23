@@ -53,6 +53,23 @@ const HomeownerDashboard = () => {
     if (tab && valid.includes(tab)) setActiveNav(tab);
   }, [searchParams]);
 
+  // One-time, dismissible nudge to set a password (skip the email next time).
+  const [showPasswordNudge, setShowPasswordNudge] = useState(false);
+  useEffect(() => {
+    if (!isReady || !user) return;
+    const dismissedKey = `pg-password-nudge-dismissed-${user.id}`;
+    const alreadyDismissed = localStorage.getItem(dismissedKey) === "1";
+    const hasPassword = user.user_metadata?.has_password === true;
+    if (!alreadyDismissed && !hasPassword) setShowPasswordNudge(true);
+  }, [isReady, user]);
+
+  const dismissPasswordNudge = () => {
+    if (user) localStorage.setItem(`pg-password-nudge-dismissed-${user.id}`, "1");
+    setShowPasswordNudge(false);
+  };
+
+
+
 
   useEffect(() => {
     if (!isReady) return;
