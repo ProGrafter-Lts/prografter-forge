@@ -217,7 +217,12 @@ const Login = () => {
       return;
     }
 
-    redirectToDashboard("homeowner");
+    const { data: { user: otpUser } } = await supabase.auth.getUser();
+    if (otpUser) {
+      await redirectAfterAuth(otpUser.id, "homeowner");
+    } else {
+      goTo("/dashboard/homeowner");
+    }
     setCodeLoading(false);
   };
 
