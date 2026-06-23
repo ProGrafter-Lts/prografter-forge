@@ -101,7 +101,7 @@ const Login = () => {
         ? user.user_metadata.user_type
         : null;
 
-    redirectToDashboard(metadataUserType);
+    void redirectAfterAuth(user.id, metadataUserType);
   }, [isReady, user, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
