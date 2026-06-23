@@ -5,8 +5,8 @@ import AdminPageHeader from "@/components/admin/AdminPageHeader";
 
 const C = {
   cream:"#F5F0E8", deep:"#0F2238", navy:"#27396A",
-  teal:"#14A8A1", brightText:"#F5F0E8", dimText:"rgba(245,240,232,0.78)",
-  darkSurface:"#152C45", darkCard:"#27396A", darkBorder:"rgba(245,240,232,0.22)",
+  teal:"#14A8A1", brightText:"#0F2238", dimText:"#5B6470",
+  darkSurface:"#FFFFFF", darkCard:"#F2EFE8", darkBorder:"#E2E0DA",
   white:"#FFFFFF", red:"#DC2626", redBorder:"#FECACA", amber:"#D97706", amberBorder:"#FDE68A",
   green:"#16A34A", greenBorder:"#BBF7D0", purple:"#7C3AED", purpleBorder:"#DDD6FE",
   amberBg:"#FFFBEB", redBg:"#FEF2F2", greenBg:"#F0FDF4", purpleBg:"#F5F3FF",
@@ -160,7 +160,7 @@ export default function AdminDisputes() {
           </div>
         )}
 
-        <div style={{ background:C.deep, borderRadius:16,
+        <div style={{ background:C.white, borderRadius:16,
           border:`1px solid ${C.darkBorder}`, padding:"1.25rem" }}>
           <p style={{ fontSize:10, fontWeight:700, color:C.teal,
             letterSpacing:"0.1em", textTransform:"uppercase", margin:"0 0 14px" }}>
@@ -320,7 +320,7 @@ export default function AdminDisputes() {
                     onChange={e => setRecommendation(e.target.value)}
                     placeholder="Set out ProGrafter's recommended resolution with full reasoning…"
                     style={{ width:"100%", padding:"8px 10px", borderRadius:7,
-                      border:`1px solid ${C.darkBorder}`, background:"rgba(255,255,255,0.05)",
+                      border:`1px solid ${C.darkBorder}`, background:"#FFFFFF",
                       color:C.brightText, fontSize:12, fontFamily:"inherit",
                       resize:"vertical", boxSizing:"border-box", marginBottom:10, outline:"none" }} />
                   <div style={{ display:"flex", gap:8 }}>
