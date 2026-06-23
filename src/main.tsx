@@ -15,20 +15,37 @@ if ("caches" in window) {
   });
 }
 
-// One-time auto-reload if a dynamically imported module fails (usually a stale SW chunk reference).
-window.addEventListener("vite:preloadError", () => {
-  if (!sessionStorage.getItem("pg-reloaded-once")) {
-    sessionStorage.setItem("pg-reloaded-once", "1");
-    window.location.reload();
+// Auto-recover when a dynamically imported chunk fails to load (stale hash after a deploy).
+// Throttled by timestamp so it can recover from future deploys without ever looping forever.
+const RELOAD_KEY = "pg-chunk-reload-at";
+const RELOAD_COOLDOWN_MS = 15000;
+
+async function recoverFromStaleChunk() {
+  const last = Number(sessionStorage.getItem(RELOAD_KEY) || 0);
+  if (Date.now() - last < RELOAD_COOLDOWN_MS) return; // already tried very recently — avoid a loop
+  sessionStorage.setItem(RELOAD_KEY, String(Date.now()));
+  try {
+    if ("caches" in window) {
+      const keys = await caches.keys();
+      await Promise.all(keys.map((k) => caches.delete(k)));
+    }
+    if ("serviceWorker" in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map((r) => r.unregister()));
+    }
+  } catch {
+    /* best effort */
   }
+  window.location.reload();
+}
+
+window.addEventListener("vite:preloadError", () => {
+  void recoverFromStaleChunk();
 });
 window.addEventListener("error", (e) => {
   const msg = String(e?.message ?? "");
   if (msg.includes("Failed to fetch dynamically imported module")) {
-    if (!sessionStorage.getItem("pg-reloaded-once")) {
-      sessionStorage.setItem("pg-reloaded-once", "1");
-      window.location.reload();
-    }
+    void recoverFromStaleChunk();
   }
 });
 
