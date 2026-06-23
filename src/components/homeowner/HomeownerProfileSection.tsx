@@ -11,6 +11,33 @@ const HomeownerProfileSection = () => {
   const [homeownerId, setHomeownerId] = useState<string | null>(null);
   const [form, setForm] = useState({ name: "", phone: "" });
 
+  // Optional password — the durable way back in.
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [savingPassword, setSavingPassword] = useState(false);
+
+  const handleSetPassword = async () => {
+    if (password.length < 8) {
+      toast.error("Password must be at least 8 characters");
+      return;
+    }
+    if (password !== confirmPassword) {
+      toast.error("Passwords don't match");
+      return;
+    }
+    setSavingPassword(true);
+    const { error } = await supabase.auth.updateUser({ password });
+    setSavingPassword(false);
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success("Password set — you can now sign in with email and password");
+      setPassword("");
+      setConfirmPassword("");
+    }
+  };
+
+
   useEffect(() => {
     const load = async () => {
       const { data: { user } } = await supabase.auth.getUser();
