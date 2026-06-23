@@ -177,6 +177,21 @@ const HomeownerProfileSection = () => {
           </div>
         </div>
 
+        {passwordError && (
+          <div className="bg-destructive/10 border border-destructive/30 text-destructive rounded-xl px-4 py-3 font-mono text-xs">
+            {passwordError}
+          </div>
+        )}
+        {passwordSet && (
+          <div className="bg-secondary/10 border border-secondary/30 text-secondary rounded-xl px-4 py-3 font-mono text-xs">
+            Password set. You can now sign in with your email and password.
+          </div>
+        )}
+
+        <p className="font-mono text-[11px] text-muted-foreground">
+          Use at least 8 characters. Avoid common passwords — a mix of unrelated words, numbers and symbols works best.
+        </p>
+
         <div className="flex justify-end">
           <button
             onClick={handleSetPassword}
