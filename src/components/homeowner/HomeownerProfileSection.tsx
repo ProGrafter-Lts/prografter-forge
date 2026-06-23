@@ -15,27 +15,38 @@ const HomeownerProfileSection = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [savingPassword, setSavingPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordSet, setPasswordSet] = useState(false);
 
   const handleSetPassword = async () => {
+    setPasswordError("");
+    setPasswordSet(false);
     if (password.length < 8) {
-      toast.error("Password must be at least 8 characters");
+      setPasswordError("Password must be at least 8 characters.");
       return;
     }
     if (password !== confirmPassword) {
-      toast.error("Passwords don't match");
+      setPasswordError("The two passwords don't match.");
       return;
     }
     setSavingPassword(true);
     const { error } = await supabase.auth.updateUser({ password });
     setSavingPassword(false);
     if (error) {
-      toast.error(error.message);
+      const friendly = /pwned|weak|easy to guess/i.test(error.message)
+        ? "That password is too common and has appeared in data breaches. Please choose a stronger one (try a mix of unrelated words, numbers and symbols)."
+        : error.message;
+      setPasswordError(friendly);
+      toast.error("Couldn't set password");
     } else {
-      toast.success("Password set — you can now sign in with email and password");
+      setPasswordSet(true);
       setPassword("");
       setConfirmPassword("");
+      toast.success("Password set — you can now sign in with email and password");
     }
   };
+
+
 
 
   useEffect(() => {
