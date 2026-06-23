@@ -32,8 +32,22 @@ const Login = () => {
   const getDashboardPath = (userType?: string | null) =>
     userType === "trade" ? "/dashboard/trade" : "/dashboard/homeowner";
 
+  /** Only allow same-origin internal paths to prevent open-redirect abuse. */
+  const getSafeRedirect = (): string | null => {
+    const raw = searchParams.get("redirect");
+    if (!raw) return null;
+    let decoded = raw;
+    try {
+      decoded = decodeURIComponent(raw);
+    } catch {
+      decoded = raw;
+    }
+    if (decoded.startsWith("/") && !decoded.startsWith("//")) return decoded;
+    return null;
+  };
+
   const redirectToDashboard = (userType?: string | null) => {
-    const nextPath = getDashboardPath(userType);
+    const nextPath = getSafeRedirect() ?? getDashboardPath(userType);
 
     if (hasRedirectedRef.current) return;
     hasRedirectedRef.current = true;

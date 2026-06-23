@@ -209,7 +209,9 @@ Deno.serve(async (req) => {
   const tradeLabel = acceptedTypes[0] || brief.trade_category_id || undefined
   const location = brief.city || 'your area'
   const valueBand = brief.budget_band || undefined
-  const briefUrl = `${SITE_URL}/dashboard`
+  // Deep-link straight to the matched job. /project/:id is a protected route that
+  // bounces unauthenticated trades to sign-in and returns them here afterwards.
+  const briefUrl = jobId ? `${SITE_URL}/project/${jobId}` : `${SITE_URL}/dashboard/trade`
 
   const sends: Promise<unknown>[] = []
   for (const t of matched) {

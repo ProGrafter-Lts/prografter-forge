@@ -227,6 +227,9 @@ const AppRoutes = () => {
                 </ProtectedRoute>
               }
             />
+            {/* Legacy email links pointed at /dashboard — forward instead of 404ing.
+                /login routes authenticated users to the right dashboard by role. */}
+            <Route path="/dashboard" element={<Navigate to="/login" replace />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="/admin" element={<AdminRoute><AdminHome /></AdminRoute>} />
             <Route path="/admin/analytics" element={<AdminRoute><AdminAnalytics /></AdminRoute>} />

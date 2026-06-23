@@ -420,11 +420,24 @@ const ProjectDetail = () => {
 
   if (!job || projectError) {
     return (
-      <div className="min-h-screen bg-cream flex items-center justify-center px-6 text-center">
-        <p className="font-mono text-sm text-secondary-text">{projectError || "This project could not be loaded."}</p>
+      <div className="min-h-screen bg-cream flex items-center justify-center px-6">
+        <div className="max-w-md w-full bg-white rounded-2xl border border-primary/10 shadow-sm p-8 text-center">
+          <h1 className="font-heading text-primary text-xl mb-2">This job isn't available</h1>
+          <p className="font-mono text-sm text-secondary-text">
+            {projectError ||
+              "This job may have been closed, or you're not matched to it. If you reached this from an email, the listing may no longer be open."}
+          </p>
+          <button
+            onClick={() => navigate("/dashboard/trade")}
+            className="mt-6 inline-flex items-center gap-1.5 bg-secondary text-secondary-foreground font-mono text-xs px-4 py-2 rounded-xl hover:opacity-90 transition-opacity"
+          >
+            Go to your dashboard
+          </button>
+        </div>
       </div>
     );
   }
+
 
   return (
     <div className="min-h-screen bg-cream">

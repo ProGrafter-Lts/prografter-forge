@@ -22,7 +22,7 @@ const NewJobInAreaEmail = ({
   trade,
   valueBand,
   location = 'your area',
-  briefUrl = `${SITE_URL}/dashboard`,
+  briefUrl = `${SITE_URL}/dashboard/trade`,
 }: Props) => (
   <ProGrafterShell
     preview={`New ${trade || 'job'} brief in ${location}`}
