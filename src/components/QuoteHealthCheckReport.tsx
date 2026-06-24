@@ -1,4 +1,5 @@
 import { AlertTriangle } from "lucide-react";
+import DOMPurify from "dompurify";
 
 interface ReportJson {
   score_addressed?: number;
