@@ -144,14 +144,14 @@ serve(async (req) => {
     }
 
     const query = `${tradeType} in ${location}`;
-    const results = await textSearch(query, apiKey);
+    const results = await textSearch(query);
     const sliced = results.slice(0, limit);
 
     const inserted: any[] = [];
     const skipped: any[] = [];
 
     for (const r of sliced) {
-      const details = await placeDetails(r.place_id, apiKey);
+      const details = await placeDetails(r.place_id);
       if (!details) continue;
       const { postcode, city } = extractAddressBits(details.address_components);
       const row = {
