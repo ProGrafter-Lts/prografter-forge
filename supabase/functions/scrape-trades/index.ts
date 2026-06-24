@@ -107,8 +107,8 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const apiKey = Deno.env.get("GOOGLE_PLACES_API_KEY");
-    if (!apiKey) throw new Error("GOOGLE_PLACES_API_KEY not configured");
+    // Google Places now routed via the Google Maps connector gateway (LOVABLE_API_KEY + GOOGLE_MAPS_API_KEY)
+
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
