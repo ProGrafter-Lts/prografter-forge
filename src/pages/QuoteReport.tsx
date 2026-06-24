@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import DOMPurify from "dompurify";
 import AppShell from "@/components/AppShell";
 import SEO from "@/components/SEO";
 import {
@@ -228,7 +229,7 @@ const QuoteReport = () => {
             </div>
             <div
               className="qr-report"
-              dangerouslySetInnerHTML={{ __html: report.report_html }}
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(report.report_html || "") }}
             />
           </div>
           <DisclaimerBanner />

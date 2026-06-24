@@ -169,6 +169,26 @@ Deno.serve(async (req) => {
   }
 
   try {
+    const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
+
+    // Authenticate the caller and confirm they are a party to the contract or an admin.
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const token = authHeader.replace("Bearer ", "");
+    const { data: userData, error: userErr } = await supabase.auth.getUser(token);
+    const userId = userData?.user?.id;
+    if (userErr || !userId) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const body = (await req.json()) as RequestBody;
     if (!body.contract_id) {
       return new Response(JSON.stringify({ error: "contract_id required" }), {
@@ -177,7 +197,20 @@ Deno.serve(async (req) => {
       });
     }
 
-    const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
+    const [{ data: isParty }, { data: isAdmin }] = await Promise.all([
+      supabase.rpc("user_is_contract_party", {
+        _user_id: userId,
+        _contract_id: body.contract_id,
+      }),
+      supabase.rpc("has_role", { _user_id: userId, _role: "admin" }),
+    ]);
+    if (!isParty && !isAdmin) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
 
     const { data: contract, error: cErr } = await supabase
       .from("contracts")

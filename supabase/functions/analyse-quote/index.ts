@@ -10,6 +10,18 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
 
+// Server-side defence-in-depth sanitizer for AI-generated HTML.
+// Removes dangerous elements and inline event handlers / javascript: URLs.
+function sanitizeReportHtml(html: string): string {
+  return html
+    .replace(/<\s*(script|style|iframe|object|embed|link|meta)\b[^>]*>[\s\S]*?<\s*\/\s*\1\s*>/gi, "")
+    .replace(/<\s*(script|style|iframe|object|embed|link|meta)\b[^>]*\/?>/gi, "")
+    .replace(/\son\w+\s*=\s*"[^"]*"/gi, "")
+    .replace(/\son\w+\s*=\s*'[^']*'/gi, "")
+    .replace(/\son\w+\s*=\s*[^\s>]+/gi, "")
+    .replace(/(href|src)\s*=\s*("|')\s*javascript:[^"']*\2/gi, "$1=$2#$2");
+}
+
 const CHECKLIST_PROMPT = `You are a senior UK quantity surveyor reviewing a residential building quote for a homeowner. Your job is AWARENESS, NOT DIAGNOSIS: help the homeowner understand what this quote does and does not cover, and what to clarify with their builder before work starts. You do NOT give professional advice, you do NOT determine what is required, and you do NOT state what anything should cost.
 
 CONTEXT PROVIDED BY THE HOMEOWNER
@@ -273,10 +285,13 @@ Deno.serve(async (req) => {
     // Verbatim figures extracted by the model (STEP 0 of the prompt).
     const figures =
       (reportJson as { figures?: { subtotal?: string; vat?: string; total?: string } })?.figures || {};
-    const reportHtml =
+    const rawReportHtml =
       typeof (reportJson as { report_html?: string })?.report_html === "string"
         ? (reportJson as { report_html?: string }).report_html ?? null
         : null;
+    // Defence-in-depth: strip script/style/iframe tags and inline event handlers
+    // before persisting AI-generated HTML (prompt-injection mitigation).
+    const reportHtml = rawReportHtml ? sanitizeReportHtml(rawReportHtml) : null;
 
     // ACCOUNT ON PURCHASE — before saving the report, ensure the homeowner has
     // an auth account, then tie the report to it and prepare a magic link.
