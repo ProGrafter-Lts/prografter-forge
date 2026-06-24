@@ -229,7 +229,7 @@ const QuoteReport = () => {
             </div>
             <div
               className="qr-report"
-              dangerouslySetInnerHTML={{ __html: report.report_html }}
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(report.report_html || "") }}
             />
           </div>
           <DisclaimerBanner />
