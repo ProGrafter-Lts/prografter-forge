@@ -76,17 +76,14 @@ async function textSearch(query: string): Promise<PlaceTextResult[]> {
   })) as PlaceTextResult[];
 }
 
-async function placeDetails(placeId: string, apiKey: string): Promise<PlaceDetails | null> {
+async function placeDetails(placeId: string): Promise<PlaceDetails | null> {
   const fieldMask = [
     "id", "displayName", "formattedAddress", "nationalPhoneNumber",
     "internationalPhoneNumber", "websiteUri", "rating",
     "userRatingCount", "addressComponents",
   ].join(",");
-  const res = await fetch(`https://places.googleapis.com/v1/places/${placeId}`, {
-    headers: {
-      "X-Goog-Api-Key": apiKey,
-      "X-Goog-FieldMask": fieldMask,
-    },
+  const res = await fetch(`${GATEWAY_URL}/places/v1/places/${placeId}`, {
+    headers: gatewayHeaders({ "X-Goog-FieldMask": fieldMask }),
   });
   if (!res.ok) return null;
   const p = await res.json();
