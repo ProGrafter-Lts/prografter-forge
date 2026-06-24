@@ -273,10 +273,13 @@ Deno.serve(async (req) => {
     // Verbatim figures extracted by the model (STEP 0 of the prompt).
     const figures =
       (reportJson as { figures?: { subtotal?: string; vat?: string; total?: string } })?.figures || {};
-    const reportHtml =
+    const rawReportHtml =
       typeof (reportJson as { report_html?: string })?.report_html === "string"
         ? (reportJson as { report_html?: string }).report_html ?? null
         : null;
+    // Defence-in-depth: strip script/style/iframe tags and inline event handlers
+    // before persisting AI-generated HTML (prompt-injection mitigation).
+    const reportHtml = rawReportHtml ? sanitizeReportHtml(rawReportHtml) : null;
 
     // ACCOUNT ON PURCHASE — before saving the report, ensure the homeowner has
     // an auth account, then tie the report to it and prepare a magic link.
