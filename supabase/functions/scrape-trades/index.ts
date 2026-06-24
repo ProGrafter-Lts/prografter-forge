@@ -38,15 +38,29 @@ function extractAddressBits(components?: PlaceDetails["address_components"]) {
   return { postcode, city };
 }
 
-// Uses Places API (New) — https://places.googleapis.com/v1
-async function textSearch(query: string, apiKey: string): Promise<PlaceTextResult[]> {
-  const res = await fetch("https://places.googleapis.com/v1/places:searchText", {
+const GATEWAY_URL = "https://connector-gateway.lovable.dev/google_maps";
+
+function gatewayHeaders(extra: Record<string, string> = {}) {
+  const lovableKey = Deno.env.get("LOVABLE_API_KEY");
+  const mapsKey = Deno.env.get("GOOGLE_MAPS_API_KEY");
+  if (!lovableKey || !mapsKey) {
+    throw new Error("Missing Google Maps connector credentials");
+  }
+  return {
+    Authorization: `Bearer ${lovableKey}`,
+    "X-Connection-Api-Key": mapsKey,
+    ...extra,
+  };
+}
+
+// Uses Places API (New) via the Google Maps connector gateway
+async function textSearch(query: string): Promise<PlaceTextResult[]> {
+  const res = await fetch(`${GATEWAY_URL}/places/v1/places:searchText`, {
     method: "POST",
-    headers: {
+    headers: gatewayHeaders({
       "Content-Type": "application/json",
-      "X-Goog-Api-Key": apiKey,
       "X-Goog-FieldMask": "places.id,places.displayName,places.formattedAddress,places.rating,places.userRatingCount",
-    },
+    }),
     body: JSON.stringify({ textQuery: query }),
   });
   const json = await res.json();
@@ -62,17 +76,14 @@ async function textSearch(query: string, apiKey: string): Promise<PlaceTextResul
   })) as PlaceTextResult[];
 }
 
-async function placeDetails(placeId: string, apiKey: string): Promise<PlaceDetails | null> {
+async function placeDetails(placeId: string): Promise<PlaceDetails | null> {
   const fieldMask = [
     "id", "displayName", "formattedAddress", "nationalPhoneNumber",
     "internationalPhoneNumber", "websiteUri", "rating",
     "userRatingCount", "addressComponents",
   ].join(",");
-  const res = await fetch(`https://places.googleapis.com/v1/places/${placeId}`, {
-    headers: {
-      "X-Goog-Api-Key": apiKey,
-      "X-Goog-FieldMask": fieldMask,
-    },
+  const res = await fetch(`${GATEWAY_URL}/places/v1/places/${placeId}`, {
+    headers: gatewayHeaders({ "X-Goog-FieldMask": fieldMask }),
   });
   if (!res.ok) return null;
   const p = await res.json();
@@ -96,8 +107,8 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const apiKey = Deno.env.get("GOOGLE_PLACES_API_KEY");
-    if (!apiKey) throw new Error("GOOGLE_PLACES_API_KEY not configured");
+    // Google Places now routed via the Google Maps connector gateway (LOVABLE_API_KEY + GOOGLE_MAPS_API_KEY)
+
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
@@ -133,14 +144,14 @@ serve(async (req) => {
     }
 
     const query = `${tradeType} in ${location}`;
-    const results = await textSearch(query, apiKey);
+    const results = await textSearch(query);
     const sliced = results.slice(0, limit);
 
     const inserted: any[] = [];
     const skipped: any[] = [];
 
     for (const r of sliced) {
-      const details = await placeDetails(r.place_id, apiKey);
+      const details = await placeDetails(r.place_id);
       if (!details) continue;
       const { postcode, city } = extractAddressBits(details.address_components);
       const row = {
