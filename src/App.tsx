@@ -116,83 +116,34 @@ const AppRoutes = () => {
             <Route path="/checkatrade-alternative" element={<CheckatradeAlternative />} />
             <Route path="/is-checkatrade-worth-it" element={<IsCheckatradeWorthIt />} />
             <Route path="/planning-alerts" element={<PlanningAlertsPage />} />
+            {/* All authenticated (non-admin) routes share ONE layout shell via <Outlet>. */}
             <Route
-              path="/dashboard/trade"
               element={
                 <ProtectedRoute>
-                  <TradeDashboard />
+                  <AppLayout />
                 </ProtectedRoute>
               }
-            />
-            <Route
-              path="/dashboard/trade/settings"
-              element={
-                <ProtectedRoute>
-                  <TradeSettings />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard/homeowner"
-              element={
-                <ProtectedRoute>
-                  <HomeownerDashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard/quote-checks"
-              element={
-                <ProtectedRoute>
-                  <MyQuoteChecks />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard/quote-checks/:id"
-              element={
-                <ProtectedRoute>
-                  <QuoteCheckDetail />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/project/:id"
-              element={
-                <ProtectedRoute>
-                  <ProjectDetail />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/project/:id/compare"
-              element={
-                <ProtectedRoute>
-                  <CompareQuotes />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/project/:id/contract"
-              element={
-                <ProtectedRoute>
-                  <ContractPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/manual/:id"
-              element={
-                <ProtectedRoute>
-                  <HomeownerManual />
-                </ProtectedRoute>
-              }
-            />
+            >
+              <Route path="/dashboard/trade" element={<TradeDashboard />} />
+              <Route path="/dashboard/trade/settings" element={<TradeSettings />} />
+              <Route path="/dashboard/homeowner" element={<HomeownerDashboard />} />
+              <Route path="/dashboard/quote-checks" element={<MyQuoteChecks />} />
+              <Route path="/dashboard/quote-checks/:id" element={<QuoteCheckDetail />} />
+              <Route path="/project/:id" element={<ProjectDetail />} />
+              <Route path="/project/:id/compare" element={<CompareQuotes />} />
+              <Route path="/project/:id/contract" element={<ContractPage />} />
+              <Route path="/manual/:id" element={<HomeownerManual />} />
+              <Route path="/quote-builder/quickbuild" element={<QuickBuildPage />} />
+              <Route path="/jobs/:ref" element={<JobOS />} />
+              <Route path="/reviews/:ref" element={<ReviewSubmit />} />
+              <Route path="/disputes/new" element={<DisputeRaise />} />
+              <Route path="/disputes/:id" element={<DisputeDetail />} />
+              <Route path="/signup/trade/under-review" element={<SignupTradeUnderReview />} />
+              <Route path="/signup/trade/assessment-pending" element={<SignupTradeAssessmentPending />} />
+            </Route>
             {/* Unified spine: posting a brief IS the homeowner sign-up (passwordless). */}
             <Route path="/signup/homeowner" element={<Navigate to="/post-job-brief" replace />} />
             <Route path="/signup/homeowner/next" element={<Navigate to="/dashboard/homeowner" replace />} />
-            <Route path="/signup/trade/under-review" element={<ProtectedRoute><SignupTradeUnderReview /></ProtectedRoute>} />
-            <Route path="/signup/trade/assessment-pending" element={<ProtectedRoute><SignupTradeAssessmentPending /></ProtectedRoute>} />
             <Route path="/verification" element={<Verification />} />
             <Route path="/signup/trade" element={<SignupTradeRedirect />} />
             <Route path="/signup/trade/under-review" element={<ProtectedRoute><SignupTradeUnderReview /></ProtectedRoute>} />
