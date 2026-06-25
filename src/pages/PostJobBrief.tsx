@@ -82,6 +82,67 @@ const ACCESS = [
 
 const STEPS = ["Your details", "The job", "Scope & access", "Budget & timing", "Review & submit"];
 
+// Stages shown in the submission overlay. The last stage is the "hold" state
+// that stays on screen until the server responds and we navigate away.
+const SUBMIT_STAGES = [
+  "Saving your job brief…",
+  "Creating your free homeowner account…",
+  "Securing your sign-in…",
+  "Sending your confirmation email…",
+  "Finishing up…",
+];
+
+const SubmitProgressOverlay = ({ stage }: { stage: number }) => {
+  const total = SUBMIT_STAGES.length;
+  const pct = Math.round(((stage + 1) / total) * 100);
+  return (
+    <div style={{
+      position: "fixed", inset: 0, zIndex: 50,
+      background: "rgba(15,34,56,0.55)", backdropFilter: "blur(2px)",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      padding: "1.5rem", fontFamily: "'DM Sans', system-ui, sans-serif",
+    }}>
+      <div style={{
+        maxWidth: 380, width: "100%", background: C.white,
+        borderRadius: 18, border: `1.5px solid ${C.border}`,
+        padding: "2rem 1.75rem", textAlign: "center",
+        boxShadow: "0 12px 40px rgba(15,34,56,0.25)",
+      }}>
+        <div
+          className="animate-spin"
+          style={{
+            width: 46, height: 46, margin: "0 auto 1.25rem",
+            borderRadius: "50%",
+            border: `4px solid ${C.tealLight}`,
+            borderTopColor: C.teal,
+          }}
+        />
+        <h3 style={{ fontSize: 16, fontWeight: 700, color: C.deep, margin: "0 0 6px" }}>
+          Submitting your brief
+        </h3>
+        <p style={{ fontSize: 13, color: C.secondary, margin: "0 0 18px", minHeight: 36, lineHeight: 1.5 }}>
+          {SUBMIT_STAGES[Math.min(stage, total - 1)]}
+        </p>
+        <div style={{ height: 8, borderRadius: 999, background: "#E5E1D8", overflow: "hidden" }}>
+          <div style={{
+            height: "100%", width: `${pct}%`, background: C.teal,
+            borderRadius: 999, transition: "width 0.6s ease",
+          }} />
+        </div>
+        <div style={{ display: "flex", justifyContent: "space-between", marginTop: 10 }}>
+          <span style={{ fontSize: 11, color: C.secondary }}>
+            Step {Math.min(stage + 1, total)} of {total}
+          </span>
+          <span style={{ fontSize: 11, fontWeight: 600, color: C.teal }}>{pct}%</span>
+        </div>
+        <p style={{ fontSize: 11, color: C.secondary, marginTop: 16, lineHeight: 1.5 }}>
+          This can take up to 20 seconds — please don't close this window.
+        </p>
+      </div>
+    </div>
+  );
+};
+
 // Generate the job-brief reference ONCE on the client, at the moment the form is
 // first opened. The same reference is shown in the preview, the confirmation
 // screen, the emails and the admin dashboard — it is never regenerated.
