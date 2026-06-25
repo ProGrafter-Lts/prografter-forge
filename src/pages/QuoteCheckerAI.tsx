@@ -343,9 +343,9 @@ ${form.quote_text}`;
         <div style={{ textAlign:"center", marginBottom:20 }}>
           <p style={{ fontSize:12, color:C.secondary }}>
             Got a PDF instead?{" "}
-            <a href="/quote-checker" style={{ color:C.teal, fontWeight:600, textDecoration:"none" }}>
+            <Link to="/quote-checker" style={{ color:C.teal, fontWeight:600, textDecoration:"none" }}>
               Try the PDF Quote Checker →
-            </a>
+            </Link>
           </p>
         </div>
 
