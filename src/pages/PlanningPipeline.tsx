@@ -895,10 +895,10 @@ export default function PlanningPipeline() {
             <p style={{ fontSize: 14, fontWeight: 700, color: C.green, margin: 0 }}>{fmt(totalValue)}</p>
             <p style={{ fontSize: 9, color: C.dimText, margin: 0 }}>VALUE</p>
           </div>
-          <a href="/admin/trade-scraper"
+          <Link to="/admin/trade-scraper"
             style={{ background: "transparent", color: C.teal, border: `1px solid ${C.teal}`, borderRadius: 8, padding: "7px 12px", fontSize: 11, fontWeight: 700, textDecoration: "none", flex: isMobile ? "1 1 100%" : "none", textAlign: "center" }}>
             🛠 Trade scraper
-          </a>
+          </Link>
           <button onClick={runIngest} disabled={ingesting}
             style={{ background: C.teal, color: C.white, border: "none", borderRadius: 8, padding: "7px 14px", fontSize: 11, fontWeight: 700, cursor: ingesting ? "not-allowed" : "pointer", opacity: ingesting ? 0.6 : 1, flex: isMobile ? "1 1 100%" : "none" }}>
             {ingesting ? "Ingesting…" : "🔄 Ingest Notts planning"}
