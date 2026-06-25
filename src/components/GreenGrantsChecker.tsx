@@ -196,6 +196,7 @@ const SchemeResult = ({ result, onPostJob }: { result: Result; onPostJob: () => 
 };
 
 export default function GreenGrantsChecker() {
+  const navigate = useNavigate();
   const [step, setStep] = useState(-1);
   const [answers, setAnswers] = useState<Answers>({});
   const [results, setResults] = useState<Result[]>([]);
