@@ -379,7 +379,24 @@ export default function PostJobBrief() {
   const [needsScoping, setNeedsScoping] = useState(false);
   const [consent, setConsent] = useState(false);
   const [marketing, setMarketing] = useState(false);
-  
+  const [progressStep, setProgressStep] = useState(0);
+
+  // Staged progress shown during the ~15–20s submission (account creation +
+  // email queuing). The server runs as one call, so these advance on a timer
+  // to reassure the homeowner that work is happening — the final stage holds
+  // until the real response lands and we navigate away.
+  useEffect(() => {
+    if (!submitting) { setProgressStep(0); return; }
+    setProgressStep(0);
+    const delays = [1800, 4000, 4500, 4500]; // ~14.8s, then holds on last stage
+    const timers = delays.map((_, i) =>
+      setTimeout(
+        () => setProgressStep(i + 1),
+        delays.slice(0, i + 1).reduce((a, b) => a + b, 0),
+      )
+    );
+    return () => timers.forEach(clearTimeout);
+  }, [submitting]);
 
   const upd = (k: string) => (e: any) => setForm(p => ({ ...p, [k]: e.target.value }));
 
