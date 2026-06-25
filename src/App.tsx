@@ -159,25 +159,13 @@ const AppRoutes = () => {
             <Route path="/vetting" element={<Vetting />} />
             <Route path="/post-job-brief" element={<PostJobBrief />} />
             <Route path="/quote-checker-ai" element={<QuoteCheckerAI />} />
-            <Route path="/jobs/:ref" element={<ProtectedRoute><JobOS /></ProtectedRoute>} />
-            <Route path="/reviews/:ref" element={<ProtectedRoute><ReviewSubmit /></ProtectedRoute>} />
             <Route path="/traders/:id/reviews" element={<TraderReviews />} />
-            <Route path="/disputes/new" element={<ProtectedRoute><DisputeRaise /></ProtectedRoute>} />
-            <Route path="/disputes/:id" element={<ProtectedRoute><DisputeDetail /></ProtectedRoute>} />
             <Route path="/admin/disputes" element={<AdminRoute><AdminDisputes /></AdminRoute>} />
             <Route path="/admin/planning-pipeline" element={<AdminRoute><PlanningPipeline /></AdminRoute>} />
             <Route path="/admin/trade-scraper" element={<AdminRoute><AdminTradeScraper /></AdminRoute>} />
             <Route path="/admin/applications" element={<AdminRoute><AdminApplications /></AdminRoute>} />
             <Route path="/admin/applications/:id" element={<AdminRoute><AdminApplicationDetail /></AdminRoute>} />
             <Route path="/admin/job-briefs" element={<AdminRoute><AdminJobBriefs /></AdminRoute>} />
-            <Route
-              path="/quote-builder/quickbuild"
-              element={
-                <ProtectedRoute>
-                  <QuickBuildPage />
-                </ProtectedRoute>
-              }
-            />
             {/* Legacy email links pointed at /dashboard — forward instead of 404ing.
                 /login routes authenticated users to the right dashboard by role. */}
             <Route path="/dashboard" element={<Navigate to="/login" replace />} />
