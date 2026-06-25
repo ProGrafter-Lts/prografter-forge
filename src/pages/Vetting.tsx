@@ -1,4 +1,5 @@
 import { useState, type CSSProperties } from "react";
+import { Link } from "react-router-dom";
 import Logo from "@/components/Logo";
 
 const C = {
@@ -164,7 +165,7 @@ export default function Vetting() {
           </div>
           <span style={{ color: C.darkBorder, fontSize: 16 }}>|</span>
           <span style={{ fontSize: 12, color: C.dimText, fontWeight: 500, letterSpacing: "0.05em" }}>VETTING DASHBOARD</span>
-          <a href="/admin/verifications" style={{ fontSize: 11, color: C.teal, marginLeft: 8, textDecoration: "none", letterSpacing: "0.04em" }}>
+          <Link to="/admin/verifications" style={{ fontSize: 11, color: C.teal, marginLeft: 8, textDecoration: "none", letterSpacing: "0.04em" }}>
             Pre-submission queue →
           </a>
         </div>
