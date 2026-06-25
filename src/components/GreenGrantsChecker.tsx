@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 // Green palette — kept distinct for the grants visual identity, but typography
 // follows the site system (Bebas Neue headings, DM Sans body, DM Mono labels).
