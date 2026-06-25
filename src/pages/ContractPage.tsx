@@ -269,9 +269,9 @@ const ContractPage = () => {
 
     return (
       <div className="min-h-screen flex flex-col items-center justify-center px-4 bg-background">
-        <a href="/" className="font-heading text-[32px] leading-none tracking-wider mb-8">
+        <Link to="/" className="font-heading text-[32px] leading-none tracking-wider mb-8">
           <Logo variant="dark" className="h-9 w-auto inline-block" />
-        </a>
+        </Link>
         <div className="text-center max-w-md bg-card border border-border rounded-2xl p-8 shadow-sm">
           <ShieldAlert className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
           <h1 className="font-heading text-2xl text-primary mb-2">{copy.title}</h1>

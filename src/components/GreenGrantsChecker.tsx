@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 // Green palette — kept distinct for the grants visual identity, but typography
 // follows the site system (Bebas Neue headings, DM Sans body, DM Mono labels).
@@ -195,6 +196,7 @@ const SchemeResult = ({ result, onPostJob }: { result: Result; onPostJob: () => 
 };
 
 export default function GreenGrantsChecker() {
+  const navigate = useNavigate();
   const [step, setStep] = useState(-1);
   const [answers, setAnswers] = useState<Answers>({});
   const [results, setResults] = useState<Result[]>([]);
@@ -372,7 +374,7 @@ export default function GreenGrantsChecker() {
           style={{ background: G.g50, borderColor: G.g200 }}
         >
           {results.map(r => (
-            <SchemeResult key={r.scheme} result={r} onPostJob={() => window.location.href = "/post-job-brief"} />
+            <SchemeResult key={r.scheme} result={r} onPostJob={() => navigate("/post-job-brief")} />
           ))}
           <div
             className="rounded-xl px-4 py-2.5 mb-3.5 font-body text-xs leading-relaxed"
@@ -386,7 +388,7 @@ export default function GreenGrantsChecker() {
               Every installer on ProGrafter is personally vetted, insured, and qualified. Many are MCS-certified — required for grant-funded installations.
             </p>
             <button
-              onClick={() => window.location.href = "/post-job-brief"}
+              onClick={() => navigate("/post-job-brief")}
               className="inline-flex bg-white rounded-xl px-7 py-3.5 font-mono text-sm font-bold mb-2 hover:opacity-95 transition-opacity"
               style={{ color: G.g800 }}
             >

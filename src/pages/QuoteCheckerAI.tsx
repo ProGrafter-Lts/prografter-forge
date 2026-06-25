@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { trackEvent } from "@/lib/analytics";
 import Logo from "@/components/Logo";
@@ -342,9 +343,9 @@ ${form.quote_text}`;
         <div style={{ textAlign:"center", marginBottom:20 }}>
           <p style={{ fontSize:12, color:C.secondary }}>
             Got a PDF instead?{" "}
-            <a href="/quote-checker" style={{ color:C.teal, fontWeight:600, textDecoration:"none" }}>
+            <Link to="/quote-checker" style={{ color:C.teal, fontWeight:600, textDecoration:"none" }}>
               Try the PDF Quote Checker →
-            </a>
+            </Link>
           </p>
         </div>
 
@@ -407,11 +408,11 @@ ${form.quote_text}`;
                 <span style={{ fontSize:12, color:C.secondary }}>
                   Want to find a vetted trade instead?
                 </span>
-                <a href="/post-job-brief" style={{ background:"none", border:`1.5px solid ${C.teal}`,
+                <Link to="/post-job-brief" style={{ background:"none", border:`1.5px solid ${C.teal}`,
                   color:C.teal, borderRadius:8, padding:"8px 16px",
                   fontSize:13, fontWeight:600, cursor:"pointer", textDecoration:"none" }}>
                   Post a job on ProGrafter →
-                </a>
+                </Link>
               </div>
             )}
           </div>
