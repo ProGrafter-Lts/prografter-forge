@@ -408,11 +408,11 @@ ${form.quote_text}`;
                 <span style={{ fontSize:12, color:C.secondary }}>
                   Want to find a vetted trade instead?
                 </span>
-                <a href="/post-job-brief" style={{ background:"none", border:`1.5px solid ${C.teal}`,
+                <Link to="/post-job-brief" style={{ background:"none", border:`1.5px solid ${C.teal}`,
                   color:C.teal, borderRadius:8, padding:"8px 16px",
                   fontSize:13, fontWeight:600, cursor:"pointer", textDecoration:"none" }}>
                   Post a job on ProGrafter →
-                </a>
+                </Link>
               </div>
             )}
           </div>
