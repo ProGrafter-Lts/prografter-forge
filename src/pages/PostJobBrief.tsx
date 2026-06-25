@@ -926,6 +926,7 @@ export default function PostJobBrief() {
 
   return (
     <div style={{ minHeight: "100vh", background: C.cream, fontFamily: "'DM Sans', system-ui, sans-serif" }}>
+      {submitting && <SubmitProgressOverlay stage={progressStep} />}
       <div style={{ background: C.deep, padding: "16px 24px",
         display: "flex", alignItems: "center", justifyContent: "space-between",
         position: "sticky", top: 0, zIndex: 10 }}>
