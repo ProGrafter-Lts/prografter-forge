@@ -179,6 +179,25 @@ const AppRoutes = () => {
             <Route path="/admin/analytics" element={<AdminRoute><AdminAnalytics /></AdminRoute>} />
             <Route path="*" element={<NotFound />} />
       </Routes>
+
+      {/* Drawer layer: when a backgroundLocation is present, detail routes render
+          in a slide-over Sheet over the preserved dashboard list. */}
+      {backgroundLocation && (
+        <Routes>
+          <Route
+            element={
+              <ProtectedRoute>
+                <DrawerHost />
+              </ProtectedRoute>
+            }
+          >
+            <Route path="/project/:id" element={<ProjectDetail />} />
+            <Route path="/project/:id/compare" element={<CompareQuotes />} />
+            <Route path="/project/:id/contract" element={<ContractPage />} />
+            <Route path="/dashboard/quote-checks/:id" element={<QuoteCheckDetail />} />
+          </Route>
+        </Routes>
+      )}
     </Suspense>
   );
 };
