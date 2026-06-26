@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import DOMPurify from "dompurify";
 import AppShell from "@/components/AppShell";
 import SEO from "@/components/SEO";
+import QuoteHealthCheckReport from "@/components/QuoteHealthCheckReport";
 import {
   Loader2,
   CheckCircle2,
