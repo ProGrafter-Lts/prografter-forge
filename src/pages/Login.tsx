@@ -93,16 +93,27 @@ const Login = () => {
     }
   }, [searchParams, setSearchParams]);
 
-  useEffect(() => {
-    if (!isReady || !user) return;
+  // NOTE: we intentionally do NOT auto-redirect an already-signed-in user.
+  // Landing on /login means the user wants to choose an account, so we show
+  // an account chooser (continue / switch account) instead of silently
+  // logging them straight back into the current session.
 
+  const continueWithCurrentSession = async () => {
+    if (!user) return;
+    hasRedirectedRef.current = false;
     const metadataUserType =
       typeof user.user_metadata?.user_type === "string"
         ? user.user_metadata.user_type
         : null;
+    await redirectAfterAuth(user.id, metadataUserType);
+  };
 
-    void redirectAfterAuth(user.id, metadataUserType);
-  }, [isReady, user, navigate]);
+  const switchAccount = async () => {
+    await supabase.auth.signOut();
+    hasRedirectedRef.current = false;
+    setEmail("");
+    setPassword("");
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
