@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useDrawerNavigate } from "@/hooks/useDrawerNavigate";
 import { MapPin, Clock, BadgeCheck, Star } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +23,7 @@ interface ActiveProjectHeroProps {
 
 const ActiveProjectHero = ({ project, tradeName, tradeVerified, tradeRating = 0 }: ActiveProjectHeroProps) => {
   const navigate = useNavigate();
+  const openDrawer = useDrawerNavigate();
   const stageIdx = STAGES.indexOf(project.stage);
   const progress = stageIdx === -1 ? 0 : Math.round(((stageIdx + 1) / STAGES.length) * 100);
   const dayNumber = Math.floor((Date.now() - new Date(project.created_at).getTime()) / 86400000);
@@ -74,7 +76,7 @@ const ActiveProjectHero = ({ project, tradeName, tradeVerified, tradeRating = 0 
       </div>
 
       <button
-        onClick={() => navigate(`/project/${project.id}`)}
+        onClick={() => openDrawer(`/project/${project.id}`)}
         className="mt-4 bg-secondary text-secondary-foreground font-mono text-sm px-6 py-2.5 rounded-xl hover:opacity-90 transition-opacity shadow-sm"
       >
         View Project

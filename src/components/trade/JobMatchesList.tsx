@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDrawerNavigate } from "@/hooks/useDrawerNavigate";
 import { Briefcase, MapPin, Clock, ChevronRight, ShieldCheck } from "lucide-react";
 
 interface JobMatch {
@@ -28,6 +29,7 @@ const timeAgo = (dateStr: string) => {
 
 const JobMatchesList = ({ matches }: { matches: JobMatch[] }) => {
   const navigate = useNavigate();
+  const openDrawer = useDrawerNavigate();
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const visible = verifiedOnly ? matches.filter((m) => m.jobs?.funds_verified) : matches;
 
@@ -101,7 +103,7 @@ const JobMatchesList = ({ matches }: { matches: JobMatch[] }) => {
                 <button
                   onClick={() => {
                     const jobId = match.jobs?.id || match.job_id;
-                    if (jobId) navigate(`/project/${jobId}`);
+                    if (jobId) openDrawer(`/project/${jobId}`);
                   }}
                   className="flex items-center gap-1 bg-secondary text-secondary-foreground font-mono text-xs px-4 py-2 rounded-xl hover:opacity-90 transition-opacity whitespace-nowrap ml-4 shadow-sm cursor-pointer"
                 >

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDrawerNavigate } from "@/hooks/useDrawerNavigate";
 import { supabase } from "@/integrations/supabase/client";
 import { Briefcase, MapPin, Clock, ChevronRight, ShieldCheck, Leaf } from "lucide-react";
 import { isGreenTrade } from "@/lib/greenTrades";
@@ -37,6 +38,7 @@ const timeAgo = (dateStr: string) => {
 
 const AvailableJobsView = ({ tradeId }: { tradeId: string }) => {
   const navigate = useNavigate();
+  const openDrawer = useDrawerNavigate();
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
   const [fundsOnly, setFundsOnly] = useState(false);
@@ -209,7 +211,7 @@ const AvailableJobsView = ({ tradeId }: { tradeId: string }) => {
                   </p>
                 </div>
                 <button
-                  onClick={() => match.job_id && navigate(`/project/${match.job_id}`)}
+                  onClick={() => match.job_id && openDrawer(`/project/${match.job_id}`)}
                   className="flex items-center gap-1 bg-secondary text-secondary-foreground font-mono text-xs px-4 py-2 rounded-xl hover:opacity-90 transition-opacity whitespace-nowrap shadow-sm cursor-pointer"
                 >
                   View &amp; Quote
