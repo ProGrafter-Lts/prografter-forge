@@ -30,25 +30,27 @@ const MUTED = "#64748B";
 const RULE = "#E2E8F0";
 const CREAM = "#FAF8F3";
 
-// Register fonts (Google Fonts static TTF mirrors)
+// Register fonts (static TTF mirrors from fontsource via jsDelivr — @react-pdf
+// cannot parse Google's variable-font TTFs, so we use static weights here)
 try {
   Font.register({
     family: "DMSans",
     fonts: [
-      { src: "https://fonts.gstatic.com/s/dmsans/v15/rP2Hp2ywxg089UriCZOIHTWEBlw.ttf" },
-      { src: "https://fonts.gstatic.com/s/dmsans/v15/rP2Cp2ywxg089UriCZaIGDWCBl0O8w.ttf", fontWeight: 700 },
+      { src: "https://cdn.jsdelivr.net/fontsource/fonts/dm-sans@latest/latin-400-normal.ttf", fontWeight: 400 },
+      { src: "https://cdn.jsdelivr.net/fontsource/fonts/dm-sans@latest/latin-700-normal.ttf", fontWeight: 700 },
     ],
   });
   Font.register({
     family: "Bebas",
-    src: "https://fonts.gstatic.com/s/bebasneue/v14/JTUSjIg69CK48gW7PXoo9Wlhyw.ttf",
+    src: "https://cdn.jsdelivr.net/fontsource/fonts/bebas-neue@latest/latin-400-normal.ttf",
   });
   Font.register({
     family: "DMMono",
-    src: "https://fonts.gstatic.com/s/dmmono/v14/aFTU7PB1QTsUX8KYthSQBK6P.ttf",
+    src: "https://cdn.jsdelivr.net/fontsource/fonts/dm-mono@latest/latin-400-normal.ttf",
   });
   Font.registerHyphenationCallback((word: string) => [word]);
 } catch (_) { /* fallback to Helvetica */ }
+
 
 // ---------- Helpers ----------
 const fmtGBP = (pence: number) =>
