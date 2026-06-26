@@ -83,6 +83,7 @@ const MyQuoteChecks = () => {
                 <Link
                   key={r.id}
                   to={`/dashboard/quote-checks/${r.id}`}
+                  state={{ backgroundLocation: location }}
                   className="block bg-card rounded-2xl p-5 border border-border hover:border-secondary/40 hover:shadow-sm transition-all"
                 >
                   <div className="flex items-center justify-between gap-3">
