@@ -3665,6 +3665,34 @@ export type Database = {
         Returns: undefined
       }
       admin_approve_trade: { Args: { _trade_id: string }; Returns: Json }
+      admin_area_coverage: {
+        Args: never
+        Returns: {
+          area: string
+          job_count: number
+          match_count: number
+          trade_count: number
+        }[]
+      }
+      admin_lead_distribution: {
+        Args: never
+        Returns: {
+          job_created_at: string
+          job_id: string
+          job_postcode: string
+          job_ref: string
+          job_type: string
+          match_id: string
+          match_status: string
+          notified_at: string
+          trade_company: string
+          trade_id: string
+          trade_name: string
+          trade_postcode: string
+          trade_type: string
+          trade_verified: boolean
+        }[]
+      }
       compute_contract_hash: { Args: { _contract_id: string }; Returns: string }
       count_verified_trades: { Args: never; Returns: number }
       create_quote_check: {

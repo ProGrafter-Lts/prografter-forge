@@ -72,6 +72,7 @@ const AdminApplications = lazy(() => import("./pages/AdminApplications.tsx"));
 const AdminApplicationDetail = lazy(() => import("./pages/AdminApplicationDetail.tsx"));
 const AdminJobBriefs = lazy(() => import("./pages/AdminJobBriefs.tsx"));
 const AdminAnalytics = lazy(() => import("./pages/AdminAnalytics.tsx"));
+const AdminLeadDistribution = lazy(() => import("./pages/AdminLeadDistribution.tsx"));
 const AdminHome = lazy(() => import("./pages/AdminHome.tsx"));
 import AdminRoute from "./components/AdminRoute.tsx";
 import AppLayout from "./components/layout/AppLayout.tsx";
@@ -177,6 +178,7 @@ const AppRoutes = () => {
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="/admin" element={<AdminRoute><AdminHome /></AdminRoute>} />
             <Route path="/admin/analytics" element={<AdminRoute><AdminAnalytics /></AdminRoute>} />
+            <Route path="/admin/lead-distribution" element={<AdminRoute><AdminLeadDistribution /></AdminRoute>} />
             <Route path="*" element={<NotFound />} />
       </Routes>
 
