@@ -584,12 +584,69 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
 }
 
 /* ============================================================
-   Quote Health Check — QS-style HTML report styling (.qr-report)
+   Quote Health Check — white "paper" document (.qr-paper / .qr-report)
+   Fixed colours only, so it is identical on screen and in print.
    ============================================================ */
+.qr-paper {
+  color: #1f2a44;
+}
+.qr-card {
+  background: #ffffff;
+  color: #1f2a44;
+  border: 1px solid #e3e6ec;
+  border-radius: 1rem;
+  padding: 2rem;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 8px 24px rgba(16, 24, 40, 0.06);
+}
+@media (max-width: 640px) {
+  .qr-card { padding: 1.25rem; }
+}
+.qr-card-head {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding-bottom: 1.25rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid #e3e6ec;
+}
+.qr-score-block {
+  text-align: center;
+  flex-shrink: 0;
+}
+.qr-score {
+  font-family: var(--font-heading, inherit);
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1;
+  color: #1f2a44;
+}
+.qr-score-label {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.625rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #6b7280;
+  margin-top: 0.25rem;
+}
+/* Assessment verdict chip — always readable, fixed colours */
+.qr-chip {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+.qr-chip-good { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
+.qr-chip-warn { background: #eef2ff; color: #3730a3; border-color: #c7d2fe; }
+.qr-chip-bad  { background: #fef3c7; color: #92400e; border-color: #fcd34d; }
+
 .qr-report .qr-section {
   margin-top: 1.5rem;
   padding-top: 1.5rem;
-  border-top: 1px solid hsl(var(--border));
+  border-top: 1px solid #e3e6ec;
 }
 .qr-report .qr-section:first-child {
   margin-top: 0;
@@ -599,74 +656,95 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
 .qr-report h2 {
   font-family: var(--font-heading, inherit);
   font-size: 1.05rem;
-  font-weight: 600;
-  color: hsl(var(--navy, var(--foreground)));
+  font-weight: 700;
+  color: #1f2a44;
   margin-bottom: 0.75rem;
 }
 .qr-report p {
-  font-size: 0.875rem;
-  line-height: 1.6;
-  color: hsl(var(--muted-foreground));
+  font-size: 0.9rem;
+  line-height: 1.65;
+  color: #374151;
   margin-bottom: 0.5rem;
 }
 .qr-report ul,
 .qr-report ol {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0.45rem;
 }
 .qr-report ol {
   list-style: decimal;
   padding-left: 1.25rem;
 }
 .qr-report ol li {
-  font-size: 0.875rem;
-  line-height: 1.5;
-  color: hsl(var(--foreground));
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: #374151;
   padding-left: 0.25rem;
+}
+.qr-report .qr-figures ul {
+  gap: 0.3rem;
 }
 .qr-report .qr-figures li {
   font-size: 0.9rem;
-  color: hsl(var(--foreground));
+  color: #374151;
 }
 .qr-report strong {
-  color: hsl(var(--navy, var(--foreground)));
-  font-weight: 600;
+  color: #1f2a44;
+  font-weight: 700;
 }
 /* Checklist status items */
 .qr-report .qr-checklist li {
   position: relative;
-  padding: 0.55rem 0.75rem 0.55rem 2rem;
+  padding: 0.6rem 0.85rem 0.6rem 2.1rem;
   border-radius: 0.6rem;
-  font-size: 0.82rem;
-  line-height: 1.45;
+  font-size: 0.85rem;
+  line-height: 1.5;
   border: 1px solid transparent;
 }
 .qr-report .qr-checklist li::before {
   position: absolute;
-  left: 0.7rem;
-  top: 0.55rem;
+  left: 0.75rem;
+  top: 0.6rem;
   font-weight: 700;
 }
 .qr-report li.addressed {
-  background: #ECFDF5;
-  border-color: #BBF7D0;
-  color: #047857;
+  background: #ecfdf5;
+  border-color: #bbf7d0;
+  color: #065f46;
 }
-.qr-report li.addressed::before { content: "✓"; color: #10B981; }
+.qr-report li.addressed::before { content: "✓"; color: #10b981; }
 .qr-report li.unclear {
-  background: #F1EEE7;
-  border-color: #E3DECE;
-  color: #4B463B;
+  background: #f3f4f6;
+  border-color: #d1d5db;
+  color: #374151;
 }
-.qr-report li.unclear::before { content: "?"; color: #8A7B4F; }
+.qr-report li.unclear::before { content: "?"; color: #6b7280; }
 .qr-report li.missing {
-  background: #FBF1DC;
-  border-color: #EBD9AE;
-  color: #B07A12;
+  background: #fef3c7;
+  border-color: #fcd34d;
+  color: #92400e;
 }
-.qr-report li.missing::before { content: "!"; color: #B07A12; }
+.qr-report li.missing::before { content: "!"; color: #b45309; }
+/* The item name (bold) must stay the chip's dark text, never inherit white */
 .qr-report .qr-checklist li strong { color: inherit; }
+
+/* Disclaimer footer */
+.qr-disclaimer {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 0.85rem;
+  padding: 1rem;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75rem;
+  line-height: 1.6;
+  color: #92400e;
+}
+.qr-disclaimer svg { color: #d97706; }
+
 
 /* ============================================================
    Print stylesheet — window.print() produces a clean PDF of the
