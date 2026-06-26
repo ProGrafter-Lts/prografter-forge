@@ -16,6 +16,7 @@ interface QuoteCheckRow {
 
 const MyQuoteChecks = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { isReady, user } = useAuthReady();
   const [rows, setRows] = useState<QuoteCheckRow[]>([]);
   const [loading, setLoading] = useState(true);
