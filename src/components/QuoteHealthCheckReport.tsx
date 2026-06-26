@@ -8,9 +8,9 @@ interface ReportJson {
 }
 
 const DisclaimerBanner = () => (
-  <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex gap-3 items-start">
-    <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
-    <div className="font-mono text-xs text-amber-800 leading-relaxed">
+  <div className="qr-disclaimer">
+    <AlertTriangle className="h-5 w-5 shrink-0 mt-0.5" />
+    <div>
       This is guidance to help you compare quotes. It is not a quote, a survey, or
       professional advice.
     </div>
@@ -18,39 +18,31 @@ const DisclaimerBanner = () => (
 );
 
 /**
- * Renders the stored Quote Health Check exactly as the Image 2 design:
- * score badge, assessment chip, the model's HTML body (.qr-report) and the
- * disclaimer footer. Used both on the public report page and the in-account
- * report view so the on-screen and printed artefact are identical.
+ * Renders the stored Quote Health Check as a self-contained white "paper"
+ * document. All colours are fixed (not theme tokens) so the report is legible
+ * and identical whether it is shown on the dark dashboard, on the public report
+ * page, or printed to PDF. See .qr-paper / .qr-report styles in index.css.
  */
 const QuoteHealthCheckReport = ({ report }: { report: ReportJson }) => {
   const assessment = report.assessment;
   const assessmentClass =
     assessment === "Ready to Accept"
-      ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+      ? "qr-chip qr-chip-good"
       : assessment === "Significant Concerns"
-        ? "bg-[#FBF1DC] text-[#B07A12] border border-[#EBD9AE]"
-        : "bg-[#F1EEE7] text-navy border border-[#E3DECE]";
+        ? "qr-chip qr-chip-bad"
+        : "qr-chip qr-chip-warn";
 
   return (
-    <div className="space-y-6">
-      <div className="bg-card rounded-2xl border border-border p-6 md:p-8 shadow-sm">
-        <div className="flex flex-wrap items-center gap-3 mb-5">
+    <div className="qr-paper space-y-6">
+      <div className="qr-card">
+        <div className="qr-card-head">
           {typeof report.score_addressed === "number" && (
-            <div className="shrink-0 text-center">
-              <div className="qr-score font-heading text-4xl text-navy leading-none">
-                {report.score_addressed}
-              </div>
-              <div className="font-mono text-[10px] uppercase tracking-wide text-muted-foreground mt-1">
-                / 43 addressed
-              </div>
+            <div className="qr-score-block">
+              <div className="qr-score">{report.score_addressed}</div>
+              <div className="qr-score-label">/ 43 addressed</div>
             </div>
           )}
-          {assessment && (
-            <span className={`font-mono text-xs px-3 py-1.5 rounded-full ${assessmentClass}`}>
-              {assessment}
-            </span>
-          )}
+          {assessment && <span className={assessmentClass}>{assessment}</span>}
         </div>
         <div
           className="qr-report"
