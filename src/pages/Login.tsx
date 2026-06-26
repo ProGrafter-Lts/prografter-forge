@@ -259,8 +259,32 @@ const Login = () => {
           <p className="font-mono text-sm text-secondary-text mt-2">Sign in — trade or homeowner</p>
         </div>
 
+        {isReady && user && (
+          <div className="bg-white rounded-2xl p-6 shadow-lg border border-navy/10 mb-4">
+            <p className="font-mono text-xs text-secondary-text mb-1">You're already signed in as</p>
+            <p className="font-mono text-sm font-semibold text-navy break-all mb-4">{user.email}</p>
+            <div className="space-y-2">
+              <button
+                type="button"
+                onClick={continueWithCurrentSession}
+                className="w-full py-3 bg-teal text-cream font-mono text-sm rounded-xl hover:bg-teal-hover transition-colors shadow-lg shadow-teal/20"
+              >
+                Continue as this account
+              </button>
+              <button
+                type="button"
+                onClick={switchAccount}
+                className="w-full py-3 bg-transparent border border-navy/20 text-navy font-mono text-sm rounded-xl hover:bg-navy/5 transition-colors"
+              >
+                Sign in with a different account
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className="bg-white rounded-2xl p-8 shadow-lg border border-navy/10">
           <form onSubmit={handleLogin} className="space-y-5">
+
             {successMessage && (
               <div className="bg-teal/10 border border-teal/30 text-teal px-4 py-3 rounded-xl text-sm font-mono">
                 {successMessage}
