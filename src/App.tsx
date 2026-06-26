@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes, useLocation, type Location } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
@@ -75,6 +75,7 @@ const AdminAnalytics = lazy(() => import("./pages/AdminAnalytics.tsx"));
 const AdminHome = lazy(() => import("./pages/AdminHome.tsx"));
 import AdminRoute from "./components/AdminRoute.tsx";
 import AppLayout from "./components/layout/AppLayout.tsx";
+import DrawerHost from "./components/layout/DrawerHost.tsx";
 
 const queryClient = new QueryClient({
   defaultOptions: {
