@@ -164,23 +164,28 @@ Deno.serve(async (req) => {
         },
       );
     }
-    const { default: Stripe } = await import("https://esm.sh/stripe@18.5.0");
-    const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
-    let paid = false;
-    try {
-      const intent = await stripe.paymentIntents.retrieve(record.stripe_payment_id);
-      paid = intent.status === "succeeded";
-    } catch (e) {
-      console.error("analyse-quote: Stripe verification failed", e);
-    }
-    if (!paid) {
-      return new Response(
-        JSON.stringify({ error: "Stripe payment not in 'succeeded' state" }),
-        {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        },
-      );
+    // Free Quote Check entitlement: redeem-quote-check-entitlement already
+    // verified the signed-in user owns an unconsumed entitlement and consumed
+    // it server-side, so there is no Stripe payment to verify here.
+    if (record.stripe_payment_id !== "free_entitlement") {
+      const { default: Stripe } = await import("https://esm.sh/stripe@18.5.0");
+      const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
+      let paid = false;
+      try {
+        const intent = await stripe.paymentIntents.retrieve(record.stripe_payment_id);
+        paid = intent.status === "succeeded";
+      } catch (e) {
+        console.error("analyse-quote: Stripe verification failed", e);
+      }
+      if (!paid) {
+        return new Response(
+          JSON.stringify({ error: "Stripe payment not in 'succeeded' state" }),
+          {
+            status: 402,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          },
+        );
+      }
     }
 
     // Download the PDF from storage
