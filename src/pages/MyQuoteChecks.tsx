@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthReady } from "@/hooks/useAuthReady";
 import SEO from "@/components/SEO";
@@ -16,6 +16,7 @@ interface QuoteCheckRow {
 
 const MyQuoteChecks = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { isReady, user } = useAuthReady();
   const [rows, setRows] = useState<QuoteCheckRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -82,6 +83,7 @@ const MyQuoteChecks = () => {
                 <Link
                   key={r.id}
                   to={`/dashboard/quote-checks/${r.id}`}
+                  state={{ backgroundLocation: location }}
                   className="block bg-card rounded-2xl p-5 border border-border hover:border-secondary/40 hover:shadow-sm transition-all"
                 >
                   <div className="flex items-center justify-between gap-3">

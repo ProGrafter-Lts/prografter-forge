@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDrawerNavigate } from "@/hooks/useDrawerNavigate";
 import { SearchCheck, Shield, ArrowRight, Check, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import VerifiedTradeBadge from "@/components/trade/VerifiedTradeBadge";
@@ -98,6 +99,7 @@ const RatingDisplay = ({
 
 const QuotesReceived = ({ quotes, onQuoteAccepted }: QuotesReceivedProps) => {
   const navigate = useNavigate();
+  const openDrawer = useDrawerNavigate();
   const [pendingAccept, setPendingAccept] = useState<Quote | null>(null);
   const [accepting, setAccepting] = useState(false);
 
@@ -152,7 +154,7 @@ const QuotesReceived = ({ quotes, onQuoteAccepted }: QuotesReceivedProps) => {
     const targetJobId = pendingAccept.job_id;
     setPendingAccept(null);
     onQuoteAccepted?.();
-    navigate(`/project/${targetJobId}/contract`);
+    openDrawer(`/project/${targetJobId}/contract`);
   };
 
   if (quotes.length === 0) {
@@ -188,7 +190,7 @@ const QuotesReceived = ({ quotes, onQuoteAccepted }: QuotesReceivedProps) => {
         <h2 className="font-heading text-primary text-2xl">Quotes Received</h2>
         {compareableJobIds.length > 0 && (
           <button
-            onClick={() => navigate(`/project/${compareableJobIds[0]}/compare`)}
+            onClick={() => openDrawer(`/project/${compareableJobIds[0]}/compare`)}
             className="bg-secondary text-secondary-foreground font-mono text-sm px-4 py-2 rounded-xl hover:opacity-90 transition-opacity shadow-sm inline-flex items-center gap-2"
           >
             Compare All Quotes <ArrowRight className="w-4 h-4" />
@@ -311,14 +313,14 @@ const QuotesReceived = ({ quotes, onQuoteAccepted }: QuotesReceivedProps) => {
                   </span>
                 )}
                 <button
-                  onClick={() => navigate(`/project/${q.job_id}`)}
+                  onClick={() => openDrawer(`/project/${q.job_id}`)}
                   className="font-mono text-xs text-secondary hover:underline"
                 >
                   View project →
                 </button>
                 {(byJob[q.job_id]?.length ?? 0) >= 2 && (
                   <button
-                    onClick={() => navigate(`/project/${q.job_id}/compare`)}
+                    onClick={() => openDrawer(`/project/${q.job_id}/compare`)}
                     className="font-mono text-xs text-secondary hover:underline"
                   >
                     Compare with other quotes →

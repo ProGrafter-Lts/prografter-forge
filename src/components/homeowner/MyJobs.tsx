@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useDrawerNavigate } from "@/hooks/useDrawerNavigate";
 import { MapPin, FolderKanban } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { formatStatusLabel } from "@/lib/statusLabel";
@@ -33,6 +34,7 @@ interface Job {
 
 const MyJobs = ({ jobs }: { jobs: Job[] }) => {
   const navigate = useNavigate();
+  const openDrawer = useDrawerNavigate();
 
   return (
     <section>
@@ -66,7 +68,7 @@ const MyJobs = ({ jobs }: { jobs: Job[] }) => {
           {jobs.map((job) => (
             <div
               key={job.id}
-              onClick={() => navigate(`/project/${job.id}`)}
+              onClick={() => openDrawer(`/project/${job.id}`)}
               className="bg-card rounded-2xl p-5 border border-border shadow-sm flex items-center justify-between cursor-pointer hover:border-secondary/30 hover:shadow-md transition-all"
             >
               <div>

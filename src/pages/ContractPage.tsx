@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import { useDrawerNavigate } from "@/hooks/useDrawerNavigate";
 import { ArrowLeft, FileText, ShieldAlert, Check, Clock, Loader2, Lock, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -70,6 +71,7 @@ type UnavailableReason = "no_contract" | "awaiting_signatures" | "permission_den
 const ContractPage = () => {
   const { id: jobId } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const openDrawer = useDrawerNavigate();
 
   const [loading, setLoading] = useState(true);
   const [contract, setContract] = useState<ContractRow | null>(null);
@@ -297,7 +299,7 @@ const ContractPage = () => {
       />
       <div className="max-w-4xl mx-auto px-4 py-6">
         <button
-          onClick={() => navigate(`/project/${jobId}`)}
+          onClick={() => openDrawer(`/project/${jobId}`)}
           className="font-mono text-xs text-muted-foreground hover:text-primary inline-flex items-center gap-1 mb-4"
         >
           <ArrowLeft className="w-3.5 h-3.5" /> Back to project

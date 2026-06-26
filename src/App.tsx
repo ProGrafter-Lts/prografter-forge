@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes, useLocation, type Location } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
@@ -75,6 +75,7 @@ const AdminAnalytics = lazy(() => import("./pages/AdminAnalytics.tsx"));
 const AdminHome = lazy(() => import("./pages/AdminHome.tsx"));
 import AdminRoute from "./components/AdminRoute.tsx";
 import AppLayout from "./components/layout/AppLayout.tsx";
+import DrawerHost from "./components/layout/DrawerHost.tsx";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -93,9 +94,13 @@ const RouteFallback = () => (
 
 const AppRoutes = () => {
   usePageTracking();
+  const location = useLocation();
+  const backgroundLocation = (location.state as { backgroundLocation?: Location } | null)
+    ?.backgroundLocation;
   return (
     <Suspense fallback={<RouteFallback />}>
-      <Routes>
+      <Routes location={backgroundLocation ?? location}>
+
 
             <Route path="/" element={<Index />} />
             <Route path="/terms" element={<Terms />} />
@@ -174,6 +179,25 @@ const AppRoutes = () => {
             <Route path="/admin/analytics" element={<AdminRoute><AdminAnalytics /></AdminRoute>} />
             <Route path="*" element={<NotFound />} />
       </Routes>
+
+      {/* Drawer layer: when a backgroundLocation is present, detail routes render
+          in a slide-over Sheet over the preserved dashboard list. */}
+      {backgroundLocation && (
+        <Routes>
+          <Route
+            element={
+              <ProtectedRoute>
+                <DrawerHost />
+              </ProtectedRoute>
+            }
+          >
+            <Route path="/project/:id" element={<ProjectDetail />} />
+            <Route path="/project/:id/compare" element={<CompareQuotes />} />
+            <Route path="/project/:id/contract" element={<ContractPage />} />
+            <Route path="/dashboard/quote-checks/:id" element={<QuoteCheckDetail />} />
+          </Route>
+        </Routes>
+      )}
     </Suspense>
   );
 };

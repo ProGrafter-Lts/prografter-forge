@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useDrawerNavigate } from "@/hooks/useDrawerNavigate";
 import { FolderKanban, MapPin, Clock, FileText, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { isActiveJob } from "@/lib/activeProjects";
@@ -43,6 +44,7 @@ const timeAgo = (dateStr: string) => {
 
 const ActiveProjectsSection = ({ jobs, quoteCounts, activeJobs: activeJobsProp }: Props) => {
   const navigate = useNavigate();
+  const openDrawer = useDrawerNavigate();
 
   const activeJobs = activeJobsProp ?? jobs.filter(isActiveJob);
 
@@ -102,14 +104,14 @@ const ActiveProjectsSection = ({ jobs, quoteCounts, activeJobs: activeJobsProp }
 
               <div className="flex flex-wrap items-center gap-2 mt-3">
                 <button
-                  onClick={() => navigate(`/project/${job.id}`)}
+                  onClick={() => openDrawer(`/project/${job.id}`)}
                   className="bg-secondary text-secondary-foreground font-mono text-xs px-4 py-2 rounded-xl hover:opacity-90 transition-opacity shadow-sm inline-flex items-center gap-1.5"
                 >
                   <FileText className="w-3.5 h-3.5" /> View Project
                 </button>
                 {count > 0 && (
                   <button
-                    onClick={() => navigate(`/project/${job.id}/compare`)}
+                    onClick={() => openDrawer(`/project/${job.id}/compare`)}
                     className="border border-secondary/40 text-secondary font-mono text-xs px-4 py-2 rounded-xl hover:bg-secondary/5 transition-colors inline-flex items-center gap-1.5"
                   >
                     <Users className="w-3.5 h-3.5" />
