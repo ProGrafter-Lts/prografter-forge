@@ -525,31 +525,13 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
 }
 
 /* ============================================================
-   Quote Health Check report on the DARK dashboard. The report HTML
-   is injected via dangerouslySetInnerHTML and uses navy/muted tokens
-   that are unreadable on the dark card — remap them to light here.
-   (Print stylesheet below restores white-background colours.)
+   Quote Health Check renders as a self-contained white "paper"
+   document (.qr-paper). Colours are fixed (not theme tokens) so it
+   stays legible and identical on the dark dashboard, the public page
+   and in print. The dark-dashboard remaps that used to lighten the
+   report text have been removed on purpose — do not re-add them.
    ============================================================ */
-.dashboard-dark .qr-report h2 {
-  color: #5EEAD4 !important;
-}
-.dashboard-dark .qr-report p {
-  color: rgba(255, 255, 255, 0.78) !important;
-}
-.dashboard-dark .qr-report ol li,
-.dashboard-dark .qr-report .qr-figures li,
-.dashboard-dark .qr-report strong {
-  color: rgba(255, 255, 255, 0.92) !important;
-}
-.dashboard-dark .qr-report .qr-section {
-  border-top-color: rgba(255, 255, 255, 0.10) !important;
-}
-/* Score number uses the .qr-score class so we can lighten just that. */
-.dashboard-dark .qr-score {
-  color: #FFFFFF !important;
-}
-/* Checklist chips keep their own light backgrounds so their dark text
-   stays readable. */
+
 
 
 /* Dashboard sidebar (navy) */
