@@ -94,9 +94,13 @@ const RouteFallback = () => (
 
 const AppRoutes = () => {
   usePageTracking();
+  const location = useLocation();
+  const backgroundLocation = (location.state as { backgroundLocation?: Location } | null)
+    ?.backgroundLocation;
   return (
     <Suspense fallback={<RouteFallback />}>
-      <Routes>
+      <Routes location={backgroundLocation ?? location}>
+
 
             <Route path="/" element={<Index />} />
             <Route path="/terms" element={<Terms />} />
