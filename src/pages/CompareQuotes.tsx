@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useDrawerNavigate } from "@/hooks/useDrawerNavigate";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Check, X, AlertTriangle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -105,6 +106,7 @@ const No = ({ warn = false }: { warn?: boolean }) => (
 const CompareQuotes = () => {
   const { id: jobId } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const openDrawer = useDrawerNavigate();
   const [job, setJob] = useState<JobInfo | null>(null);
   const [quotes, setQuotes] = useState<QuoteRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -138,7 +140,7 @@ const CompareQuotes = () => {
       toast.error("Couldn't accept quote — please try again");
     } else {
       toast.success("Quote accepted");
-      navigate(`/project/${jobId}`);
+      openDrawer(`/project/${jobId}`);
     }
   };
 
@@ -286,7 +288,7 @@ const CompareQuotes = () => {
               </p>
             </div>
             <button
-              onClick={() => navigate(`/project/${jobId}`)}
+              onClick={() => openDrawer(`/project/${jobId}`)}
               className="font-mono text-xs text-secondary hover:underline inline-flex items-center gap-1"
             >
               <ArrowLeft className="w-3 h-3" /> Back to project
