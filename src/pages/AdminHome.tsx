@@ -6,6 +6,7 @@ const SECTIONS: { to: string; label: string; desc: string }[] = [
   { to: "/admin/applications", label: "Applications", desc: "Review trade applications and references" },
   { to: "/admin/verifications", label: "Verifications", desc: "Approve, query or reject pending trades" },
   { to: "/admin/job-briefs", label: "Job briefs", desc: "Homeowner job briefs submitted" },
+  { to: "/admin/lead-distribution", label: "Lead distribution", desc: "Which trades got which briefs; area balance" },
   { to: "/admin/disputes", label: "Disputes", desc: "Open and resolved disputes" },
   { to: "/admin/suppliers", label: "Suppliers", desc: "Supplier directory" },
   { to: "/admin/testimonials", label: "Testimonials", desc: "Review submitted testimonials" },
