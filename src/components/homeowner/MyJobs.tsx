@@ -5,14 +5,14 @@ import { Badge } from "@/components/ui/badge";
 import { formatStatusLabel } from "@/lib/statusLabel";
 
 const STATUS_COLORS: Record<string, string> = {
-  open: "bg-secondary/10 text-secondary",
-  awaiting_quotes: "bg-amber-100 text-amber-800",
-  matched: "bg-blue-100 text-blue-700",
-  active: "bg-amber-100 text-amber-700",
-  in_progress: "bg-secondary/15 text-secondary",
-  review: "bg-purple-100 text-purple-800",
-  complete: "bg-green-100 text-green-700",
-  completed: "bg-green-100 text-green-700",
+  open: "border-transparent bg-secondary/15 text-secondary hover:bg-secondary/15",
+  awaiting_quotes: "border-transparent bg-amber-200 text-amber-900 hover:bg-amber-200",
+  matched: "border-transparent bg-blue-200 text-blue-900 hover:bg-blue-200",
+  active: "border-transparent bg-amber-200 text-amber-900 hover:bg-amber-200",
+  in_progress: "border-transparent bg-secondary/20 text-secondary hover:bg-secondary/20",
+  review: "border-transparent bg-purple-200 text-purple-900 hover:bg-purple-200",
+  complete: "border-transparent bg-green-200 text-green-900 hover:bg-green-200",
+  completed: "border-transparent bg-green-200 text-green-900 hover:bg-green-200",
 };
 
 const timeAgo = (dateStr: string) => {
