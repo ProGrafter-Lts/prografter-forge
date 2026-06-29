@@ -33,7 +33,6 @@ interface PlanningAlert {
   viewed: boolean;
   actioned: boolean;
   planning_portal_url: string | null;
-  applicant_phone: string | null;
 }
 
 interface TradeProfile {
