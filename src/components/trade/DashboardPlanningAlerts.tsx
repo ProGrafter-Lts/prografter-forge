@@ -494,7 +494,7 @@ const DashboardPlanningAlerts = ({ trade }: { trade: TradeProfile }) => {
               <LeadQuickActions
                 tradeId={trade.id}
                 planningAlertId={alert.id}
-                applicantPhone={alert.applicant_phone}
+                applicantPhone={null}
                 currentStatus={row?.contact_status ?? null}
                 shortlistRowId={row?.id ?? null}
                 onStatusChanged={(next) => handleStatusChanged(alert.id, next)}
