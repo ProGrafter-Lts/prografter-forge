@@ -1541,7 +1541,6 @@ export type Database = {
         Row: {
           actioned: boolean
           address: string
-          applicant_phone: string | null
           application_ref: string
           application_type: string
           approved_date: string | null
@@ -1559,7 +1558,6 @@ export type Database = {
         Insert: {
           actioned?: boolean
           address: string
-          applicant_phone?: string | null
           application_ref: string
           application_type: string
           approved_date?: string | null
@@ -1577,7 +1575,6 @@ export type Database = {
         Update: {
           actioned?: boolean
           address?: string
-          applicant_phone?: string | null
           application_ref?: string
           application_type?: string
           approved_date?: string | null
