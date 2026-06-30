@@ -146,15 +146,30 @@ export default function AdminApplicationDetail() {
     if (error) { toast.error(error.message); return; }
     await logApplicationEvent(app.id, `decision_${decision}`, { reason: reason.trim() });
     let emailSent = false;
-    if ((decision === "approved" || decision === "rejected") && app.applicant_email) {
+    if (decision === "approved" && app.applicant_email) {
+      // Provisioning creates/links the auth account + trades row, then emails a
+      // one-click magic login link via the trade-verified template.
+      try {
+        const { error: provErr } = await supabase.functions.invoke("provision-trade-account", {
+          body: { applicationId: app.id },
+        });
+        if (provErr) throw provErr;
+        emailSent = true;
+        await logApplicationEvent(app.id, "account_provisioned", {});
+        await logApplicationEvent(app.id, "email_queued", { type: decision });
+      } catch (e) {
+        console.warn("trade account provisioning failed", e);
+        await logApplicationEvent(app.id, "provision_failed", {});
+      }
+    } else if (decision === "rejected" && app.applicant_email) {
       const firstName = (app.full_name || "").trim().split(/\s+/)[0] || "";
       try {
         const { error: emailError } = await supabase.functions.invoke("send-transactional-email", {
           body: {
-            templateName: decision === "approved" ? "trade-verified" : "trade-rejected",
+            templateName: "trade-rejected",
             recipientEmail: app.applicant_email,
-            idempotencyKey: `application-${decision}-${app.id}`,
-            templateData: decision === "approved" ? { firstName } : { firstName, reason: reason.trim() },
+            idempotencyKey: `application-rejected-${app.id}`,
+            templateData: { firstName, reason: reason.trim() },
           },
         });
         if (emailError) throw emailError;
