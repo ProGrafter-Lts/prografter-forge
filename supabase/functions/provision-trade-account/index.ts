@@ -219,11 +219,14 @@ Deno.serve(async (req) => {
   }
 
   // --- Generate a one-click magic login link ---
+  // Route straight to the trade dashboard via a safe `next` param so dual-role
+  // (homeowner+trade) accounts still land on the trade side.
+  const redirectTo = `${SITE_URL}${CALLBACK_PATH}?next=${encodeURIComponent('/dashboard/trade')}`
   let loginUrl = `${SITE_URL}/dashboard/trade`
   const { data: linkData, error: linkErr } = await supabase.auth.admin.generateLink({
     type: 'magiclink',
     email: emailLower,
-    options: { redirectTo: `${SITE_URL}${CALLBACK_PATH}` },
+    options: { redirectTo },
   })
   if (!linkErr && linkData?.properties?.action_link) {
     loginUrl = linkData.properties.action_link
