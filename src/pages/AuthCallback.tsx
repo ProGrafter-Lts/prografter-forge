@@ -30,7 +30,7 @@ const AuthCallback = () => {
       });
     };
 
-    /** Route by role: admins to /admin, everyone else to homeowner dashboard. */
+    /** Route by role: admins to /admin, trades to their dashboard, else homeowner. */
     const finishByRole = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
@@ -42,6 +42,22 @@ const AuthCallback = () => {
           .maybeSingle();
         if (adminRole) {
           finish("/admin");
+          return;
+        }
+        let userType =
+          typeof user.user_metadata?.user_type === "string"
+            ? user.user_metadata.user_type
+            : null;
+        if (!userType) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("user_type")
+            .eq("user_id", user.id)
+            .maybeSingle();
+          userType = profile?.user_type ?? null;
+        }
+        if (userType === "trade") {
+          finish("/dashboard/trade");
           return;
         }
       }
