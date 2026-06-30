@@ -45,7 +45,7 @@ export const MagicLinkEmail = ({
         {token ? (
           <>
             <Text style={text}>
-              Or, if the button doesn't sign you in, enter this 6-digit code on the
+              Or, if the button doesn't sign you in, enter this code on the
               sign-in screen:
             </Text>
             <Text style={code}>{token}</Text>
