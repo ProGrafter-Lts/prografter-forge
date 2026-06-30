@@ -30,8 +30,23 @@ const AuthCallback = () => {
       });
     };
 
-    /** Route by role: admins to /admin, trades to their dashboard, else homeowner. */
+    /** Only allow same-origin internal paths to prevent open-redirect abuse. */
+    const safeNext = (): string | null => {
+      const raw = new URLSearchParams(window.location.search).get("next");
+      if (!raw) return null;
+      let decoded = raw;
+      try { decoded = decodeURIComponent(raw); } catch { decoded = raw; }
+      if (decoded.startsWith("/") && !decoded.startsWith("//")) return decoded;
+      return null;
+    };
+
+    /** Route by role: explicit next wins, then admins, trades, else homeowner. */
     const finishByRole = async () => {
+      const next = safeNext();
+      if (next) {
+        finish(next);
+        return;
+      }
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         const { data: adminRole } = await supabase
