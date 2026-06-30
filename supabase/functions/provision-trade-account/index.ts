@@ -132,16 +132,18 @@ Deno.serve(async (req) => {
     .eq('email', emailLower)
     .maybeSingle()
 
+  // An account already used as a homeowner can ALSO be a trade (dual-role).
+  // We never clobber an existing homeowner's primary type — we just attach a
+  // verified trades row and route their login link to the trade dashboard.
+  const existingType = existingProfile?.user_type ?? null
+  const isDualHomeowner = existingType === 'homeowner'
+
   if (existingProfile?.user_id) {
-    if (existingProfile.user_type && existingProfile.user_type !== 'trade') {
-      return new Response(JSON.stringify({
-        error: 'This email is already registered for another ProGrafter account type.',
-      }), { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
-    }
     tradeUserId = existingProfile.user_id
     await supabase.auth.admin.updateUserById(tradeUserId, {
       email_confirm: true,
-      user_metadata: userMetadata,
+      // Preserve a homeowner's metadata; only set trade metadata for new/trade users.
+      ...(isDualHomeowner ? {} : { user_metadata: userMetadata }),
     })
   }
 
