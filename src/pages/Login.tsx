@@ -393,7 +393,7 @@ const Login = () => {
                     inputMode="numeric"
                     autoComplete="one-time-code"
                     value={homeownerCode}
-                    onChange={(e) => setHomeownerCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                    onChange={(e) => setHomeownerCode(e.target.value.replace(/\D/g, "").slice(0, 8))}
                     placeholder="123456"
                     className="w-full px-3 py-2 rounded-lg border border-navy/20 bg-white font-mono text-sm tracking-[0.3em] text-center focus:outline-none focus:ring-2 focus:ring-teal/40 focus:border-teal"
                   />
