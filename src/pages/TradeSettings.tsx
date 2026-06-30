@@ -1,6 +1,7 @@
 import { useState } from "react";
 import TradeSidebar from "@/components/trade/TradeSidebar";
 import CalendarConnect from "@/components/trade/CalendarConnect";
+import TradePasswordSection from "@/components/trade/TradePasswordSection";
 import { Settings as SettingsIcon } from "lucide-react";
 
 const TradeSettings = () => {
@@ -33,6 +34,7 @@ const TradeSettings = () => {
           </div>
 
           <CalendarConnect variant="full" />
+          <TradePasswordSection />
         </div>
       </main>
     </div>

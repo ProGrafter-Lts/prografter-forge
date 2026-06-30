@@ -30,8 +30,23 @@ const AuthCallback = () => {
       });
     };
 
-    /** Route by role: admins to /admin, everyone else to homeowner dashboard. */
+    /** Only allow same-origin internal paths to prevent open-redirect abuse. */
+    const safeNext = (): string | null => {
+      const raw = new URLSearchParams(window.location.search).get("next");
+      if (!raw) return null;
+      let decoded = raw;
+      try { decoded = decodeURIComponent(raw); } catch { decoded = raw; }
+      if (decoded.startsWith("/") && !decoded.startsWith("//")) return decoded;
+      return null;
+    };
+
+    /** Route by role: explicit next wins, then admins, trades, else homeowner. */
     const finishByRole = async () => {
+      const next = safeNext();
+      if (next) {
+        finish(next);
+        return;
+      }
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         const { data: adminRole } = await supabase
@@ -42,6 +57,22 @@ const AuthCallback = () => {
           .maybeSingle();
         if (adminRole) {
           finish("/admin");
+          return;
+        }
+        let userType =
+          typeof user.user_metadata?.user_type === "string"
+            ? user.user_metadata.user_type
+            : null;
+        if (!userType) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("user_type")
+            .eq("user_id", user.id)
+            .maybeSingle();
+          userType = profile?.user_type ?? null;
+        }
+        if (userType === "trade") {
+          finish("/dashboard/trade");
           return;
         }
       }

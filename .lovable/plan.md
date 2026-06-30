@@ -1,30 +1,39 @@
-# Authenticated shell consolidation
+# Fix trade application confirmation + login
 
-Items 3 (loading-gated redirect) and 4 (persistSession/autoRefreshToken) already pass and need no change. This plan fixes items 1, 2, and 5 and consolidates duplicate flows.
+## Problem (confirmed from the email log and code)
 
-## 1. One shared AppLayout via nested routing
-- Create `src/components/layout/AppLayout.tsx`: persistent top bar (logo + role-aware nav), a Back control (`useNavigate(-1)` with a sensible fallback), and a breadcrumb derived from the route. Renders `<Outlet />` for page content.
-- Make it role-aware (trade vs homeowner vs admin) reusing existing `TradeSidebar`/`HomeownerSidebar`/`AdminNav` inside the single shell so chrome lives in exactly one place.
-- Restructure `App.tsx` so all authenticated routes are children of a single parent `<Route element={<ProtectedRoute><AppLayout/></ProtectedRoute>}>` (and an admin parent for `/admin/*`). Pages drop their own `min-h-screen`/sidebar wrappers and render only their content.
+Two separate, real gaps — both reproduced for `prografter.test@gmail.com`:
 
-## 2. Router-only in-app navigation
-Replace in-app `<a href>` / `window.location` with `<Link>`/`useNavigate`:
-- `ContractPage.tsx` logo, `PostJobBrief.tsx:918`, `QuoteCheckerAI.tsx` `/post-job-brief`, `GreenGrantsChecker.tsx` (×2), admin links in `Vetting.tsx`/`PlanningPipeline.tsx`.
-- Leave legitimate external/non-nav uses: Stripe checkout redirect (`QuoteChecker.tsx`), `tel:` links, analytics, and public marketing chrome (Navbar/Footer/Hero) unless you want those converted too.
+1. **No confirmation email on submit.** The application form (`src/pages/Apply.tsx`) only fires the internal admin alert (`trade-signup-admin-notification`). It never sends the applicant the `trade-welcome` email. The email log confirms it: today's submission produced only the `trade-verified` (approval) email; the last `trade-welcome` was 19 June. The template exists and is registered — it's just never called.
 
-## 3. Detail-as-overlay (preserve list + scroll)
-- Convert `/project/:id`, `/project/:id/compare`, `/project/:id/contract`, and `/dashboard/quote-checks/:id` to nested routes rendered in a slide-over `Drawer`/`Sheet` over the dashboard list, using the existing `ui/sheet.tsx`/`ui/drawer.tsx`.
-- Keep the list mounted underneath; closing the drawer returns to the preserved scroll position. Direct deep-links still work (drawer opens over the relevant list).
+2. **Approval creates no login.** The application flow writes only to the `trade_applications` table. It never creates an auth account or a `trades` record. So "approving" in admin sends the verified email but provisions nothing to log into — there are genuinely no credentials. (The `trades` row + `has_role` that the trade dashboard needs are only created by the signup trigger when an auth user signs up as a trade.)
 
-## 4. Consolidate duplicate flows (separate, reviewable commits)
-- Job posting: retire `PostAJob` standalone in favour of `PostJobBrief`.
-- Quote checker: merge `QuoteChecker` + `QuoteCheckerAI` into one entry.
-- Trade registration: collapse `TradeRegister`/`TradeRegisterNew`/`SignupTrade` behind `SignupTradeRedirect`.
-- Report UI: share one component between `QuoteCheckDetail` and `QuoteReport`.
+## What we'll build
 
-## Verification
-- Typecheck + build after each phase.
-- Playwright pass per authenticated route: confirm single shell, back/breadcrumb present, no full-page reloads on in-app nav, drawer preserves underlying list scroll, and deep-link + refresh still resolve session without a redirect flash.
+### 1. Application confirmation email (immediate fix)
+In `Apply.tsx` `submit()`, after the record is saved, also invoke `send-transactional-email` with `templateName: "trade-welcome"`, `recipientEmail: applicantEmail`, idempotency key `trade-application-welcome-<applicationId>`, and `templateData: { firstName }`. Non-blocking, like the existing admin notification, so the confirmation screen still shows on email delay. (`trade-welcome` already says "5–7 working days", matching the on-screen message.)
 
-## Risk / sequencing
-Live app on a custom domain, so I'll land this in phases (layout shell → nav cleanup → drawers → de-dup), verifying after each, rather than one large change.
+### 2. Provision a real login on approval (magic link + optional password)
+Mirror the homeowner pattern. Add a new edge function `provision-trade-account` (admin-only, validates the caller is an admin via the service role + `has_role`) that, given an application id:
+- Creates the auth user if one doesn't exist for that email (with `user_type: 'trade'` and name/company/phone/postcode/trade metadata, so the existing `handle_new_user` trigger creates the `trades` row), or fetches the existing user.
+- Links the trade record (sets `verified = true`, `verification_status = 'approved'`) so the dashboard works on first login.
+- Generates and sends a **magic link** to the applicant's email so they can log in with one click.
+
+Wire it into the admin approve action in `src/pages/AdminApplicationDetail.tsx` `decide("approved")`: after the existing `trade-verified` email, call `provision-trade-account`. The verified email link to `/dashboard/trade` then lands on a working, authenticated account.
+
+### 3. Trade login + optional password
+- Ensure `src/pages/Login.tsx` supports a trade magic-link / OTP path (it already has a homeowner magic-link path; extend it to trades) so the emailed link and manual code both resolve via `/auth/callback`.
+- Add an optional "Set a password" section to the trade dashboard (`src/pages/TradeDashboard.tsx`), reusing the same pattern as `HomeownerProfileSection.tsx`, so the trade can set a password for future direct logins instead of relying on magic links.
+
+### 4. Recover the existing account
+After the fix is in, re-run approval/provisioning for `prografter.test@gmail.com` so the already-approved test account gets a working login and a magic link, without needing a brand-new submission.
+
+## Technical notes
+- New edge function uses the service role and an explicit admin check; it is the only place auth users are created from applications.
+- `handle_new_user` already maps `user_type: 'trade'` metadata to a `trades` row — no trigger changes needed.
+- Magic-link redirect uses `${window.location.origin}/auth/callback` then routes to `/dashboard/trade`.
+- Deploy `send-transactional-email` is unaffected (template already registered); deploy the new `provision-trade-account` function.
+
+## Out of scope
+- No change to the application form fields or the 5–7 working day messaging (already correct).
+- No bulk/marketing email.
