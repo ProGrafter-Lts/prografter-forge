@@ -353,7 +353,7 @@ const Login = () => {
           <div className="mt-6 text-center space-y-2">
             <div className="rounded-xl border border-navy/10 bg-cream/60 p-4 text-left">
               <p className="font-mono text-xs font-semibold text-navy mb-3">
-                Already posted a job? Enter your email for a secure sign-in link.
+                Trade or homeowner? Enter your email for a secure sign-in link.
               </p>
               <form onSubmit={handleHomeownerMagicLink} className="space-y-3">
                 {homeownerSent && (
