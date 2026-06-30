@@ -386,7 +386,7 @@ const Login = () => {
               {homeownerSent && (
                 <form onSubmit={handleHomeownerCode} className="space-y-3 mt-3 pt-3 border-t border-navy/10">
                   <p className="font-mono text-xs text-navy">
-                    Enter the 6-digit code from the email:
+                    Enter the code from the email:
                   </p>
                   <input
                     type="text"
