@@ -358,7 +358,7 @@ const Login = () => {
               <form onSubmit={handleHomeownerMagicLink} className="space-y-3">
                 {homeownerSent && (
                   <div className="bg-teal/10 border border-teal/30 text-teal px-3 py-2 rounded-lg text-xs font-mono">
-                    Email sent. Click the link in your inbox, or enter the 6-digit code below.
+                    Email sent. Click the link in your inbox, or enter the code below.
                   </div>
                 )}
                 {homeownerError && (
