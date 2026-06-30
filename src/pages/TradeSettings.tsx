@@ -34,6 +34,7 @@ const TradeSettings = () => {
           </div>
 
           <CalendarConnect variant="full" />
+          <TradePasswordSection />
         </div>
       </main>
     </div>
