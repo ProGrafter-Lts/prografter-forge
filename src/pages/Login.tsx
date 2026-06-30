@@ -230,7 +230,19 @@ const Login = () => {
 
     const { data: { user: otpUser } } = await supabase.auth.getUser();
     if (otpUser) {
-      await redirectAfterAuth(otpUser.id, "homeowner");
+      let userType =
+        typeof otpUser.user_metadata?.user_type === "string"
+          ? otpUser.user_metadata.user_type
+          : null;
+      if (!userType) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("user_type")
+          .eq("user_id", otpUser.id)
+          .maybeSingle();
+        userType = profile?.user_type ?? null;
+      }
+      await redirectAfterAuth(otpUser.id, userType);
     } else {
       goTo("/dashboard/homeowner");
     }
