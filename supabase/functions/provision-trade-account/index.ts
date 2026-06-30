@@ -179,8 +179,16 @@ Deno.serve(async (req) => {
   }
 
   // --- Ensure profile + trades rows exist and are verified ---
+  // Don't downgrade a dual homeowner's primary type.
   await supabase.from('profiles').upsert(
-    { user_id: tradeUserId, email: emailLower, full_name: fullName, user_type: 'trade', postcode, phone },
+    {
+      user_id: tradeUserId,
+      email: emailLower,
+      full_name: fullName,
+      user_type: isDualHomeowner ? 'homeowner' : 'trade',
+      postcode,
+      phone,
+    },
     { onConflict: 'user_id' },
   )
 
