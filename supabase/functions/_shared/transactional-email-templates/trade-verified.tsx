@@ -4,24 +4,26 @@ import { ProGrafterShell, Para, CTA, InfoCard, SITE_NAME, SITE_URL } from './_br
 
 interface TradeVerifiedProps {
   firstName?: string
+  loginUrl?: string
 }
 
-const TradeVerifiedEmail = ({ firstName }: TradeVerifiedProps) => (
+const TradeVerifiedEmail = ({ firstName, loginUrl }: TradeVerifiedProps) => (
   <ProGrafterShell
     preview={`You're verified — start quoting on ${SITE_NAME}`}
     heading={firstName ? `You're in, ${firstName}.` : `You're in.`}
   >
     <Para>{firstName ? `Hi ${firstName},` : 'Hi there,'}</Para>
     <Para>
-      Good news. Your {SITE_NAME} account has been verified. You can now see and quote
-      on homeowner jobs in your area.
+      Good news. Your {SITE_NAME} account has been verified. Click the button below to
+      log straight in — no password needed. You can set a password from your dashboard
+      once you're in.
     </Para>
     <InfoCard title="Your terms">
       • No subscription<br />
       • No lead fees<br />
       • 7.5% commission (capped at £900) only when you complete a project
     </InfoCard>
-    <CTA href={`${SITE_URL}/dashboard/trade`} label="Browse available jobs" />
+    <CTA href={loginUrl || `${SITE_URL}/dashboard/trade`} label="Log in to your dashboard" />
   </ProGrafterShell>
 )
 
