@@ -2050,57 +2050,99 @@ export type Database = {
       }
       quote_checks: {
         Row: {
+          certification_readiness: string | null
+          checker_type: string
+          comparison_readiness: string | null
+          completeness_pct: number | null
           created_at: string
+          created_project: boolean
           description: string
           email: string
           id: string
+          intake: Json
+          labour_material: string | null
           lookup_token: string
           pdf_url: string
           postcode: string
+          project_confidence: string | null
           project_type: string
+          quality_score: number | null
+          quote_total_text: string | null
+          recommended_next_step: string | null
           report_html: string | null
           report_json: Json | null
+          requested_matched_trades: boolean
+          risk_level: string | null
           status: string
           stripe_payment_id: string | null
           subtotal_text: string | null
+          top_issues: Json | null
           total_text: string | null
           updated_at: string
           user_id: string | null
           vat_text: string | null
         }
         Insert: {
+          certification_readiness?: string | null
+          checker_type?: string
+          comparison_readiness?: string | null
+          completeness_pct?: number | null
           created_at?: string
+          created_project?: boolean
           description?: string
           email: string
           id?: string
+          intake?: Json
+          labour_material?: string | null
           lookup_token?: string
           pdf_url: string
           postcode?: string
+          project_confidence?: string | null
           project_type: string
+          quality_score?: number | null
+          quote_total_text?: string | null
+          recommended_next_step?: string | null
           report_html?: string | null
           report_json?: Json | null
+          requested_matched_trades?: boolean
+          risk_level?: string | null
           status?: string
           stripe_payment_id?: string | null
           subtotal_text?: string | null
+          top_issues?: Json | null
           total_text?: string | null
           updated_at?: string
           user_id?: string | null
           vat_text?: string | null
         }
         Update: {
+          certification_readiness?: string | null
+          checker_type?: string
+          comparison_readiness?: string | null
+          completeness_pct?: number | null
           created_at?: string
+          created_project?: boolean
           description?: string
           email?: string
           id?: string
+          intake?: Json
+          labour_material?: string | null
           lookup_token?: string
           pdf_url?: string
           postcode?: string
+          project_confidence?: string | null
           project_type?: string
+          quality_score?: number | null
+          quote_total_text?: string | null
+          recommended_next_step?: string | null
           report_html?: string | null
           report_json?: Json | null
+          requested_matched_trades?: boolean
+          risk_level?: string | null
           status?: string
           stripe_payment_id?: string | null
           subtotal_text?: string | null
+          top_issues?: Json | null
           total_text?: string | null
           updated_at?: string
           user_id?: string | null
@@ -3696,6 +3738,21 @@ export type Database = {
         Args: {
           _description: string
           _email: string
+          _pdf_url: string
+          _postcode: string
+          _project_type: string
+        }
+        Returns: {
+          id: string
+          lookup_token: string
+        }[]
+      }
+      create_quote_check_v2: {
+        Args: {
+          _checker_type: string
+          _description: string
+          _email: string
+          _intake: Json
           _pdf_url: string
           _postcode: string
           _project_type: string

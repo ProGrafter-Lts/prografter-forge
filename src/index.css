@@ -729,6 +729,29 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
 /* The item name (bold) must stay the chip's dark text, never inherit white */
 .qr-report .qr-checklist li strong { color: inherit; }
 
+/* Tables inside the report */
+.qr-report table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-top: 0.25rem; }
+.qr-report th, .qr-report td { border: 1px solid #e3e6ec; padding: 0.5rem 0.6rem; text-align: left; vertical-align: top; color: #374151; }
+.qr-report th { background: #f8fafc; color: #1f2a44; font-weight: 700; }
+.qr-report h3 { font-family: var(--font-heading, inherit); font-size: 0.92rem; font-weight: 700; color: #1f2a44; margin: 0.9rem 0 0.4rem; }
+
+/* Executive dashboard cards */
+.qr-dash { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+@media (min-width: 640px) { .qr-dash { grid-template-columns: repeat(4, 1fr); } }
+.qr-metric { background: #f8fafc; border: 1px solid #e3e6ec; border-radius: 0.85rem; padding: 0.9rem; }
+.qr-metric-label { font-family: var(--font-mono, monospace); font-size: 0.6rem; letter-spacing: 0.05em; text-transform: uppercase; color: #6b7280; }
+.qr-metric-value { font-family: var(--font-heading, inherit); font-size: 1.5rem; font-weight: 700; color: #1f2a44; line-height: 1.1; margin-top: 0.15rem; }
+.qr-metric-sub { font-family: var(--font-mono, monospace); font-size: 0.65rem; color: #6b7280; margin-top: 0.15rem; }
+.qr-badge { display: inline-block; font-family: var(--font-mono, monospace); font-size: 0.78rem; font-weight: 600; padding: 0.25rem 0.6rem; border-radius: 999px; border: 1px solid transparent; }
+.qr-badge-low { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
+.qr-badge-medium { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+.qr-badge-high { background: #fef3c7; color: #92400e; border-color: #fcd34d; }
+.qr-badge-critical { background: #fee2e2; color: #991b1b; border-color: #fca5a5; }
+.qr-nextstep { background: #f0fdfa; border: 1px solid #99f6e4; border-radius: 0.85rem; padding: 0.9rem; color: #134e4a; }
+.qr-issues { display: flex; flex-direction: column; gap: 0.4rem; }
+.qr-issue { display: flex; gap: 0.5rem; font-size: 0.85rem; color: #374151; line-height: 1.4; }
+.qr-issue span { color: #0d9488; font-weight: 700; }
+
 /* Disclaimer footer */
 .qr-disclaimer {
   display: flex;
