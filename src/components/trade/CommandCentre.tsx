@@ -4,7 +4,6 @@ import {
   ArrowRight,
   CheckCircle2,
   Circle,
-  Clock,
   ListChecks,
   Sparkles,
   Upload,
