@@ -8,7 +8,7 @@ import {
 import {
   VAULT_DOC_TYPES, VaultDocument, VaultDocTypeConfig,
   computeDisplayStatus, computeVaultSummary, STATUS_META, TONE_CLASSES,
-  daysUntil, getDocLabel,
+  daysUntil, getDocLabel, computeDashboardVerification,
 } from "@/lib/tradeVault";
 import VaultDocumentDialog from "./VaultDocumentDialog";
 import { cn } from "@/lib/utils";
