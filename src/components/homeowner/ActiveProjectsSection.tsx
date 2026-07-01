@@ -137,7 +137,7 @@ const ActiveProjectsSection = ({
                     </span>
                   </div>
                 </div>
-                <Badge className={`${badge.className} whitespace-nowrap`}>{badge.label}</Badge>
+                <Badge style={badge.style} className={`${badge.className} whitespace-nowrap`}>{badge.label}</Badge>
               </div>
 
               {/* Operational metrics */}
