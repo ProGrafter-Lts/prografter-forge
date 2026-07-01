@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import SEO from "@/components/SEO";
-import AppShell from "@/components/AppShell";
+import TradeSidebar from "@/components/trade/TradeSidebar";
 import { Bell, Search, X, Radio, Building2, MapPin, Calendar, FileText, CheckCircle2, AlertTriangle, XCircle, Sparkles } from "lucide-react";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
