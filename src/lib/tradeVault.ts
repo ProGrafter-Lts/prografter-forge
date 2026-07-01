@@ -234,3 +234,106 @@ export const computeVaultSummary = (docs: VaultDocument[]): VaultSummary => {
     expiredRequiredDocs,
   };
 };
+
+// ── Dashboard-facing verification state ───────────────────────────────────────
+// Reconciles TradeVault documents with legacy manual/admin verification so the
+// dashboard never shows a contradictory "Verified" + "0 of 4 uploaded" state.
+
+export type DashboardVerificationStatus =
+  | "Not Started"
+  | "Pending Review"
+  | "Verified"
+  | "Verified — Manual Review"
+  | "Migration Required"
+  | "Action Required"
+  | "Verification Paused";
+
+export const GRACE_PERIOD_DAYS = 30;
+
+export interface ManualVerificationContext {
+  /** True when the trade was approved via manual/admin review. */
+  manuallyVerified: boolean;
+  /** When the trade was verified on ProGrafter (drives the grace window). */
+  verifiedAt: string | null;
+}
+
+export interface DashboardVerification {
+  status: DashboardVerificationStatus;
+  /** Status to show specifically inside the TradeVault panel. */
+  tradeVaultStatus: DashboardVerificationStatus;
+  message?: string;
+  inGrace: boolean;
+  /** True when documents need migrating into TradeVault. */
+  migrationRequired: boolean;
+}
+
+const MIGRATION_MESSAGE =
+  "Your documents were manually reviewed before TradeVault was introduced. Please upload copies to TradeVault so your verification record stays complete and renewal reminders can work properly.";
+
+export const computeDashboardVerification = (
+  docs: VaultDocument[],
+  ctx: ManualVerificationContext,
+): DashboardVerification => {
+  const summary = computeVaultSummary(docs);
+  const hasAnyDocs = docs.some((d) => d.is_current && d.file_url);
+  const requiredComplete = summary.missingRequired.length === 0;
+
+  // Legacy manual verification with nothing in TradeVault yet → migration path.
+  if (ctx.manuallyVerified && !hasAnyDocs) {
+    const daysSince = ctx.verifiedAt
+      ? Math.floor((Date.now() - new Date(ctx.verifiedAt).getTime()) / 86_400_000)
+      : 0;
+    const inGrace = daysSince <= GRACE_PERIOD_DAYS;
+    return {
+      status: inGrace ? "Verified — Manual Review" : "Action Required",
+      tradeVaultStatus: "Migration Required",
+      message: MIGRATION_MESSAGE,
+      inGrace,
+      migrationRequired: true,
+    };
+  }
+
+  if (summary.expiredRequiredDocs.length > 0) {
+    return {
+      status: "Verification Paused",
+      tradeVaultStatus: "Verification Paused",
+      inGrace: false,
+      migrationRequired: false,
+    };
+  }
+
+  if (!hasAnyDocs) {
+    return {
+      status: ctx.manuallyVerified ? "Verified" : "Not Started",
+      tradeVaultStatus: "Not Started",
+      inGrace: false,
+      migrationRequired: false,
+    };
+  }
+
+  if (!requiredComplete) {
+    return {
+      status: "Action Required",
+      tradeVaultStatus: "Action Required",
+      inGrace: false,
+      migrationRequired: false,
+    };
+  }
+
+  if (summary.verificationStatus === "Verified" || ctx.manuallyVerified) {
+    return {
+      status: "Verified",
+      tradeVaultStatus: "Verified",
+      inGrace: false,
+      migrationRequired: false,
+    };
+  }
+
+  return {
+    status: "Pending Review",
+    tradeVaultStatus: "Pending Review",
+    inGrace: false,
+    migrationRequired: false,
+  };
+};
+
