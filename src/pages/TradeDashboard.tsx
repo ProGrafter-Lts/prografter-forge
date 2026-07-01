@@ -207,7 +207,7 @@ const TradeDashboard = () => {
   const viewFilter = searchParams.get("view");
 
   useEffect(() => {
-    const validViews = ["dashboard", "jobs", "projects", "earnings", "profile"];
+    const validViews = ["dashboard", "jobs", "projects", "earnings", "profile", "tradevault"];
 
     if (viewFilter && validViews.includes(viewFilter)) {
       setActiveNav(viewFilter);
