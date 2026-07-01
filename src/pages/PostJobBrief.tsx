@@ -383,6 +383,15 @@ const BriefPreview = ({ form, briefRef }: { form: typeof BLANK; briefRef: string
               </p>
             </Section>
 
+            {uploads.length > 0 && (
+              <Section title="Files">
+                <p style={{ fontSize: 12, color: C.body, margin: 0 }}>
+                  Files uploaded: {uploads.length}
+                </p>
+              </Section>
+            )}
+
+
             {form.scope_items && (
               <Section title="Scope of works">
                 <p style={{ fontSize: 12, color: C.body, lineHeight: 1.65, margin: 0, whiteSpace: "pre-line" }}>
