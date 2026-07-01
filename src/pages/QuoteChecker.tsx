@@ -519,6 +519,10 @@ const QuoteChecker = () => {
                 <span key={t} className="font-mono text-xs text-white/90 bg-white/8 border border-white/15 px-3 py-1.5 rounded-full">{t}</span>
               ))}
             </div>
+            <p className="font-mono text-xs text-white/70 mt-6">
+              Don't have a quote yet?{" "}
+              <a href="/quote-checker-ai" className="text-teal-foreground underline underline-offset-2 hover:text-white">Start with the free Project Cost Guide.</a>
+            </p>
           </div>
         </div>
 
