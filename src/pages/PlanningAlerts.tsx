@@ -587,6 +587,8 @@ const PDChecker = () => {
 
 export default function PlanningAlerts() {
   const isMobile = useIsMobile();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarNav, setSidebarNav] = useState("alerts");
   const [activeTab, setActiveTab] = useState("pipeline");
   const [selectedApp, setSelectedApp] = useState<PlanningApp | null>(null);
   const [filterStatus, setFilterStatus] = useState("all");
