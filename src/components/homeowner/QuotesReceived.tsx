@@ -114,10 +114,28 @@ const CONFIRM_ITEMS = [
   "I understand what is included.",
   "I understand what is excluded.",
   "I understand the agreed payment stages.",
-  "I understand any provisional sums.",
+  "I understand the VAT status.",
   "I understand the expected project duration.",
+  "I understand how changes / variations will be handled.",
   "I have reviewed the Quote Health Check, or chosen to continue without one.",
 ];
+
+const VAT_LABEL: Record<string, string> = {
+  inclusive: "Includes VAT",
+  exclusive: "Excludes VAT",
+  not_registered: "Not VAT registered",
+};
+
+function quoteClarity(q: Quote): { label: string; cls: string } {
+  if (q.ai_verdict) {
+    if (q.ai_verdict === "high_risk") return { label: "Needs clarification", cls: "bg-amber-100 text-amber-800" };
+    return { label: "Looks clear", cls: "bg-emerald-100 text-emerald-800" };
+  }
+  const missing = !q.scope_of_works || !q.exclusions || !q.vat_status || !q.estimated_duration_text;
+  if (missing) return { label: "Missing key details", cls: "bg-rose-100 text-rose-800" };
+  return { label: "Not checked", cls: "bg-slate-100 text-slate-700" };
+}
+
 
 const QuotesReceived = ({ quotes, onQuoteAccepted }: QuotesReceivedProps) => {
   const navigate = useNavigate();
