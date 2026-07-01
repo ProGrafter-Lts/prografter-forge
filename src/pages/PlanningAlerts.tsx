@@ -874,9 +874,21 @@ export default function PlanningAlerts() {
                     </div>
                   </div>
 
-                  {/* Detail panel */}
+                  {/* Detail panel — Opportunity Command Centre */}
                   {selectedApp && (
-                    <AppDetail app={selectedApp} onClose={()=>setSelectedApp(null)} isMobile={isMobile} />
+                    <OpportunityCommandCentre
+                      app={selectedApp}
+                      onClose={() => setSelectedApp(null)}
+                      isMobile={isMobile}
+                      interaction={pi.interactions[selectedApp.id]}
+                      trade={pi.trade}
+                      features={pi.features}
+                      onStatus={(status) => pi.upsertInteraction(selectedApp.id, { status })}
+                      onNotes={(notes) => pi.upsertInteraction(selectedApp.id, { notes })}
+                      onFollowUp={(date) => pi.upsertInteraction(selectedApp.id, { status: date ? "follow_up" : (pi.interactions[selectedApp.id]?.status ?? "saved"), follow_up_date: date })}
+                      onCreateInvite={() => pi.createInviteLink(selectedApp.id, getProjectType(selectedApp))}
+                      onLetterGenerated={() => pi.upsertInteraction(selectedApp.id, { intro_letter_generated: true })}
+                    />
                   )}
                 </div>
               </>
