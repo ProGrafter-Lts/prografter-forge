@@ -441,6 +441,8 @@ export default function PostJobBrief() {
   const [consent, setConsent] = useState(false);
   const [marketing, setMarketing] = useState(false);
   const [progressStep, setProgressStep] = useState(0);
+  const [uploads, setUploads] = useState<{ file: File; category: string }[]>([]);
+
 
   // Staged progress shown during the ~15–20s submission (account creation +
   // email queuing). The server runs as one call, so these advance on a timer
