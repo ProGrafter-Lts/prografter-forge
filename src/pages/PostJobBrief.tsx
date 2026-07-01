@@ -1029,7 +1029,8 @@ export default function PostJobBrief() {
       {submitting && <SubmitProgressOverlay stage={progressStep} />}
       <div style={{ background: C.deep, padding: "16px 24px",
         display: "flex", alignItems: "center", justifyContent: "space-between",
-        position: "sticky", top: 0, zIndex: 10 }}>
+        position: "relative", zIndex: 10 }}>
+
         <div className="font-heading tracking-wider" style={{ fontSize: 24, fontWeight: 700 }}>
           <Logo variant="light" className="h-9 w-auto inline-block" />
         </div>
