@@ -110,6 +110,14 @@ const RatingDisplay = ({
   );
 };
 
+const Detail = ({ k, v }: { k: string; v: string }) => (
+  <div className="min-w-0">
+    <p className="font-mono text-[9px] uppercase tracking-wide text-muted-foreground">{k}</p>
+    <p className="font-mono text-[11px] text-primary truncate">{v}</p>
+  </div>
+);
+
+
 const CONFIRM_ITEMS = [
   "I understand what is included.",
   "I understand what is excluded.",
