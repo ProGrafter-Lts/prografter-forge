@@ -266,8 +266,27 @@ const AppCard = ({ app, onSelect, selected, tradeTypes, pipelineStatus, showScor
         <div className="flex flex-col items-end gap-1 flex-shrink-0">
           <StatusBadge status={app.status} />
           {s && <span className={`font-mono text-[10px] uppercase tracking-wider ${s.accent}`}>{s.priority}</span>}
+          {pipelineLabel && (
+            <span className="font-mono text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+              {pipelineLabel}
+            </span>
+          )}
         </div>
       </div>
+
+      {showScore && (
+        <div className="flex items-center gap-2 flex-wrap mb-2.5">
+          <span
+            className="inline-flex items-center gap-1 font-mono text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider"
+            style={{ backgroundColor: `${score.bandColor}22`, color: score.bandColor }}
+          >
+            <TrendingUp className="w-2.5 h-2.5" /> {score.score}/100 · {score.band}
+          </span>
+          <span className="inline-flex items-center gap-1 font-mono text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider bg-secondary/10 text-secondary border border-secondary/20">
+            <Target className="w-2.5 h-2.5" /> {action.label}
+          </span>
+        </div>
+      )}
 
       <p className="font-sans text-xs text-foreground leading-relaxed mb-2 line-clamp-2">
         {app.description}
