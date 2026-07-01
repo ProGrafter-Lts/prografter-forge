@@ -703,6 +703,37 @@ export default function PlanningAlerts() {
           <div className="mx-auto px-4 py-6 max-w-[1100px]">
             {activeTab === "pipeline" && (
               <>
+                {/* Founding access banner */}
+                {pi.trade && (
+                  <div className="mb-5 flex items-start gap-2.5 rounded-2xl border border-secondary/30 bg-secondary/10 px-4 py-3">
+                    <Sparkles className="w-4 h-4 text-secondary mt-0.5 flex-shrink-0" />
+                    <p className="font-sans text-xs text-primary leading-relaxed">
+                      <span className="font-semibold">{ACCESS_LABEL[pi.accessLevel] ?? ACCESS_LABEL.founding}</span>
+                    </p>
+                  </div>
+                )}
+
+                {/* Pipeline tabs */}
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {PIPELINE_TABS.map((t) => {
+                    const active = pipelineTab === t.id;
+                    const count = t.id === "all"
+                      ? undefined
+                      : MOCK_APPLICATIONS.filter((a) => (pi.interactions[a.id]?.status ?? "new") === t.id).length;
+                    return (
+                      <button
+                        key={t.id}
+                        onClick={() => setPipelineTab(t.id as PipelineStatus | "all")}
+                        className={`px-3 py-1.5 rounded-xl font-mono text-[11px] uppercase tracking-wider transition-colors ${
+                          active ? "bg-secondary text-primary-foreground" : "bg-card border border-border text-muted-foreground hover:text-primary"
+                        }`}
+                      >
+                        {t.label}{count !== undefined ? ` (${count})` : ""}
+                      </button>
+                    );
+                  })}
+                </div>
+
                 {/* Stats row */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 mb-5">
                   {[
