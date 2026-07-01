@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
 import SEO from "@/components/SEO";
 import TradeSidebar from "@/components/trade/TradeSidebar";
-import { Bell, Search, X, Radio, Building2, MapPin, Calendar, FileText, CheckCircle2, AlertTriangle, XCircle, Sparkles } from "lucide-react";
+import { Bell, Search, X, Radio, Building2, MapPin, Calendar, FileText, CheckCircle2, AlertTriangle, XCircle, Sparkles, TrendingUp, Target } from "lucide-react";
+import { usePlanningIntelligence } from "@/hooks/usePlanningIntelligence";
+import OpportunityCommandCentre from "@/components/trade/planning/OpportunityCommandCentre";
+import { scoreOpportunity, getBestAction, ACCESS_LABEL, PIPELINE_TABS, PipelineStatus } from "@/lib/planningIntelligence";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 type ProjectKind = "DOMESTIC" | "CONVERSION" | "NEW BUILD";
