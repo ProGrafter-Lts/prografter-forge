@@ -367,8 +367,15 @@ const TradeDashboard = () => {
             />
           )}
 
+          {activeNav === "tradevault" && trade && (
+            <TradeVaultSection tradeId={trade.id} />
+          )}
+
           {activeNav === "dashboard" && (
           <>
+          {trade && (
+            <TradeVaultBanners tradeId={trade.id} onOpenVault={() => setActiveNav("tradevault")} />
+          )}
           {trade && (
             <AddSpecialismsBanner
               tradeId={trade.id}
