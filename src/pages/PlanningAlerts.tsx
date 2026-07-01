@@ -647,6 +647,14 @@ export default function PlanningAlerts() {
     }
     if (searchQuery && !app.description.toLowerCase().includes(searchQuery.toLowerCase())
       && !app.address.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+    if (mineOnly && tradeTypes.length) {
+      const needed = app.trades_needed.map((t) => t.toLowerCase());
+      if (!tradeTypes.some((t) => needed.some((n) => n.includes(t) || t.includes(n)))) return false;
+    }
+    if (pipelineTab !== "all") {
+      const st = pi.interactions[app.id]?.status ?? "new";
+      if (st !== pipelineTab) return false;
+    }
     return true;
   });
 
