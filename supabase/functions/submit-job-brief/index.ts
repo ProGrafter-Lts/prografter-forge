@@ -191,10 +191,14 @@ Deno.serve(async (req) => {
   if (homeownerUserId) {
     // The handle_new_user trigger creates profile + homeowner for new users.
     // For pre-existing users (or trigger gaps) ensure rows exist.
+    // Preserve an existing trade account's user_type — dual-role accounts keep
+    // their trade profile while gaining a homeowner record.
+    const profileType = existingUserType && existingUserType !== 'homeowner' ? existingUserType : 'homeowner'
     await supabase.from('profiles').upsert(
-      { user_id: homeownerUserId, email, full_name, user_type: 'homeowner', postcode, phone },
+      { user_id: homeownerUserId, email, full_name, user_type: profileType, postcode, phone },
       { onConflict: 'user_id' },
     )
+
     const { data: ho } = await supabase
       .from('homeowners').select('id').eq('user_id', homeownerUserId).maybeSingle()
     if (ho?.id) {
