@@ -814,7 +814,57 @@ export default function PostJobBrief() {
         <T f="additional_notes" rows={3}
           placeholder="We have a dog (friendly!) and a 6-month-old so early morning starts before 8am would be appreciated if avoided where possible." />
       </F>
+
+      {/* Optional file uploads */}
+      <div style={{ marginTop: 20, border: `1.5px dashed ${C.border}`, borderRadius: 12, padding: 16, background: C.white }}>
+        <h3 style={{ fontSize: 14, fontWeight: 700, color: C.deep, margin: "0 0 4px" }}>Upload anything helpful</h3>
+        <p style={{ fontSize: 12, color: C.secondary, margin: "0 0 10px", lineHeight: 1.5 }}>
+          Drawings, photos, previous quotes, planning documents or sketches help trades understand the job before quoting.
+        </p>
+        <input
+          type="file"
+          multiple
+          accept=".pdf,.jpg,.jpeg,.png,.heic,.doc,.docx"
+          onChange={(e) => {
+            const picked = Array.from(e.target.files || []).map((file) => ({ file, category: "Other" }));
+            setUploads((prev) => [...prev, ...picked]);
+            e.currentTarget.value = "";
+          }}
+          style={{ fontSize: 12, color: C.body }}
+        />
+        {uploads.length > 0 && (
+          <ul style={{ listStyle: "none", padding: 0, margin: "12px 0 0", display: "flex", flexDirection: "column", gap: 8 }}>
+            {uploads.map((u, i) => (
+              <li key={i} style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                <span style={{ fontSize: 12, color: C.body, flex: 1, minWidth: 140 }}>
+                  {u.file.name} <span style={{ color: C.secondary }}>({Math.round(u.file.size / 1024)} KB)</span>
+                </span>
+                <select
+                  value={u.category}
+                  onChange={(e) => setUploads((prev) => prev.map((x, xi) => xi === i ? { ...x, category: e.target.value } : x))}
+                  style={{ fontSize: 11, padding: "4px 6px", border: `1px solid ${C.border}`, borderRadius: 6 }}
+                >
+                  {["Photos", "Drawings", "Existing Quote", "Planning Document", "Building Control", "Structural Calculations", "Specification", "Other"].map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={() => setUploads((prev) => prev.filter((_, xi) => xi !== i))}
+                  style={{ background: "transparent", border: "none", color: C.error, cursor: "pointer", fontSize: 12, fontWeight: 700 }}
+                >
+                  Remove
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+        <p style={{ fontSize: 11, color: C.secondary, margin: "10px 0 0", lineHeight: 1.5 }}>
+          Files are only shared with matched trades once your brief is approved or you accept a quote, depending on the project stage.
+        </p>
+      </div>
     </>,
+
 
     <>
       <h2 style={{ fontSize: 17, fontWeight: 700, color: C.deep, margin: "0 0 4px" }}>Budget & timing</h2>
