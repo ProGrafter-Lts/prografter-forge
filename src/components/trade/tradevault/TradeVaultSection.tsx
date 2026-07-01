@@ -48,16 +48,32 @@ const TradeVaultSection = ({ tradeId }: Props) => {
   const [docs, setDocs] = useState<VaultDocument[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogConfig, setDialogConfig] = useState<VaultDocTypeConfig | null>(null);
+  const [manualCtx, setManualCtx] = useState<{ manuallyVerified: boolean; verifiedAt: string | null }>({
+    manuallyVerified: false,
+    verifiedAt: null,
+  });
 
   const load = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("tradevault_documents")
-      .select("*")
-      .eq("trade_id", tradeId)
-      .order("created_at", { ascending: false });
-    if (error) console.error("Failed to load vault documents", error);
-    setDocs((data as VaultDocument[]) ?? []);
+    const [docRes, tradeRes] = await Promise.all([
+      supabase
+        .from("tradevault_documents")
+        .select("*")
+        .eq("trade_id", tradeId)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("trades")
+        .select("verified, verification_status, verified_on_prografter_at")
+        .eq("id", tradeId)
+        .maybeSingle(),
+    ]);
+    if (docRes.error) console.error("Failed to load vault documents", docRes.error);
+    setDocs((docRes.data as VaultDocument[]) ?? []);
+    const t = tradeRes.data as any;
+    setManualCtx({
+      manuallyVerified: !!(t && (t.verified || t.verification_status === "approved" || t.verification_status === "verified")),
+      verifiedAt: t?.verified_on_prografter_at ?? null,
+    });
     setLoading(false);
   }, [tradeId]);
 
@@ -67,6 +83,7 @@ const TradeVaultSection = ({ tradeId }: Props) => {
   docs.filter((d) => d.is_current).forEach((d) => currentByType.set(d.document_type, d));
 
   const summary = computeVaultSummary(docs);
+  const dashVerification = computeDashboardVerification(docs, manualCtx);
 
   const viewFile = async (path: string | null) => {
     if (!path) return;
@@ -78,10 +95,12 @@ const TradeVaultSection = ({ tradeId }: Props) => {
   };
 
   const verificationTone =
-    summary.verificationStatus === "Verified" ? "green"
-    : summary.verificationStatus === "Pending Review" ? "amber"
-    : summary.verificationStatus === "Not Started" ? "grey"
+    dashVerification.status === "Verified" || dashVerification.status === "Verified — Manual Review" ? "green"
+    : dashVerification.status === "Pending Review" ? "amber"
+    : dashVerification.status === "Not Started" ? "grey"
+    : dashVerification.tradeVaultStatus === "Migration Required" ? "amber"
     : "red";
+
 
   const renderDocRow = (cfg: VaultDocTypeConfig) => {
     const doc = currentByType.get(cfg.key);
