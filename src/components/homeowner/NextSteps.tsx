@@ -10,24 +10,25 @@ interface Props {
 
 const PRIORITY_STYLE: Record<
   NextStepPriority,
-  { dot: string; chip: string; label: string }
+  { dot: string; chipStyle: React.CSSProperties; label: string }
 > = {
   high: {
     dot: "bg-amber-500",
-    chip: "bg-amber-200 text-amber-900",
+    chipStyle: { backgroundColor: "#fde68a", color: "#78350f" },
     label: "Action needed",
   },
   medium: {
     dot: "bg-secondary",
-    chip: "bg-secondary/20 text-secondary",
+    chipStyle: { backgroundColor: "#99f6e4", color: "#115e59" },
     label: "Recommended",
   },
   low: {
     dot: "bg-blue-400",
-    chip: "bg-blue-100 text-blue-900",
+    chipStyle: { backgroundColor: "#dbeafe", color: "#1e3a8a" },
     label: "When you can",
   },
 };
+
 
 const NextSteps = ({ steps, setActiveNav }: Props) => {
   const navigate = useNavigate();
