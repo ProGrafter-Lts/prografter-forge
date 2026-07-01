@@ -52,7 +52,7 @@ const DraftPreviewContent = ({ draft, onConvert, onClose }: { draft: DraftRow; o
       <DialogHeader>
         <DialogTitle className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-amber-600" />
-          QuickBuild draft preview
+          Quote draft preview
         </DialogTitle>
         <DialogDescription>
           {draft.structured_input?.trade_type || "Draft quote"}
@@ -251,7 +251,7 @@ const QuickBuildDraftsList = ({ tradeId }: { tradeId: string }) => {
   };
 
   const discard = async (id: string) => {
-    if (!confirm("Discard this QuickBuild draft? This can't be undone.")) return;
+    if (!confirm("Discard this quote draft? This can't be undone.")) return;
     const { error } = await supabase
       .from("quickbuild_generations")
       .delete()
@@ -317,7 +317,7 @@ const QuickBuildDraftsList = ({ tradeId }: { tradeId: string }) => {
         <div className="flex items-center gap-2">
           <TestDraftMenu />
           <Button size="sm" variant="outline" onClick={() => navigate("/quote-builder/quickbuild")}>
-            New draft
+            New quote
           </Button>
         </div>
       </div>
