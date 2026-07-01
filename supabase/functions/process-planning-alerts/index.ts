@@ -391,6 +391,58 @@ serve(async (req) => {
       ? Math.min(730, Math.max(1, parseInt(daysParam, 10) || 90))
       : 90;
 
+    // --- Auth gate ---------------------------------------------------------
+    // Requests must carry either the service-role key (trusted server/cron
+    // callers running a full refresh) or an authenticated user's JWT. A user
+    // may only refresh a trade_id they own; admins may refresh anything.
+    const authHeader = req.headers.get("Authorization") ?? "";
+    const bearer = authHeader.replace(/^Bearer\s+/i, "");
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+    const isServiceCaller = bearer && bearer === serviceKey;
+
+    if (!isServiceCaller) {
+      const { data: userData } = await supabase.auth.getUser(bearer);
+      const userId = userData?.user?.id;
+      if (!userId) {
+        return new Response(JSON.stringify({ error: "Authentication required" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const { data: adminRow } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .eq("role", "admin")
+        .maybeSingle();
+      const isAdmin = !!adminRow;
+
+      if (!isAdmin) {
+        // Non-admin users must scope to a trade_id they own.
+        if (!onlyTradeId) {
+          return new Response(JSON.stringify({ error: "trade_id is required" }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        const { data: ownedTrade } = await supabase
+          .from("trades")
+          .select("id")
+          .eq("id", onlyTradeId)
+          .eq("user_id", userId)
+          .maybeSingle();
+        if (!ownedTrade) {
+          return new Response(JSON.stringify({ error: "Forbidden" }), {
+            status: 403,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+      }
+    }
+    // -----------------------------------------------------------------------
+
+
     let query = supabase
       .from("planning_alert_subs")
       .select("id, trade_id, tier, radius_miles, trades(id, name, postcode, trade_type)")
