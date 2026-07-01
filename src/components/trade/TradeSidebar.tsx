@@ -94,13 +94,13 @@ const TradeSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen }: 
               <button
                 key={item.id}
                 onClick={() => handleNavClick(item.id)}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-mono text-sm transition-colors"
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-mono text-sm transition-colors whitespace-nowrap"
                 style={{
                   backgroundColor: isActive ? "rgba(13,148,136,0.18)" : "transparent",
                   color: isActive ? "#1AC2BA" : "rgba(255,255,255,0.75)",
                 }}
               >
-                <item.icon className="w-4 h-4" />
+                <item.icon className="w-4 h-4 flex-shrink-0" />
                 {item.label}
               </button>
             );
