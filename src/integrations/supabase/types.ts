@@ -1377,6 +1377,57 @@ export type Database = {
           },
         ]
       }
+      planning_access: {
+        Row: {
+          access_level: string
+          created_at: string
+          features_enabled: Json
+          monthly_limit: number | null
+          subscription_ends_at: string | null
+          subscription_started_at: string | null
+          subscription_status: string
+          trade_id: string
+          updated_at: string
+        }
+        Insert: {
+          access_level?: string
+          created_at?: string
+          features_enabled?: Json
+          monthly_limit?: number | null
+          subscription_ends_at?: string | null
+          subscription_started_at?: string | null
+          subscription_status?: string
+          trade_id: string
+          updated_at?: string
+        }
+        Update: {
+          access_level?: string
+          created_at?: string
+          features_enabled?: Json
+          monthly_limit?: number | null
+          subscription_ends_at?: string | null
+          subscription_started_at?: string | null
+          subscription_status?: string
+          trade_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "planning_access_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: true
+            referencedRelation: "trades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "planning_access_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: true
+            referencedRelation: "trades_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       planning_agents: {
         Row: {
           address: string | null
@@ -1606,6 +1657,57 @@ export type Database = {
           },
         ]
       }
+      planning_invite_links: {
+        Row: {
+          clicked_at: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          planning_application_id: string
+          project_type: string | null
+          submitted_project_id: string | null
+          token: string
+          trade_id: string
+        }
+        Insert: {
+          clicked_at?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          planning_application_id: string
+          project_type?: string | null
+          submitted_project_id?: string | null
+          token: string
+          trade_id: string
+        }
+        Update: {
+          clicked_at?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          planning_application_id?: string
+          project_type?: string | null
+          submitted_project_id?: string | null
+          token?: string
+          trade_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "planning_invite_links_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "trades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "planning_invite_links_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "trades_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       planning_leads: {
         Row: {
           agent_address: string | null
@@ -1739,6 +1841,60 @@ export type Database = {
             columns: ["agent_id"]
             isOneToOne: false
             referencedRelation: "planning_agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      planning_opportunity_interactions: {
+        Row: {
+          created_at: string
+          follow_up_date: string | null
+          id: string
+          intro_letter_generated: boolean
+          invite_link_id: string | null
+          notes: string | null
+          planning_application_id: string
+          status: string
+          trade_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          follow_up_date?: string | null
+          id?: string
+          intro_letter_generated?: boolean
+          invite_link_id?: string | null
+          notes?: string | null
+          planning_application_id: string
+          status?: string
+          trade_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          follow_up_date?: string | null
+          id?: string
+          intro_letter_generated?: boolean
+          invite_link_id?: string | null
+          notes?: string | null
+          planning_application_id?: string
+          status?: string
+          trade_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "planning_opportunity_interactions_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "trades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "planning_opportunity_interactions_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "trades_public"
             referencedColumns: ["id"]
           },
         ]
@@ -3846,6 +4002,7 @@ export type Database = {
           lookup_token: string
         }[]
       }
+      current_user_owns_trade: { Args: { _trade_id: string }; Returns: boolean }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
