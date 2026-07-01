@@ -4,6 +4,15 @@ const Footer = () => {
   return (
     <footer className="bg-deep border-t border-cream/5 py-8 px-6">
       <div className="max-w-[1800px] mx-auto flex flex-col gap-6">
+        <div className="border-b border-cream/5 pb-6 flex flex-col items-center gap-3">
+          <p className="font-mono text-xs uppercase tracking-widest text-teal">ProGrafter Intelligence</p>
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
+            <a href="/quote-checker-ai" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">Project Cost Guide</a>
+            <a href="/quote-checker" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">Quote Health Check</a>
+            <span className="font-mono text-xs text-secondary-text/60">Compare Quotes — Coming Soon</span>
+            <span className="font-mono text-xs text-secondary-text/60">Project Confidence Report — Future</span>
+          </div>
+        </div>
         <div className="flex flex-col craft:flex-row items-center justify-between gap-4">
           <Logo variant="light" className="h-10 w-auto" />
 
