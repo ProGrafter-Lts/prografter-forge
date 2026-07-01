@@ -226,13 +226,18 @@ interface PlanningApp {
   estimated_value: string; floorspace_m2: number; documents_available: boolean; validated: boolean;
 }
 
-const AppCard = ({ app, onSelect, selected }: { app: PlanningApp; onSelect: (app: PlanningApp) => void; selected: boolean }) => {
+const AppCard = ({ app, onSelect, selected, tradeTypes, pipelineStatus, showScore }: { app: PlanningApp; onSelect: (app: PlanningApp) => void; selected: boolean; tradeTypes: string[]; pipelineStatus?: PipelineStatus; showScore: boolean }) => {
   const s = STATUS_CFG[app.status];
   const [tradesExpanded, setTradesExpanded] = useState(false);
   const projectKind = getProjectType(app);
   const large = isLargeProject(app.estimated_value);
   const visibleTrades = tradesExpanded ? app.trades_needed : app.trades_needed.slice(0, 3);
   const overflow = app.trades_needed.length - 3;
+  const score = scoreOpportunity(app, tradeTypes);
+  const action = getBestAction(app);
+  const pipelineLabel = pipelineStatus && pipelineStatus !== "new"
+    ? PIPELINE_TABS.find((t) => t.id === pipelineStatus)?.label
+    : null;
 
   return (
     <div
