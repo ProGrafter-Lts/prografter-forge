@@ -51,6 +51,7 @@ const Index = () => {
       />
       <Navbar />
       <Hero />
+      <WhereAreYouSection />
       <GreenGrantsChecker />
       <AboutStoryBanner />
       <Ticker />
