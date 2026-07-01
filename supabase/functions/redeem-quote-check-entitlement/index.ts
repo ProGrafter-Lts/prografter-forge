@@ -28,9 +28,33 @@ Deno.serve(async (req) => {
     const token = (req.headers.get("Authorization") || "").replace("Bearer ", "");
     const { data: userData } = await supabase.auth.getUser(token);
     const userId = userData?.user?.id;
+    const userEmail = userData?.user?.email?.toLowerCase() ?? null;
     if (!userId) {
       return new Response(JSON.stringify({ error: "Authentication required" }), {
         status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Ownership check: the caller must own the quote check they are redeeming
+    // against. quote_checks.user_id may not be set until analysis completes, so
+    // fall back to matching the record's email to the authenticated user's email.
+    const { data: qc } = await supabase
+      .from("quote_checks")
+      .select("id, user_id, email")
+      .eq("id", quoteCheckId)
+      .maybeSingle();
+
+    if (!qc) {
+      return new Response(JSON.stringify({ error: "Quote check not found" }), {
+        status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const ownsById = qc.user_id && qc.user_id === userId;
+    const ownsByEmail = qc.email && userEmail && qc.email.toLowerCase() === userEmail;
+    if (!ownsById && !ownsByEmail) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 

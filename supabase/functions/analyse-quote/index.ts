@@ -150,6 +150,16 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Idempotency guard: if this quote check has already been analysed, return
+    // the stored result instead of re-calling Claude. This prevents a caller who
+    // knows a valid quoteCheckId from repeatedly burning AI credits.
+    if (record.status === "complete" && record.report_json) {
+      return new Response(
+        JSON.stringify({ success: true, reportJson: record.report_json, cached: true }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
     // Defence-in-depth: never call Claude unless Stripe payment is confirmed.
     // verify-quote-payment is meant to be the only caller, but we re-verify
     // here so a stray invocation can't burn AI credits.
