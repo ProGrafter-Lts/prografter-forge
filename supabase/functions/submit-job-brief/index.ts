@@ -168,22 +168,22 @@ Deno.serve(async (req) => {
       if (linkErr) {
         console.error('[submit-job-brief] generateLink (existing user) failed', linkErr)
       } else {
-        if (linkData?.user?.user_metadata?.user_type && linkData.user.user_metadata.user_type !== 'homeowner') {
-          return new Response(JSON.stringify({ error: 'This email is already registered for another ProGrafter account. Please use a different email for the homeowner brief.' }), {
-            status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          })
+        if (linkData?.user?.user_metadata?.user_type) {
+          existingUserType = linkData.user.user_metadata.user_type
         }
         homeownerUserId = linkData?.user?.id ?? null
         if (homeownerUserId) {
+          const metaUserType = existingUserType && existingUserType !== 'homeowner' ? existingUserType : 'homeowner'
           const { error: updateErr } = await supabase.auth.admin.updateUserById(homeownerUserId, {
             password: sessionPassword,
             email_confirm: true,
-            user_metadata: { user_type: 'homeowner', full_name, phone, postcode },
+            user_metadata: { user_type: metaUserType, full_name, phone, postcode },
           })
-          if (updateErr) console.error('[submit-job-brief] fallback homeowner password handoff failed', updateErr)
+          if (updateErr) console.error('[submit-job-brief] fallback account password handoff failed', updateErr)
         }
       }
     }
+
   } catch (e) {
     console.error('[submit-job-brief] account creation failed', e)
   }
