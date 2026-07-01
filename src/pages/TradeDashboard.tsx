@@ -208,6 +208,30 @@ const TradeDashboard = () => {
   const pipelineFilter = searchParams.get("pipeline");
   const viewFilter = searchParams.get("view");
 
+  const goTo = (target: PriorityTarget) => {
+    switch (target) {
+      case "tradevault":
+        setActiveNav("tradevault");
+        break;
+      case "jobs":
+        setActiveNav("jobs");
+        break;
+      case "profile":
+      case "specialisms":
+        setActiveNav("profile");
+        break;
+      case "settings":
+        navigate("/dashboard/trade/settings");
+        break;
+      case "planning":
+        navigate("/planning-alerts");
+        break;
+    }
+    if (target !== "settings" && target !== "planning") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
   useEffect(() => {
     const validViews = ["dashboard", "jobs", "projects", "earnings", "profile", "tradevault"];
 
