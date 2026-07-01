@@ -115,6 +115,10 @@ Deno.serve(async (req) => {
   // Find or create the auth user for this email, then ensure profile + homeowner.
   let homeownerUserId: string | null = null
   let homeownerId: string | null = null
+  // Dual-role: an existing trade (or any) account may ALSO post jobs as a
+  // homeowner. We never overwrite an existing non-homeowner user_type — we just
+  // ensure a homeowner record exists alongside it.
+  let existingUserType: string | null = null
   // A one-use browser handoff password establishes day-one session access.
   // The homeowner never sees or chooses a password; returning homeowners use
   // the separate magic-link path.
@@ -127,19 +131,18 @@ Deno.serve(async (req) => {
       .eq('email', emailLower)
       .maybeSingle()
     if (existingProfile?.user_id) {
-      if (existingProfile.user_type !== 'homeowner') {
-        return new Response(JSON.stringify({ error: 'This email is already registered for another ProGrafter account. Please use a different email for the homeowner brief.' }), {
-          status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        })
-      }
+      existingUserType = existingProfile.user_type ?? null
       homeownerUserId = existingProfile.user_id
+      // Keep a trade account's type intact; only default new/plain accounts to homeowner.
+      const metaUserType = existingUserType && existingUserType !== 'homeowner' ? existingUserType : 'homeowner'
       const { error: updateErr } = await supabase.auth.admin.updateUserById(homeownerUserId, {
         password: sessionPassword,
         email_confirm: true,
-        user_metadata: { user_type: 'homeowner', full_name, phone, postcode },
+        user_metadata: { user_type: metaUserType, full_name, phone, postcode },
       })
-      if (updateErr) console.error('[submit-job-brief] existing homeowner password handoff failed', updateErr)
+      if (updateErr) console.error('[submit-job-brief] existing account password handoff failed', updateErr)
     }
+
 
     // Try to create if no existing profile was found. If the auth user already
     // exists without a profile, fall back to a return link rather than touching
@@ -165,22 +168,22 @@ Deno.serve(async (req) => {
       if (linkErr) {
         console.error('[submit-job-brief] generateLink (existing user) failed', linkErr)
       } else {
-        if (linkData?.user?.user_metadata?.user_type && linkData.user.user_metadata.user_type !== 'homeowner') {
-          return new Response(JSON.stringify({ error: 'This email is already registered for another ProGrafter account. Please use a different email for the homeowner brief.' }), {
-            status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          })
+        if (linkData?.user?.user_metadata?.user_type) {
+          existingUserType = linkData.user.user_metadata.user_type
         }
         homeownerUserId = linkData?.user?.id ?? null
         if (homeownerUserId) {
+          const metaUserType = existingUserType && existingUserType !== 'homeowner' ? existingUserType : 'homeowner'
           const { error: updateErr } = await supabase.auth.admin.updateUserById(homeownerUserId, {
             password: sessionPassword,
             email_confirm: true,
-            user_metadata: { user_type: 'homeowner', full_name, phone, postcode },
+            user_metadata: { user_type: metaUserType, full_name, phone, postcode },
           })
-          if (updateErr) console.error('[submit-job-brief] fallback homeowner password handoff failed', updateErr)
+          if (updateErr) console.error('[submit-job-brief] fallback account password handoff failed', updateErr)
         }
       }
     }
+
   } catch (e) {
     console.error('[submit-job-brief] account creation failed', e)
   }
@@ -188,10 +191,14 @@ Deno.serve(async (req) => {
   if (homeownerUserId) {
     // The handle_new_user trigger creates profile + homeowner for new users.
     // For pre-existing users (or trigger gaps) ensure rows exist.
+    // Preserve an existing trade account's user_type — dual-role accounts keep
+    // their trade profile while gaining a homeowner record.
+    const profileType = existingUserType && existingUserType !== 'homeowner' ? existingUserType : 'homeowner'
     await supabase.from('profiles').upsert(
-      { user_id: homeownerUserId, email, full_name, user_type: 'homeowner', postcode, phone },
+      { user_id: homeownerUserId, email, full_name, user_type: profileType, postcode, phone },
       { onConflict: 'user_id' },
     )
+
     const { data: ho } = await supabase
       .from('homeowners').select('id').eq('user_id', homeownerUserId).maybeSingle()
     if (ho?.id) {
