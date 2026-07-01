@@ -3,6 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import SEO from "@/components/SEO";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
+import AdminBriefPublishPanel from "@/components/admin/AdminBriefPublishPanel";
+
 
 const C = {
   cream: "#F5F0E8", deep: "#0F2238", teal: "#14A8A1",
@@ -70,42 +72,27 @@ export default function AdminJobBriefs() {
     })();
   }, []);
 
-  const [publishing, setPublishing] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
+  const [files, setFiles] = useState<Record<string, any[]>>({});
 
   const patchBrief = (id: string, patch: Partial<Brief>) =>
     setBriefs((prev) => prev.map((x) => (x.id === id ? { ...x, ...patch } : x)));
 
-  const publish = async (b: Brief, overrideReason?: string) => {
-    setPublishing(b.id);
-    // Ensure a fresh, valid access token is attached before invoking the
-    // admin-only function — a stale/expiring token causes a 401.
-    const { data: sessionData } = await supabase.auth.getSession();
-    let accessToken = sessionData.session?.access_token;
-    if (!accessToken) {
-      const { data: refreshed } = await supabase.auth.refreshSession();
-      accessToken = refreshed.session?.access_token;
-    }
-    if (!accessToken) {
-      setPublishing(null);
-      alert("Your admin session has expired. Please sign in again, then retry.");
-      return;
-    }
-    const { data, error } = await supabase.functions.invoke("publish-job-brief", {
-      body: { brief_id: b.id, override_reason: overrideReason || null },
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
-    setPublishing(null);
-    if (error) { alert("Publish failed: " + error.message); return; }
-    const matched = (data as any)?.matched ?? 0;
-    alert(`Published to trades. ${matched} matched trade(s) notified.`);
-    patchBrief(b.id, {
-      status: "published_to_trades",
-      published_at: new Date().toISOString(),
-      matched_trade_count: matched,
-      override_reason: overrideReason || null,
-    });
+  const loadFiles = async (b: Brief) => {
+    if (files[b.id]) return;
+    const { data } = await supabase
+      .from("job_brief_files" as any)
+      .select("*")
+      .eq("job_brief_id", b.id)
+      .order("created_at", { ascending: true });
+    setFiles((prev) => ({ ...prev, [b.id]: (data as any) || [] }));
   };
+
+  const openFile = async (path: string) => {
+    const { data } = await supabase.storage.from("job-brief-files").createSignedUrl(path, 300);
+    if (data?.signedUrl) window.open(data.signedUrl, "_blank");
+  };
+
 
   // Record a scoping call: capture notes + editable scope fields, clear the flag.
   const recordScoping = async (b: Brief) => {
@@ -154,16 +141,8 @@ export default function AdminJobBriefs() {
     });
   };
 
-  const approveAndPublish = (b: Brief) => {
-    const blocked = b.needs_scoping || b.needs_planning_guidance;
-    if (!blocked) { publish(b); return; }
-    // Deliberate override path — requires a reason and is logged.
-    const flags = [b.needs_scoping ? "NEEDS SCOPING" : null, b.needs_planning_guidance ? "PLANNING GUIDANCE" : null].filter(Boolean).join(" + ");
-    const reason = prompt(`This brief still has blocking flag(s): ${flags}.\nPublishing now is an override. Enter a reason to proceed (required):`, "");
-    if (reason === null) return;
-    if (!reason.trim()) { alert("An override reason is required to publish a flagged brief."); return; }
-    publish(b, reason.trim());
-  };
+
+
 
 
   return (
@@ -259,21 +238,42 @@ export default function AdminJobBriefs() {
                       </div>
                     )}
 
-                    <div style={{ marginTop: 12 }}>
+                    {/* Uploaded files */}
+                    <div style={{ marginTop: 14 }}>
                       <button
-                        onClick={() => approveAndPublish(b)}
-                        disabled={publishing === b.id}
-                        style={{ background: C.teal, color: C.white, border: "none", borderRadius: 8, padding: "9px 16px", fontSize: 13, fontWeight: 700, cursor: "pointer", opacity: publishing === b.id ? 0.6 : 1 }}
+                        onClick={() => loadFiles(b)}
+                        style={{ background: "transparent", color: C.teal, border: "none", padding: 0, fontSize: 12, fontWeight: 700, cursor: "pointer" }}
                       >
-                        {publishing === b.id
-                          ? "Publishing…"
-                          : b.published_at
-                            ? "Re-publish to matched trades"
-                            : (b.needs_scoping || b.needs_planning_guidance)
-                              ? "Publish anyway (override)"
-                              : "Approve & publish to trades"}
+                        {files[b.id] ? `Uploaded files (${files[b.id].length})` : "Load uploaded files"}
                       </button>
+                      {files[b.id] && files[b.id].length > 0 && (
+                        <ul style={{ marginTop: 6, listStyle: "none", padding: 0, display: "flex", flexDirection: "column", gap: 4 }}>
+                          {files[b.id].map((f) => (
+                            <li key={f.id} style={{ fontSize: 12 }}>
+                              <button onClick={() => openFile(f.storage_path)} style={{ background: "transparent", border: "none", color: C.deep, textDecoration: "underline", cursor: "pointer", padding: 0 }}>
+                                {f.file_name}
+                              </button>
+                              <span style={{ color: "#6B6B6B" }}> — {f.category || "Other"} · {Math.round((f.file_size || 0) / 1024)} KB</span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                      {files[b.id] && files[b.id].length === 0 && (
+                        <p style={{ marginTop: 4, fontSize: 12, color: "#6B6B6B" }}>No files uploaded.</p>
+                      )}
                     </div>
+
+                    <AdminBriefPublishPanel
+                      brief={b as any}
+                      onPublished={(matched) =>
+                        patchBrief(b.id, {
+                          status: "published_to_trades",
+                          published_at: new Date().toISOString(),
+                          matched_trade_count: matched,
+                        })
+                      }
+                    />
+
                   </div>
                 )}
               </div>
