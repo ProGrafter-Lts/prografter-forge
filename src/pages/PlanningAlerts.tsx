@@ -810,7 +810,8 @@ export default function PlanningAlerts() {
           </div>
 
         </div>
-      </AppShell>
+        </main>
+      </div>
     </>
   );
 }
