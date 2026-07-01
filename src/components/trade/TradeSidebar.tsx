@@ -18,6 +18,7 @@ const NAV_ITEMS = [
   { label: "Dashboard", icon: LayoutDashboard, id: "dashboard" },
   { label: "Available Jobs", icon: Briefcase, id: "jobs" },
   { label: "Active Projects", icon: FolderKanban, id: "projects" },
+  { label: "TradeVault", icon: ShieldCheck, id: "tradevault" },
   { label: "Planning Alerts", icon: Bell, id: "alerts" },
   { label: "Earnings", icon: PoundSterling, id: "earnings" },
   { label: "My Profile", icon: UserCircle, id: "profile" },

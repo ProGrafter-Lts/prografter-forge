@@ -45,6 +45,7 @@ const SignupCheckEmail = lazy(() => import("./pages/SignupCheckEmail.tsx"));
 const AuthCallback = lazy(() => import("./pages/AuthCallback.tsx"));
 const SignupTradeRedirect = lazy(() => import("./pages/SignupTradeRedirect.tsx"));
 const AdminVerifications = lazy(() => import("./pages/AdminVerifications.tsx"));
+const AdminTradeVault = lazy(() => import("./pages/AdminTradeVault.tsx"));
 const AdminWaitlist = lazy(() => import("./pages/AdminWaitlist.tsx"));
 const AdminSuppliers = lazy(() => import("./pages/AdminSuppliers.tsx"));
 const Suppliers = lazy(() => import("./pages/Suppliers.tsx"));
@@ -155,6 +156,7 @@ const AppRoutes = () => {
             <Route path="/verification" element={<Verification />} />
             <Route path="/signup/trade" element={<SignupTradeRedirect />} />
             <Route path="/admin/verifications" element={<AdminRoute><AdminVerifications /></AdminRoute>} />
+            <Route path="/admin/tradevault" element={<AdminRoute><AdminTradeVault /></AdminRoute>} />
             <Route path="/admin/waitlist" element={<AdminRoute><AdminWaitlist /></AdminRoute>} />
             <Route path="/admin/suppliers" element={<AdminRoute><AdminSuppliers /></AdminRoute>} />
             <Route path="/suppliers" element={<Suppliers />} />

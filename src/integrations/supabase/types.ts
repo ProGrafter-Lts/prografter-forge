@@ -3329,6 +3329,7 @@ export type Database = {
           user_id: string
           vat_number: string | null
           vat_registered: boolean
+          verification_last_checked_at: string | null
           verification_notes: string | null
           verification_reminder_count: number
           verification_route: string | null
@@ -3407,6 +3408,7 @@ export type Database = {
           user_id: string
           vat_number?: string | null
           vat_registered?: boolean
+          verification_last_checked_at?: string | null
           verification_notes?: string | null
           verification_reminder_count?: number
           verification_route?: string | null
@@ -3485,6 +3487,7 @@ export type Database = {
           user_id?: string
           vat_number?: string | null
           vat_registered?: boolean
+          verification_last_checked_at?: string | null
           verification_notes?: string | null
           verification_reminder_count?: number
           verification_route?: string | null
@@ -3496,6 +3499,87 @@ export type Database = {
           years_in_trade?: number | null
         }
         Relationships: []
+      }
+      tradevault_documents: {
+        Row: {
+          admin_notes: string | null
+          cover_amount: number | null
+          created_at: string
+          document_type: string
+          expiry_date: string | null
+          file_url: string | null
+          id: string
+          is_current: boolean
+          issue_date: string | null
+          original_filename: string | null
+          policy_or_membership_number: string | null
+          provider_name: string | null
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          trade_id: string
+          trade_notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          cover_amount?: number | null
+          created_at?: string
+          document_type: string
+          expiry_date?: string | null
+          file_url?: string | null
+          id?: string
+          is_current?: boolean
+          issue_date?: string | null
+          original_filename?: string | null
+          policy_or_membership_number?: string | null
+          provider_name?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          trade_id: string
+          trade_notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          cover_amount?: number | null
+          created_at?: string
+          document_type?: string
+          expiry_date?: string | null
+          file_url?: string | null
+          id?: string
+          is_current?: boolean
+          issue_date?: string | null
+          original_filename?: string | null
+          policy_or_membership_number?: string | null
+          provider_name?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          trade_id?: string
+          trade_notes?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tradevault_documents_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "trades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tradevault_documents_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "trades_public"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -3897,6 +3981,10 @@ export type Database = {
           source_queue: string
         }
         Returns: number
+      }
+      owns_trade: {
+        Args: { _trade_id: string; _user_id: string }
+        Returns: boolean
       }
       propose_variation: {
         Args: {

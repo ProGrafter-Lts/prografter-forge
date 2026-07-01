@@ -16,6 +16,8 @@ import TradeProfileSection from "@/components/trade/TradeProfileSection";
 import AddSpecialismsBanner from "@/components/trade/AddSpecialismsBanner";
 import PipelineSection from "@/components/trade/PipelineSection";
 import AvailableJobsView from "@/components/trade/AvailableJobsView";
+import TradeVaultSection from "@/components/trade/tradevault/TradeVaultSection";
+import TradeVaultBanners from "@/components/trade/tradevault/TradeVaultBanners";
 import ActiveProjectsView from "@/components/trade/ActiveProjectsView";
 import EarningsView from "@/components/trade/EarningsView";
 import { useTradeAccess } from "@/hooks/useTradeAccess";
@@ -205,7 +207,7 @@ const TradeDashboard = () => {
   const viewFilter = searchParams.get("view");
 
   useEffect(() => {
-    const validViews = ["dashboard", "jobs", "projects", "earnings", "profile"];
+    const validViews = ["dashboard", "jobs", "projects", "earnings", "profile", "tradevault"];
 
     if (viewFilter && validViews.includes(viewFilter)) {
       setActiveNav(viewFilter);
@@ -365,8 +367,15 @@ const TradeDashboard = () => {
             />
           )}
 
+          {activeNav === "tradevault" && trade && (
+            <TradeVaultSection tradeId={trade.id} />
+          )}
+
           {activeNav === "dashboard" && (
           <>
+          {trade && (
+            <TradeVaultBanners tradeId={trade.id} onOpenVault={() => setActiveNav("tradevault")} />
+          )}
           {trade && (
             <AddSpecialismsBanner
               tradeId={trade.id}
