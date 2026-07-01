@@ -340,6 +340,60 @@ const QuotesReceived = ({ quotes, onQuoteAccepted }: QuotesReceivedProps) => {
                 </p>
               )}
 
+              {/* Structured quote details */}
+              {(q.vat_status || q.valid_until || q.estimated_start_date || q.estimated_duration_text ||
+                (q.payment_schedule && q.payment_schedule.length) || q.exclusions || q.assumptions) && (
+                <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1.5 rounded-lg bg-muted/40 p-3">
+                  {q.vat_status && <Detail k="VAT status" v={VAT_LABEL[q.vat_status] || q.vat_status} />}
+                  {q.valid_until && <Detail k="Valid until" v={new Date(q.valid_until).toLocaleDateString("en-GB")} />}
+                  {q.estimated_start_date && <Detail k="Est. start" v={new Date(q.estimated_start_date).toLocaleDateString("en-GB")} />}
+                  {q.estimated_duration_text && <Detail k="Duration" v={q.estimated_duration_text} />}
+                  {q.deposit_required && q.deposit_amount ? <Detail k="Deposit" v={`£${Number(q.deposit_amount).toLocaleString()}`} /> : null}
+                  {q.payment_schedule && q.payment_schedule.length > 0 && (
+                    <Detail k="Payment stages" v={`${q.payment_schedule.length} stage${q.payment_schedule.length === 1 ? "" : "s"}`} />
+                  )}
+                </div>
+              )}
+              {q.exclusions && (
+                <p className="font-mono text-[11px] text-muted-foreground mt-2">
+                  <span className="text-primary font-semibold">Excludes:</span> {q.exclusions}
+                </p>
+              )}
+              {q.assumptions && (
+                <p className="font-mono text-[11px] text-muted-foreground mt-1">
+                  <span className="text-primary font-semibold">Assumes:</span> {q.assumptions}
+                </p>
+              )}
+
+              {/* Quote Clarity */}
+              {(() => {
+                const clarity = quoteClarity(q);
+                return (
+                  <div className="mt-3 rounded-lg border border-border p-3">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-heading text-xs text-primary">Quote Clarity</span>
+                      <Badge className={`${clarity.cls} font-mono text-[10px]`}>{clarity.label}</Badge>
+                    </div>
+                    {!q.ai_verdict && (
+                      <p className="font-mono text-[10px] text-muted-foreground leading-relaxed">
+                        Not checked yet — run a Quote Health Check before accepting to understand what is included,
+                        missing or unclear.
+                      </p>
+                    )}
+                  </div>
+                );
+              })()}
+
+              {q.pdf_path && (
+                <button
+                  onClick={() => openDrawer(`/project/${q.job_id}`)}
+                  className="mt-2 font-mono text-[11px] text-secondary hover:underline"
+                >
+                  View quote PDF →
+                </button>
+              )}
+
+
               {isAccepted && (
                 <div className="mt-4 bg-green-50 border border-green-200 rounded-lg p-3">
                   <p className="font-mono text-xs text-green-800">
