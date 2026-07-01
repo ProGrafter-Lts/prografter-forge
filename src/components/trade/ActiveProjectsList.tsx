@@ -68,6 +68,7 @@ const ActiveProjectsList = ({ projects }: { projects: ActiveProject[] }) => {
       </div>
     )}
   </section>
-);
+  );
+};
 
 export default ActiveProjectsList;
