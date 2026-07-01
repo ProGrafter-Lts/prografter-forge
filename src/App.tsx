@@ -34,6 +34,7 @@ const MyQuoteChecks = lazy(() => import("./pages/MyQuoteChecks.tsx"));
 const QuoteCheckDetail = lazy(() => import("./pages/QuoteCheckDetail.tsx"));
 const GreenGrants = lazy(() => import("./pages/GreenGrants.tsx"));
 const PlanningAlertsPage = lazy(() => import("./pages/PlanningAlerts.tsx"));
+const PlanningInvitePage = lazy(() => import("./pages/PlanningInvite.tsx"));
 const HomeownerManual = lazy(() => import("./pages/HomeownerManual.tsx"));
 const Unsubscribe = lazy(() => import("./pages/Unsubscribe.tsx"));
 const Contact = lazy(() => import("./pages/Contact.tsx"));
