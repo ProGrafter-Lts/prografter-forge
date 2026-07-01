@@ -509,7 +509,16 @@ export default function PostJobBrief() {
       if (!form.trade_category_id) e.trade_category_id = "Please select at least one trade";
       if (!form.job_title.trim()) e.job_title = "A brief title is required";
       if (form.job_description.trim().length < 50) e.job_description = "Please describe the job in at least 50 characters — trades need enough detail to quote accurately";
+      // Gentle quality / profanity / nonsense guard.
+      if (!e.job_title && !e.job_description) {
+        const issues = validateBrief(form.job_title, form.job_description);
+        const titleIssue = issues.find((i) => i.flag === "title_too_short");
+        const descIssue = issues.find((i) => i.flag !== "title_too_short");
+        if (titleIssue) e.job_title = titleIssue.message;
+        if (descIssue) e.job_description = descIssue.message;
+      }
     }
+
     if (n === 2) {
       if (!form.access_arrangement) e.access_arrangement = "Required";
     }
