@@ -165,6 +165,7 @@ const AppRoutes = () => {
             <Route path="/vetting" element={<Vetting />} />
             <Route path="/post-job-brief" element={<PostJobBrief />} />
             <Route path="/quote-checker-ai" element={<QuoteCheckerAI />} />
+            <Route path="/prografter-intelligence" element={<ProGrafterIntelligence />} />
             <Route path="/traders/:id/reviews" element={<TraderReviews />} />
             <Route path="/admin/disputes" element={<AdminRoute><AdminDisputes /></AdminRoute>} />
             <Route path="/admin/planning-pipeline" element={<AdminRoute><PlanningPipeline /></AdminRoute>} />
