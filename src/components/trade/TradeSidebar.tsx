@@ -70,7 +70,7 @@ const TradeSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen }: 
       {/* Mobile toggle - hidden when sidebar is open to avoid overlapping logo */}
       {!sidebarOpen && (
         <button
-          className="md:hidden fixed top-4 left-4 z-50 bg-primary text-primary-foreground p-2 rounded-xl shadow-lg"
+          className="md:hidden fixed top-14 left-4 z-50 bg-primary text-primary-foreground p-2 rounded-xl shadow-lg"
           onClick={() => setSidebarOpen(true)}
         >
           <LayoutDashboard className="w-5 h-5" />
