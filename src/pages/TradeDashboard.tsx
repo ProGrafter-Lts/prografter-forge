@@ -409,6 +409,15 @@ const TradeDashboard = () => {
               onAdd={() => setActiveNav("profile")}
             />
           )}
+
+          {trade && (
+            <CommandCentre
+              tradeId={trade.id}
+              jobMatchCount={matches.length}
+              onNavigate={goTo}
+            />
+          )}
+
           <StatsRow
             jobsWon={completedCount}
             earningsThisMonth={marginData.totalReceived}
