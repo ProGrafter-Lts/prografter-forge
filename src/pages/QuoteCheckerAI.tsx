@@ -531,7 +531,7 @@ Total: £2,585`} />
                   Analysing your quote...
                 </>
               ) : (
-                "Analyse this quote →"
+                "Get Free Cost Guide →"
               )}
             </button>
             {loading && (
