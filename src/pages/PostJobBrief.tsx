@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { trackEvent } from "@/lib/analytics";
 import Logo from "@/components/Logo";
+import { validateBrief } from "@/lib/briefValidation";
+
 
 // ── ProGrafter Brand Palette ──────────────────────────────────────────────────
 const C = {
