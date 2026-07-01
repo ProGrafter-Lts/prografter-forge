@@ -75,8 +75,10 @@ const NextSteps = ({ steps, setActiveNav }: Props) => {
                 />
                 <div className="flex items-center justify-between gap-2 mb-2">
                   <span
-                    className={`font-mono text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full ${style.chip}`}
+                    style={style.chipStyle}
+                    className="font-mono text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full"
                   >
+
                     {style.label}
                   </span>
                   <span className="font-mono text-[10px] text-muted-foreground">
