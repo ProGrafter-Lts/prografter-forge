@@ -290,7 +290,7 @@ const StepBar = ({ current }: { current: number }) => (
   </div>
 );
 
-const BriefPreview = ({ form, briefRef }: { form: typeof BLANK; briefRef: string }) => {
+const BriefPreview = ({ form, briefRef, uploadCount = 0 }: { form: typeof BLANK; briefRef: string; uploadCount?: number }) => {
   const briefTradeIds = (form.trade_category_id || "").split(",").filter(Boolean);
   const briefUnsure = briefTradeIds.includes("not_sure");
   const briefTrades = briefTradeIds.map(id => TRADES.find(t => t.id === id)).filter(Boolean) as typeof TRADES;
