@@ -1,36 +1,42 @@
+import type { CSSProperties } from "react";
+
 /**
  * Shared status-badge styling for the homeowner dashboard.
  *
- * One source of truth so badges are consistent across every card. Colours use
- * the existing ProGrafter palette (Tailwind colour scales already in the design
- * system) with AA-contrast dark text on light fills.
+ * One source of truth so badges are consistent across every card. Colours are
+ * supplied as INLINE styles (not Tailwind text-*-900 utilities) because the dark
+ * dashboard theme lightens dark text utilities, which would destroy contrast on
+ * light badge fills. Inline styles guarantee AA-contrast dark text.
  *
  *  Awaiting Quotes → blue
- *  Quote Received  → teal (secondary)
+ *  Quote Received  → teal
  *  Action Required → amber
- *  In Progress     → teal (secondary)
+ *  In Progress     → teal
  *  Completed       → green
  *  Closed          → grey
  */
 
 export type BadgeTone = "blue" | "teal" | "amber" | "green" | "grey" | "purple";
 
-const TONE_CLASS: Record<BadgeTone, string> = {
-  blue: "border-transparent bg-blue-100 text-blue-900 hover:bg-blue-100",
-  teal: "border-transparent bg-secondary/20 text-secondary hover:bg-secondary/20",
-  amber: "border-transparent bg-amber-200 text-amber-900 hover:bg-amber-200",
-  green: "border-transparent bg-green-100 text-green-800 hover:bg-green-100",
-  grey: "border-transparent bg-muted text-primary hover:bg-muted",
-  purple: "border-transparent bg-purple-200 text-purple-900 hover:bg-purple-200",
+const TONE_STYLE: Record<BadgeTone, CSSProperties> = {
+  blue: { backgroundColor: "#dbeafe", color: "#1e3a8a" },
+  teal: { backgroundColor: "#99f6e4", color: "#115e59" },
+  amber: { backgroundColor: "#fde68a", color: "#78350f" },
+  green: { backgroundColor: "#bbf7d0", color: "#14532d" },
+  grey: { backgroundColor: "#e5e7eb", color: "#374151" },
+  purple: { backgroundColor: "#e9d5ff", color: "#581c87" },
 };
 
-export function badgeToneClass(tone: BadgeTone): string {
-  return TONE_CLASS[tone];
+export function badgeToneStyle(tone: BadgeTone): CSSProperties {
+  return TONE_STYLE[tone];
 }
 
 export interface StatusBadge {
   label: string;
   tone: BadgeTone;
+  /** Inline style — apply to the badge element to survive theme overrides. */
+  style: CSSProperties;
+  /** Keeps the badge from inheriting hover-driven colour swaps. */
   className: string;
 }
 
@@ -58,5 +64,10 @@ function humanise(status: string): string {
 /** Resolve a job status into a labelled, styled badge. */
 export function getStatusBadge(status: string): StatusBadge {
   const entry = STATUS_MAP[status] ?? { label: humanise(status), tone: "grey" as BadgeTone };
-  return { label: entry.label, tone: entry.tone, className: TONE_CLASS[entry.tone] };
+  return {
+    label: entry.label,
+    tone: entry.tone,
+    style: TONE_STYLE[entry.tone],
+    className: "border-transparent",
+  };
 }
