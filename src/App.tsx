@@ -45,6 +45,7 @@ const SignupCheckEmail = lazy(() => import("./pages/SignupCheckEmail.tsx"));
 const AuthCallback = lazy(() => import("./pages/AuthCallback.tsx"));
 const SignupTradeRedirect = lazy(() => import("./pages/SignupTradeRedirect.tsx"));
 const AdminVerifications = lazy(() => import("./pages/AdminVerifications.tsx"));
+const AdminTradeVault = lazy(() => import("./pages/AdminTradeVault.tsx"));
 const AdminWaitlist = lazy(() => import("./pages/AdminWaitlist.tsx"));
 const AdminSuppliers = lazy(() => import("./pages/AdminSuppliers.tsx"));
 const Suppliers = lazy(() => import("./pages/Suppliers.tsx"));
