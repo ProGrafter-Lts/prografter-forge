@@ -144,14 +144,14 @@ const CommandCentre = ({ tradeId, jobMatchCount, onNavigate }: Props) => {
 
   if (loading || !strength) return null;
 
-  const quickActions: { key: string; label: string; icon: any; target: PriorityTarget; show: boolean }[] = [
-    { key: "upload", label: "Upload Documents", icon: Upload, target: "tradevault", show: priorities.some((p) => p.target === "tradevault") },
-    { key: "spec", label: "Add Specialisms", icon: Tag, target: "specialisms", show: priorities.some((p) => p.key === "specialisms") },
-    { key: "jobs", label: "View Jobs", icon: Briefcase, target: "jobs", show: true },
-    { key: "planning", label: "View Planning Intelligence", icon: Bell, target: "planning", show: true },
-    { key: "cal", label: "Connect Calendar", icon: CalendarPlus, target: "settings", show: !calendarConnected(tradeId) },
-    { key: "quote", label: "Start a Quote", icon: FileText, target: "jobs", show: true },
-  ].filter((a) => a.show);
+  const quickActions = ([
+    { key: "upload", label: "Upload Documents", icon: Upload, target: "tradevault" as PriorityTarget, show: priorities.some((p) => p.target === "tradevault") },
+    { key: "spec", label: "Add Specialisms", icon: Tag, target: "specialisms" as PriorityTarget, show: priorities.some((p) => p.key === "specialisms") },
+    { key: "jobs", label: "View Jobs", icon: Briefcase, target: "jobs" as PriorityTarget, show: true },
+    { key: "planning", label: "View Planning Intelligence", icon: Bell, target: "planning" as PriorityTarget, show: true },
+    { key: "cal", label: "Connect Calendar", icon: CalendarPlus, target: "settings" as PriorityTarget, show: !calendarConnected(tradeId) },
+    { key: "quote", label: "Start a Quote", icon: FileText, target: "jobs" as PriorityTarget, show: true },
+  ]).filter((a) => a.show);
 
   return (
     <div className="space-y-6">
