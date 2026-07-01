@@ -1,4 +1,5 @@
 import { FolderKanban, MapPin } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Progress } from "@/components/ui/progress";
 
 interface ActiveProject {
