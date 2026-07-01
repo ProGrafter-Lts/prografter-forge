@@ -1,39 +1,83 @@
 
-# Homeowner Dashboard — Functionality Upgrade
+# ProGrafter — Trust & Distribution Upgrade
 
-Goal: improve information architecture and homeowner confidence **without** touching the visual design, colour palette, typography, branding, or the homepage. All new UI reuses existing tokens (`bg-card`, `text-primary`, `text-secondary`, `border-border`, `font-heading`, `font-mono`, rounded-2xl) so it feels like a native extension.
+Improves operational logic, quote quality, and controlled job distribution. No redesign, no subscriptions/payments/insurance/accounting, no removal of working features, magic-link auth and admin scoping preserved.
 
-## 1. "Your Next Steps" priority centre
-- New component `src/components/homeowner/NextSteps.tsx`, rendered on the Overview tab directly beneath the welcome section.
-- A pure helper `src/lib/homeownerNextSteps.ts` derives an ordered task list from existing data already loaded in `HomeownerDashboard` (jobs, quotes, variations, briefs, freeChecks, siteUpdates, password status).
-- Each task = `{ priority, title, description, estTime, ctaLabel, action }`. Priority drives colour (amber = action required, teal = recommended, blue = informational) and sort order; highest priority first.
-- Task rules generated from real state, e.g.: new unaccepted quote → "Review Quote"; quote present + free check available → "Run Quote Health Check"; pending variation → "Review payment/variation request"; new site update → "View latest progress photos"; `has_password !== true` → "Set account password"; incomplete profile → "Complete profile". Empty state: a calm "You're all caught up" card.
-- CTAs route via existing patterns (`setActiveNav`, `useDrawerNavigate`, `/quote-checker`).
+Because this is large, I'll build it in the phases below and verify each in the live preview before moving on.
 
-## 2. Richer active project cards
-- Upgrade `ActiveProjectsSection.tsx` cards to show: name, current status badge, trades matched, quotes received, accepted quote value (if any), latest update, next action, budget/value, posted date, location.
-- Add `matched_trade_count`, accepted-quote amount, and latest-update text into the data passed from `HomeownerDashboard` (values already available from `briefs`, `quoteCounts`, `quotes`, `siteUpdates`; wire them through props).
-- Buttons: View Project, View/Compare Quote, Run Quote Check (shown when quotes exist), and a disabled "Post Update" placeholder.
+---
 
-## 3 & 4. Project Control Centre tab framework
-- `ProjectDetail.tsx` already renders panels (timeline, messaging, payments, variations, contract). Add a consistent tab bar: **Overview · Quotes · Timeline · Payments · Documents · Photos · Messages**.
-- Reuse existing panels where they exist; add informative empty-state placeholder cards for the modules that have no data yet (Documents, Photos, and any empty Payments/Timeline/Messages), each with the explanatory copy from the brief. New small component `src/components/project/ControlCentreTabs.tsx` + `EmptyModule.tsx`. No backend/business-logic changes — placeholders only.
+## Phase A — Data model (one migration)
 
-## 5. Safer quote acceptance flow
-- In `QuotesReceived.tsx`, replace the direct Accept action with a confirmation checklist dialog (reusing the existing `AlertDialog`): the 6 confirmation checkboxes from the brief. "Accept Quote" stays disabled until all are ticked.
-- Add secondary actions "Ask Builder a Question" (opens project messages) and "Request Revised Quote" (opens messages prefilled / marks intent). These route through existing project navigation; no new tables.
+New tables + columns (all with GRANTs + RLS):
 
-## 6. Quote Health Check wording
-- Update copy in the Overview prompt and the Quotes tab card in `HomeownerDashboard.tsx` (and matching hero on `QuoteChecker.tsx`): remove "check it's fair"; use the clarity-focused wording (missing items, unclear wording, exclusions, risk areas, questions worth asking). Primary button "Run Quote Health Check", support line "We help you understand your quote before you commit."
+```text
+job_trade_invitations
+  id, job_id, trade_id, batch_number, status, invited_at, viewed_at,
+  responded_at, quote_submitted_at, expires_at (default now()+48h),
+  decline_reason, created_at, updated_at
+  status enum-as-text: invited|viewed|interested|declined|quote_submitted|no_response|expired|replaced
 
-## 7. Green Grants entry
-- Add a hero to the top of `GreenGrants.tsx` (and the embedded grants tab): headline "Check Which Funding Routes May Apply", supporting text, primary CTA "Start Funding Check" (scrolls to / starts existing checker), secondary "Browse Funding Routes" (scrolls to existing cards). No grant content removed. Ensure every "View Official Scheme Details" link uses high-contrast tokens.
+job_publish_overrides
+  id, job_id, admin_id, override_reason, blocking_flags (jsonb), created_at
 
-## 8. Contrast & accessibility pass
-- Standardise status badges across dashboard components to one shared map (`src/lib/statusBadge.ts`): Awaiting Quotes = blue, Quote Received = teal, Action Required = amber, Completed = green, Closed = grey — using existing palette tokens with AA-contrast foreground.
-- Replace low-contrast links/secondary buttons on the dark dashboard with token-based styles; add `aria-label`s to icon-only buttons.
+job_brief_files
+  id, job_brief_id, job_id, file_name, file_type, file_size, category,
+  storage_path, uploaded_by, created_at
+
+quotes (add columns)
+  scope_of_works, assumptions, deposit_required (bool), deposit_amount,
+  payment_schedule (jsonb), line_items (jsonb), certifications (jsonb),
+  terms (jsonb), vat_status (text), vat_amount, estimated_duration_text
+```
+
+RLS: trades see/update only their own invitations; homeowners read invitations for their jobs; admins full access via `has_role`. Files readable by owner homeowner, admins, and invited trades once published. Storage bucket `job-brief-files` (private) with scoped policies.
+
+---
+
+## Phase B — Controlled 3-trade release (Issue 1)
+
+- `publish-job-brief` edge function: rank matching trades (verified → accepting → category → within radius → closest → cap 3), create `job_trade_invitations` for batch 1 only, plus a waiting list of remaining matches (not invited).
+- New edge function `release-next-batch`: admin-triggered, invites next ≤3.
+- Trade `AvailableJobsView`: show only jobs where the trade has an active invitation; mark `viewed`/`interested`/`declined`; 48h countdown wording.
+- Admin `AdminJobBriefs`: "Matched Trades" panel (auto-select top 3 / manual choose / publish selected / add to waiting list / release next batch) with per-batch counts (viewed/interested/quotes/declined/no-response).
+- Homeowner wording: "Shared with N matched trades. Quotes will appear here as they come in."
+
+## Phase C — Admin publish checklist + override log (Issue 6)
+
+- Pre-publish checklist component in `AdminJobBriefs` computing blocking flags (missing contact/postcode/type, vague description, profanity, needs scoping/planning).
+- Blocking flags disable normal publish; "Publish anyway (override)" opens modal requiring a non-blank reason → writes `job_publish_overrides` (admin id, flags, timestamp).
+
+## Phase D — Bad-brief validation / profanity / nonsense filter (Issue 7)
+
+- Shared helper `src/lib/briefValidation.ts` (min lengths, profanity list, repeated-char/nonsense/spam heuristics, vagueness) reused by `PostJobBrief` (homeowner-facing gentle messages) and admin checklist flags.
+- Example "its a house with a door and window its full of shit" is blocked homeowner-side and flagged admin-side.
+
+## Phase E — Optional file upload in post-a-job (Issue 8)
+
+- Upload block in `PostJobBrief` Step 3 (Scope & Access): multi-file (PDF/JPG/PNG/HEIC/DOC/DOCX), optional category dropdown, reassurance copy. Store to bucket + `job_brief_files`.
+- Final review shows "Files uploaded: N". Admin brief view + invited-trade job view list files.
+
+## Phase F — Structured trade quote builder (Issue 3)
+
+- Rebuild `QuoteSubmitForm` into sections 1–11 (Summary, Scope, Line Items, Materials, Exclusions, Assumptions, Payment Schedule, Certifications & Handover, Terms, Generate PDF, Submit) with Simple vs Detailed mode. Reworded materials toggle. Payment-schedule builder with % + due triggers and total reconciliation warning. Persists to new quote columns. PDF generation kept.
+
+## Phase G — Quote quality gate (Issue 4)
+
+- `src/lib/quoteQuality.ts` computes critical vs warning issues. Pre-submit modal "Quote Quality Check": critical (total, VAT, scope, exclusions, assumptions) block; warnings allow "Submit Anyway" / "Improve Quote".
+
+## Phase H — Homeowner quote review (Issue 5)
+
+- Enhance `QuotesReceived` / quote detail into structured review (trade + verification, price/VAT/validity/start/duration, payment schedule, scope, exclusions, assumptions, certifications, warranty, PDF). "Quote Clarity" status area. Actions: Run Quote Health Check / Ask Builder / Request Revised Quote / Accept. Keeps existing pre-accept confirmation checklist, adds "Continue without Quote Health Check".
+
+## Phase I — Sticky header overlay fix (Issue 2)
+
+- Audit shared `AppLayout`/`AppShell` header + affected pages; correct top padding/offset and z-index so no content sits under the navy bar (post-a-job steps, dashboards, admin brief pages, quote screens) on mobile + desktop.
+
+---
 
 ## Technical notes
-- Data already fetched in `HomeownerDashboard.loadData` is sufficient; I'll thread it into the new components rather than adding queries where possible (one small addition: accepted-quote amount + latest update text per job, both derivable from existing `quotes`/`siteUpdates`).
-- No schema/RLS/edge-function changes. No new routes/pages. Purely presentation + client-side derivation.
-- Files touched: `HomeownerDashboard.tsx`, `ActiveProjectsSection.tsx`, `QuotesReceived.tsx`, `GreenGrants.tsx`, `QuoteChecker.tsx`, plus new `NextSteps.tsx`, `homeownerNextSteps.ts`, `statusBadge.ts`, `ControlCentreTabs.tsx`, `EmptyModule.tsx`.
+- Reuse existing `override_reason`/`published_by`/`needs_scoping`/`needs_planning_guidance` columns already on `job_briefs`.
+- All new edge functions validate JWT + admin role in code; CORS included.
+- No changes to magic-link/session creation in `submit-job-brief`.
+- Verify each phase via Playwright against localhost with the injected admin session.

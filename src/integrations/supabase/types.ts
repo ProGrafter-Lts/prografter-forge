@@ -927,6 +927,60 @@ export type Database = {
         }
         Relationships: []
       }
+      job_brief_files: {
+        Row: {
+          category: string | null
+          created_at: string
+          file_name: string
+          file_size: number | null
+          file_type: string | null
+          id: string
+          job_brief_id: string | null
+          job_id: string | null
+          storage_path: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          file_name: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          job_brief_id?: string | null
+          job_id?: string | null
+          storage_path: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          file_name?: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          job_brief_id?: string | null
+          job_id?: string | null
+          storage_path?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_brief_files_job_brief_id_fkey"
+            columns: ["job_brief_id"]
+            isOneToOne: false
+            referencedRelation: "job_briefs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_brief_files_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       job_briefs: {
         Row: {
           access_arrangement: string | null
@@ -1168,6 +1222,140 @@ export type Database = {
             columns: ["job_id"]
             isOneToOne: false
             referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_publish_overrides: {
+        Row: {
+          admin_id: string
+          blocking_flags: Json
+          brief_id: string | null
+          created_at: string
+          id: string
+          job_id: string | null
+          override_reason: string
+        }
+        Insert: {
+          admin_id: string
+          blocking_flags?: Json
+          brief_id?: string | null
+          created_at?: string
+          id?: string
+          job_id?: string | null
+          override_reason: string
+        }
+        Update: {
+          admin_id?: string
+          blocking_flags?: Json
+          brief_id?: string | null
+          created_at?: string
+          id?: string
+          job_id?: string | null
+          override_reason?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_publish_overrides_brief_id_fkey"
+            columns: ["brief_id"]
+            isOneToOne: false
+            referencedRelation: "job_briefs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_publish_overrides_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_trade_invitations: {
+        Row: {
+          batch_number: number
+          brief_id: string | null
+          created_at: string
+          decline_reason: string | null
+          distance_miles: number | null
+          expires_at: string | null
+          id: string
+          invited_at: string | null
+          job_id: string
+          quote_submitted_at: string | null
+          rank: number | null
+          released: boolean
+          responded_at: string | null
+          status: string
+          trade_id: string
+          updated_at: string
+          viewed_at: string | null
+        }
+        Insert: {
+          batch_number?: number
+          brief_id?: string | null
+          created_at?: string
+          decline_reason?: string | null
+          distance_miles?: number | null
+          expires_at?: string | null
+          id?: string
+          invited_at?: string | null
+          job_id: string
+          quote_submitted_at?: string | null
+          rank?: number | null
+          released?: boolean
+          responded_at?: string | null
+          status?: string
+          trade_id: string
+          updated_at?: string
+          viewed_at?: string | null
+        }
+        Update: {
+          batch_number?: number
+          brief_id?: string | null
+          created_at?: string
+          decline_reason?: string | null
+          distance_miles?: number | null
+          expires_at?: string | null
+          id?: string
+          invited_at?: string | null
+          job_id?: string
+          quote_submitted_at?: string | null
+          rank?: number | null
+          released?: boolean
+          responded_at?: string | null
+          status?: string
+          trade_id?: string
+          updated_at?: string
+          viewed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_trade_invitations_brief_id_fkey"
+            columns: ["brief_id"]
+            isOneToOne: false
+            referencedRelation: "job_briefs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_trade_invitations_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_trade_invitations_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "trades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_trade_invitations_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "trades_public"
             referencedColumns: ["id"]
           },
         ]
@@ -2408,34 +2596,45 @@ export type Database = {
           ai_verdict_at: string | null
           ai_verdict_summary: string | null
           amount: number
+          assumptions: string | null
           budget_description: string | null
           budget_price: number | null
+          certifications: Json | null
           created_at: string
+          deposit_amount: number | null
+          deposit_required: boolean | null
+          estimated_duration_text: string | null
           estimated_start_date: string | null
           exclusions: string | null
           id: string
           is_test: boolean
           job_id: string
           last_viewed_at: string | null
+          line_items: Json | null
           materials_spec: Json
           message: string | null
           methodology: string | null
+          payment_schedule: Json | null
           pdf_generated_at: string | null
           pdf_path: string | null
           pdf_version: number
           premium_description: string | null
           premium_price: number | null
           reference: string | null
+          scope_of_works: string | null
           selected_tier: string | null
           share_materials_with_homeowner: boolean
           standard_description: string | null
           standard_price: number | null
           status: string
+          terms: Json | null
           tier_enabled: boolean
           trade_id: string
           updated_at: string
           valid_until: string | null
+          vat_amount: number | null
           vat_registered: boolean
+          vat_status: string | null
           view_count: number
           working_days: number | null
         }
@@ -2445,34 +2644,45 @@ export type Database = {
           ai_verdict_at?: string | null
           ai_verdict_summary?: string | null
           amount: number
+          assumptions?: string | null
           budget_description?: string | null
           budget_price?: number | null
+          certifications?: Json | null
           created_at?: string
+          deposit_amount?: number | null
+          deposit_required?: boolean | null
+          estimated_duration_text?: string | null
           estimated_start_date?: string | null
           exclusions?: string | null
           id?: string
           is_test?: boolean
           job_id: string
           last_viewed_at?: string | null
+          line_items?: Json | null
           materials_spec?: Json
           message?: string | null
           methodology?: string | null
+          payment_schedule?: Json | null
           pdf_generated_at?: string | null
           pdf_path?: string | null
           pdf_version?: number
           premium_description?: string | null
           premium_price?: number | null
           reference?: string | null
+          scope_of_works?: string | null
           selected_tier?: string | null
           share_materials_with_homeowner?: boolean
           standard_description?: string | null
           standard_price?: number | null
           status?: string
+          terms?: Json | null
           tier_enabled?: boolean
           trade_id: string
           updated_at?: string
           valid_until?: string | null
+          vat_amount?: number | null
           vat_registered?: boolean
+          vat_status?: string | null
           view_count?: number
           working_days?: number | null
         }
@@ -2482,34 +2692,45 @@ export type Database = {
           ai_verdict_at?: string | null
           ai_verdict_summary?: string | null
           amount?: number
+          assumptions?: string | null
           budget_description?: string | null
           budget_price?: number | null
+          certifications?: Json | null
           created_at?: string
+          deposit_amount?: number | null
+          deposit_required?: boolean | null
+          estimated_duration_text?: string | null
           estimated_start_date?: string | null
           exclusions?: string | null
           id?: string
           is_test?: boolean
           job_id?: string
           last_viewed_at?: string | null
+          line_items?: Json | null
           materials_spec?: Json
           message?: string | null
           methodology?: string | null
+          payment_schedule?: Json | null
           pdf_generated_at?: string | null
           pdf_path?: string | null
           pdf_version?: number
           premium_description?: string | null
           premium_price?: number | null
           reference?: string | null
+          scope_of_works?: string | null
           selected_tier?: string | null
           share_materials_with_homeowner?: boolean
           standard_description?: string | null
           standard_price?: number | null
           status?: string
+          terms?: Json | null
           tier_enabled?: boolean
           trade_id?: string
           updated_at?: string
           valid_until?: string | null
+          vat_amount?: number | null
           vat_registered?: boolean
+          vat_status?: string | null
           view_count?: number
           working_days?: number | null
         }

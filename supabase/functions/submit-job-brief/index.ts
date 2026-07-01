@@ -266,13 +266,15 @@ Deno.serve(async (req) => {
     status: 'under_review',
   }
 
-  const { error: insertErr } = await supabase.from('job_briefs').insert(record)
+  const { data: insertedBrief, error: insertErr } = await supabase
+    .from('job_briefs').insert(record).select('id').single()
   if (insertErr) {
     console.error('[submit-job-brief] insert failed', insertErr)
     return new Response(JSON.stringify({ error: 'Could not save brief' }), {
       status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   }
+
 
   const fullAddress = [address_line1, clean(body.address_line2), city].filter(Boolean).join(', ')
 
@@ -338,11 +340,13 @@ Deno.serve(async (req) => {
 
   return new Response(JSON.stringify({
     ref,
+    briefId: insertedBrief?.id ?? null,
     loginUrl,
     sessionEmail: homeownerUserId ? emailLower : null,
     sessionPassword: homeownerUserId ? sessionPassword : null,
     accountCreated: !!homeownerUserId,
   }), {
+
     status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   })
 })

@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { trackEvent } from "@/lib/analytics";
 import Logo from "@/components/Logo";
+import { validateBrief } from "@/lib/briefValidation";
+
 
 // ── ProGrafter Brand Palette ──────────────────────────────────────────────────
 const C = {
@@ -288,7 +290,7 @@ const StepBar = ({ current }: { current: number }) => (
   </div>
 );
 
-const BriefPreview = ({ form, briefRef }: { form: typeof BLANK; briefRef: string }) => {
+const BriefPreview = ({ form, briefRef, uploadCount = 0 }: { form: typeof BLANK; briefRef: string; uploadCount?: number }) => {
   const briefTradeIds = (form.trade_category_id || "").split(",").filter(Boolean);
   const briefUnsure = briefTradeIds.includes("not_sure");
   const briefTrades = briefTradeIds.map(id => TRADES.find(t => t.id === id)).filter(Boolean) as typeof TRADES;
@@ -381,6 +383,16 @@ const BriefPreview = ({ form, briefRef }: { form: typeof BLANK; briefRef: string
               </p>
             </Section>
 
+            {uploadCount > 0 && (
+              <Section title="Files">
+                <p style={{ fontSize: 12, color: C.body, margin: 0 }}>
+                  Files uploaded: {uploadCount}
+                </p>
+              </Section>
+            )}
+
+
+
             {form.scope_items && (
               <Section title="Scope of works">
                 <p style={{ fontSize: 12, color: C.body, lineHeight: 1.65, margin: 0, whiteSpace: "pre-line" }}>
@@ -441,6 +453,8 @@ export default function PostJobBrief() {
   const [consent, setConsent] = useState(false);
   const [marketing, setMarketing] = useState(false);
   const [progressStep, setProgressStep] = useState(0);
+  const [uploads, setUploads] = useState<{ file: File; category: string }[]>([]);
+
 
   // Staged progress shown during the ~15–20s submission (account creation +
   // email queuing). The server runs as one call, so these advance on a timer
@@ -505,7 +519,16 @@ export default function PostJobBrief() {
       if (!form.trade_category_id) e.trade_category_id = "Please select at least one trade";
       if (!form.job_title.trim()) e.job_title = "A brief title is required";
       if (form.job_description.trim().length < 50) e.job_description = "Please describe the job in at least 50 characters — trades need enough detail to quote accurately";
+      // Gentle quality / profanity / nonsense guard.
+      if (!e.job_title && !e.job_description) {
+        const issues = validateBrief(form.job_title, form.job_description);
+        const titleIssue = issues.find((i) => i.flag === "title_too_short");
+        const descIssue = issues.find((i) => i.flag !== "title_too_short");
+        if (titleIssue) e.job_title = titleIssue.message;
+        if (descIssue) e.job_description = descIssue.message;
+      }
     }
+
     if (n === 2) {
       if (!form.access_arrangement) e.access_arrangement = "Required";
     }
@@ -571,6 +594,33 @@ export default function PostJobBrief() {
         password: data.sessionPassword,
       });
       if (signInError) throw signInError;
+
+      // Upload any optional homeowner files now that a session exists.
+      if (uploads.length && data.briefId) {
+        const { data: sess } = await supabase.auth.getUser();
+        const uid = sess.user?.id;
+        if (uid) {
+          for (const u of uploads) {
+            try {
+              const safe = u.file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+              const path = `${uid}/${data.briefId}/${Date.now()}-${safe}`;
+              const { error: upErr } = await supabase.storage
+                .from("job-brief-files").upload(path, u.file, { upsert: false });
+              if (upErr) { console.warn("file upload failed", upErr); continue; }
+              await supabase.from("job_brief_files" as any).insert({
+                job_brief_id: data.briefId,
+                file_name: u.file.name,
+                file_type: u.file.type || null,
+                file_size: u.file.size,
+                category: u.category || "Other",
+                storage_path: path,
+                uploaded_by: uid,
+              });
+            } catch (e) { console.warn("file save failed", e); }
+          }
+        }
+      }
+
 
       const burnPassword = `${crypto.randomUUID()}Aa1!`;
       void supabase.auth.updateUser({ password: burnPassword }).then(({ error: burnError }) => {
@@ -774,7 +824,57 @@ export default function PostJobBrief() {
         <T f="additional_notes" rows={3}
           placeholder="We have a dog (friendly!) and a 6-month-old so early morning starts before 8am would be appreciated if avoided where possible." />
       </F>
+
+      {/* Optional file uploads */}
+      <div style={{ marginTop: 20, border: `1.5px dashed ${C.border}`, borderRadius: 12, padding: 16, background: C.white }}>
+        <h3 style={{ fontSize: 14, fontWeight: 700, color: C.deep, margin: "0 0 4px" }}>Upload anything helpful</h3>
+        <p style={{ fontSize: 12, color: C.secondary, margin: "0 0 10px", lineHeight: 1.5 }}>
+          Drawings, photos, previous quotes, planning documents or sketches help trades understand the job before quoting.
+        </p>
+        <input
+          type="file"
+          multiple
+          accept=".pdf,.jpg,.jpeg,.png,.heic,.doc,.docx"
+          onChange={(e) => {
+            const picked = Array.from(e.target.files || []).map((file) => ({ file, category: "Other" }));
+            setUploads((prev) => [...prev, ...picked]);
+            e.currentTarget.value = "";
+          }}
+          style={{ fontSize: 12, color: C.body }}
+        />
+        {uploads.length > 0 && (
+          <ul style={{ listStyle: "none", padding: 0, margin: "12px 0 0", display: "flex", flexDirection: "column", gap: 8 }}>
+            {uploads.map((u, i) => (
+              <li key={i} style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                <span style={{ fontSize: 12, color: C.body, flex: 1, minWidth: 140 }}>
+                  {u.file.name} <span style={{ color: C.secondary }}>({Math.round(u.file.size / 1024)} KB)</span>
+                </span>
+                <select
+                  value={u.category}
+                  onChange={(e) => setUploads((prev) => prev.map((x, xi) => xi === i ? { ...x, category: e.target.value } : x))}
+                  style={{ fontSize: 11, padding: "4px 6px", border: `1px solid ${C.border}`, borderRadius: 6 }}
+                >
+                  {["Photos", "Drawings", "Existing Quote", "Planning Document", "Building Control", "Structural Calculations", "Specification", "Other"].map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={() => setUploads((prev) => prev.filter((_, xi) => xi !== i))}
+                  style={{ background: "transparent", border: "none", color: C.error, cursor: "pointer", fontSize: 12, fontWeight: 700 }}
+                >
+                  Remove
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+        <p style={{ fontSize: 11, color: C.secondary, margin: "10px 0 0", lineHeight: 1.5 }}>
+          Files are only shared with matched trades once your brief is approved or you accept a quote, depending on the project stage.
+        </p>
+      </div>
     </>,
+
 
     <>
       <h2 style={{ fontSize: 17, fontWeight: 700, color: C.deep, margin: "0 0 4px" }}>Budget & timing</h2>
@@ -830,7 +930,7 @@ export default function PostJobBrief() {
       <p style={{ fontSize: 13, color: C.secondary, margin: "0 0 20px" }}>
         This is exactly what vetted trades will see. Check it over before submitting.
       </p>
-      <BriefPreview form={form} briefRef={ref} />
+      <BriefPreview form={form} briefRef={ref} uploadCount={uploads.length} />
       <div style={{ marginTop: 16 }}>
         <InfoBox variant="navy">
           <strong>By submitting this brief you agree that:</strong>
@@ -929,7 +1029,8 @@ export default function PostJobBrief() {
       {submitting && <SubmitProgressOverlay stage={progressStep} />}
       <div style={{ background: C.deep, padding: "16px 24px",
         display: "flex", alignItems: "center", justifyContent: "space-between",
-        position: "sticky", top: 0, zIndex: 10 }}>
+        position: "relative", zIndex: 10 }}>
+
         <div className="font-heading tracking-wider" style={{ fontSize: 24, fontWeight: 700 }}>
           <Logo variant="light" className="h-9 w-auto inline-block" />
         </div>
