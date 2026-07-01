@@ -854,6 +854,9 @@ export default function PlanningAlerts() {
                         app={app}
                         selected={selectedApp?.id === app.id}
                         onSelect={a => setSelectedApp(prev=>prev?.id===a.id?null:a)}
+                        tradeTypes={tradeTypes}
+                        pipelineStatus={pi.interactions[app.id]?.status ?? "new"}
+                        showScore={pi.features.can_use_opportunity_scores}
                       />
                     ))}
 
