@@ -60,6 +60,7 @@ const Apply = lazy(() => import("./pages/Apply.tsx"));
 const Vetting = lazy(() => import("./pages/Vetting.tsx"));
 const PostJobBrief = lazy(() => import("./pages/PostJobBrief.tsx"));
 const QuoteCheckerAI = lazy(() => import("./pages/QuoteCheckerAI.tsx"));
+const ProGrafterIntelligence = lazy(() => import("./pages/ProGrafterIntelligence.tsx"));
 const JobOS = lazy(() => import("./pages/JobOS.tsx"));
 const ReviewSubmit = lazy(() => import("./pages/ReviewSubmit.tsx"));
 const TraderReviews = lazy(() => import("./pages/TraderReviews.tsx"));
@@ -165,6 +166,7 @@ const AppRoutes = () => {
             <Route path="/vetting" element={<Vetting />} />
             <Route path="/post-job-brief" element={<PostJobBrief />} />
             <Route path="/quote-checker-ai" element={<QuoteCheckerAI />} />
+            <Route path="/prografter-intelligence" element={<ProGrafterIntelligence />} />
             <Route path="/traders/:id/reviews" element={<TraderReviews />} />
             <Route path="/admin/disputes" element={<AdminRoute><AdminDisputes /></AdminRoute>} />
             <Route path="/admin/planning-pipeline" element={<AdminRoute><PlanningPipeline /></AdminRoute>} />

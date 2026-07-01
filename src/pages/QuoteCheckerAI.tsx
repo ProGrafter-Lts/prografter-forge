@@ -292,7 +292,7 @@ ${form.quote_text}`;
             AI POWERED
           </span>
           <span style={{ fontSize:12, color:"rgba(245,240,232,0.55)", letterSpacing:"0.06em" }}>
-            QUOTE CHECKER
+            PROJECT COST GUIDE
           </span>
         </div>
       </div>
@@ -313,23 +313,23 @@ ${form.quote_text}`;
             border:"1px solid rgba(20,168,161,0.4)",
             padding:"5px 14px", borderRadius:20, letterSpacing:"0.12em",
             marginBottom:18 }}>
-            INSTANT AI ANALYSIS
+            FREE FIRST LOOK
           </span>
           <h1 className="font-heading" style={{ fontSize:48, color:C.white,
             margin:"0 0 14px", letterSpacing:"0.01em", lineHeight:1.05 }}>
-            Is your quote{" "}
+            What could your{" "}
             <span style={{ background:`linear-gradient(135deg, ${C.tealHover}, ${C.tealLight})`,
               WebkitBackgroundClip:"text", backgroundClip:"text",
-              WebkitTextFillColor:"transparent" }}>fair?</span>
+              WebkitTextFillColor:"transparent" }}>project cost?</span>
           </h1>
           <p style={{ fontSize:15, color:"rgba(245,240,232,0.82)", maxWidth:500,
             margin:"0 auto", lineHeight:1.7 }}>
-            Paste in any quote you've received and our AI analyses it against current
-            regional UK market rates — telling you honestly whether it's fair, overpriced,
-            or unusually low.
+            Describe the project you’re planning and ProGrafter will give you early guidance on
+            likely cost ranges, key cost drivers, common missing items and questions to ask before
+            you start collecting quotes.
           </p>
           <div style={{ display:"flex", justifyContent:"center", gap:10, marginTop:22, flexWrap:"wrap" }}>
-            {["✅ Unbiased analysis","📊 Regional rates","🔍 Red flag detection","💷 Free to use"].map(t=>(
+            {["Free first look","Early budget guidance","Scope prompts","No quote required"].map(t=>(
               <span key={t} style={{ fontSize:12, color:C.white, fontWeight:500,
                 background:"rgba(255,255,255,0.08)", border:"1px solid rgba(255,255,255,0.14)",
                 padding:"6px 12px", borderRadius:20 }}>{t}</span>
@@ -340,11 +340,19 @@ ${form.quote_text}`;
 
       <div style={{ maxWidth:700, margin:"-4rem auto 0", padding:"0 1rem 2rem", position:"relative", zIndex:1 }}>
 
-        <div style={{ textAlign:"center", marginBottom:20 }}>
-          <p style={{ fontSize:12, color:C.secondary }}>
-            Got a PDF instead?{" "}
+        <div style={{ marginBottom:20 }}>
+          <div style={{ background:C.amberBg, border:`1px solid ${C.amberBorder}`,
+            borderRadius:12, padding:"12px 14px", marginBottom:14 }}>
+            <p style={{ fontSize:12, color:C.body, lineHeight:1.6, margin:0 }}>
+              This is early-stage guidance only. It is not a quote, valuation, survey or professional
+              advice. Costs vary depending on drawings, specification, access, site conditions,
+              region, finishes and contractor availability.
+            </p>
+          </div>
+          <p style={{ fontSize:12, color:C.secondary, textAlign:"center" }}>
+            Already got a builder’s quote?{" "}
             <Link to="/quote-checker" style={{ color:C.teal, fontWeight:600, textDecoration:"none" }}>
-              Try the PDF Quote Checker →
+              Upload it for a full Quote Health Check →
             </Link>
           </p>
         </div>
@@ -523,7 +531,7 @@ Total: £2,585`} />
                   Analysing your quote...
                 </>
               ) : (
-                "Analyse this quote →"
+                "Get Free Cost Guide →"
               )}
             </button>
             {loading && (
