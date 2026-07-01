@@ -24,6 +24,8 @@ import { useTradeAccess } from "@/hooks/useTradeAccess";
 import { isContractedActiveJob } from "@/lib/activeProjects";
 import LegalReviewBanner from "@/components/LegalReviewBanner";
 import QuickBuildDraftsList from "@/components/trade/quickbuild/QuickBuildDraftsList";
+import CommandCentre from "@/components/trade/CommandCentre";
+import type { PriorityTarget } from "@/lib/tradeProfileStrength";
 import { isFeatureEnabled } from "@/lib/featureFlags";
 
 interface TradeProfile {
