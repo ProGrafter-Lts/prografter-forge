@@ -7,213 +7,357 @@ import { Leaf, CheckCircle2, HelpCircle, ChevronLeft, AlertCircle, ExternalLink 
 import GreenSchemesBreakdown from "@/components/GreenSchemesBreakdown";
 
 /* ─── Types ─── */
-type PropertyType = "detached" | "semi" | "mid-terrace" | "end-terrace" | "ground-flat" | "upper-flat" | "bungalow";
-type Ownership = "own" | "rent-private" | "rent-social" | "family";
-type EpcBand = "ab" | "c" | "d" | "efg" | "unknown";
-type HouseholdFlag = "benefits" | "low-income" | "off-grid" | "none";
+type Country = "england" | "wales" | "scotland" | "ni";
+type Tenure = "own" | "rent-private" | "rent-private-supportive" | "social" | "landlord";
+type Benefits = "yes" | "no" | "unsure";
+type Income = "under20" | "20-36" | "over36" | "prefer";
+type Epc = "abc" | "d" | "e" | "fg" | "unknown";
+type Heating = "gas" | "oil" | "lpg" | "electric" | "coal" | "heatpump" | "none" | "unsure";
+type Gas = "yes" | "no" | "unsure";
+type Measure =
+  | "insulation" | "heatpump" | "air-to-air" | "biomass" | "solar" | "controls"
+  | "draught" | "glazing" | "ev" | "boiler" | "other" | "unsure";
 
-const PROPERTY_OPTIONS: { value: PropertyType; label: string; emoji: string }[] = [
-  { value: "detached", label: "Detached House", emoji: "🏠" },
-  { value: "semi", label: "Semi-Detached House", emoji: "🏘️" },
-  { value: "mid-terrace", label: "Mid-Terrace", emoji: "🏠" },
-  { value: "end-terrace", label: "End-Terrace", emoji: "🏠" },
-  { value: "ground-flat", label: "Ground Floor Flat", emoji: "🏢" },
-  { value: "upper-flat", label: "Upper Floor Flat", emoji: "🏢" },
-  { value: "bungalow", label: "Bungalow", emoji: "🏡" },
-];
+type Answers = {
+  country?: Country;
+  tenure?: Tenure;
+  benefits?: Benefits;
+  income?: Income;
+  epc?: Epc;
+  heating?: Heating;
+  gas?: Gas;
+  measure?: Measure;
+};
 
-const OWNERSHIP_OPTIONS: { value: Ownership; label: string; emoji: string }[] = [
-  { value: "own", label: "I own it (owner-occupier)", emoji: "🔑" },
-  { value: "rent-private", label: "I rent — private landlord", emoji: "📋" },
-  { value: "rent-social", label: "I rent — housing association or council", emoji: "🏛️" },
-  { value: "family", label: "I live with family (not my property)", emoji: "👨‍👩‍👧" },
-];
+type MatchLevel = "strong" | "possible" | "more-info" | "unlikely";
 
-const EPC_OPTIONS: { value: EpcBand; label: string; sub: string; color: string }[] = [
-  { value: "ab", label: "A or B", sub: "Very efficient", color: "🟢" },
-  { value: "c", label: "C", sub: "", color: "🟡" },
-  { value: "d", label: "D", sub: "", color: "🟠" },
-  { value: "efg", label: "E, F or G", sub: "Least efficient", color: "🔴" },
-  { value: "unknown", label: "I don't know", sub: "", color: "❓" },
-];
-
-const HOUSEHOLD_OPTIONS: { value: HouseholdFlag; label: string; emoji: string }[] = [
-  { value: "benefits", label: "We receive Universal Credit or other means-tested benefits", emoji: "💳" },
-  { value: "low-income", label: "Total household income is under £31,000 per year", emoji: "💰" },
-  { value: "off-grid", label: "Our property is off the gas grid (no mains gas supply)", emoji: "🔥" },
-  { value: "none", label: "None of these apply to us", emoji: "✖️" },
-];
-
-
-/* ─── Scheme definitions ─── */
-interface Scheme {
+interface Result {
   id: string;
   name: string;
-  icon: string;
-  confidence: "may" | "might";
-  summary: string;
-  value: string;
-  metCriteria: string[];
-  confirmCriteria: string[];
-  govUrl: string;
+  status: string;
+  level: MatchLevel;
+  why: string;
+  mayCover: string;
+  confirm: string;
+  accreditation: string;
+  value?: string;
+  govUrl?: string;
 }
 
-function isHouse(p: PropertyType) {
-  return ["detached", "semi", "mid-terrace", "end-terrace", "bungalow"].includes(p);
-}
+/* ─── Question config ─── */
+interface QOption { value: string; label: string; emoji?: string }
+interface Question { id: keyof Answers; question: string; helper?: string; options: QOption[] }
 
-function isEpcDOrBelow(epc: EpcBand) {
-  return epc === "d" || epc === "efg";
-}
+const QUESTIONS: Question[] = [
+  {
+    id: "country", question: "Where is the property?", helper: "Grant routes differ across the UK.",
+    options: [
+      { value: "england", label: "England", emoji: "🏴" },
+      { value: "wales", label: "Wales", emoji: "🏴" },
+      { value: "scotland", label: "Scotland", emoji: "🏴" },
+      { value: "ni", label: "Northern Ireland", emoji: "🇬🇧" },
+    ],
+  },
+  {
+    id: "tenure", question: "Do you own or rent your home?",
+    options: [
+      { value: "own", label: "I own my home", emoji: "🔑" },
+      { value: "rent-private", label: "I privately rent", emoji: "📋" },
+      { value: "rent-private-supportive", label: "I privately rent and my landlord is supportive", emoji: "🤝" },
+      { value: "social", label: "Social housing / council / housing association", emoji: "🏛️" },
+      { value: "landlord", label: "I am a landlord checking for my property", emoji: "🏘️" },
+    ],
+  },
+  {
+    id: "benefits", question: "Does your household receive means-tested benefits?",
+    helper: "Examples may include Universal Credit, Housing Benefit, Pension Credit and other qualifying benefits depending on the scheme.",
+    options: [
+      { value: "yes", label: "Yes — we receive qualifying benefits", emoji: "✅" },
+      { value: "no", label: "No", emoji: "❌" },
+      { value: "unsure", label: "Not sure — I need to check", emoji: "🤔" },
+    ],
+  },
+  {
+    id: "income", question: "What is your approximate household income?",
+    helper: "Some schemes use income thresholds, while others also consider benefits, postcode area or property condition.",
+    options: [
+      { value: "under20", label: "Under £20,000", emoji: "💷" },
+      { value: "20-36", label: "£20,000–£36,000", emoji: "💷" },
+      { value: "over36", label: "Over £36,000", emoji: "💷" },
+      { value: "prefer", label: "Prefer not to say / not sure", emoji: "🤐" },
+    ],
+  },
+  {
+    id: "epc", question: "What is your property's EPC rating?",
+    helper: "You can find this on your EPC certificate or the official EPC register.",
+    options: [
+      { value: "abc", label: "A, B or C — good rating", emoji: "🟢" },
+      { value: "d", label: "D", emoji: "🟡" },
+      { value: "e", label: "E", emoji: "🟠" },
+      { value: "fg", label: "F or G — poor rating", emoji: "🔴" },
+      { value: "unknown", label: "I don't know my EPC rating", emoji: "❓" },
+    ],
+  },
+  {
+    id: "heating", question: "What heating system do you currently have?",
+    options: [
+      { value: "gas", label: "Gas boiler", emoji: "🔥" },
+      { value: "oil", label: "Oil boiler", emoji: "🛢️" },
+      { value: "lpg", label: "LPG boiler", emoji: "🔥" },
+      { value: "electric", label: "Electric heating", emoji: "⚡" },
+      { value: "coal", label: "Coal / solid fuel", emoji: "🪨" },
+      { value: "heatpump", label: "Existing heat pump", emoji: "♨️" },
+      { value: "none", label: "No central heating", emoji: "🚫" },
+      { value: "unsure", label: "Not sure", emoji: "🤔" },
+    ],
+  },
+  {
+    id: "gas", question: "Is the property connected to mains gas?",
+    options: [
+      { value: "yes", label: "Yes", emoji: "✅" },
+      { value: "no", label: "No", emoji: "❌" },
+      { value: "unsure", label: "Not sure", emoji: "🤔" },
+    ],
+  },
+  {
+    id: "measure", question: "What energy improvement are you considering?",
+    options: [
+      { value: "insulation", label: "Insulation: loft, cavity or solid wall", emoji: "🧱" },
+      { value: "heatpump", label: "Heat pump: air source or ground source", emoji: "♨️" },
+      { value: "air-to-air", label: "Air-to-air heat pump", emoji: "🌬️" },
+      { value: "biomass", label: "Biomass boiler", emoji: "🌿" },
+      { value: "solar", label: "Solar panels", emoji: "☀️" },
+      { value: "controls", label: "Smart heating controls", emoji: "🌡️" },
+      { value: "draught", label: "Draught proofing", emoji: "🪟" },
+      { value: "glazing", label: "Double / triple glazing", emoji: "🪟" },
+      { value: "ev", label: "EV chargepoint", emoji: "🔌" },
+      { value: "boiler", label: "Boiler upgrade or replacement", emoji: "🔧" },
+      { value: "other", label: "Something else", emoji: "➕" },
+      { value: "unsure", label: "Not sure", emoji: "🤔" },
+    ],
+  },
+];
 
-function getSchemes(property: PropertyType, ownership: Ownership, epc: EpcBand, household: HouseholdFlag[]): Scheme[] {
-  const schemes: Scheme[] = [];
-  const hasBenefits = household.includes("benefits");
-  const lowIncome = household.includes("low-income");
-  const offGrid = household.includes("off-grid");
-  const isOwner = ownership === "own";
-  const poorEpc = isEpcDOrBelow(epc);
+/* ─── Result logic ─── */
+const GB: Country[] = ["england", "wales", "scotland"];
+const ENERGY_SAVING: Measure[] = ["insulation", "heatpump", "air-to-air", "biomass", "solar", "controls", "draught", "boiler"];
+const HEAT_PUMP_MEASURES: Measure[] = ["heatpump", "air-to-air", "biomass"];
 
-  if (poorEpc && (hasBenefits || lowIncome)) {
-    const met: string[] = ["EPC rating D or below"];
-    if (hasBenefits) met.push("Receives means-tested benefits");
-    if (lowIncome) met.push("Household income under £31,000");
-    schemes.push({
-      id: "eco4", name: "ECO4 Scheme", icon: "🌱", confidence: "may",
-      summary: "Energy suppliers fund insulation, heating & renewable upgrades for qualifying households.",
-      value: "Up to £18,000", metCriteria: met,
-      confirmCriteria: ["TrustMark-registered installer confirms eligibility"],
+function getResults(a: Answers): Result[] {
+  const results: Result[] = [];
+  const { country, tenure, benefits, income, epc, heating, measure } = a;
+  const poorEpc = epc === "d" || epc === "e" || epc === "fg" || epc === "unknown";
+  const lowIncome = income === "under20" || income === "20-36";
+  const incomeUnknown = income === "prefer";
+  const benefitsYes = benefits === "yes";
+  const benefitsUnsure = benefits === "unsure";
+
+  // Warm Homes: Local Grant (England only)
+  if (country === "england") {
+    const eligibleTenure = tenure === "own" || tenure === "rent-private" || tenure === "rent-private-supportive";
+    if (eligibleTenure && epc === "abc") {
+      results.push({
+        id: "warm-homes", name: "Warm Homes: Local Grant", status: "Active — England only",
+        level: "unlikely",
+        why: "The main route targets homes rated EPC D–G. With an A–C rating you're less likely to be prioritised.",
+        mayCover: "Insulation, air source heat pumps, smart controls, solar panels and other council-agreed measures.",
+        confirm: "Final eligibility, including your EPC band and income, is confirmed by your local council.",
+        accreditation: "Councils typically require TrustMark / PAS 2035 accredited installers.",
+        value: "Council-funded improvements where eligible.",
+        govUrl: "https://www.gov.uk/apply-warm-homes-local-grant",
+      });
+    } else if (eligibleTenure && poorEpc && (lowIncome || benefitsYes || incomeUnknown || benefitsUnsure)) {
+      const strong = benefitsYes || lowIncome;
+      results.push({
+        id: "warm-homes", name: "Warm Homes: Local Grant", status: "Active — England only",
+        level: strong ? "strong" : "more-info",
+        why: strong
+          ? "Property is in England, EPC D–G, and income/benefits point toward the low-income route."
+          : "Property is in England with an EPC D–G — eligibility may depend on income, benefits or your postcode area.",
+        mayCover: "Wall, loft and underfloor insulation, air source heat pumps, smart controls, solar panels.",
+        confirm: "Your local council usually arranges a survey and confirms suitable improvements. Private renters may need landlord involvement.",
+        accreditation: "Councils typically require TrustMark / PAS 2030 / PAS 2035 accredited installers.",
+        value: "Council-funded improvements may be available where eligible.",
+        govUrl: "https://www.gov.uk/apply-warm-homes-local-grant",
+      });
+    }
+  }
+
+  // ECO4 (GB, not NI)
+  if (country && GB.includes(country)) {
+    const measureOk = !measure || ["insulation", "heatpump", "air-to-air", "solar", "controls", "boiler", "other", "unsure"].includes(measure);
+    if ((benefitsYes || lowIncome || poorEpc) && measureOk) {
+      const strong = benefitsYes || lowIncome;
+      results.push({
+        id: "eco4", name: "ECO4 — Energy Company Obligation", status: "Active — supplier-led",
+        level: strong ? "strong" : "possible",
+        why: strong
+          ? "Household income/benefits and property condition match the fuel-poor / low-income focus of ECO4."
+          : "Property condition may match ECO4 — final eligibility is assessed through the supplier and installer route.",
+        mayCover: "Insulation, heating upgrades, whole-home retrofit and some low-carbon measures depending on assessment.",
+        confirm: "Eligibility and funding depend on the property, assessment, supplier route and measures recommended.",
+        accreditation: "Work is routed only to TrustMark / PAS 2035 accredited retrofit providers.",
+        value: "Funding depends on the property, assessment and measures recommended.",
+        govUrl: "https://www.gov.uk/energy-company-obligation",
+      });
+    }
+  }
+
+  // Boiler Upgrade Scheme (England & Wales)
+  if (country === "england" || country === "wales") {
+    if (measure && HEAT_PUMP_MEASURES.includes(measure)) {
+      const existingLowCarbon = heating === "heatpump";
+      const isOwner = tenure === "own" || tenure === "landlord";
+      const valueMap: Record<string, string> = {
+        heatpump: "£7,500 air source · £7,500 ground source heat pump",
+        "air-to-air": "£2,500 air-to-air heat pump",
+        biomass: "£5,000 biomass boiler (rural / off-gas-grid only)",
+      };
+      results.push({
+        id: "bus", name: "Boiler Upgrade Scheme", status: "Active — England and Wales",
+        level: existingLowCarbon ? "unlikely" : isOwner ? "strong" : "possible",
+        why: existingLowCarbon
+          ? "BUS is for replacing fossil fuel heating — replacing an existing heat pump is not eligible."
+          : "You're in England/Wales and considering low-carbon heating that BUS can help fund.",
+        mayCover: "A grant deducted from the installation cost by your certified installer.",
+        confirm: "Ownership, existing heating type and property suitability are confirmed by the installer.",
+        accreditation: "Must use an MCS-certified installer who applies for the grant.",
+        value: valueMap[measure] || "Up to £7,500",
+        govUrl: "https://www.gov.uk/apply-boiler-upgrade-scheme",
+      });
+    }
+  }
+
+  // 0% VAT relief (GB + NI, note NI differs)
+  if (country && measure && ENERGY_SAVING.includes(measure)) {
+    results.push({
+      id: "vat", name: "0% VAT Relief on Energy-Saving Materials", status: "Available tax relief — not a grant",
+      level: "possible",
+      why: "Your chosen measure may be a qualifying energy-saving material that attracts VAT relief.",
+      mayCover: "A VAT saving applied by the installer on the invoice for qualifying installed work.",
+      confirm: country === "ni"
+        ? "Rules differ in Northern Ireland — your installer confirms whether the relief applies."
+        : "Your installer confirms whether the work qualifies for the relief.",
+      accreditation: "Use a VAT-registered installer competent for the work (e.g. MCS, Gas Safe or NICEIC where relevant).",
+      value: "Potential tax relief, not grant funding.",
+      govUrl: "https://www.gov.uk/guidance/vat-on-energy-saving-materials-and-heating-equipment-notice-7086",
+    });
+  }
+
+  // GBIS — limited
+  if (country && GB.includes(country) && measure === "insulation" && (benefitsYes || lowIncome || poorEpc)) {
+    results.push({
+      id: "gbis", name: "Great British Insulation Scheme", status: "Limited / closing",
+      level: "more-info",
+      why: "You're considering insulation and may meet the criteria — but this route is winding down.",
+      mayCover: "A single insulation measure such as loft, cavity or solid wall insulation depending on assessment.",
+      confirm: "The central eligibility service has closed. Some suppliers may still accept applications. Installations must be completed by 31 March 2026.",
+      accreditation: "Supplier-appointed, TrustMark-registered insulation installers.",
+      value: "Availability is limited — check with your energy supplier.",
       govUrl: "https://www.gov.uk/apply-great-british-insulation-scheme",
     });
   }
 
-  if (poorEpc && isHouse(property)) {
-    schemes.push({
-      id: "gbis", name: "Great British Insulation Scheme", icon: "🏠", confidence: "may",
-      summary: "Insulation measures funded through energy suppliers for eligible homes in council tax bands A–D.",
-      value: "Up to £10,000", metCriteria: ["EPC rating D or below", "Property is a house"],
-      confirmCriteria: ["Council tax band confirmed by installer"],
-      govUrl: "https://www.gov.uk/apply-great-british-insulation-scheme",
+  // EV chargepoint
+  if (measure === "ev") {
+    results.push({
+      id: "ev", name: "EV Chargepoint Grant", status: "Check latest rules",
+      level: "more-info",
+      why: "You're considering an EV chargepoint — some support may be available in certain circumstances.",
+      mayCover: "Supply and installation of a home EV chargepoint, subject to current scheme rules.",
+      confirm: "Eligibility and grant value can change. Check current official rules before relying on this.",
+      accreditation: "Use an OZEV-approved installer where required.",
+      value: "Eligibility and grant value can change — check current official rules.",
+      govUrl: "https://www.gov.uk/government/collections/government-grants-for-low-emission-vehicles",
     });
   }
 
-  if (isOwner && offGrid) {
-    schemes.push({
-      id: "bus", name: "Boiler Upgrade Scheme", icon: "🔥", confidence: "may",
-      summary: "£7,500 grant towards an air or ground source heat pump, replacing fossil fuel heating.",
-      value: "£7,500 grant", metCriteria: ["Owner-occupier", "Off the gas grid"],
-      confirmCriteria: ["MCS-certified installer confirms suitability"],
-      govUrl: "https://www.gov.uk/apply-boiler-upgrade-scheme",
-    });
-  }
-
-  if (isOwner && offGrid && (epc === "ab" || epc === "c" || epc === "d")) {
-    schemes.push({
-      id: "hug", name: "Home Upgrade Grant (HUG2)", icon: "⚡", confidence: "might",
-      summary: "Funding for energy efficiency improvements in off-gas-grid homes.",
-      value: "Up to £10,000", metCriteria: ["Owner-occupier", "Off the gas grid", "EPC rating A–D"],
-      confirmCriteria: ["Income/benefits verified by local authority"],
-      govUrl: "https://www.gov.uk/apply-home-upgrade-grant",
-    });
-  }
-
-  schemes.push({
-    id: "vat", name: "0% VAT on Energy Saving Materials", icon: "💷", confidence: "may",
-    summary: "Zero VAT on insulation, heat pumps, solar panels, and other energy-saving installations until March 2027.",
-    value: "Save 20% on materials & install", metCriteria: ["UK residential property"],
-    confirmCriteria: [],
-    govUrl: "https://www.gov.uk/guidance/vat-on-energy-saving-materials-and-heating-equipment-notice-7086",
-  });
-
-  if (epc === "unknown") {
-    schemes.push({
-      id: "epc", name: "Get an EPC Assessment", icon: "📋", confidence: "might",
-      summary: "Knowing your EPC rating unlocks eligibility for most grant schemes. We can match you with a local assessor.",
-      value: "From £60 — could unlock thousands", metCriteria: ["EPC rating unknown"],
-      confirmCriteria: ["Assessor visit to confirm rating"],
-      govUrl: "https://www.gov.uk/find-energy-certificate",
-    });
-  }
-
-  return schemes;
+  return results;
 }
 
-function getGreenJobTypes(schemes: Scheme[]): string[] {
-  const ids = schemes.map((s) => s.id);
-  const types: string[] = [];
-  if (ids.includes("eco4") || ids.includes("gbis")) {
-    types.push("External Wall Insulation (EWI)", "Cavity Wall Insulation", "Loft Insulation", "Retrofit Coordinator", "EPC Assessor");
-  }
-  if (ids.includes("bus") || ids.includes("hug")) {
-    types.push("Air Source Heat Pump", "Ground Source Heat Pump");
-  }
-  if (ids.includes("epc")) {
-    types.push("EPC Assessor");
-  }
-  if (types.length === 0) {
-    types.push("Solar PV Installer", "Air Source Heat Pump", "Ground Source Heat Pump", "External Wall Insulation (EWI)",
-      "Cavity Wall Insulation", "Loft Insulation", "EV Charger Installer", "Battery Storage", "EPC Assessor");
-  }
-  return [...new Set(types)];
+function getNationNote(country?: Country): string | null {
+  if (country === "scotland") return "You selected Scotland. Warm Homes: Local Grant is England-only — different national schemes (such as Home Energy Scotland support) may apply. ECO4 and 0% VAT relief may still be relevant.";
+  if (country === "wales") return "You selected Wales. Warm Homes: Local Grant is England-only — the Welsh Government's Nest scheme may apply instead. ECO4, BUS and 0% VAT relief may still be relevant.";
+  if (country === "ni") return "You selected Northern Ireland. ECO4 and Warm Homes: Local Grant do not apply here — different Northern Ireland schemes may apply. VAT relief rules also differ in Northern Ireland.";
+  return null;
 }
 
-/* ─── Components ─── */
+/* ─── UI helpers ─── */
+const LEVEL_META: Record<MatchLevel, { label: string; badge: string }> = {
+  strong: { label: "Strong potential match", badge: "bg-[#16A34A] text-white" },
+  possible: { label: "Possible funding route", badge: "bg-teal text-cream" },
+  "more-info": { label: "More information needed", badge: "bg-amber-500 text-white" },
+  unlikely: { label: "Unlikely based on current answers", badge: "bg-navy/40 text-cream" },
+};
+
 const StepIndicator = ({ current, total }: { current: number; total: number }) => (
-  <div className="flex items-center gap-3 mb-8">
-    {Array.from({ length: total }, (_, i) => (
-      <div key={i} className="flex items-center gap-3 flex-1">
-        <div className={`w-8 h-8 rounded-full flex items-center justify-center font-mono text-sm transition-all ${
-          i < current ? "bg-[#16A34A] text-white" : i === current ? "bg-teal text-cream" : "bg-cream/15 text-cream/50"
-        }`}>
-          {i < current ? "✓" : i + 1}
-        </div>
-        {i < total - 1 && <div className={`h-[2px] flex-1 ${i < current ? "bg-[#16A34A]" : "bg-cream/15"}`} />}
-      </div>
-    ))}
+  <div className="flex items-center justify-between mb-6">
+    <div className="flex gap-1 flex-1">
+      {Array.from({ length: total }, (_, i) => (
+        <div key={i} className={`h-1.5 rounded-sm flex-1 transition-colors ${i <= current ? "bg-[#16A34A]" : "bg-cream/15"}`} />
+      ))}
+    </div>
+    <span className="font-mono text-[11px] text-cream/50 ml-4">{current + 1} of {total}</span>
   </div>
 );
 
-const SchemeCard = ({ scheme }: { scheme: Scheme }) => {
-  const isMay = scheme.confidence === "may";
+/* Result card — cream card with green header */
+const ResultCard = ({ r }: { r: Result }) => {
+  const meta = LEVEL_META[r.level];
   return (
-    <div className="rounded-xl border border-[#16A34A]/35 bg-[#16A34A]/[0.08] p-6 space-y-4">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <span className="text-2xl">{scheme.icon}</span>
+    <div className="rounded-xl overflow-hidden bg-cream border border-[#16A34A]/30">
+      <div className="px-5 py-4" style={{ background: "linear-gradient(135deg,#166534 0%,#15803D 100%)" }}>
+        <div className="flex items-start justify-between gap-3 flex-wrap">
           <div>
-            <h3 className="font-heading text-cream text-xl tracking-wide">{scheme.name}</h3>
-            <span className={`font-mono text-[11px] uppercase tracking-widest ${isMay ? "text-[#16A34A]" : "text-amber-400"}`}>
-              {isMay ? "You may qualify ✓" : "Worth checking ?"}
-            </span>
+            <h3 className="font-heading text-cream text-xl tracking-wide leading-tight">{r.name}</h3>
+            <span className="font-mono text-[11px] text-cream/70 uppercase tracking-wider">{r.status}</span>
           </div>
+          <span className={`font-mono text-[10px] uppercase tracking-widest px-2.5 py-1 rounded-full ${meta.badge}`}>
+            {meta.label}
+          </span>
         </div>
-        <span className="font-heading text-[#16A34A] text-lg whitespace-nowrap">{scheme.value}</span>
       </div>
-      <p className="font-body text-cream/70 text-sm leading-relaxed">{scheme.summary}</p>
-      {scheme.metCriteria.length > 0 && (
-        <div className="space-y-1.5">
-          {scheme.metCriteria.map((c) => (
-            <div key={c} className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-[#16A34A] flex-shrink-0" />
-              <span className="font-body text-sm text-cream/80">{c}</span>
-            </div>
-          ))}
+      <div className="px-5 py-4 space-y-3">
+        <div>
+          <p className="font-mono text-[10px] uppercase tracking-widest text-navy/50 mb-1">Why it appeared</p>
+          <p className="font-body text-sm text-body-text leading-relaxed">{r.why}</p>
         </div>
-      )}
-      {scheme.confirmCriteria.length > 0 && (
-        <div className="space-y-1.5">
-          {scheme.confirmCriteria.map((c) => (
-            <div key={c} className="flex items-center gap-2">
-              <HelpCircle className="w-4 h-4 text-amber-400 flex-shrink-0" />
-              <span className="font-body text-sm text-cream/65">{c}</span>
-            </div>
-          ))}
+        <div>
+          <p className="font-mono text-[10px] uppercase tracking-widest text-navy/50 mb-1">What it may cover</p>
+          <p className="font-body text-sm text-body-text leading-relaxed">{r.mayCover}</p>
         </div>
-      )}
-      <a href={scheme.govUrl} target="_blank" rel="noopener noreferrer"
-        className="inline-flex items-center gap-1.5 font-mono text-xs text-[#16A34A] hover:text-[#15803D] transition-colors">
-        Find Out More <ExternalLink className="w-3 h-3" />
-      </a>
+        {r.value && (
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-[10px] uppercase tracking-widest text-navy/50">Value</span>
+            <span className="font-body text-sm text-[#15803D] font-medium">{r.value}</span>
+          </div>
+        )}
+        <div className="rounded-lg bg-amber-500/10 border border-amber-500/30 px-3 py-2">
+          <p className="font-body text-xs text-amber-800 leading-relaxed">
+            <strong>Needs confirming:</strong> {r.confirm}
+          </p>
+        </div>
+        <div className="flex items-start gap-2">
+          <HelpCircle className="w-4 h-4 text-navy/40 flex-shrink-0 mt-0.5" />
+          <span className="font-body text-xs text-body-text/70">{r.accreditation}</span>
+        </div>
+        <div className="flex flex-wrap gap-2 pt-1">
+          <Link
+            to="/post-a-job?green=1"
+            className="font-mono text-xs text-cream bg-[#16A34A] px-4 py-2.5 rounded-lg hover:bg-[#15803D] transition-colors"
+          >
+            Post a project brief →
+          </Link>
+          {r.govUrl && (
+            <a
+              href={r.govUrl} target="_blank" rel="noopener noreferrer"
+              className="font-mono text-xs text-navy border border-navy/25 px-4 py-2.5 rounded-lg hover:bg-navy/5 transition-colors inline-flex items-center gap-1.5"
+            >
+              View official scheme details <ExternalLink className="w-3 h-3" />
+            </a>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
@@ -221,236 +365,215 @@ const SchemeCard = ({ scheme }: { scheme: Scheme }) => {
 /* ─── Main Page ─── */
 const GreenGrantsPage = () => {
   const [step, setStep] = useState(-1);
-  const [property, setProperty] = useState<PropertyType | null>(null);
-  const [ownership, setOwnership] = useState<Ownership | null>(null);
-  const [epc, setEpc] = useState<EpcBand | null>(null);
-  const [household, setHousehold] = useState<HouseholdFlag[]>([]);
+  const [answers, setAnswers] = useState<Answers>({});
   const checkerRef = useRef<HTMLDivElement>(null);
 
-  const showResults = step === 4;
-  const schemes = showResults && property && ownership && epc ? getSchemes(property, ownership, epc, household) : [];
-  const schemeIds = schemes.map((s) => s.id);
+  const TOTAL = QUESTIONS.length;
+  const showResults = step === TOTAL;
+  const results = showResults ? getResults(answers) : [];
+  const nationNote = showResults ? getNationNote(answers.country) : null;
+  const strongCount = results.filter((r) => r.level === "strong").length;
+  const needsAccred = results.some((r) => /trustmark|mcs|ozev|pas|gas safe|niceic/i.test(r.accreditation));
 
-  const toggleHousehold = (flag: HouseholdFlag) => {
-    if (flag === "none") { setHousehold(["none"]); return; }
-    setHousehold((prev) => {
-      const without = prev.filter((f) => f !== "none");
-      return without.includes(flag) ? without.filter((f) => f !== flag) : [...without, flag];
-    });
+  const currentQ = QUESTIONS[step];
+
+  const selectAnswer = (value: string) => {
+    const next = { ...answers, [currentQ.id]: value };
+    setAnswers(next);
+    setTimeout(() => setStep((s) => s + 1), 120);
   };
-
-  const canAdvance = () => {
-    if (step === 0) return !!property;
-    if (step === 1) return !!ownership;
-    if (step === 2) return !!epc;
-    if (step === 3) return household.length > 0;
-    return false;
-  };
-
-  const advance = () => { if (canAdvance()) setStep(step + 1); };
 
   const scrollToChecker = () => {
     setStep(0);
     setTimeout(() => checkerRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
   };
 
+  const reset = () => { setStep(0); setAnswers({}); };
+
   const cardClass = (isActive: boolean) =>
-    `cursor-pointer rounded-xl border px-5 py-4 transition-all text-left ${
-      isActive
-        ? "border-teal/60 bg-teal/10 text-cream"
-        : "border-cream/15 bg-cream/[0.06] text-cream/75 hover:border-cream/25"
+    `cursor-pointer rounded-xl border px-5 py-4 transition-all text-left flex items-center gap-3 ${
+      isActive ? "border-[#16A34A] bg-[#16A34A]/10 text-cream" : "border-cream/15 bg-cream/[0.06] text-cream/80 hover:border-cream/30"
     }`;
 
   return (
     <AppShell>
       <SEO
-        title="Green Grants Eligibility Checker — ProGrafter | Free"
-        description="Check your eligibility for ECO4, BUS heat pump grants, and GBIS insulation funding — free, instant result."
+        title="Green Grants Guidance Checker — ProGrafter"
+        description="Check which UK energy grant funding routes may apply to your home — guidance only. Warm Homes, ECO4, Boiler Upgrade Scheme and more."
         path="/green"
         jsonLd={buildServiceJsonLd({
-          name: "Green Grants Eligibility Checker",
-          description: "Free instant eligibility check for ECO4, Boiler Upgrade Scheme and GBIS funding.",
+          name: "Green Grants Guidance Checker",
+          description: "Guidance on which UK energy funding routes may apply to your home. Not an official eligibility checker.",
           url: "https://prografter.co.uk/green",
-          serviceType: "Energy grant eligibility assessment",
+          serviceType: "Energy grant funding guidance",
           price: "0.00",
         })}
       />
 
-      {/* SECTION 1 — HERO */}
-      <section className="pt-28 pb-16 px-6 bg-navy">
+      {/* HERO */}
+      <section className="pt-28 pb-14 px-6 bg-navy">
         <div className="max-w-3xl mx-auto text-center">
-          <span className="font-mono text-xs text-teal uppercase tracking-widest mb-4 block">Green Energy Grants</span>
-          <h1 className="font-heading text-cream text-[40px] sm:text-[52px] md:text-[60px] leading-[0.95] tracking-wide mb-5">
-            COULD YOU GET HELP FUNDING YOUR HOME IMPROVEMENTS?
+          <span className="font-mono text-xs text-teal uppercase tracking-widest mb-4 block">Green Grants Guidance Checker</span>
+          <h1 className="font-heading text-cream text-[38px] sm:text-[50px] md:text-[58px] leading-[0.97] tracking-wide mb-5">
+            COULD YOU GET HELP FUNDING ENERGY IMPROVEMENTS TO YOUR HOME?
           </h1>
-          <p className="font-body text-cream/60 text-sm md:text-base max-w-2xl mx-auto leading-relaxed mb-8">
-            Government schemes are currently funding thousands of pounds of energy upgrades for eligible UK homeowners. Answer 4 quick questions to see what you may qualify for. Free. No commitment.
+          <p className="font-body text-cream/65 text-sm md:text-base max-w-2xl mx-auto leading-relaxed mb-7">
+            Several UK schemes may help with insulation, heating upgrades, solar panels, heat pumps and
+            other energy-saving improvements. Answer a few questions to see which funding routes may be
+            worth checking.
           </p>
           <button
             onClick={scrollToChecker}
             className="inline-block bg-teal text-cream font-mono text-sm px-8 py-3.5 rounded-xl hover:bg-teal-hover transition-colors shadow-lg shadow-teal/20"
           >
-            Check My Eligibility →
+            Check funding routes →
           </button>
+          <p className="font-body text-cream/40 text-xs max-w-xl mx-auto leading-relaxed mt-5">
+            ProGrafter is not a government body and does not approve grant eligibility. This page provides
+            guidance only. Always check official scheme guidance before making decisions.
+          </p>
         </div>
       </section>
 
-      {/* SECTION 2 — DETAILED SCHEMES BREAKDOWN */}
+      {/* SCHEME CARDS */}
       <GreenSchemesBreakdown onCheckEligibility={scrollToChecker} />
 
-      {/* SECTION 3 — THE 4-STEP CHECKER */}
+      {/* CHECKER */}
       <section className="px-6 pt-16 pb-24 bg-navy" ref={checkerRef}>
         <div className="max-w-2xl mx-auto">
-          {step >= 0 && !showResults && (
+          {step >= 0 && !showResults && currentQ && (
             <>
-              <StepIndicator current={step} total={4} />
-
-              {/* Step 1 — Property type */}
-              {step === 0 && (
-                <div>
-                  <h2 className="font-heading text-cream text-2xl mb-6">What type of property do you live in?</h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {PROPERTY_OPTIONS.map((opt) => (
-                      <button key={opt.value} onClick={() => setProperty(opt.value)} className={cardClass(property === opt.value)}>
-                        <span className="text-xl mr-3">{opt.emoji}</span>
-                        <span className="font-body text-sm">{opt.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
+              <StepIndicator current={step} total={TOTAL} />
+              <p className="font-mono text-xs text-teal uppercase tracking-widest mb-2">🌿 Green Grants Guidance Checker</p>
+              <h2 className="font-heading text-cream text-2xl md:text-3xl mb-2 leading-tight">{currentQ.question}</h2>
+              {currentQ.helper && <p className="font-body text-cream/55 text-sm mb-5 leading-relaxed">{currentQ.helper}</p>}
+              <div className="grid grid-cols-1 gap-3">
+                {currentQ.options.map((opt) => (
+                  <button key={opt.value} onClick={() => selectAnswer(opt.value)} className={cardClass(answers[currentQ.id] === opt.value)}>
+                    {opt.emoji && <span className="text-lg flex-shrink-0">{opt.emoji}</span>}
+                    <span className="font-body text-sm">{opt.label}</span>
+                    <span className="ml-auto text-cream/30">→</span>
+                  </button>
+                ))}
+              </div>
+              {step > 0 && (
+                <button onClick={() => setStep(step - 1)} className="flex items-center gap-2 font-mono text-sm text-cream/60 hover:text-cream transition-colors mt-6">
+                  <ChevronLeft className="w-4 h-4" /> Back
+                </button>
               )}
+            </>
+          )}
 
-              {/* Step 2 — Ownership */}
-              {step === 1 && (
-                <div>
-                  <h2 className="font-heading text-cream text-2xl mb-6">Do you own or rent your home?</h2>
-                  <div className="grid grid-cols-1 gap-3">
-                    {OWNERSHIP_OPTIONS.map((opt) => (
-                      <button key={opt.value} onClick={() => setOwnership(opt.value)} className={cardClass(ownership === opt.value)}>
-                        <span className="text-xl mr-3">{opt.emoji}</span>
-                        <span className="font-body text-sm">{opt.label}</span>
-                      </button>
-                    ))}
-                  </div>
+          {/* RESULTS */}
+          {showResults && (
+            <div className="space-y-5">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Leaf className="w-5 h-5 text-[#16A34A]" />
+                  <p className="font-mono text-xs text-[#16A34A] uppercase tracking-widest">Your guidance results</p>
                 </div>
-              )}
+                <h2 className="font-heading text-cream text-3xl md:text-4xl leading-tight mb-2">
+                  {results.length > 0 ? "Potential funding routes found" : "No clear funding routes right now"}
+                </h2>
+                <p className="font-body text-cream/65 text-sm leading-relaxed">
+                  {results.length > 0
+                    ? "Based on your answers, these routes may be worth checking. This is not an approval. Final eligibility is confirmed by the relevant scheme provider, local authority, energy supplier or accredited installer."
+                    : "Based on your answers we couldn't identify a strong route. Schemes change often — it's still worth checking official guidance or speaking to an accredited installer."}
+                </p>
+              </div>
 
-              {/* Step 3 — EPC */}
-              {step === 2 && (
-                <div>
-                  <h2 className="font-heading text-cream text-2xl mb-6">What is your home's current EPC energy rating?</h2>
-                  <p className="font-body text-cream/60 text-sm mb-5">
-                    Your EPC (Energy Performance Certificate) rates your home from A (most efficient) to G (least efficient).
-                  </p>
-                  <div className="grid grid-cols-1 gap-3">
-                    {EPC_OPTIONS.map((opt) => (
-                      <button key={opt.value} onClick={() => setEpc(opt.value)} className={cardClass(epc === opt.value)}>
-                        <span className="text-lg mr-3">{opt.color}</span>
-                        <span className="font-body text-sm font-medium">{opt.label}</span>
-                        {opt.sub && <span className="font-body text-xs text-cream/50 ml-2">— {opt.sub}</span>}
-                      </button>
-                    ))}
-                  </div>
-                  {epc === "unknown" && (
-                    <div className="mt-4 flex items-start gap-3 bg-teal/10 border border-teal/20 rounded-xl px-5 py-4">
-                      <AlertCircle className="w-5 h-5 text-teal flex-shrink-0 mt-0.5" />
-                      <p className="font-body text-sm text-cream/70">
-                        You can find your EPC rating free at{" "}
-                        <a href="https://www.gov.uk/find-energy-certificate" target="_blank" rel="noopener noreferrer" className="text-teal underline underline-offset-2">
-                          epcregister.com <ExternalLink className="inline w-3 h-3" />
-                        </a>{" "}
-                        — just enter your postcode. Or we can match you with a local EPC Assessor who will assess your home for a small fee.
-                      </p>
-                    </div>
+              {results.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  <span className="font-mono text-[11px] font-semibold text-cream px-2.5 py-1 rounded-full bg-cream/10 border border-cream/20">
+                    📋 {results.length} potential route{results.length !== 1 ? "s" : ""}
+                  </span>
+                  {strongCount > 0 && (
+                    <span className="font-mono text-[11px] font-semibold text-cream px-2.5 py-1 rounded-full bg-[#16A34A]/25 border border-[#16A34A]/40">
+                      ✅ {strongCount} strong match{strongCount !== 1 ? "es" : ""}
+                    </span>
+                  )}
+                  {needsAccred && (
+                    <span className="font-mono text-[11px] font-semibold text-cream px-2.5 py-1 rounded-full bg-cream/10 border border-cream/20">
+                      🔒 Accreditation required
+                    </span>
                   )}
                 </div>
               )}
 
-              {/* Step 4 — Household */}
-              {step === 3 && (
-                <div>
-                  <h2 className="font-heading text-cream text-2xl mb-6">Which of these describe your household?</h2>
-                  <p className="font-mono text-xs text-cream/50 uppercase tracking-widest mb-4">Select all that apply</p>
-                  <div className="grid grid-cols-1 gap-3">
-                    {HOUSEHOLD_OPTIONS.map((opt) => {
-                      const isActive = household.includes(opt.value);
-                      return (
-                        <button key={opt.value} onClick={() => toggleHousehold(opt.value)} className={cardClass(isActive)}>
-                          <div className="flex items-center gap-3">
-                            <div className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                              isActive ? "bg-teal border-teal" : "border-cream/30"
-                            }`}>
-                              {isActive && <CheckCircle2 className="w-3.5 h-3.5 text-cream" />}
-                            </div>
-                            <span className="text-lg">{opt.emoji}</span>
-                            <span className="font-body text-sm">{opt.label}</span>
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
+              {nationNote && (
+                <div className="flex items-start gap-3 bg-teal/10 border border-teal/30 rounded-xl px-5 py-4">
+                  <AlertCircle className="w-5 h-5 text-teal flex-shrink-0 mt-0.5" />
+                  <p className="font-body text-sm text-cream/75 leading-relaxed">{nationNote}</p>
                 </div>
               )}
 
-              {/* Navigation buttons */}
-              <div className="flex items-center justify-between mt-8">
-                {step > 0 ? (
-                  <button onClick={() => setStep(step - 1)} className="flex items-center gap-2 font-mono text-sm text-cream/60 hover:text-cream transition-colors">
-                    <ChevronLeft className="w-4 h-4" /> Back
-                  </button>
-                ) : <div />}
-                <button onClick={advance} disabled={!canAdvance()}
-                  className="bg-teal text-cream font-mono text-sm px-8 py-3 rounded-xl hover:bg-teal-hover transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
-                  {step === 3 ? "See My Results →" : "Next →"}
-                </button>
-              </div>
-            </>
-          )}
+              {results.map((r) => <ResultCard key={r.id} r={r} />)}
 
-          {/* SECTION 4 — RESULTS */}
-          {showResults && (
-            <div className="space-y-6">
-              <div className="flex items-center gap-3 mb-2">
-                <Leaf className="w-5 h-5 text-[#16A34A]" />
-                <p className="font-mono text-xs text-[#16A34A] uppercase tracking-widest">
-                  {schemes.length} scheme{schemes.length !== 1 ? "s" : ""} found for you
+              {/* Closed schemes */}
+              <div className="rounded-xl border border-cream/15 bg-cream/[0.05] px-5 py-4">
+                <p className="font-mono text-[10px] uppercase tracking-widest text-cream/40 mb-1">Closed scheme</p>
+                <p className="font-body text-sm text-cream/60 leading-relaxed">
+                  <strong className="text-cream/80">Home Upgrade Grant is closed.</strong> Warm Homes: Local Grant may now be the relevant route in England.
                 </p>
               </div>
 
-              {schemes.map((s) => <SchemeCard key={s.id} scheme={s} />)}
-
-              {/* Disclaimer */}
-              <div className="bg-cream/[0.06] border border-cream/15 rounded-xl px-6 py-5">
-                <p className="font-body text-cream/60 text-xs leading-relaxed">
-                  These results are a guide based on the information you provided. Your exact eligibility will be confirmed by an MCS-certified installer during a free assessment. ProGrafter provides information only — not financial advice. For official guidance visit{" "}
-                  <a href="https://www.gov.uk" target="_blank" rel="noopener noreferrer" className="text-teal underline">gov.uk</a>.
+              {/* Result disclaimer */}
+              <div className="rounded-xl bg-amber-500/10 border border-amber-500/40 px-5 py-4">
+                <p className="font-body text-xs text-amber-200 leading-relaxed">
+                  Final eligibility, funding amount and installer requirements are confirmed by the relevant
+                  scheme provider, local authority, energy supplier or accredited installer. Scheme rules can change.
                 </p>
               </div>
 
-              {/* Main CTA */}
-              <div className="text-center pt-4">
+              {/* Commercial positioning */}
+              <div className="rounded-2xl bg-cream p-6 md:p-8">
+                <h3 className="font-heading text-navy text-2xl md:text-3xl tracking-wide leading-tight mb-3">
+                  Funding is only useful if the work is done properly.
+                </h3>
+                <p className="font-body text-body-text text-sm leading-relaxed mb-4">
+                  Grant-funded retrofit work often needs the right assessment, paperwork, installer
+                  accreditation and completion evidence. ProGrafter helps homeowners understand which
+                  funding routes may apply and connect with suitably verified trades for the work required.
+                </p>
+                <ul className="space-y-1.5 mb-4">
+                  {[
+                    "TrustMark / PAS 2030 / PAS 2035 where retrofit schemes require them",
+                    "MCS for heat pumps and solar where relevant",
+                    "OZEV-approved installers for EV chargepoints where required",
+                    "Gas Safe for gas-related works",
+                    "NICEIC / NAPIT or equivalent competent person schemes for electrical work",
+                  ].map((a) => (
+                    <li key={a} className="flex gap-2 font-body text-sm text-body-text">
+                      <CheckCircle2 className="w-4 h-4 text-[#16A34A] flex-shrink-0 mt-0.5" />
+                      <span>{a}</span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="font-mono text-xs text-body-text/60 mb-5">
+                  Relevant accreditation is checked before matching for grant-funded work.
+                </p>
                 <Link
-                  to={`/post-a-job?green=1&schemes=${schemeIds.join(",")}`}
-                  className="inline-block bg-[#16A34A] text-white font-mono text-sm py-4 px-10 rounded-xl hover:bg-[#15803D] transition-colors tracking-wider uppercase shadow-lg shadow-[#16A34A]/20"
+                  to="/post-a-job?green=1"
+                  className="inline-block bg-[#16A34A] text-white font-mono text-sm py-3.5 px-8 rounded-xl hover:bg-[#15803D] transition-colors tracking-wider uppercase"
                 >
-                  Get Matched With a Verified Local Trade — Free →
+                  Post a grant-funded project brief →
                 </Link>
+                <p className="font-body text-xs text-body-text/60 mt-3">
+                  Where grant-funded work requires accreditation, ProGrafter will only match you with
+                  installers who meet the relevant scheme requirements.
+                </p>
               </div>
 
-              {/* Start over */}
-              <div className="text-center">
-                <button
-                  onClick={() => { setStep(0); setProperty(null); setOwnership(null); setEpc(null); setHousehold([]); }}
-                  className="font-mono text-xs text-cream/50 hover:text-cream/70 underline underline-offset-4 transition-colors"
-                >
-                  Start over
+              {/* Start again */}
+              <div className="text-center pt-1">
+                <button onClick={reset} className="font-mono text-xs text-cream/50 hover:text-cream/80 underline underline-offset-4 transition-colors">
+                  Start again
                 </button>
               </div>
             </div>
           )}
         </div>
       </section>
-
     </AppShell>
   );
 };
