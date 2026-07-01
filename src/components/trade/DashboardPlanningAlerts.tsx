@@ -302,7 +302,7 @@ const DashboardPlanningAlerts = ({ trade }: { trade: TradeProfile }) => {
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <Bell className="w-5 h-5 text-secondary" />
-          <h2 className="font-heading text-primary text-xl">Recent Planning Alerts</h2>
+          <h2 className="font-heading text-primary text-xl">Planning Intelligence</h2>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <button
