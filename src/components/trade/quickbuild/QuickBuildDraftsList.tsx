@@ -309,7 +309,7 @@ const QuickBuildDraftsList = ({ tradeId }: { tradeId: string }) => {
       <div className="flex items-center justify-between mb-3">
         <h2 className="font-heading text-primary text-2xl flex items-center gap-2">
           <Sparkles className="w-5 h-5 text-amber-600" />
-          QuickBuild drafts
+          ProGrafter Quote Builder
           <span className="bg-amber-100 text-amber-800 font-mono text-[10px] px-2 py-0.5 rounded-full">
             {drafts.length}
           </span>
