@@ -159,9 +159,13 @@ const EarningsView = ({
         {loading ? (
           <p className="font-mono text-sm text-muted-foreground">Loading…</p>
         ) : monthly.length === 0 ? (
-          <p className="font-mono text-sm text-muted-foreground">
-            No payments received yet. Once a project stage is marked paid it will appear here.
-          </p>
+          <div>
+            <p className="font-heading text-primary text-lg mb-1">No payments received yet</p>
+            <p className="font-mono text-xs text-muted-foreground">
+              Once a project stage is marked paid, your earnings, upcoming stages and payment history
+              will appear here.
+            </p>
+          </div>
         ) : (
           <div className="space-y-2">
             {monthly.map((m) => {
