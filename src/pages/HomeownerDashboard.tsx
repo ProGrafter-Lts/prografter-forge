@@ -18,6 +18,8 @@ import { isGreenTrade } from "@/lib/greenTrades";
 import { isActiveJob } from "@/lib/activeProjects";
 import { BookOpen, Leaf, FolderKanban, SearchCheck, ArrowRight } from "lucide-react";
 import HomeownerProfileSection from "@/components/homeowner/HomeownerProfileSection";
+import NextSteps from "@/components/homeowner/NextSteps";
+import { buildNextSteps } from "@/lib/homeownerNextSteps";
 import { useAuthReady } from "@/hooks/useAuthReady";
 
 const HomeownerDashboard = () => {
@@ -196,6 +198,7 @@ const HomeownerDashboard = () => {
       photo_urls: u.photo_urls,
       trade_name: u.trades?.name,
       stage_name: u.project_stages?.stage_name,
+      job_id: u.project_stages?.job_id ?? null,
     }));
     setSiteUpdates(mappedUpdates);
     } catch (err) {
@@ -255,6 +258,22 @@ const HomeownerDashboard = () => {
     const projectType = TRADE_TO_PROJECT_TYPE[b.trade_category_id] || "Other";
     return { href: `/quote-checker?project_type=${encodeURIComponent(projectType)}`, jobTitle: b.job_title };
   }, [briefs]);
+
+  const nextSteps = useMemo(
+    () =>
+      buildNextSteps({
+        jobs,
+        quotes,
+        variations,
+        briefs,
+        siteUpdates,
+        freeChecks,
+        hasPassword: user?.user_metadata?.has_password === true,
+      }),
+    [jobs, quotes, variations, briefs, siteUpdates, freeChecks, user],
+  );
+
+
 
 
 
@@ -396,7 +415,14 @@ const HomeownerDashboard = () => {
                 </p>
               </div>
               <MyBriefs briefs={briefs} />
-              <ActiveProjectsSection jobs={jobs} quoteCounts={quoteCounts} activeJobs={activeJobs} />
+              <ActiveProjectsSection
+                jobs={jobs}
+                quoteCounts={quoteCounts}
+                activeJobs={activeJobs}
+                quotes={quotes}
+                siteUpdates={siteUpdates}
+                briefs={briefs}
+              />
               <MyJobs jobs={jobs} />
             </section>
           )}
@@ -415,16 +441,18 @@ const HomeownerDashboard = () => {
 
               <div className="bg-card rounded-2xl p-6 border border-border shadow-sm flex items-start justify-between gap-4 flex-wrap">
                 <div className="max-w-lg">
-                  <h3 className="font-heading text-primary text-lg">Got a quote from outside Prografter?</h3>
+                  <h3 className="font-heading text-primary text-lg">Already received a quote?</h3>
                   <p className="font-mono text-xs text-muted-foreground mt-1">
-                    Upload any builder's quote and our AI will flag missing line items, compare it to fair-market rates and produce a homeowner-friendly verdict.
+                    Upload it and ProGrafter will review missing items, unclear wording, possible exclusions,
+                    risk areas and questions worth asking before you accept. We help you understand your quote before you commit.
                   </p>
+
                 </div>
                 <a
                   href="/quote-checker"
                   className="inline-flex items-center gap-1.5 bg-secondary text-secondary-foreground font-mono text-xs px-4 py-2 rounded-xl hover:opacity-90 transition-opacity shadow-sm whitespace-nowrap"
                 >
-                  Run Quote Checker
+                  Run Quote Health Check
                   <ArrowRight className="w-3.5 h-3.5" />
                 </a>
               </div>
@@ -457,17 +485,19 @@ const HomeownerDashboard = () => {
           {/* Main overview content */}
           {activeNav === "overview" && (
             <>
+              <NextSteps steps={nextSteps} setActiveNav={setActiveNav} />
+
               <VariationAlert variations={variations} />
 
               {quoteCheckerPrompt && (
                 <div className="bg-card rounded-2xl p-6 border border-border shadow-sm flex items-start justify-between gap-4 flex-wrap">
                   <div className="max-w-lg">
                     <h3 className="font-heading text-primary text-lg flex items-center gap-2">
-                      <SearchCheck className="w-5 h-5 text-secondary" /> Already got a quote? Check it's fair
+                      <SearchCheck className="w-5 h-5 text-secondary" /> Already received a quote?
                     </h3>
                     <p className="font-mono text-xs text-muted-foreground mt-1">
-                      You told us you've received quotes{quoteCheckerPrompt.jobTitle ? ` for "${quoteCheckerPrompt.jobTitle}"` : ""}.
-                      Upload one and our AI flags missing line items and compares it to fair-market rates.
+                      Upload it and ProGrafter will review missing items, unclear wording, possible exclusions,
+                      risk areas and questions worth asking before you commit.
                       {freeChecks > 0 && <strong className="text-secondary"> Your first check is free.</strong>}
                     </p>
                   </div>
@@ -475,13 +505,20 @@ const HomeownerDashboard = () => {
                     href={quoteCheckerPrompt.href}
                     className="inline-flex items-center gap-1.5 bg-secondary text-secondary-foreground font-mono text-xs px-4 py-2 rounded-xl hover:opacity-90 transition-opacity shadow-sm whitespace-nowrap"
                   >
-                    {freeChecks > 0 ? "Run free Quote Check" : "Run Quote Checker"}
+                    {freeChecks > 0 ? "Run free Quote Health Check" : "Run Quote Health Check"}
                     <ArrowRight className="w-3.5 h-3.5" />
                   </a>
                 </div>
               )}
 
-              <ActiveProjectsSection jobs={jobs} quoteCounts={quoteCounts} activeJobs={activeJobs} />
+              <ActiveProjectsSection
+                jobs={jobs}
+                quoteCounts={quoteCounts}
+                activeJobs={activeJobs}
+                quotes={quotes}
+                siteUpdates={siteUpdates}
+                briefs={briefs}
+              />
 
               <MyBriefs briefs={briefs} />
 
@@ -491,6 +528,7 @@ const HomeownerDashboard = () => {
             </>
           )}
           </>
+
           )}
         </div>
       </main>
