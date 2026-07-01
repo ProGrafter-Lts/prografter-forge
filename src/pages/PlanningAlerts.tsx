@@ -625,6 +625,11 @@ export default function PlanningAlerts() {
   const [filterProjectType, setFilterProjectType] = useState<"all" | ProjectKind>("all");
   const [showRefused, setShowRefused] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [pipelineTab, setPipelineTab] = useState<PipelineStatus | "all">("all");
+  const [mineOnly, setMineOnly] = useState(false);
+
+  const pi = usePlanningIntelligence();
+  const tradeTypes = pi.trade?.trade_type ? [pi.trade.trade_type.toLowerCase()] : [];
 
   const allTrades = [...new Set(MOCK_APPLICATIONS.flatMap(a => a.trades_needed))].sort();
   const allCouncils = [...new Set(MOCK_APPLICATIONS.map(a => a.council))].sort();
