@@ -50,7 +50,7 @@ const Navbar = () => {
           <a href="/#how-it-works" className="font-mono text-sm text-body-text" onClick={() => setMenuOpen(false)}>How It Works</a>
           <a href="/#pricing" className="font-mono text-sm text-body-text" onClick={() => setMenuOpen(false)}>Pricing</a>
           <a href="/#features" className="font-mono text-sm text-body-text" onClick={() => setMenuOpen(false)}>Features</a>
-          <a href="/quote-checker" className="font-mono text-sm text-body-text" onClick={() => setMenuOpen(false)}>Quote Checker</a>
+          <a href="/prografter-intelligence" className="font-mono text-sm text-body-text" onClick={() => setMenuOpen(false)}>AI Tools</a>
           <a href="/green" className="font-mono text-sm text-body-text" onClick={() => setMenuOpen(false)}>Green Grants</a>
           <a href="/login" className="font-mono text-sm text-body-text" onClick={() => setMenuOpen(false)}>Login</a>
           <a href="/signup/trade" className="border border-teal text-teal font-mono text-sm px-5 py-2 rounded-xl text-center" onClick={() => setMenuOpen(false)}>Join as a Trade</a>
