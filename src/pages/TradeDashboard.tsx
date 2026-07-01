@@ -16,6 +16,8 @@ import TradeProfileSection from "@/components/trade/TradeProfileSection";
 import AddSpecialismsBanner from "@/components/trade/AddSpecialismsBanner";
 import PipelineSection from "@/components/trade/PipelineSection";
 import AvailableJobsView from "@/components/trade/AvailableJobsView";
+import TradeVaultSection from "@/components/trade/tradevault/TradeVaultSection";
+import TradeVaultBanners from "@/components/trade/tradevault/TradeVaultBanners";
 import ActiveProjectsView from "@/components/trade/ActiveProjectsView";
 import EarningsView from "@/components/trade/EarningsView";
 import { useTradeAccess } from "@/hooks/useTradeAccess";
