@@ -640,7 +640,14 @@ export default function PlanningAlerts() {
         description="Browse live planning applications from East Midlands councils. Check permitted development rules before you apply."
         path="/planning-alerts"
       />
-      <AppShell>
+      <div className="min-h-screen dashboard-dark flex">
+        <TradeSidebar
+          activeNav={sidebarNav}
+          setActiveNav={setSidebarNav}
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+        />
+        <main className="flex-1 overflow-auto pt-10 md:pt-0">
         <div className="min-h-[calc(100vh-64px)] bg-background">
           {/* Sub-header */}
           <div className="bg-primary px-6 py-4 flex items-center justify-between flex-wrap gap-3">
