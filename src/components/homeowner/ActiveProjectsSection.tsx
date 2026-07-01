@@ -1,9 +1,8 @@
-import { useNavigate } from "react-router-dom";
 import { useDrawerNavigate } from "@/hooks/useDrawerNavigate";
-import { FolderKanban, MapPin, Clock, FileText, Users } from "lucide-react";
+import { FolderKanban, MapPin, Clock, FileText, Users, SearchCheck, MessageSquarePlus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { isActiveJob } from "@/lib/activeProjects";
-import { formatStatusLabel } from "@/lib/statusLabel";
+import { getStatusBadge } from "@/lib/statusBadge";
 
 interface Job {
   id: string;
@@ -15,23 +14,32 @@ interface Job {
   created_at: string;
 }
 
+interface Quote {
+  amount: number;
+  status: string;
+  job_id: string;
+}
+
+interface SiteUpdate {
+  id: string;
+  update_text?: string;
+  created_at: string;
+  job_id?: string | null;
+}
+
+interface Brief {
+  job_title?: string | null;
+  matched_trade_count?: number | null;
+}
+
 interface Props {
   jobs: Job[];
   quoteCounts: Record<string, number>;
-  /** Optional pre-filtered active jobs from the server RPC. When provided this is
-   *  used as the authoritative list; otherwise we fall back to client-side
-   *  derivation via isActiveJob. */
   activeJobs?: Job[];
+  quotes?: Quote[];
+  siteUpdates?: SiteUpdate[];
+  briefs?: Brief[];
 }
-
-// Active stages handled centrally in src/lib/activeProjects.ts
-
-const STATUS_BADGE: Record<string, { label: string; className: string }> = {
-  awaiting_quotes: { label: "Awaiting Quotes", className: "border-transparent bg-amber-200 text-amber-900 hover:bg-amber-200" },
-  matched: { label: "Trade Matched", className: "border-transparent bg-blue-200 text-blue-900 hover:bg-blue-200" },
-  in_progress: { label: "In Progress", className: "border-transparent bg-secondary/20 text-secondary hover:bg-secondary/20" },
-  review: { label: "In Review", className: "border-transparent bg-purple-200 text-purple-900 hover:bg-purple-200" },
-};
 
 const timeAgo = (dateStr: string) => {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -42,8 +50,21 @@ const timeAgo = (dateStr: string) => {
   return new Date(dateStr).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
 };
 
-const ActiveProjectsSection = ({ jobs, quoteCounts, activeJobs: activeJobsProp }: Props) => {
-  const navigate = useNavigate();
+const Metric = ({ label, value }: { label: string; value: string }) => (
+  <div className="min-w-0">
+    <p className="font-mono text-[10px] uppercase tracking-wide text-muted-foreground">{label}</p>
+    <p className="font-heading text-primary text-sm truncate mt-0.5">{value}</p>
+  </div>
+);
+
+const ActiveProjectsSection = ({
+  jobs,
+  quoteCounts,
+  activeJobs: activeJobsProp,
+  quotes = [],
+  siteUpdates = [],
+  briefs = [],
+}: Props) => {
   const openDrawer = useDrawerNavigate();
 
   const activeJobs = activeJobsProp ?? jobs.filter(isActiveJob);
@@ -74,11 +95,28 @@ const ActiveProjectsSection = ({ jobs, quoteCounts, activeJobs: activeJobsProp }
       <div className="space-y-3">
         {activeJobs.map((job) => {
           const count = quoteCounts[job.id] ?? 0;
+          const jobQuotes = quotes.filter((q) => q.job_id === job.id);
+          const acceptedQuote = jobQuotes.find((q) => q.status === "accepted");
+          const latestUpdate = siteUpdates
+            .filter((u) => u.job_id === job.id)
+            .sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at))[0];
+          const matchedBrief = briefs.find(
+            (b) => b.job_title && job.title && b.job_title === job.title,
+          );
+          const matchedCount = matchedBrief?.matched_trade_count ?? null;
+
           const badge =
             count > 0 && job.status === "awaiting_quotes"
-              ? { label: `${count} Quote${count > 1 ? "s" : ""} Received`, className: "bg-secondary/15 text-secondary" }
-              : STATUS_BADGE[job.status] ??
-                { label: formatStatusLabel(job.status), className: "bg-muted text-primary" };
+              ? getStatusBadge("quote_received")
+              : getStatusBadge(job.status);
+
+          const nextAction = acceptedQuote
+            ? "Sign contract & schedule works"
+            : count > 0
+              ? "Review your quote"
+              : job.status === "awaiting_quotes"
+                ? "Awaiting matched trades"
+                : "Track progress";
 
           return (
             <div
@@ -102,6 +140,24 @@ const ActiveProjectsSection = ({ jobs, quoteCounts, activeJobs: activeJobsProp }
                 <Badge className={`${badge.className} whitespace-nowrap`}>{badge.label}</Badge>
               </div>
 
+              {/* Operational metrics */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 py-3 border-y border-border">
+                {matchedCount != null && (
+                  <Metric label="Trades matched" value={String(matchedCount)} />
+                )}
+                <Metric label="Quotes received" value={String(count)} />
+                {acceptedQuote ? (
+                  <Metric label="Project value" value={`£${Number(acceptedQuote.amount).toLocaleString()}`} />
+                ) : (
+                  <Metric label="Status" value={badge.label} />
+                )}
+                <Metric
+                  label="Latest update"
+                  value={latestUpdate ? timeAgo(latestUpdate.created_at) : "—"}
+                />
+                <Metric label="Next action" value={nextAction} />
+              </div>
+
               <div className="flex flex-wrap items-center gap-2 mt-3">
                 <button
                   onClick={() => openDrawer(`/project/${job.id}`)}
@@ -115,9 +171,25 @@ const ActiveProjectsSection = ({ jobs, quoteCounts, activeJobs: activeJobsProp }
                     className="border border-secondary/40 text-secondary font-mono text-xs px-4 py-2 rounded-xl hover:bg-secondary/5 transition-colors inline-flex items-center gap-1.5"
                   >
                     <Users className="w-3.5 h-3.5" />
-                    {count >= 2 ? `Compare ${count} Quotes` : `View Quote`}
+                    {count >= 2 ? `Compare ${count} Quotes` : "View Quote"}
                   </button>
                 )}
+                {count > 0 && !acceptedQuote && (
+                  <a
+                    href="/quote-checker"
+                    className="border border-border text-primary font-mono text-xs px-4 py-2 rounded-xl hover:bg-muted transition-colors inline-flex items-center gap-1.5"
+                  >
+                    <SearchCheck className="w-3.5 h-3.5" /> Run Quote Check
+                  </a>
+                )}
+                <button
+                  disabled
+                  aria-disabled="true"
+                  title="Coming soon"
+                  className="border border-border text-muted-foreground/60 font-mono text-xs px-4 py-2 rounded-xl inline-flex items-center gap-1.5 cursor-not-allowed"
+                >
+                  <MessageSquarePlus className="w-3.5 h-3.5" /> Post Update
+                </button>
               </div>
             </div>
           );

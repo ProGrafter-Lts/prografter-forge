@@ -97,11 +97,30 @@ const RatingDisplay = ({
   );
 };
 
+const CONFIRM_ITEMS = [
+  "I understand what is included.",
+  "I understand what is excluded.",
+  "I understand the agreed payment stages.",
+  "I understand any provisional sums.",
+  "I understand the expected project duration.",
+  "I have reviewed the Quote Health Check, or chosen to continue without one.",
+];
+
 const QuotesReceived = ({ quotes, onQuoteAccepted }: QuotesReceivedProps) => {
   const navigate = useNavigate();
   const openDrawer = useDrawerNavigate();
   const [pendingAccept, setPendingAccept] = useState<Quote | null>(null);
   const [accepting, setAccepting] = useState(false);
+  const [checked, setChecked] = useState<boolean[]>(() => CONFIRM_ITEMS.map(() => false));
+  const allConfirmed = checked.every(Boolean);
+
+  const openAcceptDialog = (q: Quote) => {
+    setChecked(CONFIRM_ITEMS.map(() => false));
+    setPendingAccept(q);
+  };
+  const toggleChecked = (i: number) =>
+    setChecked((prev) => prev.map((v, idx) => (idx === i ? !v : v)));
+
 
   const handleAccept = async () => {
     if (!pendingAccept) return;
@@ -301,10 +320,26 @@ const QuotesReceived = ({ quotes, onQuoteAccepted }: QuotesReceivedProps) => {
               <div className="flex flex-wrap items-center gap-2 mt-4">
                 {isPending && !jobAccepted && (
                   <button
-                    onClick={() => setPendingAccept(q)}
+                    onClick={() => openAcceptDialog(q)}
                     className="bg-secondary text-secondary-foreground font-mono text-xs px-4 py-2 rounded-xl hover:opacity-90 transition-opacity shadow-sm inline-flex items-center gap-2"
                   >
                     <Check className="w-3.5 h-3.5" /> Accept Quote
+                  </button>
+                )}
+                {isPending && !jobAccepted && (
+                  <button
+                    onClick={() => openDrawer(`/project/${q.job_id}`)}
+                    className="border border-secondary/40 text-secondary font-mono text-xs px-4 py-2 rounded-xl hover:bg-secondary/5 transition-colors"
+                  >
+                    Ask Builder a Question
+                  </button>
+                )}
+                {isPending && !jobAccepted && (
+                  <button
+                    onClick={() => openDrawer(`/project/${q.job_id}`)}
+                    className="border border-border text-primary font-mono text-xs px-4 py-2 rounded-xl hover:bg-muted transition-colors"
+                  >
+                    Request Revised Quote
                   </button>
                 )}
                 {isPending && jobAccepted && (
@@ -327,6 +362,7 @@ const QuotesReceived = ({ quotes, onQuoteAccepted }: QuotesReceivedProps) => {
                   </button>
                 )}
               </div>
+
 
               {q.ai_verdict === "high_risk" && (
                 <div className="mt-3 bg-rose-50 border border-rose-200 rounded-lg p-3 flex items-start gap-2">
@@ -355,9 +391,29 @@ const QuotesReceived = ({ quotes, onQuoteAccepted }: QuotesReceivedProps) => {
               </strong>{" "}
               at <strong>£{Number(pendingAccept?.amount || 0).toLocaleString()}</strong>.
               All other pending quotes on this job will be automatically declined.
-              You can sign the contract from the project page next.
             </AlertDialogDescription>
           </AlertDialogHeader>
+
+          <div className="space-y-2 my-2">
+            <p className="font-mono text-xs text-muted-foreground">
+              Before accepting, please confirm:
+            </p>
+            {CONFIRM_ITEMS.map((item, i) => (
+              <label
+                key={i}
+                className="flex items-start gap-2.5 cursor-pointer rounded-lg border border-border p-2.5 hover:bg-muted/50 transition-colors"
+              >
+                <input
+                  type="checkbox"
+                  checked={checked[i]}
+                  onChange={() => toggleChecked(i)}
+                  className="mt-0.5 h-4 w-4 accent-[hsl(var(--secondary))]"
+                />
+                <span className="font-mono text-xs text-primary leading-relaxed">{item}</span>
+              </label>
+            ))}
+          </div>
+
           <AlertDialogFooter>
             <AlertDialogCancel disabled={accepting}>Cancel</AlertDialogCancel>
             <AlertDialogAction
@@ -365,17 +421,18 @@ const QuotesReceived = ({ quotes, onQuoteAccepted }: QuotesReceivedProps) => {
                 e.preventDefault();
                 void handleAccept();
               }}
-              disabled={accepting}
+              disabled={accepting || !allConfirmed}
             >
               {accepting ? (
                 <span className="inline-flex items-center gap-2">
                   <Loader2 className="w-3.5 h-3.5 animate-spin" /> Accepting…
                 </span>
               ) : (
-                "Yes, accept quote"
+                "Accept Quote"
               )}
             </AlertDialogAction>
           </AlertDialogFooter>
+
         </AlertDialogContent>
       </AlertDialog>
     </section>

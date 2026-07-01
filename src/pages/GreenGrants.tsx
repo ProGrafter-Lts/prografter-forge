@@ -367,6 +367,8 @@ const GreenGrantsPage = () => {
   const [step, setStep] = useState(-1);
   const [answers, setAnswers] = useState<Answers>({});
   const checkerRef = useRef<HTMLDivElement>(null);
+  const cardsRef = useRef<HTMLDivElement>(null);
+
 
   const TOTAL = QUESTIONS.length;
   const showResults = step === TOTAL;
@@ -387,6 +389,11 @@ const GreenGrantsPage = () => {
     setStep(0);
     setTimeout(() => checkerRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
   };
+
+  const scrollToCards = () => {
+    cardsRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
 
   const reset = () => { setStep(0); setAnswers({}); };
 
@@ -415,19 +422,26 @@ const GreenGrantsPage = () => {
         <div className="max-w-3xl mx-auto text-center">
           <span className="font-mono text-xs text-teal uppercase tracking-widest mb-4 block">Green Grants Guidance Checker</span>
           <h1 className="font-heading text-cream text-[38px] sm:text-[50px] md:text-[58px] leading-[0.97] tracking-wide mb-5">
-            COULD YOU GET HELP FUNDING ENERGY IMPROVEMENTS TO YOUR HOME?
+            CHECK WHICH FUNDING ROUTES MAY APPLY
           </h1>
           <p className="font-body text-cream/65 text-sm md:text-base max-w-2xl mx-auto leading-relaxed mb-7">
-            Several UK schemes may help with insulation, heating upgrades, solar panels, heat pumps and
-            other energy-saving improvements. Answer a few questions to see which funding routes may be
-            worth checking.
+            Answer a few simple questions and we'll highlight schemes that may be relevant before you
+            contact installers — covering insulation, heating upgrades, solar panels, heat pumps and more.
           </p>
-          <button
-            onClick={scrollToChecker}
-            className="inline-block bg-teal text-cream font-mono text-sm px-8 py-3.5 rounded-xl hover:bg-teal-hover transition-colors shadow-lg shadow-teal/20"
-          >
-            Check funding routes →
-          </button>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <button
+              onClick={scrollToChecker}
+              className="inline-block bg-teal text-cream font-mono text-sm px-8 py-3.5 rounded-xl hover:bg-teal-hover transition-colors shadow-lg shadow-teal/20"
+            >
+              Start Funding Check →
+            </button>
+            <button
+              onClick={scrollToCards}
+              className="inline-block bg-cream/10 text-cream border border-cream/30 font-mono text-sm px-8 py-3.5 rounded-xl hover:bg-cream/20 transition-colors"
+            >
+              Browse Funding Routes
+            </button>
+          </div>
           <p className="font-body text-cream/40 text-xs max-w-xl mx-auto leading-relaxed mt-5">
             ProGrafter is not a government body and does not approve grant eligibility. This page provides
             guidance only. Always check official scheme guidance before making decisions.
@@ -436,7 +450,10 @@ const GreenGrantsPage = () => {
       </section>
 
       {/* SCHEME CARDS */}
-      <GreenSchemesBreakdown onCheckEligibility={scrollToChecker} />
+      <div ref={cardsRef}>
+        <GreenSchemesBreakdown onCheckEligibility={scrollToChecker} />
+      </div>
+
 
       {/* CHECKER */}
       <section className="px-6 pt-16 pb-24 bg-navy" ref={checkerRef}>

@@ -1,39 +1,39 @@
-# Fix trade application confirmation + login
 
-## Problem (confirmed from the email log and code)
+# Homeowner Dashboard — Functionality Upgrade
 
-Two separate, real gaps — both reproduced for `prografter.test@gmail.com`:
+Goal: improve information architecture and homeowner confidence **without** touching the visual design, colour palette, typography, branding, or the homepage. All new UI reuses existing tokens (`bg-card`, `text-primary`, `text-secondary`, `border-border`, `font-heading`, `font-mono`, rounded-2xl) so it feels like a native extension.
 
-1. **No confirmation email on submit.** The application form (`src/pages/Apply.tsx`) only fires the internal admin alert (`trade-signup-admin-notification`). It never sends the applicant the `trade-welcome` email. The email log confirms it: today's submission produced only the `trade-verified` (approval) email; the last `trade-welcome` was 19 June. The template exists and is registered — it's just never called.
+## 1. "Your Next Steps" priority centre
+- New component `src/components/homeowner/NextSteps.tsx`, rendered on the Overview tab directly beneath the welcome section.
+- A pure helper `src/lib/homeownerNextSteps.ts` derives an ordered task list from existing data already loaded in `HomeownerDashboard` (jobs, quotes, variations, briefs, freeChecks, siteUpdates, password status).
+- Each task = `{ priority, title, description, estTime, ctaLabel, action }`. Priority drives colour (amber = action required, teal = recommended, blue = informational) and sort order; highest priority first.
+- Task rules generated from real state, e.g.: new unaccepted quote → "Review Quote"; quote present + free check available → "Run Quote Health Check"; pending variation → "Review payment/variation request"; new site update → "View latest progress photos"; `has_password !== true` → "Set account password"; incomplete profile → "Complete profile". Empty state: a calm "You're all caught up" card.
+- CTAs route via existing patterns (`setActiveNav`, `useDrawerNavigate`, `/quote-checker`).
 
-2. **Approval creates no login.** The application flow writes only to the `trade_applications` table. It never creates an auth account or a `trades` record. So "approving" in admin sends the verified email but provisions nothing to log into — there are genuinely no credentials. (The `trades` row + `has_role` that the trade dashboard needs are only created by the signup trigger when an auth user signs up as a trade.)
+## 2. Richer active project cards
+- Upgrade `ActiveProjectsSection.tsx` cards to show: name, current status badge, trades matched, quotes received, accepted quote value (if any), latest update, next action, budget/value, posted date, location.
+- Add `matched_trade_count`, accepted-quote amount, and latest-update text into the data passed from `HomeownerDashboard` (values already available from `briefs`, `quoteCounts`, `quotes`, `siteUpdates`; wire them through props).
+- Buttons: View Project, View/Compare Quote, Run Quote Check (shown when quotes exist), and a disabled "Post Update" placeholder.
 
-## What we'll build
+## 3 & 4. Project Control Centre tab framework
+- `ProjectDetail.tsx` already renders panels (timeline, messaging, payments, variations, contract). Add a consistent tab bar: **Overview · Quotes · Timeline · Payments · Documents · Photos · Messages**.
+- Reuse existing panels where they exist; add informative empty-state placeholder cards for the modules that have no data yet (Documents, Photos, and any empty Payments/Timeline/Messages), each with the explanatory copy from the brief. New small component `src/components/project/ControlCentreTabs.tsx` + `EmptyModule.tsx`. No backend/business-logic changes — placeholders only.
 
-### 1. Application confirmation email (immediate fix)
-In `Apply.tsx` `submit()`, after the record is saved, also invoke `send-transactional-email` with `templateName: "trade-welcome"`, `recipientEmail: applicantEmail`, idempotency key `trade-application-welcome-<applicationId>`, and `templateData: { firstName }`. Non-blocking, like the existing admin notification, so the confirmation screen still shows on email delay. (`trade-welcome` already says "5–7 working days", matching the on-screen message.)
+## 5. Safer quote acceptance flow
+- In `QuotesReceived.tsx`, replace the direct Accept action with a confirmation checklist dialog (reusing the existing `AlertDialog`): the 6 confirmation checkboxes from the brief. "Accept Quote" stays disabled until all are ticked.
+- Add secondary actions "Ask Builder a Question" (opens project messages) and "Request Revised Quote" (opens messages prefilled / marks intent). These route through existing project navigation; no new tables.
 
-### 2. Provision a real login on approval (magic link + optional password)
-Mirror the homeowner pattern. Add a new edge function `provision-trade-account` (admin-only, validates the caller is an admin via the service role + `has_role`) that, given an application id:
-- Creates the auth user if one doesn't exist for that email (with `user_type: 'trade'` and name/company/phone/postcode/trade metadata, so the existing `handle_new_user` trigger creates the `trades` row), or fetches the existing user.
-- Links the trade record (sets `verified = true`, `verification_status = 'approved'`) so the dashboard works on first login.
-- Generates and sends a **magic link** to the applicant's email so they can log in with one click.
+## 6. Quote Health Check wording
+- Update copy in the Overview prompt and the Quotes tab card in `HomeownerDashboard.tsx` (and matching hero on `QuoteChecker.tsx`): remove "check it's fair"; use the clarity-focused wording (missing items, unclear wording, exclusions, risk areas, questions worth asking). Primary button "Run Quote Health Check", support line "We help you understand your quote before you commit."
 
-Wire it into the admin approve action in `src/pages/AdminApplicationDetail.tsx` `decide("approved")`: after the existing `trade-verified` email, call `provision-trade-account`. The verified email link to `/dashboard/trade` then lands on a working, authenticated account.
+## 7. Green Grants entry
+- Add a hero to the top of `GreenGrants.tsx` (and the embedded grants tab): headline "Check Which Funding Routes May Apply", supporting text, primary CTA "Start Funding Check" (scrolls to / starts existing checker), secondary "Browse Funding Routes" (scrolls to existing cards). No grant content removed. Ensure every "View Official Scheme Details" link uses high-contrast tokens.
 
-### 3. Trade login + optional password
-- Ensure `src/pages/Login.tsx` supports a trade magic-link / OTP path (it already has a homeowner magic-link path; extend it to trades) so the emailed link and manual code both resolve via `/auth/callback`.
-- Add an optional "Set a password" section to the trade dashboard (`src/pages/TradeDashboard.tsx`), reusing the same pattern as `HomeownerProfileSection.tsx`, so the trade can set a password for future direct logins instead of relying on magic links.
-
-### 4. Recover the existing account
-After the fix is in, re-run approval/provisioning for `prografter.test@gmail.com` so the already-approved test account gets a working login and a magic link, without needing a brand-new submission.
+## 8. Contrast & accessibility pass
+- Standardise status badges across dashboard components to one shared map (`src/lib/statusBadge.ts`): Awaiting Quotes = blue, Quote Received = teal, Action Required = amber, Completed = green, Closed = grey — using existing palette tokens with AA-contrast foreground.
+- Replace low-contrast links/secondary buttons on the dark dashboard with token-based styles; add `aria-label`s to icon-only buttons.
 
 ## Technical notes
-- New edge function uses the service role and an explicit admin check; it is the only place auth users are created from applications.
-- `handle_new_user` already maps `user_type: 'trade'` metadata to a `trades` row — no trigger changes needed.
-- Magic-link redirect uses `${window.location.origin}/auth/callback` then routes to `/dashboard/trade`.
-- Deploy `send-transactional-email` is unaffected (template already registered); deploy the new `provision-trade-account` function.
-
-## Out of scope
-- No change to the application form fields or the 5–7 working day messaging (already correct).
-- No bulk/marketing email.
+- Data already fetched in `HomeownerDashboard.loadData` is sufficient; I'll thread it into the new components rather than adding queries where possible (one small addition: accepted-quote amount + latest update text per job, both derivable from existing `quotes`/`siteUpdates`).
+- No schema/RLS/edge-function changes. No new routes/pages. Purely presentation + client-side derivation.
+- Files touched: `HomeownerDashboard.tsx`, `ActiveProjectsSection.tsx`, `QuotesReceived.tsx`, `GreenGrants.tsx`, `QuoteChecker.tsx`, plus new `NextSteps.tsx`, `homeownerNextSteps.ts`, `statusBadge.ts`, `ControlCentreTabs.tsx`, `EmptyModule.tsx`.

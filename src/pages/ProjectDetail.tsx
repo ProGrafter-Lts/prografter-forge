@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, ShieldCheck } from "lucide-react";
+import { ArrowLeft, ShieldCheck, LayoutDashboard, ClipboardList, CalendarClock, CreditCard, FolderArchive, Image as ImageIcon, MessageSquare } from "lucide-react";
+import ControlCentreTabs, { type ControlCentreTab } from "@/components/project/ControlCentreTabs";
+import EmptyModule from "@/components/project/EmptyModule";
 import { toast } from "sonner";
 import GreenCertificatePack from "@/components/GreenCertificatePack";
 import ProjectHeader from "@/components/project/ProjectHeader";
@@ -79,6 +81,7 @@ const ProjectDetail = () => {
   const [contract, setContract] = useState<Contract | null>(null);
   const [subAssignments, setSubAssignments] = useState<SubAssignment[]>([]);
   const [viewerContextReady, setViewerContextReady] = useState(false);
+  const [hoTab, setHoTab] = useState("overview");
 
   const [userRole, setUserRole] = useState<UserRole>(null);
   const [userId, setUserId] = useState<string | null>(null);
@@ -484,6 +487,118 @@ const ProjectDetail = () => {
           onRefresh={refreshProject}
         />
 
+        {userRole === "homeowner" ? (
+          (() => {
+            const tabs: ControlCentreTab[] = [
+              { id: "overview", label: "Overview", icon: LayoutDashboard },
+              { id: "quotes", label: "Quotes", icon: ClipboardList },
+              { id: "timeline", label: "Timeline", icon: CalendarClock },
+              { id: "payments", label: "Payments", icon: CreditCard },
+              { id: "documents", label: "Documents", icon: FolderArchive },
+              { id: "photos", label: "Photos", icon: ImageIcon },
+              { id: "messages", label: "Messages", icon: MessageSquare },
+            ];
+            return (
+              <div className="space-y-6">
+                <ControlCentreTabs tabs={tabs} active={hoTab} onChange={setHoTab} />
+
+                {hoTab === "overview" && (
+                  <div className="space-y-6">
+                    <div className="bg-card rounded-2xl p-6 border border-border shadow-sm">
+                      <h3 className="font-heading text-primary text-lg mb-2">Project summary</h3>
+                      <p className="font-mono text-sm text-muted-foreground whitespace-pre-line leading-relaxed">
+                        {job.description || "No description provided."}
+                      </p>
+                    </div>
+                    {job.is_green_job && (
+                      <GreenCertificatePack jobType={job.job_type} isComplete={job.status === "complete" || job.stage === "completed"} />
+                    )}
+                  </div>
+                )}
+
+                {hoTab === "quotes" && (
+                  <ContractPanel
+                    jobId={id!}
+                    jobType={job.job_type}
+                    quotes={quotes}
+                    contract={contract}
+                    userRole={userRole}
+                    userId={userId}
+                    tradeName={tradeName}
+                    homeownerName={homeownerName}
+                    onRefresh={refreshProject}
+                  />
+                )}
+
+                {hoTab === "timeline" && (
+                  stages.length > 0 ? (
+                    <StageTimeline
+                      stages={stages}
+                      updates={updates}
+                      subAssignments={subAssignments}
+                      userRole={userRole}
+                      userId={userId}
+                      onRefresh={refreshProject}
+                    />
+                  ) : (
+                    <EmptyModule
+                      icon={CalendarClock}
+                      title="Timeline"
+                      message="Major project events, inspections and milestones will appear here."
+                      hint="No project updates have been posted yet."
+                    />
+                  )
+                )}
+
+                {hoTab === "payments" && (
+                  stages.length > 0 ? (
+                    <PaymentSchedule
+                      stages={stages}
+                      contractValue={contractValue}
+                      userRole={userRole}
+                      onReleasePayment={releasePayment}
+                    />
+                  ) : (
+                    <EmptyModule
+                      icon={CreditCard}
+                      title="Payments"
+                      message="Agreed payment stages and completed payments will appear here."
+                      hint="No payment stages have been agreed yet."
+                    />
+                  )
+                )}
+
+                {hoTab === "documents" && (
+                  <EmptyModule
+                    icon={FolderArchive}
+                    title="Documents"
+                    message="This is where quotes, contracts, certificates, drawings and warranties will be stored."
+                    hint="No project documents uploaded yet."
+                  />
+                )}
+
+                {hoTab === "photos" && (
+                  <EmptyModule
+                    icon={ImageIcon}
+                    title="Photos"
+                    message="Progress photographs uploaded by you or your tradesperson will appear here."
+                    hint="No progress photos yet."
+                  />
+                )}
+
+                {hoTab === "messages" && (
+                  <MessagingPanel
+                    messages={messages}
+                    userId={userId}
+                    msgText={msgText}
+                    onMsgTextChange={setMsgText}
+                    onSendMessage={sendMessage}
+                  />
+                )}
+              </div>
+            );
+          })()
+        ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Left column */}
           <div className="md:col-span-2 space-y-8">
@@ -568,10 +683,12 @@ const ProjectDetail = () => {
               stages={stages}
               contractValue={contractValue}
               userRole={userRole}
-              onReleasePayment={userRole === "homeowner" ? releasePayment : undefined}
+              onReleasePayment={undefined}
             />
           </div>
         </div>
+        )}
+
       </div>
 
       {/* Sub-trade assignment modal */}
