@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
 import SEO from "@/components/SEO";
 import TradeSidebar from "@/components/trade/TradeSidebar";
-import { Bell, Search, X, Radio, Building2, MapPin, Calendar, FileText, CheckCircle2, AlertTriangle, XCircle, Sparkles } from "lucide-react";
+import { Bell, Search, X, Radio, Building2, MapPin, Calendar, FileText, CheckCircle2, AlertTriangle, XCircle, Sparkles, TrendingUp, Target } from "lucide-react";
+import { usePlanningIntelligence } from "@/hooks/usePlanningIntelligence";
+import OpportunityCommandCentre from "@/components/trade/planning/OpportunityCommandCentre";
+import { scoreOpportunity, getBestAction, ACCESS_LABEL, PIPELINE_TABS, PipelineStatus } from "@/lib/planningIntelligence";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 type ProjectKind = "DOMESTIC" | "CONVERSION" | "NEW BUILD";
@@ -223,13 +226,18 @@ interface PlanningApp {
   estimated_value: string; floorspace_m2: number; documents_available: boolean; validated: boolean;
 }
 
-const AppCard = ({ app, onSelect, selected }: { app: PlanningApp; onSelect: (app: PlanningApp) => void; selected: boolean }) => {
+const AppCard = ({ app, onSelect, selected, tradeTypes, pipelineStatus, showScore }: { app: PlanningApp; onSelect: (app: PlanningApp) => void; selected: boolean; tradeTypes: string[]; pipelineStatus?: PipelineStatus; showScore: boolean }) => {
   const s = STATUS_CFG[app.status];
   const [tradesExpanded, setTradesExpanded] = useState(false);
   const projectKind = getProjectType(app);
   const large = isLargeProject(app.estimated_value);
   const visibleTrades = tradesExpanded ? app.trades_needed : app.trades_needed.slice(0, 3);
   const overflow = app.trades_needed.length - 3;
+  const score = scoreOpportunity(app, tradeTypes);
+  const action = getBestAction(app);
+  const pipelineLabel = pipelineStatus && pipelineStatus !== "new"
+    ? PIPELINE_TABS.find((t) => t.id === pipelineStatus)?.label
+    : null;
 
   return (
     <div
@@ -258,8 +266,27 @@ const AppCard = ({ app, onSelect, selected }: { app: PlanningApp; onSelect: (app
         <div className="flex flex-col items-end gap-1 flex-shrink-0">
           <StatusBadge status={app.status} />
           {s && <span className={`font-mono text-[10px] uppercase tracking-wider ${s.accent}`}>{s.priority}</span>}
+          {pipelineLabel && (
+            <span className="font-mono text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+              {pipelineLabel}
+            </span>
+          )}
         </div>
       </div>
+
+      {showScore && (
+        <div className="flex items-center gap-2 flex-wrap mb-2.5">
+          <span
+            className="inline-flex items-center gap-1 font-mono text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider"
+            style={{ backgroundColor: `${score.bandColor}22`, color: score.bandColor }}
+          >
+            <TrendingUp className="w-2.5 h-2.5" /> {score.score}/100 · {score.band}
+          </span>
+          <span className="inline-flex items-center gap-1 font-mono text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider bg-secondary/10 text-secondary border border-secondary/20">
+            <Target className="w-2.5 h-2.5" /> {action.label}
+          </span>
+        </div>
+      )}
 
       <p className="font-sans text-xs text-foreground leading-relaxed mb-2 line-clamp-2">
         {app.description}
@@ -300,147 +327,6 @@ const AppCard = ({ app, onSelect, selected }: { app: PlanningApp; onSelect: (app
       </div>
     </div>
   );
-};
-
-// ── Application detail panel ──────────────────────────────────────────────────
-
-const AppDetail = ({ app, onClose, isMobile }: { app: PlanningApp; onClose: () => void; isMobile: boolean }) => {
-  const s = STATUS_CFG[app.status] || STATUS_CFG.submitted;
-  const daysSinceSubmission = Math.floor((Date.now() - new Date(app.submitted_date).getTime()) / 86400000);
-
-  useEffect(() => {
-    if (!isMobile) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = prev; };
-  }, [isMobile]);
-
-  const panel = (
-    <div
-      style={{ backgroundColor: "#0F1F38" }}
-      className={`overflow-hidden flex flex-col ${
-        isMobile ? "h-full rounded-none border-0" : "rounded-2xl border-2 border-secondary sticky top-20 max-h-[calc(100vh-100px)]"
-      }`}
-    >
-      {/* Header */}
-      <div className="bg-primary px-5 py-4 flex items-center justify-between gap-3 flex-shrink-0">
-        <div className="min-w-0 flex-1">
-          <p className="font-heading text-primary-foreground text-sm truncate">{app.address}</p>
-          <p className="font-mono text-[11px] text-primary-foreground/70 truncate mt-0.5 uppercase tracking-wider">
-            {app.id} · {app.council}
-          </p>
-        </div>
-        <button
-          onClick={onClose}
-          aria-label="Close"
-          className="bg-primary-foreground/15 hover:bg-primary-foreground/25 text-primary-foreground w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-colors"
-        >
-          <X className="w-4 h-4" />
-        </button>
-      </div>
-
-      {/* Priority alert */}
-      {(app.status === "submitted" || app.status === "pending_decision") && (
-        <div className={`px-5 py-3 border-b flex items-start gap-2.5 ${
-          app.status === "submitted" ? "bg-secondary/10 border-secondary/20" : "bg-amber-500/10 border-amber-500/20"
-        }`}>
-          <AlertTriangle className={`w-4 h-4 mt-0.5 flex-shrink-0 ${s.accent}`} />
-          <div>
-            <p className={`font-mono text-[11px] font-semibold uppercase tracking-wider ${s.accent}`}>
-              {app.status === "submitted"
-                ? `Submitted ${daysSinceSubmission} days ago`
-                : "Decision pending"}
-            </p>
-            <p className="font-sans text-xs text-foreground/80 mt-1 leading-relaxed">
-              {app.status === "submitted"
-                ? "Homeowner likely sourcing trades now — register your interest to be first in front of them."
-                : "Homeowner preparing for works to start — register your interest now."}
-            </p>
-          </div>
-        </div>
-      )}
-
-      <div className="px-5 py-4 overflow-y-auto flex-1 min-h-0 space-y-5">
-        {/* Key info grid */}
-        <div className="grid grid-cols-2 gap-2">
-          {[
-            { label:"Type", value:app.type },
-            { label:"Est. value", value:app.estimated_value },
-            { label:"Floorspace", value:`${app.floorspace_m2}m²` },
-            { label:"Submitted", value:new Date(app.submitted_date).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"}) },
-            { label:"Decision", value:app.decision_date ? new Date(app.decision_date).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"}) : "Pending" },
-            { label:"Documents", value:app.documents_available ? "Available" : "Not yet uploaded" },
-          ].map(item => (
-            <div key={item.label} className="bg-muted/40 rounded-xl px-3 py-2.5 border border-border">
-              <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{item.label}</p>
-              <p className="font-mono text-xs font-semibold text-primary mt-1">{item.value}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* Description */}
-        <div>
-          <p className="font-mono text-[10px] font-semibold text-secondary uppercase tracking-wider mb-2">
-            Full description
-          </p>
-          <p className="font-sans text-xs text-foreground leading-relaxed">{app.description}</p>
-        </div>
-
-        {/* Trades */}
-        <div>
-          <p className="font-mono text-[10px] font-semibold text-secondary uppercase tracking-wider mb-2">
-            Trades likely required
-          </p>
-          <div className="flex flex-wrap gap-1.5">
-            {app.trades_needed.map(t => <TradePill key={t} trade={t} />)}
-          </div>
-        </div>
-
-        {/* CTA */}
-        {(app.status === "submitted" || app.status === "pending_decision") && (
-          <div className="bg-secondary/10 border border-secondary/30 rounded-2xl p-4">
-            <p className="font-heading text-primary text-sm mb-2">Register your interest</p>
-            <p className="font-sans text-xs text-muted-foreground leading-relaxed mb-3">
-              ProGrafter will notify the homeowner that a vetted {app.trades_needed[0]} in their area
-              has seen their application and is available to quote. Your credentials and reviews are
-              shared — no cold calling.
-            </p>
-            <button className="w-full bg-secondary text-primary-foreground font-mono text-xs px-4 py-2.5 rounded-xl hover:bg-secondary/90 transition-colors uppercase tracking-wider">
-              Register interest →
-            </button>
-            <p className="font-mono text-[10px] text-muted-foreground text-center mt-2 uppercase tracking-wider">
-              Only charged 7.5% commission on completed jobs
-            </p>
-          </div>
-        )}
-
-        {app.status === "approved" && (
-          <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-4">
-            <p className="font-heading text-primary text-sm mb-2">Permission granted</p>
-            <p className="font-sans text-xs text-muted-foreground mb-3 leading-relaxed">
-              Homeowner likely sourcing trades right now.
-            </p>
-            <button className="bg-emerald-600 text-white font-mono text-xs px-4 py-2.5 rounded-xl hover:bg-emerald-700 transition-colors uppercase tracking-wider">
-              Register interest →
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-
-  if (isMobile) {
-    return (
-      <div onClick={onClose} className="fixed inset-0 bg-primary/60 z-[1000] flex items-stretch justify-center">
-        <div onClick={e => e.stopPropagation()} style={{ backgroundColor: "#0F1F38" }} className="w-full h-full flex flex-col">
-          {panel}
-        </div>
-      </div>
-
-    );
-  }
-
-  return panel;
 };
 
 // ── PD Checker ───────────────────────────────────────────────────────────────
@@ -598,6 +484,11 @@ export default function PlanningAlerts() {
   const [filterProjectType, setFilterProjectType] = useState<"all" | ProjectKind>("all");
   const [showRefused, setShowRefused] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [pipelineTab, setPipelineTab] = useState<PipelineStatus | "all">("all");
+  const [mineOnly, setMineOnly] = useState(false);
+
+  const pi = usePlanningIntelligence();
+  const tradeTypes = pi.trade?.trade_type ? [pi.trade.trade_type.toLowerCase()] : [];
 
   const allTrades = [...new Set(MOCK_APPLICATIONS.flatMap(a => a.trades_needed))].sort();
   const allCouncils = [...new Set(MOCK_APPLICATIONS.map(a => a.council))].sort();
@@ -615,6 +506,14 @@ export default function PlanningAlerts() {
     }
     if (searchQuery && !app.description.toLowerCase().includes(searchQuery.toLowerCase())
       && !app.address.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+    if (mineOnly && tradeTypes.length) {
+      const needed = app.trades_needed.map((t) => t.toLowerCase());
+      if (!tradeTypes.some((t) => needed.some((n) => n.includes(t) || t.includes(n)))) return false;
+    }
+    if (pipelineTab !== "all") {
+      const st = pi.interactions[app.id]?.status ?? "new";
+      if (st !== pipelineTab) return false;
+    }
     return true;
   });
 
@@ -663,6 +562,37 @@ export default function PlanningAlerts() {
           <div className="mx-auto px-4 py-6 max-w-[1100px]">
             {activeTab === "pipeline" && (
               <>
+                {/* Founding access banner */}
+                {pi.trade && (
+                  <div className="mb-5 flex items-start gap-2.5 rounded-2xl border border-secondary/30 bg-secondary/10 px-4 py-3">
+                    <Sparkles className="w-4 h-4 text-secondary mt-0.5 flex-shrink-0" />
+                    <p className="font-sans text-xs text-primary leading-relaxed">
+                      <span className="font-semibold">{ACCESS_LABEL[pi.accessLevel] ?? ACCESS_LABEL.founding}</span>
+                    </p>
+                  </div>
+                )}
+
+                {/* Pipeline tabs */}
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {PIPELINE_TABS.map((t) => {
+                    const active = pipelineTab === t.id;
+                    const count = t.id === "all"
+                      ? undefined
+                      : MOCK_APPLICATIONS.filter((a) => (pi.interactions[a.id]?.status ?? "new") === t.id).length;
+                    return (
+                      <button
+                        key={t.id}
+                        onClick={() => setPipelineTab(t.id as PipelineStatus | "all")}
+                        className={`px-3 py-1.5 rounded-xl font-mono text-[11px] uppercase tracking-wider transition-colors ${
+                          active ? "bg-secondary text-primary-foreground" : "bg-card border border-border text-muted-foreground hover:text-primary"
+                        }`}
+                      >
+                        {t.label}{count !== undefined ? ` (${count})` : ""}
+                      </button>
+                    );
+                  })}
+                </div>
+
                 {/* Stats row */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 mb-5">
                   {[
@@ -783,6 +713,9 @@ export default function PlanningAlerts() {
                         app={app}
                         selected={selectedApp?.id === app.id}
                         onSelect={a => setSelectedApp(prev=>prev?.id===a.id?null:a)}
+                        tradeTypes={tradeTypes}
+                        pipelineStatus={pi.interactions[app.id]?.status ?? "new"}
+                        showScore={pi.features.can_use_opportunity_scores}
                       />
                     ))}
 
@@ -800,9 +733,21 @@ export default function PlanningAlerts() {
                     </div>
                   </div>
 
-                  {/* Detail panel */}
+                  {/* Detail panel — Opportunity Command Centre */}
                   {selectedApp && (
-                    <AppDetail app={selectedApp} onClose={()=>setSelectedApp(null)} isMobile={isMobile} />
+                    <OpportunityCommandCentre
+                      app={selectedApp}
+                      onClose={() => setSelectedApp(null)}
+                      isMobile={isMobile}
+                      interaction={pi.interactions[selectedApp.id]}
+                      trade={pi.trade}
+                      features={pi.features}
+                      onStatus={(status) => pi.upsertInteraction(selectedApp.id, { status })}
+                      onNotes={(notes) => pi.upsertInteraction(selectedApp.id, { notes })}
+                      onFollowUp={(date) => pi.upsertInteraction(selectedApp.id, { status: date ? "follow_up" : (pi.interactions[selectedApp.id]?.status ?? "saved"), follow_up_date: date })}
+                      onCreateInvite={() => pi.createInviteLink(selectedApp.id, getProjectType(selectedApp))}
+                      onLetterGenerated={() => pi.upsertInteraction(selectedApp.id, { intro_letter_generated: true })}
+                    />
                   )}
                 </div>
               </>

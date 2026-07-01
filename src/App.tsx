@@ -34,6 +34,7 @@ const MyQuoteChecks = lazy(() => import("./pages/MyQuoteChecks.tsx"));
 const QuoteCheckDetail = lazy(() => import("./pages/QuoteCheckDetail.tsx"));
 const GreenGrants = lazy(() => import("./pages/GreenGrants.tsx"));
 const PlanningAlertsPage = lazy(() => import("./pages/PlanningAlerts.tsx"));
+const PlanningInvitePage = lazy(() => import("./pages/PlanningInvite.tsx"));
 const HomeownerManual = lazy(() => import("./pages/HomeownerManual.tsx"));
 const Unsubscribe = lazy(() => import("./pages/Unsubscribe.tsx"));
 const Contact = lazy(() => import("./pages/Contact.tsx"));
@@ -125,6 +126,7 @@ const AppRoutes = () => {
             <Route path="/checkatrade-alternative" element={<CheckatradeAlternative />} />
             <Route path="/is-checkatrade-worth-it" element={<IsCheckatradeWorthIt />} />
             <Route path="/planning-alerts" element={<PlanningAlertsPage />} />
+            <Route path="/planning-invite/:token" element={<PlanningInvitePage />} />
             {/* All authenticated (non-admin) routes share ONE layout shell via <Outlet>. */}
             <Route
               element={
