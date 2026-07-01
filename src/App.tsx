@@ -156,6 +156,7 @@ const AppRoutes = () => {
             <Route path="/verification" element={<Verification />} />
             <Route path="/signup/trade" element={<SignupTradeRedirect />} />
             <Route path="/admin/verifications" element={<AdminRoute><AdminVerifications /></AdminRoute>} />
+            <Route path="/admin/tradevault" element={<AdminRoute><AdminTradeVault /></AdminRoute>} />
             <Route path="/admin/waitlist" element={<AdminRoute><AdminWaitlist /></AdminRoute>} />
             <Route path="/admin/suppliers" element={<AdminRoute><AdminSuppliers /></AdminRoute>} />
             <Route path="/suppliers" element={<Suppliers />} />
