@@ -41,4 +41,6 @@ project_id = "xryinqaxjclcmhebdcex"
     verify_jwt = false
   [functions.publish-job-brief]
     verify_jwt = false
+  [functions.send-tradevault-expiry-reminders]
+    verify_jwt = false
 
