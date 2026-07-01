@@ -34,6 +34,19 @@ interface Quote {
   premium_price?: number | null;
   premium_description?: string | null;
   selected_tier?: string | null;
+  vat_status?: string | null;
+  valid_until?: string | null;
+  estimated_start_date?: string | null;
+  estimated_duration_text?: string | null;
+  scope_of_works?: string | null;
+  exclusions?: string | null;
+  assumptions?: string | null;
+  deposit_required?: boolean | null;
+  deposit_amount?: number | null;
+  payment_schedule?: { name?: string; amount?: number; percentage?: number | null }[] | null;
+  certifications?: Record<string, string> | null;
+  pdf_path?: string | null;
+
   trades: {
     name: string;
     company_name: string;
