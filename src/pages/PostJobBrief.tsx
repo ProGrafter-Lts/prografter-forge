@@ -383,13 +383,14 @@ const BriefPreview = ({ form, briefRef, uploadCount = 0 }: { form: typeof BLANK;
               </p>
             </Section>
 
-            {uploads.length > 0 && (
+            {uploadCount > 0 && (
               <Section title="Files">
                 <p style={{ fontSize: 12, color: C.body, margin: 0 }}>
-                  Files uploaded: {uploads.length}
+                  Files uploaded: {uploadCount}
                 </p>
               </Section>
             )}
+
 
 
             {form.scope_items && (
