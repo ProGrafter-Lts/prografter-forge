@@ -267,22 +267,38 @@ const QuickBuildDraftsList = ({ tradeId }: { tradeId: string }) => {
   if (drafts.length === 0) {
     return (
       <section>
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between mb-1 gap-2 flex-wrap">
           <h2 className="font-heading text-primary text-2xl flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-amber-600" />
-            QuickBuild drafts
+            ProGrafter Quote Builder
+            <span className="bg-amber-100 text-amber-800 font-mono text-[10px] px-2 py-0.5 rounded-full">
+              Founding Access preview
+            </span>
           </h2>
           <div className="flex items-center gap-2">
             <TestDraftMenu />
             <Button size="sm" variant="outline" onClick={() => navigate("/quote-builder/quickbuild")}>
-              Start a draft
+              Start a Quote
             </Button>
           </div>
         </div>
-        <div className="bg-card rounded-2xl p-6 border border-amber-200 text-center">
-          <p className="font-mono text-xs text-muted-foreground">
-            No saved drafts. Generate one with QuickBuild and it'll appear here, ready to attach to a job.
+        <p className="font-mono text-xs text-muted-foreground mb-3">
+          Create, save and improve quote drafts before sending them to homeowners.
+        </p>
+        <div className="bg-card rounded-2xl p-8 border border-amber-200 text-center">
+          <p className="font-heading text-primary text-lg mb-1">No quote drafts yet</p>
+          <p className="font-mono text-xs text-muted-foreground mb-4 max-w-md mx-auto">
+            Start a quote draft or generate one from a matched job when you're ready to price work
+            through ProGrafter.
           </p>
+          <div className="flex flex-wrap gap-2 justify-center">
+            <Button size="sm" onClick={() => navigate("/quote-builder/quickbuild")}>
+              Start a Quote
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => navigate("/dashboard/trade?view=jobs")}>
+              Browse Available Jobs
+            </Button>
+          </div>
         </div>
       </section>
     );
