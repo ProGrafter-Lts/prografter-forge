@@ -48,6 +48,7 @@ import { template as disputeRaisedOtherParty } from './dispute-raised-other-part
 import { template as disputeRaisedClaimant } from './dispute-raised-claimant.tsx'
 import { template as disputeRaisedAdmin } from './dispute-raised-admin.tsx'
 import { template as quoteHealthCheckReady } from './quote-health-check-ready.tsx'
+import { template as tradevaultDocExpiring } from './tradevault-doc-expiring.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'waitlist-admin-notification': waitlistAdminNotification,
