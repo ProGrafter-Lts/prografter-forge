@@ -340,11 +340,19 @@ ${form.quote_text}`;
 
       <div style={{ maxWidth:700, margin:"-4rem auto 0", padding:"0 1rem 2rem", position:"relative", zIndex:1 }}>
 
-        <div style={{ textAlign:"center", marginBottom:20 }}>
-          <p style={{ fontSize:12, color:C.secondary }}>
-            Got a PDF instead?{" "}
+        <div style={{ marginBottom:20 }}>
+          <div style={{ background:C.amberBg, border:`1px solid ${C.amberBorder}`,
+            borderRadius:12, padding:"12px 14px", marginBottom:14 }}>
+            <p style={{ fontSize:12, color:C.body, lineHeight:1.6, margin:0 }}>
+              This is early-stage guidance only. It is not a quote, valuation, survey or professional
+              advice. Costs vary depending on drawings, specification, access, site conditions,
+              region, finishes and contractor availability.
+            </p>
+          </div>
+          <p style={{ fontSize:12, color:C.secondary, textAlign:"center" }}>
+            Already got a builder’s quote?{" "}
             <Link to="/quote-checker" style={{ color:C.teal, fontWeight:600, textDecoration:"none" }}>
-              Try the PDF Quote Checker →
+              Upload it for a full Quote Health Check →
             </Link>
           </p>
         </div>
