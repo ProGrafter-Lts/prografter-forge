@@ -24,6 +24,8 @@ import { useTradeAccess } from "@/hooks/useTradeAccess";
 import { isContractedActiveJob } from "@/lib/activeProjects";
 import LegalReviewBanner from "@/components/LegalReviewBanner";
 import QuickBuildDraftsList from "@/components/trade/quickbuild/QuickBuildDraftsList";
+import CommandCentre from "@/components/trade/CommandCentre";
+import type { PriorityTarget } from "@/lib/tradeProfileStrength";
 import { isFeatureEnabled } from "@/lib/featureFlags";
 
 interface TradeProfile {
@@ -206,6 +208,30 @@ const TradeDashboard = () => {
   const pipelineFilter = searchParams.get("pipeline");
   const viewFilter = searchParams.get("view");
 
+  const goTo = (target: PriorityTarget) => {
+    switch (target) {
+      case "tradevault":
+        setActiveNav("tradevault");
+        break;
+      case "jobs":
+        setActiveNav("jobs");
+        break;
+      case "profile":
+      case "specialisms":
+        setActiveNav("profile");
+        break;
+      case "settings":
+        navigate("/dashboard/trade/settings");
+        break;
+      case "planning":
+        navigate("/planning-alerts");
+        break;
+    }
+    if (target !== "settings" && target !== "planning") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
   useEffect(() => {
     const validViews = ["dashboard", "jobs", "projects", "earnings", "profile", "tradevault"];
 
@@ -383,6 +409,15 @@ const TradeDashboard = () => {
               onAdd={() => setActiveNav("profile")}
             />
           )}
+
+          {trade && (
+            <CommandCentre
+              tradeId={trade.id}
+              jobMatchCount={matches.length}
+              onNavigate={goTo}
+            />
+          )}
+
           <StatsRow
             jobsWon={completedCount}
             earningsThisMonth={marginData.totalReceived}

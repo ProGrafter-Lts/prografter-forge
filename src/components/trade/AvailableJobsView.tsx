@@ -145,19 +145,30 @@ const AvailableJobsView = ({ tradeId }: { tradeId: string }) => {
           <Briefcase className="w-10 h-10 text-primary/20 mx-auto mb-3" />
           {matches.length === 0 ? (
             <>
-              <p className="font-mono text-sm text-muted-foreground mb-1">
-                No job matches yet — we'll notify you when relevant jobs appear near you.
+              <p className="font-heading text-primary text-lg mb-1">
+                No matched homeowner jobs yet
               </p>
-              <p className="font-mono text-xs text-muted-foreground mb-4">
-                In the meantime, check your Planning Alerts for local homeowners to contact.
+              <p className="font-mono text-xs text-muted-foreground mb-4 max-w-md mx-auto">
+                We'll notify you when suitable homeowner projects appear in your area. In the
+                meantime, complete your profile and check Planning Intelligence for upcoming local
+                opportunities.
               </p>
-              <button
-                onClick={() => navigate("/planning-alerts")}
-                className="inline-flex items-center gap-1 bg-secondary text-secondary-foreground font-mono text-xs px-4 py-2 rounded-xl hover:opacity-90 transition-opacity"
-              >
-                View Planning Alerts
-                <ChevronRight className="w-3 h-3" />
-              </button>
+              <div className="flex flex-wrap gap-2 justify-center">
+                <button
+                  onClick={() => navigate("/dashboard/trade?view=profile")}
+                  className="inline-flex items-center gap-1 bg-secondary text-secondary-foreground font-mono text-xs px-4 py-2 rounded-xl hover:opacity-90 transition-opacity"
+                >
+                  Improve My Matches
+                  <ChevronRight className="w-3 h-3" />
+                </button>
+                <button
+                  onClick={() => navigate("/planning-alerts")}
+                  className="inline-flex items-center gap-1 border border-secondary/40 text-secondary font-mono text-xs px-4 py-2 rounded-xl hover:bg-secondary/10 transition-colors"
+                >
+                  View Planning Intelligence
+                  <ChevronRight className="w-3 h-3" />
+                </button>
+              </div>
             </>
           ) : (
             <p className="font-mono text-sm text-muted-foreground">

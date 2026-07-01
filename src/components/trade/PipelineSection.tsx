@@ -169,14 +169,16 @@ const PipelineSection = ({ tradeId }: Props) => {
         </div>
       ) : totalLeads === 0 ? (
         <div className="rounded-2xl border-2 border-dashed border-border p-6 text-center space-y-3">
-          <p className="font-sans text-sm text-foreground">
-            No leads in your pipeline yet — check Planning Alerts to get started
+          <p className="font-heading text-primary text-base">No leads in your pipeline yet</p>
+          <p className="font-sans text-sm text-muted-foreground max-w-md mx-auto">
+            Save planning opportunities or submit quotes for matched jobs to start building your
+            pipeline.
           </p>
           <button
             onClick={() => navigate("/planning-alerts")}
             className="inline-flex items-center gap-2 bg-secondary text-white font-mono text-xs px-4 py-2 rounded-xl hover:bg-secondary/90 transition-colors"
           >
-            View Planning Alerts
+            View Planning Intelligence
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>

@@ -8,7 +8,7 @@ import {
 import {
   VAULT_DOC_TYPES, VaultDocument, VaultDocTypeConfig,
   computeDisplayStatus, computeVaultSummary, STATUS_META, TONE_CLASSES,
-  daysUntil, getDocLabel,
+  daysUntil, getDocLabel, computeDashboardVerification,
 } from "@/lib/tradeVault";
 import VaultDocumentDialog from "./VaultDocumentDialog";
 import { cn } from "@/lib/utils";
@@ -48,16 +48,32 @@ const TradeVaultSection = ({ tradeId }: Props) => {
   const [docs, setDocs] = useState<VaultDocument[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogConfig, setDialogConfig] = useState<VaultDocTypeConfig | null>(null);
+  const [manualCtx, setManualCtx] = useState<{ manuallyVerified: boolean; verifiedAt: string | null }>({
+    manuallyVerified: false,
+    verifiedAt: null,
+  });
 
   const load = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("tradevault_documents")
-      .select("*")
-      .eq("trade_id", tradeId)
-      .order("created_at", { ascending: false });
-    if (error) console.error("Failed to load vault documents", error);
-    setDocs((data as VaultDocument[]) ?? []);
+    const [docRes, tradeRes] = await Promise.all([
+      supabase
+        .from("tradevault_documents")
+        .select("*")
+        .eq("trade_id", tradeId)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("trades")
+        .select("verified, verification_status, verified_on_prografter_at")
+        .eq("id", tradeId)
+        .maybeSingle(),
+    ]);
+    if (docRes.error) console.error("Failed to load vault documents", docRes.error);
+    setDocs((docRes.data as VaultDocument[]) ?? []);
+    const t = tradeRes.data as any;
+    setManualCtx({
+      manuallyVerified: !!(t && (t.verified || t.verification_status === "approved" || t.verification_status === "verified")),
+      verifiedAt: t?.verified_on_prografter_at ?? null,
+    });
     setLoading(false);
   }, [tradeId]);
 
@@ -67,6 +83,7 @@ const TradeVaultSection = ({ tradeId }: Props) => {
   docs.filter((d) => d.is_current).forEach((d) => currentByType.set(d.document_type, d));
 
   const summary = computeVaultSummary(docs);
+  const dashVerification = computeDashboardVerification(docs, manualCtx);
 
   const viewFile = async (path: string | null) => {
     if (!path) return;
@@ -78,10 +95,12 @@ const TradeVaultSection = ({ tradeId }: Props) => {
   };
 
   const verificationTone =
-    summary.verificationStatus === "Verified" ? "green"
-    : summary.verificationStatus === "Pending Review" ? "amber"
-    : summary.verificationStatus === "Not Started" ? "grey"
+    dashVerification.status === "Verified" || dashVerification.status === "Verified — Manual Review" ? "green"
+    : dashVerification.status === "Pending Review" ? "amber"
+    : dashVerification.status === "Not Started" ? "grey"
+    : dashVerification.tradeVaultStatus === "Migration Required" ? "amber"
     : "red";
+
 
   const renderDocRow = (cfg: VaultDocTypeConfig) => {
     const doc = currentByType.get(cfg.key);
@@ -143,13 +162,29 @@ const TradeVaultSection = ({ tradeId }: Props) => {
         </p>
       </div>
 
+      {/* Migration notice for legacy manually-verified trades */}
+      {dashVerification.migrationRequired && (
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="font-semibold text-amber-700 text-sm">Verified — TradeVault migration required</span>
+            {dashVerification.inGrace && (
+              <span className="font-mono text-[10px] uppercase tracking-wide bg-amber-500/15 text-amber-700 border border-amber-500/30 px-2 py-0.5 rounded-full">
+                Grace period
+              </span>
+            )}
+          </div>
+          <p className="text-sm text-amber-700">{dashVerification.message}</p>
+        </div>
+      )}
+
       {/* Summary cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <SummaryCard icon={ShieldCheck} label="Verification Status" value={summary.verificationStatus} tone={verificationTone} />
-        <SummaryCard icon={FileText} label="Required Documents" value={`${summary.requiredUploaded} of ${summary.requiredTotal} uploaded`} tone={summary.requiredUploaded === summary.requiredTotal ? "green" : "amber"} />
+        <SummaryCard icon={ShieldCheck} label="Verification Status" value={dashVerification.status} tone={verificationTone} />
+        <SummaryCard icon={FileText} label="Required Documents" value={dashVerification.migrationRequired ? "Migration required" : `${summary.requiredUploaded} of ${summary.requiredTotal} uploaded`} tone={dashVerification.migrationRequired ? "amber" : summary.requiredUploaded === summary.requiredTotal ? "green" : "amber"} />
         <SummaryCard icon={Clock} label="Expiring Soon" value={`${summary.expiringSoon} within 30 days`} tone={summary.expiringSoon > 0 ? "amber" : "grey"} />
         <SummaryCard icon={AlertTriangle} label="Expired Documents" value={`${summary.expired} expired`} tone={summary.expired > 0 ? "red" : "grey"} />
       </div>
+
 
       {/* Reminders */}
       {(summary.expiringDocs.length > 0 || summary.expiredRequiredDocs.length > 0) && (

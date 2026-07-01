@@ -58,11 +58,34 @@ const JobMatchesList = ({ matches }: { matches: JobMatch[] }) => {
       {visible.length === 0 ? (
         <div className="bg-card rounded-2xl p-8 border border-primary/10 text-center">
           <Briefcase className="w-10 h-10 text-primary/20 mx-auto mb-3" />
-          <p className="font-mono text-sm text-muted-foreground">
-            {verifiedOnly
-              ? "No funds-verified job matches right now."
-              : "No new job matches yet. We'll notify you when relevant jobs appear in your area."}
-          </p>
+          {verifiedOnly ? (
+            <p className="font-mono text-sm text-muted-foreground">
+              No funds-verified job matches right now.
+            </p>
+          ) : (
+            <>
+              <p className="font-heading text-primary text-lg mb-1">No matched homeowner jobs yet</p>
+              <p className="font-mono text-xs text-muted-foreground mb-4 max-w-md mx-auto">
+                We'll notify you when suitable homeowner projects appear in your area. In the
+                meantime, complete your profile and check Planning Intelligence for upcoming local
+                opportunities.
+              </p>
+              <div className="flex flex-wrap gap-2 justify-center">
+                <button
+                  onClick={() => navigate("/dashboard/trade?view=profile")}
+                  className="inline-flex items-center gap-1 bg-secondary text-secondary-foreground font-mono text-xs px-4 py-2 rounded-xl hover:opacity-90 transition-opacity"
+                >
+                  Improve My Matches
+                </button>
+                <button
+                  onClick={() => navigate("/planning-alerts")}
+                  className="inline-flex items-center gap-1 border border-secondary/40 text-secondary font-mono text-xs px-4 py-2 rounded-xl hover:bg-secondary/10 transition-colors"
+                >
+                  View Planning Intelligence
+                </button>
+              </div>
+            </>
+          )}
         </div>
       ) : (
         <div className="space-y-3">

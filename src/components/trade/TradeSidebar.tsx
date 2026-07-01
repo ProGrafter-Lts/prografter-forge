@@ -19,7 +19,7 @@ const NAV_ITEMS = [
   { label: "Available Jobs", icon: Briefcase, id: "jobs" },
   { label: "Active Projects", icon: FolderKanban, id: "projects" },
   { label: "TradeVault", icon: ShieldCheck, id: "tradevault" },
-  { label: "Planning Alerts", icon: Bell, id: "alerts" },
+  { label: "Planning Intelligence", icon: Bell, id: "alerts" },
   { label: "Earnings", icon: PoundSterling, id: "earnings" },
   { label: "My Profile", icon: UserCircle, id: "profile" },
   { label: "Settings", icon: Settings, id: "settings" },
@@ -70,7 +70,7 @@ const TradeSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen }: 
       {/* Mobile toggle - hidden when sidebar is open to avoid overlapping logo */}
       {!sidebarOpen && (
         <button
-          className="md:hidden fixed top-4 left-4 z-50 bg-primary text-primary-foreground p-2 rounded-xl shadow-lg"
+          className="md:hidden fixed top-14 left-4 z-50 bg-primary text-primary-foreground p-2 rounded-xl shadow-lg"
           onClick={() => setSidebarOpen(true)}
         >
           <LayoutDashboard className="w-5 h-5" />
@@ -79,7 +79,7 @@ const TradeSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen }: 
 
       {/* Sidebar */}
       <aside
-        className={`dashboard-sidebar fixed md:sticky md:top-0 inset-y-0 left-0 z-40 w-64 h-screen md:h-screen flex flex-col transition-transform duration-300 ${
+        className={`dashboard-sidebar fixed md:sticky md:top-12 inset-y-0 left-0 z-40 w-64 h-screen md:h-[calc(100vh-3rem)] flex flex-col transition-transform duration-300 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         }`}
       >
