@@ -94,4 +94,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'dispute-raised-claimant': disputeRaisedClaimant,
   'dispute-raised-admin': disputeRaisedAdmin,
   'quote-health-check-ready': quoteHealthCheckReady,
+  'tradevault-doc-expiring': tradevaultDocExpiring,
 }
