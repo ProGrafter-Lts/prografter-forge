@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import SEO from "@/components/SEO";
-import AppShell from "@/components/AppShell";
+import TradeSidebar from "@/components/trade/TradeSidebar";
 import { Bell, Search, X, Radio, Building2, MapPin, Calendar, FileText, CheckCircle2, AlertTriangle, XCircle, Sparkles } from "lucide-react";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -587,6 +587,8 @@ const PDChecker = () => {
 
 export default function PlanningAlerts() {
   const isMobile = useIsMobile();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarNav, setSidebarNav] = useState("alerts");
   const [activeTab, setActiveTab] = useState("pipeline");
   const [selectedApp, setSelectedApp] = useState<PlanningApp | null>(null);
   const [filterStatus, setFilterStatus] = useState("all");
@@ -638,7 +640,14 @@ export default function PlanningAlerts() {
         description="Browse live planning applications from East Midlands councils. Check permitted development rules before you apply."
         path="/planning-alerts"
       />
-      <AppShell>
+      <div className="min-h-screen dashboard-dark flex">
+        <TradeSidebar
+          activeNav={sidebarNav}
+          setActiveNav={setSidebarNav}
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+        />
+        <main className="flex-1 overflow-auto pt-10 md:pt-0">
         <div className="min-h-[calc(100vh-64px)] bg-background">
           {/* Sub-header */}
           <div className="bg-primary px-6 py-4 flex items-center justify-between flex-wrap gap-3">
@@ -801,7 +810,8 @@ export default function PlanningAlerts() {
           </div>
 
         </div>
-      </AppShell>
+        </main>
+      </div>
     </>
   );
 }
