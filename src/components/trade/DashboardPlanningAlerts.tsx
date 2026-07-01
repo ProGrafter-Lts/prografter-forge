@@ -91,11 +91,14 @@ const DashboardPlanningAlerts = ({ trade }: { trade: TradeProfile }) => {
     try {
       const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
       const anon = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      const { data: { session } } = await supabase.auth.getSession();
+      const accessToken = session?.access_token;
+      if (!accessToken) throw new Error("Please sign in again to refresh your planning feed.");
       const res = await fetch(
         `https://${projectId}.supabase.co/functions/v1/process-planning-alerts?trade_id=${trade.id}&days=${days}`,
         {
           method: "POST",
-          headers: { Authorization: `Bearer ${anon}`, apikey: anon },
+          headers: { Authorization: `Bearer ${accessToken}`, apikey: anon },
         },
       );
       const json = await res.json();
