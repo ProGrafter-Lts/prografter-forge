@@ -1227,20 +1227,22 @@ export default function AdminTradeScraper() {
     if (!filtered.length) return;
     const isWeb = pipeline === "website";
     const header = isWeb
-      ? ["Business name","Type","Phone","Email","Website","Website quality","Audit sent","Proposal sent","Address","Postcode","City","Rating","Reviews","Stage","Interested","Follow-up","Last contacted","Notes"]
+      ? ["Business name","Business type","Phone","Email","Website","Website status","Website score","Google rating","Review count","Location","Stage","Last contact date","Follow-up date","Contact name","Package recommended","Quoted value","Monthly care interest","Monthly care price","Audit sent","Proposal sent","Notes","Do not call","TPS checked","CTPS checked"]
       : ["Trade name","Type","Phone","Email","Website","Address","Postcode","City","Rating","Reviews","Stage","Interested","Follow-up","Last contacted","Notes"];
     const lines = [header.join(",")];
     for (const r of filtered) {
       const cells = (isWeb
         ? [
             r.trade_name, r.trade_type ?? "", r.phone ?? "", r.email ?? "",
-            r.website ?? "", webQualityMeta(r.website_quality)?.label ?? "",
-            r.mini_audit_sent ? "yes" : "no", r.proposal_sent ? "yes" : "no",
-            r.address ?? "", r.postcode ?? "", r.city ?? "",
+            r.website ?? "", r.website_status ?? "", r.website_score?.toString() ?? webScoreOf(r).toString(),
             r.rating?.toString() ?? "", r.reviews_count?.toString() ?? "",
+            [r.city, r.postcode].filter(Boolean).join(", ") || (r.address ?? ""),
             r.outreach_stage,
-            r.interested == null ? "" : r.interested ? "yes" : "no",
-            r.follow_up_at ?? "", r.last_contacted_at ?? "", r.notes ?? "",
+            r.last_contacted_date ?? "", (r.next_follow_up_date || r.follow_up_at) ?? "",
+            r.contact_name ?? "", r.package_recommended ?? "",
+            r.quoted_value?.toString() ?? "", r.monthly_care_interest ?? "", r.monthly_care_price?.toString() ?? "",
+            (r.audit_sent || r.mini_audit_sent) ? "yes" : "no", r.proposal_sent ? "yes" : "no",
+            r.notes ?? "", r.do_not_call ? "yes" : "no", r.tps_checked ? "yes" : "no", r.ctps_checked ? "yes" : "no",
           ]
         : [
             r.trade_name, r.trade_type ?? "", r.phone ?? "", r.email ?? "",
