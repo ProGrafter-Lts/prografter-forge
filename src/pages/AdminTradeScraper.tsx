@@ -141,7 +141,6 @@ export default function AdminTradeScraper() {
   const [tradeType, setTradeType] = useState("electricians");
   const [location, setLocation] = useState("Nottingham, Nottinghamshire");
   const [limit, setLimit] = useState(10);
-  const [noWebsiteOnly, setNoWebsiteOnly] = useState(true);
   const [webFocus, setWebFocus] = useState<WebFocus>("no_website");
   const [running, setRunning] = useState(false);
   const [filter, setFilter] = useState("");
