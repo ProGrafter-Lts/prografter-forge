@@ -740,8 +740,10 @@ export default function AdminTradeScraper() {
               {sorted.map((r) => {
                 const m = stageMeta(r.outreach_stage);
                 const isEditing = editing === r.id;
+                const isExpanded = expanded === r.id;
                 return (
-                  <tr key={r.id} style={{ borderTop: `1px solid ${C.border}`, verticalAlign: "top" }}>
+                  <React.Fragment key={r.id}>
+                  <tr style={{ borderTop: `1px solid ${C.border}`, verticalAlign: "top" }}>
                     <td style={{ padding: "10px 12px" }}>
                       <div style={{ fontWeight: 600 }}>{r.trade_name}</div>
                       <div style={{ color: C.dim, fontSize: 10, marginTop: 2 }}>{r.trade_type ?? "—"}</div>
