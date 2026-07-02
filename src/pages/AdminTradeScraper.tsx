@@ -164,6 +164,15 @@ const webScore = (r: Scraped): number => {
 const scoreColor = (s: number): string =>
   s >= 70 ? C.green : s >= 45 ? C.amber : C.dim;
 
+// Website opportunity score bands for the small coloured badge in the table.
+const SCORE_BANDS: { min: number; color: string; label: string }[] = [
+  { min: 80, color: C.green, label: "Excellent" },
+  { min: 60, color: "#22C55E", label: "Good" },
+  { min: 40, color: C.amber, label: "Possible" },
+  { min: 0, color: C.dim, label: "Weak" },
+];
+const scoreBand = (s: number) => SCORE_BANDS.find((b) => s >= b.min) ?? SCORE_BANDS[SCORE_BANDS.length - 1];
+
 const stageMeta = (s: Stage) => STAGES.find((x) => x.value === s) ?? STAGES[1];
 
 // Website Outreach stage filters — each has a live predicate over a lead.
@@ -366,6 +375,75 @@ function WebLeadDetails({ row, onSave, colSpan }: {
   );
 }
 
+// Generates a simple, editable cold-call script for a website-outreach lead.
+function buildCallScript(r: Scraped): string {
+  const name = r.contact_name || "there";
+  const biz = r.trade_name;
+  const issue = r.main_website_issue || r.website_status || (r.has_website ? "your current website" : "not having a website");
+  const reviews = r.reviews_count ? `${r.reviews_count} reviews` : "your reputation";
+  const rating = r.rating ? ` at ${r.rating}★` : "";
+  return [
+    `CALL SCRIPT — ${biz}`,
+    ``,
+    `Opener:`,
+    `"Hi, is that ${name}? My name's [YOU] from ProGrafter. I'll be quick — I help local businesses like ${biz} get more enquiries from their website. Have you got 30 seconds?"`,
+    ``,
+    `Reason for call:`,
+    `"I had a look at ${biz} online — you've got ${reviews}${rating}, which is brilliant. But I noticed ${issue}, and that's likely costing you enquiries from people who'd otherwise call."`,
+    ``,
+    `Value:`,
+    `"We build fast, mobile-friendly sites that turn visitors into phone calls and form enquiries — usually live within a couple of weeks."`,
+    ``,
+    `Ask:`,
+    `"Would it help if I put together a free 2-minute mini-audit of your online presence and send it over? No obligation."`,
+    ``,
+    `If yes → confirm best email/WhatsApp. If not now → agree a follow-up date.`,
+  ].join("\n");
+}
+
+// Generates a plain-text mini website audit the admin can copy and send.
+function buildAuditText(r: Scraped): string {
+  const lines = [
+    `WEBSITE MINI-AUDIT — ${r.trade_name}`,
+    ``,
+    `Prepared by ProGrafter`,
+    `Date: ${new Date().toLocaleDateString()}`,
+    ``,
+    `Business: ${r.trade_name}${r.trade_type ? ` (${r.trade_type})` : ""}`,
+    `Location: ${[r.city, r.postcode].filter(Boolean).join(", ") || r.address || "—"}`,
+    `Google rating: ${r.rating ? `${r.rating}★ (${r.reviews_count ?? 0} reviews)` : "—"}`,
+    `Current website: ${r.website || "None found"}`,
+    ``,
+    `WHAT WE FOUND`,
+    `• Website status: ${r.website_status || (r.has_website ? "Has a website" : "No website found")}`,
+    `• Main issue: ${r.main_website_issue || "Site does not reflect the quality of the business"}`,
+    `• Opportunity: ${r.opportunity_angle || "Strong reviews but weak online presence — enquiries are being lost."}`,
+    ``,
+    `WHY IT MATTERS`,
+    `Most customers check you online before calling. A slow, outdated or missing website means`,
+    `they move on to a competitor — even when your reviews are excellent.`,
+    ``,
+    `WHAT WE'D RECOMMEND`,
+    `• A fast, mobile-first website that loads in under 2 seconds`,
+    `• Clear services, service area and a prominent "call / enquire" button`,
+    `• Reviews and photos front and centre to build trust`,
+    `${r.package_recommended && r.package_recommended !== "Not selected" ? `• Suggested package: ${r.package_recommended}` : "• Suggested package: Starter or Growth Site"}`,
+    ``,
+    `NEXT STEP`,
+    `Reply to this message or call us back and we'll walk you through it — no obligation.`,
+  ];
+  return lines.join("\n");
+}
+
+async function copyToClipboard(text: string) {
+  try {
+    await navigator.clipboard.writeText(text);
+    toast({ title: "Copied to clipboard" });
+  } catch {
+    toast({ title: "Copy failed", description: "Select the text and copy manually.", variant: "destructive" });
+  }
+}
+
 export default function AdminTradeScraper() {
   const [rows, setRows] = useState<Scraped[]>([]);
   const [loading, setLoading] = useState(true);
@@ -384,6 +462,7 @@ export default function AdminTradeScraper() {
   const [expanded, setExpanded] = useState<string | null>(null);
   const [draftNotes, setDraftNotes] = useState("");
   const [draftFollowUp, setDraftFollowUp] = useState("");
+  const [modal, setModal] = useState<{ title: string; text: string } | null>(null);
 
 
   const load = async () => {
@@ -454,6 +533,10 @@ export default function AdminTradeScraper() {
 
   const setWebQuality = (row: Scraped, q: WebQuality) => {
     updateRow(row.id, { website_quality: q });
+  };
+
+  const setWebsiteStatus = (row: Scraped, status: string) => {
+    updateRow(row.id, { website_status: status });
   };
 
   const toggleAudit = (row: Scraped) => {
@@ -776,14 +859,14 @@ export default function AdminTradeScraper() {
               <tr style={{ textAlign: "left", color: C.dim, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.06em" }}>
                 <th style={{ padding: "10px 12px" }}>{pipeline === "website" ? "Business" : "Trade"}</th>
                 <th style={{ padding: "10px 12px" }}>Contact</th>
-                {pipeline === "website" && <th style={{ padding: "10px 12px" }}>Score</th>}
-                {pipeline === "website" && <th style={{ padding: "10px 12px" }}>Website / Outreach</th>}
                 <th style={{ padding: "10px 12px" }}>Location</th>
                 <th style={{ padding: "10px 12px" }}>Rating</th>
+                {pipeline === "website" && <th style={{ padding: "10px 12px" }}>Website status</th>}
+                {pipeline === "website" && <th style={{ padding: "10px 12px" }}>Website score</th>}
                 <th style={{ padding: "10px 12px" }}>Stage</th>
                 <th style={{ padding: "10px 12px" }}>Follow-up</th>
                 <th style={{ padding: "10px 12px" }}>Notes</th>
-                <th style={{ padding: "10px 12px" }}></th>
+                <th style={{ padding: "10px 12px" }}>Actions</th>
               </tr>
 
             </thead>
@@ -805,78 +888,46 @@ export default function AdminTradeScraper() {
                       {r.website && <div><a href={r.website} target="_blank" rel="noreferrer" style={{ color: C.green }}>website ↗</a></div>}
                       {!r.phone && !r.email && !r.website && <span style={{ color: C.dim }}>—</span>}
                     </td>
-                    {pipeline === "website" && (() => {
-                      const sc = webScore(r);
-                      return (
-                        <td style={{ padding: "10px 12px" }}>
-                          <div style={{
-                            display: "inline-flex", flexDirection: "column", alignItems: "center", gap: 2,
-                            background: "rgba(255,255,255,0.04)", border: `1px solid ${scoreColor(sc)}`,
-                            borderRadius: 10, padding: "6px 10px", minWidth: 52,
-                          }}>
-                            <span style={{ fontSize: 16, fontWeight: 800, color: scoreColor(sc), lineHeight: 1 }}>{sc}</span>
-                            <span style={{ fontSize: 8, color: C.dim, textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                              {sc >= 70 ? "Hot" : sc >= 45 ? "Warm" : "Low"}
-                            </span>
-                          </div>
-                        </td>
-                      );
-                    })()}
-                    {pipeline === "website" && (
-                      <td style={{ padding: "10px 12px", minWidth: 180 }}>
-                        {(() => {
-                          const wm = webQualityMeta(r.website_quality);
-                          return (
-                            <select
-                              value={r.website_quality ?? ""}
-                              onChange={(e) => setWebQuality(r, e.target.value as WebQuality)}
-                              style={{
-                                ...inp, padding: "5px 8px", fontSize: 11, fontWeight: 700, width: "auto",
-                                borderColor: wm?.color ?? C.border, color: wm?.color ?? C.dim,
-                              }}
-                            >
-                              <option value="" style={{ color: "#000" }}>Not assessed</option>
-                              {WEB_QUALITY.map((q) => (
-                                <option key={q.value} value={q.value} style={{ color: "#000" }}>{q.label}</option>
-                              ))}
-                            </select>
-                          );
-                        })()}
-                        <div style={{ display: "flex", gap: 6, marginTop: 6, flexWrap: "wrap" }}>
-                          <button
-                            onClick={() => toggleAudit(r)}
-                            title="Toggle whether a mini website audit has been sent"
-                            style={{
-                              background: r.mini_audit_sent ? C.green : "transparent",
-                              color: r.mini_audit_sent ? "#fff" : C.green,
-                              border: `1px solid ${C.green}`, borderRadius: 999,
-                              padding: "3px 9px", fontSize: 10, fontWeight: 700, cursor: "pointer",
-                            }}
-                          >
-                            {r.mini_audit_sent ? "✓ Audit sent" : "Audit sent?"}
-                          </button>
-                          <button
-                            onClick={() => toggleProposal(r)}
-                            title="Toggle whether a proposal has been sent"
-                            style={{
-                              background: r.proposal_sent ? "#7c3aed" : "transparent",
-                              color: r.proposal_sent ? "#fff" : "#a78bfa",
-                              border: "1px solid #7c3aed", borderRadius: 999,
-                              padding: "3px 9px", fontSize: 10, fontWeight: 700, cursor: "pointer",
-                            }}
-                          >
-                            {r.proposal_sent ? "✓ Proposal sent" : "Proposal sent?"}
-                          </button>
-                        </div>
-                      </td>
-                    )}
                     <td style={{ padding: "10px 12px", color: C.dim, maxWidth: 200 }}>
-
                       {[r.city, r.postcode].filter(Boolean).join(" · ") || r.address || "—"}
                     </td>
                     <td style={{ padding: "10px 12px" }}>
                       {r.rating != null ? `${r.rating} (${r.reviews_count ?? 0})` : "—"}
                     </td>
+                    {pipeline === "website" && (
+                      <td style={{ padding: "10px 12px", minWidth: 170 }}>
+                        <select
+                          value={r.website_status ?? "Not checked"}
+                          onChange={(e) => setWebsiteStatus(r, e.target.value)}
+                          style={{ ...inp, padding: "5px 8px", fontSize: 11, fontWeight: 700, width: "auto" }}
+                        >
+                          {WEBSITE_STATUS_OPTIONS.map((o) => (
+                            <option key={o} value={o} style={{ color: "#000" }}>{o}</option>
+                          ))}
+                        </select>
+                      </td>
+                    )}
+                    {pipeline === "website" && (() => {
+                      const sc = r.website_score ?? webScore(r);
+                      const band = scoreBand(sc);
+                      return (
+                        <td style={{ padding: "10px 12px" }}>
+                          <div
+                            title={`${band.label} opportunity`}
+                            style={{
+                              display: "inline-flex", flexDirection: "column", alignItems: "center", gap: 2,
+                              background: "rgba(255,255,255,0.04)", border: `1px solid ${band.color}`,
+                              borderRadius: 10, padding: "6px 10px", minWidth: 56,
+                            }}
+                          >
+                            <span style={{ fontSize: 16, fontWeight: 800, color: band.color, lineHeight: 1 }}>{sc}</span>
+                            <span style={{ fontSize: 8, color: band.color, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                              {band.label}
+                            </span>
+                          </div>
+                        </td>
+                      );
+                    })()}
                     <td style={{ padding: "10px 12px", minWidth: 160 }}>
                       <select
                         value={r.outreach_stage}
@@ -907,35 +958,65 @@ export default function AdminTradeScraper() {
                         <span style={{ color: C.dim }}>—</span>
                       )}
                     </td>
-                    <td style={{ padding: "10px 12px", maxWidth: 260 }}>
+                    <td style={{ padding: "10px 12px", maxWidth: 220 }}>
                       {isEditing ? (
                         <textarea value={draftNotes} onChange={(e) => setDraftNotes(e.target.value)} rows={3} style={{ ...inp, fontSize: 11 }} />
                       ) : (
                         <div
                           onClick={() => beginEdit(r)}
-                          title="Click to add or edit a note"
-                          style={{ color: r.notes ? C.bright : C.dim, fontSize: 11, whiteSpace: "pre-wrap", cursor: "pointer", minHeight: 18 }}
+                          title={r.notes || "Click to add or edit a note"}
+                          style={{
+                            color: r.notes ? C.bright : C.dim, fontSize: 11, cursor: "pointer", minHeight: 18,
+                            display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
+                            overflow: "hidden", textOverflow: "ellipsis",
+                          }}
                         >
                           {r.notes || "✎ Add note…"}
                         </div>
                       )}
                     </td>
-                    <td style={{ padding: "10px 12px", whiteSpace: "nowrap" }}>
+                    <td style={{ padding: "10px 12px" }}>
                       {isEditing ? (
                         <>
                           <button onClick={() => saveEdit(r)} style={{ ...btn(true), padding: "5px 10px", fontSize: 10, marginRight: 4 }}>Save</button>
                           <button onClick={() => setEditing(null)} style={{ background: "transparent", color: C.dim, border: "none", cursor: "pointer", fontSize: 11 }}>Cancel</button>
                         </>
                       ) : (
-                        <>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: 4, maxWidth: 220 }}>
+                          <button onClick={() => beginEdit(r)} style={{ ...btn(false), padding: "5px 10px", fontSize: 10 }}>Edit</button>
                           {pipeline === "website" && (
-                            <button onClick={() => setExpanded(isExpanded ? null : r.id)} style={{ ...btn(false), padding: "5px 10px", fontSize: 10, marginRight: 4 }}>
-                              {isExpanded ? "Close ▲" : "Details ▾"}
-                            </button>
+                            <>
+                              <button onClick={() => setModal({ title: `Call script — ${r.trade_name}`, text: buildCallScript(r) })} style={{ ...btn(false), padding: "5px 10px", fontSize: 10 }}>Call script</button>
+                              <button onClick={() => setModal({ title: `Website audit — ${r.trade_name}`, text: buildAuditText(r) })} style={{ ...btn(false), padding: "5px 10px", fontSize: 10 }}>Build audit</button>
+                              <button
+                                onClick={() => toggleAudit(r)}
+                                style={{
+                                  background: r.mini_audit_sent ? C.green : "transparent",
+                                  color: r.mini_audit_sent ? "#fff" : C.green,
+                                  border: `1px solid ${C.green}`, borderRadius: 8,
+                                  padding: "5px 10px", fontSize: 10, fontWeight: 700, cursor: "pointer",
+                                }}
+                              >
+                                {r.mini_audit_sent ? "✓ Audit sent" : "Mark audit sent"}
+                              </button>
+                              <button
+                                onClick={() => toggleProposal(r)}
+                                style={{
+                                  background: r.proposal_sent ? "#7c3aed" : "transparent",
+                                  color: r.proposal_sent ? "#fff" : "#a78bfa",
+                                  border: "1px solid #7c3aed", borderRadius: 8,
+                                  padding: "5px 10px", fontSize: 10, fontWeight: 700, cursor: "pointer",
+                                }}
+                              >
+                                {r.proposal_sent ? "✓ Proposal" : "Proposal"}
+                              </button>
+                              <button onClick={() => setExpanded(isExpanded ? null : r.id)} style={{ ...btn(false), padding: "5px 10px", fontSize: 10 }}>
+                                {isExpanded ? "Close ▲" : "Details ▾"}
+                              </button>
+                            </>
                           )}
-                          <button onClick={() => beginEdit(r)} style={{ ...btn(false), padding: "5px 10px", fontSize: 10, marginRight: 4 }}>Edit</button>
                           <button onClick={() => deleteRow(r)} style={{ background: "transparent", color: C.red, border: "none", cursor: "pointer", fontSize: 11 }}>Delete</button>
-                        </>
+                        </div>
                       )}
                     </td>
                   </tr>
@@ -962,6 +1043,36 @@ export default function AdminTradeScraper() {
               )}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {modal && (
+        <div
+          onClick={() => setModal(null)}
+          style={{
+            position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 60,
+            display: "flex", alignItems: "center", justifyContent: "center", padding: 20,
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: C.deep, border: `1px solid ${C.border}`, borderRadius: 14,
+              width: "min(640px, 100%)", maxHeight: "85vh", display: "flex", flexDirection: "column",
+            }}
+          >
+            <div style={{ padding: "14px 18px", borderBottom: `1px solid ${C.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <strong style={{ color: C.bright }}>{modal.title}</strong>
+              <button onClick={() => setModal(null)} style={{ background: "transparent", color: C.dim, border: "none", cursor: "pointer", fontSize: 18 }}>×</button>
+            </div>
+            <pre style={{ margin: 0, padding: 18, overflow: "auto", whiteSpace: "pre-wrap", fontSize: 13, color: C.bright, fontFamily: "inherit" }}>
+              {modal.text}
+            </pre>
+            <div style={{ padding: "12px 18px", borderTop: `1px solid ${C.border}`, display: "flex", gap: 8, justifyContent: "flex-end" }}>
+              <button onClick={() => copyToClipboard(modal.text)} style={{ ...btn(true), padding: "7px 14px", fontSize: 12 }}>Copy</button>
+              <button onClick={() => setModal(null)} style={{ ...btn(false), padding: "7px 14px", fontSize: 12 }}>Close</button>
+            </div>
+          </div>
         </div>
       )}
     </div>
