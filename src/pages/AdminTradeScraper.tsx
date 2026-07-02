@@ -402,30 +402,53 @@ export default function AdminTradeScraper() {
         <p style={{ fontSize: 11, fontWeight: 700, color: C.teal, letterSpacing: "0.08em", textTransform: "uppercase", margin: "0 0 12px" }}>
           {pipeline === "website" ? "Find businesses (website prospects)" : "New scrape"}
         </p>
-        <div style={{ display: "grid", gridTemplateColumns: "2fr 2fr 1fr auto", gap: 10, alignItems: "end" }}>
+        <div style={{ display: "grid", gridTemplateColumns: pipeline === "website" ? "2fr 2fr 1fr" : "2fr 2fr 1fr auto", gap: 10, alignItems: "end" }}>
           <div>
             <label style={{ fontSize: 10, color: C.dim, display: "block", marginBottom: 4 }}>
               {pipeline === "website" ? "Business type" : "Trade type"}
             </label>
-            <input value={tradeType} onChange={(e) => setTradeType(e.target.value)} placeholder={pipeline === "website" ? "e.g. plumbers, cafes, garages" : "electricians"} style={inp} />
+            <input
+              value={tradeType}
+              onChange={(e) => setTradeType(e.target.value)}
+              placeholder={pipeline === "website"
+                ? "landscapers, builders, electricians, cafes, dog groomers, salons, mechanics, takeaways, cleaners"
+                : "electricians"}
+              style={inp}
+            />
           </div>
           <div>
             <label style={{ fontSize: 10, color: C.dim, display: "block", marginBottom: 4 }}>Location</label>
-            <input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Nottingham, Nottinghamshire" style={inp} />
+            <input
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              placeholder="Nottingham, Mansfield, Sutton-in-Ashfield, Derby, Sheffield"
+              style={inp}
+            />
           </div>
           <div>
             <label style={{ fontSize: 10, color: C.dim, display: "block", marginBottom: 4 }}>Limit (max 20)</label>
-            <input type="number" min={1} max={20} value={limit} onChange={(e) => setLimit(parseInt(e.target.value, 10) || 10)} style={inp} />
+            <input type="number" min={1} max={20} value={limit} onChange={(e) => setLimit(Math.min(20, parseInt(e.target.value, 10) || 10))} style={inp} />
           </div>
-          <button onClick={runScrape} disabled={running} style={{ ...btn(true), opacity: running ? 0.6 : 1 }}>
-            {running ? "Scraping…" : "🔎 Run scrape"}
-          </button>
+          {pipeline !== "website" && (
+            <button onClick={runScrape} disabled={running} style={{ ...btn(true), opacity: running ? 0.6 : 1 }}>
+              {running ? "Scraping…" : "🔎 Run scrape"}
+            </button>
+          )}
         </div>
         {pipeline === "website" && (
-          <label style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color: C.dim, cursor: "pointer", marginTop: 12 }}>
-            <input type="checkbox" checked={noWebsiteOnly} onChange={(e) => setNoWebsiteOnly(e.target.checked)} />
-            Only keep businesses with no website (best cold-outreach targets)
-          </label>
+          <div style={{ display: "grid", gridTemplateColumns: "2fr auto", gap: 10, alignItems: "end", marginTop: 12 }}>
+            <div>
+              <label style={{ fontSize: 10, color: C.dim, display: "block", marginBottom: 4 }}>Website opportunity focus</label>
+              <select value={webFocus} onChange={(e) => setWebFocus(e.target.value as WebFocus)} style={inp}>
+                {WEB_FOCUS.map((f) => (
+                  <option key={f.value} value={f.value} style={{ color: "#000" }}>{f.label}</option>
+                ))}
+              </select>
+            </div>
+            <button onClick={runScrape} disabled={running} style={{ ...btn(true), opacity: running ? 0.6 : 1 }}>
+              {running ? "Scraping…" : "🔎 Run website scrape"}
+            </button>
+          </div>
         )}
         <p style={{ fontSize: 10, color: C.dim, margin: "10px 0 0" }}>
           Re-running the same search won't create duplicates — existing leads are refreshed and your stage/notes are preserved.
