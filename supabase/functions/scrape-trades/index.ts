@@ -137,6 +137,9 @@ serve(async (req) => {
     const tradeType = String(body.trade_type ?? "").trim();
     const location = String(body.location ?? "Nottinghamshire").trim();
     const limit = Math.min(20, Math.max(1, parseInt(body.limit ?? "10", 10)));
+    const pipeline = body.pipeline === "website" ? "website" : "trade";
+    // In website-outreach mode, only keep businesses with no website (best targets).
+    const websiteOnlyNoSite = pipeline === "website" && body.no_website_only === true;
     if (!tradeType) {
       return new Response(JSON.stringify({ error: "trade_type required (e.g. 'electricians')" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
