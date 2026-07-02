@@ -1775,6 +1775,7 @@ export default function AdminTradeScraper() {
         <CallScriptModal
           row={callLead}
           onClose={() => setCallLead(null)}
+          onBuildAudit={() => { setAuditLead(callLead); setCallLead(null); }}
           onLog={async (patch, label) => {
             await updateRow(callLead.id, patch);
             setCallLead((prev) => (prev ? { ...prev, ...patch } as Scraped : prev));
