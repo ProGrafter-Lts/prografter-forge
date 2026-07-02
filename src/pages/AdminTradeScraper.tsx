@@ -604,7 +604,9 @@ function AuditBuilderModal({ row, onClose, onSave, onMarkSent, onSaveNotes, onMa
     suggestedPrice: row.quoted_value ? String(row.quoted_value) : "",
     carePlan: row.monthly_care_price ? `£${row.monthly_care_price}/month` : "",
   });
+  const [showEmail, setShowEmail] = useState(false);
   const text = useMemo(() => buildMiniAudit(row, a), [row, a]);
+  const emailText = useMemo(() => buildProposalEmail(row, a), [row, a]);
   const toggleIssue = (i: string) =>
     setA((p) => ({ ...p, issues: p.issues.includes(i) ? p.issues.filter((x) => x !== i) : [...p.issues, i] }));
   const patch = (): Partial<Scraped> => ({
