@@ -294,6 +294,13 @@ const isFollowUpOverdue = (r: Scraped): boolean => {
   const today = new Date(); today.setHours(0, 0, 0, 0);
   return d < today;
 };
+// Return an ISO date string N days from today (used for follow-up suggestions).
+const inDays = (days: number): string => {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() + days);
+  return d.toISOString();
+};
 
 
 const inp: React.CSSProperties = {
@@ -885,7 +892,7 @@ function CallScriptModal({ row, onClose, onLog }: {
     { label: "Log interested", color: C.green, patch: { outreach_stage: "interested", interested: true, last_call_outcome: "Interested", contacted: true, last_contacted_at: new Date().toISOString() } },
     { label: "Log audit requested", color: "#7c3aed", patch: { outreach_stage: "contacted", last_call_outcome: "Audit requested", contacted: true, last_contacted_at: new Date().toISOString() } },
     { label: "Log not interested", color: C.red, patch: { outreach_stage: "not_interested", interested: false, last_call_outcome: "Not interested", contacted: true, last_contacted_at: new Date().toISOString() } },
-    { label: "Mark do not call", color: "#9CA3AF", patch: { do_not_call: true, outreach_stage: "not_interested", last_call_outcome: "Do not call", contacted: true, last_contacted_at: new Date().toISOString() } },
+    { label: "Mark do not call", color: "#9CA3AF", patch: { do_not_call: true, outreach_stage: "not_interested", last_call_outcome: "Do not call", contacted: true, last_contacted_at: new Date().toISOString(), next_follow_up_date: null, follow_up_at: null } },
   ];
 
   return (
@@ -1012,6 +1019,15 @@ export default function AdminTradeScraper() {
     }
     if (stage === "interested") patch.interested = true;
     if (stage === "not_interested") patch.interested = false;
+
+    // Follow-up suggestions driven by the new stage.
+    if (stage === "no_answer") {
+      patch.next_follow_up_date = inDays(2);
+      toast({ title: "Follow-up suggested", description: "No answer — try again in 2 days." });
+    } else if (stage === "interested") {
+      patch.next_follow_up_date = inDays(0);
+      toast({ title: "Send audit today", description: "Lead is interested — send the mini-audit while it's hot." });
+    }
     updateRow(row.id, patch as Partial<Scraped>);
   };
 
@@ -1023,12 +1039,24 @@ export default function AdminTradeScraper() {
     updateRow(row.id, { website_status: status });
   };
 
+  // Toggle "Do not call": on enable, clear future follow-up dates but keep the
+  // lead for compliance records. Call action buttons are disabled elsewhere.
+  const toggleDoNotCall = (row: Scraped) => {
+    const next = !row.do_not_call;
+    updateRow(row.id, next
+      ? { do_not_call: true, next_follow_up_date: null, follow_up_at: null }
+      : { do_not_call: false });
+    toast({ title: next ? "Marked do not call" : "Do not call cleared" });
+  };
+
   const toggleAudit = (row: Scraped) => {
     const next = !row.mini_audit_sent;
     updateRow(row.id, {
       mini_audit_sent: next,
       mini_audit_sent_at: next ? new Date().toISOString() : null,
+      ...(next ? { audit_sent: true, next_follow_up_date: inDays(3) } : {}),
     });
+    if (next) toast({ title: "Audit sent", description: "Follow-up suggested in 2-3 days." });
   };
 
   const toggleProposal = (row: Scraped) => {
@@ -1036,7 +1064,9 @@ export default function AdminTradeScraper() {
     updateRow(row.id, {
       proposal_sent: next,
       proposal_sent_at: next ? new Date().toISOString() : null,
+      ...(next ? { next_follow_up_date: inDays(4) } : {}),
     });
+    if (next) toast({ title: "Proposal sent", description: "Follow-up suggested in 3-5 days." });
   };
 
   const beginEdit = (r: Scraped) => {
@@ -1437,15 +1467,23 @@ export default function AdminTradeScraper() {
                 const m = stageMeta(r.outreach_stage);
                 const isEditing = editing === r.id;
                 const isExpanded = expanded === r.id;
+                const dueToday = isFollowUpToday(r);
+                const overdue = isFollowUpOverdue(r);
+                const rowBg = overdue ? "rgba(239,68,68,0.10)" : dueToday ? "rgba(245,158,11,0.10)" : undefined;
                 return (
                   <React.Fragment key={r.id}>
-                  <tr style={{ borderTop: `1px solid ${C.border}`, verticalAlign: "top" }}>
+                  <tr style={{ borderTop: `1px solid ${C.border}`, verticalAlign: "top", background: rowBg, borderLeft: overdue ? `3px solid ${C.red}` : dueToday ? `3px solid ${C.amber}` : "3px solid transparent" }}>
                     <td style={{ padding: "10px 12px" }}>
-                      <div style={{ fontWeight: 600 }}>{r.trade_name}</div>
+                      <div style={{ fontWeight: 600 }}>
+                        {r.trade_name}
+                        {r.do_not_call && <span style={{ marginLeft: 6, fontSize: 9, fontWeight: 800, color: "#9CA3AF", border: "1px solid #9CA3AF", borderRadius: 6, padding: "1px 5px" }}>DO NOT CALL</span>}
+                      </div>
                       <div style={{ color: C.dim, fontSize: 10, marginTop: 2 }}>{r.trade_type ?? "—"}</div>
+                      {overdue && <div style={{ color: C.red, fontSize: 9, fontWeight: 800, marginTop: 3 }}>⏰ Follow-up overdue</div>}
+                      {!overdue && dueToday && <div style={{ color: C.amber, fontSize: 9, fontWeight: 800, marginTop: 3 }}>📅 Follow-up due today</div>}
                     </td>
                     <td style={{ padding: "10px 12px" }}>
-                      {r.phone && <div><a href={`tel:${r.phone}`} style={{ color: C.teal }}>{r.phone}</a></div>}
+                      {r.phone && <div>{r.do_not_call ? <span style={{ color: C.dim, textDecoration: "line-through" }} title="Do not call">{r.phone}</span> : <a href={`tel:${r.phone}`} style={{ color: C.teal }}>{r.phone}</a>}</div>}
                       {r.email && <div><a href={`mailto:${r.email}`} style={{ color: C.teal }}>{r.email}</a></div>}
                       {r.website && <div><a href={r.website} target="_blank" rel="noreferrer" style={{ color: C.green }}>website ↗</a></div>}
                       {!r.phone && !r.email && !r.website && <span style={{ color: C.dim }}>—</span>}
@@ -1513,9 +1551,9 @@ export default function AdminTradeScraper() {
                     <td style={{ padding: "10px 12px" }}>
                       {isEditing ? (
                         <input type="date" value={draftFollowUp} onChange={(e) => setDraftFollowUp(e.target.value)} style={{ ...inp, padding: "5px 8px", fontSize: 11 }} />
-                      ) : r.follow_up_at ? (
-                        <span style={{ color: new Date(r.follow_up_at) < new Date() ? C.red : C.amber, fontWeight: 600 }}>
-                          {new Date(r.follow_up_at).toLocaleDateString()}
+                      ) : followUpDate(r) ? (
+                        <span style={{ color: overdue ? C.red : dueToday ? C.amber : C.dim, fontWeight: 600 }}>
+                          {followUpDate(r)!.toLocaleDateString()}
                         </span>
                       ) : (
                         <span style={{ color: C.dim }}>—</span>
@@ -1549,7 +1587,12 @@ export default function AdminTradeScraper() {
                           <button onClick={() => beginEdit(r)} style={{ ...btn(false), padding: "5px 10px", fontSize: 10 }}>Edit</button>
                           {pipeline === "website" && (
                             <>
-                              <button onClick={() => setCallLead(r)} style={{ ...btn(false), padding: "5px 10px", fontSize: 10 }}>Call script</button>
+                              <button
+                                onClick={() => !r.do_not_call && setCallLead(r)}
+                                disabled={r.do_not_call}
+                                title={r.do_not_call ? "This lead is marked Do not call" : "Open call script"}
+                                style={{ ...btn(false), padding: "5px 10px", fontSize: 10, opacity: r.do_not_call ? 0.4 : 1, cursor: r.do_not_call ? "not-allowed" : "pointer" }}
+                              >Call script</button>
                               <button onClick={() => setAuditLead(r)} style={{ ...btn(false), padding: "5px 10px", fontSize: 10 }}>Build audit</button>
                               <button
                                 onClick={() => toggleAudit(r)}
@@ -1572,6 +1615,18 @@ export default function AdminTradeScraper() {
                                 }}
                               >
                                 {r.proposal_sent ? "✓ Proposal" : "Proposal"}
+                              </button>
+                              <button
+                                onClick={() => toggleDoNotCall(r)}
+                                title={r.do_not_call ? "Kept for compliance — click to allow calling again" : "Mark do not call (clears follow-up, keeps record)"}
+                                style={{
+                                  background: r.do_not_call ? "#9CA3AF" : "transparent",
+                                  color: r.do_not_call ? "#111" : "#9CA3AF",
+                                  border: "1px solid #9CA3AF", borderRadius: 8,
+                                  padding: "5px 10px", fontSize: 10, fontWeight: 700, cursor: "pointer",
+                                }}
+                              >
+                                {r.do_not_call ? "✓ Do not call" : "Do not call"}
                               </button>
                               <button onClick={() => setExpanded(isExpanded ? null : r.id)} style={{ ...btn(false), padding: "5px 10px", fontSize: 10 }}>
                                 {isExpanded ? "Close ▲" : "Details ▾"}
