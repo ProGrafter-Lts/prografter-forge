@@ -119,13 +119,19 @@ export default function AdminTradeScraper() {
 
   const runScrape = async () => {
     if (!tradeType.trim()) {
-      toast({ title: "Pick a trade type", variant: "destructive" });
+      toast({ title: pipeline === "website" ? "Pick a business type" : "Pick a trade type", variant: "destructive" });
       return;
     }
     setRunning(true);
     const { data: { session } } = await supabase.auth.getSession();
     const { data, error } = await supabase.functions.invoke("scrape-trades", {
-      body: { trade_type: tradeType, location, limit },
+      body: {
+        trade_type: tradeType,
+        location,
+        limit,
+        pipeline,
+        no_website_only: pipeline === "website" ? noWebsiteOnly : false,
+      },
       headers: session ? { Authorization: `Bearer ${session.access_token}` } : {},
     });
     setRunning(false);
@@ -135,12 +141,13 @@ export default function AdminTradeScraper() {
     }
     toast({
       title: "Scrape complete",
-      description: `${(data as { upserted?: number }).upserted ?? 0} trades added/updated`,
+      description: `${(data as { upserted?: number }).upserted ?? 0} ${pipeline === "website" ? "businesses" : "trades"} added/updated`,
     });
     load();
   };
 
   const updateRow = async (id: string, patch: Partial<Scraped>) => {
+
     const { error } = await supabase.from("scraped_trades").update(patch as never).eq("id", id);
     if (error) {
       toast({ title: "Update failed", description: error.message, variant: "destructive" });
