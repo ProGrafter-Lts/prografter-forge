@@ -501,7 +501,10 @@ export default function AdminTradeScraper() {
 
   const filtered = useMemo(() => pipelineRows.filter((r) => {
     if (filterType !== "all" && r.trade_type !== filterType) return false;
-    if (filterStage !== "all" && r.outreach_stage !== filterStage) return false;
+    if (pipeline === "website") {
+      const wf = WEB_FILTERS.find((f) => f.value === webFilter);
+      if (wf && !wf.match(r)) return false;
+    } else if (filterStage !== "all" && r.outreach_stage !== filterStage) return false;
     if (hideContacted && r.contacted) return false;
     if (filter) {
       const s = filter.toLowerCase();
@@ -513,7 +516,7 @@ export default function AdminTradeScraper() {
       );
     }
     return true;
-  }), [pipelineRows, filter, filterType, filterStage, hideContacted]);
+  }), [pipelineRows, filter, filterType, filterStage, webFilter, pipeline, hideContacted]);
 
   // In the website pipeline, surface the strongest opportunities first.
   const sorted = useMemo(() => {
