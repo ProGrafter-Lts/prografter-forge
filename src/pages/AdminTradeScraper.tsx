@@ -356,6 +356,7 @@ export default function AdminTradeScraper() {
   const [filterStage, setFilterStage] = useState<Stage | "all">("all");
   const [hideContacted, setHideContacted] = useState(false);
   const [editing, setEditing] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState<string | null>(null);
   const [draftNotes, setDraftNotes] = useState("");
   const [draftFollowUp, setDraftFollowUp] = useState("");
 
