@@ -1258,6 +1258,9 @@ export default function AdminTradeScraper() {
         })}
       </div>
 
+      {/* Website Outreach summary cards */}
+      {pipeline === "website" && <SummaryCards rows={pipelineRows} />}
+
       <div style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${C.border}`, borderRadius: 12, padding: 16, marginBottom: 20 }}>
         <p style={{ fontSize: 11, fontWeight: 700, color: C.teal, letterSpacing: "0.08em", textTransform: "uppercase", margin: "0 0 12px" }}>
           {pipeline === "website" ? "Find businesses (website prospects)" : "New scrape"}
