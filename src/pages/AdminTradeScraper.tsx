@@ -892,7 +892,7 @@ function CallScriptModal({ row, onClose, onLog }: {
     { label: "Log interested", color: C.green, patch: { outreach_stage: "interested", interested: true, last_call_outcome: "Interested", contacted: true, last_contacted_at: new Date().toISOString() } },
     { label: "Log audit requested", color: "#7c3aed", patch: { outreach_stage: "contacted", last_call_outcome: "Audit requested", contacted: true, last_contacted_at: new Date().toISOString() } },
     { label: "Log not interested", color: C.red, patch: { outreach_stage: "not_interested", interested: false, last_call_outcome: "Not interested", contacted: true, last_contacted_at: new Date().toISOString() } },
-    { label: "Mark do not call", color: "#9CA3AF", patch: { do_not_call: true, outreach_stage: "not_interested", last_call_outcome: "Do not call", contacted: true, last_contacted_at: new Date().toISOString() } },
+    { label: "Mark do not call", color: "#9CA3AF", patch: { do_not_call: true, outreach_stage: "not_interested", last_call_outcome: "Do not call", contacted: true, last_contacted_at: new Date().toISOString(), next_follow_up_date: null, follow_up_at: null } },
   ];
 
   return (
