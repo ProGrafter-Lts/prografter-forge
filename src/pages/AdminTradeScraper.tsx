@@ -1060,8 +1060,18 @@ export default function AdminTradeScraper() {
     setRows((prev) => prev.map((r) => (r.id === id ? { ...r, ...patch } as Scraped : r)));
   };
 
+  const ACTIVE_STAGES: Stage[] = ["new", "contacted", "no_answer", "interested"];
   const setStage = (row: Scraped, stage: Stage) => {
+    // Compliance guard: a Do Not Call lead can't be moved back into an active
+    // calling stage without an explicit admin confirmation.
+    if (row.do_not_call && ACTIVE_STAGES.includes(stage)) {
+      const ok = window.confirm(
+        `${row.trade_name} is marked "Do Not Call". Moving it back to an active stage means it can be contacted again.\n\nConfirm you have a lawful basis to call (e.g. TPS/CTPS checked, objection withdrawn) before continuing.`,
+      );
+      if (!ok) return;
+    }
     const patch: Record<string, unknown> = { outreach_stage: stage };
+
     if (stage !== "new") {
       patch.contacted = true;
       patch.last_contacted_at = new Date().toISOString();
@@ -1311,9 +1321,18 @@ export default function AdminTradeScraper() {
       {/* Website Outreach summary cards */}
       {pipeline === "website" && <SummaryCards rows={pipelineRows} />}
 
+      {/* Compliance note for marketing calls */}
+      <div style={{ background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.35)", borderRadius: 10, padding: "10px 14px", marginBottom: 16, display: "flex", gap: 10, alignItems: "flex-start" }}>
+        <span style={{ fontSize: 16, lineHeight: "20px" }}>⚠️</span>
+        <p style={{ margin: 0, fontSize: 12, color: C.amber, lineHeight: 1.5 }}>
+          Before making marketing calls, check TPS/CTPS where required, respect previous objections, and keep a do-not-call record.
+        </p>
+      </div>
+
       <div style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${C.border}`, borderRadius: 12, padding: 16, marginBottom: 20 }}>
         <p style={{ fontSize: 11, fontWeight: 700, color: C.teal, letterSpacing: "0.08em", textTransform: "uppercase", margin: "0 0 12px" }}>
           {pipeline === "website" ? "Find businesses (website prospects)" : "New scrape"}
+
         </p>
         <div style={{ display: "grid", gridTemplateColumns: pipeline === "website" ? "2fr 2fr 1fr" : "2fr 2fr 1fr auto", gap: 10, alignItems: "end" }}>
           <div>
