@@ -61,6 +61,7 @@ const HomeownerSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen
         <nav className="flex-1 p-4 space-y-1">
           {NAV_ITEMS.map((item) => {
             const isActive = activeNav === item.id;
+            const isGreen = item.id === "grants";
             return (
               <button
                 key={item.id}
@@ -70,8 +71,8 @@ const HomeownerSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen
                 }}
                 className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-mono text-sm transition-colors"
                 style={{
-                  backgroundColor: isActive ? "rgba(13,148,136,0.18)" : "transparent",
-                  color: isActive ? "#1AC2BA" : "rgba(255,255,255,0.75)",
+                  backgroundColor: isActive ? (isGreen ? "rgba(34,197,94,0.18)" : "rgba(13,148,136,0.18)") : "transparent",
+                  color: isActive ? (isGreen ? "#4ADE80" : "#1AC2BA") : (isGreen ? "#4ADE80" : "rgba(255,255,255,0.75)"),
                   fontWeight: isActive ? 600 : 400,
                 }}
               >
