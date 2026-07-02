@@ -473,6 +473,7 @@ export default function AdminTradeScraper() {
               <tr style={{ textAlign: "left", color: C.dim, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.06em" }}>
                 <th style={{ padding: "10px 12px" }}>{pipeline === "website" ? "Business" : "Trade"}</th>
                 <th style={{ padding: "10px 12px" }}>Contact</th>
+                {pipeline === "website" && <th style={{ padding: "10px 12px" }}>Score</th>}
                 {pipeline === "website" && <th style={{ padding: "10px 12px" }}>Website / Outreach</th>}
                 <th style={{ padding: "10px 12px" }}>Location</th>
                 <th style={{ padding: "10px 12px" }}>Rating</th>
