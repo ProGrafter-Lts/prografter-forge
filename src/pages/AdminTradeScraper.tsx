@@ -702,20 +702,35 @@ export default function AdminTradeScraper() {
 
       {/* Stage chips */}
       <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
-        {STAGES.map((s) => {
-          const active = filterStage === s.value;
-          return (
-            <button key={s.value} onClick={() => setFilterStage(s.value)} style={{
-              background: active ? s.color : "transparent",
-              color: active ? "#fff" : s.color,
-              border: `1px solid ${s.color}`,
-              borderRadius: 999, padding: "5px 12px", fontSize: 11, fontWeight: 700, cursor: "pointer",
-            }}>
-              {s.label} <span style={{ opacity: 0.7, marginLeft: 4 }}>{counts[s.value] ?? 0}</span>
-            </button>
-          );
-        })}
+        {pipeline === "website"
+          ? WEB_FILTERS.map((s) => {
+              const active = webFilter === s.value;
+              return (
+                <button key={s.value} onClick={() => setWebFilter(s.value)} style={{
+                  background: active ? s.color : "transparent",
+                  color: active ? "#fff" : s.color,
+                  border: `1px solid ${s.color}`,
+                  borderRadius: 999, padding: "5px 12px", fontSize: 11, fontWeight: 700, cursor: "pointer",
+                }}>
+                  {s.label} <span style={{ opacity: 0.7, marginLeft: 4 }}>{webCounts[s.value] ?? 0}</span>
+                </button>
+              );
+            })
+          : STAGES.map((s) => {
+              const active = filterStage === s.value;
+              return (
+                <button key={s.value} onClick={() => setFilterStage(s.value)} style={{
+                  background: active ? s.color : "transparent",
+                  color: active ? "#fff" : s.color,
+                  border: `1px solid ${s.color}`,
+                  borderRadius: 999, padding: "5px 12px", fontSize: 11, fontWeight: 700, cursor: "pointer",
+                }}>
+                  {s.label} <span style={{ opacity: 0.7, marginLeft: 4 }}>{counts[s.value] ?? 0}</span>
+                </button>
+              );
+            })}
       </div>
+
 
       <div style={{ display: "flex", gap: 10, marginBottom: 12, flexWrap: "wrap", alignItems: "center" }}>
         <input placeholder="Search name, address, phone, notes…" value={filter} onChange={(e) => setFilter(e.target.value)} style={{ ...inp, maxWidth: 320 }} />
