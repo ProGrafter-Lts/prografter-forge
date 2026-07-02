@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
 import AppShell from "@/components/AppShell";
@@ -105,13 +105,18 @@ const QuoteReport = () => {
   const [report, setReport] = useState<ReportJson | null>(null);
   const [status, setStatus] = useState<string>("pending");
   const [accessError, setAccessError] = useState<string | null>(null);
+  const [readyElsewhere, setReadyElsewhere] = useState(false);
 
   // The lookup token gates access — without it the report cannot be read,
   // so a guessed URL alone is not enough.
   const tokenFromUrl = searchParams.get("t");
 
   useEffect(() => {
-    if (!id) return;
+    if (!id) {
+      console.error("[QuoteReport] missing report ID in URL");
+      setAccessError("This report link is missing its report reference.");
+      return;
+    }
     let token = tokenFromUrl || "";
     if (!token) {
       const stored = localStorage.getItem(`quoteReportToken:${id}`);
@@ -128,6 +133,12 @@ const QuoteReport = () => {
     }
 
     let cancelled = false;
+    // Safety cap: keep polling for up to ~5 minutes. Analysis usually finishes
+    // well within this window; after it we stop the spinner and offer the
+    // dashboard fallback so the user is never stuck on a spinner forever.
+    const startedAt = Date.now();
+    const MAX_POLL_MS = 5 * 60 * 1000;
+
     const poll = async () => {
       while (!cancelled) {
         const { data, error } = await supabase.functions.invoke("read-quote-check", {
@@ -135,19 +146,41 @@ const QuoteReport = () => {
         });
         if (cancelled) return;
         if (error) {
+          console.error("[QuoteReport] read-quote-check failed", { id, error });
           setAccessError("We couldn't load this report. The link may be invalid or expired.");
           return;
         }
         if (data) {
           setStatus(data.status);
-          if (data.status === "complete" && data.report_json) {
-            setReport(data.report_json as ReportJson);
+
+          // Report is ready ONLY when the status says complete AND the report
+          // content actually exists. This guards against a status/content race.
+          const content = (data.report_json as ReportJson | null) || null;
+          const hasContent = !!content && (!!content.report_html || !!content.error);
+
+          if (data.status === "complete") {
+            if (hasContent) {
+              setReport(content as ReportJson);
+              return;
+            }
+            // Status complete but no usable content — log and offer the
+            // dashboard fallback rather than spinning indefinitely.
+            console.error("[QuoteReport] status complete but report content empty", { id });
+            setReadyElsewhere(true);
             return;
           }
-          if (data.status === "error") {
+
+          if (data.status === "error" || data.status === "failed") {
+            console.error("[QuoteReport] analysis failed", { id, status: data.status });
             setStatus("error");
             return;
           }
+        }
+
+        if (Date.now() - startedAt > MAX_POLL_MS) {
+          console.warn("[QuoteReport] polling timed out; offering dashboard fallback", { id });
+          setReadyElsewhere(true);
+          return;
         }
         await new Promise((r) => setTimeout(r, 3000));
       }
@@ -157,6 +190,7 @@ const QuoteReport = () => {
       cancelled = true;
     };
   }, [id, tokenFromUrl]);
+
 
   const renderBody = () => {
     if (accessError) {
@@ -178,17 +212,39 @@ const QuoteReport = () => {
       );
     }
 
+    // Report exists but this page couldn't render it immediately — give the
+    // user a reliable way to open it from their dashboard.
+    if (readyElsewhere && !report) {
+      return (
+        <div className="text-center py-16 space-y-5">
+          <ShieldCheck className="mx-auto h-10 w-10 text-teal" />
+          <h2 className="font-heading text-2xl text-navy">Your report is ready</h2>
+          <p className="font-mono text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
+            Your Quote Health Check has finished. Open it from your dashboard.
+          </p>
+          <Link
+            to={`/dashboard/quote-checks/${id ?? ""}`}
+            className="inline-flex items-center gap-2 bg-teal text-white font-mono text-sm px-5 py-2.5 rounded-xl hover:bg-teal-hover transition-colors shadow-sm no-underline"
+          >
+            Open Report
+          </Link>
+        </div>
+      );
+    }
+
     if (!report) {
       return (
         <div className="text-center py-16 space-y-4">
           <Loader2 className="mx-auto h-10 w-10 text-teal animate-spin" />
-          <h2 className="font-heading text-2xl text-navy">Reviewing your quote…</h2>
+          <h2 className="font-heading text-2xl text-navy">Preparing your Quote Health Check…</h2>
           <p className="font-mono text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
-            This usually takes around 60 seconds.
+            Your Quote Health Check is being prepared. This usually takes a few minutes.
           </p>
         </div>
       );
     }
+
+
 
     if (report.error) {
       return (
