@@ -632,7 +632,7 @@ export default function AdminTradeScraper() {
                 );
               })}
               {!filtered.length && (
-                <tr><td colSpan={pipeline === "website" ? 9 : 8} style={{ padding: 40, textAlign: "center", color: C.dim }}>
+                <tr><td colSpan={pipeline === "website" ? 10 : 8} style={{ padding: 40, textAlign: "center", color: C.dim }}>
                   {pipeline === "website"
                     ? "No website prospects match. Try a different filter or run a search above."
                     : "No trades match. Try a different filter or run a scrape above."}
