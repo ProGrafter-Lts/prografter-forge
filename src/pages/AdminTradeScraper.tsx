@@ -437,39 +437,6 @@ function buildCallScript(r: Scraped): string {
   ].join("\n");
 }
 
-// Generates a plain-text mini website audit the admin can copy and send.
-function buildAuditText(r: Scraped): string {
-  const lines = [
-    `WEBSITE MINI-AUDIT — ${r.trade_name}`,
-    ``,
-    `Prepared by ProGrafter`,
-    `Date: ${new Date().toLocaleDateString()}`,
-    ``,
-    `Business: ${r.trade_name}${r.trade_type ? ` (${r.trade_type})` : ""}`,
-    `Location: ${[r.city, r.postcode].filter(Boolean).join(", ") || r.address || "—"}`,
-    `Google rating: ${r.rating ? `${r.rating}★ (${r.reviews_count ?? 0} reviews)` : "—"}`,
-    `Current website: ${r.website || "None found"}`,
-    ``,
-    `WHAT WE FOUND`,
-    `• Website status: ${r.website_status || (r.has_website ? "Has a website" : "No website found")}`,
-    `• Main issue: ${r.main_website_issue || "Site does not reflect the quality of the business"}`,
-    `• Opportunity: ${r.opportunity_angle || "Strong reviews but weak online presence — enquiries are being lost."}`,
-    ``,
-    `WHY IT MATTERS`,
-    `Most customers check you online before calling. A slow, outdated or missing website means`,
-    `they move on to a competitor — even when your reviews are excellent.`,
-    ``,
-    `WHAT WE'D RECOMMEND`,
-    `• A fast, mobile-first website that loads in under 2 seconds`,
-    `• Clear services, service area and a prominent "call / enquire" button`,
-    `• Reviews and photos front and centre to build trust`,
-    `${r.package_recommended && r.package_recommended !== "Not selected" ? `• Suggested package: ${r.package_recommended}` : "• Suggested package: Starter or Growth Site"}`,
-    ``,
-    `NEXT STEP`,
-    `Reply to this message or call us back and we'll walk you through it — no obligation.`,
-  ];
-  return lines.join("\n");
-}
 
 async function copyToClipboard(text: string) {
   try {
