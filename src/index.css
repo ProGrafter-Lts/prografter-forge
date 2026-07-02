@@ -770,6 +770,210 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
 
 
 /* ============================================================
+   Quote Health Check — v2 section hierarchy, action plan,
+   copyable questions and suggested builder message.
+   ============================================================ */
+.qr-report-stack > .qr-section2,
+.qr-report-stack > .qr-actionplan,
+.qr-report-stack > .qr-msgcard {
+  padding-top: 1.75rem;
+  margin-top: 1.75rem;
+  border-top: 1px solid #eef0f4;
+}
+.qr-report-stack > .qr-card-head + .qr-section2,
+.qr-report-stack > .qr-section2:first-child {
+  padding-top: 0;
+  margin-top: 0;
+  border-top: none;
+}
+
+.qr-section2-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.qr-section2-title {
+  font-family: var(--font-heading, inherit);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1f2a44;
+  line-height: 1.2;
+  margin: 0;
+}
+.qr-section2-intro {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin: 0.3rem 0 0;
+  line-height: 1.5;
+}
+.qr-section2-body { margin-top: 0.9rem; }
+.qr-section2-body .qr-section,
+.qr-section2-body .qr-report .qr-section {
+  border-top: none;
+  margin-top: 0;
+  padding-top: 0;
+}
+.qr-section2-body .qr-report h2 { display: none; }
+.qr-section2-body .qr-report h3:first-child { margin-top: 0; }
+
+.qr-collapse-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-shrink: 0;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #0d9488;
+  background: #f0fdfa;
+  border: 1px solid #99f6e4;
+  border-radius: 999px;
+  padding: 0.3rem 0.7rem;
+  cursor: pointer;
+}
+.qr-collapse-btn:hover { background: #ccfbf1; }
+
+/* Responsive tables */
+.qr-tablewrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+/* What To Do Next — highlighted action plan */
+.qr-actionplan {
+  background: linear-gradient(180deg, #f0fdfa 0%, #ecfdf5 100%);
+  border: 1.5px solid #5eead4;
+  border-radius: 1rem;
+  padding: 1.4rem 1.5rem;
+}
+.qr-actionplan-head {
+  display: flex;
+  gap: 0.7rem;
+  align-items: flex-start;
+  color: #0f766e;
+}
+.qr-actionplan-title {
+  font-family: var(--font-heading, inherit);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0f766e;
+  margin: 0;
+  line-height: 1.2;
+}
+.qr-actionplan-sub {
+  font-size: 0.85rem;
+  color: #0d766e;
+  opacity: 0.85;
+  margin: 0.25rem 0 0;
+}
+.qr-actionplan-list {
+  list-style: none;
+  margin: 1.1rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+.qr-actionplan-list li {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  font-size: 0.95rem;
+  color: #134e4a;
+  line-height: 1.5;
+}
+.qr-actionplan-list li span {
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #0d9488;
+  color: #fff;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+/* Copyable questions */
+.qr-copyall-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #fff;
+  background: #0d9488;
+  border: none;
+  border-radius: 0.7rem;
+  padding: 0.55rem 0.95rem;
+  cursor: pointer;
+}
+.qr-copyall-btn:hover { background: #0f766e; }
+.qr-qgroups { display: flex; flex-direction: column; gap: 1.1rem; }
+.qr-qgroup-title {
+  font-family: var(--font-heading, inherit);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1f2a44;
+  margin: 0 0 0.5rem;
+}
+.qr-qlist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+.qr-qitem {
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+  justify-content: space-between;
+  background: #f8fafc;
+  border: 1px solid #e3e6ec;
+  border-radius: 0.7rem;
+  padding: 0.7rem 0.85rem;
+}
+.qr-qtext { font-size: 0.9rem; color: #374151; line-height: 1.5; }
+.qr-qcopy {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.55rem;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  color: #0d9488;
+  cursor: pointer;
+}
+.qr-qcopy:hover { background: #f0fdfa; border-color: #99f6e4; }
+
+/* Suggested builder message */
+.qr-msgbox {
+  margin: 1rem 0 0;
+  background: #f8fafc;
+  border: 1px solid #e3e6ec;
+  border-radius: 0.85rem;
+  padding: 1.1rem 1.2rem;
+  font-family: var(--font-body, inherit);
+  font-size: 0.9rem;
+  line-height: 1.65;
+  color: #374151;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+@media (max-width: 640px) {
+  .qr-card { padding: 1.1rem; }
+  .qr-actionplan { padding: 1.1rem; }
+  .qr-actionplan-title { font-size: 1.1rem; }
+  .qr-section2-title { font-size: 1.05rem; }
+  .qr-report table { font-size: 0.78rem; }
+  .qr-qtext { font-size: 0.85rem; }
+}
+
+
+
+
+/* ============================================================
    Print stylesheet — window.print() produces a clean PDF of the
    Quote Health Check. Hides nav/sidebar/buttons/footer chrome and
    prints only the report card (.qr-print-area), keeping the
