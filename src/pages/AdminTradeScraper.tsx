@@ -547,6 +547,43 @@ function buildAuditEmail(r: Scraped, auditText: string): string {
   ].join("\n");
 }
 
+function buildProposalEmail(r: Scraped, a: AuditState): string {
+  const business = r.trade_name || "your business";
+  const contact = r.contact_name || "there";
+  const pkg = a.suggestedPackage.trim() || (r.package_recommended && r.package_recommended !== "Not selected" ? r.package_recommended : "[package_recommended]");
+  const price = a.suggestedPrice.trim() || (r.quoted_value ? String(r.quoted_value) : "[quoted_value]");
+  return [
+    `Subject: Quick website review for ${business}`,
+    "",
+    `Hi ${contact},`,
+    "",
+    "Thanks for taking the time to speak today.",
+    "",
+    "I had a quick look over your online presence and put together a few notes on where your website could be improved so it better reflects the quality of your business.",
+    "",
+    "The main opportunity is to make it clearer, more modern, easier to use on mobile, and more focused on turning visitors into enquiries.",
+    "",
+    `Based on what I've seen, I think the best fit would be the ${pkg} package.`,
+    "",
+    "This would include:",
+    "",
+    "- Clean modern design",
+    "- Mobile-friendly layout",
+    "- Clear service sections",
+    "- Gallery or examples of work",
+    "- Reviews/testimonials",
+    "- Click-to-call and enquiry form",
+    "- Basic local SEO structure",
+    "",
+    `The price for this would usually be around £${price}.`,
+    "",
+    "There is also an optional care plan from £49/month if you would like help with updates, photos, changes and ongoing improvements.",
+    "",
+    "Kind regards,",
+    "[caller name]",
+  ].join("\n");
+}
+
 function AuditBuilderModal({ row, onClose, onSave, onMarkSent, onEmail }: {
   row: Scraped;
   onClose: () => void;
