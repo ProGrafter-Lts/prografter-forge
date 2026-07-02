@@ -620,7 +620,7 @@ export default function AdminTradeScraper() {
   // In the website pipeline, surface the strongest opportunities first.
   const sorted = useMemo(() => {
     if (pipeline !== "website") return filtered;
-    return [...filtered].sort((a, b) => webScore(b) - webScore(a));
+    return [...filtered].sort((a, b) => webScoreOf(b) - webScoreOf(a));
   }, [filtered, pipeline]);
 
 
