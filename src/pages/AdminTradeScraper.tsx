@@ -655,9 +655,29 @@ function AuditBuilderModal({ row, onClose, onSave, onMarkSent, onSaveNotes, onMa
           <button onClick={() => copyToClipboard(text)} style={{ ...btn(true), padding: "7px 14px", fontSize: 12 }}>Copy audit</button>
           <button onClick={() => onSave(patch(), text)} style={{ ...btn(false), padding: "7px 14px", fontSize: 12 }}>Save audit to lead</button>
           <button onClick={() => onMarkSent({ ...patch(), mini_audit_sent: true, mini_audit_sent_at: new Date().toISOString() }, text)} style={{ background: "transparent", color: C.green, border: `1px solid ${C.green}`, borderRadius: 8, padding: "7px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>Mark audit sent</button>
-          <button onClick={() => onEmail(buildAuditEmail(row, text))} style={{ background: "transparent", color: C.teal, border: `1px solid ${C.teal}`, borderRadius: 8, padding: "7px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>Generate email</button>
+          <button onClick={() => setShowEmail(true)} style={{ background: C.teal, color: "#00110f", border: `1px solid ${C.teal}`, borderRadius: 8, padding: "7px 12px", fontSize: 12, fontWeight: 800, cursor: "pointer" }}>Generate email</button>
         </div>
       </div>
+
+      {showEmail && (
+        <div onClick={(e) => { e.stopPropagation(); setShowEmail(false); }} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 110, padding: 16 }}>
+          <div onClick={(e) => e.stopPropagation()} style={{ background: C.deep, border: `1px solid ${C.border}`, borderRadius: 14, width: "100%", maxWidth: 640, maxHeight: "90vh", display: "flex", flexDirection: "column" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 18px", borderBottom: `1px solid ${C.border}` }}>
+              <strong style={{ color: C.bright }}>Proposal email — {row.trade_name}</strong>
+              <button onClick={() => setShowEmail(false)} style={{ background: "transparent", color: C.dim, border: "none", cursor: "pointer", fontSize: 18 }}>×</button>
+            </div>
+            <div style={{ padding: 18, overflowY: "auto", flex: 1 }}>
+              <pre style={{ margin: 0, padding: 14, background: "rgba(0,0,0,0.25)", borderRadius: 10, whiteSpace: "pre-wrap", color: C.bright, fontSize: 12.5, lineHeight: 1.55, fontFamily: "inherit" }}>{emailText}</pre>
+            </div>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", padding: "12px 18px", borderTop: `1px solid ${C.border}` }}>
+              <button onClick={() => copyToClipboard(emailText)} style={{ ...btn(true), padding: "7px 14px", fontSize: 12 }}>Copy email</button>
+              <button onClick={() => onSaveNotes(emailText)} style={{ ...btn(false), padding: "7px 14px", fontSize: 12 }}>Save to lead notes</button>
+              <button onClick={() => onMarkSent({ ...patch(), mini_audit_sent: true, mini_audit_sent_at: new Date().toISOString() }, text)} style={{ background: "transparent", color: C.green, border: `1px solid ${C.green}`, borderRadius: 8, padding: "7px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>Mark audit sent</button>
+              <button onClick={() => onMarkProposal({ ...patch(), proposal_sent: true, proposal_sent_at: new Date().toISOString() })} style={{ background: "transparent", color: C.amber, border: `1px solid ${C.amber}`, borderRadius: 8, padding: "7px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>Mark proposal sent</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
