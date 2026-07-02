@@ -291,10 +291,14 @@ export default function AdminTradeScraper() {
         <div>
           <div className="font-heading tracking-wider" style={{ fontSize: 22, fontWeight: 700 }}>
             <Logo variant="light" className="h-9 w-auto inline-block" />
-            <span style={{ color: C.dim, fontSize: 12, marginLeft: 12 }}>OUTREACH PIPELINE</span>
+            <span style={{ color: C.dim, fontSize: 12, marginLeft: 12 }}>
+              {pipeline === "website" ? "WEBSITE OUTREACH PIPELINE" : "TRADE OUTREACH PIPELINE"}
+            </span>
           </div>
           <p style={{ fontSize: 12, color: C.dim, margin: "4px 0 0" }}>
-            Scrape, track outreach, log follow-ups. Admin only.
+            {pipeline === "website"
+              ? "Find local businesses with weak or missing websites, log calls, send mini-audits and proposals. Admin only."
+              : "Scrape local trades, track outreach, log follow-ups. Admin only."}
           </p>
         </div>
         <div style={{ display: "flex", gap: 8 }}>
@@ -307,14 +311,45 @@ export default function AdminTradeScraper() {
         </div>
       </div>
 
+      {/* Pipeline tabs */}
+      <div style={{ display: "flex", gap: 8, marginBottom: 20, flexWrap: "wrap" }}>
+        {([
+          { value: "trade" as Pipeline, label: "🔧 Trade Outreach", count: pipelineCounts.trade },
+          { value: "website" as Pipeline, label: "🌐 Website Outreach", count: pipelineCounts.website },
+        ]).map((t) => {
+          const active = pipeline === t.value;
+          return (
+            <button
+              key={t.value}
+              onClick={() => { setPipeline(t.value); setFilterStage("all"); setFilterType("all"); setEditing(null); }}
+              style={{
+                background: active ? C.teal : "rgba(255,255,255,0.04)",
+                color: active ? "#fff" : C.bright,
+                border: `1px solid ${active ? C.teal : C.border}`,
+                borderRadius: 10, padding: "10px 18px", fontSize: 13, fontWeight: 700, cursor: "pointer",
+                display: "inline-flex", alignItems: "center", gap: 8,
+              }}
+            >
+              {t.label}
+              <span style={{
+                background: active ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.08)",
+                borderRadius: 999, padding: "1px 8px", fontSize: 11,
+              }}>{t.count}</span>
+            </button>
+          );
+        })}
+      </div>
+
       <div style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${C.border}`, borderRadius: 12, padding: 16, marginBottom: 20 }}>
         <p style={{ fontSize: 11, fontWeight: 700, color: C.teal, letterSpacing: "0.08em", textTransform: "uppercase", margin: "0 0 12px" }}>
-          New scrape
+          {pipeline === "website" ? "Find businesses (website prospects)" : "New scrape"}
         </p>
         <div style={{ display: "grid", gridTemplateColumns: "2fr 2fr 1fr auto", gap: 10, alignItems: "end" }}>
           <div>
-            <label style={{ fontSize: 10, color: C.dim, display: "block", marginBottom: 4 }}>Trade type</label>
-            <input value={tradeType} onChange={(e) => setTradeType(e.target.value)} placeholder="electricians" style={inp} />
+            <label style={{ fontSize: 10, color: C.dim, display: "block", marginBottom: 4 }}>
+              {pipeline === "website" ? "Business type" : "Trade type"}
+            </label>
+            <input value={tradeType} onChange={(e) => setTradeType(e.target.value)} placeholder={pipeline === "website" ? "e.g. plumbers, cafes, garages" : "electricians"} style={inp} />
           </div>
           <div>
             <label style={{ fontSize: 10, color: C.dim, display: "block", marginBottom: 4 }}>Location</label>
@@ -328,10 +363,17 @@ export default function AdminTradeScraper() {
             {running ? "Scraping…" : "🔎 Run scrape"}
           </button>
         </div>
+        {pipeline === "website" && (
+          <label style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color: C.dim, cursor: "pointer", marginTop: 12 }}>
+            <input type="checkbox" checked={noWebsiteOnly} onChange={(e) => setNoWebsiteOnly(e.target.checked)} />
+            Only keep businesses with no website (best cold-outreach targets)
+          </label>
+        )}
         <p style={{ fontSize: 10, color: C.dim, margin: "10px 0 0" }}>
           Re-running the same search won't create duplicates — existing leads are refreshed and your stage/notes are preserved.
         </p>
       </div>
+
 
       {/* Stage chips */}
       <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
