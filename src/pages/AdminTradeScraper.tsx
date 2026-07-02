@@ -1587,7 +1587,12 @@ export default function AdminTradeScraper() {
                           <button onClick={() => beginEdit(r)} style={{ ...btn(false), padding: "5px 10px", fontSize: 10 }}>Edit</button>
                           {pipeline === "website" && (
                             <>
-                              <button onClick={() => setCallLead(r)} style={{ ...btn(false), padding: "5px 10px", fontSize: 10 }}>Call script</button>
+                              <button
+                                onClick={() => !r.do_not_call && setCallLead(r)}
+                                disabled={r.do_not_call}
+                                title={r.do_not_call ? "This lead is marked Do not call" : "Open call script"}
+                                style={{ ...btn(false), padding: "5px 10px", fontSize: 10, opacity: r.do_not_call ? 0.4 : 1, cursor: r.do_not_call ? "not-allowed" : "pointer" }}
+                              >Call script</button>
                               <button onClick={() => setAuditLead(r)} style={{ ...btn(false), padding: "5px 10px", fontSize: 10 }}>Build audit</button>
                               <button
                                 onClick={() => toggleAudit(r)}
