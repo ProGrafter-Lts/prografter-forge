@@ -112,7 +112,11 @@ const QuoteReport = () => {
   const tokenFromUrl = searchParams.get("t");
 
   useEffect(() => {
-    if (!id) return;
+    if (!id) {
+      console.error("[QuoteReport] missing report ID in URL");
+      setAccessError("This report link is missing its report reference.");
+      return;
+    }
     let token = tokenFromUrl || "";
     if (!token) {
       const stored = localStorage.getItem(`quoteReportToken:${id}`);
@@ -129,6 +133,12 @@ const QuoteReport = () => {
     }
 
     let cancelled = false;
+    // Safety cap: keep polling for up to ~5 minutes. Analysis usually finishes
+    // well within this window; after it we stop the spinner and offer the
+    // dashboard fallback so the user is never stuck on a spinner forever.
+    const startedAt = Date.now();
+    const MAX_POLL_MS = 5 * 60 * 1000;
+
     const poll = async () => {
       while (!cancelled) {
         const { data, error } = await supabase.functions.invoke("read-quote-check", {
@@ -136,19 +146,41 @@ const QuoteReport = () => {
         });
         if (cancelled) return;
         if (error) {
+          console.error("[QuoteReport] read-quote-check failed", { id, error });
           setAccessError("We couldn't load this report. The link may be invalid or expired.");
           return;
         }
         if (data) {
           setStatus(data.status);
-          if (data.status === "complete" && data.report_json) {
-            setReport(data.report_json as ReportJson);
+
+          // Report is ready ONLY when the status says complete AND the report
+          // content actually exists. This guards against a status/content race.
+          const content = (data.report_json as ReportJson | null) || null;
+          const hasContent = !!content && (!!content.report_html || !!content.error);
+
+          if (data.status === "complete") {
+            if (hasContent) {
+              setReport(content as ReportJson);
+              return;
+            }
+            // Status complete but no usable content — log and offer the
+            // dashboard fallback rather than spinning indefinitely.
+            console.error("[QuoteReport] status complete but report content empty", { id });
+            setReadyElsewhere(true);
             return;
           }
-          if (data.status === "error") {
+
+          if (data.status === "error" || data.status === "failed") {
+            console.error("[QuoteReport] analysis failed", { id, status: data.status });
             setStatus("error");
             return;
           }
+        }
+
+        if (Date.now() - startedAt > MAX_POLL_MS) {
+          console.warn("[QuoteReport] polling timed out; offering dashboard fallback", { id });
+          setReadyElsewhere(true);
+          return;
         }
         await new Promise((r) => setTimeout(r, 3000));
       }
@@ -158,6 +190,7 @@ const QuoteReport = () => {
       cancelled = true;
     };
   }, [id, tokenFromUrl]);
+
 
   const renderBody = () => {
     if (accessError) {
