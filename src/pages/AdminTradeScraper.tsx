@@ -67,6 +67,25 @@ const WEB_QUALITY: { value: WebQuality; label: string; color: string }[] = [
 const webQualityMeta = (q: WebQuality | null) =>
   WEB_QUALITY.find((x) => x.value === q) ?? null;
 
+// Website opportunity focus for the scrape panel. `seed` sets an initial
+// website_quality assessment on NEW leads only (Places can't verify site quality,
+// so this is a starting hint the admin confirms). `noSiteOnly` strictly filters.
+type WebFocus =
+  | "any" | "no_website" | "poor" | "facebook_only" | "outdated"
+  | "poor_mobile" | "no_form" | "weak_seo" | "strong_reviews_weak";
+
+const WEB_FOCUS: { value: WebFocus; label: string; seed: WebQuality | null; noSiteOnly: boolean }[] = [
+  { value: "any", label: "Any opportunity", seed: null, noSiteOnly: false },
+  { value: "no_website", label: "No website only", seed: "none", noSiteOnly: true },
+  { value: "poor", label: "Poor website", seed: "poor", noSiteOnly: false },
+  { value: "facebook_only", label: "Facebook only", seed: "poor", noSiteOnly: false },
+  { value: "outdated", label: "Outdated website", seed: "outdated", noSiteOnly: false },
+  { value: "poor_mobile", label: "Poor mobile experience", seed: "weak_mobile", noSiteOnly: false },
+  { value: "no_form", label: "No enquiry form", seed: "no_form", noSiteOnly: false },
+  { value: "weak_seo", label: "Weak local SEO", seed: "poor", noSiteOnly: false },
+  { value: "strong_reviews_weak", label: "Strong reviews but weak website", seed: "poor", noSiteOnly: false },
+];
+
 // Website-outreach opportunity score (0-100): higher = better prospect to sell a website to.
 // An established local business (lots of reviews, decent rating) with a missing/weak website
 // is the strongest target — they clearly have demand but a poor online presence.
