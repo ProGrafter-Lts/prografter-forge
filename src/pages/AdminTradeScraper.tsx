@@ -926,6 +926,56 @@ function CallScriptModal({ row, onClose, onLog }: {
   );
 }
 
+function SummaryCards({ rows }: { rows: Scraped[] }) {
+  const total = rows.length;
+  const highOpp = rows.filter((r) => webScoreOf(r) >= 70).length;
+  const noWebsite = rows.filter(isNoWebsite).length;
+  const poorWebsite = rows.filter(isPoorWebsite).length;
+  const interested = rows.filter((r) => r.interested === true || r.outreach_stage === "interested" || r.last_call_outcome === "Interested").length;
+  const auditsSent = rows.filter((r) => r.audit_sent || r.mini_audit_sent).length;
+  const proposalsSent = rows.filter((r) => r.proposal_sent).length;
+  const wonJobs = rows.filter((r) => r.last_call_outcome === "Won" || r.outreach_stage === "converted").length;
+
+  const sumQuoted = (predicate: (r: Scraped) => boolean) =>
+    rows.filter(predicate).reduce((acc, r) => acc + (r.quoted_value ?? 0), 0);
+
+  const pipelineValue = sumQuoted((r) =>
+    r.interested === true || r.outreach_stage === "interested" || r.last_call_outcome === "Interested" ||
+    r.audit_sent || r.mini_audit_sent || r.proposal_sent
+  );
+  const monthlyCareValue = rows
+    .filter((r) => (r.last_call_outcome === "Won" || r.outreach_stage === "converted") && r.monthly_care_interest === "Yes" && (r.monthly_care_price ?? 0) > 0)
+    .reduce((acc, r) => acc + (r.monthly_care_price ?? 0), 0);
+
+  const cards = [
+    { label: "Total website leads", value: total, color: C.bright },
+    { label: "High opportunity leads", value: highOpp, color: C.green },
+    { label: "No website leads", value: noWebsite, color: C.teal },
+    { label: "Poor website leads", value: poorWebsite, color: C.amber },
+    { label: "Interested leads", value: interested, color: C.green },
+    { label: "Audits sent", value: auditsSent, color: "#7c3aed" },
+    { label: "Proposals sent", value: proposalsSent, color: C.amber },
+    { label: "Won jobs", value: wonJobs, color: "#22C55E" },
+    { label: "Pipeline value", value: `£${pipelineValue.toLocaleString()}`, color: C.bright, isValue: true },
+    { label: "Monthly care value", value: `£${monthlyCareValue.toLocaleString()}/mo`, color: C.bright, isValue: true },
+  ];
+
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(155px, 1fr))", gap: 12, marginBottom: 20 }}>
+      {cards.map((c) => (
+        <div key={c.label} style={{
+          background: "rgba(255,255,255,0.04)", border: `1px solid ${C.border}`, borderRadius: 12,
+          padding: "14px 16px", display: "flex", flexDirection: "column", gap: 4,
+          borderTop: `3px solid ${c.color}`,
+        }}>
+          <span style={{ fontSize: 10, fontWeight: 700, color: C.dim, textTransform: "uppercase", letterSpacing: "0.06em" }}>{c.label}</span>
+          <span style={{ fontSize: 22, fontWeight: 800, color: c.color }}>{c.value}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function AdminTradeScraper() {
   const [rows, setRows] = useState<Scraped[]>([]);
   const [loading, setLoading] = useState(true);
