@@ -180,7 +180,8 @@ export default function AdminTradeScraper() {
         location,
         limit,
         pipeline,
-        no_website_only: pipeline === "website" ? noWebsiteOnly : false,
+        website_focus: pipeline === "website" ? webFocus : undefined,
+        no_website_only: pipeline === "website" && WEB_FOCUS.find((f) => f.value === webFocus)?.noSiteOnly,
       },
       headers: session ? { Authorization: `Bearer ${session.access_token}` } : {},
     });
