@@ -1551,9 +1551,9 @@ export default function AdminTradeScraper() {
                     <td style={{ padding: "10px 12px" }}>
                       {isEditing ? (
                         <input type="date" value={draftFollowUp} onChange={(e) => setDraftFollowUp(e.target.value)} style={{ ...inp, padding: "5px 8px", fontSize: 11 }} />
-                      ) : r.follow_up_at ? (
-                        <span style={{ color: new Date(r.follow_up_at) < new Date() ? C.red : C.amber, fontWeight: 600 }}>
-                          {new Date(r.follow_up_at).toLocaleDateString()}
+                      ) : followUpDate(r) ? (
+                        <span style={{ color: overdue ? C.red : dueToday ? C.amber : C.dim, fontWeight: 600 }}>
+                          {followUpDate(r)!.toLocaleDateString()}
                         </span>
                       ) : (
                         <span style={{ color: C.dim }}>—</span>
