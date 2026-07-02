@@ -474,6 +474,13 @@ export default function AdminTradeScraper() {
   const [filterStage, setFilterStage] = useState<Stage | "all">("all");
   const [webFilter, setWebFilter] = useState<string>("all");
   const [hideContacted, setHideContacted] = useState(false);
+  const [webStatusFilter, setWebStatusFilter] = useState("all");
+  const [webScoreFilter, setWebScoreFilter] = useState("all");
+  const [webHasSite, setWebHasSite] = useState("all");
+  const [webAuditSent, setWebAuditSent] = useState("all");
+  const [webProposalSent, setWebProposalSent] = useState("all");
+  const [webFollowUp, setWebFollowUp] = useState("all");
+  const [hideDoNotCall, setHideDoNotCall] = useState(false);
   const [editing, setEditing] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [draftNotes, setDraftNotes] = useState("");
