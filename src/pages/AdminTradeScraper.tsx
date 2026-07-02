@@ -888,78 +888,46 @@ export default function AdminTradeScraper() {
                       {r.website && <div><a href={r.website} target="_blank" rel="noreferrer" style={{ color: C.green }}>website ↗</a></div>}
                       {!r.phone && !r.email && !r.website && <span style={{ color: C.dim }}>—</span>}
                     </td>
-                    {pipeline === "website" && (() => {
-                      const sc = webScore(r);
-                      return (
-                        <td style={{ padding: "10px 12px" }}>
-                          <div style={{
-                            display: "inline-flex", flexDirection: "column", alignItems: "center", gap: 2,
-                            background: "rgba(255,255,255,0.04)", border: `1px solid ${scoreColor(sc)}`,
-                            borderRadius: 10, padding: "6px 10px", minWidth: 52,
-                          }}>
-                            <span style={{ fontSize: 16, fontWeight: 800, color: scoreColor(sc), lineHeight: 1 }}>{sc}</span>
-                            <span style={{ fontSize: 8, color: C.dim, textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                              {sc >= 70 ? "Hot" : sc >= 45 ? "Warm" : "Low"}
-                            </span>
-                          </div>
-                        </td>
-                      );
-                    })()}
-                    {pipeline === "website" && (
-                      <td style={{ padding: "10px 12px", minWidth: 180 }}>
-                        {(() => {
-                          const wm = webQualityMeta(r.website_quality);
-                          return (
-                            <select
-                              value={r.website_quality ?? ""}
-                              onChange={(e) => setWebQuality(r, e.target.value as WebQuality)}
-                              style={{
-                                ...inp, padding: "5px 8px", fontSize: 11, fontWeight: 700, width: "auto",
-                                borderColor: wm?.color ?? C.border, color: wm?.color ?? C.dim,
-                              }}
-                            >
-                              <option value="" style={{ color: "#000" }}>Not assessed</option>
-                              {WEB_QUALITY.map((q) => (
-                                <option key={q.value} value={q.value} style={{ color: "#000" }}>{q.label}</option>
-                              ))}
-                            </select>
-                          );
-                        })()}
-                        <div style={{ display: "flex", gap: 6, marginTop: 6, flexWrap: "wrap" }}>
-                          <button
-                            onClick={() => toggleAudit(r)}
-                            title="Toggle whether a mini website audit has been sent"
-                            style={{
-                              background: r.mini_audit_sent ? C.green : "transparent",
-                              color: r.mini_audit_sent ? "#fff" : C.green,
-                              border: `1px solid ${C.green}`, borderRadius: 999,
-                              padding: "3px 9px", fontSize: 10, fontWeight: 700, cursor: "pointer",
-                            }}
-                          >
-                            {r.mini_audit_sent ? "✓ Audit sent" : "Audit sent?"}
-                          </button>
-                          <button
-                            onClick={() => toggleProposal(r)}
-                            title="Toggle whether a proposal has been sent"
-                            style={{
-                              background: r.proposal_sent ? "#7c3aed" : "transparent",
-                              color: r.proposal_sent ? "#fff" : "#a78bfa",
-                              border: "1px solid #7c3aed", borderRadius: 999,
-                              padding: "3px 9px", fontSize: 10, fontWeight: 700, cursor: "pointer",
-                            }}
-                          >
-                            {r.proposal_sent ? "✓ Proposal sent" : "Proposal sent?"}
-                          </button>
-                        </div>
-                      </td>
-                    )}
                     <td style={{ padding: "10px 12px", color: C.dim, maxWidth: 200 }}>
-
                       {[r.city, r.postcode].filter(Boolean).join(" · ") || r.address || "—"}
                     </td>
                     <td style={{ padding: "10px 12px" }}>
                       {r.rating != null ? `${r.rating} (${r.reviews_count ?? 0})` : "—"}
                     </td>
+                    {pipeline === "website" && (
+                      <td style={{ padding: "10px 12px", minWidth: 170 }}>
+                        <select
+                          value={r.website_status ?? "Not checked"}
+                          onChange={(e) => setWebsiteStatus(r, e.target.value)}
+                          style={{ ...inp, padding: "5px 8px", fontSize: 11, fontWeight: 700, width: "auto" }}
+                        >
+                          {WEBSITE_STATUS_OPTIONS.map((o) => (
+                            <option key={o} value={o} style={{ color: "#000" }}>{o}</option>
+                          ))}
+                        </select>
+                      </td>
+                    )}
+                    {pipeline === "website" && (() => {
+                      const sc = r.website_score ?? webScore(r);
+                      const band = scoreBand(sc);
+                      return (
+                        <td style={{ padding: "10px 12px" }}>
+                          <div
+                            title={`${band.label} opportunity`}
+                            style={{
+                              display: "inline-flex", flexDirection: "column", alignItems: "center", gap: 2,
+                              background: "rgba(255,255,255,0.04)", border: `1px solid ${band.color}`,
+                              borderRadius: 10, padding: "6px 10px", minWidth: 56,
+                            }}
+                          >
+                            <span style={{ fontSize: 16, fontWeight: 800, color: band.color, lineHeight: 1 }}>{sc}</span>
+                            <span style={{ fontSize: 8, color: band.color, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                              {band.label}
+                            </span>
+                          </div>
+                        </td>
+                      );
+                    })()}
                     <td style={{ padding: "10px 12px", minWidth: 160 }}>
                       <select
                         value={r.outreach_stage}
