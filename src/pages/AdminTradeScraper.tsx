@@ -622,6 +622,7 @@ function CallScriptModal({ row, onClose, onLog }: {
   );
 }
 
+export default function AdminTradeScraper() {
   const [rows, setRows] = useState<Scraped[]>([]);
   const [loading, setLoading] = useState(true);
   const [pipeline, setPipeline] = useState<Pipeline>("trade");
