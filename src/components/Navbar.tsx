@@ -15,8 +15,9 @@ const Navbar = () => {
           <a href="/#features" className="font-mono text-sm text-body-text hover:text-teal transition-colors">Features</a>
           <a
             href="/prografter-intelligence"
-            className="font-mono text-sm bg-teal/10 text-teal border border-teal/30 px-4 py-2 rounded-xl hover:bg-teal hover:text-cream transition-colors"
+            className="font-mono text-sm font-bold bg-teal text-cream px-4 py-2 rounded-xl hover:bg-teal-hover transition-colors shadow-lg shadow-teal/25 flex items-center gap-2"
           >
+            <span className="text-lg leading-none">✦</span>
             ProGrafter Intelligence
           </a>
           <a href="/green" className="font-mono text-sm text-body-text hover:text-teal transition-colors">Green Grants</a>
@@ -55,7 +56,10 @@ const Navbar = () => {
           <a href="/#how-it-works" className="font-mono text-sm text-body-text" onClick={() => setMenuOpen(false)}>How It Works</a>
           <a href="/#pricing" className="font-mono text-sm text-body-text" onClick={() => setMenuOpen(false)}>Pricing</a>
           <a href="/#features" className="font-mono text-sm text-body-text" onClick={() => setMenuOpen(false)}>Features</a>
-          <a href="/prografter-intelligence" className="font-mono text-sm text-teal bg-teal/10 border border-teal/30 px-4 py-2 rounded-xl text-center" onClick={() => setMenuOpen(false)}>ProGrafter Intelligence</a>
+          <a href="/prografter-intelligence" className="font-mono text-sm font-bold bg-teal text-cream px-4 py-2 rounded-xl text-center shadow-lg shadow-teal/25 flex items-center justify-center gap-2" onClick={() => setMenuOpen(false)}>
+            <span className="text-lg leading-none">✦</span>
+            ProGrafter Intelligence
+          </a>
           <a href="/green" className="font-mono text-sm text-body-text" onClick={() => setMenuOpen(false)}>Green Grants</a>
           <a href="/login" className="font-mono text-sm text-body-text" onClick={() => setMenuOpen(false)}>Login</a>
           <a href="/signup/trade" className="border border-teal text-teal font-mono text-sm px-5 py-2 rounded-xl text-center" onClick={() => setMenuOpen(false)}>Join as a Trade</a>
