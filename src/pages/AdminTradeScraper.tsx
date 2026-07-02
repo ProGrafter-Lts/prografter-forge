@@ -584,12 +584,13 @@ function buildProposalEmail(r: Scraped, a: AuditState): string {
   ].join("\n");
 }
 
-function AuditBuilderModal({ row, onClose, onSave, onMarkSent, onEmail }: {
+function AuditBuilderModal({ row, onClose, onSave, onMarkSent, onSaveNotes, onMarkProposal }: {
   row: Scraped;
   onClose: () => void;
   onSave: (patch: Partial<Scraped>, text: string) => void;
   onMarkSent: (patch: Partial<Scraped>, text: string) => void;
-  onEmail: (text: string) => void;
+  onSaveNotes: (notes: string) => void;
+  onMarkProposal: (patch: Partial<Scraped>) => void;
 }) {
   const [a, setA] = useState<AuditState>({
     issues: [
