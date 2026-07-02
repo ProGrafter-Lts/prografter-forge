@@ -88,9 +88,11 @@ const btn = (primary = true): React.CSSProperties => ({
 export default function AdminTradeScraper() {
   const [rows, setRows] = useState<Scraped[]>([]);
   const [loading, setLoading] = useState(true);
+  const [pipeline, setPipeline] = useState<Pipeline>("trade");
   const [tradeType, setTradeType] = useState("electricians");
   const [location, setLocation] = useState("Nottingham, Nottinghamshire");
   const [limit, setLimit] = useState(10);
+  const [noWebsiteOnly, setNoWebsiteOnly] = useState(true);
   const [running, setRunning] = useState(false);
   const [filter, setFilter] = useState("");
   const [filterType, setFilterType] = useState("all");
@@ -99,6 +101,7 @@ export default function AdminTradeScraper() {
   const [editing, setEditing] = useState<string | null>(null);
   const [draftNotes, setDraftNotes] = useState("");
   const [draftFollowUp, setDraftFollowUp] = useState("");
+
 
   const load = async () => {
     setLoading(true);
