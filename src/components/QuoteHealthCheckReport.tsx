@@ -144,7 +144,7 @@ const SectionCard = ({
           </button>
         )}
       </div>
-      {(open || !collapsible) && <div className="qr-section2-body">{children}</div>}
+      <div className={`qr-section2-body${collapsible && !open ? " qr-collapsed" : ""}`}>{children}</div>
     </section>
   );
 };
