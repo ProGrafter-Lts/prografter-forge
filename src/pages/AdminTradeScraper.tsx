@@ -1616,6 +1616,18 @@ export default function AdminTradeScraper() {
                               >
                                 {r.proposal_sent ? "✓ Proposal" : "Proposal"}
                               </button>
+                              <button
+                                onClick={() => toggleDoNotCall(r)}
+                                title={r.do_not_call ? "Kept for compliance — click to allow calling again" : "Mark do not call (clears follow-up, keeps record)"}
+                                style={{
+                                  background: r.do_not_call ? "#9CA3AF" : "transparent",
+                                  color: r.do_not_call ? "#111" : "#9CA3AF",
+                                  border: "1px solid #9CA3AF", borderRadius: 8,
+                                  padding: "5px 10px", fontSize: 10, fontWeight: 700, cursor: "pointer",
+                                }}
+                              >
+                                {r.do_not_call ? "✓ Do not call" : "Do not call"}
+                              </button>
                               <button onClick={() => setExpanded(isExpanded ? null : r.id)} style={{ ...btn(false), padding: "5px 10px", fontSize: 10 }}>
                                 {isExpanded ? "Close ▲" : "Details ▾"}
                               </button>
