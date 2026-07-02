@@ -924,12 +924,13 @@ export default function AdminTradeScraper() {
                       </td>
                     )}
                     {pipeline === "website" && (() => {
-                      const sc = r.website_score ?? webScore(r);
+                      const overridden = r.website_score != null;
+                      const sc = overridden ? r.website_score! : webScore(r);
                       const band = scoreBand(sc);
                       return (
                         <td style={{ padding: "10px 12px" }}>
                           <div
-                            title={`${band.label} opportunity`}
+                            title={overridden ? `${band.label} opportunity (manual override — auto ${webScore(r)})` : `${band.label} opportunity (auto)`}
                             style={{
                               display: "inline-flex", flexDirection: "column", alignItems: "center", gap: 2,
                               background: "rgba(255,255,255,0.04)", border: `1px solid ${band.color}`,
@@ -938,7 +939,7 @@ export default function AdminTradeScraper() {
                           >
                             <span style={{ fontSize: 16, fontWeight: 800, color: band.color, lineHeight: 1 }}>{sc}</span>
                             <span style={{ fontSize: 8, color: band.color, textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                              {band.label}
+                              {overridden ? "Manual" : band.label}
                             </span>
                           </div>
                         </td>
