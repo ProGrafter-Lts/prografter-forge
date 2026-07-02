@@ -1014,7 +1014,34 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
+  /* Reveal any on-screen collapsed sections so the PDF is the FULL report */
+  .qr-collapsed {
+    display: block !important;
+  }
+  /* Keep each report section together where possible; avoid mid-card breaks */
+  .qr-section2,
+  .qr-actionplan,
+  .qr-msgcard,
+  .qr-disclaimer,
+  .qr-metric,
+  .qr-qitem,
+  .qr-report tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .qr-section2-title,
+  .qr-actionplan-title {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+  /* Card should not force one giant unbreakable block */
+  .qr-card {
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+  }
   @page {
-    margin: 14mm;
+    margin: 16mm 14mm;
   }
 }
+
