@@ -5,6 +5,8 @@ import { toast } from "@/hooks/use-toast";
 import Logo from "@/components/Logo";
 
 type Stage = "new" | "contacted" | "no_answer" | "follow_up" | "interested" | "not_interested" | "converted";
+type Pipeline = "trade" | "website";
+type WebQuality = "none" | "poor" | "outdated" | "weak_mobile" | "no_form" | "ok";
 
 type Scraped = {
   id: string;
@@ -28,6 +30,12 @@ type Scraped = {
   last_contacted_at: string | null;
   notes: string | null;
   last_scraped_at: string;
+  pipeline: Pipeline;
+  website_quality: WebQuality | null;
+  mini_audit_sent: boolean;
+  mini_audit_sent_at: string | null;
+  proposal_sent: boolean;
+  proposal_sent_at: string | null;
 };
 
 const C = {
@@ -47,7 +55,20 @@ const STAGES: { value: Stage | "all"; label: string; color: string }[] = [
   { value: "converted", label: "Converted", color: "#7c3aed" },
 ];
 
+const WEB_QUALITY: { value: WebQuality; label: string; color: string }[] = [
+  { value: "none", label: "No website", color: C.red },
+  { value: "poor", label: "Poor / weak", color: C.amber },
+  { value: "outdated", label: "Outdated", color: C.amber },
+  { value: "weak_mobile", label: "Weak mobile", color: "#0EA5E9" },
+  { value: "no_form", label: "No enquiry form", color: "#7c3aed" },
+  { value: "ok", label: "Looks OK", color: C.green },
+];
+
+const webQualityMeta = (q: WebQuality | null) =>
+  WEB_QUALITY.find((x) => x.value === q) ?? null;
+
 const stageMeta = (s: Stage) => STAGES.find((x) => x.value === s) ?? STAGES[1];
+
 
 const inp: React.CSSProperties = {
   width: "100%", padding: "9px 12px", borderRadius: 8,
