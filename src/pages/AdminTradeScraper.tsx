@@ -878,28 +878,46 @@ If you're happy, we can get you booked in with a small deposit and start pulling
   ];
 }
 
-function CallScriptModal({ row, onClose, onLog }: {
+function CallScriptModal({ row, onClose, onLog, onBuildAudit }: {
   row: Scraped;
   onClose: () => void;
   onLog: (patch: Partial<Scraped>, label: string) => void;
+  onBuildAudit: () => void;
 }) {
   const scripts = useMemo(() => buildScripts(row), [row]);
   const [active, setActive] = useState(0);
   const current = scripts[active];
+  const [notes, setNotes] = useState(row.notes ?? "");
+  const [followUp, setFollowUp] = useState(row.next_follow_up_date || row.follow_up_at || "");
 
   const logBtns: { label: string; color: string; patch: Partial<Scraped> }[] = [
-    { label: "Log no answer", color: "#3B82F6", patch: { outreach_stage: "no_answer", last_call_outcome: "No answer", contacted: true, call_attempts: (row.call_attempts ?? 0) + 1, last_contacted_at: new Date().toISOString() } },
-    { label: "Log interested", color: C.green, patch: { outreach_stage: "interested", interested: true, last_call_outcome: "Interested", contacted: true, last_contacted_at: new Date().toISOString() } },
-    { label: "Log audit requested", color: "#7c3aed", patch: { outreach_stage: "contacted", last_call_outcome: "Audit requested", contacted: true, last_contacted_at: new Date().toISOString() } },
-    { label: "Log not interested", color: C.red, patch: { outreach_stage: "not_interested", interested: false, last_call_outcome: "Not interested", contacted: true, last_contacted_at: new Date().toISOString() } },
+    { label: "Log no answer", color: "#3B82F6", patch: { outreach_stage: "no_answer", last_call_outcome: "No answer", contacted: true, call_attempts: (row.call_attempts ?? 0) + 1, last_contacted_at: new Date().toISOString(), next_follow_up_date: inDays(2) } },
+    { label: "Log interested", color: C.green, patch: { outreach_stage: "interested", interested: true, last_call_outcome: "Interested", contacted: true, last_contacted_at: new Date().toISOString(), next_follow_up_date: inDays(0) } },
+    { label: "Log audit requested", color: "#7c3aed", patch: { outreach_stage: "contacted", last_call_outcome: "Audit requested", contacted: true, last_contacted_at: new Date().toISOString(), next_follow_up_date: inDays(0) } },
+    { label: "Log not interested", color: C.red, patch: { outreach_stage: "not_interested", interested: false, last_call_outcome: "Not interested", contacted: true, last_contacted_at: new Date().toISOString(), next_follow_up_date: null, follow_up_at: null } },
     { label: "Mark do not call", color: "#9CA3AF", patch: { do_not_call: true, outreach_stage: "not_interested", last_call_outcome: "Do not call", contacted: true, last_contacted_at: new Date().toISOString(), next_follow_up_date: null, follow_up_at: null } },
   ];
 
+  // Merge the quick notes + follow-up date into whatever outcome is logged so
+  // the caller never has to touch the row afterwards.
+  const withExtras = (patch: Partial<Scraped>): Partial<Scraped> => {
+    const extra: Partial<Scraped> = { ...patch };
+    if (notes !== (row.notes ?? "")) extra.notes = notes;
+    // Do-not-call / not-interested explicitly clear the date, so respect that.
+    if (!("do_not_call" in patch) && patch.next_follow_up_date !== null && followUp) {
+      extra.next_follow_up_date = followUp;
+    }
+    return extra;
+  };
+
   return (
     <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100, padding: 16 }}>
-      <div onClick={(e) => e.stopPropagation()} style={{ background: C.deep, border: `1px solid ${C.border}`, borderRadius: 14, width: "100%", maxWidth: 640, maxHeight: "88vh", display: "flex", flexDirection: "column" }}>
+      <div onClick={(e) => e.stopPropagation()} style={{ background: C.deep, border: `1px solid ${C.border}`, borderRadius: 14, width: "100%", maxWidth: 640, maxHeight: "92vh", display: "flex", flexDirection: "column" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 18px", borderBottom: `1px solid ${C.border}` }}>
-          <strong style={{ color: C.bright }}>Call script — {row.trade_name}</strong>
+          <div>
+            <strong style={{ color: C.bright }}>Call script — {row.trade_name}</strong>
+            {row.phone && <div style={{ marginTop: 3 }}><a href={`tel:${row.phone}`} style={{ color: C.teal, fontSize: 13, fontWeight: 700 }}>📞 {row.phone}</a></div>}
+          </div>
           <button onClick={onClose} style={{ background: "transparent", color: C.dim, border: "none", cursor: "pointer", fontSize: 18 }}>×</button>
         </div>
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap", padding: "12px 18px", borderBottom: `1px solid ${C.border}` }}>
@@ -911,11 +929,25 @@ function CallScriptModal({ row, onClose, onLog }: {
             }}>{sc.label}</button>
           ))}
         </div>
-        <pre style={{ margin: 0, padding: 18, overflowY: "auto", whiteSpace: "pre-wrap", color: C.bright, fontSize: 13, lineHeight: 1.55, fontFamily: "inherit", flex: 1 }}>{current.text}</pre>
+        <pre style={{ margin: 0, padding: 18, overflowY: "auto", whiteSpace: "pre-wrap", color: C.bright, fontSize: 13, lineHeight: 1.55, fontFamily: "inherit", flex: 1, minHeight: 120 }}>{current.text}</pre>
+
+        {/* Quick capture: notes + follow-up without leaving the call */}
+        <div style={{ padding: "12px 18px", borderTop: `1px solid ${C.border}`, display: "grid", gap: 10 }}>
+          <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+            <label style={{ fontSize: 11, color: C.dim, fontWeight: 700 }}>Follow-up:</label>
+            <input type="date" value={followUp ?? ""} onChange={(e) => setFollowUp(e.target.value)} style={{ ...inp, padding: "5px 8px", fontSize: 11, width: "auto" }} />
+            {([["Today", 0], ["+2d", 2], ["+3d", 3], ["+7d", 7]] as [string, number][]).map(([lbl, d]) => (
+              <button key={lbl} onClick={() => setFollowUp(inDays(d))} style={{ ...btn(false), padding: "4px 9px", fontSize: 10 }}>{lbl}</button>
+            ))}
+          </div>
+          <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} placeholder="Quick call notes…" style={{ ...inp, fontSize: 12 }} />
+        </div>
+
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap", padding: "12px 18px", borderTop: `1px solid ${C.border}` }}>
           <button onClick={() => copyToClipboard(current.text)} style={{ ...btn(true), padding: "7px 14px", fontSize: 12 }}>Copy script</button>
+          <button onClick={onBuildAudit} style={{ background: "transparent", color: "#7c3aed", border: "1px solid #7c3aed", borderRadius: 8, padding: "7px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>Build audit →</button>
           {logBtns.map((b) => (
-            <button key={b.label} onClick={() => onLog(b.patch, b.label)} style={{
+            <button key={b.label} onClick={() => onLog(withExtras(b.patch), b.label)} style={{
               background: "transparent", color: b.color, border: `1px solid ${b.color}`,
               borderRadius: 8, padding: "7px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer",
             }}>{b.label}</button>
@@ -925,6 +957,7 @@ function CallScriptModal({ row, onClose, onLog }: {
     </div>
   );
 }
+
 
 function SummaryCards({ rows }: { rows: Scraped[] }) {
   const total = rows.length;
@@ -1742,6 +1775,7 @@ export default function AdminTradeScraper() {
         <CallScriptModal
           row={callLead}
           onClose={() => setCallLead(null)}
+          onBuildAudit={() => { setAuditLead(callLead); setCallLead(null); }}
           onLog={async (patch, label) => {
             await updateRow(callLead.id, patch);
             setCallLead((prev) => (prev ? { ...prev, ...patch } as Scraped : prev));
