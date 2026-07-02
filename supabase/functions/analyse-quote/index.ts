@@ -262,7 +262,7 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify({
         model: "claude-sonnet-4-5-20250929",
-        max_tokens: 8000,
+        max_tokens: 20000,
         temperature: 0,
         messages: [{ role: "user", content: [contentBlock, { type: "text", text: prompt }] }],
       }),
