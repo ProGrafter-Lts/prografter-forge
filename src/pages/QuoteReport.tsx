@@ -461,7 +461,7 @@ const QuoteReport = () => {
           noindex
         />
         <div className="pt-24 pb-16 px-6">
-          <div className="max-w-2xl mx-auto qr-print-area">>
+          <div className="max-w-2xl mx-auto qr-print-area">
             <div className="text-center mb-8">
               <div className="inline-flex items-center gap-2 bg-teal/10 text-teal font-mono text-xs px-3 py-1.5 rounded-full mb-4">
                 <ShieldCheck className="h-3.5 w-3.5" />
