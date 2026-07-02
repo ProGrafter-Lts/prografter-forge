@@ -212,17 +212,39 @@ const QuoteReport = () => {
       );
     }
 
+    // Report exists but this page couldn't render it immediately — give the
+    // user a reliable way to open it from their dashboard.
+    if (readyElsewhere && !report) {
+      return (
+        <div className="text-center py-16 space-y-5">
+          <ShieldCheck className="mx-auto h-10 w-10 text-teal" />
+          <h2 className="font-heading text-2xl text-navy">Your report is ready</h2>
+          <p className="font-mono text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
+            Your Quote Health Check has finished. Open it from your dashboard.
+          </p>
+          <Link
+            to={`/dashboard/quote-checks/${id ?? ""}`}
+            className="inline-flex items-center gap-2 bg-teal text-white font-mono text-sm px-5 py-2.5 rounded-xl hover:bg-teal-hover transition-colors shadow-sm no-underline"
+          >
+            Open Report
+          </Link>
+        </div>
+      );
+    }
+
     if (!report) {
       return (
         <div className="text-center py-16 space-y-4">
           <Loader2 className="mx-auto h-10 w-10 text-teal animate-spin" />
-          <h2 className="font-heading text-2xl text-navy">Reviewing your quote…</h2>
+          <h2 className="font-heading text-2xl text-navy">Preparing your Quote Health Check…</h2>
           <p className="font-mono text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
-            This usually takes around 60 seconds.
+            Your Quote Health Check is being prepared. This usually takes a few minutes.
           </p>
         </div>
       );
     }
+
+
 
     if (report.error) {
       return (
