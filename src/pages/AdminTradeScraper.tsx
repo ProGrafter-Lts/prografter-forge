@@ -912,6 +912,65 @@ export default function AdminTradeScraper() {
 
       </div>
 
+      {pipeline === "website" && (
+        <div style={{ display: "flex", gap: 10, marginBottom: 12, flexWrap: "wrap", alignItems: "center" }}>
+          <select value={webStatusFilter} onChange={(e) => setWebStatusFilter(e.target.value)} style={{ ...inp, maxWidth: 190 }}>
+            <option value="all" style={{ color: "#000" }}>All website statuses</option>
+            {WEBSITE_STATUS_OPTIONS.map((o) => <option key={o} value={o} style={{ color: "#000" }}>{o}</option>)}
+          </select>
+          <select value={webScoreFilter} onChange={(e) => setWebScoreFilter(e.target.value)} style={{ ...inp, maxWidth: 150 }}>
+            <option value="all" style={{ color: "#000" }}>Any score</option>
+            <option value="80" style={{ color: "#000" }}>80+ only</option>
+            <option value="60" style={{ color: "#000" }}>60+ only</option>
+            <option value="40" style={{ color: "#000" }}>40+ only</option>
+            <option value="below40" style={{ color: "#000" }}>Below 40</option>
+          </select>
+          <select value={webHasSite} onChange={(e) => setWebHasSite(e.target.value)} style={{ ...inp, maxWidth: 150 }}>
+            <option value="all" style={{ color: "#000" }}>Site: any</option>
+            <option value="has" style={{ color: "#000" }}>Has website</option>
+            <option value="no" style={{ color: "#000" }}>No website</option>
+          </select>
+          <select value={webAuditSent} onChange={(e) => setWebAuditSent(e.target.value)} style={{ ...inp, maxWidth: 150 }}>
+            <option value="all" style={{ color: "#000" }}>Audit: any</option>
+            <option value="yes" style={{ color: "#000" }}>Audit sent</option>
+            <option value="no" style={{ color: "#000" }}>Audit not sent</option>
+          </select>
+          <select value={webProposalSent} onChange={(e) => setWebProposalSent(e.target.value)} style={{ ...inp, maxWidth: 160 }}>
+            <option value="all" style={{ color: "#000" }}>Proposal: any</option>
+            <option value="yes" style={{ color: "#000" }}>Proposal sent</option>
+            <option value="no" style={{ color: "#000" }}>Proposal not sent</option>
+          </select>
+          <button
+            onClick={() => setWebFollowUp((p) => (p === "today" ? "all" : "today"))}
+            style={{
+              background: webFollowUp === "today" ? C.amber : "transparent",
+              color: webFollowUp === "today" ? "#fff" : C.amber,
+              border: `1px solid ${C.amber}`, borderRadius: 999, padding: "6px 14px",
+              fontSize: 12, fontWeight: 700, cursor: "pointer",
+            }}
+          >
+            📅 Today's follow-ups {pipelineRows.filter(isFollowUpToday).length ? `(${pipelineRows.filter(isFollowUpToday).length})` : ""}
+          </button>
+          <button
+            onClick={() => setWebFollowUp((p) => (p === "overdue" ? "all" : "overdue"))}
+            style={{
+              background: webFollowUp === "overdue" ? C.red : "transparent",
+              color: webFollowUp === "overdue" ? "#fff" : C.red,
+              border: `1px solid ${C.red}`, borderRadius: 999, padding: "6px 14px",
+              fontSize: 12, fontWeight: 700, cursor: "pointer",
+            }}
+          >
+            ⏰ Overdue follow-ups {pipelineRows.filter(isFollowUpOverdue).length ? `(${pipelineRows.filter(isFollowUpOverdue).length})` : ""}
+          </button>
+          <label style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color: C.dim, cursor: "pointer" }}>
+            <input type="checkbox" checked={hideDoNotCall} onChange={(e) => setHideDoNotCall(e.target.checked)} />
+            Hide do-not-call
+          </label>
+        </div>
+      )}
+
+
+
       {loading ? (
         <div style={{ color: C.dim, padding: 40, textAlign: "center" }}>Loading…</div>
       ) : (
