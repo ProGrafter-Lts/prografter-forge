@@ -80,6 +80,15 @@ OUTPUT — return ONLY a single valid JSON object. No markdown, no code fences, 
   "report_html": string
 }
 
+LANGUAGE — write for a homeowner. Use plain English. Avoid jargon; where a technical term is unavoidable, explain it in everyday words. For example, do NOT write "domestic reverse charge applies"; instead write "confirm whether VAT is included, excluded, or not applicable". Keep the tone professional, calm, practical and protective — never alarmist and never accusing the builder. Prefer safe wording: "not stated", "needs confirming", "appears unclear", "should be requested before accepting", "may affect the final cost", "could lead to misunderstanding".
+
+what_to_do_next — 3 to 6 short, practical, homeowner-friendly action steps (imperatives) derived from the actual findings, ordered by importance. Example: "Ask the builder to confirm whether VAT is included or excluded." Do not include monetary figures.
+
+questions_list — a flat list of 5 to 12 clear, homeowner-friendly questions to ask the builder, drawn from the findings. Avoid technical phrasing. Example: "Can you confirm whether VAT is included, excluded, or not applicable?" These must mirror the questions in report_html but as plain strings.
+
+builder_message — a single polite, professional message the homeowner can copy and send to the builder to clarify the quote. Open with a thank-you, then a short numbered list of the specific points to confirm (only those relevant to THIS quote's findings — e.g. include VAT if VAT is unclear, payment stages if missing, start/completion timing if missing, exclusions if unclear, certificates/warranties if relevant), and close by politely asking for a revised quote showing these details clearly. Use \n for line breaks.
+
+
 report_html — clean semantic HTML using ONLY these classes. No inline styles, scripts, or <html>/<body> wrappers — inner body markup only. Produce these sections in order:
 
 <section class="qr-section qr-figures"><h2>Figures</h2><ul><li><strong>Subtotal:</strong> …</li><li><strong>VAT:</strong> …</li><li><strong>Total:</strong> …</li></ul></section>
