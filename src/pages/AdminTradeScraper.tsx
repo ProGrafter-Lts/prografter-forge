@@ -480,6 +480,148 @@ async function copyToClipboard(text: string) {
   }
 }
 
+// Dynamic phone scripts, personalised with the lead's live data.
+type ScriptDef = { key: string; label: string; text: string };
+function buildScripts(r: Scraped): ScriptDef[] {
+  const biz = r.trade_name || "the business";
+  const type = r.trade_type || "local trade";
+  const status = r.website_status || (r.has_website ? "Has a website" : "No website found");
+  const rating = r.rating ? `${r.rating}★ (${r.reviews_count ?? 0} reviews)` : "no rating recorded";
+  const issue = r.main_website_issue || r.website_status || "the website doesn't reflect the quality of the business";
+  const angle = r.opportunity_angle || "strong reviews but a weak online presence — enquiries are being lost";
+  const name = r.contact_name || "there";
+  const pkg = r.package_recommended && r.package_recommended !== "Not selected" ? r.package_recommended : "Starter";
+  const amount = r.quoted_value ? `${r.quoted_value}` : "[amount]";
+
+  const context =
+    `— LEAD SNAPSHOT —\n` +
+    `Business: ${biz}\n` +
+    `Type: ${type}\n` +
+    `Website status: ${status}\n` +
+    `Google rating: ${rating}\n` +
+    `Main issue: ${issue}\n` +
+    `Opportunity angle: ${angle}\n\n`;
+
+  const s = (body: string) => context + body;
+
+  return [
+    { key: "no_website", label: "1. First call — no website", text: s(
+`"Hi, is that ${biz}?
+
+My name's [caller name]. I'll be quick — I noticed you've got good reviews online, but I couldn't see a proper website for the business.
+
+We help local businesses get a clean, modern website set up so customers can see your work, services, reviews and send enquiries easily.
+
+I'm not ringing to pressure you into anything today. We're offering a quick free website opportunity review for a few local businesses. Would it be okay if I sent you a short example of what could be improved or built for you?"`) },
+    { key: "poor_website", label: "2. First call — poor website", text: s(
+`"Hi, is that ${biz}?
+
+My name's [caller name]. I'll be quick — I came across your business online and noticed you've got some good reviews, but your website doesn't really show the business as well as it could.
+
+We help local businesses modernise their websites so they look more professional, work better on mobile, and make it easier for customers to enquire.
+
+We're doing a few free mini website reviews for local businesses. It's not a sales pitch — just a quick visual review showing what could be improved. Would you be open to me sending one over?"`) },
+    { key: "facebook_only", label: "3. First call — Facebook only", text: s(
+`"That makes sense, a lot of local businesses do really well from Facebook.
+
+The only issue is that some customers still Google the business before they enquire, especially for higher-value jobs.
+
+A website gives them somewhere clear to see your services, reviews, photos and contact details without having to scroll through posts. It doesn't replace Facebook — it supports it."`) },
+    { key: "price", label: "4. If they ask price", text: s(
+`"It depends on what you need. A simple professional site usually starts from around £495 to £795, and a more complete multi-page site is usually around £995 to £1,495.
+
+But the first step would just be sending you the free review so you can see whether it's worth looking at."`) },
+    { key: "use_facebook", label: "5. If they say they use Facebook", text: s(
+`"That makes sense, a lot of local businesses do really well from Facebook.
+
+The only issue is that some customers still Google the business before they enquire, especially for higher-value jobs.
+
+A website gives them somewhere clear to see your services, reviews, photos and contact details without having to scroll through posts. It doesn't replace Facebook — it supports it."`) },
+    { key: "too_busy", label: "6. If they say they are too busy", text: s(
+`"That's usually a good sign.
+
+The reason it might still be worth looking at is that a better website can help bring in better enquiries, not just more enquiries.
+
+It can show the type of work you actually want, filter out time-wasters, and make the business look more professional when people check you out."`) },
+    { key: "defensive", label: "7. If they are defensive", text: s(
+`"That's completely fair. A lot of businesses are happy enough with what they have.
+
+The only reason I called is because sometimes a business can have great reviews and do really good work, but the website doesn't quite show that to new customers.
+
+I'm happy to send a quick review over, and if it's not useful, no problem at all."`) },
+    { key: "send_over", label: "8. Send something over", text: s(
+`"Great. I'll send a short review across.
+
+It'll show what we noticed, what could be improved, and a rough idea of what a better version could include.
+
+What's the best email or WhatsApp number for that?
+
+And who should I put it for?"`) },
+    { key: "follow_up", label: "9. Follow-up after audit", text: s(
+`"Hi ${name}, it's [caller name]. I sent over the website review for ${biz} a couple of days ago.
+
+I just wanted to check you'd received it and see whether it made sense.
+
+The main thing we noticed was ${issue}, and I think there's a good opportunity to make the business look more professional online."`) },
+    { key: "closing", label: "10. Closing call", text: s(
+`"Based on what you need, I think the best fit is the ${pkg} package.
+
+That would include [key features], and the price would be £${amount}.
+
+We can usually turn the first version around quite quickly once we've got the photos, business details and service list.
+
+If you're happy, we can get you booked in with a small deposit and start pulling the content together."`) },
+  ];
+}
+
+function CallScriptModal({ row, onClose, onLog }: {
+  row: Scraped;
+  onClose: () => void;
+  onLog: (patch: Partial<Scraped>, label: string) => void;
+}) {
+  const scripts = useMemo(() => buildScripts(row), [row]);
+  const [active, setActive] = useState(0);
+  const current = scripts[active];
+
+  const logBtns: { label: string; color: string; patch: Partial<Scraped> }[] = [
+    { label: "Log no answer", color: "#3B82F6", patch: { outreach_stage: "no_answer", last_call_outcome: "No answer", contacted: true, call_attempts: (row.call_attempts ?? 0) + 1, last_contacted_at: new Date().toISOString() } },
+    { label: "Log interested", color: C.green, patch: { outreach_stage: "interested", interested: true, last_call_outcome: "Interested", contacted: true, last_contacted_at: new Date().toISOString() } },
+    { label: "Log audit requested", color: "#7c3aed", patch: { outreach_stage: "contacted", last_call_outcome: "Audit requested", contacted: true, last_contacted_at: new Date().toISOString() } },
+    { label: "Log not interested", color: C.red, patch: { outreach_stage: "not_interested", interested: false, last_call_outcome: "Not interested", contacted: true, last_contacted_at: new Date().toISOString() } },
+    { label: "Mark do not call", color: "#9CA3AF", patch: { do_not_call: true, outreach_stage: "not_interested", last_call_outcome: "Do not call", contacted: true, last_contacted_at: new Date().toISOString() } },
+  ];
+
+  return (
+    <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100, padding: 16 }}>
+      <div onClick={(e) => e.stopPropagation()} style={{ background: C.deep, border: `1px solid ${C.border}`, borderRadius: 14, width: "100%", maxWidth: 640, maxHeight: "88vh", display: "flex", flexDirection: "column" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 18px", borderBottom: `1px solid ${C.border}` }}>
+          <strong style={{ color: C.bright }}>Call script — {row.trade_name}</strong>
+          <button onClick={onClose} style={{ background: "transparent", color: C.dim, border: "none", cursor: "pointer", fontSize: 18 }}>×</button>
+        </div>
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", padding: "12px 18px", borderBottom: `1px solid ${C.border}` }}>
+          {scripts.map((sc, i) => (
+            <button key={sc.key} onClick={() => setActive(i)} style={{
+              background: i === active ? C.teal : "transparent",
+              color: i === active ? "#fff" : C.teal,
+              border: `1px solid ${C.teal}`, borderRadius: 999, padding: "5px 11px", fontSize: 11, fontWeight: 700, cursor: "pointer",
+            }}>{sc.label}</button>
+          ))}
+        </div>
+        <pre style={{ margin: 0, padding: 18, overflowY: "auto", whiteSpace: "pre-wrap", color: C.bright, fontSize: 13, lineHeight: 1.55, fontFamily: "inherit", flex: 1 }}>{current.text}</pre>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", padding: "12px 18px", borderTop: `1px solid ${C.border}` }}>
+          <button onClick={() => copyToClipboard(current.text)} style={{ ...btn(true), padding: "7px 14px", fontSize: 12 }}>Copy script</button>
+          {logBtns.map((b) => (
+            <button key={b.label} onClick={() => onLog(b.patch, b.label)} style={{
+              background: "transparent", color: b.color, border: `1px solid ${b.color}`,
+              borderRadius: 8, padding: "7px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer",
+            }}>{b.label}</button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminTradeScraper() {
   const [rows, setRows] = useState<Scraped[]>([]);
   const [loading, setLoading] = useState(true);
@@ -506,6 +648,7 @@ export default function AdminTradeScraper() {
   const [draftNotes, setDraftNotes] = useState("");
   const [draftFollowUp, setDraftFollowUp] = useState("");
   const [modal, setModal] = useState<{ title: string; text: string } | null>(null);
+  const [callLead, setCallLead] = useState<Scraped | null>(null);
 
 
   const load = async () => {
@@ -1108,7 +1251,7 @@ export default function AdminTradeScraper() {
                           <button onClick={() => beginEdit(r)} style={{ ...btn(false), padding: "5px 10px", fontSize: 10 }}>Edit</button>
                           {pipeline === "website" && (
                             <>
-                              <button onClick={() => setModal({ title: `Call script — ${r.trade_name}`, text: buildCallScript(r) })} style={{ ...btn(false), padding: "5px 10px", fontSize: 10 }}>Call script</button>
+                              <button onClick={() => setCallLead(r)} style={{ ...btn(false), padding: "5px 10px", fontSize: 10 }}>Call script</button>
                               <button onClick={() => setModal({ title: `Website audit — ${r.trade_name}`, text: buildAuditText(r) })} style={{ ...btn(false), padding: "5px 10px", fontSize: 10 }}>Build audit</button>
                               <button
                                 onClick={() => toggleAudit(r)}
@@ -1166,6 +1309,18 @@ export default function AdminTradeScraper() {
             </tbody>
           </table>
         </div>
+      )}
+
+      {callLead && (
+        <CallScriptModal
+          row={callLead}
+          onClose={() => setCallLead(null)}
+          onLog={async (patch, label) => {
+            await updateRow(callLead.id, patch);
+            setCallLead((prev) => (prev ? { ...prev, ...patch } as Scraped : prev));
+            toast({ title: label });
+          }}
+        />
       )}
 
       {modal && (
