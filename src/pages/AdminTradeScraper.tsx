@@ -480,6 +480,181 @@ async function copyToClipboard(text: string) {
   }
 }
 
+// ---- Mini-audit builder ----
+const AUDIT_ISSUES = [
+  "No website found",
+  "Facebook only",
+  "Outdated design",
+  "Poor mobile experience",
+  "No enquiry form",
+  "Weak call-to-action",
+  "No visible reviews",
+  "No gallery/case studies",
+  "Poor service descriptions",
+  "No local area targeting",
+  "Slow/confusing layout",
+  "Weak trust signals",
+  "No clear contact journey",
+];
+
+type AuditState = {
+  issues: string[];
+  looksGood: string;
+  mainIssue: string;
+  improvements: string;
+  suggestedPackage: string;
+  suggestedPrice: string;
+  carePlan: string;
+};
+
+function buildMiniAudit(r: Scraped, a: AuditState): string {
+  const rating = r.rating
+    ? `${r.rating}★ (${r.reviews_count ?? 0} reviews)`
+    : "No Google rating found";
+  const good = a.looksGood.trim()
+    ? a.looksGood.split("\n").map((l) => `- ${l.replace(/^-\s*/, "").trim()}`).filter((l) => l !== "-")
+    : ["Strong local presence", "Good reviews", "Clear service offering", "Existing photos or examples if available"];
+  const holdingBack = a.issues.length
+    ? a.issues.map((i) => `- ${i}`)
+    : ["- Website does not reflect the quality of the business"];
+  const improvements = a.improvements.trim()
+    ? a.improvements.split("\n").map((l) => `- ${l.replace(/^-\s*/, "").trim()}`).filter((l) => l !== "-")
+    : [
+        "Cleaner modern homepage",
+        "Clear service sections",
+        "Click-to-call button",
+        "Enquiry form",
+        "Gallery or case studies",
+        "Reviews/testimonials section",
+        "Local area/service wording",
+        "Stronger trust signals",
+        "Mobile-first layout",
+      ];
+  const pkg = a.suggestedPackage.trim() || r.package_recommended || "Starter or Growth Site";
+  const price = a.suggestedPrice.trim() || (r.quoted_value ? `${r.quoted_value}` : "TBC");
+  const care = a.carePlan.trim() || "From £49/month";
+
+  return [
+    "Website Mini-Audit",
+    "",
+    `Business: ${r.trade_name}`,
+    `Current website: ${r.website || "No website found"}`,
+    `Google rating: ${rating}`,
+    `Main opportunity: ${a.mainIssue.trim() || r.opportunity_angle || "Strong reviews but weak online presence — enquiries are being lost."}`,
+    "",
+    "What looks good:",
+    ...good,
+    "",
+    "What is holding the business back:",
+    ...holdingBack,
+    "",
+    "What we would improve:",
+    ...improvements,
+    "",
+    "Suggested package:",
+    `${pkg} — £${price}`,
+    "",
+    "Optional care plan:",
+    care,
+    "",
+    "Summary:",
+    "You already look like a good business. The website just needs to show that faster and more clearly.",
+  ].join("\n");
+}
+
+function buildAuditEmail(r: Scraped, auditText: string): string {
+  const name = r.contact_name || "there";
+  return [
+    `Subject: Quick website review for ${r.trade_name}`,
+    "",
+    `Hi ${name},`,
+    "",
+    `Thanks for your time — as promised, here's a short website mini-audit for ${r.trade_name}.`,
+    "",
+    auditText,
+    "",
+    "No obligation at all — happy to talk it through whenever suits you.",
+    "",
+    "Best regards,",
+    "The ProGrafter Team",
+  ].join("\n");
+}
+
+function AuditBuilderModal({ row, onClose, onSave, onMarkSent, onEmail }: {
+  row: Scraped;
+  onClose: () => void;
+  onSave: (patch: Partial<Scraped>, text: string) => void;
+  onMarkSent: (patch: Partial<Scraped>, text: string) => void;
+  onEmail: (text: string) => void;
+}) {
+  const [a, setA] = useState<AuditState>({
+    issues: [
+      ...(!row.has_website || row.website_status === "No website found" ? ["No website found"] : []),
+      ...(row.main_website_issue && AUDIT_ISSUES.includes(row.main_website_issue) ? [row.main_website_issue] : []),
+    ].filter((v, i, arr) => arr.indexOf(v) === i),
+    looksGood: "",
+    mainIssue: row.opportunity_angle ?? "",
+    improvements: "",
+    suggestedPackage: row.package_recommended ?? "",
+    suggestedPrice: row.quoted_value ? String(row.quoted_value) : "",
+    carePlan: row.monthly_care_price ? `£${row.monthly_care_price}/month` : "",
+  });
+  const text = useMemo(() => buildMiniAudit(row, a), [row, a]);
+  const toggleIssue = (i: string) =>
+    setA((p) => ({ ...p, issues: p.issues.includes(i) ? p.issues.filter((x) => x !== i) : [...p.issues, i] }));
+  const patch = (): Partial<Scraped> => ({
+    audit_notes: text,
+    main_website_issue: a.issues[0] ?? row.main_website_issue,
+    opportunity_angle: a.mainIssue.trim() || row.opportunity_angle,
+    package_recommended: a.suggestedPackage.trim() || row.package_recommended,
+    quoted_value: a.suggestedPrice.trim() ? Number(a.suggestedPrice.replace(/[^\d.]/g, "")) || row.quoted_value : row.quoted_value,
+  });
+
+  const fieldWrap: React.CSSProperties = { display: "flex", flexDirection: "column", gap: 4, marginBottom: 10 };
+  const lbl: React.CSSProperties = { fontSize: 11, fontWeight: 700, color: C.dim };
+  const fi: React.CSSProperties = { ...smallInp };
+
+  return (
+    <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100, padding: 16 }}>
+      <div onClick={(e) => e.stopPropagation()} style={{ background: C.deep, border: `1px solid ${C.border}`, borderRadius: 14, width: "100%", maxWidth: 760, maxHeight: "90vh", display: "flex", flexDirection: "column" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 18px", borderBottom: `1px solid ${C.border}` }}>
+          <strong style={{ color: C.bright }}>Build mini-audit — {row.trade_name}</strong>
+          <button onClick={onClose} style={{ background: "transparent", color: C.dim, border: "none", cursor: "pointer", fontSize: 18 }}>×</button>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, padding: 18, overflowY: "auto", flex: 1 }}>
+          <div>
+            <div style={{ fontSize: 12, fontWeight: 800, color: C.bright, marginBottom: 8 }}>Website issues</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 14 }}>
+              {AUDIT_ISSUES.map((i) => (
+                <label key={i} style={{ display: "flex", gap: 8, alignItems: "center", fontSize: 12, color: C.bright, cursor: "pointer" }}>
+                  <input type="checkbox" checked={a.issues.includes(i)} onChange={() => toggleIssue(i)} />
+                  {i}
+                </label>
+              ))}
+            </div>
+            <div style={fieldWrap}><span style={lbl}>What looks good (one per line)</span><textarea rows={3} value={a.looksGood} onChange={(e) => setA((p) => ({ ...p, looksGood: e.target.value }))} style={fi} /></div>
+            <div style={fieldWrap}><span style={lbl}>Main issue / opportunity</span><textarea rows={2} value={a.mainIssue} onChange={(e) => setA((p) => ({ ...p, mainIssue: e.target.value }))} style={fi} /></div>
+            <div style={fieldWrap}><span style={lbl}>Recommended improvements (one per line)</span><textarea rows={3} value={a.improvements} onChange={(e) => setA((p) => ({ ...p, improvements: e.target.value }))} style={fi} /></div>
+            <div style={fieldWrap}><span style={lbl}>Suggested package</span><input value={a.suggestedPackage} onChange={(e) => setA((p) => ({ ...p, suggestedPackage: e.target.value }))} placeholder="e.g. Growth Site" style={fi} /></div>
+            <div style={fieldWrap}><span style={lbl}>Suggested price (£)</span><input value={a.suggestedPrice} onChange={(e) => setA((p) => ({ ...p, suggestedPrice: e.target.value }))} placeholder="e.g. 795" style={fi} /></div>
+            <div style={fieldWrap}><span style={lbl}>Optional monthly care plan</span><input value={a.carePlan} onChange={(e) => setA((p) => ({ ...p, carePlan: e.target.value }))} placeholder="From £49/month" style={fi} /></div>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <div style={{ fontSize: 12, fontWeight: 800, color: C.bright, marginBottom: 8 }}>Preview</div>
+            <pre style={{ margin: 0, padding: 14, background: "rgba(0,0,0,0.25)", borderRadius: 10, whiteSpace: "pre-wrap", color: C.bright, fontSize: 12, lineHeight: 1.5, fontFamily: "inherit", flex: 1, overflowY: "auto" }}>{text}</pre>
+          </div>
+        </div>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", padding: "12px 18px", borderTop: `1px solid ${C.border}` }}>
+          <button onClick={() => copyToClipboard(text)} style={{ ...btn(true), padding: "7px 14px", fontSize: 12 }}>Copy audit</button>
+          <button onClick={() => onSave(patch(), text)} style={{ ...btn(false), padding: "7px 14px", fontSize: 12 }}>Save audit to lead</button>
+          <button onClick={() => onMarkSent({ ...patch(), mini_audit_sent: true, mini_audit_sent_at: new Date().toISOString() }, text)} style={{ background: "transparent", color: C.green, border: `1px solid ${C.green}`, borderRadius: 8, padding: "7px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>Mark audit sent</button>
+          <button onClick={() => onEmail(buildAuditEmail(row, text))} style={{ background: "transparent", color: C.teal, border: `1px solid ${C.teal}`, borderRadius: 8, padding: "7px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>Generate email</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Dynamic phone scripts, personalised with the lead's live data.
 type ScriptDef = { key: string; label: string; text: string };
 function buildScripts(r: Scraped): ScriptDef[] {
