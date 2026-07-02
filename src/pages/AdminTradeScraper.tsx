@@ -73,6 +73,66 @@ const WEBSITE_STATUS_OPTIONS = [
   "Decent website", "Strong website", "Not suitable",
 ];
 const PACKAGE_OPTIONS = ["Not selected", "Starter Site", "Growth Site", "Monthly Care Only", "Custom"];
+
+type PackagePreset = {
+  name: string;
+  priceRange: string;
+  defaultPrice: number;
+  isCare?: boolean;
+  includes: string[];
+};
+
+const PACKAGE_PRESETS: PackagePreset[] = [
+  {
+    name: "Starter Site",
+    priceRange: "£495–£795",
+    defaultPrice: 795,
+    includes: [
+      "One-page professional website",
+      "Mobile-friendly design",
+      "Services section",
+      "About section",
+      "Gallery",
+      "Reviews/testimonials section",
+      "Contact form",
+      "Click-to-call button",
+      "Google Maps/location section",
+      "Basic local SEO setup",
+    ],
+  },
+  {
+    name: "Growth Site",
+    priceRange: "£995–£1,495",
+    defaultPrice: 1495,
+    includes: [
+      "4–6 page website",
+      "Home page",
+      "About page",
+      "Services pages",
+      "Gallery/case studies",
+      "Reviews section",
+      "Enquiry form",
+      "Booking or availability option",
+      "Local SEO page structure",
+      "Analytics/Search Console setup",
+      "Basic content rewrite",
+    ],
+  },
+  {
+    name: "Monthly Care",
+    priceRange: "£49–£99/month",
+    defaultPrice: 49,
+    isCare: true,
+    includes: [
+      "Small text changes",
+      "Add new photos",
+      "Add testimonials",
+      "Basic form checks",
+      "Monthly updates depending on plan",
+      "Local SEO tweaks depending on plan",
+    ],
+  },
+];
 const MONTHLY_CARE_INTEREST_OPTIONS = ["Not discussed", "Yes", "Maybe", "No"];
 const PREFERRED_CONTACT_OPTIONS = ["Unknown", "Phone", "Email", "WhatsApp", "Text"];
 const CALL_OUTCOME_OPTIONS = [
