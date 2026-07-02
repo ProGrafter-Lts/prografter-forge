@@ -275,6 +275,9 @@ Deno.serve(async (req) => {
 
     const aiResult = await aiResponse.json();
     const rawText = aiResult.content?.[0]?.text || "";
+    if (aiResult.stop_reason === "max_tokens") {
+      console.warn("analyse-quote: model output hit max_tokens; attempting repair");
+    }
 
     let jsonText = rawText.trim();
     if (jsonText.startsWith("```")) {
@@ -282,18 +285,49 @@ Deno.serve(async (req) => {
     }
     const first = jsonText.indexOf("{");
     const last = jsonText.lastIndexOf("}");
-    if (first !== -1 && last !== -1) jsonText = jsonText.slice(first, last + 1);
+    if (first !== -1 && last !== -1 && last > first) jsonText = jsonText.slice(first, last + 1);
+    else if (first !== -1) jsonText = jsonText.slice(first);
+
+    // Attempt to repair JSON truncated by the token limit: close any open
+    // string, then balance any unclosed brackets/braces.
+    const repairTruncatedJson = (s: string): string => {
+      let inStr = false;
+      let esc = false;
+      const stack: string[] = [];
+      for (let i = 0; i < s.length; i++) {
+        const c = s[i];
+        if (inStr) {
+          if (esc) esc = false;
+          else if (c === "\\") esc = true;
+          else if (c === '"') inStr = false;
+          continue;
+        }
+        if (c === '"') inStr = true;
+        else if (c === "{" || c === "[") stack.push(c);
+        else if (c === "}" || c === "]") stack.pop();
+      }
+      let out = s;
+      if (inStr) out += '"';
+      for (let i = stack.length - 1; i >= 0; i--) {
+        out += stack[i] === "{" ? "}" : "]";
+      }
+      return out;
+    };
 
     let reportJson: any;
     try {
       reportJson = JSON.parse(jsonText);
-    } catch (e) {
-      console.error("analyse-quote: failed to parse model JSON", e, rawText.slice(0, 500));
-      await supabase.from("quote_checks").update({ status: "error" }).eq("id", quoteCheckId);
-      return new Response(JSON.stringify({ error: "The analysis could not be formatted. Please try again." }), {
-        status: 502,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    } catch (_e1) {
+      try {
+        reportJson = JSON.parse(repairTruncatedJson(jsonText));
+      } catch (e) {
+        console.error("analyse-quote: failed to parse model JSON", e, rawText.slice(0, 500));
+        await supabase.from("quote_checks").update({ status: "error" }).eq("id", quoteCheckId);
+        return new Response(JSON.stringify({ error: "The analysis could not be formatted. Please try again." }), {
+          status: 502,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
     }
 
     const isErrorReport = reportJson && typeof reportJson === "object" && "error" in reportJson;
