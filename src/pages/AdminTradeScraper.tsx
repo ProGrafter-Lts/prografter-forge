@@ -1499,6 +1499,27 @@ export default function AdminTradeScraper() {
         />
       )}
 
+      {auditLead && (
+        <AuditBuilderModal
+          row={auditLead}
+          onClose={() => setAuditLead(null)}
+          onSave={async (patch, _text) => {
+            await updateRow(auditLead.id, patch);
+            setAuditLead((prev) => (prev ? { ...prev, ...patch } as Scraped : prev));
+            toast({ title: "Audit saved to lead" });
+          }}
+          onMarkSent={async (patch, _text) => {
+            await updateRow(auditLead.id, patch);
+            setAuditLead(null);
+            toast({ title: "Audit marked as sent" });
+          }}
+          onEmail={(text) => {
+            setAuditLead(null);
+            setModal({ title: `Audit email — ${auditLead.trade_name}`, text });
+          }}
+        />
+      )}
+
       {modal && (
         <div
           onClick={() => setModal(null)}
