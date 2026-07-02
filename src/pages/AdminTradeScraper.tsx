@@ -422,8 +422,9 @@ export default function AdminTradeScraper() {
           Hide already-contacted
         </label>
         <span style={{ color: C.dim, fontSize: 12, marginLeft: "auto" }}>
-          {filtered.length} of {rows.length}
+          {filtered.length} of {pipelineRows.length}
         </span>
+
       </div>
 
       {loading ? (
