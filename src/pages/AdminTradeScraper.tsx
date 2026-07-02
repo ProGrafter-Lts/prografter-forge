@@ -67,6 +67,36 @@ const WEB_QUALITY: { value: WebQuality; label: string; color: string }[] = [
 const webQualityMeta = (q: WebQuality | null) =>
   WEB_QUALITY.find((x) => x.value === q) ?? null;
 
+// Website-outreach opportunity score (0-100): higher = better prospect to sell a website to.
+// An established local business (lots of reviews, decent rating) with a missing/weak website
+// is the strongest target — they clearly have demand but a poor online presence.
+const webScore = (r: Scraped): number => {
+  let score = 0;
+  const q = r.website_quality;
+  if (!r.has_website || q === "none") score += 45;
+  else if (q === "poor" || q === "outdated") score += 30;
+  else if (q === "weak_mobile" || q === "no_form") score += 18;
+  else if (q === "ok") score += 4;
+  else score += 20; // not assessed yet — treat as a live unknown
+
+  const reviews = r.reviews_count ?? 0;
+  if (reviews >= 100) score += 30;
+  else if (reviews >= 40) score += 22;
+  else if (reviews >= 15) score += 14;
+  else if (reviews >= 5) score += 8;
+
+  const rating = r.rating ?? 0;
+  if (rating >= 4.5) score += 15;
+  else if (rating >= 4.0) score += 10;
+  else if (rating >= 3.0) score += 4;
+
+  if (r.phone) score += 5;
+  return Math.max(0, Math.min(100, score));
+};
+
+const scoreColor = (s: number): string =>
+  s >= 70 ? C.green : s >= 45 ? C.amber : C.dim;
+
 const stageMeta = (s: Stage) => STAGES.find((x) => x.value === s) ?? STAGES[1];
 
 
@@ -230,6 +260,13 @@ export default function AdminTradeScraper() {
     }
     return true;
   }), [pipelineRows, filter, filterType, filterStage, hideContacted]);
+
+  // In the website pipeline, surface the strongest opportunities first.
+  const sorted = useMemo(() => {
+    if (pipeline !== "website") return filtered;
+    return [...filtered].sort((a, b) => webScore(b) - webScore(a));
+  }, [filtered, pipeline]);
+
 
   const counts = useMemo(() => {
     const c: Record<string, number> = { all: pipelineRows.length };
@@ -436,6 +473,7 @@ export default function AdminTradeScraper() {
               <tr style={{ textAlign: "left", color: C.dim, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.06em" }}>
                 <th style={{ padding: "10px 12px" }}>{pipeline === "website" ? "Business" : "Trade"}</th>
                 <th style={{ padding: "10px 12px" }}>Contact</th>
+                {pipeline === "website" && <th style={{ padding: "10px 12px" }}>Score</th>}
                 {pipeline === "website" && <th style={{ padding: "10px 12px" }}>Website / Outreach</th>}
                 <th style={{ padding: "10px 12px" }}>Location</th>
                 <th style={{ padding: "10px 12px" }}>Rating</th>
@@ -447,7 +485,7 @@ export default function AdminTradeScraper() {
 
             </thead>
             <tbody>
-              {filtered.map((r) => {
+              {sorted.map((r) => {
                 const m = stageMeta(r.outreach_stage);
                 const isEditing = editing === r.id;
                 return (
@@ -462,6 +500,23 @@ export default function AdminTradeScraper() {
                       {r.website && <div><a href={r.website} target="_blank" rel="noreferrer" style={{ color: C.green }}>website ↗</a></div>}
                       {!r.phone && !r.email && !r.website && <span style={{ color: C.dim }}>—</span>}
                     </td>
+                    {pipeline === "website" && (() => {
+                      const sc = webScore(r);
+                      return (
+                        <td style={{ padding: "10px 12px" }}>
+                          <div style={{
+                            display: "inline-flex", flexDirection: "column", alignItems: "center", gap: 2,
+                            background: "rgba(255,255,255,0.04)", border: `1px solid ${scoreColor(sc)}`,
+                            borderRadius: 10, padding: "6px 10px", minWidth: 52,
+                          }}>
+                            <span style={{ fontSize: 16, fontWeight: 800, color: scoreColor(sc), lineHeight: 1 }}>{sc}</span>
+                            <span style={{ fontSize: 8, color: C.dim, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                              {sc >= 70 ? "Hot" : sc >= 45 ? "Warm" : "Low"}
+                            </span>
+                          </div>
+                        </td>
+                      );
+                    })()}
                     {pipeline === "website" && (
                       <td style={{ padding: "10px 12px", minWidth: 180 }}>
                         {(() => {
@@ -577,7 +632,7 @@ export default function AdminTradeScraper() {
                 );
               })}
               {!filtered.length && (
-                <tr><td colSpan={pipeline === "website" ? 9 : 8} style={{ padding: 40, textAlign: "center", color: C.dim }}>
+                <tr><td colSpan={pipeline === "website" ? 10 : 8} style={{ padding: 40, textAlign: "center", color: C.dim }}>
                   {pipeline === "website"
                     ? "No website prospects match. Try a different filter or run a search above."
                     : "No trades match. Try a different filter or run a scrape above."}
