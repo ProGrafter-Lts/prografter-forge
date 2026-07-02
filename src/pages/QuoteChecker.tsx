@@ -458,11 +458,24 @@ const QuoteChecker = () => {
             toast({ title: "Payment not confirmed", description: "Please try again.", variant: "destructive" });
           }
         } catch (err: any) {
-          console.error(err);
-          toast({ title: "Verification failed", description: err.message || "Please contact support.", variant: "destructive" });
+          console.error("[QuoteChecker] verify-quote-payment failed", err);
+          // The analysis may still be running / completed in the background.
+          // If we have a secure token, send the user to the report page so its
+          // poller can pick up the report once it's ready, rather than stranding
+          // them here.
+          const stored = localStorage.getItem("pendingQuoteCheck");
+          const parsed = stored ? (() => { try { return JSON.parse(stored); } catch { return {}; } })() : {};
+          const fallbackToken = parsed.lookupToken || "";
+          if (fallbackToken) {
+            localStorage.removeItem("pendingQuoteCheck");
+            goToReport(quoteId, fallbackToken);
+          } else {
+            toast({ title: "Verification failed", description: err.message || "Please contact support.", variant: "destructive" });
+          }
         } finally {
           setVerifying(false);
         }
+
       };
       verify();
     }
