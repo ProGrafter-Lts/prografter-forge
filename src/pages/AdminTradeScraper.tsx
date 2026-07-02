@@ -375,6 +375,75 @@ function WebLeadDetails({ row, onSave, colSpan }: {
   );
 }
 
+// Generates a simple, editable cold-call script for a website-outreach lead.
+function buildCallScript(r: Scraped): string {
+  const name = r.contact_name || "there";
+  const biz = r.trade_name;
+  const issue = r.main_website_issue || r.website_status || (r.has_website ? "your current website" : "not having a website");
+  const reviews = r.reviews_count ? `${r.reviews_count} reviews` : "your reputation";
+  const rating = r.rating ? ` at ${r.rating}★` : "";
+  return [
+    `CALL SCRIPT — ${biz}`,
+    ``,
+    `Opener:`,
+    `"Hi, is that ${name}? My name's [YOU] from ProGrafter. I'll be quick — I help local businesses like ${biz} get more enquiries from their website. Have you got 30 seconds?"`,
+    ``,
+    `Reason for call:`,
+    `"I had a look at ${biz} online — you've got ${reviews}${rating}, which is brilliant. But I noticed ${issue}, and that's likely costing you enquiries from people who'd otherwise call."`,
+    ``,
+    `Value:`,
+    `"We build fast, mobile-friendly sites that turn visitors into phone calls and form enquiries — usually live within a couple of weeks."`,
+    ``,
+    `Ask:`,
+    `"Would it help if I put together a free 2-minute mini-audit of your online presence and send it over? No obligation."`,
+    ``,
+    `If yes → confirm best email/WhatsApp. If not now → agree a follow-up date.`,
+  ].join("\n");
+}
+
+// Generates a plain-text mini website audit the admin can copy and send.
+function buildAuditText(r: Scraped): string {
+  const lines = [
+    `WEBSITE MINI-AUDIT — ${r.trade_name}`,
+    ``,
+    `Prepared by ProGrafter`,
+    `Date: ${new Date().toLocaleDateString()}`,
+    ``,
+    `Business: ${r.trade_name}${r.trade_type ? ` (${r.trade_type})` : ""}`,
+    `Location: ${[r.city, r.postcode].filter(Boolean).join(", ") || r.address || "—"}`,
+    `Google rating: ${r.rating ? `${r.rating}★ (${r.reviews_count ?? 0} reviews)` : "—"}`,
+    `Current website: ${r.website || "None found"}`,
+    ``,
+    `WHAT WE FOUND`,
+    `• Website status: ${r.website_status || (r.has_website ? "Has a website" : "No website found")}`,
+    `• Main issue: ${r.main_website_issue || "Site does not reflect the quality of the business"}`,
+    `• Opportunity: ${r.opportunity_angle || "Strong reviews but weak online presence — enquiries are being lost."}`,
+    ``,
+    `WHY IT MATTERS`,
+    `Most customers check you online before calling. A slow, outdated or missing website means`,
+    `they move on to a competitor — even when your reviews are excellent.`,
+    ``,
+    `WHAT WE'D RECOMMEND`,
+    `• A fast, mobile-first website that loads in under 2 seconds`,
+    `• Clear services, service area and a prominent "call / enquire" button`,
+    `• Reviews and photos front and centre to build trust`,
+    `${r.package_recommended && r.package_recommended !== "Not selected" ? `• Suggested package: ${r.package_recommended}` : "• Suggested package: Starter or Growth Site"}`,
+    ``,
+    `NEXT STEP`,
+    `Reply to this message or call us back and we'll walk you through it — no obligation.`,
+  ];
+  return lines.join("\n");
+}
+
+async function copyToClipboard(text: string) {
+  try {
+    await navigator.clipboard.writeText(text);
+    toast({ title: "Copied to clipboard" });
+  } catch {
+    toast({ title: "Copy failed", description: "Select the text and copy manually.", variant: "destructive" });
+  }
+}
+
 export default function AdminTradeScraper() {
   const [rows, setRows] = useState<Scraped[]>([]);
   const [loading, setLoading] = useState(true);
