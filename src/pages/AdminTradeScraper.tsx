@@ -1057,7 +1057,7 @@ export default function AdminTradeScraper() {
           <div
             onClick={(e) => e.stopPropagation()}
             style={{
-              background: C.card, border: `1px solid ${C.border}`, borderRadius: 14,
+              background: C.deep, border: `1px solid ${C.border}`, borderRadius: 14,
               width: "min(640px, 100%)", maxHeight: "85vh", display: "flex", flexDirection: "column",
             }}
           >
