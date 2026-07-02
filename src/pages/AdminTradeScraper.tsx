@@ -484,7 +484,7 @@ export default function AdminTradeScraper() {
 
             </thead>
             <tbody>
-              {filtered.map((r) => {
+              {sorted.map((r) => {
                 const m = stageMeta(r.outreach_stage);
                 const isEditing = editing === r.id;
                 return (
