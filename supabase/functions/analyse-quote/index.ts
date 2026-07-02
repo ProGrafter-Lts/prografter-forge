@@ -73,6 +73,9 @@ OUTPUT — return ONLY a single valid JSON object. No markdown, no code fences, 
   "comparison_readiness": string,
   "certification_readiness": "Ready"|"Needs improvement"|"Not ready",
   "top_issues": [string, string, string],
+  "what_to_do_next": [string, ...],
+  "questions_list": [string, ...],
+  "builder_message": string,
   "assessment": "Ready to Accept"|"Needs Clarification"|"Significant Concerns",
   "report_html": string
 }
