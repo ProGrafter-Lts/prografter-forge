@@ -878,9 +878,9 @@ export default function AdminTradeScraper() {
 
 
       <div style={{ display: "flex", gap: 10, marginBottom: 12, flexWrap: "wrap", alignItems: "center" }}>
-        <input placeholder="Search name, address, phone, notes…" value={filter} onChange={(e) => setFilter(e.target.value)} style={{ ...inp, maxWidth: 320 }} />
+        <input placeholder={pipeline === "website" ? "Search name, address, phone, notes, website issue…" : "Search name, address, phone, notes…"} value={filter} onChange={(e) => setFilter(e.target.value)} style={{ ...inp, maxWidth: 320 }} />
         <select value={filterType} onChange={(e) => setFilterType(e.target.value)} style={{ ...inp, maxWidth: 200 }}>
-          <option value="all" style={{ color: "#000" }}>All trade types</option>
+          <option value="all" style={{ color: "#000" }}>{pipeline === "website" ? "All business types" : "All trade types"}</option>
           {tradeTypes.map((t) => <option key={t} value={t} style={{ color: "#000" }}>{t}</option>)}
         </select>
         <button
