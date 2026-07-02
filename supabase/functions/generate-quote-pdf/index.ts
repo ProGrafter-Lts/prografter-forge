@@ -623,7 +623,8 @@ Deno.serve(async (req) => {
       .eq("quote_id", quote_id)
       .order("created_at", { ascending: true });
 
-    // Build PDF
+    // Build PDF (ensure fonts are fetched & registered before layout)
+    await ensureFonts();
     const ctx = buildContext(quote, trade, homeowner, job || {}, quoteMaterials || []);
     const doc = buildDoc(ctx);
     const pdfBlob = await pdf(doc).toBlob();
