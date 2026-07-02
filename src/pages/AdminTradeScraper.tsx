@@ -67,6 +67,25 @@ const WEB_QUALITY: { value: WebQuality; label: string; color: string }[] = [
 const webQualityMeta = (q: WebQuality | null) =>
   WEB_QUALITY.find((x) => x.value === q) ?? null;
 
+// Website opportunity focus for the scrape panel. `seed` sets an initial
+// website_quality assessment on NEW leads only (Places can't verify site quality,
+// so this is a starting hint the admin confirms). `noSiteOnly` strictly filters.
+type WebFocus =
+  | "any" | "no_website" | "poor" | "facebook_only" | "outdated"
+  | "poor_mobile" | "no_form" | "weak_seo" | "strong_reviews_weak";
+
+const WEB_FOCUS: { value: WebFocus; label: string; seed: WebQuality | null; noSiteOnly: boolean }[] = [
+  { value: "any", label: "Any opportunity", seed: null, noSiteOnly: false },
+  { value: "no_website", label: "No website only", seed: "none", noSiteOnly: true },
+  { value: "poor", label: "Poor website", seed: "poor", noSiteOnly: false },
+  { value: "facebook_only", label: "Facebook only", seed: "poor", noSiteOnly: false },
+  { value: "outdated", label: "Outdated website", seed: "outdated", noSiteOnly: false },
+  { value: "poor_mobile", label: "Poor mobile experience", seed: "weak_mobile", noSiteOnly: false },
+  { value: "no_form", label: "No enquiry form", seed: "no_form", noSiteOnly: false },
+  { value: "weak_seo", label: "Weak local SEO", seed: "poor", noSiteOnly: false },
+  { value: "strong_reviews_weak", label: "Strong reviews but weak website", seed: "poor", noSiteOnly: false },
+];
+
 // Website-outreach opportunity score (0-100): higher = better prospect to sell a website to.
 // An established local business (lots of reviews, decent rating) with a missing/weak website
 // is the strongest target — they clearly have demand but a poor online presence.
@@ -122,7 +141,7 @@ export default function AdminTradeScraper() {
   const [tradeType, setTradeType] = useState("electricians");
   const [location, setLocation] = useState("Nottingham, Nottinghamshire");
   const [limit, setLimit] = useState(10);
-  const [noWebsiteOnly, setNoWebsiteOnly] = useState(true);
+  const [webFocus, setWebFocus] = useState<WebFocus>("no_website");
   const [running, setRunning] = useState(false);
   const [filter, setFilter] = useState("");
   const [filterType, setFilterType] = useState("all");
@@ -160,7 +179,8 @@ export default function AdminTradeScraper() {
         location,
         limit,
         pipeline,
-        no_website_only: pipeline === "website" ? noWebsiteOnly : false,
+        website_focus: pipeline === "website" ? webFocus : undefined,
+        no_website_only: pipeline === "website" && WEB_FOCUS.find((f) => f.value === webFocus)?.noSiteOnly,
       },
       headers: session ? { Authorization: `Bearer ${session.access_token}` } : {},
     });
@@ -381,30 +401,53 @@ export default function AdminTradeScraper() {
         <p style={{ fontSize: 11, fontWeight: 700, color: C.teal, letterSpacing: "0.08em", textTransform: "uppercase", margin: "0 0 12px" }}>
           {pipeline === "website" ? "Find businesses (website prospects)" : "New scrape"}
         </p>
-        <div style={{ display: "grid", gridTemplateColumns: "2fr 2fr 1fr auto", gap: 10, alignItems: "end" }}>
+        <div style={{ display: "grid", gridTemplateColumns: pipeline === "website" ? "2fr 2fr 1fr" : "2fr 2fr 1fr auto", gap: 10, alignItems: "end" }}>
           <div>
             <label style={{ fontSize: 10, color: C.dim, display: "block", marginBottom: 4 }}>
               {pipeline === "website" ? "Business type" : "Trade type"}
             </label>
-            <input value={tradeType} onChange={(e) => setTradeType(e.target.value)} placeholder={pipeline === "website" ? "e.g. plumbers, cafes, garages" : "electricians"} style={inp} />
+            <input
+              value={tradeType}
+              onChange={(e) => setTradeType(e.target.value)}
+              placeholder={pipeline === "website"
+                ? "landscapers, builders, electricians, cafes, dog groomers, salons, mechanics, takeaways, cleaners"
+                : "electricians"}
+              style={inp}
+            />
           </div>
           <div>
             <label style={{ fontSize: 10, color: C.dim, display: "block", marginBottom: 4 }}>Location</label>
-            <input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Nottingham, Nottinghamshire" style={inp} />
+            <input
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              placeholder="Nottingham, Mansfield, Sutton-in-Ashfield, Derby, Sheffield"
+              style={inp}
+            />
           </div>
           <div>
             <label style={{ fontSize: 10, color: C.dim, display: "block", marginBottom: 4 }}>Limit (max 20)</label>
-            <input type="number" min={1} max={20} value={limit} onChange={(e) => setLimit(parseInt(e.target.value, 10) || 10)} style={inp} />
+            <input type="number" min={1} max={20} value={limit} onChange={(e) => setLimit(Math.min(20, parseInt(e.target.value, 10) || 10))} style={inp} />
           </div>
-          <button onClick={runScrape} disabled={running} style={{ ...btn(true), opacity: running ? 0.6 : 1 }}>
-            {running ? "Scraping…" : "🔎 Run scrape"}
-          </button>
+          {pipeline !== "website" && (
+            <button onClick={runScrape} disabled={running} style={{ ...btn(true), opacity: running ? 0.6 : 1 }}>
+              {running ? "Scraping…" : "🔎 Run scrape"}
+            </button>
+          )}
         </div>
         {pipeline === "website" && (
-          <label style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color: C.dim, cursor: "pointer", marginTop: 12 }}>
-            <input type="checkbox" checked={noWebsiteOnly} onChange={(e) => setNoWebsiteOnly(e.target.checked)} />
-            Only keep businesses with no website (best cold-outreach targets)
-          </label>
+          <div style={{ display: "grid", gridTemplateColumns: "2fr auto", gap: 10, alignItems: "end", marginTop: 12 }}>
+            <div>
+              <label style={{ fontSize: 10, color: C.dim, display: "block", marginBottom: 4 }}>Website opportunity focus</label>
+              <select value={webFocus} onChange={(e) => setWebFocus(e.target.value as WebFocus)} style={inp}>
+                {WEB_FOCUS.map((f) => (
+                  <option key={f.value} value={f.value} style={{ color: "#000" }}>{f.label}</option>
+                ))}
+              </select>
+            </div>
+            <button onClick={runScrape} disabled={running} style={{ ...btn(true), opacity: running ? 0.6 : 1 }}>
+              {running ? "Scraping…" : "🔎 Run website scrape"}
+            </button>
+          </div>
         )}
         <p style={{ fontSize: 10, color: C.dim, margin: "10px 0 0" }}>
           Re-running the same search won't create duplicates — existing leads are refreshed and your stage/notes are preserved.

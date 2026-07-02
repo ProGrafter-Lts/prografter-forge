@@ -138,8 +138,24 @@ serve(async (req) => {
     const location = String(body.location ?? "Nottinghamshire").trim();
     const limit = Math.min(20, Math.max(1, parseInt(body.limit ?? "10", 10)));
     const pipeline = body.pipeline === "website" ? "website" : "trade";
+    const websiteFocus = pipeline === "website" ? String(body.website_focus ?? "any") : null;
     // In website-outreach mode, only keep businesses with no website (best targets).
     const websiteOnlyNoSite = pipeline === "website" && body.no_website_only === true;
+
+    // Seed an initial website assessment on NEW website leads only.
+    // Places can't verify site quality, so this is a starting hint the admin confirms.
+    const FOCUS_SEED: Record<string, string | null> = {
+      any: null,
+      no_website: "none",
+      poor: "poor",
+      facebook_only: "poor",
+      outdated: "outdated",
+      poor_mobile: "weak_mobile",
+      no_form: "no_form",
+      weak_seo: "poor",
+      strong_reviews_weak: "poor",
+    };
+
     if (!tradeType) {
       return new Response(JSON.stringify({ error: "trade_type required (e.g. 'electricians')" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -151,6 +167,7 @@ serve(async (req) => {
     const sliced = results.slice(0, limit);
 
     const inserted: any[] = [];
+    const refreshed: any[] = [];
     const skipped: any[] = [];
 
     for (const r of sliced) {
@@ -160,11 +177,20 @@ serve(async (req) => {
       const hasWebsite = !!details.website;
       // In website-outreach mode, optionally skip businesses that already have a website.
       if (websiteOnlyNoSite && hasWebsite) continue;
-      const row: Record<string, unknown> = {
+
+      // Check whether this lead already exists — refresh core data but preserve outreach state.
+      const { data: existing } = await supabase
+        .from("scraped_trades")
+        .select("id, website_quality")
+        .eq("source", "google_places")
+        .eq("source_id", r.place_id)
+        .maybeSingle();
+
+      // Core business data collected from Google Places (same fields for both pipelines).
+      const core: Record<string, unknown> = {
         trade_name: details.name ?? r.name,
         trade_type: tradeType,
         phone: details.formatted_phone_number ?? details.international_phone_number ?? null,
-        email: null, // Google Places does NOT return email — must be enriched separately
         website: details.website ?? null,
         has_website: hasWebsite,
         address: details.formatted_address ?? r.formatted_address ?? null,
@@ -172,19 +198,38 @@ serve(async (req) => {
         city,
         rating: details.rating ?? null,
         reviews_count: details.user_ratings_total ?? null,
+        search_query: query,
+        last_scraped_at: new Date().toISOString(),
+      };
+
+      if (existing) {
+        // Refresh only core data. Notes, stage, call history, follow-up date,
+        // website status/score and proposal status are all left untouched.
+        const { error } = await supabase
+          .from("scraped_trades")
+          .update(core)
+          .eq("id", existing.id);
+        if (error) skipped.push({ name: core.trade_name, reason: error.message });
+        else refreshed.push({ id: existing.id, trade_name: core.trade_name });
+        continue;
+      }
+
+      // New lead — insert with full seed.
+      const row: Record<string, unknown> = {
+        ...core,
+        email: null, // Google Places does NOT return email — must be enriched separately
         source: "google_places",
         source_id: r.place_id,
-        search_query: query,
         pipeline,
       };
-      // Seed an initial website assessment for the website-outreach pipeline.
       if (pipeline === "website") {
-        row.website_quality = hasWebsite ? null : "none";
+        // Prefer the focus-based seed; fall back to "none" when no website is found.
+        row.website_quality = FOCUS_SEED[websiteFocus ?? "any"] ?? (hasWebsite ? null : "none");
       }
 
       const { data, error } = await supabase
         .from("scraped_trades")
-        .upsert(row, { onConflict: "source,source_id" })
+        .insert(row)
         .select("id, trade_name")
         .single();
       if (error) {
@@ -194,13 +239,16 @@ serve(async (req) => {
       }
     }
 
+
     return new Response(
       JSON.stringify({
         ok: true,
         query,
         found: results.length,
         processed: sliced.length,
-        upserted: inserted.length,
+        upserted: inserted.length + refreshed.length,
+        added: inserted.length,
+        refreshed: refreshed.length,
         skipped,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
