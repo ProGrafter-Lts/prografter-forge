@@ -1311,6 +1311,18 @@ export default function AdminTradeScraper() {
         </div>
       )}
 
+      {callLead && (
+        <CallScriptModal
+          row={callLead}
+          onClose={() => setCallLead(null)}
+          onLog={async (patch, label) => {
+            await updateRow(callLead.id, patch);
+            setCallLead((prev) => (prev ? { ...prev, ...patch } as Scraped : prev));
+            toast({ title: label });
+          }}
+        />
+      )}
+
       {modal && (
         <div
           onClick={() => setModal(null)}
