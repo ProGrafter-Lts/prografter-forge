@@ -137,29 +137,45 @@ const WEB_FOCUS: { value: WebFocus; label: string; seed: WebQuality | null; noSi
 // Website-outreach opportunity score (0-100): higher = better prospect to sell a website to.
 // An established local business (lots of reviews, decent rating) with a missing/weak website
 // is the strongest target — they clearly have demand but a poor online presence.
+// Admin can manually override via the `website_score` field (see webScoreOf below).
 const webScore = (r: Scraped): number => {
   let score = 0;
   const q = r.website_quality;
-  if (!r.has_website || q === "none") score += 45;
-  else if (q === "poor" || q === "outdated") score += 30;
-  else if (q === "weak_mobile" || q === "no_form") score += 18;
-  else if (q === "ok") score += 4;
-  else score += 20; // not assessed yet — treat as a live unknown
+  const st = r.website_status;
 
-  const reviews = r.reviews_count ?? 0;
-  if (reviews >= 100) score += 30;
-  else if (reviews >= 40) score += 22;
-  else if (reviews >= 15) score += 14;
-  else if (reviews >= 5) score += 8;
+  // Website weaknesses (opportunity signals)
+  if (!r.has_website || q === "none" || st === "No website found") score += 30;
+  if (st === "Facebook only") score += 25;
+  if (q === "outdated" || st === "Outdated website") score += 20;
+  if (q === "weak_mobile" || st === "Poor mobile layout") score += 20;
+  if (q === "no_form" || st === "No enquiry form") score += 15;
+  if (st === "No reviews shown") score += 15;
+  if (st === "No clear services") score += 15;
+  if (st === "Weak gallery/photos") score += 15;
 
-  const rating = r.rating ?? 0;
-  if (rating >= 4.5) score += 15;
-  else if (rating >= 4.0) score += 10;
-  else if (rating >= 3.0) score += 4;
+  // Demand / reachability signals
+  if ((r.rating ?? 0) >= 4.3) score += 20;
+  if ((r.reviews_count ?? 0) >= 10) score += 15;
+  if (r.phone) score += 10;
+  // Local service / trade-based business — this pipeline is trade-focused.
+  score += 10;
+  // Active photos / social presence.
+  if (st === "Facebook only" || r.mini_audit_sent) score += 5;
 
-  if (r.phone) score += 5;
+  // Negative signals (poor prospect / off-limits)
+  if (st === "Strong website") score -= 30;
+  if (st === "Decent website") score -= 20;
+  if (r.do_not_call) score -= 30;
+  const lost = r.last_call_outcome === "Lost" || r.outreach_stage === "not_interested" ||
+    (!!r.lost_reason && r.lost_reason !== "Not selected");
+  if (lost) score -= 25;
+  if (r.last_call_outcome === "Do not call") score -= 50;
+
   return Math.max(0, Math.min(100, score));
 };
+
+// Resolve the effective score, respecting a manual admin override when set.
+const webScoreOf = (r: Scraped): number => r.website_score ?? webScore(r);
 
 const scoreColor = (s: number): string =>
   s >= 70 ? C.green : s >= 45 ? C.amber : C.dim;
@@ -321,7 +337,7 @@ function WebLeadDetails({ row, onSave, colSpan }: {
           <div style={section}>Website</div>
           <div style={grid}>
             <Field label="Website status"><Sel k="website_status" options={WEBSITE_STATUS_OPTIONS} /></Field>
-            <Field label="Website score (0-100)"><input type="number" min={0} max={100} value={d.website_score ?? ""} onChange={(e) => set("website_score", e.target.value)} style={smallInp} /></Field>
+            <Field label={`Website score — auto ${webScore({ ...row, ...d } as Scraped)} (leave blank to auto-calculate)`}><input type="number" min={0} max={100} value={d.website_score ?? ""} onChange={(e) => set("website_score", e.target.value)} placeholder={`${webScore({ ...row, ...d } as Scraped)}`} style={smallInp} /></Field>
             <Field label="Opportunity angle"><input value={d.opportunity_angle ?? ""} onChange={(e) => set("opportunity_angle", e.target.value)} placeholder="Strong reviews but website does not reflect quality…" style={smallInp} /></Field>
             <Field label="Main website issue"><input value={d.main_website_issue ?? ""} onChange={(e) => set("main_website_issue", e.target.value)} style={smallInp} /></Field>
           </div>
@@ -604,7 +620,7 @@ export default function AdminTradeScraper() {
   // In the website pipeline, surface the strongest opportunities first.
   const sorted = useMemo(() => {
     if (pipeline !== "website") return filtered;
-    return [...filtered].sort((a, b) => webScore(b) - webScore(a));
+    return [...filtered].sort((a, b) => webScoreOf(b) - webScoreOf(a));
   }, [filtered, pipeline]);
 
 
@@ -908,12 +924,13 @@ export default function AdminTradeScraper() {
                       </td>
                     )}
                     {pipeline === "website" && (() => {
-                      const sc = r.website_score ?? webScore(r);
+                      const overridden = r.website_score != null;
+                      const sc = overridden ? r.website_score! : webScore(r);
                       const band = scoreBand(sc);
                       return (
                         <td style={{ padding: "10px 12px" }}>
                           <div
-                            title={`${band.label} opportunity`}
+                            title={overridden ? `${band.label} opportunity (manual override — auto ${webScore(r)})` : `${band.label} opportunity (auto)`}
                             style={{
                               display: "inline-flex", flexDirection: "column", alignItems: "center", gap: 2,
                               background: "rgba(255,255,255,0.04)", border: `1px solid ${band.color}`,
@@ -922,7 +939,7 @@ export default function AdminTradeScraper() {
                           >
                             <span style={{ fontSize: 16, fontWeight: 800, color: band.color, lineHeight: 1 }}>{sc}</span>
                             <span style={{ fontSize: 8, color: band.color, textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                              {band.label}
+                              {overridden ? "Manual" : band.label}
                             </span>
                           </div>
                         </td>
