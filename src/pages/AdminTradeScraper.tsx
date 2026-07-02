@@ -36,7 +36,55 @@ type Scraped = {
   mini_audit_sent_at: string | null;
   proposal_sent: boolean;
   proposal_sent_at: string | null;
+  // Extended Website Outreach fields
+  website_status: string | null;
+  website_score: number | null;
+  opportunity_angle: string | null;
+  main_website_issue: string | null;
+  audit_notes: string | null;
+  audit_sent: boolean;
+  audit_sent_date: string | null;
+  proposal_sent_date: string | null;
+  package_recommended: string | null;
+  quoted_value: number | null;
+  monthly_care_interest: string | null;
+  monthly_care_price: number | null;
+  contact_name: string | null;
+  contact_email: string | null;
+  whatsapp_number: string | null;
+  preferred_contact_method: string | null;
+  tps_checked: boolean;
+  ctps_checked: boolean;
+  date_checked: string | null;
+  do_not_call: boolean;
+  objection_reason: string | null;
+  source_of_number: string | null;
+  last_contacted_date: string | null;
+  next_follow_up_date: string | null;
+  call_attempts: number | null;
+  last_call_outcome: string | null;
+  lost_reason: string | null;
 };
+
+const WEBSITE_STATUS_OPTIONS = [
+  "Not checked", "No website found", "Facebook only", "Outdated website",
+  "Poor mobile layout", "No enquiry form", "Weak content", "Weak gallery/photos",
+  "No reviews shown", "No clear services", "Slow/confusing website",
+  "Decent website", "Strong website", "Not suitable",
+];
+const PACKAGE_OPTIONS = ["Not selected", "Starter Site", "Growth Site", "Monthly Care Only", "Custom"];
+const MONTHLY_CARE_INTEREST_OPTIONS = ["Not discussed", "Yes", "Maybe", "No"];
+const PREFERRED_CONTACT_OPTIONS = ["Unknown", "Phone", "Email", "WhatsApp", "Text"];
+const CALL_OUTCOME_OPTIONS = [
+  "Not called", "No answer", "Voicemail left", "Spoke to owner",
+  "Spoke to staff/gatekeeper", "Call back requested", "Interested",
+  "Audit requested", "Not interested", "Do not call", "Won", "Lost",
+];
+const LOST_REASON_OPTIONS = [
+  "Not selected", "Too expensive", "Already has designer", "Not interested",
+  "No budget", "Too busy", "Wants to stay as is", "Could not contact", "Other",
+];
+
 
 const C = {
   cream: "#F5F0E8", deep: "#0F2238", navy: "#27396A",
