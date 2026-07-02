@@ -1540,9 +1540,15 @@ export default function AdminTradeScraper() {
             setAuditLead(null);
             toast({ title: "Audit marked as sent" });
           }}
-          onEmail={(text) => {
+          onSaveNotes={async (notes) => {
+            await updateRow(auditLead.id, { notes });
+            setAuditLead((prev) => (prev ? { ...prev, notes } as Scraped : prev));
+            toast({ title: "Email saved to lead notes" });
+          }}
+          onMarkProposal={async (patch) => {
+            await updateRow(auditLead.id, patch);
             setAuditLead(null);
-            setModal({ title: `Audit email — ${auditLead.trade_name}`, text });
+            toast({ title: "Proposal marked as sent" });
           }}
         />
       )}
