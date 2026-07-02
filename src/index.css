@@ -1389,13 +1389,27 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
   .qr-msgcard,
   .qr-disclaimer,
   .qr-metric,
+  .qr-metric2,
+  .qr-strip-card,
+  .qr-flagcol,
+  .qr-insight,
+  .qr-final,
   .qr-qitem,
   .qr-report tr {
     break-inside: avoid;
     page-break-inside: avoid;
   }
+  /* Hero stays together on the cover, never split */
+  .qr-hero {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    break-after: avoid;
+    page-break-after: avoid;
+  }
   .qr-section2-title,
-  .qr-actionplan-title {
+  .qr-actionplan-title,
+  .qr-flagcol-title,
+  .qr-final-headline {
     break-after: avoid;
     page-break-after: avoid;
   }
@@ -1407,6 +1421,19 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
   }
   @page {
     margin: 16mm 14mm;
+    @bottom-right {
+      content: "Page " counter(page);
+      font-family: monospace;
+      font-size: 9px;
+      color: #6b7280;
+    }
+    @bottom-left {
+      content: "ProGrafter — Quote Health Check";
+      font-family: monospace;
+      font-size: 9px;
+      color: #6b7280;
+    }
   }
 }
+
 
