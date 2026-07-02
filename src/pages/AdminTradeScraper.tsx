@@ -434,8 +434,9 @@ export default function AdminTradeScraper() {
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
             <thead style={{ background: "rgba(255,255,255,0.04)" }}>
               <tr style={{ textAlign: "left", color: C.dim, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                <th style={{ padding: "10px 12px" }}>Trade</th>
+                <th style={{ padding: "10px 12px" }}>{pipeline === "website" ? "Business" : "Trade"}</th>
                 <th style={{ padding: "10px 12px" }}>Contact</th>
+                {pipeline === "website" && <th style={{ padding: "10px 12px" }}>Website / Outreach</th>}
                 <th style={{ padding: "10px 12px" }}>Location</th>
                 <th style={{ padding: "10px 12px" }}>Rating</th>
                 <th style={{ padding: "10px 12px" }}>Stage</th>
@@ -443,6 +444,7 @@ export default function AdminTradeScraper() {
                 <th style={{ padding: "10px 12px" }}>Notes</th>
                 <th style={{ padding: "10px 12px" }}></th>
               </tr>
+
             </thead>
             <tbody>
               {filtered.map((r) => {
