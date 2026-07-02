@@ -30,26 +30,59 @@ const MUTED = "#64748B";
 const RULE = "#E2E8F0";
 const CREAM = "#FAF8F3";
 
-// Register fonts (static TTF mirrors from fontsource via jsDelivr — @react-pdf
-// cannot parse Google's variable-font TTFs, so we use static weights here)
-try {
+// Register fonts. We fetch the static-weight TTFs ourselves (pinned version,
+// with retry) and register them as data URIs. Relying on @react-pdf's lazy
+// URL fetch against the unstable `@latest` jsDelivr path caused
+// "Could not resolve font for DMSans" 500s at layout time in the edge runtime.
+const FONT_VERSION_PATHS = {
+  DMSans400: "dm-sans@5.2.6/latin-400-normal.ttf",
+  DMSans700: "dm-sans@5.2.6/latin-700-normal.ttf",
+  Bebas400: "bebas-neue@5.2.6/latin-400-normal.ttf",
+  DMMono400: "dm-mono@5.2.6/latin-400-normal.ttf",
+};
+
+const fetchFontDataUri = async (path: string): Promise<string | null> => {
+  const url = `https://cdn.jsdelivr.net/fontsource/fonts/${path}`;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const buf = new Uint8Array(await res.arrayBuffer());
+      let binary = "";
+      for (let i = 0; i < buf.length; i++) binary += String.fromCharCode(buf[i]);
+      return `data:font/ttf;base64,${btoa(binary)}`;
+    } catch (err) {
+      console.error(`[generate-quote-pdf] font fetch failed (${path}, attempt ${attempt + 1})`, err);
+    }
+  }
+  return null;
+};
+
+let fontsReady = false;
+const ensureFonts = async () => {
+  if (fontsReady) return;
+  const [dm400, dm700, bebas, mono] = await Promise.all([
+    fetchFontDataUri(FONT_VERSION_PATHS.DMSans400),
+    fetchFontDataUri(FONT_VERSION_PATHS.DMSans700),
+    fetchFontDataUri(FONT_VERSION_PATHS.Bebas400),
+    fetchFontDataUri(FONT_VERSION_PATHS.DMMono400),
+  ]);
+  if (!dm400 || !dm700 || !bebas || !mono) {
+    throw new Error("Could not load PDF fonts");
+  }
   Font.register({
     family: "DMSans",
     fonts: [
-      { src: "https://cdn.jsdelivr.net/fontsource/fonts/dm-sans@latest/latin-400-normal.ttf", fontWeight: 400 },
-      { src: "https://cdn.jsdelivr.net/fontsource/fonts/dm-sans@latest/latin-700-normal.ttf", fontWeight: 700 },
+      { src: dm400, fontWeight: 400 },
+      { src: dm700, fontWeight: 700 },
     ],
   });
-  Font.register({
-    family: "Bebas",
-    src: "https://cdn.jsdelivr.net/fontsource/fonts/bebas-neue@latest/latin-400-normal.ttf",
-  });
-  Font.register({
-    family: "DMMono",
-    src: "https://cdn.jsdelivr.net/fontsource/fonts/dm-mono@latest/latin-400-normal.ttf",
-  });
+  Font.register({ family: "Bebas", src: bebas });
+  Font.register({ family: "DMMono", src: mono });
   Font.registerHyphenationCallback((word: string) => [word]);
-} catch (_) { /* fallback to Helvetica */ }
+  fontsReady = true;
+};
+
 
 
 // ---------- Helpers ----------
@@ -590,7 +623,8 @@ Deno.serve(async (req) => {
       .eq("quote_id", quote_id)
       .order("created_at", { ascending: true });
 
-    // Build PDF
+    // Build PDF (ensure fonts are fetched & registered before layout)
+    await ensureFonts();
     const ctx = buildContext(quote, trade, homeowner, job || {}, quoteMaterials || []);
     const doc = buildDoc(ctx);
     const pdfBlob = await pdf(doc).toBlob();
