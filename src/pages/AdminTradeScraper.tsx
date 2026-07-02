@@ -1467,12 +1467,20 @@ export default function AdminTradeScraper() {
                 const m = stageMeta(r.outreach_stage);
                 const isEditing = editing === r.id;
                 const isExpanded = expanded === r.id;
+                const dueToday = isFollowUpToday(r);
+                const overdue = isFollowUpOverdue(r);
+                const rowBg = overdue ? "rgba(239,68,68,0.10)" : dueToday ? "rgba(245,158,11,0.10)" : undefined;
                 return (
                   <React.Fragment key={r.id}>
-                  <tr style={{ borderTop: `1px solid ${C.border}`, verticalAlign: "top" }}>
+                  <tr style={{ borderTop: `1px solid ${C.border}`, verticalAlign: "top", background: rowBg, borderLeft: overdue ? `3px solid ${C.red}` : dueToday ? `3px solid ${C.amber}` : "3px solid transparent" }}>
                     <td style={{ padding: "10px 12px" }}>
-                      <div style={{ fontWeight: 600 }}>{r.trade_name}</div>
+                      <div style={{ fontWeight: 600 }}>
+                        {r.trade_name}
+                        {r.do_not_call && <span style={{ marginLeft: 6, fontSize: 9, fontWeight: 800, color: "#9CA3AF", border: "1px solid #9CA3AF", borderRadius: 6, padding: "1px 5px" }}>DO NOT CALL</span>}
+                      </div>
                       <div style={{ color: C.dim, fontSize: 10, marginTop: 2 }}>{r.trade_type ?? "—"}</div>
+                      {overdue && <div style={{ color: C.red, fontSize: 9, fontWeight: 800, marginTop: 3 }}>⏰ Follow-up overdue</div>}
+                      {!overdue && dueToday && <div style={{ color: C.amber, fontSize: 9, fontWeight: 800, marginTop: 3 }}>📅 Follow-up due today</div>}
                     </td>
                     <td style={{ padding: "10px 12px" }}>
                       {r.phone && <div><a href={`tel:${r.phone}`} style={{ color: C.teal }}>{r.phone}</a></div>}
