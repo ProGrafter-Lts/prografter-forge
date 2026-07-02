@@ -532,6 +532,14 @@ export default function AdminTradeScraper() {
     return c;
   }, [pipelineRows]);
 
+  const webCounts = useMemo(() => {
+    const c: Record<string, number> = {};
+    for (const f of WEB_FILTERS) c[f.value] = pipelineRows.filter(f.match).length;
+    return c;
+  }, [pipelineRows]);
+
+
+
   const pipelineCounts = useMemo(() => {
     let trade = 0, website = 0;
     for (const r of rows) ((r.pipeline ?? "trade") === "website" ? (website++) : (trade++));
