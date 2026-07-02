@@ -164,6 +164,15 @@ const webScore = (r: Scraped): number => {
 const scoreColor = (s: number): string =>
   s >= 70 ? C.green : s >= 45 ? C.amber : C.dim;
 
+// Website opportunity score bands for the small coloured badge in the table.
+const SCORE_BANDS: { min: number; color: string; label: string }[] = [
+  { min: 80, color: C.green, label: "Excellent" },
+  { min: 60, color: "#22C55E", label: "Good" },
+  { min: 40, color: C.amber, label: "Possible" },
+  { min: 0, color: C.dim, label: "Weak" },
+];
+const scoreBand = (s: number) => SCORE_BANDS.find((b) => s >= b.min) ?? SCORE_BANDS[SCORE_BANDS.length - 1];
+
 const stageMeta = (s: Stage) => STAGES.find((x) => x.value === s) ?? STAGES[1];
 
 // Website Outreach stage filters — each has a live predicate over a lead.
