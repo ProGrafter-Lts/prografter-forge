@@ -261,6 +261,13 @@ export default function AdminTradeScraper() {
     return true;
   }), [pipelineRows, filter, filterType, filterStage, hideContacted]);
 
+  // In the website pipeline, surface the strongest opportunities first.
+  const sorted = useMemo(() => {
+    if (pipeline !== "website") return filtered;
+    return [...filtered].sort((a, b) => webScore(b) - webScore(a));
+  }, [filtered, pipeline]);
+
+
   const counts = useMemo(() => {
     const c: Record<string, number> = { all: pipelineRows.length };
     for (const s of STAGES) if (s.value !== "all") c[s.value] = 0;
