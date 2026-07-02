@@ -166,6 +166,30 @@ const scoreColor = (s: number): string =>
 
 const stageMeta = (s: Stage) => STAGES.find((x) => x.value === s) ?? STAGES[1];
 
+// Website Outreach stage filters — each has a live predicate over a lead.
+const isNoWebsite = (r: Scraped) =>
+  !r.has_website || r.website_quality === "none" || r.website_status === "No website found";
+const isPoorWebsite = (r: Scraped) =>
+  ["poor", "outdated", "weak_mobile", "no_form"].includes(r.website_quality ?? "") ||
+  ["Facebook only", "Outdated website", "Poor mobile layout", "No enquiry form",
+   "Weak content", "Weak gallery/photos", "No reviews shown", "No clear services",
+   "Slow/confusing website"].includes(r.website_status ?? "");
+
+const WEB_FILTERS: { value: string; label: string; color: string; match: (r: Scraped) => boolean }[] = [
+  { value: "all", label: "All", color: C.dim, match: () => true },
+  { value: "new", label: "New", color: "#0EA5E9", match: (r) => r.outreach_stage === "new" },
+  { value: "no_website", label: "No website", color: C.teal, match: isNoWebsite },
+  { value: "poor_website", label: "Poor website", color: C.amber, match: isPoorWebsite },
+  { value: "contacted", label: "Contacted", color: "#06B6D4", match: (r) => r.outreach_stage === "contacted" },
+  { value: "no_answer", label: "No answer", color: "#3B82F6", match: (r) => r.outreach_stage === "no_answer" || r.last_call_outcome === "No answer" },
+  { value: "interested", label: "Interested", color: C.green, match: (r) => r.interested === true || r.outreach_stage === "interested" || r.last_call_outcome === "Interested" },
+  { value: "audit_sent", label: "Audit sent", color: "#7c3aed", match: (r) => !!(r.audit_sent || r.mini_audit_sent) },
+  { value: "proposal_sent", label: "Proposal sent", color: C.amber, match: (r) => !!r.proposal_sent },
+  { value: "won", label: "Won", color: "#22C55E", match: (r) => r.last_call_outcome === "Won" || r.outreach_stage === "converted" },
+  { value: "lost", label: "Lost", color: C.red, match: (r) => r.last_call_outcome === "Lost" || r.outreach_stage === "not_interested" || !!r.lost_reason && r.lost_reason !== "Not selected" },
+  { value: "do_not_call", label: "Do not call", color: "#9CA3AF", match: (r) => !!r.do_not_call },
+];
+
 
 const inp: React.CSSProperties = {
   width: "100%", padding: "9px 12px", borderRadius: 8,
@@ -354,6 +378,7 @@ export default function AdminTradeScraper() {
   const [filter, setFilter] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [filterStage, setFilterStage] = useState<Stage | "all">("all");
+  const [webFilter, setWebFilter] = useState<string>("all");
   const [hideContacted, setHideContacted] = useState(false);
   const [editing, setEditing] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -476,7 +501,10 @@ export default function AdminTradeScraper() {
 
   const filtered = useMemo(() => pipelineRows.filter((r) => {
     if (filterType !== "all" && r.trade_type !== filterType) return false;
-    if (filterStage !== "all" && r.outreach_stage !== filterStage) return false;
+    if (pipeline === "website") {
+      const wf = WEB_FILTERS.find((f) => f.value === webFilter);
+      if (wf && !wf.match(r)) return false;
+    } else if (filterStage !== "all" && r.outreach_stage !== filterStage) return false;
     if (hideContacted && r.contacted) return false;
     if (filter) {
       const s = filter.toLowerCase();
@@ -488,7 +516,7 @@ export default function AdminTradeScraper() {
       );
     }
     return true;
-  }), [pipelineRows, filter, filterType, filterStage, hideContacted]);
+  }), [pipelineRows, filter, filterType, filterStage, webFilter, pipeline, hideContacted]);
 
   // In the website pipeline, surface the strongest opportunities first.
   const sorted = useMemo(() => {
@@ -503,6 +531,14 @@ export default function AdminTradeScraper() {
     for (const r of pipelineRows) c[r.outreach_stage] = (c[r.outreach_stage] ?? 0) + 1;
     return c;
   }, [pipelineRows]);
+
+  const webCounts = useMemo(() => {
+    const c: Record<string, number> = {};
+    for (const f of WEB_FILTERS) c[f.value] = pipelineRows.filter(f.match).length;
+    return c;
+  }, [pipelineRows]);
+
+
 
   const pipelineCounts = useMemo(() => {
     let trade = 0, website = 0;
@@ -666,20 +702,35 @@ export default function AdminTradeScraper() {
 
       {/* Stage chips */}
       <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
-        {STAGES.map((s) => {
-          const active = filterStage === s.value;
-          return (
-            <button key={s.value} onClick={() => setFilterStage(s.value)} style={{
-              background: active ? s.color : "transparent",
-              color: active ? "#fff" : s.color,
-              border: `1px solid ${s.color}`,
-              borderRadius: 999, padding: "5px 12px", fontSize: 11, fontWeight: 700, cursor: "pointer",
-            }}>
-              {s.label} <span style={{ opacity: 0.7, marginLeft: 4 }}>{counts[s.value] ?? 0}</span>
-            </button>
-          );
-        })}
+        {pipeline === "website"
+          ? WEB_FILTERS.map((s) => {
+              const active = webFilter === s.value;
+              return (
+                <button key={s.value} onClick={() => setWebFilter(s.value)} style={{
+                  background: active ? s.color : "transparent",
+                  color: active ? "#fff" : s.color,
+                  border: `1px solid ${s.color}`,
+                  borderRadius: 999, padding: "5px 12px", fontSize: 11, fontWeight: 700, cursor: "pointer",
+                }}>
+                  {s.label} <span style={{ opacity: 0.7, marginLeft: 4 }}>{webCounts[s.value] ?? 0}</span>
+                </button>
+              );
+            })
+          : STAGES.map((s) => {
+              const active = filterStage === s.value;
+              return (
+                <button key={s.value} onClick={() => setFilterStage(s.value)} style={{
+                  background: active ? s.color : "transparent",
+                  color: active ? "#fff" : s.color,
+                  border: `1px solid ${s.color}`,
+                  borderRadius: 999, padding: "5px 12px", fontSize: 11, fontWeight: 700, cursor: "pointer",
+                }}>
+                  {s.label} <span style={{ opacity: 0.7, marginLeft: 4 }}>{counts[s.value] ?? 0}</span>
+                </button>
+              );
+            })}
       </div>
+
 
       <div style={{ display: "flex", gap: 10, marginBottom: 12, flexWrap: "wrap", alignItems: "center" }}>
         <input placeholder="Search name, address, phone, notes…" value={filter} onChange={(e) => setFilter(e.target.value)} style={{ ...inp, maxWidth: 320 }} />
