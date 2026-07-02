@@ -500,6 +500,23 @@ export default function AdminTradeScraper() {
                       {r.website && <div><a href={r.website} target="_blank" rel="noreferrer" style={{ color: C.green }}>website ↗</a></div>}
                       {!r.phone && !r.email && !r.website && <span style={{ color: C.dim }}>—</span>}
                     </td>
+                    {pipeline === "website" && (() => {
+                      const sc = webScore(r);
+                      return (
+                        <td style={{ padding: "10px 12px" }}>
+                          <div style={{
+                            display: "inline-flex", flexDirection: "column", alignItems: "center", gap: 2,
+                            background: "rgba(255,255,255,0.04)", border: `1px solid ${scoreColor(sc)}`,
+                            borderRadius: 10, padding: "6px 10px", minWidth: 52,
+                          }}>
+                            <span style={{ fontSize: 16, fontWeight: 800, color: scoreColor(sc), lineHeight: 1 }}>{sc}</span>
+                            <span style={{ fontSize: 8, color: C.dim, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                              {sc >= 70 ? "Hot" : sc >= 45 ? "Warm" : "Low"}
+                            </span>
+                          </div>
+                        </td>
+                      );
+                    })()}
                     {pipeline === "website" && (
                       <td style={{ padding: "10px 12px", minWidth: 180 }}>
                         {(() => {
