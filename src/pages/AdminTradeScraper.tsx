@@ -215,6 +215,26 @@ const WEB_FILTERS: { value: string; label: string; color: string; match: (r: Scr
   { value: "do_not_call", label: "Do not call", color: "#9CA3AF", match: (r) => !!r.do_not_call },
 ];
 
+// Effective follow-up date for a lead (next_follow_up_date preferred, then follow_up_at).
+const followUpDate = (r: Scraped): Date | null => {
+  const raw = r.next_follow_up_date || r.follow_up_at;
+  if (!raw) return null;
+  const d = new Date(raw);
+  return isNaN(d.getTime()) ? null : d;
+};
+const isFollowUpToday = (r: Scraped): boolean => {
+  const d = followUpDate(r);
+  if (!d) return false;
+  const now = new Date();
+  return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
+};
+const isFollowUpOverdue = (r: Scraped): boolean => {
+  const d = followUpDate(r);
+  if (!d) return false;
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  return d < today;
+};
+
 
 const inp: React.CSSProperties = {
   width: "100%", padding: "9px 12px", borderRadius: 8,
