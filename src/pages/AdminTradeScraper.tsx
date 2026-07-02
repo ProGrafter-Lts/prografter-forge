@@ -137,29 +137,45 @@ const WEB_FOCUS: { value: WebFocus; label: string; seed: WebQuality | null; noSi
 // Website-outreach opportunity score (0-100): higher = better prospect to sell a website to.
 // An established local business (lots of reviews, decent rating) with a missing/weak website
 // is the strongest target — they clearly have demand but a poor online presence.
+// Admin can manually override via the `website_score` field (see webScoreOf below).
 const webScore = (r: Scraped): number => {
   let score = 0;
   const q = r.website_quality;
-  if (!r.has_website || q === "none") score += 45;
-  else if (q === "poor" || q === "outdated") score += 30;
-  else if (q === "weak_mobile" || q === "no_form") score += 18;
-  else if (q === "ok") score += 4;
-  else score += 20; // not assessed yet — treat as a live unknown
+  const st = r.website_status;
 
-  const reviews = r.reviews_count ?? 0;
-  if (reviews >= 100) score += 30;
-  else if (reviews >= 40) score += 22;
-  else if (reviews >= 15) score += 14;
-  else if (reviews >= 5) score += 8;
+  // Website weaknesses (opportunity signals)
+  if (!r.has_website || q === "none" || st === "No website found") score += 30;
+  if (st === "Facebook only") score += 25;
+  if (q === "outdated" || st === "Outdated website") score += 20;
+  if (q === "weak_mobile" || st === "Poor mobile layout") score += 20;
+  if (q === "no_form" || st === "No enquiry form") score += 15;
+  if (st === "No reviews shown") score += 15;
+  if (st === "No clear services") score += 15;
+  if (st === "Weak gallery/photos") score += 15;
 
-  const rating = r.rating ?? 0;
-  if (rating >= 4.5) score += 15;
-  else if (rating >= 4.0) score += 10;
-  else if (rating >= 3.0) score += 4;
+  // Demand / reachability signals
+  if ((r.rating ?? 0) >= 4.3) score += 20;
+  if ((r.reviews_count ?? 0) >= 10) score += 15;
+  if (r.phone) score += 10;
+  // Local service / trade-based business — this pipeline is trade-focused.
+  score += 10;
+  // Active photos / social presence.
+  if (st === "Facebook only" || r.mini_audit_sent) score += 5;
 
-  if (r.phone) score += 5;
+  // Negative signals (poor prospect / off-limits)
+  if (st === "Strong website") score -= 30;
+  if (st === "Decent website") score -= 20;
+  if (r.do_not_call) score -= 30;
+  const lost = r.last_call_outcome === "Lost" || r.outreach_stage === "not_interested" ||
+    (!!r.lost_reason && r.lost_reason !== "Not selected");
+  if (lost) score -= 25;
+  if (r.last_call_outcome === "Do not call") score -= 50;
+
   return Math.max(0, Math.min(100, score));
 };
+
+// Resolve the effective score, respecting a manual admin override when set.
+const webScoreOf = (r: Scraped): number => r.website_score ?? webScore(r);
 
 const scoreColor = (s: number): string =>
   s >= 70 ? C.green : s >= 45 ? C.amber : C.dim;
