@@ -1045,6 +1045,36 @@ export default function AdminTradeScraper() {
           </table>
         </div>
       )}
+
+      {modal && (
+        <div
+          onClick={() => setModal(null)}
+          style={{
+            position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 60,
+            display: "flex", alignItems: "center", justifyContent: "center", padding: 20,
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: C.card, border: `1px solid ${C.border}`, borderRadius: 14,
+              width: "min(640px, 100%)", maxHeight: "85vh", display: "flex", flexDirection: "column",
+            }}
+          >
+            <div style={{ padding: "14px 18px", borderBottom: `1px solid ${C.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <strong style={{ color: C.bright }}>{modal.title}</strong>
+              <button onClick={() => setModal(null)} style={{ background: "transparent", color: C.dim, border: "none", cursor: "pointer", fontSize: 18 }}>×</button>
+            </div>
+            <pre style={{ margin: 0, padding: 18, overflow: "auto", whiteSpace: "pre-wrap", fontSize: 13, color: C.bright, fontFamily: "inherit" }}>
+              {modal.text}
+            </pre>
+            <div style={{ padding: "12px 18px", borderTop: `1px solid ${C.border}`, display: "flex", gap: 8, justifyContent: "flex-end" }}>
+              <button onClick={() => copyToClipboard(modal.text)} style={{ ...btn(true), padding: "7px 14px", fontSize: 12 }}>Copy</button>
+              <button onClick={() => setModal(null)} style={{ ...btn(false), padding: "7px 14px", fontSize: 12 }}>Close</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
