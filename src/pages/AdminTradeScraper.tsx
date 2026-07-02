@@ -1019,6 +1019,15 @@ export default function AdminTradeScraper() {
     }
     if (stage === "interested") patch.interested = true;
     if (stage === "not_interested") patch.interested = false;
+
+    // Follow-up suggestions driven by the new stage.
+    if (stage === "no_answer") {
+      patch.next_follow_up_date = inDays(2);
+      toast({ title: "Follow-up suggested", description: "No answer — try again in 2 days." });
+    } else if (stage === "interested") {
+      patch.next_follow_up_date = inDays(0);
+      toast({ title: "Send audit today", description: "Lead is interested — send the mini-audit while it's hot." });
+    }
     updateRow(row.id, patch as Partial<Scraped>);
   };
 
@@ -1030,12 +1039,24 @@ export default function AdminTradeScraper() {
     updateRow(row.id, { website_status: status });
   };
 
+  // Toggle "Do not call": on enable, clear future follow-up dates but keep the
+  // lead for compliance records. Call action buttons are disabled elsewhere.
+  const toggleDoNotCall = (row: Scraped) => {
+    const next = !row.do_not_call;
+    updateRow(row.id, next
+      ? { do_not_call: true, next_follow_up_date: null, follow_up_at: null }
+      : { do_not_call: false });
+    toast({ title: next ? "Marked do not call" : "Do not call cleared" });
+  };
+
   const toggleAudit = (row: Scraped) => {
     const next = !row.mini_audit_sent;
     updateRow(row.id, {
       mini_audit_sent: next,
       mini_audit_sent_at: next ? new Date().toISOString() : null,
+      ...(next ? { audit_sent: true, next_follow_up_date: inDays(3) } : {}),
     });
+    if (next) toast({ title: "Audit sent", description: "Follow-up suggested in 2-3 days." });
   };
 
   const toggleProposal = (row: Scraped) => {
@@ -1043,7 +1064,9 @@ export default function AdminTradeScraper() {
     updateRow(row.id, {
       proposal_sent: next,
       proposal_sent_at: next ? new Date().toISOString() : null,
+      ...(next ? { next_follow_up_date: inDays(4) } : {}),
     });
+    if (next) toast({ title: "Proposal sent", description: "Follow-up suggested in 3-5 days." });
   };
 
   const beginEdit = (r: Scraped) => {
