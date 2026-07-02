@@ -208,9 +208,14 @@ export default function AdminTradeScraper() {
     else load();
   };
 
-  const tradeTypes = Array.from(new Set(rows.map((r) => r.trade_type).filter(Boolean))) as string[];
+  const pipelineRows = useMemo(
+    () => rows.filter((r) => (r.pipeline ?? "trade") === pipeline),
+    [rows, pipeline],
+  );
 
-  const filtered = useMemo(() => rows.filter((r) => {
+  const tradeTypes = Array.from(new Set(pipelineRows.map((r) => r.trade_type).filter(Boolean))) as string[];
+
+  const filtered = useMemo(() => pipelineRows.filter((r) => {
     if (filterType !== "all" && r.trade_type !== filterType) return false;
     if (filterStage !== "all" && r.outreach_stage !== filterStage) return false;
     if (hideContacted && r.contacted) return false;
@@ -224,14 +229,21 @@ export default function AdminTradeScraper() {
       );
     }
     return true;
-  }), [rows, filter, filterType, filterStage, hideContacted]);
+  }), [pipelineRows, filter, filterType, filterStage, hideContacted]);
 
   const counts = useMemo(() => {
-    const c: Record<string, number> = { all: rows.length };
+    const c: Record<string, number> = { all: pipelineRows.length };
     for (const s of STAGES) if (s.value !== "all") c[s.value] = 0;
-    for (const r of rows) c[r.outreach_stage] = (c[r.outreach_stage] ?? 0) + 1;
+    for (const r of pipelineRows) c[r.outreach_stage] = (c[r.outreach_stage] ?? 0) + 1;
     return c;
+  }, [pipelineRows]);
+
+  const pipelineCounts = useMemo(() => {
+    let trade = 0, website = 0;
+    for (const r of rows) ((r.pipeline ?? "trade") === "website" ? (website++) : (trade++));
+    return { trade, website };
   }, [rows]);
+
 
   const exportCsv = () => {
     if (!filtered.length) return;
