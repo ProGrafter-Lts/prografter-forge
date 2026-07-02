@@ -168,6 +168,26 @@ export default function AdminTradeScraper() {
     updateRow(row.id, patch as Partial<Scraped>);
   };
 
+  const setWebQuality = (row: Scraped, q: WebQuality) => {
+    updateRow(row.id, { website_quality: q });
+  };
+
+  const toggleAudit = (row: Scraped) => {
+    const next = !row.mini_audit_sent;
+    updateRow(row.id, {
+      mini_audit_sent: next,
+      mini_audit_sent_at: next ? new Date().toISOString() : null,
+    });
+  };
+
+  const toggleProposal = (row: Scraped) => {
+    const next = !row.proposal_sent;
+    updateRow(row.id, {
+      proposal_sent: next,
+      proposal_sent_at: next ? new Date().toISOString() : null,
+    });
+  };
+
   const beginEdit = (r: Scraped) => {
     setEditing(r.id);
     setDraftNotes(r.notes ?? "");
