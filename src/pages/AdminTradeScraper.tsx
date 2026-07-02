@@ -337,7 +337,7 @@ function WebLeadDetails({ row, onSave, colSpan }: {
           <div style={section}>Website</div>
           <div style={grid}>
             <Field label="Website status"><Sel k="website_status" options={WEBSITE_STATUS_OPTIONS} /></Field>
-            <Field label={`Website score — auto ${webScore(d as unknown as Scraped)} (leave blank to auto-calculate)`}><input type="number" min={0} max={100} value={d.website_score ?? ""} onChange={(e) => set("website_score", e.target.value)} placeholder={`${webScore(d as unknown as Scraped)}`} style={smallInp} /></Field>
+            <Field label={`Website score — auto ${webScore({ ...row, ...d } as Scraped)} (leave blank to auto-calculate)`}><input type="number" min={0} max={100} value={d.website_score ?? ""} onChange={(e) => set("website_score", e.target.value)} placeholder={`${webScore({ ...row, ...d } as Scraped)}`} style={smallInp} /></Field>
             <Field label="Opportunity angle"><input value={d.opportunity_angle ?? ""} onChange={(e) => set("opportunity_angle", e.target.value)} placeholder="Strong reviews but website does not reflect quality…" style={smallInp} /></Field>
             <Field label="Main website issue"><input value={d.main_website_issue ?? ""} onChange={(e) => set("main_website_issue", e.target.value)} style={smallInp} /></Field>
           </div>
