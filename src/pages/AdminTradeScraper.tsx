@@ -67,6 +67,36 @@ const WEB_QUALITY: { value: WebQuality; label: string; color: string }[] = [
 const webQualityMeta = (q: WebQuality | null) =>
   WEB_QUALITY.find((x) => x.value === q) ?? null;
 
+// Website-outreach opportunity score (0-100): higher = better prospect to sell a website to.
+// An established local business (lots of reviews, decent rating) with a missing/weak website
+// is the strongest target — they clearly have demand but a poor online presence.
+const webScore = (r: Scraped): number => {
+  let score = 0;
+  const q = r.website_quality;
+  if (!r.has_website || q === "none") score += 45;
+  else if (q === "poor" || q === "outdated") score += 30;
+  else if (q === "weak_mobile" || q === "no_form") score += 18;
+  else if (q === "ok") score += 4;
+  else score += 20; // not assessed yet — treat as a live unknown
+
+  const reviews = r.reviews_count ?? 0;
+  if (reviews >= 100) score += 30;
+  else if (reviews >= 40) score += 22;
+  else if (reviews >= 15) score += 14;
+  else if (reviews >= 5) score += 8;
+
+  const rating = r.rating ?? 0;
+  if (rating >= 4.5) score += 15;
+  else if (rating >= 4.0) score += 10;
+  else if (rating >= 3.0) score += 4;
+
+  if (r.phone) score += 5;
+  return Math.max(0, Math.min(100, score));
+};
+
+const scoreColor = (s: number): string =>
+  s >= 70 ? C.green : s >= 45 ? C.amber : C.dim;
+
 const stageMeta = (s: Stage) => STAGES.find((x) => x.value === s) ?? STAGES[1];
 
 
