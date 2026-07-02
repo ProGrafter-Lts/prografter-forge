@@ -462,6 +462,7 @@ export default function AdminTradeScraper() {
   const [expanded, setExpanded] = useState<string | null>(null);
   const [draftNotes, setDraftNotes] = useState("");
   const [draftFollowUp, setDraftFollowUp] = useState("");
+  const [modal, setModal] = useState<{ title: string; text: string } | null>(null);
 
 
   const load = async () => {
