@@ -958,35 +958,65 @@ export default function AdminTradeScraper() {
                         <span style={{ color: C.dim }}>—</span>
                       )}
                     </td>
-                    <td style={{ padding: "10px 12px", maxWidth: 260 }}>
+                    <td style={{ padding: "10px 12px", maxWidth: 220 }}>
                       {isEditing ? (
                         <textarea value={draftNotes} onChange={(e) => setDraftNotes(e.target.value)} rows={3} style={{ ...inp, fontSize: 11 }} />
                       ) : (
                         <div
                           onClick={() => beginEdit(r)}
-                          title="Click to add or edit a note"
-                          style={{ color: r.notes ? C.bright : C.dim, fontSize: 11, whiteSpace: "pre-wrap", cursor: "pointer", minHeight: 18 }}
+                          title={r.notes || "Click to add or edit a note"}
+                          style={{
+                            color: r.notes ? C.bright : C.dim, fontSize: 11, cursor: "pointer", minHeight: 18,
+                            display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
+                            overflow: "hidden", textOverflow: "ellipsis",
+                          }}
                         >
                           {r.notes || "✎ Add note…"}
                         </div>
                       )}
                     </td>
-                    <td style={{ padding: "10px 12px", whiteSpace: "nowrap" }}>
+                    <td style={{ padding: "10px 12px" }}>
                       {isEditing ? (
                         <>
                           <button onClick={() => saveEdit(r)} style={{ ...btn(true), padding: "5px 10px", fontSize: 10, marginRight: 4 }}>Save</button>
                           <button onClick={() => setEditing(null)} style={{ background: "transparent", color: C.dim, border: "none", cursor: "pointer", fontSize: 11 }}>Cancel</button>
                         </>
                       ) : (
-                        <>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: 4, maxWidth: 220 }}>
+                          <button onClick={() => beginEdit(r)} style={{ ...btn(false), padding: "5px 10px", fontSize: 10 }}>Edit</button>
                           {pipeline === "website" && (
-                            <button onClick={() => setExpanded(isExpanded ? null : r.id)} style={{ ...btn(false), padding: "5px 10px", fontSize: 10, marginRight: 4 }}>
-                              {isExpanded ? "Close ▲" : "Details ▾"}
-                            </button>
+                            <>
+                              <button onClick={() => setModal({ title: `Call script — ${r.trade_name}`, text: buildCallScript(r) })} style={{ ...btn(false), padding: "5px 10px", fontSize: 10 }}>Call script</button>
+                              <button onClick={() => setModal({ title: `Website audit — ${r.trade_name}`, text: buildAuditText(r) })} style={{ ...btn(false), padding: "5px 10px", fontSize: 10 }}>Build audit</button>
+                              <button
+                                onClick={() => toggleAudit(r)}
+                                style={{
+                                  background: r.mini_audit_sent ? C.green : "transparent",
+                                  color: r.mini_audit_sent ? "#fff" : C.green,
+                                  border: `1px solid ${C.green}`, borderRadius: 8,
+                                  padding: "5px 10px", fontSize: 10, fontWeight: 700, cursor: "pointer",
+                                }}
+                              >
+                                {r.mini_audit_sent ? "✓ Audit sent" : "Mark audit sent"}
+                              </button>
+                              <button
+                                onClick={() => toggleProposal(r)}
+                                style={{
+                                  background: r.proposal_sent ? "#7c3aed" : "transparent",
+                                  color: r.proposal_sent ? "#fff" : "#a78bfa",
+                                  border: "1px solid #7c3aed", borderRadius: 8,
+                                  padding: "5px 10px", fontSize: 10, fontWeight: 700, cursor: "pointer",
+                                }}
+                              >
+                                {r.proposal_sent ? "✓ Proposal" : "Proposal"}
+                              </button>
+                              <button onClick={() => setExpanded(isExpanded ? null : r.id)} style={{ ...btn(false), padding: "5px 10px", fontSize: 10 }}>
+                                {isExpanded ? "Close ▲" : "Details ▾"}
+                              </button>
+                            </>
                           )}
-                          <button onClick={() => beginEdit(r)} style={{ ...btn(false), padding: "5px 10px", fontSize: 10, marginRight: 4 }}>Edit</button>
                           <button onClick={() => deleteRow(r)} style={{ background: "transparent", color: C.red, border: "none", cursor: "pointer", fontSize: 11 }}>Delete</button>
-                        </>
+                        </div>
                       )}
                     </td>
                   </tr>
