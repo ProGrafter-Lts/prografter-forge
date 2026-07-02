@@ -877,12 +877,28 @@ export default function AdminTradeScraper() {
                         </>
                       ) : (
                         <>
+                          {pipeline === "website" && (
+                            <button onClick={() => setExpanded(isExpanded ? null : r.id)} style={{ ...btn(false), padding: "5px 10px", fontSize: 10, marginRight: 4 }}>
+                              {isExpanded ? "Close ▲" : "Details ▾"}
+                            </button>
+                          )}
                           <button onClick={() => beginEdit(r)} style={{ ...btn(false), padding: "5px 10px", fontSize: 10, marginRight: 4 }}>Edit</button>
                           <button onClick={() => deleteRow(r)} style={{ background: "transparent", color: C.red, border: "none", cursor: "pointer", fontSize: 11 }}>Delete</button>
                         </>
                       )}
                     </td>
                   </tr>
+                  {isExpanded && pipeline === "website" && (
+                    <WebLeadDetails
+                      row={r}
+                      colSpan={10}
+                      onSave={async (patch) => {
+                        await updateRow(r.id, patch);
+                        toast({ title: "Details saved" });
+                      }}
+                    />
+                  )}
+                  </React.Fragment>
                 );
               })}
               {!filtered.length && (
