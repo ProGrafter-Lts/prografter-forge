@@ -547,12 +547,50 @@ function buildAuditEmail(r: Scraped, auditText: string): string {
   ].join("\n");
 }
 
-function AuditBuilderModal({ row, onClose, onSave, onMarkSent, onEmail }: {
+function buildProposalEmail(r: Scraped, a: AuditState): string {
+  const business = r.trade_name || "your business";
+  const contact = r.contact_name || "there";
+  const pkg = a.suggestedPackage.trim() || (r.package_recommended && r.package_recommended !== "Not selected" ? r.package_recommended : "[package_recommended]");
+  const price = a.suggestedPrice.trim() || (r.quoted_value ? String(r.quoted_value) : "[quoted_value]");
+  return [
+    `Subject: Quick website review for ${business}`,
+    "",
+    `Hi ${contact},`,
+    "",
+    "Thanks for taking the time to speak today.",
+    "",
+    "I had a quick look over your online presence and put together a few notes on where your website could be improved so it better reflects the quality of your business.",
+    "",
+    "The main opportunity is to make it clearer, more modern, easier to use on mobile, and more focused on turning visitors into enquiries.",
+    "",
+    `Based on what I've seen, I think the best fit would be the ${pkg} package.`,
+    "",
+    "This would include:",
+    "",
+    "- Clean modern design",
+    "- Mobile-friendly layout",
+    "- Clear service sections",
+    "- Gallery or examples of work",
+    "- Reviews/testimonials",
+    "- Click-to-call and enquiry form",
+    "- Basic local SEO structure",
+    "",
+    `The price for this would usually be around £${price}.`,
+    "",
+    "There is also an optional care plan from £49/month if you would like help with updates, photos, changes and ongoing improvements.",
+    "",
+    "Kind regards,",
+    "[caller name]",
+  ].join("\n");
+}
+
+function AuditBuilderModal({ row, onClose, onSave, onMarkSent, onSaveNotes, onMarkProposal }: {
   row: Scraped;
   onClose: () => void;
   onSave: (patch: Partial<Scraped>, text: string) => void;
   onMarkSent: (patch: Partial<Scraped>, text: string) => void;
-  onEmail: (text: string) => void;
+  onSaveNotes: (notes: string) => void;
+  onMarkProposal: (patch: Partial<Scraped>) => void;
 }) {
   const [a, setA] = useState<AuditState>({
     issues: [
@@ -566,7 +604,9 @@ function AuditBuilderModal({ row, onClose, onSave, onMarkSent, onEmail }: {
     suggestedPrice: row.quoted_value ? String(row.quoted_value) : "",
     carePlan: row.monthly_care_price ? `£${row.monthly_care_price}/month` : "",
   });
+  const [showEmail, setShowEmail] = useState(false);
   const text = useMemo(() => buildMiniAudit(row, a), [row, a]);
+  const emailText = useMemo(() => buildProposalEmail(row, a), [row, a]);
   const toggleIssue = (i: string) =>
     setA((p) => ({ ...p, issues: p.issues.includes(i) ? p.issues.filter((x) => x !== i) : [...p.issues, i] }));
   const patch = (): Partial<Scraped> => ({
@@ -615,9 +655,29 @@ function AuditBuilderModal({ row, onClose, onSave, onMarkSent, onEmail }: {
           <button onClick={() => copyToClipboard(text)} style={{ ...btn(true), padding: "7px 14px", fontSize: 12 }}>Copy audit</button>
           <button onClick={() => onSave(patch(), text)} style={{ ...btn(false), padding: "7px 14px", fontSize: 12 }}>Save audit to lead</button>
           <button onClick={() => onMarkSent({ ...patch(), mini_audit_sent: true, mini_audit_sent_at: new Date().toISOString() }, text)} style={{ background: "transparent", color: C.green, border: `1px solid ${C.green}`, borderRadius: 8, padding: "7px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>Mark audit sent</button>
-          <button onClick={() => onEmail(buildAuditEmail(row, text))} style={{ background: "transparent", color: C.teal, border: `1px solid ${C.teal}`, borderRadius: 8, padding: "7px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>Generate email</button>
+          <button onClick={() => setShowEmail(true)} style={{ background: C.teal, color: "#00110f", border: `1px solid ${C.teal}`, borderRadius: 8, padding: "7px 12px", fontSize: 12, fontWeight: 800, cursor: "pointer" }}>Generate email</button>
         </div>
       </div>
+
+      {showEmail && (
+        <div onClick={(e) => { e.stopPropagation(); setShowEmail(false); }} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 110, padding: 16 }}>
+          <div onClick={(e) => e.stopPropagation()} style={{ background: C.deep, border: `1px solid ${C.border}`, borderRadius: 14, width: "100%", maxWidth: 640, maxHeight: "90vh", display: "flex", flexDirection: "column" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 18px", borderBottom: `1px solid ${C.border}` }}>
+              <strong style={{ color: C.bright }}>Proposal email — {row.trade_name}</strong>
+              <button onClick={() => setShowEmail(false)} style={{ background: "transparent", color: C.dim, border: "none", cursor: "pointer", fontSize: 18 }}>×</button>
+            </div>
+            <div style={{ padding: 18, overflowY: "auto", flex: 1 }}>
+              <pre style={{ margin: 0, padding: 14, background: "rgba(0,0,0,0.25)", borderRadius: 10, whiteSpace: "pre-wrap", color: C.bright, fontSize: 12.5, lineHeight: 1.55, fontFamily: "inherit" }}>{emailText}</pre>
+            </div>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", padding: "12px 18px", borderTop: `1px solid ${C.border}` }}>
+              <button onClick={() => copyToClipboard(emailText)} style={{ ...btn(true), padding: "7px 14px", fontSize: 12 }}>Copy email</button>
+              <button onClick={() => onSaveNotes(emailText)} style={{ ...btn(false), padding: "7px 14px", fontSize: 12 }}>Save to lead notes</button>
+              <button onClick={() => onMarkSent({ ...patch(), mini_audit_sent: true, mini_audit_sent_at: new Date().toISOString() }, text)} style={{ background: "transparent", color: C.green, border: `1px solid ${C.green}`, borderRadius: 8, padding: "7px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>Mark audit sent</button>
+              <button onClick={() => onMarkProposal({ ...patch(), proposal_sent: true, proposal_sent_at: new Date().toISOString() })} style={{ background: "transparent", color: C.amber, border: `1px solid ${C.amber}`, borderRadius: 8, padding: "7px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>Mark proposal sent</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -1480,9 +1540,15 @@ export default function AdminTradeScraper() {
             setAuditLead(null);
             toast({ title: "Audit marked as sent" });
           }}
-          onEmail={(text) => {
+          onSaveNotes={async (notes) => {
+            await updateRow(auditLead.id, { notes });
+            setAuditLead((prev) => (prev ? { ...prev, notes } as Scraped : prev));
+            toast({ title: "Email saved to lead notes" });
+          }}
+          onMarkProposal={async (patch) => {
+            await updateRow(auditLead.id, patch);
             setAuditLead(null);
-            setModal({ title: `Audit email — ${auditLead.trade_name}`, text });
+            toast({ title: "Proposal marked as sent" });
           }}
         />
       )}
