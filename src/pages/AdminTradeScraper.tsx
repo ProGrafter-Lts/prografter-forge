@@ -5,6 +5,8 @@ import { toast } from "@/hooks/use-toast";
 import Logo from "@/components/Logo";
 
 type Stage = "new" | "contacted" | "no_answer" | "follow_up" | "interested" | "not_interested" | "converted";
+type Pipeline = "trade" | "website";
+type WebQuality = "none" | "poor" | "outdated" | "weak_mobile" | "no_form" | "ok";
 
 type Scraped = {
   id: string;
@@ -28,6 +30,12 @@ type Scraped = {
   last_contacted_at: string | null;
   notes: string | null;
   last_scraped_at: string;
+  pipeline: Pipeline;
+  website_quality: WebQuality | null;
+  mini_audit_sent: boolean;
+  mini_audit_sent_at: string | null;
+  proposal_sent: boolean;
+  proposal_sent_at: string | null;
 };
 
 const C = {
@@ -47,7 +55,20 @@ const STAGES: { value: Stage | "all"; label: string; color: string }[] = [
   { value: "converted", label: "Converted", color: "#7c3aed" },
 ];
 
+const WEB_QUALITY: { value: WebQuality; label: string; color: string }[] = [
+  { value: "none", label: "No website", color: C.red },
+  { value: "poor", label: "Poor / weak", color: C.amber },
+  { value: "outdated", label: "Outdated", color: C.amber },
+  { value: "weak_mobile", label: "Weak mobile", color: "#0EA5E9" },
+  { value: "no_form", label: "No enquiry form", color: "#7c3aed" },
+  { value: "ok", label: "Looks OK", color: C.green },
+];
+
+const webQualityMeta = (q: WebQuality | null) =>
+  WEB_QUALITY.find((x) => x.value === q) ?? null;
+
 const stageMeta = (s: Stage) => STAGES.find((x) => x.value === s) ?? STAGES[1];
+
 
 const inp: React.CSSProperties = {
   width: "100%", padding: "9px 12px", borderRadius: 8,
@@ -67,9 +88,11 @@ const btn = (primary = true): React.CSSProperties => ({
 export default function AdminTradeScraper() {
   const [rows, setRows] = useState<Scraped[]>([]);
   const [loading, setLoading] = useState(true);
+  const [pipeline, setPipeline] = useState<Pipeline>("trade");
   const [tradeType, setTradeType] = useState("electricians");
   const [location, setLocation] = useState("Nottingham, Nottinghamshire");
   const [limit, setLimit] = useState(10);
+  const [noWebsiteOnly, setNoWebsiteOnly] = useState(true);
   const [running, setRunning] = useState(false);
   const [filter, setFilter] = useState("");
   const [filterType, setFilterType] = useState("all");
@@ -78,6 +101,7 @@ export default function AdminTradeScraper() {
   const [editing, setEditing] = useState<string | null>(null);
   const [draftNotes, setDraftNotes] = useState("");
   const [draftFollowUp, setDraftFollowUp] = useState("");
+
 
   const load = async () => {
     setLoading(true);
@@ -95,13 +119,19 @@ export default function AdminTradeScraper() {
 
   const runScrape = async () => {
     if (!tradeType.trim()) {
-      toast({ title: "Pick a trade type", variant: "destructive" });
+      toast({ title: pipeline === "website" ? "Pick a business type" : "Pick a trade type", variant: "destructive" });
       return;
     }
     setRunning(true);
     const { data: { session } } = await supabase.auth.getSession();
     const { data, error } = await supabase.functions.invoke("scrape-trades", {
-      body: { trade_type: tradeType, location, limit },
+      body: {
+        trade_type: tradeType,
+        location,
+        limit,
+        pipeline,
+        no_website_only: pipeline === "website" ? noWebsiteOnly : false,
+      },
       headers: session ? { Authorization: `Bearer ${session.access_token}` } : {},
     });
     setRunning(false);
@@ -111,12 +141,13 @@ export default function AdminTradeScraper() {
     }
     toast({
       title: "Scrape complete",
-      description: `${(data as { upserted?: number }).upserted ?? 0} trades added/updated`,
+      description: `${(data as { upserted?: number }).upserted ?? 0} ${pipeline === "website" ? "businesses" : "trades"} added/updated`,
     });
     load();
   };
 
   const updateRow = async (id: string, patch: Partial<Scraped>) => {
+
     const { error } = await supabase.from("scraped_trades").update(patch as never).eq("id", id);
     if (error) {
       toast({ title: "Update failed", description: error.message, variant: "destructive" });
@@ -135,6 +166,26 @@ export default function AdminTradeScraper() {
     if (stage === "interested") patch.interested = true;
     if (stage === "not_interested") patch.interested = false;
     updateRow(row.id, patch as Partial<Scraped>);
+  };
+
+  const setWebQuality = (row: Scraped, q: WebQuality) => {
+    updateRow(row.id, { website_quality: q });
+  };
+
+  const toggleAudit = (row: Scraped) => {
+    const next = !row.mini_audit_sent;
+    updateRow(row.id, {
+      mini_audit_sent: next,
+      mini_audit_sent_at: next ? new Date().toISOString() : null,
+    });
+  };
+
+  const toggleProposal = (row: Scraped) => {
+    const next = !row.proposal_sent;
+    updateRow(row.id, {
+      proposal_sent: next,
+      proposal_sent_at: next ? new Date().toISOString() : null,
+    });
   };
 
   const beginEdit = (r: Scraped) => {
@@ -157,9 +208,14 @@ export default function AdminTradeScraper() {
     else load();
   };
 
-  const tradeTypes = Array.from(new Set(rows.map((r) => r.trade_type).filter(Boolean))) as string[];
+  const pipelineRows = useMemo(
+    () => rows.filter((r) => (r.pipeline ?? "trade") === pipeline),
+    [rows, pipeline],
+  );
 
-  const filtered = useMemo(() => rows.filter((r) => {
+  const tradeTypes = Array.from(new Set(pipelineRows.map((r) => r.trade_type).filter(Boolean))) as string[];
+
+  const filtered = useMemo(() => pipelineRows.filter((r) => {
     if (filterType !== "all" && r.trade_type !== filterType) return false;
     if (filterStage !== "all" && r.outreach_stage !== filterStage) return false;
     if (hideContacted && r.contacted) return false;
@@ -173,38 +229,61 @@ export default function AdminTradeScraper() {
       );
     }
     return true;
-  }), [rows, filter, filterType, filterStage, hideContacted]);
+  }), [pipelineRows, filter, filterType, filterStage, hideContacted]);
 
   const counts = useMemo(() => {
-    const c: Record<string, number> = { all: rows.length };
+    const c: Record<string, number> = { all: pipelineRows.length };
     for (const s of STAGES) if (s.value !== "all") c[s.value] = 0;
-    for (const r of rows) c[r.outreach_stage] = (c[r.outreach_stage] ?? 0) + 1;
+    for (const r of pipelineRows) c[r.outreach_stage] = (c[r.outreach_stage] ?? 0) + 1;
     return c;
+  }, [pipelineRows]);
+
+  const pipelineCounts = useMemo(() => {
+    let trade = 0, website = 0;
+    for (const r of rows) ((r.pipeline ?? "trade") === "website" ? (website++) : (trade++));
+    return { trade, website };
   }, [rows]);
+
 
   const exportCsv = () => {
     if (!filtered.length) return;
-    const header = ["Trade name","Type","Phone","Email","Website","Address","Postcode","City","Rating","Reviews","Stage","Interested","Follow-up","Last contacted","Notes"];
+    const isWeb = pipeline === "website";
+    const header = isWeb
+      ? ["Business name","Type","Phone","Email","Website","Website quality","Audit sent","Proposal sent","Address","Postcode","City","Rating","Reviews","Stage","Interested","Follow-up","Last contacted","Notes"]
+      : ["Trade name","Type","Phone","Email","Website","Address","Postcode","City","Rating","Reviews","Stage","Interested","Follow-up","Last contacted","Notes"];
     const lines = [header.join(",")];
     for (const r of filtered) {
-      const cells = [
-        r.trade_name, r.trade_type ?? "", r.phone ?? "", r.email ?? "",
-        r.website ?? "", r.address ?? "", r.postcode ?? "", r.city ?? "",
-        r.rating?.toString() ?? "", r.reviews_count?.toString() ?? "",
-        r.outreach_stage,
-        r.interested == null ? "" : r.interested ? "yes" : "no",
-        r.follow_up_at ?? "", r.last_contacted_at ?? "", r.notes ?? "",
-      ].map((v) => `"${String(v).replace(/"/g, '""')}"`);
+      const cells = (isWeb
+        ? [
+            r.trade_name, r.trade_type ?? "", r.phone ?? "", r.email ?? "",
+            r.website ?? "", webQualityMeta(r.website_quality)?.label ?? "",
+            r.mini_audit_sent ? "yes" : "no", r.proposal_sent ? "yes" : "no",
+            r.address ?? "", r.postcode ?? "", r.city ?? "",
+            r.rating?.toString() ?? "", r.reviews_count?.toString() ?? "",
+            r.outreach_stage,
+            r.interested == null ? "" : r.interested ? "yes" : "no",
+            r.follow_up_at ?? "", r.last_contacted_at ?? "", r.notes ?? "",
+          ]
+        : [
+            r.trade_name, r.trade_type ?? "", r.phone ?? "", r.email ?? "",
+            r.website ?? "", r.address ?? "", r.postcode ?? "", r.city ?? "",
+            r.rating?.toString() ?? "", r.reviews_count?.toString() ?? "",
+            r.outreach_stage,
+            r.interested == null ? "" : r.interested ? "yes" : "no",
+            r.follow_up_at ?? "", r.last_contacted_at ?? "", r.notes ?? "",
+          ]
+      ).map((v) => `"${String(v).replace(/"/g, '""')}"`);
       lines.push(cells.join(","));
     }
     const blob = new Blob([lines.join("\n")], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `trades-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = `${isWeb ? "website-outreach" : "trades"}-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
+
 
   return (
     <div style={{ minHeight: "100vh", background: C.deep, fontFamily: "system-ui, sans-serif", color: C.bright, padding: "20px 24px" }}>
@@ -212,10 +291,14 @@ export default function AdminTradeScraper() {
         <div>
           <div className="font-heading tracking-wider" style={{ fontSize: 22, fontWeight: 700 }}>
             <Logo variant="light" className="h-9 w-auto inline-block" />
-            <span style={{ color: C.dim, fontSize: 12, marginLeft: 12 }}>OUTREACH PIPELINE</span>
+            <span style={{ color: C.dim, fontSize: 12, marginLeft: 12 }}>
+              {pipeline === "website" ? "WEBSITE OUTREACH PIPELINE" : "TRADE OUTREACH PIPELINE"}
+            </span>
           </div>
           <p style={{ fontSize: 12, color: C.dim, margin: "4px 0 0" }}>
-            Scrape, track outreach, log follow-ups. Admin only.
+            {pipeline === "website"
+              ? "Find local businesses with weak or missing websites, log calls, send mini-audits and proposals. Admin only."
+              : "Scrape local trades, track outreach, log follow-ups. Admin only."}
           </p>
         </div>
         <div style={{ display: "flex", gap: 8 }}>
@@ -228,14 +311,45 @@ export default function AdminTradeScraper() {
         </div>
       </div>
 
+      {/* Pipeline tabs */}
+      <div style={{ display: "flex", gap: 8, marginBottom: 20, flexWrap: "wrap" }}>
+        {([
+          { value: "trade" as Pipeline, label: "🔧 Trade Outreach", count: pipelineCounts.trade },
+          { value: "website" as Pipeline, label: "🌐 Website Outreach", count: pipelineCounts.website },
+        ]).map((t) => {
+          const active = pipeline === t.value;
+          return (
+            <button
+              key={t.value}
+              onClick={() => { setPipeline(t.value); setFilterStage("all"); setFilterType("all"); setEditing(null); }}
+              style={{
+                background: active ? C.teal : "rgba(255,255,255,0.04)",
+                color: active ? "#fff" : C.bright,
+                border: `1px solid ${active ? C.teal : C.border}`,
+                borderRadius: 10, padding: "10px 18px", fontSize: 13, fontWeight: 700, cursor: "pointer",
+                display: "inline-flex", alignItems: "center", gap: 8,
+              }}
+            >
+              {t.label}
+              <span style={{
+                background: active ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.08)",
+                borderRadius: 999, padding: "1px 8px", fontSize: 11,
+              }}>{t.count}</span>
+            </button>
+          );
+        })}
+      </div>
+
       <div style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${C.border}`, borderRadius: 12, padding: 16, marginBottom: 20 }}>
         <p style={{ fontSize: 11, fontWeight: 700, color: C.teal, letterSpacing: "0.08em", textTransform: "uppercase", margin: "0 0 12px" }}>
-          New scrape
+          {pipeline === "website" ? "Find businesses (website prospects)" : "New scrape"}
         </p>
         <div style={{ display: "grid", gridTemplateColumns: "2fr 2fr 1fr auto", gap: 10, alignItems: "end" }}>
           <div>
-            <label style={{ fontSize: 10, color: C.dim, display: "block", marginBottom: 4 }}>Trade type</label>
-            <input value={tradeType} onChange={(e) => setTradeType(e.target.value)} placeholder="electricians" style={inp} />
+            <label style={{ fontSize: 10, color: C.dim, display: "block", marginBottom: 4 }}>
+              {pipeline === "website" ? "Business type" : "Trade type"}
+            </label>
+            <input value={tradeType} onChange={(e) => setTradeType(e.target.value)} placeholder={pipeline === "website" ? "e.g. plumbers, cafes, garages" : "electricians"} style={inp} />
           </div>
           <div>
             <label style={{ fontSize: 10, color: C.dim, display: "block", marginBottom: 4 }}>Location</label>
@@ -249,10 +363,17 @@ export default function AdminTradeScraper() {
             {running ? "Scraping…" : "🔎 Run scrape"}
           </button>
         </div>
+        {pipeline === "website" && (
+          <label style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color: C.dim, cursor: "pointer", marginTop: 12 }}>
+            <input type="checkbox" checked={noWebsiteOnly} onChange={(e) => setNoWebsiteOnly(e.target.checked)} />
+            Only keep businesses with no website (best cold-outreach targets)
+          </label>
+        )}
         <p style={{ fontSize: 10, color: C.dim, margin: "10px 0 0" }}>
           Re-running the same search won't create duplicates — existing leads are refreshed and your stage/notes are preserved.
         </p>
       </div>
+
 
       {/* Stage chips */}
       <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
@@ -301,8 +422,9 @@ export default function AdminTradeScraper() {
           Hide already-contacted
         </label>
         <span style={{ color: C.dim, fontSize: 12, marginLeft: "auto" }}>
-          {filtered.length} of {rows.length}
+          {filtered.length} of {pipelineRows.length}
         </span>
+
       </div>
 
       {loading ? (
@@ -312,8 +434,9 @@ export default function AdminTradeScraper() {
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
             <thead style={{ background: "rgba(255,255,255,0.04)" }}>
               <tr style={{ textAlign: "left", color: C.dim, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                <th style={{ padding: "10px 12px" }}>Trade</th>
+                <th style={{ padding: "10px 12px" }}>{pipeline === "website" ? "Business" : "Trade"}</th>
                 <th style={{ padding: "10px 12px" }}>Contact</th>
+                {pipeline === "website" && <th style={{ padding: "10px 12px" }}>Website / Outreach</th>}
                 <th style={{ padding: "10px 12px" }}>Location</th>
                 <th style={{ padding: "10px 12px" }}>Rating</th>
                 <th style={{ padding: "10px 12px" }}>Stage</th>
@@ -321,6 +444,7 @@ export default function AdminTradeScraper() {
                 <th style={{ padding: "10px 12px" }}>Notes</th>
                 <th style={{ padding: "10px 12px" }}></th>
               </tr>
+
             </thead>
             <tbody>
               {filtered.map((r) => {
@@ -338,7 +462,56 @@ export default function AdminTradeScraper() {
                       {r.website && <div><a href={r.website} target="_blank" rel="noreferrer" style={{ color: C.green }}>website ↗</a></div>}
                       {!r.phone && !r.email && !r.website && <span style={{ color: C.dim }}>—</span>}
                     </td>
+                    {pipeline === "website" && (
+                      <td style={{ padding: "10px 12px", minWidth: 180 }}>
+                        {(() => {
+                          const wm = webQualityMeta(r.website_quality);
+                          return (
+                            <select
+                              value={r.website_quality ?? ""}
+                              onChange={(e) => setWebQuality(r, e.target.value as WebQuality)}
+                              style={{
+                                ...inp, padding: "5px 8px", fontSize: 11, fontWeight: 700, width: "auto",
+                                borderColor: wm?.color ?? C.border, color: wm?.color ?? C.dim,
+                              }}
+                            >
+                              <option value="" style={{ color: "#000" }}>Not assessed</option>
+                              {WEB_QUALITY.map((q) => (
+                                <option key={q.value} value={q.value} style={{ color: "#000" }}>{q.label}</option>
+                              ))}
+                            </select>
+                          );
+                        })()}
+                        <div style={{ display: "flex", gap: 6, marginTop: 6, flexWrap: "wrap" }}>
+                          <button
+                            onClick={() => toggleAudit(r)}
+                            title="Toggle whether a mini website audit has been sent"
+                            style={{
+                              background: r.mini_audit_sent ? C.green : "transparent",
+                              color: r.mini_audit_sent ? "#fff" : C.green,
+                              border: `1px solid ${C.green}`, borderRadius: 999,
+                              padding: "3px 9px", fontSize: 10, fontWeight: 700, cursor: "pointer",
+                            }}
+                          >
+                            {r.mini_audit_sent ? "✓ Audit sent" : "Audit sent?"}
+                          </button>
+                          <button
+                            onClick={() => toggleProposal(r)}
+                            title="Toggle whether a proposal has been sent"
+                            style={{
+                              background: r.proposal_sent ? "#7c3aed" : "transparent",
+                              color: r.proposal_sent ? "#fff" : "#a78bfa",
+                              border: "1px solid #7c3aed", borderRadius: 999,
+                              padding: "3px 9px", fontSize: 10, fontWeight: 700, cursor: "pointer",
+                            }}
+                          >
+                            {r.proposal_sent ? "✓ Proposal sent" : "Proposal sent?"}
+                          </button>
+                        </div>
+                      </td>
+                    )}
                     <td style={{ padding: "10px 12px", color: C.dim, maxWidth: 200 }}>
+
                       {[r.city, r.postcode].filter(Boolean).join(" · ") || r.address || "—"}
                     </td>
                     <td style={{ padding: "10px 12px" }}>
@@ -404,9 +577,12 @@ export default function AdminTradeScraper() {
                 );
               })}
               {!filtered.length && (
-                <tr><td colSpan={8} style={{ padding: 40, textAlign: "center", color: C.dim }}>
-                  No trades match. Try a different filter or run a scrape above.
+                <tr><td colSpan={pipeline === "website" ? 9 : 8} style={{ padding: 40, textAlign: "center", color: C.dim }}>
+                  {pipeline === "website"
+                    ? "No website prospects match. Try a different filter or run a search above."
+                    : "No trades match. Try a different filter or run a scrape above."}
                 </td></tr>
+
               )}
             </tbody>
           </table>

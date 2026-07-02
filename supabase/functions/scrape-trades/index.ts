@@ -137,6 +137,9 @@ serve(async (req) => {
     const tradeType = String(body.trade_type ?? "").trim();
     const location = String(body.location ?? "Nottinghamshire").trim();
     const limit = Math.min(20, Math.max(1, parseInt(body.limit ?? "10", 10)));
+    const pipeline = body.pipeline === "website" ? "website" : "trade";
+    // In website-outreach mode, only keep businesses with no website (best targets).
+    const websiteOnlyNoSite = pipeline === "website" && body.no_website_only === true;
     if (!tradeType) {
       return new Response(JSON.stringify({ error: "trade_type required (e.g. 'electricians')" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -154,13 +157,16 @@ serve(async (req) => {
       const details = await placeDetails(r.place_id);
       if (!details) continue;
       const { postcode, city } = extractAddressBits(details.address_components);
-      const row = {
+      const hasWebsite = !!details.website;
+      // In website-outreach mode, optionally skip businesses that already have a website.
+      if (websiteOnlyNoSite && hasWebsite) continue;
+      const row: Record<string, unknown> = {
         trade_name: details.name ?? r.name,
         trade_type: tradeType,
         phone: details.formatted_phone_number ?? details.international_phone_number ?? null,
         email: null, // Google Places does NOT return email — must be enriched separately
         website: details.website ?? null,
-        has_website: !!details.website,
+        has_website: hasWebsite,
         address: details.formatted_address ?? r.formatted_address ?? null,
         postcode,
         city,
@@ -169,7 +175,12 @@ serve(async (req) => {
         source: "google_places",
         source_id: r.place_id,
         search_query: query,
+        pipeline,
       };
+      // Seed an initial website assessment for the website-outreach pipeline.
+      if (pipeline === "website") {
+        row.website_quality = hasWebsite ? null : "none";
+      }
 
       const { data, error } = await supabase
         .from("scraped_trades")
