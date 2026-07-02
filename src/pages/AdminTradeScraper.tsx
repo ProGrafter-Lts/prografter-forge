@@ -73,6 +73,66 @@ const WEBSITE_STATUS_OPTIONS = [
   "Decent website", "Strong website", "Not suitable",
 ];
 const PACKAGE_OPTIONS = ["Not selected", "Starter Site", "Growth Site", "Monthly Care Only", "Custom"];
+
+type PackagePreset = {
+  name: string;
+  priceRange: string;
+  defaultPrice: number;
+  isCare?: boolean;
+  includes: string[];
+};
+
+const PACKAGE_PRESETS: PackagePreset[] = [
+  {
+    name: "Starter Site",
+    priceRange: "£495–£795",
+    defaultPrice: 795,
+    includes: [
+      "One-page professional website",
+      "Mobile-friendly design",
+      "Services section",
+      "About section",
+      "Gallery",
+      "Reviews/testimonials section",
+      "Contact form",
+      "Click-to-call button",
+      "Google Maps/location section",
+      "Basic local SEO setup",
+    ],
+  },
+  {
+    name: "Growth Site",
+    priceRange: "£995–£1,495",
+    defaultPrice: 1495,
+    includes: [
+      "4–6 page website",
+      "Home page",
+      "About page",
+      "Services pages",
+      "Gallery/case studies",
+      "Reviews section",
+      "Enquiry form",
+      "Booking or availability option",
+      "Local SEO page structure",
+      "Analytics/Search Console setup",
+      "Basic content rewrite",
+    ],
+  },
+  {
+    name: "Monthly Care",
+    priceRange: "£49–£99/month",
+    defaultPrice: 49,
+    isCare: true,
+    includes: [
+      "Small text changes",
+      "Add new photos",
+      "Add testimonials",
+      "Basic form checks",
+      "Monthly updates depending on plan",
+      "Local SEO tweaks depending on plan",
+    ],
+  },
+];
 const MONTHLY_CARE_INTEREST_OPTIONS = ["Not discussed", "Yes", "Maybe", "No"];
 const PREFERRED_CONTACT_OPTIONS = ["Unknown", "Phone", "Email", "WhatsApp", "Text"];
 const CALL_OUTCOME_OPTIONS = [
@@ -642,8 +702,43 @@ function AuditBuilderModal({ row, onClose, onSave, onMarkSent, onSaveNotes, onMa
             <div style={fieldWrap}><span style={lbl}>What looks good (one per line)</span><textarea rows={3} value={a.looksGood} onChange={(e) => setA((p) => ({ ...p, looksGood: e.target.value }))} style={fi} /></div>
             <div style={fieldWrap}><span style={lbl}>Main issue / opportunity</span><textarea rows={2} value={a.mainIssue} onChange={(e) => setA((p) => ({ ...p, mainIssue: e.target.value }))} style={fi} /></div>
             <div style={fieldWrap}><span style={lbl}>Recommended improvements (one per line)</span><textarea rows={3} value={a.improvements} onChange={(e) => setA((p) => ({ ...p, improvements: e.target.value }))} style={fi} /></div>
+            <div style={fieldWrap}>
+              <span style={lbl}>Package presets</span>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                {PACKAGE_PRESETS.map((p) => {
+                  const active = a.suggestedPackage.trim() === p.name;
+                  return (
+                    <button
+                      key={p.name}
+                      type="button"
+                      onClick={() => setA((prev) => ({
+                        ...prev,
+                        suggestedPackage: p.name,
+                        ...(p.isCare
+                          ? { carePlan: p.priceRange.replace("/month", "") + "/month" }
+                          : { suggestedPrice: String(p.defaultPrice) }),
+                      }))}
+                      style={{
+                        textAlign: "left",
+                        background: active ? "rgba(20,184,166,0.15)" : "rgba(255,255,255,0.03)",
+                        border: `1px solid ${active ? C.teal : C.border}`,
+                        borderRadius: 8,
+                        padding: "8px 10px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+                        <strong style={{ color: C.bright, fontSize: 12 }}>{p.name}</strong>
+                        <span style={{ color: C.teal, fontSize: 12, fontWeight: 700 }}>{p.priceRange}</span>
+                      </div>
+                      <div style={{ color: C.dim, fontSize: 10.5, marginTop: 3, lineHeight: 1.35 }}>{p.includes.slice(0, 4).join(" · ")}…</div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
             <div style={fieldWrap}><span style={lbl}>Suggested package</span><input value={a.suggestedPackage} onChange={(e) => setA((p) => ({ ...p, suggestedPackage: e.target.value }))} placeholder="e.g. Growth Site" style={fi} /></div>
-            <div style={fieldWrap}><span style={lbl}>Suggested price (£)</span><input value={a.suggestedPrice} onChange={(e) => setA((p) => ({ ...p, suggestedPrice: e.target.value }))} placeholder="e.g. 795" style={fi} /></div>
+            <div style={fieldWrap}><span style={lbl}>Suggested price / custom quoted value (£)</span><input value={a.suggestedPrice} onChange={(e) => setA((p) => ({ ...p, suggestedPrice: e.target.value }))} placeholder="e.g. 795" style={fi} /></div>
             <div style={fieldWrap}><span style={lbl}>Optional monthly care plan</span><input value={a.carePlan} onChange={(e) => setA((p) => ({ ...p, carePlan: e.target.value }))} placeholder="From £49/month" style={fi} /></div>
           </div>
           <div style={{ display: "flex", flexDirection: "column" }}>
