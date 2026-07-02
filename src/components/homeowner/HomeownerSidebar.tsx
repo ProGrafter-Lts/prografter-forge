@@ -71,9 +71,9 @@ const HomeownerSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen
                 }}
                 className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-mono text-sm transition-colors"
                 style={{
-                  backgroundColor: isActive ? (isGreen ? "rgba(34,197,94,0.18)" : "rgba(13,148,136,0.18)") : "transparent",
-                  color: isActive ? (isGreen ? "#4ADE80" : "#1AC2BA") : (isGreen ? "#4ADE80" : "rgba(255,255,255,0.75)"),
-                  fontWeight: isActive ? 600 : 400,
+                  backgroundColor: isActive ? (isGreen ? "rgba(34,197,94,0.22)" : "rgba(13,148,136,0.18)") : (isGreen ? "rgba(34,197,94,0.10)" : "transparent"),
+                  color: isActive ? (isGreen ? "#4ADE80" : "#1AC2BA") : (isGreen ? "#22C55E" : "rgba(255,255,255,0.75)"),
+                  fontWeight: isActive || isGreen ? 600 : 400,
                 }}
               >
                 <item.icon className="w-4 h-4" />

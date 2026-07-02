@@ -391,7 +391,7 @@ const HomeownerDashboard = () => {
           {/* Green Grants tab — embedded scheme cards (no longer a dead-end link) */}
           {activeNav === "grants" && (
             <section>
-              <h2 className="font-heading text-primary text-2xl mb-4 flex items-center gap-2">
+              <h2 className="font-heading text-green-500 text-2xl mb-4 flex items-center gap-2">
                 <Leaf className="w-5 h-5 text-green-500" /> Green Grants
               </h2>
               <div className="grants-light-section -mx-4 md:-mx-8 -mt-2 rounded-2xl overflow-hidden">
