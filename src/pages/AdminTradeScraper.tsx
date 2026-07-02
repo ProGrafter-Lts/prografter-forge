@@ -247,27 +247,43 @@ export default function AdminTradeScraper() {
 
   const exportCsv = () => {
     if (!filtered.length) return;
-    const header = ["Trade name","Type","Phone","Email","Website","Address","Postcode","City","Rating","Reviews","Stage","Interested","Follow-up","Last contacted","Notes"];
+    const isWeb = pipeline === "website";
+    const header = isWeb
+      ? ["Business name","Type","Phone","Email","Website","Website quality","Audit sent","Proposal sent","Address","Postcode","City","Rating","Reviews","Stage","Interested","Follow-up","Last contacted","Notes"]
+      : ["Trade name","Type","Phone","Email","Website","Address","Postcode","City","Rating","Reviews","Stage","Interested","Follow-up","Last contacted","Notes"];
     const lines = [header.join(",")];
     for (const r of filtered) {
-      const cells = [
-        r.trade_name, r.trade_type ?? "", r.phone ?? "", r.email ?? "",
-        r.website ?? "", r.address ?? "", r.postcode ?? "", r.city ?? "",
-        r.rating?.toString() ?? "", r.reviews_count?.toString() ?? "",
-        r.outreach_stage,
-        r.interested == null ? "" : r.interested ? "yes" : "no",
-        r.follow_up_at ?? "", r.last_contacted_at ?? "", r.notes ?? "",
-      ].map((v) => `"${String(v).replace(/"/g, '""')}"`);
+      const cells = (isWeb
+        ? [
+            r.trade_name, r.trade_type ?? "", r.phone ?? "", r.email ?? "",
+            r.website ?? "", webQualityMeta(r.website_quality)?.label ?? "",
+            r.mini_audit_sent ? "yes" : "no", r.proposal_sent ? "yes" : "no",
+            r.address ?? "", r.postcode ?? "", r.city ?? "",
+            r.rating?.toString() ?? "", r.reviews_count?.toString() ?? "",
+            r.outreach_stage,
+            r.interested == null ? "" : r.interested ? "yes" : "no",
+            r.follow_up_at ?? "", r.last_contacted_at ?? "", r.notes ?? "",
+          ]
+        : [
+            r.trade_name, r.trade_type ?? "", r.phone ?? "", r.email ?? "",
+            r.website ?? "", r.address ?? "", r.postcode ?? "", r.city ?? "",
+            r.rating?.toString() ?? "", r.reviews_count?.toString() ?? "",
+            r.outreach_stage,
+            r.interested == null ? "" : r.interested ? "yes" : "no",
+            r.follow_up_at ?? "", r.last_contacted_at ?? "", r.notes ?? "",
+          ]
+      ).map((v) => `"${String(v).replace(/"/g, '""')}"`);
       lines.push(cells.join(","));
     }
     const blob = new Blob([lines.join("\n")], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `trades-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = `${isWeb ? "website-outreach" : "trades"}-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
+
 
   return (
     <div style={{ minHeight: "100vh", background: C.deep, fontFamily: "system-ui, sans-serif", color: C.bright, padding: "20px 24px" }}>
