@@ -1060,8 +1060,18 @@ export default function AdminTradeScraper() {
     setRows((prev) => prev.map((r) => (r.id === id ? { ...r, ...patch } as Scraped : r)));
   };
 
+  const ACTIVE_STAGES: Stage[] = ["new", "contacted", "no_answer", "interested"];
   const setStage = (row: Scraped, stage: Stage) => {
+    // Compliance guard: a Do Not Call lead can't be moved back into an active
+    // calling stage without an explicit admin confirmation.
+    if (row.do_not_call && ACTIVE_STAGES.includes(stage)) {
+      const ok = window.confirm(
+        `${row.trade_name} is marked "Do Not Call". Moving it back to an active stage means it can be contacted again.\n\nConfirm you have a lawful basis to call (e.g. TPS/CTPS checked, objection withdrawn) before continuing.`,
+      );
+      if (!ok) return;
+    }
     const patch: Record<string, unknown> = { outreach_stage: stage };
+
     if (stage !== "new") {
       patch.contacted = true;
       patch.last_contacted_at = new Date().toISOString();
