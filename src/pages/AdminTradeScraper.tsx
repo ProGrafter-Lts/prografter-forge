@@ -1251,7 +1251,7 @@ export default function AdminTradeScraper() {
                           <button onClick={() => beginEdit(r)} style={{ ...btn(false), padding: "5px 10px", fontSize: 10 }}>Edit</button>
                           {pipeline === "website" && (
                             <>
-                              <button onClick={() => setModal({ title: `Call script — ${r.trade_name}`, text: buildCallScript(r) })} style={{ ...btn(false), padding: "5px 10px", fontSize: 10 }}>Call script</button>
+                              <button onClick={() => setCallLead(r)} style={{ ...btn(false), padding: "5px 10px", fontSize: 10 }}>Call script</button>
                               <button onClick={() => setModal({ title: `Website audit — ${r.trade_name}`, text: buildAuditText(r) })} style={{ ...btn(false), padding: "5px 10px", fontSize: 10 }}>Build audit</button>
                               <button
                                 onClick={() => toggleAudit(r)}
