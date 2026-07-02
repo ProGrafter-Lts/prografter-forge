@@ -535,6 +535,10 @@ export default function AdminTradeScraper() {
     updateRow(row.id, { website_quality: q });
   };
 
+  const setWebsiteStatus = (row: Scraped, status: string) => {
+    updateRow(row.id, { website_status: status });
+  };
+
   const toggleAudit = (row: Scraped) => {
     const next = !row.mini_audit_sent;
     updateRow(row.id, {
