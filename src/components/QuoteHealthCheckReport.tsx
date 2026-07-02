@@ -875,8 +875,8 @@ const QuoteHealthCheckReport = ({ report }: { report: ReportJson }) => {
 
   const summary = find("summary");
   const figures = find("figure");
-  const includes = find("includes");
-  const excludes = find("excludes");
+  const includes = find("include");
+  const excludes = find("exclude");
   const missing = find("missing or unclear") || find("unclear");
   const scoreBreakdown = find("score breakdown") || find("quality score");
   const comparison = find("comparison");
