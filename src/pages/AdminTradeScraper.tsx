@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -36,7 +36,55 @@ type Scraped = {
   mini_audit_sent_at: string | null;
   proposal_sent: boolean;
   proposal_sent_at: string | null;
+  // Extended Website Outreach fields
+  website_status: string | null;
+  website_score: number | null;
+  opportunity_angle: string | null;
+  main_website_issue: string | null;
+  audit_notes: string | null;
+  audit_sent: boolean;
+  audit_sent_date: string | null;
+  proposal_sent_date: string | null;
+  package_recommended: string | null;
+  quoted_value: number | null;
+  monthly_care_interest: string | null;
+  monthly_care_price: number | null;
+  contact_name: string | null;
+  contact_email: string | null;
+  whatsapp_number: string | null;
+  preferred_contact_method: string | null;
+  tps_checked: boolean;
+  ctps_checked: boolean;
+  date_checked: string | null;
+  do_not_call: boolean;
+  objection_reason: string | null;
+  source_of_number: string | null;
+  last_contacted_date: string | null;
+  next_follow_up_date: string | null;
+  call_attempts: number | null;
+  last_call_outcome: string | null;
+  lost_reason: string | null;
 };
+
+const WEBSITE_STATUS_OPTIONS = [
+  "Not checked", "No website found", "Facebook only", "Outdated website",
+  "Poor mobile layout", "No enquiry form", "Weak content", "Weak gallery/photos",
+  "No reviews shown", "No clear services", "Slow/confusing website",
+  "Decent website", "Strong website", "Not suitable",
+];
+const PACKAGE_OPTIONS = ["Not selected", "Starter Site", "Growth Site", "Monthly Care Only", "Custom"];
+const MONTHLY_CARE_INTEREST_OPTIONS = ["Not discussed", "Yes", "Maybe", "No"];
+const PREFERRED_CONTACT_OPTIONS = ["Unknown", "Phone", "Email", "WhatsApp", "Text"];
+const CALL_OUTCOME_OPTIONS = [
+  "Not called", "No answer", "Voicemail left", "Spoke to owner",
+  "Spoke to staff/gatekeeper", "Call back requested", "Interested",
+  "Audit requested", "Not interested", "Do not call", "Won", "Lost",
+];
+const LOST_REASON_OPTIONS = [
+  "Not selected", "Too expensive", "Already has designer", "Not interested",
+  "No budget", "Too busy", "Wants to stay as is", "Could not contact", "Other",
+];
+
 
 const C = {
   cream: "#F5F0E8", deep: "#0F2238", navy: "#27396A",
@@ -134,6 +182,166 @@ const btn = (primary = true): React.CSSProperties => ({
   cursor: "pointer",
 });
 
+const lbl: React.CSSProperties = {
+  fontSize: 10, fontWeight: 700, color: C.dim, textTransform: "uppercase",
+  letterSpacing: "0.05em", marginBottom: 4, display: "block",
+};
+const smallInp: React.CSSProperties = { ...inp, padding: "7px 10px", fontSize: 12 };
+
+function WebLeadDetails({ row, onSave, colSpan }: {
+  row: Scraped;
+  onSave: (patch: Partial<Scraped>) => Promise<void> | void;
+  colSpan: number;
+}) {
+  const [d, setD] = useState<Partial<Scraped>>({
+    website_status: row.website_status ?? "Not checked",
+    website_score: row.website_score,
+    opportunity_angle: row.opportunity_angle ?? "",
+    main_website_issue: row.main_website_issue ?? "",
+    audit_notes: row.audit_notes ?? "",
+    audit_sent: row.audit_sent ?? false,
+    audit_sent_date: row.audit_sent_date ?? "",
+    proposal_sent: row.proposal_sent ?? false,
+    proposal_sent_date: row.proposal_sent_date ?? "",
+    package_recommended: row.package_recommended ?? "Not selected",
+    quoted_value: row.quoted_value,
+    monthly_care_interest: row.monthly_care_interest ?? "Not discussed",
+    monthly_care_price: row.monthly_care_price,
+    contact_name: row.contact_name ?? "",
+    contact_email: row.contact_email ?? "",
+    whatsapp_number: row.whatsapp_number ?? "",
+    preferred_contact_method: row.preferred_contact_method ?? "Unknown",
+    tps_checked: row.tps_checked ?? false,
+    ctps_checked: row.ctps_checked ?? false,
+    date_checked: row.date_checked ?? "",
+    do_not_call: row.do_not_call ?? false,
+    objection_reason: row.objection_reason ?? "",
+    source_of_number: row.source_of_number ?? "",
+    last_contacted_date: row.last_contacted_date ?? "",
+    next_follow_up_date: row.next_follow_up_date ?? "",
+    call_attempts: row.call_attempts ?? 0,
+    last_call_outcome: row.last_call_outcome ?? "Not called",
+    lost_reason: row.lost_reason ?? "Not selected",
+  });
+  const [saving, setSaving] = useState(false);
+  const set = (k: keyof Scraped, v: unknown) => setD((p) => ({ ...p, [k]: v }));
+
+  const num = (v: unknown) => (v === "" || v == null ? null : Number(v));
+  const str = (v: unknown) => (v === "" ? null : v);
+
+  const handleSave = async () => {
+    setSaving(true);
+    await onSave({
+      website_status: str(d.website_status) as string | null,
+      website_score: num(d.website_score),
+      opportunity_angle: str(d.opportunity_angle) as string | null,
+      main_website_issue: str(d.main_website_issue) as string | null,
+      audit_notes: str(d.audit_notes) as string | null,
+      audit_sent: !!d.audit_sent,
+      audit_sent_date: str(d.audit_sent_date) as string | null,
+      proposal_sent: !!d.proposal_sent,
+      proposal_sent_date: str(d.proposal_sent_date) as string | null,
+      package_recommended: str(d.package_recommended) as string | null,
+      quoted_value: num(d.quoted_value),
+      monthly_care_interest: str(d.monthly_care_interest) as string | null,
+      monthly_care_price: num(d.monthly_care_price),
+      contact_name: str(d.contact_name) as string | null,
+      contact_email: str(d.contact_email) as string | null,
+      whatsapp_number: str(d.whatsapp_number) as string | null,
+      preferred_contact_method: str(d.preferred_contact_method) as string | null,
+      tps_checked: !!d.tps_checked,
+      ctps_checked: !!d.ctps_checked,
+      date_checked: str(d.date_checked) as string | null,
+      do_not_call: !!d.do_not_call,
+      objection_reason: str(d.objection_reason) as string | null,
+      source_of_number: str(d.source_of_number) as string | null,
+      last_contacted_date: str(d.last_contacted_date) as string | null,
+      next_follow_up_date: str(d.next_follow_up_date) as string | null,
+      call_attempts: num(d.call_attempts),
+      last_call_outcome: str(d.last_call_outcome) as string | null,
+      lost_reason: str(d.lost_reason) as string | null,
+    });
+    setSaving(false);
+  };
+
+  const Field = ({ label, children }: { label: string; children: React.ReactNode }) => (
+    <div><label style={lbl}>{label}</label>{children}</div>
+  );
+  const Check = ({ label, k }: { label: string; k: keyof Scraped }) => (
+    <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: C.bright, cursor: "pointer" }}>
+      <input type="checkbox" checked={!!d[k]} onChange={(e) => set(k, e.target.checked)} />
+      {label}
+    </label>
+  );
+  const Sel = ({ k, options }: { k: keyof Scraped; options: string[] }) => (
+    <select value={(d[k] as string) ?? ""} onChange={(e) => set(k, e.target.value)} style={smallInp}>
+      {options.map((o) => <option key={o} value={o} style={{ color: "#000" }}>{o}</option>)}
+    </select>
+  );
+  const section: React.CSSProperties = { fontSize: 12, fontWeight: 800, color: C.teal, textTransform: "uppercase", letterSpacing: "0.06em", margin: "4px 0 2px" };
+  const grid: React.CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12 };
+
+  return (
+    <tr>
+      <td colSpan={colSpan} style={{ padding: 0, background: "rgba(0,0,0,0.2)" }}>
+        <div style={{ padding: "18px 22px", display: "flex", flexDirection: "column", gap: 14 }}>
+          <div style={section}>Website</div>
+          <div style={grid}>
+            <Field label="Website status"><Sel k="website_status" options={WEBSITE_STATUS_OPTIONS} /></Field>
+            <Field label="Website score (0-100)"><input type="number" min={0} max={100} value={d.website_score ?? ""} onChange={(e) => set("website_score", e.target.value)} style={smallInp} /></Field>
+            <Field label="Opportunity angle"><input value={d.opportunity_angle ?? ""} onChange={(e) => set("opportunity_angle", e.target.value)} placeholder="Strong reviews but website does not reflect quality…" style={smallInp} /></Field>
+            <Field label="Main website issue"><input value={d.main_website_issue ?? ""} onChange={(e) => set("main_website_issue", e.target.value)} style={smallInp} /></Field>
+          </div>
+          <Field label="Audit notes"><textarea rows={3} value={d.audit_notes ?? ""} onChange={(e) => set("audit_notes", e.target.value)} style={smallInp} /></Field>
+
+          <div style={section}>Audit &amp; Proposal</div>
+          <div style={grid}>
+            <Check label="Audit sent" k="audit_sent" />
+            <Field label="Audit sent date"><input type="date" value={d.audit_sent_date ?? ""} onChange={(e) => set("audit_sent_date", e.target.value)} style={smallInp} /></Field>
+            <Check label="Proposal sent" k="proposal_sent" />
+            <Field label="Proposal sent date"><input type="date" value={d.proposal_sent_date ?? ""} onChange={(e) => set("proposal_sent_date", e.target.value)} style={smallInp} /></Field>
+            <Field label="Package recommended"><Sel k="package_recommended" options={PACKAGE_OPTIONS} /></Field>
+            <Field label="Quoted value (£)"><input type="number" min={0} value={d.quoted_value ?? ""} onChange={(e) => set("quoted_value", e.target.value)} style={smallInp} /></Field>
+            <Field label="Monthly care interest"><Sel k="monthly_care_interest" options={MONTHLY_CARE_INTEREST_OPTIONS} /></Field>
+            <Field label="Monthly care price (£)"><input type="number" min={0} value={d.monthly_care_price ?? ""} onChange={(e) => set("monthly_care_price", e.target.value)} style={smallInp} /></Field>
+          </div>
+
+          <div style={section}>Contact &amp; Compliance</div>
+          <div style={grid}>
+            <Field label="Contact name"><input value={d.contact_name ?? ""} onChange={(e) => set("contact_name", e.target.value)} style={smallInp} /></Field>
+            <Field label="Contact email"><input value={d.contact_email ?? ""} onChange={(e) => set("contact_email", e.target.value)} style={smallInp} /></Field>
+            <Field label="WhatsApp number"><input value={d.whatsapp_number ?? ""} onChange={(e) => set("whatsapp_number", e.target.value)} style={smallInp} /></Field>
+            <Field label="Preferred contact method"><Sel k="preferred_contact_method" options={PREFERRED_CONTACT_OPTIONS} /></Field>
+            <Field label="Date checked"><input type="date" value={d.date_checked ?? ""} onChange={(e) => set("date_checked", e.target.value)} style={smallInp} /></Field>
+            <Field label="Source of number"><input value={d.source_of_number ?? ""} onChange={(e) => set("source_of_number", e.target.value)} style={smallInp} /></Field>
+            <Field label="Objection reason"><input value={d.objection_reason ?? ""} onChange={(e) => set("objection_reason", e.target.value)} style={smallInp} /></Field>
+            <Field label="Last contacted date"><input type="date" value={d.last_contacted_date ?? ""} onChange={(e) => set("last_contacted_date", e.target.value)} style={smallInp} /></Field>
+            <Field label="Next follow-up date"><input type="date" value={d.next_follow_up_date ?? ""} onChange={(e) => set("next_follow_up_date", e.target.value)} style={smallInp} /></Field>
+          </div>
+          <div style={{ display: "flex", gap: 20, flexWrap: "wrap", marginTop: 2 }}>
+            <Check label="TPS checked" k="tps_checked" />
+            <Check label="CTPS checked" k="ctps_checked" />
+            <Check label="Do not call" k="do_not_call" />
+          </div>
+
+          <div style={section}>Sales Tracking</div>
+          <div style={grid}>
+            <Field label="Call attempts"><input type="number" min={0} value={d.call_attempts ?? 0} onChange={(e) => set("call_attempts", e.target.value)} style={smallInp} /></Field>
+            <Field label="Last call outcome"><Sel k="last_call_outcome" options={CALL_OUTCOME_OPTIONS} /></Field>
+            <Field label="Lost reason"><Sel k="lost_reason" options={LOST_REASON_OPTIONS} /></Field>
+          </div>
+
+          <div>
+            <button onClick={handleSave} disabled={saving} style={{ ...btn(true), opacity: saving ? 0.6 : 1 }}>
+              {saving ? "Saving…" : "Save details"}
+            </button>
+          </div>
+        </div>
+      </td>
+    </tr>
+  );
+}
+
 export default function AdminTradeScraper() {
   const [rows, setRows] = useState<Scraped[]>([]);
   const [loading, setLoading] = useState(true);
@@ -148,6 +356,7 @@ export default function AdminTradeScraper() {
   const [filterStage, setFilterStage] = useState<Stage | "all">("all");
   const [hideContacted, setHideContacted] = useState(false);
   const [editing, setEditing] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState<string | null>(null);
   const [draftNotes, setDraftNotes] = useState("");
   const [draftFollowUp, setDraftFollowUp] = useState("");
 
@@ -531,8 +740,10 @@ export default function AdminTradeScraper() {
               {sorted.map((r) => {
                 const m = stageMeta(r.outreach_stage);
                 const isEditing = editing === r.id;
+                const isExpanded = expanded === r.id;
                 return (
-                  <tr key={r.id} style={{ borderTop: `1px solid ${C.border}`, verticalAlign: "top" }}>
+                  <React.Fragment key={r.id}>
+                  <tr style={{ borderTop: `1px solid ${C.border}`, verticalAlign: "top" }}>
                     <td style={{ padding: "10px 12px" }}>
                       <div style={{ fontWeight: 600 }}>{r.trade_name}</div>
                       <div style={{ color: C.dim, fontSize: 10, marginTop: 2 }}>{r.trade_type ?? "—"}</div>
@@ -666,12 +877,28 @@ export default function AdminTradeScraper() {
                         </>
                       ) : (
                         <>
+                          {pipeline === "website" && (
+                            <button onClick={() => setExpanded(isExpanded ? null : r.id)} style={{ ...btn(false), padding: "5px 10px", fontSize: 10, marginRight: 4 }}>
+                              {isExpanded ? "Close ▲" : "Details ▾"}
+                            </button>
+                          )}
                           <button onClick={() => beginEdit(r)} style={{ ...btn(false), padding: "5px 10px", fontSize: 10, marginRight: 4 }}>Edit</button>
                           <button onClick={() => deleteRow(r)} style={{ background: "transparent", color: C.red, border: "none", cursor: "pointer", fontSize: 11 }}>Delete</button>
                         </>
                       )}
                     </td>
                   </tr>
+                  {isExpanded && pipeline === "website" && (
+                    <WebLeadDetails
+                      row={r}
+                      colSpan={10}
+                      onSave={async (patch) => {
+                        await updateRow(r.id, patch);
+                        toast({ title: "Details saved" });
+                      }}
+                    />
+                  )}
+                  </React.Fragment>
                 );
               })}
               {!filtered.length && (

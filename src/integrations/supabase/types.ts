@@ -2928,102 +2928,186 @@ export type Database = {
       scraped_trades: {
         Row: {
           address: string | null
+          audit_notes: string | null
+          audit_sent: boolean
+          audit_sent_date: string | null
+          call_attempts: number
           city: string | null
+          contact_email: string | null
+          contact_name: string | null
           contacted: boolean
           contacted_at: string | null
           created_at: string
+          ctps_checked: boolean
+          date_checked: string | null
+          do_not_call: boolean
           email: string | null
           follow_up_at: string | null
           has_website: boolean
           id: string
           interested: boolean | null
+          last_call_outcome: string | null
           last_contacted_at: string | null
+          last_contacted_date: string | null
           last_scraped_at: string
+          lost_reason: string | null
+          main_website_issue: string | null
           mini_audit_sent: boolean
           mini_audit_sent_at: string | null
+          monthly_care_interest: string | null
+          monthly_care_price: number | null
+          next_follow_up_date: string | null
           notes: string | null
+          objection_reason: string | null
+          opportunity_angle: string | null
           outreach_stage: string
+          package_recommended: string | null
           phone: string | null
           pipeline: string
           postcode: string | null
+          preferred_contact_method: string | null
           proposal_sent: boolean
           proposal_sent_at: string | null
+          proposal_sent_bool: boolean
+          proposal_sent_date: string | null
+          quoted_value: number | null
           rating: number | null
           reviews_count: number | null
           search_query: string | null
           source: string
           source_id: string | null
+          source_of_number: string | null
+          tps_checked: boolean
           trade_name: string
           trade_type: string | null
           updated_at: string
           website: string | null
           website_quality: string | null
+          website_score: number | null
+          website_status: string | null
+          whatsapp_number: string | null
         }
         Insert: {
           address?: string | null
+          audit_notes?: string | null
+          audit_sent?: boolean
+          audit_sent_date?: string | null
+          call_attempts?: number
           city?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
           contacted?: boolean
           contacted_at?: string | null
           created_at?: string
+          ctps_checked?: boolean
+          date_checked?: string | null
+          do_not_call?: boolean
           email?: string | null
           follow_up_at?: string | null
           has_website?: boolean
           id?: string
           interested?: boolean | null
+          last_call_outcome?: string | null
           last_contacted_at?: string | null
+          last_contacted_date?: string | null
           last_scraped_at?: string
+          lost_reason?: string | null
+          main_website_issue?: string | null
           mini_audit_sent?: boolean
           mini_audit_sent_at?: string | null
+          monthly_care_interest?: string | null
+          monthly_care_price?: number | null
+          next_follow_up_date?: string | null
           notes?: string | null
+          objection_reason?: string | null
+          opportunity_angle?: string | null
           outreach_stage?: string
+          package_recommended?: string | null
           phone?: string | null
           pipeline?: string
           postcode?: string | null
+          preferred_contact_method?: string | null
           proposal_sent?: boolean
           proposal_sent_at?: string | null
+          proposal_sent_bool?: boolean
+          proposal_sent_date?: string | null
+          quoted_value?: number | null
           rating?: number | null
           reviews_count?: number | null
           search_query?: string | null
           source?: string
           source_id?: string | null
+          source_of_number?: string | null
+          tps_checked?: boolean
           trade_name: string
           trade_type?: string | null
           updated_at?: string
           website?: string | null
           website_quality?: string | null
+          website_score?: number | null
+          website_status?: string | null
+          whatsapp_number?: string | null
         }
         Update: {
           address?: string | null
+          audit_notes?: string | null
+          audit_sent?: boolean
+          audit_sent_date?: string | null
+          call_attempts?: number
           city?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
           contacted?: boolean
           contacted_at?: string | null
           created_at?: string
+          ctps_checked?: boolean
+          date_checked?: string | null
+          do_not_call?: boolean
           email?: string | null
           follow_up_at?: string | null
           has_website?: boolean
           id?: string
           interested?: boolean | null
+          last_call_outcome?: string | null
           last_contacted_at?: string | null
+          last_contacted_date?: string | null
           last_scraped_at?: string
+          lost_reason?: string | null
+          main_website_issue?: string | null
           mini_audit_sent?: boolean
           mini_audit_sent_at?: string | null
+          monthly_care_interest?: string | null
+          monthly_care_price?: number | null
+          next_follow_up_date?: string | null
           notes?: string | null
+          objection_reason?: string | null
+          opportunity_angle?: string | null
           outreach_stage?: string
+          package_recommended?: string | null
           phone?: string | null
           pipeline?: string
           postcode?: string | null
+          preferred_contact_method?: string | null
           proposal_sent?: boolean
           proposal_sent_at?: string | null
+          proposal_sent_bool?: boolean
+          proposal_sent_date?: string | null
+          quoted_value?: number | null
           rating?: number | null
           reviews_count?: number | null
           search_query?: string | null
           source?: string
           source_id?: string | null
+          source_of_number?: string | null
+          tps_checked?: boolean
           trade_name?: string
           trade_type?: string | null
           updated_at?: string
           website?: string | null
           website_quality?: string | null
+          website_score?: number | null
+          website_status?: string | null
+          whatsapp_number?: string | null
         }
         Relationships: []
       }
