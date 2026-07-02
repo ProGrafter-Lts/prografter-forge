@@ -215,6 +215,26 @@ const WEB_FILTERS: { value: string; label: string; color: string; match: (r: Scr
   { value: "do_not_call", label: "Do not call", color: "#9CA3AF", match: (r) => !!r.do_not_call },
 ];
 
+// Effective follow-up date for a lead (next_follow_up_date preferred, then follow_up_at).
+const followUpDate = (r: Scraped): Date | null => {
+  const raw = r.next_follow_up_date || r.follow_up_at;
+  if (!raw) return null;
+  const d = new Date(raw);
+  return isNaN(d.getTime()) ? null : d;
+};
+const isFollowUpToday = (r: Scraped): boolean => {
+  const d = followUpDate(r);
+  if (!d) return false;
+  const now = new Date();
+  return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
+};
+const isFollowUpOverdue = (r: Scraped): boolean => {
+  const d = followUpDate(r);
+  if (!d) return false;
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  return d < today;
+};
+
 
 const inp: React.CSSProperties = {
   width: "100%", padding: "9px 12px", borderRadius: 8,
@@ -474,6 +494,13 @@ export default function AdminTradeScraper() {
   const [filterStage, setFilterStage] = useState<Stage | "all">("all");
   const [webFilter, setWebFilter] = useState<string>("all");
   const [hideContacted, setHideContacted] = useState(false);
+  const [webStatusFilter, setWebStatusFilter] = useState("all");
+  const [webScoreFilter, setWebScoreFilter] = useState("all");
+  const [webHasSite, setWebHasSite] = useState("all");
+  const [webAuditSent, setWebAuditSent] = useState("all");
+  const [webProposalSent, setWebProposalSent] = useState("all");
+  const [webFollowUp, setWebFollowUp] = useState("all");
+  const [hideDoNotCall, setHideDoNotCall] = useState(false);
   const [editing, setEditing] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [draftNotes, setDraftNotes] = useState("");
@@ -603,6 +630,23 @@ export default function AdminTradeScraper() {
     if (pipeline === "website") {
       const wf = WEB_FILTERS.find((f) => f.value === webFilter);
       if (wf && !wf.match(r)) return false;
+      if (webStatusFilter !== "all" && (r.website_status ?? "Not checked") !== webStatusFilter) return false;
+      if (webScoreFilter !== "all") {
+        const sc = webScoreOf(r);
+        if (webScoreFilter === "80" && sc < 80) return false;
+        if (webScoreFilter === "60" && sc < 60) return false;
+        if (webScoreFilter === "40" && sc < 40) return false;
+        if (webScoreFilter === "below40" && sc >= 40) return false;
+      }
+      if (webHasSite === "has" && isNoWebsite(r)) return false;
+      if (webHasSite === "no" && !isNoWebsite(r)) return false;
+      if (webAuditSent === "yes" && !(r.audit_sent || r.mini_audit_sent)) return false;
+      if (webAuditSent === "no" && (r.audit_sent || r.mini_audit_sent)) return false;
+      if (webProposalSent === "yes" && !r.proposal_sent) return false;
+      if (webProposalSent === "no" && r.proposal_sent) return false;
+      if (webFollowUp === "today" && !isFollowUpToday(r)) return false;
+      if (webFollowUp === "overdue" && !isFollowUpOverdue(r)) return false;
+      if (hideDoNotCall && r.do_not_call) return false;
     } else if (filterStage !== "all" && r.outreach_stage !== filterStage) return false;
     if (hideContacted && r.contacted) return false;
     if (filter) {
@@ -611,11 +655,13 @@ export default function AdminTradeScraper() {
         r.trade_name.toLowerCase().includes(s) ||
         (r.address ?? "").toLowerCase().includes(s) ||
         (r.phone ?? "").toLowerCase().includes(s) ||
-        (r.notes ?? "").toLowerCase().includes(s)
+        (r.notes ?? "").toLowerCase().includes(s) ||
+        (r.main_website_issue ?? "").toLowerCase().includes(s) ||
+        (r.opportunity_angle ?? "").toLowerCase().includes(s)
       );
     }
     return true;
-  }), [pipelineRows, filter, filterType, filterStage, webFilter, pipeline, hideContacted]);
+  }), [pipelineRows, filter, filterType, filterStage, webFilter, pipeline, hideContacted, webStatusFilter, webScoreFilter, webHasSite, webAuditSent, webProposalSent, webFollowUp, hideDoNotCall]);
 
   // In the website pipeline, surface the strongest opportunities first.
   const sorted = useMemo(() => {
@@ -832,9 +878,9 @@ export default function AdminTradeScraper() {
 
 
       <div style={{ display: "flex", gap: 10, marginBottom: 12, flexWrap: "wrap", alignItems: "center" }}>
-        <input placeholder="Search name, address, phone, notes…" value={filter} onChange={(e) => setFilter(e.target.value)} style={{ ...inp, maxWidth: 320 }} />
+        <input placeholder={pipeline === "website" ? "Search name, address, phone, notes, website issue…" : "Search name, address, phone, notes…"} value={filter} onChange={(e) => setFilter(e.target.value)} style={{ ...inp, maxWidth: 320 }} />
         <select value={filterType} onChange={(e) => setFilterType(e.target.value)} style={{ ...inp, maxWidth: 200 }}>
-          <option value="all" style={{ color: "#000" }}>All trade types</option>
+          <option value="all" style={{ color: "#000" }}>{pipeline === "website" ? "All business types" : "All trade types"}</option>
           {tradeTypes.map((t) => <option key={t} value={t} style={{ color: "#000" }}>{t}</option>)}
         </select>
         <button
@@ -865,6 +911,65 @@ export default function AdminTradeScraper() {
         </span>
 
       </div>
+
+      {pipeline === "website" && (
+        <div style={{ display: "flex", gap: 10, marginBottom: 12, flexWrap: "wrap", alignItems: "center" }}>
+          <select value={webStatusFilter} onChange={(e) => setWebStatusFilter(e.target.value)} style={{ ...inp, maxWidth: 190 }}>
+            <option value="all" style={{ color: "#000" }}>All website statuses</option>
+            {WEBSITE_STATUS_OPTIONS.map((o) => <option key={o} value={o} style={{ color: "#000" }}>{o}</option>)}
+          </select>
+          <select value={webScoreFilter} onChange={(e) => setWebScoreFilter(e.target.value)} style={{ ...inp, maxWidth: 150 }}>
+            <option value="all" style={{ color: "#000" }}>Any score</option>
+            <option value="80" style={{ color: "#000" }}>80+ only</option>
+            <option value="60" style={{ color: "#000" }}>60+ only</option>
+            <option value="40" style={{ color: "#000" }}>40+ only</option>
+            <option value="below40" style={{ color: "#000" }}>Below 40</option>
+          </select>
+          <select value={webHasSite} onChange={(e) => setWebHasSite(e.target.value)} style={{ ...inp, maxWidth: 150 }}>
+            <option value="all" style={{ color: "#000" }}>Site: any</option>
+            <option value="has" style={{ color: "#000" }}>Has website</option>
+            <option value="no" style={{ color: "#000" }}>No website</option>
+          </select>
+          <select value={webAuditSent} onChange={(e) => setWebAuditSent(e.target.value)} style={{ ...inp, maxWidth: 150 }}>
+            <option value="all" style={{ color: "#000" }}>Audit: any</option>
+            <option value="yes" style={{ color: "#000" }}>Audit sent</option>
+            <option value="no" style={{ color: "#000" }}>Audit not sent</option>
+          </select>
+          <select value={webProposalSent} onChange={(e) => setWebProposalSent(e.target.value)} style={{ ...inp, maxWidth: 160 }}>
+            <option value="all" style={{ color: "#000" }}>Proposal: any</option>
+            <option value="yes" style={{ color: "#000" }}>Proposal sent</option>
+            <option value="no" style={{ color: "#000" }}>Proposal not sent</option>
+          </select>
+          <button
+            onClick={() => setWebFollowUp((p) => (p === "today" ? "all" : "today"))}
+            style={{
+              background: webFollowUp === "today" ? C.amber : "transparent",
+              color: webFollowUp === "today" ? "#fff" : C.amber,
+              border: `1px solid ${C.amber}`, borderRadius: 999, padding: "6px 14px",
+              fontSize: 12, fontWeight: 700, cursor: "pointer",
+            }}
+          >
+            📅 Today's follow-ups {pipelineRows.filter(isFollowUpToday).length ? `(${pipelineRows.filter(isFollowUpToday).length})` : ""}
+          </button>
+          <button
+            onClick={() => setWebFollowUp((p) => (p === "overdue" ? "all" : "overdue"))}
+            style={{
+              background: webFollowUp === "overdue" ? C.red : "transparent",
+              color: webFollowUp === "overdue" ? "#fff" : C.red,
+              border: `1px solid ${C.red}`, borderRadius: 999, padding: "6px 14px",
+              fontSize: 12, fontWeight: 700, cursor: "pointer",
+            }}
+          >
+            ⏰ Overdue follow-ups {pipelineRows.filter(isFollowUpOverdue).length ? `(${pipelineRows.filter(isFollowUpOverdue).length})` : ""}
+          </button>
+          <label style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color: C.dim, cursor: "pointer" }}>
+            <input type="checkbox" checked={hideDoNotCall} onChange={(e) => setHideDoNotCall(e.target.checked)} />
+            Hide do-not-call
+          </label>
+        </div>
+      )}
+
+
 
       {loading ? (
         <div style={{ color: C.dim, padding: 40, textAlign: "center" }}>Loading…</div>
