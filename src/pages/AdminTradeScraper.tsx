@@ -630,6 +630,23 @@ export default function AdminTradeScraper() {
     if (pipeline === "website") {
       const wf = WEB_FILTERS.find((f) => f.value === webFilter);
       if (wf && !wf.match(r)) return false;
+      if (webStatusFilter !== "all" && (r.website_status ?? "Not checked") !== webStatusFilter) return false;
+      if (webScoreFilter !== "all") {
+        const sc = webScoreOf(r);
+        if (webScoreFilter === "80" && sc < 80) return false;
+        if (webScoreFilter === "60" && sc < 60) return false;
+        if (webScoreFilter === "40" && sc < 40) return false;
+        if (webScoreFilter === "below40" && sc >= 40) return false;
+      }
+      if (webHasSite === "has" && isNoWebsite(r)) return false;
+      if (webHasSite === "no" && !isNoWebsite(r)) return false;
+      if (webAuditSent === "yes" && !(r.audit_sent || r.mini_audit_sent)) return false;
+      if (webAuditSent === "no" && (r.audit_sent || r.mini_audit_sent)) return false;
+      if (webProposalSent === "yes" && !r.proposal_sent) return false;
+      if (webProposalSent === "no" && r.proposal_sent) return false;
+      if (webFollowUp === "today" && !isFollowUpToday(r)) return false;
+      if (webFollowUp === "overdue" && !isFollowUpOverdue(r)) return false;
+      if (hideDoNotCall && r.do_not_call) return false;
     } else if (filterStage !== "all" && r.outreach_stage !== filterStage) return false;
     if (hideContacted && r.contacted) return false;
     if (filter) {
@@ -638,11 +655,13 @@ export default function AdminTradeScraper() {
         r.trade_name.toLowerCase().includes(s) ||
         (r.address ?? "").toLowerCase().includes(s) ||
         (r.phone ?? "").toLowerCase().includes(s) ||
-        (r.notes ?? "").toLowerCase().includes(s)
+        (r.notes ?? "").toLowerCase().includes(s) ||
+        (r.main_website_issue ?? "").toLowerCase().includes(s) ||
+        (r.opportunity_angle ?? "").toLowerCase().includes(s)
       );
     }
     return true;
-  }), [pipelineRows, filter, filterType, filterStage, webFilter, pipeline, hideContacted]);
+  }), [pipelineRows, filter, filterType, filterStage, webFilter, pipeline, hideContacted, webStatusFilter, webScoreFilter, webHasSite, webAuditSent, webProposalSent, webFollowUp, hideDoNotCall]);
 
   // In the website pipeline, surface the strongest opportunities first.
   const sorted = useMemo(() => {
