@@ -166,6 +166,30 @@ const scoreColor = (s: number): string =>
 
 const stageMeta = (s: Stage) => STAGES.find((x) => x.value === s) ?? STAGES[1];
 
+// Website Outreach stage filters — each has a live predicate over a lead.
+const isNoWebsite = (r: Scraped) =>
+  !r.has_website || r.website_quality === "none" || r.website_status === "No website found";
+const isPoorWebsite = (r: Scraped) =>
+  ["poor", "outdated", "weak_mobile", "no_form"].includes(r.website_quality ?? "") ||
+  ["Facebook only", "Outdated website", "Poor mobile layout", "No enquiry form",
+   "Weak content", "Weak gallery/photos", "No reviews shown", "No clear services",
+   "Slow/confusing website"].includes(r.website_status ?? "");
+
+const WEB_FILTERS: { value: string; label: string; color: string; match: (r: Scraped) => boolean }[] = [
+  { value: "all", label: "All", color: C.dim, match: () => true },
+  { value: "new", label: "New", color: "#0EA5E9", match: (r) => r.outreach_stage === "new" },
+  { value: "no_website", label: "No website", color: C.teal, match: isNoWebsite },
+  { value: "poor_website", label: "Poor website", color: C.amber, match: isPoorWebsite },
+  { value: "contacted", label: "Contacted", color: "#06B6D4", match: (r) => r.outreach_stage === "contacted" },
+  { value: "no_answer", label: "No answer", color: "#3B82F6", match: (r) => r.outreach_stage === "no_answer" || r.last_call_outcome === "No answer" },
+  { value: "interested", label: "Interested", color: C.green, match: (r) => r.interested === true || r.outreach_stage === "interested" || r.last_call_outcome === "Interested" },
+  { value: "audit_sent", label: "Audit sent", color: "#7c3aed", match: (r) => !!(r.audit_sent || r.mini_audit_sent) },
+  { value: "proposal_sent", label: "Proposal sent", color: C.amber, match: (r) => !!r.proposal_sent },
+  { value: "won", label: "Won", color: "#22C55E", match: (r) => r.last_call_outcome === "Won" || r.outreach_stage === "converted" },
+  { value: "lost", label: "Lost", color: C.red, match: (r) => r.last_call_outcome === "Lost" || r.outreach_stage === "not_interested" || !!r.lost_reason && r.lost_reason !== "Not selected" },
+  { value: "do_not_call", label: "Do not call", color: "#9CA3AF", match: (r) => !!r.do_not_call },
+];
+
 
 const inp: React.CSSProperties = {
   width: "100%", padding: "9px 12px", borderRadius: 8,
