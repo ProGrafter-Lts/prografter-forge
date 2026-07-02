@@ -1483,7 +1483,7 @@ export default function AdminTradeScraper() {
                       {!overdue && dueToday && <div style={{ color: C.amber, fontSize: 9, fontWeight: 800, marginTop: 3 }}>📅 Follow-up due today</div>}
                     </td>
                     <td style={{ padding: "10px 12px" }}>
-                      {r.phone && <div><a href={`tel:${r.phone}`} style={{ color: C.teal }}>{r.phone}</a></div>}
+                      {r.phone && <div>{r.do_not_call ? <span style={{ color: C.dim, textDecoration: "line-through" }} title="Do not call">{r.phone}</span> : <a href={`tel:${r.phone}`} style={{ color: C.teal }}>{r.phone}</a>}</div>}
                       {r.email && <div><a href={`mailto:${r.email}`} style={{ color: C.teal }}>{r.email}</a></div>}
                       {r.website && <div><a href={r.website} target="_blank" rel="noreferrer" style={{ color: C.green }}>website ↗</a></div>}
                       {!r.phone && !r.email && !r.website && <span style={{ color: C.dim }}>—</span>}
