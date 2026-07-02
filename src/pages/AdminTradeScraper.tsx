@@ -294,6 +294,13 @@ const isFollowUpOverdue = (r: Scraped): boolean => {
   const today = new Date(); today.setHours(0, 0, 0, 0);
   return d < today;
 };
+// Return an ISO date string N days from today (used for follow-up suggestions).
+const inDays = (days: number): string => {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() + days);
+  return d.toISOString();
+};
 
 
 const inp: React.CSSProperties = {
