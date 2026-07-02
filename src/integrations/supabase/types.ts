@@ -2939,10 +2939,15 @@ export type Database = {
           interested: boolean | null
           last_contacted_at: string | null
           last_scraped_at: string
+          mini_audit_sent: boolean
+          mini_audit_sent_at: string | null
           notes: string | null
           outreach_stage: string
           phone: string | null
+          pipeline: string
           postcode: string | null
+          proposal_sent: boolean
+          proposal_sent_at: string | null
           rating: number | null
           reviews_count: number | null
           search_query: string | null
@@ -2952,6 +2957,7 @@ export type Database = {
           trade_type: string | null
           updated_at: string
           website: string | null
+          website_quality: string | null
         }
         Insert: {
           address?: string | null
@@ -2966,10 +2972,15 @@ export type Database = {
           interested?: boolean | null
           last_contacted_at?: string | null
           last_scraped_at?: string
+          mini_audit_sent?: boolean
+          mini_audit_sent_at?: string | null
           notes?: string | null
           outreach_stage?: string
           phone?: string | null
+          pipeline?: string
           postcode?: string | null
+          proposal_sent?: boolean
+          proposal_sent_at?: string | null
           rating?: number | null
           reviews_count?: number | null
           search_query?: string | null
@@ -2979,6 +2990,7 @@ export type Database = {
           trade_type?: string | null
           updated_at?: string
           website?: string | null
+          website_quality?: string | null
         }
         Update: {
           address?: string | null
@@ -2993,10 +3005,15 @@ export type Database = {
           interested?: boolean | null
           last_contacted_at?: string | null
           last_scraped_at?: string
+          mini_audit_sent?: boolean
+          mini_audit_sent_at?: string | null
           notes?: string | null
           outreach_stage?: string
           phone?: string | null
+          pipeline?: string
           postcode?: string | null
+          proposal_sent?: boolean
+          proposal_sent_at?: string | null
           rating?: number | null
           reviews_count?: number | null
           search_query?: string | null
@@ -3006,6 +3023,7 @@ export type Database = {
           trade_type?: string | null
           updated_at?: string
           website?: string | null
+          website_quality?: string | null
         }
         Relationships: []
       }
