@@ -475,6 +475,68 @@ const Dashboard = ({ report }: { report: ReportJson }) => {
           </div>
         </div>
       )}
+      {Array.isArray(report.score_breakdown) && report.score_breakdown.length > 0 && (
+        <div style={{ marginTop: "1.25rem" }}>
+          <div className="qr-metric-label">Score Breakdown</div>
+          <p className="qr-section2-intro" style={{ marginTop: "0.25rem" }}>
+            Each category is scored out of 10. "Quote" is what the uploaded quote shows; "Confidence" also reflects details you supplied through the form.
+          </p>
+          <div className="qr-breakdown" style={{ marginTop: "0.6rem", display: "grid", gap: "0.4rem" }}>
+            {report.score_breakdown.map((row, i) => {
+              const statusLabel: Record<string, string> = {
+                clear: "Clear",
+                missing: "Missing from quote",
+                supplied_separately: "Supplied separately — confirm in writing",
+                builder_confirmed: "Builder confirmed",
+                project_dependent: "Project dependent",
+                not_applicable: "Not applicable",
+                advisory: "Advisory",
+              };
+              const q = typeof row.quote_score === "number" ? row.quote_score : undefined;
+              const c = typeof row.confidence_score === "number" ? row.confidence_score : undefined;
+              return (
+                <div
+                  key={i}
+                  style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: "0.5rem",
+                    padding: "0.55rem 0.7rem",
+                    border: "1px solid rgba(15,118,110,0.15)",
+                    borderRadius: "0.6rem",
+                    background: "rgba(15,118,110,0.03)",
+                  }}
+                >
+                  <div style={{ minWidth: "10rem", flex: "1 1 12rem" }}>
+                    <div style={{ fontWeight: 600, fontSize: "0.85rem" }}>{row.category}</div>
+                    <div style={{ fontSize: "0.72rem", opacity: 0.7 }}>
+                      {statusLabel[row.status || ""] || row.status || ""}
+                      {row.source ? ` · Source: ${row.source}` : ""}
+                    </div>
+                    {row.note && <div style={{ fontSize: "0.72rem", opacity: 0.75, marginTop: "0.2rem" }}>{row.note}</div>}
+                  </div>
+                  <div style={{ display: "flex", gap: "0.9rem", fontSize: "0.8rem", fontVariantNumeric: "tabular-nums" }}>
+                    {typeof q === "number" && (
+                      <div style={{ textAlign: "center" }}>
+                        <div style={{ fontWeight: 700 }}>{q}/10</div>
+                        <div style={{ fontSize: "0.65rem", opacity: 0.7 }}>Quote</div>
+                      </div>
+                    )}
+                    {typeof c === "number" && (
+                      <div style={{ textAlign: "center" }}>
+                        <div style={{ fontWeight: 700, color: "#0f766e" }}>{c}/10</div>
+                        <div style={{ fontSize: "0.65rem", opacity: 0.7 }}>Confidence</div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </section>
   );
 };
