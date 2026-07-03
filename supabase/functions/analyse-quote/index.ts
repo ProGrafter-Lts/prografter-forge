@@ -59,7 +59,38 @@ Be construction-aware: scaffold, toilet/welfare hire and plant hire are TEMPORAR
 - RISK WEIGHTING: temporary works that are already included must be treated as Low risk / Included / Advisory only — never Medium, High, Unclear or a red flag. Do not let included temporary works lower the risk_level, quality scores or certification_readiness.
 
 
-STEP 2 — Score the quote out of 10 in each of these ten categories, then compute overall QUALITY SCORE out of 100 (sum x 1): Scope Completeness; Clarity of Wording; Pricing Transparency; Labour/Materials Responsibility; Exclusions Clearly Listed; Compliance & Certification; Programme/Timescale Clarity; Payment Structure; Variation Handling; Customer Decision Safety.
+STEP 2 — DETERMINISTIC RUBRIC SCORING (this is the most important step — follow it exactly and consistently).
+Score TEN fixed categories. For EACH category produce TWO scores out of 10 and record the source and status:
+  (a) quote_score (0-10): based ONLY on what is visible/confirmed IN THE UPLOADED QUOTE. Homeowner form context must NOT raise this score. It can only rise if the item is in the quote itself or has been confirmed by the builder in writing.
+  (b) confidence_score (0-10): based on the uploaded quote PLUS useful information the homeowner supplied through the form (payment stages, scope description, timescale, drawings, known agreements). If the homeowner supplied genuinely useful information for this category, confidence_score should be EQUAL TO OR HIGHER THAN quote_score for that category — NEVER lower. Extra context must never reduce a score.
+
+The ten fixed categories (score each exactly once, in this order):
+1. VAT clarity
+2. Scope detail (scope completeness)
+3. Pricing/itemisation transparency
+4. Payment structure
+5. Programme/timescale
+6. Exclusions clarity
+7. Variation process
+8. Certification/handover
+9. Allowances/provisional sums (incl. temporary works)
+10. Homeowner decision safety
+
+DETERMINISTIC ANCHORS — apply these fixed rules so the SAME quote always scores the SAME:
+- Give the quote_score you can justify from the printed text. Use these anchors: fully clear/complete and unambiguous = 9-10; mostly clear with a minor gap = 7-8; partially addressed / needs confirming = 4-6; barely addressed or ambiguous = 2-3; entirely absent from the quote = 0-1.
+- VAT clarity: if the quote shows VAT (a VAT line, VAT rate e.g. "VAT @ 20%", VAT amount, or a total that clearly includes VAT) then VAT clarity quote_score = 9 or 10 and VAT MUST be a POSITIVE point. NEVER mark VAT as "not applicable", "unclear" or "missing" when VAT is clearly shown. Only score VAT low when VAT genuinely is not addressed at all.
+- Payment structure: if NO payment schedule/stages appear in the uploaded quote, quote_score for payment = 1-2. If the homeowner supplied payment information through the form, confidence_score for payment RISES (e.g. 5-6) but quote_score stays low. Word the finding as: "No payment schedule is visible in the uploaded quote. Payment information has been supplied separately and should be confirmed in writing by the builder." Never write only "No payment schedule".
+- Programme/timescale: if no start/completion date appears in the uploaded quote, quote_score = 1-2. If the homeowner supplied a timeframe/schedule separately, confidence_score rises but quote_score stays low; status = supplied_separately. Do NOT create separate scaffold/toilet-hire concerns from a missing programme (see STEP 1B).
+- Allowances/temporary works: temporary works (scaffold, welfare/toilet, plant) that are clearly included with a stated duration are POSITIVE — score them well and never penalise them.
+
+STATUS per category — set "status" to EXACTLY one of: "clear" (clearly in the quote), "missing" (absent from the quote and not supplied), "supplied_separately" (not in the quote but the homeowner supplied it via the form — remind them to confirm in writing), "builder_confirmed" (confirmed by the builder in writing), "project_dependent", "not_applicable", "advisory".
+SOURCE per category — set "source" to EXACTLY one of: "uploaded quote", "homeowner form", "previous project data", "AI inference", "admin note", "builder response". Never present AI inference as fact.
+
+COMPUTE THE TWO HEADLINE SCORES (do the arithmetic exactly):
+- document_score = sum of the ten quote_score values (0-100). This is the "Quote Document Score" — how complete and clear the uploaded quote itself is.
+- project_confidence_score = sum of the ten confidence_score values (0-100). This is the "Project Confidence Score" — how confident the homeowner can be after considering the quote PLUS supplied context. project_confidence_score MUST be >= document_score.
+- quality_score = document_score (kept for backward compatibility).
+Do NOT invent scores loosely — they must equal the sum of the per-category values you recorded.
 
 STEP 3 — Derive:
 - completeness_pct: approximate % of expected residential scope this quote clearly addresses (0-100).
