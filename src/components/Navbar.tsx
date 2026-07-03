@@ -21,6 +21,7 @@ const GROUPS: NavGroup[] = [
       { label: "Trade Verification", href: "/trade-verification", desc: "Our 5-step check" },
       { label: "Planning Alerts", href: "/planning-alerts", desc: "Turn planning into work" },
       { label: "Pricing", href: "/pricing", desc: "Commission only, no monthly fees" },
+      { label: "Calculators", href: "/calculators", desc: "Commission & savings tools" },
     ],
   },
   {
