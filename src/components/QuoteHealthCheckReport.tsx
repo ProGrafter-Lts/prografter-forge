@@ -25,6 +25,17 @@ interface ReportJson {
   // New structured fields
   checker_type?: string;
   quality_score?: number;
+  document_score?: number;
+  project_confidence_score?: number;
+  recommendation_summary?: string;
+  score_breakdown?: Array<{
+    category: string;
+    quote_score?: number;
+    confidence_score?: number;
+    status?: string;
+    source?: string;
+    note?: string;
+  }>;
   completeness_pct?: number;
   risk_level?: "Low" | "Medium" | "High" | "Critical";
   project_confidence?: "Low" | "Medium" | "High";
