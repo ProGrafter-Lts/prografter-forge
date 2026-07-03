@@ -326,14 +326,66 @@ Deno.serve(async (req) => {
       return out;
     };
 
+    // Escape raw control characters (unescaped newlines/tabs) that appear
+    // INSIDE JSON string values — a very common cause of early parse errors
+    // like "Expected ',' or '}' after property value" that the truncation
+    // repair above cannot handle.
+    const escapeControlCharsInStrings = (s: string): string => {
+      let out = "";
+      let inStr = false;
+      let esc = false;
+      for (let i = 0; i < s.length; i++) {
+        const c = s[i];
+        if (inStr) {
+          if (esc) {
+            esc = false;
+            out += c;
+            continue;
+          }
+          if (c === "\\") {
+            esc = true;
+            out += c;
+            continue;
+          }
+          if (c === '"') {
+            inStr = false;
+            out += c;
+            continue;
+          }
+          if (c === "\n") { out += "\\n"; continue; }
+          if (c === "\r") { out += "\\r"; continue; }
+          if (c === "\t") { out += "\\t"; continue; }
+          out += c;
+          continue;
+        }
+        if (c === '"') inStr = true;
+        out += c;
+      }
+      return out;
+    };
+
     let reportJson: any;
     try {
       reportJson = JSON.parse(jsonText);
     } catch (_e1) {
-      try {
-        reportJson = JSON.parse(repairTruncatedJson(jsonText));
-      } catch (e) {
-        console.error("analyse-quote: failed to parse model JSON", e, rawText.slice(0, 500));
+      const attempts = [
+        () => JSON.parse(repairTruncatedJson(jsonText)),
+        () => JSON.parse(escapeControlCharsInStrings(jsonText)),
+        () => JSON.parse(repairTruncatedJson(escapeControlCharsInStrings(jsonText))),
+      ];
+      let parsed: any;
+      for (const attempt of attempts) {
+        try {
+          parsed = attempt();
+          break;
+        } catch (_e) {
+          // try the next recovery strategy
+        }
+      }
+      if (parsed !== undefined) {
+        reportJson = parsed;
+      } else {
+        console.error("analyse-quote: failed to parse model JSON", _e1, rawText.slice(0, 500));
         await supabase.from("quote_checks").update({ status: "error" }).eq("id", quoteCheckId);
         return new Response(JSON.stringify({ error: "The analysis could not be formatted. Please try again." }), {
           status: 502,
