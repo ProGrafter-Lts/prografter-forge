@@ -14,11 +14,11 @@ const CAP = 900;
  * user-adjustable and clearly illustrative of common industry pricing.
  */
 const SavingsCalculator = () => {
-  const [jobsPerMonth, setJobsPerMonth] = useState(4);
-  const [avgJob, setAvgJob] = useState(3000);
-  const [monthlyFee, setMonthlyFee] = useState(60);
-  const [leadsPerJob, setLeadsPerJob] = useState(4);
-  const [costPerLead, setCostPerLead] = useState(15);
+  const [jobsPerMonth, setJobsPerMonth] = useState(3);
+  const [avgJob, setAvgJob] = useState(2000);
+  const [monthlyFee, setMonthlyFee] = useState(80);
+  const [leadsPerJob, setLeadsPerJob] = useState(6);
+  const [costPerLead, setCostPerLead] = useState(25);
 
   const { pgYear, otherYear, saving } = useMemo(() => {
     const perJobCommission = Math.min(avgJob * RATE, CAP);
