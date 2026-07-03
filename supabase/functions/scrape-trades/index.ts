@@ -203,11 +203,21 @@ serve(async (req) => {
       };
 
       if (existing) {
-        // Refresh only core data. Notes, stage, call history, follow-up date,
-        // website status/score and proposal status are all left untouched.
+        // Refresh core data. Notes, stage, call history, follow-up date and
+        // proposal status are left untouched. But make sure the lead lands in
+        // the pipeline the admin is currently scraping — otherwise a business
+        // already captured in the trade pipeline would never surface in the
+        // website outreach tab (unique constraint is on source+source_id).
+        const patch: Record<string, unknown> = { ...core };
+        if ((existing as { pipeline?: string }).pipeline !== pipeline) {
+          patch.pipeline = pipeline;
+          if (pipeline === "website" && !(existing as { website_quality?: string }).website_quality) {
+            patch.website_quality = FOCUS_SEED[websiteFocus ?? "any"] ?? (hasWebsite ? null : "none");
+          }
+        }
         const { error } = await supabase
           .from("scraped_trades")
-          .update(core)
+          .update(patch)
           .eq("id", existing.id);
         if (error) skipped.push({ name: core.trade_name, reason: error.message });
         else refreshed.push({ id: existing.id, trade_name: core.trade_name });
