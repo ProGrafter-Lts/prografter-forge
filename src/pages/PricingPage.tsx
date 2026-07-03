@@ -70,7 +70,13 @@ const PricingPage = () => (
         <PriceCard title="For homeowners" points={HOME_POINTS} />
       </div>
     </ContentSection>
-    <ContentSection title="How our pricing compares" tone="white" intro="Most platforms charge whether you win work or not. We don't.">
+    <ContentSection title="Work out your numbers" tone="white" intro="See exactly what a job costs and how much you could save versus a typical lead-based platform.">
+      <div className="grid grid-cols-1 craft:grid-cols-2 gap-6 items-start">
+        <CommissionCalculator />
+        <SavingsCalculator />
+      </div>
+    </ContentSection>
+    <ContentSection title="How our pricing compares" intro="Most platforms charge whether you win work or not. We don't.">
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse min-w-[560px]">
           <thead>
