@@ -4610,6 +4610,18 @@ export type Database = {
       generate_contract_reference: { Args: never; Returns: string }
       generate_job_ref: { Args: never; Returns: string }
       generate_quote_reference: { Args: never; Returns: string }
+      get_planning_invite: {
+        Args: { _token: string }
+        Returns: {
+          company_name: string
+          planning_application_id: string
+          project_type: string
+          trade_name: string
+          trade_type: string
+          verification_status: string
+          verified: boolean
+        }[]
+      }
       get_public_trade: {
         Args: { _id: string }
         Returns: {
@@ -4715,6 +4727,10 @@ export type Database = {
       }
       log_contract_event: {
         Args: { _contract_id: string; _event_type: string; _payload?: Json }
+        Returns: undefined
+      }
+      mark_planning_invite_clicked: {
+        Args: { _token: string }
         Returns: undefined
       }
       mark_practical_completion: {
