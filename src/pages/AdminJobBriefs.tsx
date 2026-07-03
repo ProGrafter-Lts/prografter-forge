@@ -58,9 +58,31 @@ const Field = ({ label, value }: { label: string; value: any }) =>
   ) : null;
 
 export default function AdminJobBriefs() {
+  const navigate = useNavigate();
   const [briefs, setBriefs] = useState<Brief[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState<string | null>(null);
+
+  const startScopingCall = async (b: Brief, callType: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    const { data, error } = await (supabase as any)
+      .from("customer_call_notes")
+      .insert({
+        call_type: callType,
+        call_status: "in_progress",
+        admin_user_id: user?.id,
+        call_date: new Date().toISOString(),
+        job_brief_id: b.id,
+        homeowner_name: b.full_name,
+        homeowner_email: b.email,
+        homeowner_phone: b.phone,
+        project_reference: b.ref,
+      })
+      .select("id")
+      .single();
+    if (error) { alert(error.message); return; }
+    navigate(`/admin/scoping-calls/${data.id}`);
+  };
 
   useEffect(() => {
     (async () => {
