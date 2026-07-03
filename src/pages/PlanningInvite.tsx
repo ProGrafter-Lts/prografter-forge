@@ -24,40 +24,28 @@ export default function PlanningInvite() {
     let cancelled = false;
     const load = async () => {
       if (!token) return;
-      const { data: link, error: linkErr } = await supabase
-        .from("planning_invite_links")
-        .select("trade_id, planning_application_id, project_type, expires_at")
-        .eq("token", token)
+      const { data, error: rpcErr } = await supabase
+        .rpc("get_planning_invite", { _token: token })
         .maybeSingle();
 
       if (cancelled) return;
-      if (linkErr || !link) {
+      if (rpcErr || !data) {
         setError("This invite link is not valid or has expired.");
         setLoading(false);
         return;
       }
 
-      // best-effort: mark clicked
-      void supabase
-        .from("planning_invite_links")
-        .update({ clicked_at: new Date().toISOString() })
-        .eq("token", token);
+      // best-effort: mark clicked (token-scoped, no table write access needed)
+      void supabase.rpc("mark_planning_invite_clicked", { _token: token });
 
-      const { data: trade } = await supabase
-        .from("trades")
-        .select("name, company_name, trade_type, verified, verification_status")
-        .eq("id", link.trade_id)
-        .maybeSingle();
-
-      if (cancelled) return;
       setInvite({
-        trade_name: trade?.name ?? "A ProGrafter-verified trade",
-        company_name: trade?.company_name ?? "",
-        trade_type: trade?.trade_type ?? "",
-        verified: trade?.verified ?? false,
-        verification_status: trade?.verification_status ?? null,
-        project_type: link.project_type,
-        planning_application_id: link.planning_application_id,
+        trade_name: data.trade_name ?? "A ProGrafter-verified trade",
+        company_name: data.company_name ?? "",
+        trade_type: data.trade_type ?? "",
+        verified: data.verified ?? false,
+        verification_status: data.verification_status ?? null,
+        project_type: data.project_type,
+        planning_application_id: data.planning_application_id,
       });
       setLoading(false);
     };
