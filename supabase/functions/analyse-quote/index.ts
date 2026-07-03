@@ -61,7 +61,7 @@ STEP 3 — Derive:
 
 IF THE INPUT IS NOT A BUILDING QUOTE, return exactly: {"error": "This doesn't look like a building quote. Please upload a builder's quotation or estimate."}
 
-OUTPUT — return ONLY a single valid JSON object. No markdown, no code fences, no commentary. Keys:
+OUTPUT — return ONLY a single valid JSON object. No markdown, no code fences, no commentary. STRICT JSON RULES: every string value must be valid JSON — escape any double quotes inside strings as \\", escape backslashes as \\\\, and never place a raw newline inside a string value (use \\n instead). Currency values are plain strings like "£10,253.49" (the £ symbol and commas are fine inside a quoted string, but never break out of the quotes). Keys:
 {
   "figures": { "subtotal": string, "vat": string, "total": string },
   "checker_type": "[CHECKER_KEY]",
