@@ -51,11 +51,16 @@ const TrustStats = () => {
     };
 
     (async () => {
-      const [verified, homeowners, quotes] = await Promise.all([
-        supabase.rpc("count_verified_trades").then(({ data }) => (typeof data === "number" ? data : null)).catch(() => null),
+      const verifiedTrades = await Promise.resolve(
+        supabase.rpc("count_verified_trades")
+      )
+        .then(({ data }: any) => (typeof data === "number" ? data : null))
+        .catch(() => null);
+      const [homeowners, quotes] = await Promise.all([
         safeCount("homeowners"),
         safeCount("quote_checks"),
       ]);
+      const verified = verifiedTrades;
 
       // Average clarity score — best effort; falls back to message if blocked.
       let avgClarity: number | null = null;
