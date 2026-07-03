@@ -32,9 +32,11 @@ const QuoteCheckDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { isReady, user } = useAuthReady();
+  const { isAdmin } = useIsAdmin();
   const [report, setReport] = useState<ReportJson | null>(null);
   const [status, setStatus] = useState<string>("loading");
   const [error, setError] = useState<string | null>(null);
+  const [diagnostic, setDiagnostic] = useState<ConsistencyDiagnostic | null>(null);
 
   useEffect(() => {
     if (!isReady) return;
@@ -46,7 +48,7 @@ const QuoteCheckDetail = () => {
     (async () => {
       const { data, error: err } = await supabase
         .from("quote_checks")
-        .select("status, report_json")
+        .select("status, report_json, consistency_diagnostic")
         .eq("id", id)
         .maybeSingle();
       if (err || !data) {
@@ -56,6 +58,9 @@ const QuoteCheckDetail = () => {
       setStatus(data.status);
       if (data.status === "complete" && data.report_json) {
         setReport(data.report_json as unknown as ReportJson);
+      }
+      if (data.consistency_diagnostic) {
+        setDiagnostic(data.consistency_diagnostic as unknown as ConsistencyDiagnostic);
       }
     })();
   }, [isReady, id, user, navigate]);
