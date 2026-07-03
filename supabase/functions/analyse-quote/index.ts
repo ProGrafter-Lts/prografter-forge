@@ -484,7 +484,7 @@ Deno.serve(async (req) => {
         subtotal_text: figures.subtotal ?? null,
         vat_text: figures.vat ?? null,
         total_text: figures.total ?? null,
-        quality_score: isErrorReport ? null : clampInt(reportJson.quality_score),
+        quality_score: isErrorReport ? null : clampInt(reportJson.quality_score ?? reportJson.document_score),
         completeness_pct: isErrorReport ? null : clampInt(reportJson.completeness_pct),
         risk_level: isErrorReport ? null : (reportJson.risk_level ?? null),
         project_confidence: isErrorReport ? null : (reportJson.project_confidence ?? null),
