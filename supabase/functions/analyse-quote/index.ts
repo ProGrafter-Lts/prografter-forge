@@ -280,6 +280,17 @@ Deno.serve(async (req) => {
     const fileBytes = await fileData.arrayBuffer();
     const bytes = new Uint8Array(fileBytes);
 
+    // Fingerprint the uploaded file so re-runs of the SAME quote can be
+    // compared for scoring consistency (STEP 9 — re-run consistency check).
+    let fileHash: string | null = null;
+    try {
+      const digest = await crypto.subtle.digest("SHA-256", fileBytes);
+      fileHash = Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, "0")).join("");
+    } catch (hashErr) {
+      console.error("analyse-quote: hashing failed", hashErr);
+    }
+
+
     // Build the intake context and mode guidance.
     const intake = (record.intake || {}) as Record<string, unknown>;
     const checkerKey = (record.checker_type || "homeowner") as string;
