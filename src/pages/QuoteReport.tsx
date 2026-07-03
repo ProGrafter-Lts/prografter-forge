@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useParams, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
 import AppShell from "@/components/AppShell";
@@ -105,7 +105,7 @@ const QuoteReport = () => {
   const [report, setReport] = useState<ReportJson | null>(null);
   const [status, setStatus] = useState<string>("pending");
   const [accessError, setAccessError] = useState<string | null>(null);
-  const [readyElsewhere, setReadyElsewhere] = useState(false);
+  const [fallbackReason, setFallbackReason] = useState<"timeout" | "empty" | null>(null);
 
   // The lookup token gates access — without it the report cannot be read,
   // so a guessed URL alone is not enough.
@@ -166,7 +166,7 @@ const QuoteReport = () => {
             // Status complete but no usable content — log and offer the
             // dashboard fallback rather than spinning indefinitely.
             console.error("[QuoteReport] status complete but report content empty", { id });
-            setReadyElsewhere(true);
+            setFallbackReason("empty");
             return;
           }
 
@@ -178,8 +178,8 @@ const QuoteReport = () => {
         }
 
         if (Date.now() - startedAt > MAX_POLL_MS) {
-          console.warn("[QuoteReport] polling timed out; offering dashboard fallback", { id });
-          setReadyElsewhere(true);
+          console.warn("[QuoteReport] polling timed out; offering retry", { id });
+          setFallbackReason("timeout");
           return;
         }
         await new Promise((r) => setTimeout(r, 3000));
@@ -212,22 +212,29 @@ const QuoteReport = () => {
       );
     }
 
-    // Report exists but this page couldn't render it immediately — give the
-    // user a reliable way to open it from their dashboard.
-    if (readyElsewhere && !report) {
+    // Report exists but this page couldn't render it immediately, or analysis
+    // is taking longer than usual. Keep the user on this token-gated page and
+    // let them retry — never send a guest to the login-gated dashboard.
+    if (fallbackReason && !report) {
+      const isTimeout = fallbackReason === "timeout";
       return (
         <div className="text-center py-16 space-y-5">
           <ShieldCheck className="mx-auto h-10 w-10 text-teal" />
-          <h2 className="font-heading text-2xl text-navy">Your report is ready</h2>
+          <h2 className="font-heading text-2xl text-navy">
+            {isTimeout ? "This is taking longer than usual" : "Almost ready"}
+          </h2>
           <p className="font-mono text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
-            Your Quote Health Check has finished. Open it from your dashboard.
+            {isTimeout
+              ? "Your Quote Health Check is still being prepared. Give it a moment, then reload to check again. We've also emailed you a secure link to your report."
+              : "Your Quote Health Check has finished processing. Reload to open it. We've also emailed you a secure link to your report."}
           </p>
-          <Link
-            to={`/dashboard/quote-checks/${id ?? ""}`}
-            className="inline-flex items-center gap-2 bg-teal text-white font-mono text-sm px-5 py-2.5 rounded-xl hover:bg-teal-hover transition-colors shadow-sm no-underline"
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="inline-flex items-center gap-2 bg-teal text-white font-mono text-sm px-5 py-2.5 rounded-xl hover:bg-teal-hover transition-colors shadow-sm"
           >
-            Open Report
-          </Link>
+            Reload report
+          </button>
         </div>
       );
     }
