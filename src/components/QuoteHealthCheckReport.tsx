@@ -25,6 +25,17 @@ interface ReportJson {
   // New structured fields
   checker_type?: string;
   quality_score?: number;
+  document_score?: number;
+  project_confidence_score?: number;
+  recommendation_summary?: string;
+  score_breakdown?: Array<{
+    category: string;
+    quote_score?: number;
+    confidence_score?: number;
+    status?: string;
+    source?: string;
+    note?: string;
+  }>;
   completeness_pct?: number;
   risk_level?: "Low" | "Medium" | "High" | "Critical";
   project_confidence?: "Low" | "Medium" | "High";
@@ -373,6 +384,13 @@ const Dashboard = ({ report }: { report: ReportJson }) => {
         ? Math.round((report.score_addressed / 43) * 100)
         : undefined;
 
+  const documentScore =
+    typeof report.document_score === "number" ? report.document_score : qualityScore;
+  const confidenceScore =
+    typeof report.project_confidence_score === "number"
+      ? report.project_confidence_score
+      : undefined;
+
   if (!hasNew && typeof qualityScore !== "number") return null;
 
   return (
@@ -385,12 +403,22 @@ const Dashboard = ({ report }: { report: ReportJson }) => {
       </div>
 
       <div className="qr-dash2">
-        {typeof qualityScore === "number" && (
+        {typeof documentScore === "number" && (
           <div className="qr-metric2 qr-metric2-hero">
-            <div className="qr-metric-label">Quote Quality Score</div>
+            <div className="qr-metric-label">Quote Document Score</div>
             <div className="qr-metric2-ringrow">
-              <Ring value={qualityScore} />
-              <p className="qr-metric2-explain">{scoreExplain(qualityScore)}</p>
+              <Ring value={documentScore} />
+              <p className="qr-metric2-explain">How complete and clear the uploaded quote itself is. {scoreExplain(documentScore)}</p>
+            </div>
+          </div>
+        )}
+
+        {typeof confidenceScore === "number" && (
+          <div className="qr-metric2 qr-metric2-hero">
+            <div className="qr-metric-label">Project Confidence Score</div>
+            <div className="qr-metric2-ringrow">
+              <Ring value={confidenceScore} />
+              <p className="qr-metric2-explain">How confident you can be after the quote plus the extra details you supplied. Anything supplied separately should be confirmed in writing.</p>
             </div>
           </div>
         )}
@@ -433,6 +461,9 @@ const Dashboard = ({ report }: { report: ReportJson }) => {
           <div>
             <div className="qr-metric-label" style={{ color: "#0f766e" }}>Recommended Next Step</div>
             <p className="qr-nextstep2-text">{report.recommended_next_step}</p>
+            {report.recommendation_summary && (
+              <p className="qr-nextstep2-text" style={{ marginTop: "0.4rem", opacity: 0.85 }}>{report.recommendation_summary}</p>
+            )}
           </div>
         </div>
       )}
@@ -444,6 +475,68 @@ const Dashboard = ({ report }: { report: ReportJson }) => {
             {report.top_issues.slice(0, 3).map((issue, i) => (
               <div key={i} className="qr-issue"><span>{i + 1}.</span> {issue}</div>
             ))}
+          </div>
+        </div>
+      )}
+      {Array.isArray(report.score_breakdown) && report.score_breakdown.length > 0 && (
+        <div style={{ marginTop: "1.25rem" }}>
+          <div className="qr-metric-label">Score Breakdown</div>
+          <p className="qr-section2-intro" style={{ marginTop: "0.25rem" }}>
+            Each category is scored out of 10. "Quote" is what the uploaded quote shows; "Confidence" also reflects details you supplied through the form.
+          </p>
+          <div className="qr-breakdown" style={{ marginTop: "0.6rem", display: "grid", gap: "0.4rem" }}>
+            {report.score_breakdown.map((row, i) => {
+              const statusLabel: Record<string, string> = {
+                clear: "Clear",
+                missing: "Missing from quote",
+                supplied_separately: "Supplied separately — confirm in writing",
+                builder_confirmed: "Builder confirmed",
+                project_dependent: "Project dependent",
+                not_applicable: "Not applicable",
+                advisory: "Advisory",
+              };
+              const q = typeof row.quote_score === "number" ? row.quote_score : undefined;
+              const c = typeof row.confidence_score === "number" ? row.confidence_score : undefined;
+              return (
+                <div
+                  key={i}
+                  style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: "0.5rem",
+                    padding: "0.55rem 0.7rem",
+                    border: "1px solid rgba(15,118,110,0.15)",
+                    borderRadius: "0.6rem",
+                    background: "rgba(15,118,110,0.03)",
+                  }}
+                >
+                  <div style={{ minWidth: "10rem", flex: "1 1 12rem" }}>
+                    <div style={{ fontWeight: 600, fontSize: "0.85rem" }}>{row.category}</div>
+                    <div style={{ fontSize: "0.72rem", opacity: 0.7 }}>
+                      {statusLabel[row.status || ""] || row.status || ""}
+                      {row.source ? ` · Source: ${row.source}` : ""}
+                    </div>
+                    {row.note && <div style={{ fontSize: "0.72rem", opacity: 0.75, marginTop: "0.2rem" }}>{row.note}</div>}
+                  </div>
+                  <div style={{ display: "flex", gap: "0.9rem", fontSize: "0.8rem", fontVariantNumeric: "tabular-nums" }}>
+                    {typeof q === "number" && (
+                      <div style={{ textAlign: "center" }}>
+                        <div style={{ fontWeight: 700 }}>{q}/10</div>
+                        <div style={{ fontSize: "0.65rem", opacity: 0.7 }}>Quote</div>
+                      </div>
+                    )}
+                    {typeof c === "number" && (
+                      <div style={{ textAlign: "center" }}>
+                        <div style={{ fontWeight: 700, color: "#0f766e" }}>{c}/10</div>
+                        <div style={{ fontSize: "0.65rem", opacity: 0.7 }}>Confidence</div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
