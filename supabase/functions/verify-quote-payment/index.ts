@@ -46,19 +46,45 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    // Update quote check with payment ID and return the lookup token so the
-    // client can read the report even if its localStorage was lost (e.g. the
-    // Stripe redirect landed in a new tab / different browsing context).
+    // Read the CURRENT state first. Updating the row before checking would
+    // always report status "analysing" (Postgres returns the post-update row),
+    // so the already-complete guard could never fire and a refresh of the
+    // Stripe return URL would wipe a finished report and re-run analysis.
+    const { data: existing } = await supabase
+      .from("quote_checks")
+      .select("lookup_token, email, status, report_json")
+      .eq("id", quoteCheckId)
+      .single();
+
+    const alreadyComplete = existing?.status === "complete" && existing?.report_json != null;
+
+    if (alreadyComplete) {
+      // Record the payment id but do NOT reset status or re-trigger analysis.
+      await supabase
+        .from("quote_checks")
+        .update({ stripe_payment_id: session.payment_intent as string })
+        .eq("id", quoteCheckId);
+
+      return new Response(
+        JSON.stringify({
+          paid: true,
+          analysisStarted: false,
+          alreadyComplete: true,
+          lookupToken: existing?.lookup_token ?? null,
+          email: existing?.email ?? null,
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    // Not complete yet — move to "analysing" and record the payment id.
     const { data: updated } = await supabase
       .from("quote_checks")
       .update({ stripe_payment_id: session.payment_intent as string, status: "analysing" })
       .eq("id", quoteCheckId)
-      .select("lookup_token, email, status, report_json")
+      .select("lookup_token, email")
       .single();
 
-    // If the report is already complete (e.g. verify called twice after a
-    // refresh), do NOT re-trigger analysis — this prevents duplicate reports.
-    const alreadyComplete = updated?.status === "complete" && updated?.report_json != null;
 
     // Kick off the analysis WITHOUT blocking the response. Analysis can take
     // 1–3 minutes; awaiting it here caused the client invoke to time out, so
