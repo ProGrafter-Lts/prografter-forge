@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-const stats = [
-  { value: "£0", label: "Monthly Fee" },
-  { value: "7.5%", label: "Commission" },
-  { value: "£900", label: "Per Job Cap" },
+const flow = [
+  { step: "01", label: "Your Quote", desc: "Upload a builder's quote" },
+  { step: "02", label: "AI Analysis", desc: "Clarity Score in minutes" },
+  { step: "03", label: "Trusted Trade", desc: "5-step verified pros" },
+  { step: "04", label: "Successful Project", desc: "Tracked to completion" },
 ];
 
 const Hero = () => {
@@ -20,145 +21,87 @@ const Hero = () => {
 
   return (
     <section
-      className="relative min-h-screen flex items-center overflow-hidden bg-navy"
+      className="relative min-h-screen flex items-center overflow-hidden"
       style={{ background: "linear-gradient(135deg, #27396A 0%, #0F1F38 100%)" }}
     >
+      {/* Ambient glows */}
+      <div className="pointer-events-none absolute -top-24 -right-24 h-96 w-96 rounded-full bg-teal/20 blur-[120px]" />
+      <div className="pointer-events-none absolute bottom-0 -left-32 h-96 w-96 rounded-full bg-teal/10 blur-[120px]" />
+
       {/* Ghost GRAFT text */}
-      <span className="absolute bottom-8 left-8 font-heading text-[120px] craft:text-[240px] text-cream select-none pointer-events-none leading-none" style={{ opacity: 0.03 }}>
+      <span className="absolute bottom-6 left-6 font-heading text-[120px] craft:text-[220px] text-cream select-none pointer-events-none leading-none" style={{ opacity: 0.03 }}>
         GRAFT
       </span>
 
-      {/* Vertical divider between trade & homeowner columns */}
-      <div className="hidden craft:block absolute top-24 bottom-24 w-px bg-teal/20" style={{ left: "60%" }} />
+      <div className="relative max-w-6xl mx-auto px-6 w-full pt-28 pb-20 text-center">
+        {/* Positioning badge */}
+        <div className="inline-flex items-center gap-2 mb-7 px-4 py-2 rounded-full bg-white/5 border border-teal/30 backdrop-blur-md">
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-teal opacity-75" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-teal" />
+          </span>
+          <span className="font-mono text-[11px] text-cream uppercase tracking-[0.2em]">
+            The UK&apos;s AI-Powered Construction Trust Platform
+          </span>
+        </div>
 
-      <div className="max-w-7xl mx-auto px-6 w-full grid craft:grid-cols-[60fr_40fr] gap-10 craft:gap-12 items-start pt-24 pb-16">
-        {/* Left column — TRADES */}
-        <div className="craft:pr-8">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-8 h-[2px] bg-teal" />
-            <span className="font-mono text-xs text-teal uppercase tracking-widest">For Tradespeople</span>
-          </div>
-          <div className="inline-flex items-center gap-2 mb-6 px-3 py-1.5 rounded-full bg-teal/10 border border-teal/30">
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-teal opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-teal" />
-            </span>
-            <span className="font-mono text-[11px] text-cream uppercase tracking-wider">
-              Now live · Nottinghamshire & East Midlands{tradeCount !== null && tradeCount >= 10 ? ` — ${tradeCount} verified trades registered` : ""}
-            </span>
-          </div>
-          <h1 className="font-heading text-cream text-[48px] craft:text-[72px] leading-[0.95] mb-6">
-            Proper grafters<br />
-            don't pay to work.
-          </h1>
-          <p className="font-body text-secondary-text text-base craft:text-lg max-w-md mb-6 font-light">
-            No monthly fee. No lead fees. No "free trial" that starts charging you later. We only earn when you do.
-          </p>
-          <p className="font-body text-secondary-text text-sm max-w-md mb-6 font-light">
-            7.5% commission only when the job completes and you've been paid — capped at £900 per job. Founding Members (first 50 trades): your first 5 jobs at 6%, permanent badge, personal welcome call from Lee.
-          </p>
+        <h1 className="font-heading text-cream text-[44px] craft:text-[80px] leading-[0.95] mb-6 max-w-4xl mx-auto">
+          The future of trusted<br className="hidden craft:block" /> construction starts here.
+        </h1>
 
+        <p className="font-body text-secondary-text text-base craft:text-xl max-w-2xl mx-auto mb-4 font-light">
+          AI-powered quote checking, verified professionals, transparent pricing and smarter
+          project management — all in one platform.
+        </p>
+        <p className="font-body text-cream/60 text-sm max-w-xl mx-auto mb-9 font-light">
+          Not another directory. We restore trust to domestic construction through intelligent
+          technology, genuine verification and real accountability.
+        </p>
+
+        {/* CTAs */}
+        <div className="flex flex-col craft:flex-row items-center justify-center gap-4 mb-4">
           <a
-            href="/register/trade"
-            className="inline-flex items-center justify-center bg-teal text-cream font-mono text-sm px-6 py-3.5 rounded-xl hover:bg-teal-hover transition-colors"
+            href="/quote-checker"
+            className="inline-flex items-center justify-center gap-2 bg-teal text-cream font-mono text-sm px-8 py-4 rounded-xl hover:bg-teal-hover transition-all shadow-lg shadow-teal/30 hover:-translate-y-0.5 w-full craft:w-auto"
           >
-            Register free — win work
+            <span className="text-base leading-none">✦</span>
+            Upload Your Quote
           </a>
-
-          {/* Tertiary links */}
-          <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-xs text-secondary-text">
-            <a href="/login" className="hover:text-teal transition-colors">
-              Already have an account? Sign in
-            </a>
-          </div>
-
-          {/* Stats — inline on all sizes for trade column */}
-          <div className="mt-8 grid grid-cols-3 gap-3 max-w-md">
-            {stats.map((stat) => (
-            <div key={stat.label} className="bg-navy/50 backdrop-blur-sm border border-teal/20 rounded-xl px-3 py-3 flex flex-col items-center justify-between text-center">
-                <div className="font-heading text-teal text-xl craft:text-2xl leading-none flex items-center justify-center h-7 craft:h-8">{stat.value}</div>
-                <div className="font-mono text-[10px] text-secondary-text uppercase mt-2 leading-none">{stat.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Right column — HOMEOWNERS */}
-        <div className="relative craft:pl-8 craft:mt-[175px]">
-          <div
-            className="bg-cream rounded-[12px] p-6 craft:p-8"
-            style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.12)" }}
+          <a
+            href="/signup/trade"
+            className="inline-flex items-center justify-center w-full craft:w-auto border border-cream/30 text-cream font-mono text-sm px-8 py-4 rounded-xl hover:border-teal hover:text-teal transition-colors backdrop-blur-sm"
           >
-            <div className="flex items-center gap-3 mb-5">
-              <div className="w-8 h-[2px]" style={{ backgroundColor: "#14A8A1" }} />
-              <span className="font-mono text-[11px] uppercase tracking-widest" style={{ color: "#14A8A1" }}>
-                For Homeowners
-              </span>
-            </div>
-            <h2
-              className="font-heading text-[32px] craft:text-[36px] leading-[1] mb-4"
-              style={{ color: "#27396A" }}
-            >
-              Your project. Fully visible. Fully protected.
-            </h2>
-            <p className="font-body text-[15px] mb-5 font-light" style={{ color: "#1F2937" }}>
-              Up to three matched trades. Not thirty. Vetted, local, and actually available — you choose on the work, not just the lowest price.
-            </p>
-            <p className="font-body text-[14px] mb-6 leading-relaxed font-light" style={{ color: "#4B5563" }}>
-              Anyone can hand you a cheap quote. ProGrafter gives you a verified trade, a written contract, daily photos from site, staged payments held safe, and every certificate and warranty at the end — the record you'll show friends.
-            </p>
-            <div className="flex flex-col gap-3">
-              <a
-                href="/post-a-job"
-                className="homeowner-cta inline-flex items-center justify-center w-full font-mono text-base px-8 py-4 rounded-xl transition-all duration-200 shadow-md"
-                style={{
-                  backgroundColor: "transparent",
-                  border: "2px solid #27396A",
-                  color: "#27396A",
-                  fontWeight: 700,
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = "#14A8A1";
-                  e.currentTarget.style.borderColor = "#14A8A1";
-                  e.currentTarget.style.color = "#FFFFFF";
-                  e.currentTarget.style.transform = "translateY(-2px)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "transparent";
-                  e.currentTarget.style.borderColor = "#27396A";
-                  e.currentTarget.style.color = "#27396A";
-                  e.currentTarget.style.transform = "translateY(0)";
-                }}
-              >
-                Post your job — free
-              </a>
-              <a
-                href="#how-it-works"
-                className="inline-flex items-center justify-center w-full font-mono text-sm px-8 py-3 rounded-xl transition-all duration-200"
-                style={{
-                  backgroundColor: "transparent",
-                  border: "2px solid #27396A",
-                  color: "#27396A",
-                  fontWeight: 500,
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = "#27396A";
-                  e.currentTarget.style.color = "#FFFFFF";
-                  e.currentTarget.style.transform = "translateY(-2px)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "transparent";
-                  e.currentTarget.style.color = "#27396A";
-                  e.currentTarget.style.transform = "translateY(0)";
-                }}
-              >
-                See how it works
-              </a>
-            </div>
-          </div>
+            Join as a Trade
+          </a>
         </div>
-      </div>
+        <div className="mb-14 font-mono text-xs text-cream/50">
+          <a href="/login" className="hover:text-teal transition-colors">Already have an account? Sign in</a>
+        </div>
 
+        {/* Flow visualisation */}
+        <div className="grid grid-cols-2 craft:grid-cols-4 gap-3 craft:gap-4 max-w-4xl mx-auto">
+          {flow.map((f, i) => (
+            <div
+              key={f.step}
+              className="relative rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md px-4 py-5 text-left animate-fade-in"
+              style={{ animationDelay: `${i * 120}ms` }}
+            >
+              <div className="font-mono text-[11px] text-teal mb-2">{f.step}</div>
+              <div className="font-heading text-cream text-lg leading-tight mb-1">{f.label}</div>
+              <div className="font-body text-cream/55 text-xs font-light">{f.desc}</div>
+              {i < flow.length - 1 && (
+                <span className="hidden craft:block absolute top-1/2 -right-3 -translate-y-1/2 text-teal/60 z-10">→</span>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {tradeCount !== null && tradeCount >= 10 && (
+          <p className="mt-8 font-mono text-xs text-cream/50">
+            {tradeCount} verified trades registered · Nottinghamshire &amp; East Midlands, expanding nationally
+          </p>
+        )}
+      </div>
     </section>
   );
 };
