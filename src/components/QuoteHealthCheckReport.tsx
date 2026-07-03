@@ -461,6 +461,9 @@ const Dashboard = ({ report }: { report: ReportJson }) => {
           <div>
             <div className="qr-metric-label" style={{ color: "#0f766e" }}>Recommended Next Step</div>
             <p className="qr-nextstep2-text">{report.recommended_next_step}</p>
+            {report.recommendation_summary && (
+              <p className="qr-nextstep2-text" style={{ marginTop: "0.4rem", opacity: 0.85 }}>{report.recommendation_summary}</p>
+            )}
           </div>
         </div>
       )}
