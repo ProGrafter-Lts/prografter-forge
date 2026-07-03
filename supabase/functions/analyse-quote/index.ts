@@ -569,8 +569,12 @@ Deno.serve(async (req) => {
       }
     }
 
-
+    await supabase
+      .from("quote_checks")
       .update({
+        file_hash: fileHash,
+        analysis_snapshot: analysisSnapshot,
+        consistency_diagnostic: consistencyDiagnostic,
         report_json: reportJson,
         report_html: reportHtml,
         status: "complete",
