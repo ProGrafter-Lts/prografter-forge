@@ -105,7 +105,7 @@ const QuoteReport = () => {
   const [report, setReport] = useState<ReportJson | null>(null);
   const [status, setStatus] = useState<string>("pending");
   const [accessError, setAccessError] = useState<string | null>(null);
-  const [readyElsewhere, setReadyElsewhere] = useState(false);
+  const [fallbackReason, setFallbackReason] = useState<"timeout" | "empty" | null>(null);
 
   // The lookup token gates access — without it the report cannot be read,
   // so a guessed URL alone is not enough.
