@@ -454,6 +454,271 @@ export type Database = {
           },
         ]
       }
+      customer_call_insights: {
+        Row: {
+          agent_training_note: string | null
+          anonymised: boolean
+          call_note_id: string | null
+          common_confusion: string | null
+          created_at: string
+          created_by: string | null
+          homeowner_concern_type: string | null
+          id: string
+          missing_information: string | null
+          project_type: string | null
+          quote_issue_type: string | null
+          useful_question: string | null
+        }
+        Insert: {
+          agent_training_note?: string | null
+          anonymised?: boolean
+          call_note_id?: string | null
+          common_confusion?: string | null
+          created_at?: string
+          created_by?: string | null
+          homeowner_concern_type?: string | null
+          id?: string
+          missing_information?: string | null
+          project_type?: string | null
+          quote_issue_type?: string | null
+          useful_question?: string | null
+        }
+        Update: {
+          agent_training_note?: string | null
+          anonymised?: boolean
+          call_note_id?: string | null
+          common_confusion?: string | null
+          created_at?: string
+          created_by?: string | null
+          homeowner_concern_type?: string | null
+          id?: string
+          missing_information?: string | null
+          project_type?: string | null
+          quote_issue_type?: string | null
+          useful_question?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_call_insights_call_note_id_fkey"
+            columns: ["call_note_id"]
+            isOneToOne: false
+            referencedRelation: "customer_call_notes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_call_notes: {
+        Row: {
+          admin_user_id: string | null
+          ai_summary: string | null
+          answers: Json
+          budget_notes: string | null
+          call_date: string | null
+          call_status: string
+          call_type: string
+          consent_given: boolean
+          consent_recorded_at: string | null
+          created_at: string
+          follow_up_date: string | null
+          homeowner_email: string | null
+          homeowner_id: string | null
+          homeowner_name: string | null
+          homeowner_phone: string | null
+          id: string
+          job_brief_id: string | null
+          key_concerns: string | null
+          next_steps: string | null
+          outputs: Json
+          planning_notes: string | null
+          project_id: string | null
+          project_reference: string | null
+          quote_check_id: string | null
+          quote_notes: string | null
+          recording_path: string | null
+          scope_notes: string | null
+          trade_notes: string | null
+          transcript_text: string | null
+          updated_at: string
+        }
+        Insert: {
+          admin_user_id?: string | null
+          ai_summary?: string | null
+          answers?: Json
+          budget_notes?: string | null
+          call_date?: string | null
+          call_status?: string
+          call_type?: string
+          consent_given?: boolean
+          consent_recorded_at?: string | null
+          created_at?: string
+          follow_up_date?: string | null
+          homeowner_email?: string | null
+          homeowner_id?: string | null
+          homeowner_name?: string | null
+          homeowner_phone?: string | null
+          id?: string
+          job_brief_id?: string | null
+          key_concerns?: string | null
+          next_steps?: string | null
+          outputs?: Json
+          planning_notes?: string | null
+          project_id?: string | null
+          project_reference?: string | null
+          quote_check_id?: string | null
+          quote_notes?: string | null
+          recording_path?: string | null
+          scope_notes?: string | null
+          trade_notes?: string | null
+          transcript_text?: string | null
+          updated_at?: string
+        }
+        Update: {
+          admin_user_id?: string | null
+          ai_summary?: string | null
+          answers?: Json
+          budget_notes?: string | null
+          call_date?: string | null
+          call_status?: string
+          call_type?: string
+          consent_given?: boolean
+          consent_recorded_at?: string | null
+          created_at?: string
+          follow_up_date?: string | null
+          homeowner_email?: string | null
+          homeowner_id?: string | null
+          homeowner_name?: string | null
+          homeowner_phone?: string | null
+          id?: string
+          job_brief_id?: string | null
+          key_concerns?: string | null
+          next_steps?: string | null
+          outputs?: Json
+          planning_notes?: string | null
+          project_id?: string | null
+          project_reference?: string | null
+          quote_check_id?: string | null
+          quote_notes?: string | null
+          recording_path?: string | null
+          scope_notes?: string | null
+          trade_notes?: string | null
+          transcript_text?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_call_notes_homeowner_id_fkey"
+            columns: ["homeowner_id"]
+            isOneToOne: false
+            referencedRelation: "homeowners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_call_notes_job_brief_id_fkey"
+            columns: ["job_brief_id"]
+            isOneToOne: false
+            referencedRelation: "job_briefs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_call_notes_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_call_notes_quote_check_id_fkey"
+            columns: ["quote_check_id"]
+            isOneToOne: false
+            referencedRelation: "quote_checks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_call_tasks: {
+        Row: {
+          assigned_admin_id: string | null
+          call_note_id: string | null
+          created_at: string
+          due_date: string | null
+          homeowner_id: string | null
+          id: string
+          job_brief_id: string | null
+          project_id: string | null
+          quote_check_id: string | null
+          status: string
+          task_type: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_admin_id?: string | null
+          call_note_id?: string | null
+          created_at?: string
+          due_date?: string | null
+          homeowner_id?: string | null
+          id?: string
+          job_brief_id?: string | null
+          project_id?: string | null
+          quote_check_id?: string | null
+          status?: string
+          task_type?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_admin_id?: string | null
+          call_note_id?: string | null
+          created_at?: string
+          due_date?: string | null
+          homeowner_id?: string | null
+          id?: string
+          job_brief_id?: string | null
+          project_id?: string | null
+          quote_check_id?: string | null
+          status?: string
+          task_type?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_call_tasks_call_note_id_fkey"
+            columns: ["call_note_id"]
+            isOneToOne: false
+            referencedRelation: "customer_call_notes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_call_tasks_homeowner_id_fkey"
+            columns: ["homeowner_id"]
+            isOneToOne: false
+            referencedRelation: "homeowners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_call_tasks_job_brief_id_fkey"
+            columns: ["job_brief_id"]
+            isOneToOne: false
+            referencedRelation: "job_briefs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_call_tasks_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_call_tasks_quote_check_id_fkey"
+            columns: ["quote_check_id"]
+            isOneToOne: false
+            referencedRelation: "quote_checks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dispute_events: {
         Row: {
           created_at: string
@@ -2394,6 +2659,7 @@ export type Database = {
       }
       quote_checks: {
         Row: {
+          admin_call_notes: string | null
           certification_readiness: string | null
           checker_type: string
           comparison_readiness: string | null
@@ -2427,6 +2693,7 @@ export type Database = {
           vat_text: string | null
         }
         Insert: {
+          admin_call_notes?: string | null
           certification_readiness?: string | null
           checker_type?: string
           comparison_readiness?: string | null
@@ -2460,6 +2727,7 @@ export type Database = {
           vat_text?: string | null
         }
         Update: {
+          admin_call_notes?: string | null
           certification_readiness?: string | null
           checker_type?: string
           comparison_readiness?: string | null

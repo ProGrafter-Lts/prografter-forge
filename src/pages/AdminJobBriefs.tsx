@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import SEO from "@/components/SEO";
@@ -57,9 +58,31 @@ const Field = ({ label, value }: { label: string; value: any }) =>
   ) : null;
 
 export default function AdminJobBriefs() {
+  const navigate = useNavigate();
   const [briefs, setBriefs] = useState<Brief[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState<string | null>(null);
+
+  const startScopingCall = async (b: Brief, callType: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    const { data, error } = await (supabase as any)
+      .from("customer_call_notes")
+      .insert({
+        call_type: callType,
+        call_status: "in_progress",
+        admin_user_id: user?.id,
+        call_date: new Date().toISOString(),
+        job_brief_id: b.id,
+        homeowner_name: b.full_name,
+        homeowner_email: b.email,
+        homeowner_phone: b.phone,
+        project_reference: b.ref,
+      })
+      .select("id")
+      .single();
+    if (error) { alert(error.message); return; }
+    navigate(`/admin/scoping-calls/${data.id}`);
+  };
 
   useEffect(() => {
     (async () => {
@@ -211,6 +234,18 @@ export default function AdminJobBriefs() {
                     <Field label="Override reason" value={b.override_reason} />
 
                     <div style={{ marginTop: 14, display: "flex", flexWrap: "wrap", gap: 8 }}>
+                      <button
+                        onClick={() => startScopingCall(b, "job_scoping")}
+                        style={{ background: C.deep, color: C.white, border: "none", borderRadius: 8, padding: "9px 14px", fontSize: 13, fontWeight: 700, cursor: "pointer" }}
+                      >
+                        Start scoping call
+                      </button>
+                      <button
+                        onClick={() => startScopingCall(b, "planning_guidance")}
+                        style={{ background: "transparent", color: C.deep, border: `1px solid ${C.deep}`, borderRadius: 8, padding: "9px 14px", fontSize: 13, fontWeight: 700, cursor: "pointer" }}
+                      >
+                        Start planning guidance call
+                      </button>
                       {b.needs_scoping && (
                         <button
                           onClick={() => recordScoping(b)}
