@@ -132,7 +132,14 @@ const AppRoutes = () => {
             <Route path="/unsubscribe" element={<Unsubscribe />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/about" element={<About />} />
-            <Route path="/how-it-works" element={<HowItWorksPage />} />
+           <Route path="/how-it-works" element={<HowItWorksPage />} />
+           <Route path="/trade-verification" element={<TradeVerificationPage />} />
+           <Route path="/homeowner-verification" element={<HomeownerVerificationPage />} />
+           <Route path="/ai-quote-checker" element={<AiQuoteCheckerPage />} />
+           <Route path="/quote-clarity-score" element={<QuoteClarityScorePage />} />
+           <Route path="/pricing" element={<PricingPage />} />
+           <Route path="/faq" element={<FaqPage />} />
+           <Route path="/resources" element={<ResourcesPage />} />
             <Route path="/checkatrade-alternative" element={<CheckatradeAlternative />} />
             <Route path="/is-checkatrade-worth-it" element={<IsCheckatradeWorthIt />} />
             <Route path="/planning-alerts" element={<PlanningAlertsPage />} />
