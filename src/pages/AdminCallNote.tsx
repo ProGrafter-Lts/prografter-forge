@@ -187,13 +187,12 @@ export default function AdminCallNote() {
   // ---- save summary to job brief / quote check ----
   const saveToJobBrief = async () => {
     if (!note?.job_brief_id) { toast.error("No linked job brief."); return; }
-    const scopeAddition = [note.outputs.job_brief_improvements, note.answers.scope_summary].filter(Boolean).join("\n");
+    const scopeAddition = [note.outputs.job_brief_improvements, note.answers.scope_summary, note.answers.affordability_concern && `Budget: ${note.answers.affordability_concern}`].filter(Boolean).join("\n");
     const { error } = await (supabase as any)
       .from("job_briefs")
       .update({
-        admin_scope_notes: scopeAddition,
-        admin_planning_notes: note.answers.planning_call_notes || null,
-        admin_budget_notes: note.answers.affordability_concern || null,
+        scoping_notes: scopeAddition,
+        planning_notes: note.answers.planning_call_notes || null,
       })
       .eq("id", note.job_brief_id);
     if (error) { toast.error("Could not save to job brief: " + error.message); return; }
