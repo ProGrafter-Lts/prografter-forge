@@ -86,6 +86,31 @@ const QuoteCheckDetail = () => {
           )}
         </div>
 
+        {isAdmin && diagnostic && (
+          <div className="no-print rounded-xl border border-amber-400/50 bg-amber-50 p-4 text-amber-900">
+            <p className="flex items-center gap-2 font-mono text-sm font-semibold">
+              <AlertTriangle className="h-4 w-4" /> Admin: {diagnostic.warning || "Score changed materially from previous run."}
+            </p>
+            <p className="mt-2 font-mono text-xs">
+              Previous score: <strong>{diagnostic.previous_document_score ?? "—"}/100</strong> · New score:{" "}
+              <strong>{diagnostic.new_document_score ?? "—"}/100</strong>
+              {typeof diagnostic.delta === "number" && (
+                <> · Change: <strong>{diagnostic.delta > 0 ? "+" : ""}{diagnostic.delta}</strong></>
+              )}
+            </p>
+            {diagnostic.category_differences && diagnostic.category_differences.length > 0 && (
+              <ul className="mt-2 space-y-0.5 font-mono text-xs">
+                {diagnostic.category_differences.map((d, i) => (
+                  <li key={i}>
+                    {d.category}: {d.previous_quote_score ?? "—"} → {d.new_quote_score ?? "—"}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+
+
         <div className="qr-print-area">
           {error ? (
             <div className="text-center py-16">
