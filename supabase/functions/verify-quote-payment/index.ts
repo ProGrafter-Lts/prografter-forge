@@ -92,30 +92,28 @@ Deno.serve(async (req) => {
     // generated successfully in the background. We now return immediately and
     // let the report page poll for completion. EdgeRuntime.waitUntil keeps the
     // worker alive until the fire-and-forget analysis finishes.
-    if (!alreadyComplete) {
-      const analysisPromise = supabase.functions
-        .invoke("analyse-quote", { body: { quoteCheckId } })
-        .then((res) => {
-          if (res.error) {
-            console.error("verify-quote-payment: analyse-quote invoke error", quoteCheckId, res.error);
-          }
-        })
-        .catch((e) => {
-          console.error("verify-quote-payment: analyse-quote threw", quoteCheckId, e);
-        });
-      try {
-        // @ts-ignore EdgeRuntime is available in the Supabase edge runtime.
-        EdgeRuntime.waitUntil(analysisPromise);
-      } catch {
-        // If waitUntil is unavailable, fall back to best-effort (do not await).
-      }
+    const analysisPromise = supabase.functions
+      .invoke("analyse-quote", { body: { quoteCheckId } })
+      .then((res) => {
+        if (res.error) {
+          console.error("verify-quote-payment: analyse-quote invoke error", quoteCheckId, res.error);
+        }
+      })
+      .catch((e) => {
+        console.error("verify-quote-payment: analyse-quote threw", quoteCheckId, e);
+      });
+    try {
+      // @ts-ignore EdgeRuntime is available in the Supabase edge runtime.
+      EdgeRuntime.waitUntil(analysisPromise);
+    } catch {
+      // If waitUntil is unavailable, fall back to best-effort (do not await).
     }
 
     return new Response(
       JSON.stringify({
         paid: true,
-        analysisStarted: !alreadyComplete,
-        alreadyComplete,
+        analysisStarted: true,
+        alreadyComplete: false,
         lookupToken: updated?.lookup_token ?? null,
         email: updated?.email ?? null,
       }),
