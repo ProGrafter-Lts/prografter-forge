@@ -384,6 +384,13 @@ const Dashboard = ({ report }: { report: ReportJson }) => {
         ? Math.round((report.score_addressed / 43) * 100)
         : undefined;
 
+  const documentScore =
+    typeof report.document_score === "number" ? report.document_score : qualityScore;
+  const confidenceScore =
+    typeof report.project_confidence_score === "number"
+      ? report.project_confidence_score
+      : undefined;
+
   if (!hasNew && typeof qualityScore !== "number") return null;
 
   return (
