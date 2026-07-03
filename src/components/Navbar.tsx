@@ -10,7 +10,7 @@ const GROUPS: NavGroup[] = [
     items: [
       { label: "Post a Job", href: "/post-job-brief", desc: "Get matched with vetted trades" },
       { label: "How It Works", href: "/how-it-works", desc: "Your project, step by step" },
-      { label: "Homeowner Verification", href: "/how-it-works#homeowner-verification", desc: "Why we verify everyone" },
+      { label: "Homeowner Verification", href: "/homeowner-verification", desc: "Why we verify everyone" },
       { label: "Green Grants", href: "/green", desc: "Funding for energy upgrades" },
     ],
   },
@@ -18,21 +18,25 @@ const GROUPS: NavGroup[] = [
     label: "Trades",
     items: [
       { label: "Join as a Trade", href: "/signup/trade", desc: "Free — commission only" },
-      { label: "Trade Verification", href: "/vetting", desc: "Our 5-step check" },
+      { label: "Trade Verification", href: "/trade-verification", desc: "Our 5-step check" },
       { label: "Planning Alerts", href: "/planning-alerts", desc: "Turn planning into work" },
+      { label: "Pricing", href: "/pricing", desc: "Commission only, no monthly fees" },
+      { label: "Calculators", href: "/calculators", desc: "Commission & savings tools" },
     ],
   },
   {
     label: "AI Tools",
     items: [
-      { label: "AI Quote Checker", href: "/quote-checker", desc: "Instant Quote Clarity Score" },
+      { label: "AI Quote Checker", href: "/ai-quote-checker", desc: "Instant Quote Clarity Score" },
+      { label: "Quote Clarity Score", href: "/quote-clarity-score", desc: "How we score quotes" },
       { label: "ProGrafter Intelligence", href: "/prografter-intelligence", desc: "The full toolkit" },
     ],
   },
   {
     label: "Resources",
     items: [
-      { label: "How It Works", href: "/how-it-works" },
+      { label: "Advice Centre", href: "/resources", desc: "Guides & tools" },
+      { label: "FAQ", href: "/faq", desc: "Common questions answered" },
       { label: "Is Checkatrade Worth It?", href: "/is-checkatrade-worth-it" },
       { label: "Checkatrade Alternative", href: "/checkatrade-alternative" },
       { label: "Contact", href: "/contact" },
@@ -41,7 +45,7 @@ const GROUPS: NavGroup[] = [
 ];
 
 const SINGLES: NavItem[] = [
-  { label: "Pricing", href: "/#pricing" },
+  { label: "Pricing", href: "/pricing" },
   { label: "About", href: "/about" },
 ];
 
@@ -53,7 +57,7 @@ const Navbar = () => {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-[12px] border-b border-border/40" style={{ backgroundColor: "rgba(245, 240, 232, 0.92)" }}>
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between h-16">
-        <a href="/" aria-label="ProGrafter home"><Logo className="h-11 w-auto" /></a>
+        <Logo className="h-11 w-auto" />
 
         {/* Desktop */}
         <div className="hidden craft:flex items-center gap-1">

@@ -73,6 +73,14 @@ const PlanningPipeline = lazy(() => import("./pages/PlanningPipeline.tsx"));
 const AdminTradeScraper = lazy(() => import("./pages/AdminTradeScraper.tsx"));
 const AdminApplications = lazy(() => import("./pages/AdminApplications.tsx"));
 const AdminApplicationDetail = lazy(() => import("./pages/AdminApplicationDetail.tsx"));
+const TradeVerificationPage = lazy(() => import("./pages/TradeVerificationPage.tsx"));
+const HomeownerVerificationPage = lazy(() => import("./pages/HomeownerVerificationPage.tsx"));
+const AiQuoteCheckerPage = lazy(() => import("./pages/AiQuoteCheckerPage.tsx"));
+const QuoteClarityScorePage = lazy(() => import("./pages/QuoteClarityScorePage.tsx"));
+const PricingPage = lazy(() => import("./pages/PricingPage.tsx"));
+const FaqPage = lazy(() => import("./pages/FaqPage.tsx"));
+const ResourcesPage = lazy(() => import("./pages/ResourcesPage.tsx"));
+const CalculatorsPage = lazy(() => import("./pages/CalculatorsPage.tsx"));
 const AdminJobBriefs = lazy(() => import("./pages/AdminJobBriefs.tsx"));
 const AdminAnalytics = lazy(() => import("./pages/AdminAnalytics.tsx"));
 const AdminLeadDistribution = lazy(() => import("./pages/AdminLeadDistribution.tsx"));
@@ -125,7 +133,15 @@ const AppRoutes = () => {
             <Route path="/unsubscribe" element={<Unsubscribe />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/about" element={<About />} />
-            <Route path="/how-it-works" element={<HowItWorksPage />} />
+           <Route path="/how-it-works" element={<HowItWorksPage />} />
+           <Route path="/trade-verification" element={<TradeVerificationPage />} />
+           <Route path="/homeowner-verification" element={<HomeownerVerificationPage />} />
+           <Route path="/ai-quote-checker" element={<AiQuoteCheckerPage />} />
+           <Route path="/quote-clarity-score" element={<QuoteClarityScorePage />} />
+           <Route path="/pricing" element={<PricingPage />} />
+           <Route path="/faq" element={<FaqPage />} />
+           <Route path="/resources" element={<ResourcesPage />} />
+           <Route path="/calculators" element={<CalculatorsPage />} />
             <Route path="/checkatrade-alternative" element={<CheckatradeAlternative />} />
             <Route path="/is-checkatrade-worth-it" element={<IsCheckatradeWorthIt />} />
             <Route path="/planning-alerts" element={<PlanningAlertsPage />} />
