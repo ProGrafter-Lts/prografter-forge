@@ -141,6 +141,7 @@ const AppRoutes = () => {
            <Route path="/pricing" element={<PricingPage />} />
            <Route path="/faq" element={<FaqPage />} />
            <Route path="/resources" element={<ResourcesPage />} />
+           <Route path="/calculators" element={<CalculatorsPage />} />
             <Route path="/checkatrade-alternative" element={<CheckatradeAlternative />} />
             <Route path="/is-checkatrade-worth-it" element={<IsCheckatradeWorthIt />} />
             <Route path="/planning-alerts" element={<PlanningAlertsPage />} />
