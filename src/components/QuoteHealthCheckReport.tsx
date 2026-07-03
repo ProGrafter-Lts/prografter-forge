@@ -403,12 +403,22 @@ const Dashboard = ({ report }: { report: ReportJson }) => {
       </div>
 
       <div className="qr-dash2">
-        {typeof qualityScore === "number" && (
+        {typeof documentScore === "number" && (
           <div className="qr-metric2 qr-metric2-hero">
-            <div className="qr-metric-label">Quote Quality Score</div>
+            <div className="qr-metric-label">Quote Document Score</div>
             <div className="qr-metric2-ringrow">
-              <Ring value={qualityScore} />
-              <p className="qr-metric2-explain">{scoreExplain(qualityScore)}</p>
+              <Ring value={documentScore} />
+              <p className="qr-metric2-explain">How complete and clear the uploaded quote itself is. {scoreExplain(documentScore)}</p>
+            </div>
+          </div>
+        )}
+
+        {typeof confidenceScore === "number" && (
+          <div className="qr-metric2 qr-metric2-hero">
+            <div className="qr-metric-label">Project Confidence Score</div>
+            <div className="qr-metric2-ringrow">
+              <Ring value={confidenceScore} />
+              <p className="qr-metric2-explain">How confident you can be after the quote plus the extra details you supplied. Anything supplied separately should be confirmed in writing.</p>
             </div>
           </div>
         )}
