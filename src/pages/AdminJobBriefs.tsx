@@ -234,6 +234,18 @@ export default function AdminJobBriefs() {
                     <Field label="Override reason" value={b.override_reason} />
 
                     <div style={{ marginTop: 14, display: "flex", flexWrap: "wrap", gap: 8 }}>
+                      <button
+                        onClick={() => startScopingCall(b, "job_scoping")}
+                        style={{ background: C.deep, color: C.white, border: "none", borderRadius: 8, padding: "9px 14px", fontSize: 13, fontWeight: 700, cursor: "pointer" }}
+                      >
+                        Start scoping call
+                      </button>
+                      <button
+                        onClick={() => startScopingCall(b, "planning_guidance")}
+                        style={{ background: "transparent", color: C.deep, border: `1px solid ${C.deep}`, borderRadius: 8, padding: "9px 14px", fontSize: 13, fontWeight: 700, cursor: "pointer" }}
+                      >
+                        Start planning guidance call
+                      </button>
                       {b.needs_scoping && (
                         <button
                           onClick={() => recordScoping(b)}
