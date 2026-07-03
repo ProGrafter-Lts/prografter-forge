@@ -2660,14 +2660,17 @@ export type Database = {
       quote_checks: {
         Row: {
           admin_call_notes: string | null
+          analysis_snapshot: Json | null
           certification_readiness: string | null
           checker_type: string
           comparison_readiness: string | null
           completeness_pct: number | null
+          consistency_diagnostic: Json | null
           created_at: string
           created_project: boolean
           description: string
           email: string
+          file_hash: string | null
           id: string
           intake: Json
           labour_material: string | null
@@ -2694,14 +2697,17 @@ export type Database = {
         }
         Insert: {
           admin_call_notes?: string | null
+          analysis_snapshot?: Json | null
           certification_readiness?: string | null
           checker_type?: string
           comparison_readiness?: string | null
           completeness_pct?: number | null
+          consistency_diagnostic?: Json | null
           created_at?: string
           created_project?: boolean
           description?: string
           email: string
+          file_hash?: string | null
           id?: string
           intake?: Json
           labour_material?: string | null
@@ -2728,14 +2734,17 @@ export type Database = {
         }
         Update: {
           admin_call_notes?: string | null
+          analysis_snapshot?: Json | null
           certification_readiness?: string | null
           checker_type?: string
           comparison_readiness?: string | null
           completeness_pct?: number | null
+          consistency_diagnostic?: Json | null
           created_at?: string
           created_project?: boolean
           description?: string
           email?: string
+          file_hash?: string | null
           id?: string
           intake?: Json
           labour_material?: string | null
