@@ -100,14 +100,15 @@ const SavingsCalculator = () => {
       </div>
 
       <div className="rounded-xl bg-teal/10 border border-teal/25 p-5 text-center mt-3">
-        <div className="font-heading text-teal text-3xl">{saving >= 0 ? GBP(saving) : GBP(0)}</div>
+        <div className="font-heading text-teal text-3xl">{saving > 0 ? GBP(saving) : GBP(0)}</div>
         <div className="font-mono text-[11px] text-secondary-text uppercase mt-1">
-          {saving >= 0 ? "Estimated yearly saving" : "No saving at these inputs"}
+          {saving > 0 ? "Estimated yearly saving" : "No upfront risk either way"}
         </div>
       </div>
       <p className="font-body text-xs text-secondary-text mt-4">
-        Illustrative of common lead-based pricing models, not a statement about any named competitor.
-        ProGrafter charges nothing until a job completes and you've been paid.
+        {saving > 0
+          ? "Illustrative of common lead-based pricing models, not a statement about any named competitor."
+          : "At high job volumes commission can exceed lead fees — but you pay nothing until a job completes and you've been paid, with a £900 per-job cap and no money at risk on leads that never convert."}
       </p>
     </div>
   );
