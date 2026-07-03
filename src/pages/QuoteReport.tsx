@@ -166,7 +166,7 @@ const QuoteReport = () => {
             // Status complete but no usable content — log and offer the
             // dashboard fallback rather than spinning indefinitely.
             console.error("[QuoteReport] status complete but report content empty", { id });
-            setReadyElsewhere(true);
+            setFallbackReason("empty");
             return;
           }
 
