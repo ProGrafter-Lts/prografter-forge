@@ -497,8 +497,79 @@ Deno.serve(async (req) => {
       }
     }
 
-    await supabase
-      .from("quote_checks")
+    // STEP 9 — RE-RUN CONSISTENCY CHECK.
+    // Snapshot the scoring so re-runs of the same document can be compared,
+    // and flag (admin-only) when a re-run of the SAME file scores materially
+    // differently from a previous run.
+    let analysisSnapshot: Record<string, unknown> | null = null;
+    let consistencyDiagnostic: Record<string, unknown> | null = null;
+    if (!isErrorReport) {
+      const docScore = clampInt(reportJson.document_score ?? reportJson.quality_score);
+      const confScore = clampInt(reportJson.project_confidence_score);
+      analysisSnapshot = {
+        file_hash: fileHash,
+        document_score: docScore,
+        project_confidence_score: confScore,
+        score_breakdown: Array.isArray(reportJson.score_breakdown) ? reportJson.score_breakdown : null,
+        context_used: {
+          project_type: record.project_type || null,
+          checker_type: checkerKey,
+          expected_items: items,
+          quote_total: (intake.quote_total as string) || null,
+          labour_material: (intake.labour_material as string) || null,
+          concerns: (intake.concerns as string) || null,
+        },
+        analysed_at: new Date().toISOString(),
+      };
+
+      if (fileHash && docScore != null) {
+        try {
+          const { data: priorRuns } = await supabase
+            .from("quote_checks")
+            .select("id, created_at, quality_score, analysis_snapshot")
+            .eq("file_hash", fileHash)
+            .neq("id", quoteCheckId)
+            .eq("status", "complete")
+            .not("analysis_snapshot", "is", null)
+            .order("created_at", { ascending: false })
+            .limit(1);
+          const prior = priorRuns?.[0];
+          const priorSnap = (prior?.analysis_snapshot || null) as Record<string, unknown> | null;
+          const priorDoc = priorSnap
+            ? Number(priorSnap.document_score)
+            : (prior?.quality_score != null ? Number(prior.quality_score) : NaN);
+          if (prior && Number.isFinite(priorDoc)) {
+            const delta = docScore - priorDoc;
+            if (Math.abs(delta) > 5) {
+              const priorBreakdown = Array.isArray(priorSnap?.score_breakdown) ? (priorSnap!.score_breakdown as any[]) : [];
+              const newBreakdown = Array.isArray(reportJson.score_breakdown) ? (reportJson.score_breakdown as any[]) : [];
+              const category_differences = newBreakdown.map((c: any) => {
+                const p = priorBreakdown.find((x: any) => x?.category === c?.category);
+                return {
+                  category: c?.category,
+                  previous_quote_score: p ? p.quote_score : null,
+                  new_quote_score: c?.quote_score ?? null,
+                  changed: p ? Number(p.quote_score) !== Number(c?.quote_score) : true,
+                };
+              }).filter((d) => d.changed);
+              consistencyDiagnostic = {
+                warning: "Score changed materially from previous run. Review scoring differences.",
+                previous_run_id: prior.id,
+                previous_document_score: priorDoc,
+                new_document_score: docScore,
+                delta,
+                category_differences,
+                compared_at: new Date().toISOString(),
+              };
+            }
+          }
+        } catch (consErr) {
+          console.error("analyse-quote: consistency check failed", consErr);
+        }
+      }
+    }
+
+
       .update({
         report_json: reportJson,
         report_html: reportHtml,
