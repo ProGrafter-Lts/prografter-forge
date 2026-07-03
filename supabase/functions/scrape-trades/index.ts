@@ -181,7 +181,7 @@ serve(async (req) => {
       // Check whether this lead already exists — refresh core data but preserve outreach state.
       const { data: existing } = await supabase
         .from("scraped_trades")
-        .select("id, website_quality")
+        .select("id, website_quality, pipeline")
         .eq("source", "google_places")
         .eq("source_id", r.place_id)
         .maybeSingle();
