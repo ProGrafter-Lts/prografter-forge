@@ -58,6 +58,18 @@ Be construction-aware: scaffold, toilet/welfare hire and plant hire are TEMPORAR
 - Where scaffold/toilet/plant hire are included with durations, present them as GREEN / Included (or neutral) items in "What The Quote Clearly Includes" (e.g. "Scaffold included for 8 weeks.", "Toilet hire included for 12 weeks."). If a caveat is warranted, use an ADVISORY note only: "These allowances can be reviewed once a full programme is agreed, but they are not in themselves a concern."
 - RISK WEIGHTING: temporary works that are already included must be treated as Low risk / Included / Advisory only — never Medium, High, Unclear or a red flag. Do not let included temporary works lower the risk_level, quality scores or certification_readiness.
 
+STEP 1C — ALLOWANCES & PROVISIONAL SUMS (do NOT treat normal construction allowances as red flags).
+An allowance/provisional sum is a NORMAL, professional way to price items that are not yet finally selected. Classify these as "Allowance included — confirm final selection/provider", risk Low or Medium (NEVER High), and NEVER as a missing item, red flag or omission when an allowance is clearly present.
+- Facing brick allowance -> word it: "The quote includes a facing brick allowance. This is normal where exact brick match or final brick selection is not yet confirmed. Ask what brick the allowance is based on and whether any cost difference applies." Risk = Low/Medium.
+- Building Control allowance -> word it: "Building Control is allowed for. Confirm which Building Control provider will be used and whether the allowance covers the expected inspection stages." Risk = Low/Medium.
+- Any client-selected item or provisional material selection (e.g. kitchen units, sanitaryware, tiles, flooring finishes, ironmongery) shown as an allowance -> "Allowance included — confirm final selection/provider". Ask what the allowance is based on and whether a cost difference applies. Do NOT flag these as missing.
+- Only treat an allowance area as a genuine risk when NO allowance exists at all for an item the homeowner expects.
+
+STEP 1D — PROJECT-DEPENDENT ITEMS (do NOT auto-flag as missing).
+Items such as kitchen, bathroom, flooring, tiling, decoration, heating, party wall and planning are frequently OUT OF SCOPE by design and are NOT automatically omissions. If such an item is not in the quote and the homeowner has NOT specifically expected it, classify it as "Project-dependent — confirm if expected" with status "project_dependent" and word it: "This may not be required for your project. If you expected it to be included, ask the builder to confirm." Only raise it to a real risk when the homeowner explicitly expected the item (via [EXPECTED_ITEMS]/[EXPECTED_SCOPE]) but the quote does not cover it.
+
+STEP 1E — RISK PRIORITISATION (order top_issues and the report by real homeowner decision risk).
+Highest-priority concerns, in order: (1) no payment schedule/stages; (2) no variations/change process; (3) unclear certification/handover where relevant; (4) unclear or missing MAJOR trade packages the homeowner expected; (5) no written programme/start/completion date. Payment structure is weighted HIGHER than programme. Temporary works, allowances and project-dependent items that are already included/handled are LOW priority / advisory only and must never appear above the concerns above.
 
 STEP 2 — DETERMINISTIC RUBRIC SCORING (this is the most important step — follow it exactly and consistently).
 Score TEN fixed categories. For EACH category produce TWO scores out of 10 and record the source and status:
@@ -268,6 +280,17 @@ Deno.serve(async (req) => {
     const fileBytes = await fileData.arrayBuffer();
     const bytes = new Uint8Array(fileBytes);
 
+    // Fingerprint the uploaded file so re-runs of the SAME quote can be
+    // compared for scoring consistency (STEP 9 — re-run consistency check).
+    let fileHash: string | null = null;
+    try {
+      const digest = await crypto.subtle.digest("SHA-256", fileBytes);
+      fileHash = Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, "0")).join("");
+    } catch (hashErr) {
+      console.error("analyse-quote: hashing failed", hashErr);
+    }
+
+
     // Build the intake context and mode guidance.
     const intake = (record.intake || {}) as Record<string, unknown>;
     const checkerKey = (record.checker_type || "homeowner") as string;
@@ -474,9 +497,84 @@ Deno.serve(async (req) => {
       }
     }
 
+    // STEP 9 — RE-RUN CONSISTENCY CHECK.
+    // Snapshot the scoring so re-runs of the same document can be compared,
+    // and flag (admin-only) when a re-run of the SAME file scores materially
+    // differently from a previous run.
+    let analysisSnapshot: Record<string, unknown> | null = null;
+    let consistencyDiagnostic: Record<string, unknown> | null = null;
+    if (!isErrorReport) {
+      const docScore = clampInt(reportJson.document_score ?? reportJson.quality_score);
+      const confScore = clampInt(reportJson.project_confidence_score);
+      analysisSnapshot = {
+        file_hash: fileHash,
+        document_score: docScore,
+        project_confidence_score: confScore,
+        score_breakdown: Array.isArray(reportJson.score_breakdown) ? reportJson.score_breakdown : null,
+        context_used: {
+          project_type: record.project_type || null,
+          checker_type: checkerKey,
+          expected_items: items,
+          quote_total: (intake.quote_total as string) || null,
+          labour_material: (intake.labour_material as string) || null,
+          concerns: (intake.concerns as string) || null,
+        },
+        analysed_at: new Date().toISOString(),
+      };
+
+      if (fileHash && docScore != null) {
+        try {
+          const { data: priorRuns } = await supabase
+            .from("quote_checks")
+            .select("id, created_at, quality_score, analysis_snapshot")
+            .eq("file_hash", fileHash)
+            .neq("id", quoteCheckId)
+            .eq("status", "complete")
+            .not("analysis_snapshot", "is", null)
+            .order("created_at", { ascending: false })
+            .limit(1);
+          const prior = priorRuns?.[0];
+          const priorSnap = (prior?.analysis_snapshot || null) as Record<string, unknown> | null;
+          const priorDoc = priorSnap
+            ? Number(priorSnap.document_score)
+            : (prior?.quality_score != null ? Number(prior.quality_score) : NaN);
+          if (prior && Number.isFinite(priorDoc)) {
+            const delta = docScore - priorDoc;
+            if (Math.abs(delta) > 5) {
+              const priorBreakdown = Array.isArray(priorSnap?.score_breakdown) ? (priorSnap!.score_breakdown as any[]) : [];
+              const newBreakdown = Array.isArray(reportJson.score_breakdown) ? (reportJson.score_breakdown as any[]) : [];
+              const category_differences = newBreakdown.map((c: any) => {
+                const p = priorBreakdown.find((x: any) => x?.category === c?.category);
+                return {
+                  category: c?.category,
+                  previous_quote_score: p ? p.quote_score : null,
+                  new_quote_score: c?.quote_score ?? null,
+                  changed: p ? Number(p.quote_score) !== Number(c?.quote_score) : true,
+                };
+              }).filter((d) => d.changed);
+              consistencyDiagnostic = {
+                warning: "Score changed materially from previous run. Review scoring differences.",
+                previous_run_id: prior.id,
+                previous_document_score: priorDoc,
+                new_document_score: docScore,
+                delta,
+                category_differences,
+                compared_at: new Date().toISOString(),
+              };
+            }
+          }
+        } catch (consErr) {
+          console.error("analyse-quote: consistency check failed", consErr);
+        }
+      }
+    }
+
     await supabase
       .from("quote_checks")
       .update({
+        file_hash: fileHash,
+        analysis_snapshot: analysisSnapshot,
+        consistency_diagnostic: consistencyDiagnostic,
         report_json: reportJson,
         report_html: reportHtml,
         status: "complete",

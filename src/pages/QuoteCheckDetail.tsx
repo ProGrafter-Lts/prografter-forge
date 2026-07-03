@@ -2,9 +2,24 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthReady } from "@/hooks/useAuthReady";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 import SEO from "@/components/SEO";
 import QuoteHealthCheckReport from "@/components/QuoteHealthCheckReport";
 import { ArrowLeft, Download, Loader2, AlertTriangle } from "lucide-react";
+
+interface CategoryDiff {
+  category?: string;
+  previous_quote_score?: number | null;
+  new_quote_score?: number | null;
+}
+interface ConsistencyDiagnostic {
+  warning?: string;
+  previous_document_score?: number;
+  new_document_score?: number;
+  delta?: number;
+  category_differences?: CategoryDiff[];
+}
+
 
 interface ReportJson {
   error?: string;
@@ -17,9 +32,11 @@ const QuoteCheckDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { isReady, user } = useAuthReady();
+  const { isAdmin } = useIsAdmin();
   const [report, setReport] = useState<ReportJson | null>(null);
   const [status, setStatus] = useState<string>("loading");
   const [error, setError] = useState<string | null>(null);
+  const [diagnostic, setDiagnostic] = useState<ConsistencyDiagnostic | null>(null);
 
   useEffect(() => {
     if (!isReady) return;
@@ -31,7 +48,7 @@ const QuoteCheckDetail = () => {
     (async () => {
       const { data, error: err } = await supabase
         .from("quote_checks")
-        .select("status, report_json")
+        .select("status, report_json, consistency_diagnostic")
         .eq("id", id)
         .maybeSingle();
       if (err || !data) {
@@ -41,6 +58,9 @@ const QuoteCheckDetail = () => {
       setStatus(data.status);
       if (data.status === "complete" && data.report_json) {
         setReport(data.report_json as unknown as ReportJson);
+      }
+      if (data.consistency_diagnostic) {
+        setDiagnostic(data.consistency_diagnostic as unknown as ConsistencyDiagnostic);
       }
     })();
   }, [isReady, id, user, navigate]);
@@ -65,6 +85,31 @@ const QuoteCheckDetail = () => {
             </button>
           )}
         </div>
+
+        {isAdmin && diagnostic && (
+          <div className="no-print rounded-xl border border-amber-400/50 bg-amber-50 p-4 text-amber-900">
+            <p className="flex items-center gap-2 font-mono text-sm font-semibold">
+              <AlertTriangle className="h-4 w-4" /> Admin: {diagnostic.warning || "Score changed materially from previous run."}
+            </p>
+            <p className="mt-2 font-mono text-xs">
+              Previous score: <strong>{diagnostic.previous_document_score ?? "—"}/100</strong> · New score:{" "}
+              <strong>{diagnostic.new_document_score ?? "—"}/100</strong>
+              {typeof diagnostic.delta === "number" && (
+                <> · Change: <strong>{diagnostic.delta > 0 ? "+" : ""}{diagnostic.delta}</strong></>
+              )}
+            </p>
+            {diagnostic.category_differences && diagnostic.category_differences.length > 0 && (
+              <ul className="mt-2 space-y-0.5 font-mono text-xs">
+                {diagnostic.category_differences.map((d, i) => (
+                  <li key={i}>
+                    {d.category}: {d.previous_quote_score ?? "—"} → {d.new_quote_score ?? "—"}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+
 
         <div className="qr-print-area">
           {error ? (
