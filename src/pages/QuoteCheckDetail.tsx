@@ -2,9 +2,24 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthReady } from "@/hooks/useAuthReady";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 import SEO from "@/components/SEO";
 import QuoteHealthCheckReport from "@/components/QuoteHealthCheckReport";
 import { ArrowLeft, Download, Loader2, AlertTriangle } from "lucide-react";
+
+interface CategoryDiff {
+  category?: string;
+  previous_quote_score?: number | null;
+  new_quote_score?: number | null;
+}
+interface ConsistencyDiagnostic {
+  warning?: string;
+  previous_document_score?: number;
+  new_document_score?: number;
+  delta?: number;
+  category_differences?: CategoryDiff[];
+}
+
 
 interface ReportJson {
   error?: string;
