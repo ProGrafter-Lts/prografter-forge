@@ -49,17 +49,35 @@ const Index = () => {
   return (
     <div className="min-h-screen">
       <SEO
-        title="ProGrafter — Commission-Only Trades Marketplace | Zero Monthly Fees"
-        description="ProGrafter connects verified UK tradespeople with homeowners. Pay 7.5% only when a job completes — capped at £900. No monthly fees. Free to register. Free to post a job."
+        title="ProGrafter — The UK's AI-Powered Construction Trust Platform"
+        description="ProGrafter restores trust to UK construction: AI quote checking, 5-step verified trades, transparent commission-only pricing and smarter project management. Not another directory."
         path="/"
         jsonLd={[localBusinessJsonLd, homepageFaqJsonLd]}
       />
       <Navbar />
       <Hero />
+      <WhyProGrafter />
+      <TrustStats />
+      <WhyWeBuilt />
       <WhereAreYouSection />
       <GreenGrantsChecker />
       <AboutStoryBanner />
       <Ticker />
+      <HowItWorks />
+      <OldWayContrast />
+      <ContrastSection />
+      <FeaturesGrid />
+      <TradesHowItWorks />
+      <HomeownersHowItWorks />
+      <GreenEnergySection />
+      <WhatYouGet />
+      <WhyDifferent />
+      <PlatformPreview />
+      <FounderNote />
+      <FutureRoadmap />
+      <VerificationStandards />
+      <Testimonials />
+
       <HowItWorks />
       <OldWayContrast />
       <ContrastSection />
