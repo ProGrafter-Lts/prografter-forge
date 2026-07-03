@@ -2659,6 +2659,7 @@ export type Database = {
       }
       quote_checks: {
         Row: {
+          admin_call_notes: string | null
           certification_readiness: string | null
           checker_type: string
           comparison_readiness: string | null
@@ -2692,6 +2693,7 @@ export type Database = {
           vat_text: string | null
         }
         Insert: {
+          admin_call_notes?: string | null
           certification_readiness?: string | null
           checker_type?: string
           comparison_readiness?: string | null
@@ -2725,6 +2727,7 @@ export type Database = {
           vat_text?: string | null
         }
         Update: {
+          admin_call_notes?: string | null
           certification_readiness?: string | null
           checker_type?: string
           comparison_readiness?: string | null
