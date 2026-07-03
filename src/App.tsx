@@ -80,6 +80,7 @@ const QuoteClarityScorePage = lazy(() => import("./pages/QuoteClarityScorePage.t
 const PricingPage = lazy(() => import("./pages/PricingPage.tsx"));
 const FaqPage = lazy(() => import("./pages/FaqPage.tsx"));
 const ResourcesPage = lazy(() => import("./pages/ResourcesPage.tsx"));
+const CalculatorsPage = lazy(() => import("./pages/CalculatorsPage.tsx"));
 const AdminJobBriefs = lazy(() => import("./pages/AdminJobBriefs.tsx"));
 const AdminAnalytics = lazy(() => import("./pages/AdminAnalytics.tsx"));
 const AdminLeadDistribution = lazy(() => import("./pages/AdminLeadDistribution.tsx"));
