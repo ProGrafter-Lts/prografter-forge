@@ -93,13 +93,14 @@ COMPUTE THE TWO HEADLINE SCORES (do the arithmetic exactly):
 Do NOT invent scores loosely — they must equal the sum of the per-category values you recorded.
 
 STEP 3 — Derive:
-- completeness_pct: approximate % of expected residential scope this quote clearly addresses (0-100).
-- risk_level: Low / Medium / High / Critical.
-- project_confidence: Low / Medium / High.
+- completeness_pct: approximate % of expected residential scope this quote clearly addresses (0-100). Base this on the UPLOADED QUOTE, but do NOT reduce it just because the homeowner supplied extra context — extra context is not evidence of a gap unless there is a clear mismatch between what the homeowner described and what the quote covers.
+- risk_level: Low / Medium / High / Critical. Judge risk from the QUOTE plus supplied context together; supplied context that narrows uncertainty should not raise risk.
+- project_confidence: Low / Medium / High — the plain-language band matching project_confidence_score (>=75 High, 45-74 Medium, <45 Low).
 - recommended_next_step: EXACTLY one of: "Safe to proceed subject to minor clarification." | "Clarify key items before accepting." | "Request a revised quote before proceeding." | "Seek a second quote using a clearer scope." | "Do not proceed until major omissions are resolved."
+- recommendation_summary: a short plain-English sentence. If the quote is technically detailed but missing commercial/project-control information (payment, programme, variations), use: "Technically detailed but commercially incomplete." If the homeowner supplied payment/timeframe details separately, ADD: "The quote document itself still needs strengthening, but the additional information supplied helps narrow the uncertainty. Ask the builder to confirm these points in writing."
 - comparison_readiness: "Ready to compare" | "Partially ready" | "Not ready to compare".
-- certification_readiness (internal ProGrafter Certified Quote assessment): "Ready" | "Needs improvement" | "Not ready". "Ready" requires quality_score >= 85, no critical missing scope, clear exclusions, payment terms present, variation process present, clear VAT status, clear labour/material responsibility, clear compliance responsibilities, and a programme/timescale.
-- top_issues: array of the 3 most important issues (short strings).
+- certification_readiness (internal ProGrafter Certified Quote assessment): "Ready" | "Needs improvement" | "Not ready". "Ready" requires document_score >= 85, no critical missing scope, clear exclusions, payment terms present, variation process present, clear VAT status, clear labour/material responsibility, clear compliance responsibilities, and a programme/timescale. Certification depends on the DOCUMENT score, never on supplied context.
+- top_issues: array of the 3 most important issues (short strings), based on genuine gaps in the uploaded quote — not on the homeowner having supplied extra context.
 
 IF THE INPUT IS NOT A BUILDING QUOTE, return exactly: {"error": "This doesn't look like a building quote. Please upload a builder's quotation or estimate."}
 
