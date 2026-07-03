@@ -178,8 +178,8 @@ const QuoteReport = () => {
         }
 
         if (Date.now() - startedAt > MAX_POLL_MS) {
-          console.warn("[QuoteReport] polling timed out; offering dashboard fallback", { id });
-          setReadyElsewhere(true);
+          console.warn("[QuoteReport] polling timed out; offering retry", { id });
+          setFallbackReason("timeout");
           return;
         }
         await new Promise((r) => setTimeout(r, 3000));
