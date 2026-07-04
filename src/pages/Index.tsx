@@ -61,6 +61,9 @@ const Index = () => {
       <Hero />
       <WhyProGrafter />
       <TrustStats />
+      <AiQuoteCheckerDemo />
+      <QuoteComparisonDemo />
+      <VerificationExplainerInteractive />
       <WhyWeBuilt />
       <WhereAreYouSection />
       <GreenGrantsChecker />
