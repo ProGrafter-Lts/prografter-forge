@@ -27,6 +27,9 @@ import Testimonials from "@/components/Testimonials";
 import SeeHowItWorks from "@/components/SeeHowItWorks";
 import SignUpSection from "@/components/SignUpSection";
 import TradeVerificationExplainer from "@/components/TradeVerificationExplainer";
+import AiQuoteCheckerDemo from "@/components/demos/AiQuoteCheckerDemo";
+import QuoteComparisonDemo from "@/components/demos/QuoteComparisonDemo";
+import VerificationExplainerInteractive from "@/components/demos/VerificationExplainerInteractive";
 import Footer from "@/components/Footer";
 
 const Index = () => {
@@ -58,6 +61,9 @@ const Index = () => {
       <Hero />
       <WhyProGrafter />
       <TrustStats />
+      <AiQuoteCheckerDemo />
+      <QuoteComparisonDemo />
+      <VerificationExplainerInteractive />
       <WhyWeBuilt />
       <WhereAreYouSection />
       <GreenGrantsChecker />
