@@ -83,20 +83,6 @@ const Index = () => {
       <FutureRoadmap />
       <VerificationStandards />
       <Testimonials />
-
-      <HowItWorks />
-      <OldWayContrast />
-      <ContrastSection />
-      <FeaturesGrid />
-      <TradesHowItWorks />
-      <HomeownersHowItWorks />
-      <GreenEnergySection />
-      <WhatYouGet />
-      <WhyDifferent />
-      <PlatformPreview />
-      <FounderNote />
-      <VerificationStandards />
-      <Testimonials />
       <SeeHowItWorks />
       <TradeVerificationExplainer />
       <SignUpSection />
