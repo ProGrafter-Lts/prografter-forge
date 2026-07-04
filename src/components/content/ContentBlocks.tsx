@@ -81,7 +81,7 @@ export const ContentSection = ({
   <section className={`px-6 py-16 craft:py-20 ${tone === "white" ? "bg-white" : "bg-cream"}`}>
     <div className="max-w-5xl mx-auto">
       {title && (
-        <h2 className="font-heading text-navy text-[30px] craft:text-[42px] leading-tight mb-4 max-w-3xl">
+        <h2 className="font-heading font-extrabold text-navy text-[30px] craft:text-[42px] leading-tight mb-4 max-w-3xl">
           {title}
         </h2>
       )}
