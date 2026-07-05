@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { trackEvent } from "@/lib/analytics";
 import SEO from "@/components/SEO";
 import Navbar from "@/components/Navbar";
+import TrustSignal from "@/components/TrustSignal";
 
 // UK postcode regex (loose — accepts standard formats with or without space)
 const UK_POSTCODE = /^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}$/i;
