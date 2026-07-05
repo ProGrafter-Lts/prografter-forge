@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { trackEvent } from "@/lib/analytics";
 import SEO from "@/components/SEO";
 import Navbar from "@/components/Navbar";
+import TrustSignal from "@/components/TrustSignal";
 
 // UK postcode regex (loose — accepts standard formats with or without space)
 const UK_POSTCODE = /^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}$/i;
@@ -160,6 +161,9 @@ const SignupHomeowner = () => {
               Free to post. No deposit. Up to three matched trades — not thirty — all vetted, local, and actually available.
             </p>
           </div>
+
+          <TrustSignal tone="dark" className="mb-6" text="Verified homeowners. Human-reviewed briefs. Up to 3 matched trades." />
+
 
           <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-navy/10 p-6 craft:p-8 shadow-sm space-y-5">
             <Field label="Full name" error={errors.fullName} required>

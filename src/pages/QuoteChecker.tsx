@@ -14,6 +14,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import AppShell from "@/components/AppShell";
 import SEO from "@/components/SEO";
+import TrustSignal from "@/components/TrustSignal";
 import { buildServiceJsonLd } from "@/lib/seoSchemas";
 import { Upload, FileText, Loader2, ShieldCheck } from "lucide-react";
 import { useSearchParams, useNavigate } from "react-router-dom";
@@ -536,6 +537,7 @@ const QuoteChecker = () => {
               Don't have a quote yet?{" "}
               <a href="/quote-checker-ai" className="text-teal-foreground underline underline-offset-2 hover:text-white">Start with the free Project Cost Guide.</a>
             </p>
+            <TrustSignal tone="light" className="mt-6" text="Independent, construction-aware analysis — never a sales pitch." />
           </div>
         </div>
 

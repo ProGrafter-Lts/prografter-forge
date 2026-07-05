@@ -1047,6 +1047,9 @@ export default function PostJobBrief() {
           <p style={{ fontSize: 13, color: C.secondary }}>
             Every trade who sees this brief has been verified and insured by ProGrafter before going live. Takes about 5 minutes.
           </p>
+          <a href="/trust" style={{ fontSize: 12, color: C.teal, textDecoration: "underline", textUnderlineOffset: 2, display: "inline-block", marginTop: 6 }}>
+            How we verify everyone — Trust Centre →
+          </a>
         </div>
 
         <StepBar current={step} />

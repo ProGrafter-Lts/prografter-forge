@@ -1019,9 +1019,13 @@ const SignupTrade = () => {
         <div className="flex-1 flex items-center justify-center px-6 py-8">
           <div className="w-full max-w-lg">
             <p className="font-mono text-xs text-teal uppercase tracking-widest mb-3">Application checklist</p>
-            <h2 className="font-heading text-cream text-[40px] leading-[1.05] mb-6">
+            <h2 className="font-heading text-cream text-[40px] leading-[1.05] mb-3">
               Before you start — <span className="text-teal">have these ready.</span>
             </h2>
+            <p className="font-body text-cream/60 text-sm mb-6">
+              We verify every trade in 5 steps so homeowners trust who they hire.{" "}
+              <a href="/trust" className="text-teal underline underline-offset-2 hover:text-teal-hover">See our Trust Centre →</a>
+            </p>
             <ul className="space-y-4 mb-6">
               {[
                 { icon: ShieldCheck, title: "Public Liability Insurance certificate", body: "PDF or photo. Must show your business name, policy number, and expiry date." },
