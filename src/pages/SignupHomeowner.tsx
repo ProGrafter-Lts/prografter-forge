@@ -161,6 +161,9 @@ const SignupHomeowner = () => {
             </p>
           </div>
 
+          <TrustSignal tone="dark" className="mb-6" text="Verified homeowners. Human-reviewed briefs. Up to 3 matched trades." />
+
+
           <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-navy/10 p-6 craft:p-8 shadow-sm space-y-5">
             <Field label="Full name" error={errors.fullName} required>
               <input
