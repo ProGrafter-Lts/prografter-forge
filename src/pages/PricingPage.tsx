@@ -10,6 +10,7 @@ import {
 } from "@/components/content/ContentBlocks";
 import CommissionCalculator from "@/components/calculators/CommissionCalculator";
 import SavingsCalculator from "@/components/calculators/SavingsCalculator";
+import TrustSignal from "@/components/TrustSignal";
 
 const TRADE_POINTS = [
   { title: "£0 to register", desc: "Join, get verified and build your profile for free. No card required.", icon: "£" },
@@ -110,6 +111,7 @@ const PricingPage = () => (
     </ContentSection>
     <ContentSection title="Frequently asked questions">
       <FaqBlock items={FAQ} />
+      <TrustSignal className="mt-10" text="No lead fees, no pay-to-play rankings. One capped commission, only when the job completes." />
     </ContentSection>
     <ContentCta
       title="Only pay when you get paid"

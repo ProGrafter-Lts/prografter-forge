@@ -1,6 +1,7 @@
 import SEO from "@/components/SEO";
 import AppShell from "@/components/AppShell";
 import { localBusinessJsonLd } from "@/lib/seoSchemas";
+import TrustSignal from "@/components/TrustSignal";
 
 const About = () => {
   return (
@@ -126,6 +127,7 @@ const About = () => {
         {/* Company info */}
         <section className="px-6 py-12 border-t border-cream/5">
           <div className="max-w-3xl mx-auto text-center">
+            <TrustSignal tone="light" className="mb-8" text="Everything Lee learned on site is built into how we verify, price and protect every project." />
             <p className="font-mono text-xs text-secondary-text uppercase tracking-widest">
               ProGrafter Ltd · Company 17124130 · ICO ZC114018
             </p>
