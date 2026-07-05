@@ -36,7 +36,7 @@ const About = () => {
             </div>
 
             {/* Founder photo slot */}
-            <div className="hidden craft:flex aspect-[4/5] w-full rounded-2xl border border-cream/15 bg-navy/40 items-center justify-center">
+            <div className="hidden craft:flex aspect-[4/5] w-full rounded-[4px] border border-cream/15 bg-navy/40 items-center justify-center">
               <span className="font-mono text-xs text-secondary-text uppercase tracking-widest text-center px-6">
                 Founder photo
               </span>
