@@ -6,30 +6,30 @@ type NavGroup = { label: string; items: NavItem[] };
 
 const GROUPS: NavGroup[] = [
   {
-    label: "Homeowners",
+    label: "For Homeowners",
     items: [
+      { label: "Check a Quote (AI)", href: "/quote-checker", desc: "Instant Quote Clarity Score" },
       { label: "Post a Job", href: "/post-job-brief", desc: "Get matched with vetted trades" },
       { label: "How It Works", href: "/how-it-works", desc: "Your project, step by step" },
-      { label: "Homeowner Verification", href: "/homeowner-verification", desc: "Why we verify everyone" },
       { label: "Green Grants", href: "/green", desc: "Funding for energy upgrades" },
     ],
   },
   {
-    label: "Trades",
+    label: "For Trades",
     items: [
       { label: "Join as a Trade", href: "/signup/trade", desc: "Free — commission only" },
-      { label: "Trade Verification", href: "/trade-verification", desc: "Our 5-step check" },
-      { label: "Planning Alerts", href: "/planning-alerts", desc: "Turn planning into work" },
       { label: "Pricing", href: "/pricing", desc: "Commission only, no monthly fees" },
+      { label: "Planning Alerts", href: "/planning-alerts", desc: "Turn planning into work" },
       { label: "Calculators", href: "/calculators", desc: "Commission & savings tools" },
     ],
   },
   {
-    label: "AI Tools",
+    label: "Trust Centre",
     items: [
-      { label: "AI Quote Checker", href: "/ai-quote-checker", desc: "Instant Quote Clarity Score" },
+      { label: "Trust Centre", href: "/trust", desc: "How we keep construction honest" },
+      { label: "Trade Verification", href: "/trade-verification", desc: "Our 5-step check" },
+      { label: "Homeowner Verification", href: "/homeowner-verification", desc: "Why we verify everyone" },
       { label: "Quote Clarity Score", href: "/quote-clarity-score", desc: "How we score quotes" },
-      { label: "ProGrafter Intelligence", href: "/prografter-intelligence", desc: "The full toolkit" },
     ],
   },
   {
@@ -37,8 +37,8 @@ const GROUPS: NavGroup[] = [
     items: [
       { label: "Advice Centre", href: "/resources", desc: "Guides & tools" },
       { label: "FAQ", href: "/faq", desc: "Common questions answered" },
-      { label: "Is Checkatrade Worth It?", href: "/is-checkatrade-worth-it" },
-      { label: "Checkatrade Alternative", href: "/checkatrade-alternative" },
+      { label: "ProGrafter Intelligence", href: "/prografter-intelligence", desc: "The full toolkit" },
+      { label: "About", href: "/about", desc: "Why ProGrafter exists" },
       { label: "Contact", href: "/contact" },
     ],
   },
@@ -46,7 +46,6 @@ const GROUPS: NavGroup[] = [
 
 const SINGLES: NavItem[] = [
   { label: "Pricing", href: "/pricing" },
-  { label: "About", href: "/about" },
 ];
 
 const Navbar = () => {

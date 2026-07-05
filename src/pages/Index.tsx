@@ -5,31 +5,14 @@ import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import WhyProGrafter from "@/components/WhyProGrafter";
 import TrustStats from "@/components/TrustStats";
-import WhyWeBuilt from "@/components/WhyWeBuilt";
-import FutureRoadmap from "@/components/FutureRoadmap";
 import WhereAreYouSection from "@/components/WhereAreYouSection";
-import AboutStoryBanner from "@/components/AboutStoryBanner";
-import Ticker from "@/components/Ticker";
 import HowItWorks from "@/components/HowItWorks";
 import OldWayContrast from "@/components/OldWayContrast";
-import GreenEnergySection from "@/components/GreenEnergySection";
-import ContrastSection from "@/components/ContrastSection";
-import FeaturesGrid from "@/components/FeaturesGrid";
-import TradesHowItWorks from "@/components/TradesHowItWorks";
-import HomeownersHowItWorks from "@/components/HomeownersHowItWorks";
-import GreenGrantsChecker from "@/components/GreenGrantsChecker";
-import WhatYouGet from "@/components/WhatYouGet";
-import WhyDifferent from "@/components/WhyDifferent";
-import PlatformPreview from "@/components/PlatformPreview";
-import FounderNote from "@/components/FounderNote";
 import VerificationStandards from "@/components/VerificationStandards";
 import Testimonials from "@/components/Testimonials";
-import SeeHowItWorks from "@/components/SeeHowItWorks";
 import SignUpSection from "@/components/SignUpSection";
-import TradeVerificationExplainer from "@/components/TradeVerificationExplainer";
 import AiQuoteCheckerDemo from "@/components/demos/AiQuoteCheckerDemo";
-import QuoteComparisonDemo from "@/components/demos/QuoteComparisonDemo";
-import VerificationExplainerInteractive from "@/components/demos/VerificationExplainerInteractive";
+import TrustCentreBand from "@/components/TrustCentreBand";
 import Footer from "@/components/Footer";
 
 const Index = () => {
@@ -59,32 +42,15 @@ const Index = () => {
       />
       <Navbar />
       <Hero />
-      <WhyProGrafter />
-      <TrustStats />
       <AiQuoteCheckerDemo />
-      <QuoteComparisonDemo />
-      <VerificationExplainerInteractive />
-      <WhyWeBuilt />
+      <WhyProGrafter />
       <WhereAreYouSection />
-      <GreenGrantsChecker />
-      <AboutStoryBanner />
-      <Ticker />
       <HowItWorks />
       <OldWayContrast />
-      <ContrastSection />
-      <FeaturesGrid />
-      <TradesHowItWorks />
-      <HomeownersHowItWorks />
-      <GreenEnergySection />
-      <WhatYouGet />
-      <WhyDifferent />
-      <PlatformPreview />
-      <FounderNote />
-      <FutureRoadmap />
       <VerificationStandards />
+      <TrustCentreBand />
+      <TrustStats />
       <Testimonials />
-      <SeeHowItWorks />
-      <TradeVerificationExplainer />
       <SignUpSection />
       <Footer />
     </div>
