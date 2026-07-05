@@ -111,7 +111,7 @@ const TrustCentre = () => {
       >
         <div className="space-y-3 max-w-3xl">
           {FAQ.map((it) => (
-            <details key={it.q} className="group rounded-2xl bg-white border border-border/60 p-5 shadow-sm">
+            <details key={it.q} className="group rounded-[4px] bg-white border border-border/60 p-5 shadow-sm">
               <summary className="flex items-center justify-between cursor-pointer font-heading text-navy text-lg leading-tight list-none">
                 {it.q}
                 <span className="ml-4 text-teal transition-transform group-open:rotate-45 text-2xl leading-none">+</span>
