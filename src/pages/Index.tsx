@@ -42,32 +42,15 @@ const Index = () => {
       />
       <Navbar />
       <Hero />
-      <WhyProGrafter />
-      <TrustStats />
       <AiQuoteCheckerDemo />
-      <QuoteComparisonDemo />
-      <VerificationExplainerInteractive />
-      <WhyWeBuilt />
+      <WhyProGrafter />
       <WhereAreYouSection />
-      <GreenGrantsChecker />
-      <AboutStoryBanner />
-      <Ticker />
       <HowItWorks />
       <OldWayContrast />
-      <ContrastSection />
-      <FeaturesGrid />
-      <TradesHowItWorks />
-      <HomeownersHowItWorks />
-      <GreenEnergySection />
-      <WhatYouGet />
-      <WhyDifferent />
-      <PlatformPreview />
-      <FounderNote />
-      <FutureRoadmap />
       <VerificationStandards />
+      <TrustCentreBand />
+      <TrustStats />
       <Testimonials />
-      <SeeHowItWorks />
-      <TradeVerificationExplainer />
       <SignUpSection />
       <Footer />
     </div>
