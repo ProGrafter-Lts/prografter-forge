@@ -76,6 +76,7 @@ const AdminApplicationDetail = lazy(() => import("./pages/AdminApplicationDetail
 const TradeVerificationPage = lazy(() => import("./pages/TradeVerificationPage.tsx"));
 const HomeownerVerificationPage = lazy(() => import("./pages/HomeownerVerificationPage.tsx"));
 const AiQuoteCheckerPage = lazy(() => import("./pages/AiQuoteCheckerPage.tsx"));
+const TrustCentre = lazy(() => import("./pages/TrustCentre.tsx"));
 const QuoteClarityScorePage = lazy(() => import("./pages/QuoteClarityScorePage.tsx"));
 const PricingPage = lazy(() => import("./pages/PricingPage.tsx"));
 const FaqPage = lazy(() => import("./pages/FaqPage.tsx"));
