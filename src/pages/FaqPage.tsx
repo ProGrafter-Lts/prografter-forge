@@ -7,6 +7,8 @@ import {
   ContentCta,
   buildFaqJsonLd,
 } from "@/components/content/ContentBlocks";
+import TrustSignal from "@/components/TrustSignal";
+
 
 const GENERAL = [
   { q: "What is ProGrafter?", a: "ProGrafter is the UK's AI-powered construction trust platform. We connect verified tradespeople with homeowners and add intelligent tools — like the AI Quote Checker — to remove uncertainty from building work for both sides." },
@@ -57,6 +59,7 @@ const FaqPage = () => (
       <Group title="About ProGrafter" items={GENERAL} />
       <Group title="For homeowners" items={HOMEOWNERS} />
       <Group title="For tradespeople" items={TRADES} />
+      <TrustSignal className="mt-10" />
     </ContentSection>
     <ContentCta
       title="Still have a question?"
