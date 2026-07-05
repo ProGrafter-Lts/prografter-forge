@@ -138,6 +138,7 @@ const AppRoutes = () => {
            <Route path="/trade-verification" element={<TradeVerificationPage />} />
            <Route path="/homeowner-verification" element={<HomeownerVerificationPage />} />
            <Route path="/ai-quote-checker" element={<AiQuoteCheckerPage />} />
+           <Route path="/trust" element={<TrustCentre />} />
            <Route path="/quote-clarity-score" element={<QuoteClarityScorePage />} />
            <Route path="/pricing" element={<PricingPage />} />
            <Route path="/faq" element={<FaqPage />} />
