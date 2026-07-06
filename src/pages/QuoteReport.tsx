@@ -175,6 +175,12 @@ const QuoteReport = () => {
             setStatus("error");
             return;
           }
+
+          if (data.status === "needs_review") {
+            console.warn("[QuoteReport] flagged for manual review", { id });
+            setStatus("needs_review");
+            return;
+          }
         }
 
         if (Date.now() - startedAt > MAX_POLL_MS) {
