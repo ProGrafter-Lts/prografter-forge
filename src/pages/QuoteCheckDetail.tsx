@@ -5,6 +5,7 @@ import { useAuthReady } from "@/hooks/useAuthReady";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import SEO from "@/components/SEO";
 import QuoteHealthCheckReport from "@/components/QuoteHealthCheckReport";
+import QuoteAuditDiagnostic from "@/components/admin/QuoteAuditDiagnostic";
 import { ArrowLeft, Download, Loader2, AlertTriangle } from "lucide-react";
 
 interface CategoryDiff {
