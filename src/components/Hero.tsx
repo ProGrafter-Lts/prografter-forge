@@ -50,7 +50,7 @@ const Hero = () => {
           The future of trusted<br className="hidden craft:block" /> construction starts here.
         </h1>
 
-        <p className="font-body text-secondary-text text-base craft:text-xl max-w-2xl mx-auto mb-4 font-light">
+        <p className="font-body text-cream text-base craft:text-xl max-w-2xl mx-auto mb-4 font-light drop-shadow-sm">
           AI-powered quote checking, verified professionals, transparent pricing and smarter
           project management — all in one platform.
         </p>
