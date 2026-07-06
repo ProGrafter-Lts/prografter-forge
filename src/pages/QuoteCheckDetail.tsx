@@ -151,6 +151,16 @@ const QuoteCheckDetail = () => {
                 Something went wrong analysing this quote.
               </p>
             </div>
+          ) : status === "needs_review" ? (
+            <div className="text-center py-16 space-y-4">
+              <AlertTriangle className="mx-auto h-10 w-10 text-amber-500 mb-2" />
+              <p className="font-heading text-xl text-foreground">Under manual review</p>
+              <p className="font-mono text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
+                This quote produced some conflicting details, so our team is reviewing it
+                by hand to keep your Quote Health Check accurate. We'll email you as soon
+                as it's ready — usually within one working day.
+              </p>
+            </div>
           ) : !report ? (
             <div className="text-center py-16 space-y-4">
               <Loader2 className="mx-auto h-10 w-10 text-teal animate-spin" />
