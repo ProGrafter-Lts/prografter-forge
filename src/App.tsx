@@ -88,6 +88,7 @@ const AdminLeadDistribution = lazy(() => import("./pages/AdminLeadDistribution.t
 const AdminCustomerDiscovery = lazy(() => import("./pages/AdminCustomerDiscovery.tsx"));
 const AdminCallNote = lazy(() => import("./pages/AdminCallNote.tsx"));
 const AdminHome = lazy(() => import("./pages/AdminHome.tsx"));
+const AdminQuoteStandards = lazy(() => import("./pages/AdminQuoteStandards.tsx"));
 import AdminRoute from "./components/AdminRoute.tsx";
 import AppLayout from "./components/layout/AppLayout.tsx";
 import DrawerHost from "./components/layout/DrawerHost.tsx";
@@ -208,6 +209,7 @@ const AppRoutes = () => {
             <Route path="/admin/lead-distribution" element={<AdminRoute><AdminLeadDistribution /></AdminRoute>} />
             <Route path="/admin/scoping-calls" element={<AdminRoute><AdminCustomerDiscovery /></AdminRoute>} />
             <Route path="/admin/scoping-calls/:id" element={<AdminRoute><AdminCallNote /></AdminRoute>} />
+            <Route path="/admin/quote-standards" element={<AdminRoute><AdminQuoteStandards /></AdminRoute>} />
             <Route path="*" element={<NotFound />} />
       </Routes>
 
