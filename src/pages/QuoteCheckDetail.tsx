@@ -38,6 +38,14 @@ const QuoteCheckDetail = () => {
   const [status, setStatus] = useState<string>("loading");
   const [error, setError] = useState<string | null>(null);
   const [diagnostic, setDiagnostic] = useState<ConsistencyDiagnostic | null>(null);
+  const [audit, setAudit] = useState<{
+    fileName: string | null;
+    fileHash: string | null;
+    evidence: Record<string, unknown> | null;
+    validation: any;
+    scoring: any;
+    reportHtml: string | null;
+  } | null>(null);
 
   useEffect(() => {
     if (!isReady) return;
