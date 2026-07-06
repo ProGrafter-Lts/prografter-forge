@@ -1374,10 +1374,33 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
   .dashboard-dark {
     background: #ffffff !important;
   }
+  /* Kill the fixed grain texture and any page background bleed (the source of
+     the cream vertical stripe seen on printed pages) */
+  body::before,
+  html::before,
+  html::after,
+  body::after {
+    display: none !important;
+    content: none !important;
+  }
+  html,
+  body,
+  #root,
+  main,
+  .qr-paper,
+  .qr-card {
+    background: #ffffff !important;
+    background-image: none !important;
+  }
   /* Ensure colours/backgrounds (score, checklist chips) render in print */
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+  }
+  /* Branded hero becomes a dedicated cover page */
+  .qr-hero {
+    page-break-after: always;
+    break-after: page;
   }
   /* Reveal any on-screen collapsed sections so the PDF is the FULL report */
   .qr-collapsed {

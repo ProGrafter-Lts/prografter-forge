@@ -326,6 +326,8 @@ Deno.serve(async (req) => {
         note: b.note,
       })),
       completeness_pct: scoring.completeness_pct,
+      construction_completeness_pct: scoring.construction_completeness_pct,
+      commercial_completeness_pct: scoring.commercial_completeness_pct,
       risk_level: scoring.risk_level,
       project_confidence: scoring.project_confidence,
       recommended_next_step: scoring.recommended_next_step,

@@ -105,6 +105,8 @@ export interface ScoringResult {
   document_score: number;
   project_confidence_score: number;
   completeness_pct: number;
+  construction_completeness_pct: number;
+  commercial_completeness_pct: number;
   risk_level: "Low" | "Medium" | "High" | "Critical";
   project_confidence: "Low" | "Medium" | "High";
   certification_readiness: "Ready" | "Needs improvement" | "Not ready";
@@ -389,15 +391,16 @@ export function scoreQuote(ev: QuoteEvidence, ctx: HomeownerContext): ScoringRes
     });
   }
 
-  // 6. Payment structure (weight: high)
+  // 6. Payment structure (weight: medium) — a clarification item, not a
+  // document-quality catastrophe, so the missing floor is 3 (not 0-2).
   {
     const inQuote = ev.payment_terms_found;
-    const q = inQuote ? 9 : 2;
-    const conf = inQuote ? 9 : ctx.payment_supplied ? 6 : 2;
+    const q = inQuote ? 9 : 3;
+    const conf = inQuote ? 9 : ctx.payment_supplied ? 7 : 3;
     push({
       category: "Payment structure",
       key: "payment_structure",
-      weight: 3,
+      weight: 1.5,
       quote_score: q,
       confidence_score: conf,
       status: inQuote ? "clear" : ctx.payment_supplied ? "supplied_separately" : "missing",
@@ -413,12 +416,12 @@ export function scoreQuote(ev: QuoteEvidence, ctx: HomeownerContext): ScoringRes
   // 7. Programme / timescale (weight: medium)
   {
     const inQuote = ev.programme_start_found || ev.completion_timescale_found;
-    const q = inQuote ? 9 : 2;
-    const conf = inQuote ? 9 : ctx.programme_supplied ? 6 : 2;
+    const q = inQuote ? 9 : 3;
+    const conf = inQuote ? 9 : ctx.programme_supplied ? 7 : 3;
     push({
       category: "Programme / timescale",
       key: "programme_timescale",
-      weight: 2,
+      weight: 1,
       quote_score: q,
       confidence_score: conf,
       status: inQuote ? "clear" : ctx.programme_supplied ? "supplied_separately" : "missing",
@@ -431,13 +434,13 @@ export function scoreQuote(ev: QuoteEvidence, ctx: HomeownerContext): ScoringRes
     });
   }
 
-  // 8. Variations process (weight: high)
+  // 8. Variations process (weight: medium)
   {
-    const q = ev.variation_process_found ? 9 : 2;
+    const q = ev.variation_process_found ? 9 : 3;
     push({
       category: "Variations process",
       key: "variations_process",
-      weight: 3,
+      weight: 1,
       quote_score: q,
       confidence_score: q,
       status: ev.variation_process_found ? "clear" : "missing",
@@ -448,14 +451,14 @@ export function scoreQuote(ev: QuoteEvidence, ctx: HomeownerContext): ScoringRes
     });
   }
 
-  // 9. Certification / handover (weight: medium)
+  // 9. Certification / handover (weight: low-medium)
   {
     const has = ev.certification_handover_found || ev.warranties_found;
     const q = has ? 8 : 4;
     push({
       category: "Certification / handover",
       key: "certification_handover",
-      weight: 2,
+      weight: 1,
       quote_score: q,
       confidence_score: q,
       status: has ? "clear" : "missing",
@@ -466,16 +469,16 @@ export function scoreQuote(ev: QuoteEvidence, ctx: HomeownerContext): ScoringRes
     });
   }
 
-  // 10. Exclusions clarity (weight: medium)
+  // 10. Exclusions clarity (weight: low-medium)
   {
     const q = ev.exclusions_found ? 8 : 3;
     push({
       category: "Exclusions clarity",
       key: "exclusions_clarity",
-      weight: 2,
+      weight: 1,
       quote_score: q,
       confidence_score: q,
-      status: ev.exclusions_found ? "clear" : "missing",
+      status: ev.exclusions_found ? "clear" : "advisory",
       source: "uploaded quote",
       note: ev.exclusions_found
         ? "The quote states what is excluded."
@@ -483,7 +486,9 @@ export function scoreQuote(ev: QuoteEvidence, ctx: HomeownerContext): ScoringRes
     });
   }
 
-  // 11. Homeowner decision safety (weight: medium) — derived from key controls.
+  // 11. Homeowner decision safety — a derived meta-indicator shown to the user
+  // but EXCLUDED from the weighted document score (weight 0) so it never
+  // double-counts the commercial-control gaps that already feed it.
   {
     const controls = rows.filter((r) =>
       ["payment_structure", "variations_process", "programme_timescale", "exclusions_clarity"].includes(r.key),
@@ -493,7 +498,7 @@ export function scoreQuote(ev: QuoteEvidence, ctx: HomeownerContext): ScoringRes
     push({
       category: "Homeowner decision safety",
       key: "homeowner_decision_safety",
-      weight: 2,
+      weight: 0,
       quote_score: q,
       confidence_score: conf,
       status: q >= 7 ? "clear" : q >= 4 ? "advisory" : "missing",
@@ -511,7 +516,18 @@ export function scoreQuote(ev: QuoteEvidence, ctx: HomeownerContext): ScoringRes
   let project_confidence_score = weighted((r) => r.confidence_score);
   if (project_confidence_score < document_score) project_confidence_score = document_score;
 
-  // Completeness — proportion of categories scoring >= 6 on the quote itself.
+  // --- Split completeness into two homeowner-friendly metrics ---
+  const CONSTRUCTION_KEYS = ["vat_clarity", "scope_detail", "pricing_transparency", "temporary_works", "allowances"];
+  const COMMERCIAL_KEYS = ["payment_structure", "programme_timescale", "variations_process", "certification_handover", "exclusions_clarity"];
+  const avgPct = (keys: string[]) => {
+    const grp = rows.filter((r) => keys.includes(r.key));
+    if (!grp.length) return 0;
+    return Math.round((grp.reduce((s, r) => s + r.quote_score, 0) / (grp.length * 10)) * 100);
+  };
+  const construction_completeness_pct = avgPct(CONSTRUCTION_KEYS);
+  const commercial_completeness_pct = avgPct(COMMERCIAL_KEYS);
+
+  // Legacy single completeness metric (kept for backward compatibility).
   const completeness_pct = Math.round(
     (rows.filter((r) => r.quote_score >= 6).length / rows.length) * 100,
   );
@@ -558,10 +574,15 @@ export function scoreQuote(ev: QuoteEvidence, ctx: HomeownerContext): ScoringRes
   const assessment: ScoringResult["assessment"] =
     document_score >= 80 ? "Ready to Accept" : document_score >= 55 ? "Needs Clarification" : "Significant Concerns";
 
-  // Top issues — the lowest-scoring high/medium weight categories.
+  // Top issues — the lowest-scoring genuine gaps (commercial controls first).
+  const COMMERCIAL_KEYS2 = ["payment_structure", "programme_timescale", "variations_process", "certification_handover", "exclusions_clarity"];
   const top_issues = rows
-    .filter((r) => r.quote_score <= 5 && r.weight >= 2)
-    .sort((a, b) => b.weight - a.weight || a.quote_score - b.quote_score)
+    .filter((r) => r.quote_score <= 5 && r.key !== "homeowner_decision_safety")
+    .sort((a, b) => {
+      const ac = COMMERCIAL_KEYS2.includes(a.key) ? 0 : 1;
+      const bc = COMMERCIAL_KEYS2.includes(b.key) ? 0 : 1;
+      return ac - bc || a.quote_score - b.quote_score;
+    })
     .slice(0, 3)
     .map((r) => r.note);
 
@@ -570,6 +591,8 @@ export function scoreQuote(ev: QuoteEvidence, ctx: HomeownerContext): ScoringRes
     document_score,
     project_confidence_score,
     completeness_pct,
+    construction_completeness_pct,
+    commercial_completeness_pct,
     risk_level,
     project_confidence,
     certification_readiness,
