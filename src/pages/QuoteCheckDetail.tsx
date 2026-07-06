@@ -127,6 +127,17 @@ const QuoteCheckDetail = () => {
           </div>
         )}
 
+        {isAdmin && audit && (audit.evidence || audit.scoring) && (
+          <QuoteAuditDiagnostic
+            fileName={audit.fileName}
+            fileHash={audit.fileHash}
+            evidence={audit.evidence}
+            validation={audit.validation}
+            scoring={audit.scoring}
+            reportHtml={audit.reportHtml}
+          />
+        )}
+
 
         <div className="qr-print-area">
           {error ? (
