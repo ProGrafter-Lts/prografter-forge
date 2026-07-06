@@ -2669,7 +2669,9 @@ export type Database = {
           created_at: string
           created_project: boolean
           description: string
+          document_score: number | null
           email: string
+          evidence_validation: Json | null
           file_hash: string | null
           id: string
           intake: Json
@@ -2678,8 +2680,11 @@ export type Database = {
           pdf_url: string
           postcode: string
           project_confidence: string | null
+          project_confidence_score: number | null
           project_type: string
+          qs_scoring: Json | null
           quality_score: number | null
+          quote_evidence: Json | null
           quote_total_text: string | null
           recommended_next_step: string | null
           report_html: string | null
@@ -2706,7 +2711,9 @@ export type Database = {
           created_at?: string
           created_project?: boolean
           description?: string
+          document_score?: number | null
           email: string
+          evidence_validation?: Json | null
           file_hash?: string | null
           id?: string
           intake?: Json
@@ -2715,8 +2722,11 @@ export type Database = {
           pdf_url: string
           postcode?: string
           project_confidence?: string | null
+          project_confidence_score?: number | null
           project_type: string
+          qs_scoring?: Json | null
           quality_score?: number | null
+          quote_evidence?: Json | null
           quote_total_text?: string | null
           recommended_next_step?: string | null
           report_html?: string | null
@@ -2743,7 +2753,9 @@ export type Database = {
           created_at?: string
           created_project?: boolean
           description?: string
+          document_score?: number | null
           email?: string
+          evidence_validation?: Json | null
           file_hash?: string | null
           id?: string
           intake?: Json
@@ -2752,8 +2764,11 @@ export type Database = {
           pdf_url?: string
           postcode?: string
           project_confidence?: string | null
+          project_confidence_score?: number | null
           project_type?: string
+          qs_scoring?: Json | null
           quality_score?: number | null
+          quote_evidence?: Json | null
           quote_total_text?: string | null
           recommended_next_step?: string | null
           report_html?: string | null

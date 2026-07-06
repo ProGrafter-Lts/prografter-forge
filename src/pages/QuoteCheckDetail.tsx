@@ -5,6 +5,7 @@ import { useAuthReady } from "@/hooks/useAuthReady";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import SEO from "@/components/SEO";
 import QuoteHealthCheckReport from "@/components/QuoteHealthCheckReport";
+import QuoteAuditDiagnostic from "@/components/admin/QuoteAuditDiagnostic";
 import { ArrowLeft, Download, Loader2, AlertTriangle } from "lucide-react";
 
 interface CategoryDiff {
@@ -37,6 +38,14 @@ const QuoteCheckDetail = () => {
   const [status, setStatus] = useState<string>("loading");
   const [error, setError] = useState<string | null>(null);
   const [diagnostic, setDiagnostic] = useState<ConsistencyDiagnostic | null>(null);
+  const [audit, setAudit] = useState<{
+    fileName: string | null;
+    fileHash: string | null;
+    evidence: Record<string, unknown> | null;
+    validation: any;
+    scoring: any;
+    reportHtml: string | null;
+  } | null>(null);
 
   useEffect(() => {
     if (!isReady) return;
@@ -48,7 +57,7 @@ const QuoteCheckDetail = () => {
     (async () => {
       const { data, error: err } = await supabase
         .from("quote_checks")
-        .select("status, report_json, consistency_diagnostic")
+        .select("status, report_json, report_html, consistency_diagnostic, pdf_url, file_hash, quote_evidence, evidence_validation, qs_scoring")
         .eq("id", id)
         .maybeSingle();
       if (err || !data) {
@@ -62,6 +71,14 @@ const QuoteCheckDetail = () => {
       if (data.consistency_diagnostic) {
         setDiagnostic(data.consistency_diagnostic as unknown as ConsistencyDiagnostic);
       }
+      setAudit({
+        fileName: (data.pdf_url as string | null)?.split("/").pop() ?? null,
+        fileHash: (data.file_hash as string | null) ?? null,
+        evidence: (data.quote_evidence as Record<string, unknown> | null) ?? null,
+        validation: (data.evidence_validation as any) ?? null,
+        scoring: (data.qs_scoring as any) ?? null,
+        reportHtml: (data.report_html as string | null) ?? null,
+      });
     })();
   }, [isReady, id, user, navigate]);
 
@@ -108,6 +125,17 @@ const QuoteCheckDetail = () => {
               </ul>
             )}
           </div>
+        )}
+
+        {isAdmin && audit && (audit.evidence || audit.scoring) && (
+          <QuoteAuditDiagnostic
+            fileName={audit.fileName}
+            fileHash={audit.fileHash}
+            evidence={audit.evidence}
+            validation={audit.validation}
+            scoring={audit.scoring}
+            reportHtml={audit.reportHtml}
+          />
         )}
 
 
