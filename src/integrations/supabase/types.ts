@@ -2659,10 +2659,15 @@ export type Database = {
       }
       quote_checks: {
         Row: {
+          addressed_count: number | null
           admin_call_notes: string | null
+          analysis_mode: string | null
           analysis_snapshot: Json | null
           certification_readiness: string | null
           checker_type: string
+          checklist_results: Json | null
+          checklist_score: number | null
+          clarification_count: number | null
           comparison_readiness: string | null
           completeness_pct: number | null
           consistency_diagnostic: Json | null
@@ -2677,6 +2682,7 @@ export type Database = {
           intake: Json
           labour_material: string | null
           lookup_token: string
+          missing_count: number | null
           pdf_url: string
           postcode: string
           project_confidence: string | null
@@ -2691,20 +2697,30 @@ export type Database = {
           report_json: Json | null
           requested_matched_trades: boolean
           risk_level: string | null
+          standard_id: string | null
+          standard_mismatch: boolean | null
+          standard_name: string | null
+          standard_version: string | null
           status: string
           stripe_payment_id: string | null
           subtotal_text: string | null
           top_issues: Json | null
+          total_checks: number | null
           total_text: string | null
           updated_at: string
           user_id: string | null
           vat_text: string | null
         }
         Insert: {
+          addressed_count?: number | null
           admin_call_notes?: string | null
+          analysis_mode?: string | null
           analysis_snapshot?: Json | null
           certification_readiness?: string | null
           checker_type?: string
+          checklist_results?: Json | null
+          checklist_score?: number | null
+          clarification_count?: number | null
           comparison_readiness?: string | null
           completeness_pct?: number | null
           consistency_diagnostic?: Json | null
@@ -2719,6 +2735,7 @@ export type Database = {
           intake?: Json
           labour_material?: string | null
           lookup_token?: string
+          missing_count?: number | null
           pdf_url: string
           postcode?: string
           project_confidence?: string | null
@@ -2733,20 +2750,30 @@ export type Database = {
           report_json?: Json | null
           requested_matched_trades?: boolean
           risk_level?: string | null
+          standard_id?: string | null
+          standard_mismatch?: boolean | null
+          standard_name?: string | null
+          standard_version?: string | null
           status?: string
           stripe_payment_id?: string | null
           subtotal_text?: string | null
           top_issues?: Json | null
+          total_checks?: number | null
           total_text?: string | null
           updated_at?: string
           user_id?: string | null
           vat_text?: string | null
         }
         Update: {
+          addressed_count?: number | null
           admin_call_notes?: string | null
+          analysis_mode?: string | null
           analysis_snapshot?: Json | null
           certification_readiness?: string | null
           checker_type?: string
+          checklist_results?: Json | null
+          checklist_score?: number | null
+          clarification_count?: number | null
           comparison_readiness?: string | null
           completeness_pct?: number | null
           consistency_diagnostic?: Json | null
@@ -2761,6 +2788,7 @@ export type Database = {
           intake?: Json
           labour_material?: string | null
           lookup_token?: string
+          missing_count?: number | null
           pdf_url?: string
           postcode?: string
           project_confidence?: string | null
@@ -2775,10 +2803,15 @@ export type Database = {
           report_json?: Json | null
           requested_matched_trades?: boolean
           risk_level?: string | null
+          standard_id?: string | null
+          standard_mismatch?: boolean | null
+          standard_name?: string | null
+          standard_version?: string | null
           status?: string
           stripe_payment_id?: string | null
           subtotal_text?: string | null
           top_issues?: Json | null
+          total_checks?: number | null
           total_text?: string | null
           updated_at?: string
           user_id?: string | null
@@ -2878,6 +2911,107 @@ export type Database = {
           metadata?: Json
           quote_id?: string
           user_agent?: string | null
+        }
+        Relationships: []
+      }
+      quote_standard_checks: {
+        Row: {
+          check_id: string
+          check_title: string
+          created_at: string
+          display_order: number
+          id: string
+          pass_condition: string | null
+          section_name: string | null
+          standard_id: string
+          standard_uuid: string
+          trade_type: string
+          version: string
+          why_it_matters: string | null
+        }
+        Insert: {
+          check_id: string
+          check_title: string
+          created_at?: string
+          display_order: number
+          id?: string
+          pass_condition?: string | null
+          section_name?: string | null
+          standard_id: string
+          standard_uuid: string
+          trade_type: string
+          version: string
+          why_it_matters?: string | null
+        }
+        Update: {
+          check_id?: string
+          check_title?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          pass_condition?: string | null
+          section_name?: string | null
+          standard_id?: string
+          standard_uuid?: string
+          trade_type?: string
+          version?: string
+          why_it_matters?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quote_standard_checks_standard_uuid_fkey"
+            columns: ["standard_uuid"]
+            isOneToOne: false
+            referencedRelation: "quote_standards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quote_standards: {
+        Row: {
+          author: string | null
+          created_at: string
+          effective_date: string | null
+          excluded_scope: string | null
+          id: string
+          included_scope: string | null
+          scope_summary: string | null
+          standard_id: string
+          standard_name: string
+          status: string
+          trade_type: string
+          updated_at: string
+          version: string
+        }
+        Insert: {
+          author?: string | null
+          created_at?: string
+          effective_date?: string | null
+          excluded_scope?: string | null
+          id?: string
+          included_scope?: string | null
+          scope_summary?: string | null
+          standard_id: string
+          standard_name: string
+          status?: string
+          trade_type: string
+          updated_at?: string
+          version: string
+        }
+        Update: {
+          author?: string | null
+          created_at?: string
+          effective_date?: string | null
+          excluded_scope?: string | null
+          id?: string
+          included_scope?: string | null
+          scope_summary?: string | null
+          standard_id?: string
+          standard_name?: string
+          status?: string
+          trade_type?: string
+          updated_at?: string
+          version?: string
         }
         Relationships: []
       }
