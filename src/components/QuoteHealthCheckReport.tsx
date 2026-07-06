@@ -63,6 +63,33 @@ interface ReportJson {
   score_addressed?: number;
   assessment?: "Ready to Accept" | "Needs Clarification" | "Significant Concerns";
   report_html?: string;
+  // Fixed-standard (v2) fields
+  analysis_mode?: "fixed_standard" | "general_guidance";
+  standard_name?: string;
+  standard_version?: string;
+  checked_against?: string;
+  checklist_score?: number;
+  total_checks?: number;
+  addressed_count?: number;
+  clarification_count?: number;
+  missing_count?: number;
+  verdict_summary?: string;
+  general_guidance_notice?: string;
+  figures?: { subtotal?: string | null; vat_rate?: string | null; vat_amount?: string | null; total_incl_vat?: string | null };
+  figures_reconcile?: boolean;
+  checklist_results?: Array<{
+    check_id: string;
+    check_title: string;
+    section_name?: string | null;
+    verdict: "ADDRESSED" | "NEEDS CLARIFICATION" | "MISSING";
+    evidence_quote?: string | null;
+    source_type?: string;
+    reason_from_standard?: string | null;
+  }>;
+  questions_detailed?: Array<{ check_id: string; question: string; why_it_matters?: string | null }>;
+  additional_observations?: string[];
+  disclaimer?: string;
+  standard_mismatch?: boolean;
 }
 
 /* ------------------------------------------------------------------ */
@@ -1104,7 +1131,192 @@ const ExecutiveVerdict = ({ report }: { report: ReportJson }) => {
 
 /* ------------------------------------------------------------------ */
 
+const VerdictPill = ({ v }: { v: "ADDRESSED" | "NEEDS CLARIFICATION" | "MISSING" }) => {
+  const map = {
+    ADDRESSED: { cls: "bg-teal/15 text-teal border-teal/30", Icon: CheckCircle2, label: "Addressed" },
+    "NEEDS CLARIFICATION": { cls: "bg-amber-500/15 text-amber-700 border-amber-500/30", Icon: AlertCircle, label: "Clarify" },
+    MISSING: { cls: "bg-destructive/15 text-destructive border-destructive/30", Icon: XCircle, label: "Missing" },
+  }[v];
+  return (
+    <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide ${map.cls}`}>
+      <map.Icon className="h-3 w-3" /> {map.label}
+    </span>
+  );
+};
+
+const FixedStandardReport = ({ report }: { report: ReportJson }) => {
+  const [copied, setCopied] = useState(false);
+  const [showChecklist, setShowChecklist] = useState(false);
+  const results = report.checklist_results || [];
+  const grouped = useMemo(() => {
+    const m = new Map<string, typeof results>();
+    for (const r of results) {
+      const s = r.section_name || "General";
+      if (!m.has(s)) m.set(s, []);
+      m.get(s)!.push(r);
+    }
+    return [...m.entries()];
+  }, [results]);
+  const questions = report.questions_detailed || [];
+  const copyMsg = () => {
+    navigator.clipboard.writeText(report.builder_message || "");
+    setCopied(true);
+    toast.success("Message copied");
+    setTimeout(() => setCopied(false), 2000);
+  };
+  const scoreColor = (report.checklist_score ?? 0) >= 80 ? "text-teal" : (report.checklist_score ?? 0) >= 55 ? "text-amber-600" : "text-destructive";
+
+  return (
+    <div className="mx-auto max-w-4xl space-y-6 px-4 py-8">
+      <div className="flex items-center justify-between gap-3">
+        <img src={logoLight.url} alt="ProGrafter" className="h-8" />
+        <button onClick={() => window.print()} className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 font-mono text-xs text-navy hover:bg-muted">
+          <Printer className="h-3.5 w-3.5" /> Print / PDF
+        </button>
+      </div>
+
+      {report.standard_mismatch && (
+        <div className="flex items-start gap-2 rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 font-mono text-sm text-amber-800">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+          Project type mismatch was flagged for this quote. The report was generated against the confirmed standard.
+        </div>
+      )}
+
+      <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+        <p className="font-mono text-xs uppercase tracking-wider text-teal">Checked against</p>
+        <h1 className="font-heading text-2xl text-navy">{report.checked_against || `${report.standard_name} · Version ${report.standard_version}`}</h1>
+        <div className="mt-5 flex flex-wrap items-center gap-6">
+          <div className="text-center">
+            <div className={`font-heading text-5xl ${scoreColor}`}>{report.checklist_score}<span className="text-2xl text-muted-foreground">/100</span></div>
+            <p className="font-mono text-[11px] uppercase tracking-wide text-muted-foreground">Quote Check Score</p>
+          </div>
+          <div className="grid grid-cols-3 gap-3 text-center">
+            <div className="rounded-lg bg-teal/10 px-4 py-2"><div className="font-heading text-2xl text-teal">{report.addressed_count}</div><p className="font-mono text-[10px] uppercase text-muted-foreground">Addressed</p></div>
+            <div className="rounded-lg bg-amber-500/10 px-4 py-2"><div className="font-heading text-2xl text-amber-600">{report.clarification_count}</div><p className="font-mono text-[10px] uppercase text-muted-foreground">Clarify</p></div>
+            <div className="rounded-lg bg-destructive/10 px-4 py-2"><div className="font-heading text-2xl text-destructive">{report.missing_count}</div><p className="font-mono text-[10px] uppercase text-muted-foreground">Missing</p></div>
+          </div>
+        </div>
+        {report.verdict_summary && <p className="mt-4 font-mono text-sm text-muted-foreground">{report.verdict_summary}</p>}
+      </div>
+
+      {report.figures && (
+        <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+          <h2 className="mb-3 font-heading text-lg text-navy">Figures (as stated in the quote)</h2>
+          <div className="grid grid-cols-3 gap-4 font-mono text-sm">
+            <div><p className="text-muted-foreground">Subtotal</p><p className="text-navy">{report.figures.subtotal ?? "not stated"}</p></div>
+            <div><p className="text-muted-foreground">VAT</p><p className="text-navy">{report.figures.vat_amount ?? report.figures.vat_rate ?? "not stated"}</p></div>
+            <div><p className="text-muted-foreground">Total</p><p className="text-navy">{report.figures.total_incl_vat ?? "not stated"}</p></div>
+          </div>
+          {report.figures_reconcile === false && (
+            <p className="mt-3 font-mono text-xs text-amber-700">The figures shown in the quote do not reconcile and should be confirmed by the contractor.</p>
+          )}
+        </div>
+      )}
+
+      {questions.length > 0 && (
+        <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+          <h2 className="mb-3 flex items-center gap-2 font-heading text-lg text-navy"><ClipboardList className="h-5 w-5 text-teal" /> Questions to ask the builder</h2>
+          <ol className="space-y-3">
+            {questions.map((q) => (
+              <li key={q.check_id} className="border-l-2 border-teal/40 pl-3">
+                <p className="font-mono text-sm text-navy"><span className="text-teal">{q.check_id}</span> {q.question}</p>
+                {q.why_it_matters && <p className="mt-0.5 font-mono text-xs text-muted-foreground">Why it matters: {q.why_it_matters}</p>}
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
+
+      {report.builder_message && (
+        <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="flex items-center gap-2 font-heading text-lg text-navy"><MessageSquareText className="h-5 w-5 text-teal" /> Suggested message to builder</h2>
+            <button onClick={copyMsg} className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 font-mono text-xs text-navy hover:bg-muted">
+              {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />} {copied ? "Copied" : "Copy"}
+            </button>
+          </div>
+          <pre className="whitespace-pre-wrap rounded-lg bg-muted/50 p-4 font-mono text-sm text-navy">{report.builder_message}</pre>
+        </div>
+      )}
+
+      <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+        <button onClick={() => setShowChecklist((s) => !s)} className="flex w-full items-center justify-between font-heading text-lg text-navy">
+          <span>Full checklist results ({results.length})</span>
+          <ChevronDown className={`h-5 w-5 transition-transform ${showChecklist ? "rotate-180" : ""}`} />
+        </button>
+        {showChecklist && (
+          <div className="mt-4 space-y-5">
+            {grouped.map(([section, rows]) => (
+              <div key={section}>
+                <h3 className="mb-2 font-mono text-xs uppercase tracking-wide text-teal">{section}</h3>
+                <div className="space-y-2">
+                  {rows.map((r) => (
+                    <div key={r.check_id} className="flex flex-col gap-1 rounded-lg border border-border/60 p-3 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="flex-1">
+                        <p className="font-mono text-sm text-navy"><span className="text-muted-foreground">{r.check_id}</span> {r.check_title}</p>
+                        {r.evidence_quote && <p className="mt-1 font-mono text-xs text-muted-foreground">“{r.evidence_quote}”</p>}
+                      </div>
+                      <VerdictPill v={r.verdict} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {(report.additional_observations?.length ?? 0) > 0 && (
+        <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+          <h2 className="mb-2 font-heading text-lg text-navy">Additional observations</h2>
+          <p className="mb-2 font-mono text-xs text-muted-foreground">Outside the fixed checklist — these do not affect the score.</p>
+          <ul className="list-disc space-y-1 pl-5 font-mono text-sm text-navy">
+            {report.additional_observations!.map((o, i) => <li key={i}>{o}</li>)}
+          </ul>
+        </div>
+      )}
+
+      {report.disclaimer && (
+        <p className="font-mono text-xs leading-relaxed text-muted-foreground">{report.disclaimer}</p>
+      )}
+    </div>
+  );
+};
+
+const GeneralGuidanceReport = ({ report }: { report: ReportJson }) => (
+  <div className="mx-auto max-w-3xl space-y-6 px-4 py-8">
+    <div className="flex items-center justify-between">
+      <img src={logoLight.url} alt="ProGrafter" className="h-8" />
+      <button onClick={() => window.print()} className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 font-mono text-xs text-navy hover:bg-muted"><Printer className="h-3.5 w-3.5" /> Print / PDF</button>
+    </div>
+    <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 font-mono text-sm text-amber-800">
+      {report.general_guidance_notice || "This is general quote guidance. A fixed ProGrafter checklist standard is not yet available for this project type."}
+    </div>
+    {report.figures && (
+      <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+        <h2 className="mb-3 font-heading text-lg text-navy">Figures (as stated)</h2>
+        <p className="font-mono text-sm text-navy">Subtotal: {report.figures.subtotal ?? "not stated"} · VAT: {report.figures.vat_amount ?? report.figures.vat_rate ?? "not stated"} · Total: {report.figures.total_incl_vat ?? "not stated"}</p>
+      </div>
+    )}
+    {(report.additional_observations?.length ?? 0) > 0 && (
+      <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+        <h2 className="mb-2 font-heading text-lg text-navy">Observations</h2>
+        <ul className="list-disc space-y-1 pl-5 font-mono text-sm text-navy">{report.additional_observations!.map((o, i) => <li key={i}>{o}</li>)}</ul>
+      </div>
+    )}
+    {(report.questions_list?.length ?? 0) > 0 && (
+      <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+        <h2 className="mb-2 font-heading text-lg text-navy">Questions to ask</h2>
+        <ol className="list-decimal space-y-1 pl-5 font-mono text-sm text-navy">{report.questions_list!.map((q, i) => <li key={i}>{q}</li>)}</ol>
+      </div>
+    )}
+    {report.disclaimer && <p className="font-mono text-xs leading-relaxed text-muted-foreground">{report.disclaimer}</p>}
+  </div>
+);
+
 const QuoteHealthCheckReport = ({ report }: { report: ReportJson }) => {
+  if (report.analysis_mode === "fixed_standard") return <FixedStandardReport report={report} />;
+  if (report.analysis_mode === "general_guidance") return <GeneralGuidanceReport report={report} />;
   const sections = useMemo(() => parseSections(report.report_html || ""), [report.report_html]);
 
   const find = (kw: string) => sections.find((s) => s.heading.toLowerCase().includes(kw));
