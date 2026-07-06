@@ -35,13 +35,14 @@ const Hero = () => {
 
       <div className="relative max-w-6xl mx-auto px-6 w-full pt-28 pb-20 text-center">
         {/* Positioning badge */}
-        <div className="inline-flex items-center gap-2 mb-7 px-4 py-2 rounded-full bg-white/5 border border-teal/30 backdrop-blur-md">
+        <div className="inline-flex items-center gap-2 mb-7 px-4 py-2 rounded-full bg-white/10 border border-teal/60 backdrop-blur-md shadow-md shadow-teal/20">
           <span className="relative flex h-2 w-2">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-teal opacity-75" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-teal" />
           </span>
-          <span className="font-mono text-[11px] text-cream uppercase tracking-[0.2em]">
-            The UK&apos;s AI-Powered Construction Trust Platform
+          <span className="font-mono text-[11px] uppercase tracking-[0.2em]">
+            <span className="text-teal">AI-Powered</span>{" "}
+            <span className="text-cream">UK Construction Trust Platform</span>
           </span>
         </div>
 
