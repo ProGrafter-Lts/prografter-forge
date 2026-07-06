@@ -14,6 +14,13 @@
 // Types
 // ---------------------------------------------------------------------------
 
+import {
+  CATEGORY_WEIGHTS,
+  CATEGORY_RUBRICS,
+  SCORE_ANCHORS,
+  type RubricKey,
+} from "./rubric.ts";
+
 export interface QuoteEvidence {
   subtotal: string | null;
   vat_rate: string | null;
@@ -92,6 +99,10 @@ export interface CategoryScore {
   status: CategoryStatus;
   source: CategorySource;
   note: string;
+  /** What would move this category's score up (from the rubric). */
+  improvement: string;
+  /** The fixed anchor definition matching this quote_score. */
+  anchor: string;
 }
 
 export interface ValidationResult {
@@ -107,6 +118,7 @@ export interface ScoringResult {
   completeness_pct: number;
   construction_completeness_pct: number;
   commercial_completeness_pct: number;
+  overall_readiness_pct: number;
   risk_level: "Low" | "Medium" | "High" | "Critical";
   project_confidence: "Low" | "Medium" | "High";
   certification_readiness: "Ready" | "Needs improvement" | "Not ready";
@@ -291,38 +303,46 @@ const clamp10 = (n: number) => Math.max(0, Math.min(10, Math.round(n)));
 export function scoreQuote(ev: QuoteEvidence, ctx: HomeownerContext): ScoringResult {
   const rows: CategoryScore[] = [];
 
-  const push = (r: CategoryScore) => {
+  const push = (
+    r: Omit<CategoryScore, "weight" | "improvement" | "anchor"> & { weight?: number },
+  ) => {
     // Confidence can never be below the quote score.
-    r.confidence_score = Math.max(r.quote_score, r.confidence_score);
-    rows.push(r);
+    const confidence_score = Math.max(r.quote_score, r.confidence_score);
+    // Weight, improvement text and anchor are taken from the fixed rubric so
+    // the AI can never re-decide them.
+    const weight = CATEGORY_WEIGHTS[r.key as RubricKey] ?? 0;
+    const improvement =
+      CATEGORY_RUBRICS[r.key as Exclude<RubricKey, "homeowner_decision_safety">]?.improvement ?? "";
+    const anchor = SCORE_ANCHORS[Math.max(0, Math.min(10, Math.round(r.quote_score)))];
+    rows.push({ ...r, confidence_score, weight, improvement, anchor });
   };
 
-  // 1. VAT clarity (weight: medium)
+
+  // 1. VAT clarity — anchors: 0 none / 5 rate OR amount / 7 rate+amount / 9 +inclusive total
   {
-    const vatShown = !!(ev.vat_rate || ev.vat_amount);
-    const q = vatShown ? (ev.vat_rate && ev.total_incl_vat ? 10 : 9) : 2;
+    const both = !!(ev.vat_rate && ev.vat_amount);
+    const one = !!(ev.vat_rate || ev.vat_amount);
+    const q = both && ev.total_incl_vat ? 9 : both ? 7 : one ? 5 : 2;
     push({
       category: "VAT clarity",
       key: "vat_clarity",
-      weight: 2,
       quote_score: q,
       confidence_score: q,
-      status: vatShown ? "clear" : "missing",
+      status: one ? "clear" : "missing",
       source: "uploaded quote",
-      note: vatShown
-        ? `VAT is shown clearly (${[ev.vat_rate, ev.vat_amount].filter(Boolean).join(", ")}).`
+      note: one
+        ? `VAT is shown (${[ev.vat_rate, ev.vat_amount].filter(Boolean).join(", ")}).`
         : "No VAT rate or amount is shown — confirm whether VAT is included, excluded or not applicable.",
     });
   }
 
-  // 2. Scope detail (weight: high)
+  // 2. Physical scope detail — anchors scale with the number of itemised works.
   {
     const n = ev.included_scope_items.length;
-    const q = n >= 10 ? 9 : n >= 6 ? 8 : n >= 4 ? 6 : n >= 2 ? 4 : 2;
+    const q = n >= 14 ? 10 : n >= 10 ? 9 : n >= 7 ? 8 : n >= 5 ? 7 : n >= 4 ? 6 : n >= 3 ? 5 : n >= 2 ? 4 : n === 1 ? 2 : 0;
     push({
-      category: "Scope detail",
+      category: "Physical scope detail",
       key: "scope_detail",
-      weight: 3,
       quote_score: q,
       confidence_score: ctx.expected_scope ? Math.min(10, q + 1) : q,
       status: n >= 2 ? "clear" : "missing",
@@ -331,14 +351,13 @@ export function scoreQuote(ev: QuoteEvidence, ctx: HomeownerContext): ScoringRes
     });
   }
 
-  // 3. Pricing / itemisation transparency (weight: medium)
+  // 3. Pricing transparency — anchors: 2 lump sum / 5 total+VAT / 7 subtotal+VAT+total / 9 +sub-totals
   {
     const hasBreakdown = !!(ev.subtotal && ev.total_incl_vat);
-    const q = hasBreakdown ? 9 : ev.total_incl_vat ? 5 : 2;
+    const q = hasBreakdown ? (ev.vat_amount ? 9 : 7) : ev.total_incl_vat ? 5 : 2;
     push({
       category: "Pricing transparency",
       key: "pricing_transparency",
-      weight: 2,
       quote_score: q,
       confidence_score: q,
       status: hasBreakdown ? "clear" : ev.total_incl_vat ? "advisory" : "missing",
@@ -526,6 +545,10 @@ export function scoreQuote(ev: QuoteEvidence, ctx: HomeownerContext): ScoringRes
   };
   const construction_completeness_pct = avgPct(CONSTRUCTION_KEYS);
   const commercial_completeness_pct = avgPct(COMMERCIAL_KEYS);
+  // Overall Quote Readiness — the true weighted headline (construction +
+  // commercial combined via the rubric weights). Kept as a named metric so the
+  // report can show it alongside the two split completeness scores.
+  const overall_readiness_pct = document_score;
 
   // Legacy single completeness metric (kept for backward compatibility).
   const completeness_pct = Math.round(
@@ -593,6 +616,7 @@ export function scoreQuote(ev: QuoteEvidence, ctx: HomeownerContext): ScoringRes
     completeness_pct,
     construction_completeness_pct,
     commercial_completeness_pct,
+    overall_readiness_pct,
     risk_level,
     project_confidence,
     certification_readiness,

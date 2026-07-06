@@ -9,6 +9,9 @@
 // homeowner-facing narrative report. It must NEVER invent scores or create
 // findings that contradict the evidence.
 
+import { rubricPromptText } from "./rubric.ts";
+
+
 export const EXTRACTION_PROMPT = `You are a QUOTE EVIDENCE EXTRACTION ENGINE for UK residential building quotes.
 
 YOUR ONLY JOB IS TO EXTRACT FACTS FROM THE QUOTE. You must NOT score, judge, rate, recommend, praise or criticise anything. You do not decide what is good, bad, missing-as-a-problem, or risky. You only record what the document literally states.
@@ -76,11 +79,15 @@ interface ReportInputs {
 export function buildReportPrompt(inp: ReportInputs): string {
   return `You are a senior UK quantity surveyor writing a homeowner-facing Quote Health Check report.
 
-CRITICAL: All facts, statuses and scores have ALREADY been decided by a deterministic audit engine. You are ONLY the writer. You must:
+${rubricPromptText()}
+
+CRITICAL: All facts, statuses and scores have ALREADY been decided by a deterministic audit engine that scored each category against the fixed rubric above. You are ONLY the writer. You must:
 - Use the EVIDENCE RECORD as the single source of truth for what the quote contains.
-- Use the SCORING RESULT exactly as given. NEVER invent, change or recalculate any score.
+- Use the SCORING RESULT exactly as given. NEVER invent, change or recalculate any score. The scores are already calibrated to the rubric anchors — explain them, never re-decide them.
+- When you discuss a category, state its score out of 10, the reason, the evidence source, and what would improve the score (use the "improvement" text supplied per category). This must read like a QS/compliance audit, not an AI opinion.
 - NEVER create a finding that contradicts the evidence (e.g. do not say scaffold is missing if scaffold_included is true; do not say VAT is unclear if VAT figures are present).
 - For every finding, indicate the SOURCE using the "source" field already attached to each category (uploaded quote / homeowner form / builder response / admin note / AI inference). Never present AI inference as fact — word it as "confirm with the builder".
+- Do NOT treat project-dependent items (kitchen, bathroom, flooring, tiling, decoration, heating, party wall, planning, landscaping) as missing/problems unless the homeowner brief says they are expected. Otherwise label them "project-dependent — confirm if expected".
 - Do NOT accuse the builder of anything. Be calm, fair, protective and plain-English.
 
 WHO IS CHECKING THIS QUOTE: ${inp.modeLabel}

@@ -30,15 +30,19 @@ interface ReportJson {
   recommendation_summary?: string;
   score_breakdown?: Array<{
     category: string;
+    weight?: number;
     quote_score?: number;
     confidence_score?: number;
+    anchor?: string;
     status?: string;
     source?: string;
     note?: string;
+    improvement?: string;
   }>;
   completeness_pct?: number;
   construction_completeness_pct?: number;
   commercial_completeness_pct?: number;
+  overall_readiness_pct?: number;
   risk_level?: "Low" | "Medium" | "High" | "Critical";
   project_confidence?: "Low" | "Medium" | "High";
   recommended_next_step?: string;
@@ -441,6 +445,17 @@ const Dashboard = ({ report }: { report: ReportJson }) => {
           </div>
         )}
 
+        {typeof report.overall_readiness_pct === "number" && (
+          <div className="qr-metric2">
+            <div className="qr-metric-label">Overall Quote Readiness</div>
+            <div className="qr-metric2-value">{report.overall_readiness_pct}%</div>
+            <div className={`qr-bar qr-bar-${barTone(report.overall_readiness_pct)}`}>
+              <span style={{ width: `${Math.max(4, Math.min(100, report.overall_readiness_pct))}%` }} />
+            </div>
+            <p className="qr-metric2-explain">Weighted across all categories — construction and commercial combined.</p>
+          </div>
+        )}
+
         {typeof report.construction_completeness_pct === "number" && (
           <div className="qr-metric2">
             <div className="qr-metric-label">Construction Scope Completeness</div>
@@ -554,12 +569,22 @@ const Dashboard = ({ report }: { report: ReportJson }) => {
                   }}
                 >
                   <div style={{ minWidth: "10rem", flex: "1 1 12rem" }}>
-                    <div style={{ fontWeight: 600, fontSize: "0.85rem" }}>{row.category}</div>
+                    <div style={{ fontWeight: 600, fontSize: "0.85rem" }}>
+                      {row.category}
+                      {typeof row.weight === "number" ? (
+                        <span style={{ fontWeight: 500, fontSize: "0.68rem", opacity: 0.6 }}> · {row.weight}% weight</span>
+                      ) : ""}
+                    </div>
                     <div style={{ fontSize: "0.72rem", opacity: 0.7 }}>
                       {statusLabel[row.status || ""] || row.status || ""}
                       {row.source ? ` · Source: ${row.source}` : ""}
                     </div>
                     {row.note && <div style={{ fontSize: "0.72rem", opacity: 0.75, marginTop: "0.2rem" }}>{row.note}</div>}
+                    {typeof q === "number" && q < 8 && row.improvement && (
+                      <div style={{ fontSize: "0.72rem", opacity: 0.85, marginTop: "0.2rem", color: "#0f766e" }}>
+                        To improve: {row.improvement}
+                      </div>
+                    )}
                   </div>
                   <div style={{ display: "flex", gap: "0.9rem", fontSize: "0.8rem", fontVariantNumeric: "tabular-nums" }}>
                     {typeof q === "number" && (
