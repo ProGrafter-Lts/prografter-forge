@@ -208,6 +208,21 @@ const QuoteReport = () => {
       );
     }
 
+    if (status === "needs_review") {
+      return (
+        <div className="text-center py-16 space-y-5">
+          <ShieldCheck className="mx-auto h-10 w-10 text-teal" />
+          <h2 className="font-heading text-2xl text-navy">Your report is under manual review</h2>
+          <p className="font-mono text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
+            Your quote produced some conflicting details, so a member of our team is
+            reviewing it by hand to make sure your Quote Health Check is accurate.
+            We'll email your secure report link as soon as it's ready — usually within
+            one working day. You haven't lost your check.
+          </p>
+        </div>
+      );
+    }
+
     if (status === "error") {
       return (
         <div className="text-center py-16">
