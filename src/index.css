@@ -1422,12 +1422,12 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
     break-inside: avoid;
     page-break-inside: avoid;
   }
-  /* Hero stays together on the cover, never split */
+  /* Hero is the cover page — keep it whole, then force a page break after it */
   .qr-hero {
     break-inside: avoid;
     page-break-inside: avoid;
-    break-after: avoid;
-    page-break-after: avoid;
+    break-after: page;
+    page-break-after: always;
   }
   .qr-section2-title,
   .qr-actionplan-title,
