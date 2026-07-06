@@ -1144,10 +1144,100 @@ const VerdictPill = ({ v }: { v: "ADDRESSED" | "NEEDS CLARIFICATION" | "MISSING"
   );
 };
 
+const fixedVerdict = (
+  score: number,
+): { line: string; tone: "good" | "warn" | "bad"; tag: string; action: string } => {
+  if (score >= 80)
+    return {
+      line: "This quote is largely complete.",
+      tone: "good",
+      tag: "Ready with minor checks",
+      action: "Confirm the few remaining clarifications in writing, then you can reasonably proceed.",
+    };
+  if (score >= 55)
+    return {
+      line: "Clarify key items before you proceed.",
+      tone: "warn",
+      tag: "Needs clarification",
+      action: "Send the builder the questions below and get written answers before you commit.",
+    };
+  return {
+    line: "This quote has significant gaps — do not accept it yet.",
+    tone: "bad",
+    tag: "Significant concerns",
+    action: "Request a revised quote that clearly addresses the missing items before making any payment.",
+  };
+};
+
+const StandardHero = ({
+  report,
+  score,
+  generated,
+}: {
+  report: ReportJson;
+  score: number;
+  generated: string;
+}) => (
+  <header className="qr-hero">
+    <div className="qr-hero-top">
+      <img src={logoLight.url} alt="ProGrafter" className="qr-hero-logo" />
+      <span className="qr-hero-kicker">Quote Health Check</span>
+    </div>
+    <div className="qr-hero-rule" />
+    <h1 className="qr-hero-title">Quote Health Check</h1>
+    <p className="qr-hero-prepared">Prepared by ProGrafter · Fixed-standard compliance audit</p>
+
+    <div className="qr-hero-meta">
+      {report.standard_name && (
+        <div className="qr-hero-metaitem">
+          <span className="qr-hero-metalabel">Checked against</span>
+          <span className="qr-hero-metavalue">{report.standard_name}</span>
+        </div>
+      )}
+      {report.standard_version && (
+        <div className="qr-hero-metaitem">
+          <span className="qr-hero-metalabel">Standard version</span>
+          <span className="qr-hero-metavalue">v{report.standard_version}</span>
+        </div>
+      )}
+      {report.figures?.total_incl_vat && (
+        <div className="qr-hero-metaitem">
+          <span className="qr-hero-metalabel">Quote value</span>
+          <span className="qr-hero-metavalue">{report.figures.total_incl_vat}</span>
+        </div>
+      )}
+      <div className="qr-hero-metaitem">
+        <span className="qr-hero-metalabel">Quote Check Score</span>
+        <span className="qr-hero-metavalue">{score}/100</span>
+      </div>
+      <div className="qr-hero-metaitem">
+        <span className="qr-hero-metalabel">Generated</span>
+        <span className="qr-hero-metavalue">
+          <CalendarDays className="h-3.5 w-3.5" style={{ display: "inline", marginRight: 4, verticalAlign: "-2px" }} />
+          {generated}
+        </span>
+      </div>
+    </div>
+
+    <p className="qr-hero-desc">
+      Every check below comes from a fixed ProGrafter standard. The checklist decides the score — not
+      an AI opinion — so the same quote produces the same result every time.
+    </p>
+  </header>
+);
+
 const FixedStandardReport = ({ report }: { report: ReportJson }) => {
-  const [copied, setCopied] = useState(false);
+  const { copied, copy } = useCopy();
   const [showChecklist, setShowChecklist] = useState(false);
   const results = report.checklist_results || [];
+  const score = report.checklist_score ?? 0;
+  const v = fixedVerdict(score);
+  const generated = new Date().toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+
   const grouped = useMemo(() => {
     const m = new Map<string, typeof results>();
     for (const r of results) {
@@ -1157,104 +1247,249 @@ const FixedStandardReport = ({ report }: { report: ReportJson }) => {
     }
     return [...m.entries()];
   }, [results]);
+
+  const sectionStats = useMemo(
+    () =>
+      grouped.map(([section, rows]) => {
+        const total = rows.length;
+        const addressed = rows.filter((r) => r.verdict === "ADDRESSED").length;
+        const clarify = rows.filter((r) => r.verdict === "NEEDS CLARIFICATION").length;
+        const missing = rows.filter((r) => r.verdict === "MISSING").length;
+        const pct = total ? Math.round((addressed / total) * 100) : 0;
+        return { section, total, addressed, clarify, missing, pct };
+      }),
+    [grouped],
+  );
+
   const questions = report.questions_detailed || [];
-  const copyMsg = () => {
-    navigator.clipboard.writeText(report.builder_message || "");
-    setCopied(true);
-    toast.success("Message copied");
-    setTimeout(() => setCopied(false), 2000);
-  };
-  const scoreColor = (report.checklist_score ?? 0) >= 80 ? "text-teal" : (report.checklist_score ?? 0) >= 55 ? "text-amber-600" : "text-destructive";
+  const questionsText = questions.map((q, i) => `${i + 1}. ${q.question}`).join("\n");
+  // showChecklist retained for potential external toggling; appendix uses SectionCard collapse.
+  void showChecklist;
+  void setShowChecklist;
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6 px-4 py-8">
-      <div className="flex items-center justify-between gap-3">
-        <img src={logoLight.url} alt="ProGrafter" className="h-8" />
-        <button onClick={() => window.print()} className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 font-mono text-xs text-navy hover:bg-muted">
-          <Printer className="h-3.5 w-3.5" /> Print / PDF
-        </button>
-      </div>
+    <div className="qr-paper qr-paper-v2 space-y-6">
+      <StandardHero report={report} score={score} generated={generated} />
 
-      {report.standard_mismatch && (
-        <div className="flex items-start gap-2 rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 font-mono text-sm text-amber-800">
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-          Project type mismatch was flagged for this quote. The report was generated against the confirmed standard.
-        </div>
-      )}
+      <div className="qr-card qr-report-stack">
+        {report.standard_mismatch && (
+          <div className="qr-section2">
+            <Insight title="Project type mismatch flagged" tone="amber">
+              A project type mismatch was flagged for this quote. The report was generated against the
+              confirmed standard shown above.
+            </Insight>
+          </div>
+        )}
 
-      <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-        <p className="font-mono text-xs uppercase tracking-wider text-teal">Checked against</p>
-        <h1 className="font-heading text-2xl text-navy">{report.checked_against || `${report.standard_name} · Version ${report.standard_version}`}</h1>
-        <div className="mt-5 flex flex-wrap items-center gap-6">
-          <div className="text-center">
-            <div className={`font-heading text-5xl ${scoreColor}`}>{report.checklist_score}<span className="text-2xl text-muted-foreground">/100</span></div>
-            <p className="font-mono text-[11px] uppercase tracking-wide text-muted-foreground">Quote Check Score</p>
-          </div>
-          <div className="grid grid-cols-3 gap-3 text-center">
-            <div className="rounded-lg bg-teal/10 px-4 py-2"><div className="font-heading text-2xl text-teal">{report.addressed_count}</div><p className="font-mono text-[10px] uppercase text-muted-foreground">Addressed</p></div>
-            <div className="rounded-lg bg-amber-500/10 px-4 py-2"><div className="font-heading text-2xl text-amber-600">{report.clarification_count}</div><p className="font-mono text-[10px] uppercase text-muted-foreground">Clarify</p></div>
-            <div className="rounded-lg bg-destructive/10 px-4 py-2"><div className="font-heading text-2xl text-destructive">{report.missing_count}</div><p className="font-mono text-[10px] uppercase text-muted-foreground">Missing</p></div>
-          </div>
-        </div>
-        {report.verdict_summary && <p className="mt-4 font-mono text-sm text-muted-foreground">{report.verdict_summary}</p>}
-      </div>
-
-      {report.figures && (
-        <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-          <h2 className="mb-3 font-heading text-lg text-navy">Figures (as stated in the quote)</h2>
-          <div className="grid grid-cols-3 gap-4 font-mono text-sm">
-            <div><p className="text-muted-foreground">Subtotal</p><p className="text-navy">{report.figures.subtotal ?? "not stated"}</p></div>
-            <div><p className="text-muted-foreground">VAT</p><p className="text-navy">{report.figures.vat_amount ?? report.figures.vat_rate ?? "not stated"}</p></div>
-            <div><p className="text-muted-foreground">Total</p><p className="text-navy">{report.figures.total_incl_vat ?? "not stated"}</p></div>
-          </div>
-          {report.figures_reconcile === false && (
-            <p className="mt-3 font-mono text-xs text-amber-700">The figures shown in the quote do not reconcile and should be confirmed by the contractor.</p>
+        {/* Executive verdict */}
+        <section className={`qr-final qr-final-${v.tone}`} style={{ marginTop: 0 }}>
+          <div className="qr-final-tag">{v.tag}</div>
+          <h2 className="qr-final-headline">{v.line}</h2>
+          {report.verdict_summary && (
+            <p className="qr-final-why" style={{ marginTop: "0.6rem" }}>{report.verdict_summary}</p>
           )}
-        </div>
-      )}
-
-      {questions.length > 0 && (
-        <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-          <h2 className="mb-3 flex items-center gap-2 font-heading text-lg text-navy"><ClipboardList className="h-5 w-5 text-teal" /> Questions to ask the builder</h2>
-          <ol className="space-y-3">
-            {questions.map((q) => (
-              <li key={q.check_id} className="border-l-2 border-teal/40 pl-3">
-                <p className="font-mono text-sm text-navy"><span className="text-teal">{q.check_id}</span> {q.question}</p>
-                {q.why_it_matters && <p className="mt-0.5 font-mono text-xs text-muted-foreground">Why it matters: {q.why_it_matters}</p>}
-              </li>
-            ))}
-          </ol>
-        </div>
-      )}
-
-      {report.builder_message && (
-        <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="flex items-center gap-2 font-heading text-lg text-navy"><MessageSquareText className="h-5 w-5 text-teal" /> Suggested message to builder</h2>
-            <button onClick={copyMsg} className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 font-mono text-xs text-navy hover:bg-muted">
-              {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />} {copied ? "Copied" : "Copy"}
-            </button>
+          <div className="qr-verdict-metrics" style={{ display: "flex", flexWrap: "wrap", gap: "1.25rem", marginTop: "1rem" }}>
+            <div>
+              <div className="qr-metric-label">Quote Check Score</div>
+              <div style={{ fontWeight: 800, fontSize: "1.4rem", color: "#0f2544" }}>
+                {score}<span style={{ fontSize: "0.8rem", opacity: 0.6 }}>/100</span>
+              </div>
+            </div>
+            <div>
+              <div className="qr-metric-label">Checks run</div>
+              <div style={{ fontWeight: 800, fontSize: "1.4rem", color: "#0f2544" }}>{report.total_checks ?? results.length}</div>
+            </div>
+            <div>
+              <div className="qr-metric-label">Checked against</div>
+              <div style={{ fontWeight: 700, fontSize: "0.95rem", color: "#0f2544", marginTop: "0.3rem" }}>
+                {report.checked_against || `${report.standard_name} · v${report.standard_version}`}
+              </div>
+            </div>
           </div>
-          <pre className="whitespace-pre-wrap rounded-lg bg-muted/50 p-4 font-mono text-sm text-navy">{report.builder_message}</pre>
-        </div>
-      )}
+          <div className="qr-final-action">
+            <span className="qr-final-action-label">Recommended action</span>
+            <p>{v.action}</p>
+          </div>
+        </section>
 
-      <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-        <button onClick={() => setShowChecklist((s) => !s)} className="flex w-full items-center justify-between font-heading text-lg text-navy">
-          <span>Full checklist results ({results.length})</span>
-          <ChevronDown className={`h-5 w-5 transition-transform ${showChecklist ? "rotate-180" : ""}`} />
-        </button>
-        {showChecklist && (
-          <div className="mt-4 space-y-5">
+        {/* Score dashboard */}
+        <section className="qr-section2">
+          <div className="qr-section2-head">
+            <div>
+              <h2 className="qr-section2-title">Quote Check Dashboard</h2>
+              <p className="qr-section2-intro">
+                The fixed checklist scores this quote — {report.addressed_count ?? 0} addressed,{" "}
+                {report.clarification_count ?? 0} to clarify, {report.missing_count ?? 0} missing.
+              </p>
+            </div>
+          </div>
+          <div className="qr-dash2">
+            <div className="qr-metric2 qr-metric2-hero">
+              <div className="qr-metric-label">Quote Check Score</div>
+              <div className="qr-metric2-ringrow">
+                <Ring value={score} />
+                <p className="qr-metric2-explain">{scoreExplain(score)} Based only on the fixed standard checks.</p>
+              </div>
+            </div>
+            <div className="qr-metric2">
+              <div className="qr-metric-label">Addressed</div>
+              <div className="qr-metric2-value" style={{ color: "#0f766e" }}>{report.addressed_count ?? 0}</div>
+              <p className="qr-metric2-explain">Clearly covered in the quote.</p>
+            </div>
+            <div className="qr-metric2">
+              <div className="qr-metric-label">Needs clarification</div>
+              <div className="qr-metric2-value" style={{ color: "#b45309" }}>{report.clarification_count ?? 0}</div>
+              <p className="qr-metric2-explain">Stated but unclear or unconfirmed.</p>
+            </div>
+            <div className="qr-metric2">
+              <div className="qr-metric-label">Missing</div>
+              <div className="qr-metric2-value" style={{ color: "#b91c1c" }}>{report.missing_count ?? 0}</div>
+              <p className="qr-metric2-explain">Not found anywhere in the quote.</p>
+            </div>
+          </div>
+
+          {sectionStats.length > 0 && (
+            <div style={{ marginTop: "1.25rem" }}>
+              <div className="qr-metric-label">Completeness by section</div>
+              <div style={{ marginTop: "0.6rem", display: "grid", gap: "0.7rem" }}>
+                {sectionStats.map((s) => (
+                  <div key={s.section}>
+                    <div style={{ display: "flex", justifyContent: "space-between", gap: "0.5rem", fontSize: "0.82rem", color: "#374151" }}>
+                      <span style={{ fontWeight: 600 }}>{s.section}</span>
+                      <span style={{ fontVariantNumeric: "tabular-nums", opacity: 0.75 }}>
+                        {s.addressed}/{s.total} addressed · {s.pct}%
+                      </span>
+                    </div>
+                    <div className={`qr-bar qr-bar-${barTone(s.pct)}`}>
+                      <span style={{ width: `${Math.max(4, Math.min(100, s.pct))}%` }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </section>
+
+        {/* Figures */}
+        {report.figures && (
+          <section className="qr-section2">
+            <div className="qr-section2-head">
+              <div>
+                <h2 className="qr-section2-title">Figures (as stated in the quote)</h2>
+                <p className="qr-section2-intro">Quoted verbatim from the document — never recalculated.</p>
+              </div>
+            </div>
+            <div className="qr-strip">
+              <div className="qr-strip-card">
+                <div className="qr-strip-label">Subtotal</div>
+                <span style={{ fontWeight: 700, color: "#0f2544" }}>{report.figures.subtotal ?? "Not stated"}</span>
+              </div>
+              <div className="qr-strip-card">
+                <div className="qr-strip-label">VAT</div>
+                <span style={{ fontWeight: 700, color: "#0f2544" }}>
+                  {report.figures.vat_amount ?? report.figures.vat_rate ?? "Not stated"}
+                </span>
+              </div>
+              <div className="qr-strip-card">
+                <div className="qr-strip-label">Total incl. VAT</div>
+                <span style={{ fontWeight: 700, color: "#0f2544" }}>{report.figures.total_incl_vat ?? "Not stated"}</span>
+              </div>
+            </div>
+            {report.figures_reconcile === false && (
+              <div style={{ marginTop: "0.85rem" }}>
+                <Insight title="Figures do not reconcile" tone="amber">
+                  The subtotal, VAT and total shown in the quote do not add up. Ask the contractor to
+                  confirm the correct figures in writing.
+                </Insight>
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* Questions to ask */}
+        {questions.length > 0 && (
+          <SectionCard
+            title="Questions To Ask The Builder"
+            intro="Generated from every missing or unclear check — copy any question to raise it directly."
+          >
+            <div className="no-print" style={{ marginBottom: "1rem" }}>
+              <button
+                type="button"
+                className="qr-copyall-btn"
+                onClick={() => copy("all-q", questionsText, "Questions copied")}
+              >
+                {copied === "all-q" ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                Copy All Questions
+              </button>
+            </div>
+            <ul className="qr-qlist">
+              {questions.map((q, i) => (
+                <li key={q.check_id} className="qr-qitem">
+                  <span className="qr-qtext">
+                    <strong style={{ color: "#0d9488" }}>{q.check_id}</strong> {q.question}
+                    {q.why_it_matters && (
+                      <span style={{ display: "block", marginTop: "0.2rem", fontSize: "0.78rem", color: "#6b7280" }}>
+                        Why it matters: {q.why_it_matters}
+                      </span>
+                    )}
+                  </span>
+                  <button
+                    type="button"
+                    className="qr-qcopy no-print"
+                    aria-label="Copy question"
+                    onClick={() => copy(`q-${i}`, q.question, "Question copied")}
+                  >
+                    {copied === `q-${i}` ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </SectionCard>
+        )}
+
+        {/* Builder message */}
+        {report.builder_message && <BuilderMessage message={report.builder_message} />}
+
+        {/* Full checklist appendix */}
+        <SectionCard
+          title={`Full Checklist Results (${results.length})`}
+          intro="Every check in the standard, with the evidence found. Kept here so the summary stays easy to scan."
+          collapsible
+          defaultOpen={false}
+        >
+          <div className="space-y-5">
             {grouped.map(([section, rows]) => (
               <div key={section}>
-                <h3 className="mb-2 font-mono text-xs uppercase tracking-wide text-teal">{section}</h3>
-                <div className="space-y-2">
+                <h3 className="qr-appendix-h3">{section}</h3>
+                <div style={{ display: "grid", gap: "0.5rem" }}>
                   {rows.map((r) => (
-                    <div key={r.check_id} className="flex flex-col gap-1 rounded-lg border border-border/60 p-3 sm:flex-row sm:items-start sm:justify-between">
-                      <div className="flex-1">
-                        <p className="font-mono text-sm text-navy"><span className="text-muted-foreground">{r.check_id}</span> {r.check_title}</p>
-                        {r.evidence_quote && <p className="mt-1 font-mono text-xs text-muted-foreground">“{r.evidence_quote}”</p>}
+                    <div
+                      key={r.check_id}
+                      style={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        gap: "0.6rem",
+                        alignItems: "flex-start",
+                        justifyContent: "space-between",
+                        padding: "0.6rem 0.7rem",
+                        border: "1px solid #e3e6ec",
+                        borderRadius: "0.6rem",
+                        background: "#ffffff",
+                      }}
+                    >
+                      <div style={{ flex: "1 1 16rem", minWidth: "12rem" }}>
+                        <p style={{ fontSize: "0.85rem", color: "#0f2544", margin: 0 }}>
+                          <span style={{ color: "#6b7280", fontFamily: "var(--font-mono, monospace)" }}>{r.check_id}</span>{" "}
+                          {r.check_title}
+                        </p>
+                        {r.evidence_quote && (
+                          <p style={{ margin: "0.3rem 0 0", fontSize: "0.76rem", color: "#52606d", fontStyle: "italic" }}>
+                            “{r.evidence_quote}”
+                          </p>
+                        )}
+                        {r.reason_from_standard && r.verdict !== "ADDRESSED" && (
+                          <p style={{ margin: "0.2rem 0 0", fontSize: "0.74rem", color: "#6b7280" }}>{r.reason_from_standard}</p>
+                        )}
                       </div>
                       <VerdictPill v={r.verdict} />
                     </div>
@@ -1263,56 +1498,123 @@ const FixedStandardReport = ({ report }: { report: ReportJson }) => {
               </div>
             ))}
           </div>
+        </SectionCard>
+
+        {/* Additional observations */}
+        {(report.additional_observations?.length ?? 0) > 0 && (
+          <SectionCard
+            title="Additional Observations"
+            intro="Outside the fixed checklist — these do not affect the score."
+            collapsible
+            defaultOpen={false}
+          >
+            <ul className="qr-flaglist">
+              {report.additional_observations!.map((o, i) => (
+                <li key={i} style={{ paddingLeft: "1rem", position: "relative" }}>{o}</li>
+              ))}
+            </ul>
+          </SectionCard>
         )}
+
+        <div style={{ marginTop: "1.5rem" }}>
+          <PostReportCTAs checkerType={report.checker_type} />
+        </div>
       </div>
 
-      {(report.additional_observations?.length ?? 0) > 0 && (
-        <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-          <h2 className="mb-2 font-heading text-lg text-navy">Additional observations</h2>
-          <p className="mb-2 font-mono text-xs text-muted-foreground">Outside the fixed checklist — these do not affect the score.</p>
-          <ul className="list-disc space-y-1 pl-5 font-mono text-sm text-navy">
-            {report.additional_observations!.map((o, i) => <li key={i}>{o}</li>)}
-          </ul>
-        </div>
-      )}
-
-      {report.disclaimer && (
-        <p className="font-mono text-xs leading-relaxed text-muted-foreground">{report.disclaimer}</p>
-      )}
+      <DisclaimerBanner />
     </div>
   );
 };
 
-const GeneralGuidanceReport = ({ report }: { report: ReportJson }) => (
-  <div className="mx-auto max-w-3xl space-y-6 px-4 py-8">
-    <div className="flex items-center justify-between">
-      <img src={logoLight.url} alt="ProGrafter" className="h-8" />
-      <button onClick={() => window.print()} className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 font-mono text-xs text-navy hover:bg-muted"><Printer className="h-3.5 w-3.5" /> Print / PDF</button>
+const GeneralGuidanceReport = ({ report }: { report: ReportJson }) => {
+  const generated = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+  return (
+    <div className="qr-paper qr-paper-v2 space-y-6">
+      <header className="qr-hero">
+        <div className="qr-hero-top">
+          <img src={logoLight.url} alt="ProGrafter" className="qr-hero-logo" />
+          <span className="qr-hero-kicker">Quote Health Check</span>
+        </div>
+        <div className="qr-hero-rule" />
+        <h1 className="qr-hero-title">Quote Health Check</h1>
+        <p className="qr-hero-prepared">Prepared by ProGrafter · General guidance</p>
+        <div className="qr-hero-meta">
+          <div className="qr-hero-metaitem">
+            <span className="qr-hero-metalabel">Generated</span>
+            <span className="qr-hero-metavalue">
+              <CalendarDays className="h-3.5 w-3.5" style={{ display: "inline", marginRight: 4, verticalAlign: "-2px" }} />
+              {generated}
+            </span>
+          </div>
+        </div>
+        <p className="qr-hero-desc">
+          A fixed ProGrafter checklist standard is not yet available for this project type, so this is
+          general guidance rather than a scored compliance audit.
+        </p>
+      </header>
+
+      <div className="qr-card qr-report-stack">
+        <div className="qr-section2">
+          <Insight title="General guidance only" tone="amber">
+            {report.general_guidance_notice ||
+              "This is general quote guidance. A fixed ProGrafter checklist standard is not yet available for this project type, so no score is given."}
+          </Insight>
+        </div>
+
+        {report.figures && (
+          <section className="qr-section2">
+            <div className="qr-section2-head">
+              <div>
+                <h2 className="qr-section2-title">Figures (as stated)</h2>
+                <p className="qr-section2-intro">Quoted verbatim from the document.</p>
+              </div>
+            </div>
+            <div className="qr-strip">
+              <div className="qr-strip-card">
+                <div className="qr-strip-label">Subtotal</div>
+                <span style={{ fontWeight: 700, color: "#0f2544" }}>{report.figures.subtotal ?? "Not stated"}</span>
+              </div>
+              <div className="qr-strip-card">
+                <div className="qr-strip-label">VAT</div>
+                <span style={{ fontWeight: 700, color: "#0f2544" }}>{report.figures.vat_amount ?? report.figures.vat_rate ?? "Not stated"}</span>
+              </div>
+              <div className="qr-strip-card">
+                <div className="qr-strip-label">Total incl. VAT</div>
+                <span style={{ fontWeight: 700, color: "#0f2544" }}>{report.figures.total_incl_vat ?? "Not stated"}</span>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {(report.additional_observations?.length ?? 0) > 0 && (
+          <SectionCard title="Observations">
+            <ul className="qr-flaglist">
+              {report.additional_observations!.map((o, i) => (
+                <li key={i} style={{ paddingLeft: "1rem", position: "relative" }}>{o}</li>
+              ))}
+            </ul>
+          </SectionCard>
+        )}
+
+        {(report.questions_list?.length ?? 0) > 0 && (
+          <SectionCard title="Questions To Ask" intro="Sensible points to confirm with the builder before accepting.">
+            <ul className="qr-qlist">
+              {report.questions_list!.map((q, i) => (
+                <li key={i} className="qr-qitem"><span className="qr-qtext">{q}</span></li>
+              ))}
+            </ul>
+          </SectionCard>
+        )}
+
+        <div style={{ marginTop: "1.5rem" }}>
+          <PostReportCTAs checkerType={report.checker_type} />
+        </div>
+      </div>
+
+      <DisclaimerBanner />
     </div>
-    <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 font-mono text-sm text-amber-800">
-      {report.general_guidance_notice || "This is general quote guidance. A fixed ProGrafter checklist standard is not yet available for this project type."}
-    </div>
-    {report.figures && (
-      <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-        <h2 className="mb-3 font-heading text-lg text-navy">Figures (as stated)</h2>
-        <p className="font-mono text-sm text-navy">Subtotal: {report.figures.subtotal ?? "not stated"} · VAT: {report.figures.vat_amount ?? report.figures.vat_rate ?? "not stated"} · Total: {report.figures.total_incl_vat ?? "not stated"}</p>
-      </div>
-    )}
-    {(report.additional_observations?.length ?? 0) > 0 && (
-      <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-        <h2 className="mb-2 font-heading text-lg text-navy">Observations</h2>
-        <ul className="list-disc space-y-1 pl-5 font-mono text-sm text-navy">{report.additional_observations!.map((o, i) => <li key={i}>{o}</li>)}</ul>
-      </div>
-    )}
-    {(report.questions_list?.length ?? 0) > 0 && (
-      <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-        <h2 className="mb-2 font-heading text-lg text-navy">Questions to ask</h2>
-        <ol className="list-decimal space-y-1 pl-5 font-mono text-sm text-navy">{report.questions_list!.map((q, i) => <li key={i}>{q}</li>)}</ol>
-      </div>
-    )}
-    {report.disclaimer && <p className="font-mono text-xs leading-relaxed text-muted-foreground">{report.disclaimer}</p>}
-  </div>
-);
+  );
+};
 
 const QuoteHealthCheckReport = ({ report }: { report: ReportJson }) => {
   if (report.analysis_mode === "fixed_standard") return <FixedStandardReport report={report} />;
