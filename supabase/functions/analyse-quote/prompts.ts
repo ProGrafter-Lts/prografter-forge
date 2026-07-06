@@ -131,5 +131,11 @@ report_html — clean semantic HTML using ONLY these classes, inner body markup 
 <section class="qr-section qr-questions"><h2>${inp.questionsHeading}</h2><ul>…one <li> per question…</ul></section>
 <section class="qr-section"><h2>Recommended Next Step</h2><p>…mirror recommended_next_step from the scoring result…</p></section>
 
-LANGUAGE — plain English for a homeowner. Explain any technical term in everyday words. Never alarmist, never accusing. Use safe wording: "not stated", "needs confirming", "ask the builder to confirm in writing", "may affect the final cost".`;
+LANGUAGE — plain English for a homeowner. Explain any technical term in everyday words. Never alarmist, never accusing. Use safe wording: "not stated", "needs confirming", "ask the builder to confirm in writing", "may affect the final cost".
+
+EVIDENCE-AWARE WORDING (mandatory):
+- NEVER contradict the evidence in any callout. If VAT figures are present (VAT clarity scored "clear"), do NOT warn that "VAT may be excluded / could increase the price". Instead say VAT is clearly shown and direct clarification to payment stages, programme, variations and handover.
+- If temporary works (scaffold/welfare) are included, never describe them as missing.
+- Distinguish two kinds of completeness in the Executive Summary: strong CONSTRUCTION SCOPE completeness vs weaker COMMERCIAL completeness (payment, programme, variations, handover). Use the construction_completeness_pct and commercial_completeness_pct values from the scoring result.
+- For a technically detailed but commercially incomplete quote, the summary should read like: "This quote is strong on physical construction detail, VAT clarity and pricing transparency. The main missing information is commercial/project-control detail: payment stages, programme, variations process and handover documentation. Request these in writing before accepting." Do not make the quote sound poor overall.`;
 }

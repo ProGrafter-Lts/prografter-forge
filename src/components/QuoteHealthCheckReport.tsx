@@ -37,6 +37,8 @@ interface ReportJson {
     note?: string;
   }>;
   completeness_pct?: number;
+  construction_completeness_pct?: number;
+  commercial_completeness_pct?: number;
   risk_level?: "Low" | "Medium" | "High" | "Critical";
   project_confidence?: "Low" | "Medium" | "High";
   recommended_next_step?: string;
@@ -251,10 +253,14 @@ const ReportHero = ({
   riskLevel,
   quoteValue,
   projectType,
+  documentScore,
+  confidenceScore,
 }: {
   riskLevel?: string;
   quoteValue?: string;
   projectType?: string;
+  documentScore?: number;
+  confidenceScore?: number;
 }) => {
   const generated = new Date().toLocaleDateString("en-GB", {
     day: "numeric",
@@ -282,6 +288,18 @@ const ReportHero = ({
           <div className="qr-hero-metaitem">
             <span className="qr-hero-metalabel">Quote value</span>
             <span className="qr-hero-metavalue">{quoteValue}</span>
+          </div>
+        )}
+        {typeof documentScore === "number" && (
+          <div className="qr-hero-metaitem">
+            <span className="qr-hero-metalabel">Quote Document Score</span>
+            <span className="qr-hero-metavalue">{documentScore}/100</span>
+          </div>
+        )}
+        {typeof confidenceScore === "number" && (
+          <div className="qr-hero-metaitem">
+            <span className="qr-hero-metalabel">Project Confidence Score</span>
+            <span className="qr-hero-metavalue">{confidenceScore}/100</span>
           </div>
         )}
         {riskLevel && (
@@ -423,7 +441,30 @@ const Dashboard = ({ report }: { report: ReportJson }) => {
           </div>
         )}
 
-        {typeof report.completeness_pct === "number" && (
+        {typeof report.construction_completeness_pct === "number" && (
+          <div className="qr-metric2">
+            <div className="qr-metric-label">Construction Scope Completeness</div>
+            <div className="qr-metric2-value">{report.construction_completeness_pct}%</div>
+            <div className={`qr-bar qr-bar-${barTone(report.construction_completeness_pct)}`}>
+              <span style={{ width: `${Math.max(4, Math.min(100, report.construction_completeness_pct))}%` }} />
+            </div>
+            <p className="qr-metric2-explain">How well the physical build items are described.</p>
+          </div>
+        )}
+
+        {typeof report.commercial_completeness_pct === "number" && (
+          <div className="qr-metric2">
+            <div className="qr-metric-label">Commercial Completeness</div>
+            <div className="qr-metric2-value">{report.commercial_completeness_pct}%</div>
+            <div className={`qr-bar qr-bar-${barTone(report.commercial_completeness_pct)}`}>
+              <span style={{ width: `${Math.max(4, Math.min(100, report.commercial_completeness_pct))}%` }} />
+            </div>
+            <p className="qr-metric2-explain">Payment stages, programme, variations, warranties and handover.</p>
+          </div>
+        )}
+
+        {typeof report.construction_completeness_pct !== "number" &&
+          typeof report.completeness_pct === "number" && (
           <div className="qr-metric2">
             <div className="qr-metric-label">Completeness</div>
             <div className="qr-metric2-value">{report.completeness_pct}%</div>
@@ -591,6 +632,38 @@ const deriveStrip = (
     return { label: t.label, status };
   });
 
+/**
+ * Build the Risk Status strip DIRECTLY from the deterministic score breakdown so
+ * it can never contradict the scores/evidence (e.g. VAT clear in the breakdown
+ * must show "Clear" here, never "Not applicable").
+ */
+const STATUS_TO_PILL: Record<string, PillStatus> = {
+  clear: "clear",
+  supplied_separately: "confirm",
+  builder_confirmed: "clear",
+  advisory: "advisory",
+  project_dependent: "advisory",
+  missing: "missing",
+  not_applicable: "na",
+};
+
+const BREAKDOWN_STRIP_MAP: { label: string; match: RegExp }[] = [
+  { label: "VAT Clarity", match: /vat/i },
+  { label: "Payment Terms", match: /payment/i },
+  { label: "Programme", match: /programme|timescale/i },
+  { label: "Scope Detail", match: /scope/i },
+  { label: "Exclusions", match: /exclusion/i },
+];
+
+const deriveStripFromBreakdown = (
+  breakdown: NonNullable<ReportJson["score_breakdown"]>,
+): { label: string; status: PillStatus }[] =>
+  BREAKDOWN_STRIP_MAP.map((t) => {
+    const row = breakdown.find((b) => t.match.test(b.category || ""));
+    const status: PillStatus = row ? STATUS_TO_PILL[row.status || ""] ?? "advisory" : "na";
+    return { label: t.label, status };
+  });
+
 const RiskStrip = ({ items }: { items: { label: string; status: PillStatus }[] }) => {
   if (!items.some((i) => i.status !== "na")) return null;
   return (
@@ -628,17 +701,17 @@ const QuoteFlags = ({
 }) => {
   if (!green.length && !amber.length && !red.length) return null;
   const cols: { tone: "green" | "amber" | "red"; title: string; sub: string; items: string[]; Icon: typeof CheckCircle2 }[] = [
-    { tone: "green", title: "Green Flags", sub: "Looks positive or reasonably covered", items: green, Icon: CheckCircle2 },
-    { tone: "amber", title: "Amber Flags", sub: "Needs clarification", items: amber, Icon: AlertCircle },
-    { tone: "red", title: "Red Flags", sub: "Confirm before proceeding", items: red, Icon: XCircle },
+    { tone: "green", title: "Key Strengths", sub: "Clear and well covered in this quote", items: green, Icon: CheckCircle2 },
+    { tone: "amber", title: "Key Clarifications Needed", sub: "Confirm these in writing before accepting", items: amber, Icon: AlertCircle },
+    { tone: "red", title: "Higher Priority", sub: "Address before proceeding", items: red, Icon: XCircle },
   ];
   return (
     <section className="qr-section2">
       <div className="qr-section2-head">
         <div>
-          <h2 className="qr-section2-title">Quote Flags</h2>
+          <h2 className="qr-section2-title">Strengths &amp; Clarifications</h2>
           <p className="qr-section2-intro">
-            What looks positive, what needs checking, and what should be clarified before accepting.
+            What this quote does well, and the specific points to confirm before you accept.
           </p>
         </div>
       </div>
@@ -958,7 +1031,52 @@ const PROJECT_LABELS: Record<string, string> = {
 };
 
 /* ------------------------------------------------------------------ */
-/* Main component                                                      */
+/* Executive verdict — top-of-report summary a homeowner reads first   */
+/* ------------------------------------------------------------------ */
+
+const ExecutiveVerdict = ({ report }: { report: ReportJson }) => {
+  const v = verdictHeadline(report.risk_level);
+  const summary =
+    report.recommendation_summary?.trim() ||
+    "This is a plain-English health check of the quote you uploaded — see the strengths and clarifications below.";
+  const docScore =
+    typeof report.document_score === "number" ? report.document_score : report.quality_score;
+  const confScore = report.project_confidence_score;
+  return (
+    <section className={`qr-final qr-final-${v.tone}`} style={{ marginTop: 0 }}>
+      <div className="qr-final-tag">Executive Verdict</div>
+      <h2 className="qr-final-headline">{v.line}</h2>
+      <p className="qr-final-why" style={{ marginTop: "0.6rem" }}>{summary}</p>
+      <div className="qr-verdict-metrics" style={{ display: "flex", flexWrap: "wrap", gap: "1.25rem", marginTop: "1rem" }}>
+        {typeof docScore === "number" && (
+          <div>
+            <div className="qr-metric-label">Quote Document Score</div>
+            <div style={{ fontWeight: 800, fontSize: "1.4rem", color: "#0f2544" }}>{docScore}<span style={{ fontSize: "0.8rem", opacity: 0.6 }}>/100</span></div>
+          </div>
+        )}
+        {typeof confScore === "number" && (
+          <div>
+            <div className="qr-metric-label">Project Confidence Score</div>
+            <div style={{ fontWeight: 800, fontSize: "1.4rem", color: "#0f766e" }}>{confScore}<span style={{ fontSize: "0.8rem", opacity: 0.6 }}>/100</span></div>
+          </div>
+        )}
+        {report.risk_level && (
+          <div>
+            <div className="qr-metric-label">Risk Level</div>
+            <div style={{ marginTop: "0.25rem" }}><span className={riskClass(report.risk_level)}>{report.risk_level}</span></div>
+          </div>
+        )}
+        {report.assessment && (
+          <div>
+            <div className="qr-metric-label">Assessment</div>
+            <div style={{ fontWeight: 700, fontSize: "0.95rem", color: "#0f2544", marginTop: "0.3rem" }}>{report.assessment}</div>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+};
+
 /* ------------------------------------------------------------------ */
 
 const QuoteHealthCheckReport = ({ report }: { report: ReportJson }) => {
@@ -998,9 +1116,14 @@ const QuoteHealthCheckReport = ({ report }: { report: ReportJson }) => {
   const missingItems = useMemo(() => extractItems(missing?.html), [missing]);
   const excludeItems = useMemo(() => extractItems(excludes?.html), [excludes]);
 
+  // Prefer the deterministic score breakdown for the Risk Status strip so it can
+  // never contradict the scores/evidence; fall back to text parsing for legacy reports.
   const strip = useMemo(
-    () => deriveStrip(includeItems, missingItems, excludeItems),
-    [includeItems, missingItems, excludeItems],
+    () =>
+      report.score_breakdown?.length
+        ? deriveStripFromBreakdown(report.score_breakdown)
+        : deriveStrip(includeItems, missingItems, excludeItems),
+    [report.score_breakdown, includeItems, missingItems, excludeItems],
   );
 
   const { amber: derivedAmber, red: derivedRed } = useMemo(
@@ -1008,11 +1131,35 @@ const QuoteHealthCheckReport = ({ report }: { report: ReportJson }) => {
     [missingItems],
   );
 
-  const greenFlags = report.green_flags?.length ? report.green_flags : includeItems;
-  const amberFlags = report.amber_flags?.length ? report.amber_flags : derivedAmber;
+  // Build strengths / clarifications from the deterministic breakdown so they
+  // always agree with the scores. Fall back to text-derived flags for legacy reports.
+  const breakdownStrengths = useMemo(
+    () =>
+      (report.score_breakdown || [])
+        .filter((b) => (b.quote_score ?? 0) >= 8 && !/decision safety/i.test(b.category || ""))
+        .map((b) => b.note || b.category)
+        .filter(Boolean) as string[],
+    [report.score_breakdown],
+  );
+  const breakdownClarifications = useMemo(
+    () =>
+      (report.score_breakdown || [])
+        .filter((b) => (b.quote_score ?? 10) <= 5 && !/decision safety/i.test(b.category || ""))
+        .map((b) => b.note || b.category)
+        .filter(Boolean) as string[],
+    [report.score_breakdown],
+  );
+
+  const hasBreakdown = !!report.score_breakdown?.length;
+  const greenFlags = report.green_flags?.length
+    ? report.green_flags
+    : hasBreakdown ? breakdownStrengths : includeItems;
+  const amberFlags = report.amber_flags?.length
+    ? report.amber_flags
+    : hasBreakdown ? breakdownClarifications : derivedAmber;
   const redFlags = report.red_flags?.length
     ? report.red_flags
-    : Array.from(new Set([...(report.top_issues || []), ...derivedRed]));
+    : hasBreakdown ? [] : Array.from(new Set([...(report.top_issues || []), ...derivedRed]));
 
   const quoteValue = report.quote_value || extractQuoteValue(figures?.html);
   const projectType = report.project_type || PROJECT_LABELS[report.checker_type || ""];
@@ -1023,78 +1170,99 @@ const QuoteHealthCheckReport = ({ report }: { report: ReportJson }) => {
   // raw HTML so we never lose content.
   const parsedAnything = sections.length > 0;
 
+  // Evidence-aware VAT flag so callouts never contradict the score breakdown.
+  const vatRow = report.score_breakdown?.find((b) => /vat/i.test(b.category || ""));
+  const vatClear = vatRow ? vatRow.status === "clear" : undefined;
+
   return (
     <div className="qr-paper qr-paper-v2 space-y-6">
       {/* 1. Branded hero */}
-      <ReportHero riskLevel={report.risk_level} quoteValue={quoteValue} projectType={projectType} />
+      <ReportHero
+        riskLevel={report.risk_level}
+        quoteValue={quoteValue}
+        projectType={projectType}
+        documentScore={typeof report.document_score === "number" ? report.document_score : report.quality_score}
+        confidenceScore={report.project_confidence_score}
+      />
 
       <div className="qr-card qr-report-stack">
-        {/* 2. Dashboard */}
+        {/* 1. Executive verdict — read this first */}
+        <ExecutiveVerdict report={report} />
+
+        {/* 2. Score summary */}
         <Dashboard report={report} />
 
-        {/* 3. Risk status strip */}
+        {/* Risk status strip (evidence-aware) */}
         <RiskStrip items={strip} />
 
-        {/* ProGrafter Insight callout */}
-        <div className="qr-section2">
-          <Insight title="ProGrafter Insight — why this matters">
-            Most quote disputes come from unclear scope, payment expectations or assumptions that were
-            never written down. Getting these confirmed in writing now protects both you and the builder.
-          </Insight>
-        </div>
-
-        {/* 4. Quote flags */}
+        {/* 3 + 4. Key strengths / clarifications */}
         <QuoteFlags green={greenFlags} amber={amberFlags} red={redFlags} />
 
-        {/* What To Do Next */}
+        {/* 5. What to do next */}
         <WhatToDoNext actions={actions} />
 
+        {/* 6. Suggested message to builder */}
+        <BuilderMessage message={builderMessage} />
+
+        {/* Questions to ask */}
+        <QuestionsSection groups={questionGroups} />
+
+        {/* Evidence-aware callout — never contradicts the VAT evidence */}
+        <div className="qr-section2">
+          {vatClear ? (
+            <Insight title="Where to focus your clarifications" tone="teal">
+              VAT is clearly shown in this quote. Focus clarification on payment stages, programme,
+              variations and handover documents — get these confirmed in writing before you commit.
+            </Insight>
+          ) : (
+            <Insight title="Before you pay a deposit" tone="amber">
+              Payment stages should be tied to clear work milestones, not vague dates. Ask the builder
+              to confirm the VAT status, payment schedule and programme in writing before you commit.
+            </Insight>
+          )}
+        </div>
+
+        {/* 7 + 8. Detailed evidence + full scope tables (appendix) */}
         {parsedAnything ? (
           <>
-            {/* Plain-English Summary */}
             {summary && (
-              <SectionCard title="Plain-English Summary" intro="A calm overview of what this quote covers and what to check.">
+              <SectionCard title="Detailed Summary" intro="A calm overview of what this quote covers and what to check." collapsible defaultOpen={false}>
                 <RawHtml html={summary.html} />
               </SectionCard>
             )}
 
-            {/* Quote Figures */}
             {figures && (
-              <SectionCard title="Quote Figures" intro="The headline numbers taken directly from the quote.">
+              <SectionCard title="Quote Figures" intro="The headline numbers taken directly from the quote." collapsible defaultOpen={false}>
                 <RawHtml html={figures.html} />
               </SectionCard>
             )}
 
-            {/* What Appears Included */}
-            {includes && (
-              <SectionCard title="What Appears Included" intro="Items the quote clearly states are covered." collapsible defaultOpen>
-                <RawHtml html={includes.html} />
-              </SectionCard>
-            )}
+            <SectionCard
+              title="Detailed Scope Review"
+              intro="The full breakdown of what appears included, missing/unclear and excluded — kept here so the summary above stays easy to scan."
+              collapsible
+              defaultOpen={false}
+            >
+              {includes && (
+                <>
+                  <h3 className="qr-appendix-h3">What Appears Included</h3>
+                  <RawHtml html={includes.html} />
+                </>
+              )}
+              {missing && (
+                <>
+                  <h3 className="qr-appendix-h3">What Is Missing or Unclear</h3>
+                  <RawHtml html={missing.html} />
+                </>
+              )}
+              {excludes && (
+                <>
+                  <h3 className="qr-appendix-h3">What Appears Excluded</h3>
+                  <RawHtml html={excludes.html} />
+                </>
+              )}
+            </SectionCard>
 
-            {/* What Appears Missing / Unclear */}
-            {missing && (
-              <SectionCard title="What Is Missing or Unclear" intro="Items not stated or that need confirming before you accept." collapsible defaultOpen>
-                <RawHtml html={missing.html} />
-              </SectionCard>
-            )}
-
-            {/* What Appears Excluded */}
-            {excludes && (
-              <SectionCard title="What Appears Excluded" intro="Items the quote states are not covered." collapsible defaultOpen={false}>
-                <RawHtml html={excludes.html} />
-              </SectionCard>
-            )}
-
-            {/* ProGrafter Insight — before you pay */}
-            <div className="qr-section2">
-              <Insight title="Before you pay a deposit" tone="amber">
-                Payment stages should be tied to clear work milestones, not vague dates. If VAT is
-                excluded, the final price could increase materially — ask for the VAT status in writing.
-              </Insight>
-            </div>
-
-            {/* Risk Breakdown */}
             {(scoreBreakdown || costAreas || comparison) && (
               <SectionCard title="Risk Breakdown" intro="A closer look at quote quality and areas that may affect cost." collapsible defaultOpen={false}>
                 {scoreBreakdown && <RawHtml html={scoreBreakdown.html} />}
@@ -1102,22 +1270,14 @@ const QuoteHealthCheckReport = ({ report }: { report: ReportJson }) => {
                 {costAreas && <RawHtml html={costAreas.html} />}
               </SectionCard>
             )}
-
-            {/* Questions To Ask (copyable) */}
-            <QuestionsSection groups={questionGroups} />
-
-            {/* Suggested Message To Builder */}
-            <BuilderMessage message={builderMessage} />
           </>
         ) : (
-          <>
-            <QuestionsSection groups={questionGroups} />
-            <BuilderMessage message={builderMessage} />
+          <SectionCard title="Full Report Detail" collapsible defaultOpen={false}>
             <RawHtml html={report.report_html || ""} />
-          </>
+          </SectionCard>
         )}
 
-        {/* 7. Final Recommendation conclusion card */}
+        {/* Final Recommendation conclusion card */}
         <FinalRecommendation
           report={report}
           recommendationHtml={recommendation?.html}
@@ -1129,6 +1289,7 @@ const QuoteHealthCheckReport = ({ report }: { report: ReportJson }) => {
           <PostReportCTAs checkerType={report.checker_type} />
         </div>
       </div>
+
 
       {/* Disclaimer */}
       <DisclaimerBanner />

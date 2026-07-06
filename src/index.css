@@ -808,6 +808,14 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
   line-height: 1.5;
 }
 .qr-section2-body { margin-top: 0.9rem; }
+.qr-appendix-h3 {
+  font-family: var(--font-heading, inherit);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1f2a44;
+  margin: 1.25rem 0 0.5rem;
+}
+.qr-appendix-h3:first-child { margin-top: 0; }
 .qr-section2-body .qr-section,
 .qr-section2-body .qr-report .qr-section {
   border-top: none;
@@ -1374,10 +1382,33 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
   .dashboard-dark {
     background: #ffffff !important;
   }
+  /* Kill the fixed grain texture and any page background bleed (the source of
+     the cream vertical stripe seen on printed pages) */
+  body::before,
+  html::before,
+  html::after,
+  body::after {
+    display: none !important;
+    content: none !important;
+  }
+  html,
+  body,
+  #root,
+  main,
+  .qr-paper,
+  .qr-card {
+    background: #ffffff !important;
+    background-image: none !important;
+  }
   /* Ensure colours/backgrounds (score, checklist chips) render in print */
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+  }
+  /* Branded hero becomes a dedicated cover page */
+  .qr-hero {
+    page-break-after: always;
+    break-after: page;
   }
   /* Reveal any on-screen collapsed sections so the PDF is the FULL report */
   .qr-collapsed {
@@ -1399,12 +1430,12 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
     break-inside: avoid;
     page-break-inside: avoid;
   }
-  /* Hero stays together on the cover, never split */
+  /* Hero is the cover page — keep it whole, then force a page break after it */
   .qr-hero {
     break-inside: avoid;
     page-break-inside: avoid;
-    break-after: avoid;
-    page-break-after: avoid;
+    break-after: page;
+    page-break-after: always;
   }
   .qr-section2-title,
   .qr-actionplan-title,
