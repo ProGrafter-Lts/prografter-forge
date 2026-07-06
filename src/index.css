@@ -808,6 +808,14 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
   line-height: 1.5;
 }
 .qr-section2-body { margin-top: 0.9rem; }
+.qr-appendix-h3 {
+  font-family: var(--font-heading, inherit);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1f2a44;
+  margin: 1.25rem 0 0.5rem;
+}
+.qr-appendix-h3:first-child { margin-top: 0; }
 .qr-section2-body .qr-section,
 .qr-section2-body .qr-report .qr-section {
   border-top: none;
