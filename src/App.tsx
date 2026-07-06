@@ -209,6 +209,7 @@ const AppRoutes = () => {
             <Route path="/admin/lead-distribution" element={<AdminRoute><AdminLeadDistribution /></AdminRoute>} />
             <Route path="/admin/scoping-calls" element={<AdminRoute><AdminCustomerDiscovery /></AdminRoute>} />
             <Route path="/admin/scoping-calls/:id" element={<AdminRoute><AdminCallNote /></AdminRoute>} />
+            <Route path="/admin/quote-standards" element={<AdminRoute><AdminQuoteStandards /></AdminRoute>} />
             <Route path="*" element={<NotFound />} />
       </Routes>
 
