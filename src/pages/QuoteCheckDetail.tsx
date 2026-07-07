@@ -82,6 +82,10 @@ const QuoteCheckDetail = () => {
         validation: (data.evidence_validation as any) ?? null,
         scoring: (data.qs_scoring as any) ?? null,
         reportHtml: (data.report_html as string | null) ?? null,
+        documentExtractions: (data as any).document_extractions ?? null,
+        supportingDiagnostic: (data as any).supporting_docs_diagnostic ?? null,
+        mergedEvidence: (data as any).merged_evidence ?? null,
+        checklistResults: (data as any).checklist_results ?? null,
       });
     })();
   }, [isReady, id, user, navigate]);
