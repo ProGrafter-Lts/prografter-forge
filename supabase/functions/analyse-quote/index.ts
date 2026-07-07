@@ -320,6 +320,40 @@ Deno.serve(async (req) => {
       } catch (e) { console.error("analyse-quote: merged checklist pass failed", e); }
     }
 
+    // -------------------------------------------------------------------------
+    // DETERMINISTIC PAYMENT-SCHEDULE RECONCILIATION
+    // The AI merged pass is not reliable at connecting a separately-supplied
+    // payment schedule to the payment-related checks. When a payment_schedule
+    // document with real facts is present, guarantee those checks are credited:
+    // any MISSING payment check becomes NEEDS CLARIFICATION, sourced as
+    // "supplied separately, confirm in writing". This makes the payment
+    // structure always affect Project Pack Confidence (never the quote-only
+    // Document Score, which stays main-quote-only).
+    // -------------------------------------------------------------------------
+    if (hasPaymentScheduleDoc(docExtractions)) {
+      const isPaymentCheck = (title: string) =>
+        /\b(payment|deposit|retention|instal)/i.test(title) ||
+        /stage[^.]*paid|paid[^.]*stage|payment[^.]*stage|stage[^.]*payment/i.test(title);
+      // Work on a copy so the quote-only results stay untouched.
+      mergedResults = mergedResults.map((r) => {
+        if (r.verdict === "MISSING" && isPaymentCheck(r.check_title)) {
+          return {
+            ...r,
+            verdict: "NEEDS CLARIFICATION" as const,
+            source_type: "builder_confirmed_separately" as const,
+            evidence_quote:
+              "A staged payment schedule was supplied as a separate document. Confirm in writing that these payment stages form part of the agreed quote.",
+          };
+        }
+        return r;
+      });
+      const reCounts = scoreChecklist(mergedResults);
+      // Project Pack Confidence must never drop below the quote-only score.
+      mergedCounts = reCounts.score >= quoteCounts.score ? reCounts : mergedCounts;
+    }
+
+
+
     // --- What supporting documents changed, and payment-structure logic ---
     const improvedChecks = diffChecklists(quoteResults, mergedResults);
     const paymentSuppliedSeparately = hasPaymentScheduleDoc(docExtractions);
