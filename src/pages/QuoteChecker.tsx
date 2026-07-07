@@ -19,63 +19,28 @@ import { buildServiceJsonLd } from "@/lib/seoSchemas";
 import { Upload, FileText, Loader2, ShieldCheck } from "lucide-react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 
-const CHECKER_TYPES = [
-  { value: "homeowner", label: "Homeowner checking a builder's quote" },
-  { value: "trade_self", label: "Trade checking my own quote before sending it" },
-  { value: "trade_sub", label: "Trade checking a subcontractor quote" },
-  { value: "other", label: "Other" },
-];
-
+// Public-facing project types. Values map to the fixed-standard trades in the
+// backend (extension / rewire / bathroom / boiler); "Other" -> general guidance.
 const PROJECT_TYPES = [
-  "Single-storey extension",
-  "Double-storey extension",
-  "Bathroom",
-  "Full rewire",
-  "Boiler / heating replacement",
-  "Loft conversion",
-  "Garage conversion",
-  "Renovation",
-  "Kitchen",
-  "Roofing",
-  "Electrical",
-  "Plumbing / heating",
-  "Landscaping",
-  "General building",
-  "Other",
+  { value: "Single-storey extension", label: "Extension" },
+  { value: "Full rewire", label: "Rewire" },
+  { value: "Bathroom", label: "Bathroom" },
+  { value: "Boiler / heating replacement", label: "Boiler / Heating" },
+  { value: "Other", label: "Something else" },
 ];
 
-const STAGES = [
-  "Idea stage",
-  "Drawings prepared",
-  "Planning submitted",
-  "Planning approved",
-  "Building Control involved",
-  "Ready to start",
-  "Already started",
-  "Not sure",
-];
+const BASIS = ["Drawings", "A site visit", "Photos", "A written description", "Not sure"];
+const BC_STATUS = ["Included in the quote", "Arranged separately", "Not sure"];
+const YES_NO_UNSURE = ["Yes", "No", "Not sure"];
 
-const YES_NO_NOTYET = ["Yes", "No", "Not yet"];
-const YES_NO_NR_NS = ["Yes", "No", "Not required", "Not sure"];
-
-const EXPECTED_ITEMS = [
-  "Groundworks", "Foundations", "Drainage", "Brickwork / blockwork", "Steelwork",
-  "Roof", "Windows / doors", "Electrics", "Plumbing", "Heating", "Kitchen",
-  "Bathroom", "Plastering", "Flooring", "Decorating", "Waste removal",
-  "Building Control", "Structural engineer", "Certificates / warranties", "Not sure",
-];
-
-const LABOUR_MATERIAL = ["Labour only", "Materials only", "Labour and materials", "Not sure"];
-const NUM_QUOTES = ["1", "2", "3", "4+"];
-
-// Small labelled select used across the optional context sections.
-const MiniSelect = ({
-  label, value, onChange, options, placeholder,
-}: { label: string; value: string; onChange: (v: string) => void; options: string[]; placeholder: string }) => (
+// Simple labelled select.
+const AskSelect = ({
+  label, value, onChange, options,
+}: { label: string; value: string; onChange: (v: string) => void; options: string[] }) => (
   <div className="space-y-2">
-    <Label className="font-mono text-sm text-navy">{label}</Label>
+    <Label className="font-mono text-sm text-navy leading-snug">{label}</Label>
     <Select value={value} onValueChange={onChange}>
-      <SelectTrigger className="font-mono"><SelectValue placeholder={placeholder} /></SelectTrigger>
+      <SelectTrigger className="font-mono"><SelectValue placeholder="Select an answer" /></SelectTrigger>
       <SelectContent>
         {options.map((o) => (
           <SelectItem key={o} value={o} className="font-mono">{o}</SelectItem>
@@ -91,9 +56,7 @@ const SectionCard = ({
   <div className={`relative bg-card rounded-2xl border p-6 md:p-8 space-y-5 overflow-hidden ${prominent ? "border-teal/40 shadow-xl shadow-navy/5" : "border-border shadow-sm"}`}>
     {prominent && <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-teal via-teal/70 to-navy" />}
     <div className="pt-1">
-      <div className="flex items-center gap-2">
-        <span className="font-mono text-[10px] uppercase tracking-wider text-teal">{step}</span>
-      </div>
+      <span className="font-mono text-[10px] uppercase tracking-wider text-teal">{step}</span>
       <p className="font-heading text-lg text-navy leading-tight">{title}</p>
       {subtitle && <p className="font-mono text-xs text-muted-foreground mt-1">{subtitle}</p>}
     </div>
@@ -101,42 +64,36 @@ const SectionCard = ({
   </div>
 );
 
-const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: string, lookupToken: string) => void }) => {
+const SimpleQuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: string, lookupToken: string) => void }) => {
   const [file, setFile] = useState<File | null>(null);
-  const [checkerType, setCheckerType] = useState("");
   const [projectType, setProjectType] = useState("");
   const [email, setEmail] = useState("");
-  const [postcode, setPostcode] = useState("");
-  // Section 3 — project basics (all optional)
-  const [projectSize, setProjectSize] = useState("");
-  const [stage, setStage] = useState("");
-  const [hasDrawings, setHasDrawings] = useState("");
-  const [hasPlanning, setHasPlanning] = useState("");
-  const [hasStructural, setHasStructural] = useState("");
-  // Section 4 — expected scope
-  const [expectedScope, setExpectedScope] = useState("");
-  const [expectedItems, setExpectedItems] = useState<string[]>([]);
-  // Section 5 — concerns
-  const [concerns, setConcerns] = useState("");
-  // Section 6 — price context
-  const [quoteTotal, setQuoteTotal] = useState("");
-  const [labourMaterial, setLabourMaterial] = useState("");
-  const [numQuotes, setNumQuotes] = useState("");
 
-  const [website, setWebsite] = useState(""); // honeypot — must stay empty
+  // Simple homeowner context (all used only to determine relevance).
+  const [basis, setBasis] = useState("");
+  const [buildingControl, setBuildingControl] = useState("");
+  const [expectElectrics, setExpectElectrics] = useState("");
+  const [expectPlumbing, setExpectPlumbing] = useState("");
+  const [expectHeating, setExpectHeating] = useState("");
+  const [expectPlastering, setExpectPlastering] = useState("");
+  const [expectFinishes, setExpectFinishes] = useState("");
+  const [opensUpHouse, setOpensUpHouse] = useState("");
+  const [paymentStages, setPaymentStages] = useState("");
+  const [timescale, setTimescale] = useState("");
+  const [verbalAgreements, setVerbalAgreements] = useState("");
+
+  const [website, setWebsite] = useState(""); // honeypot
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [freeAvailable, setFreeAvailable] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const [formParams] = useSearchParams();
 
-  const isTrade = checkerType === "trade_self" || checkerType === "trade_sub";
+  const isExtension = projectType === "Single-storey extension" || /extension/i.test(projectType);
 
   useEffect(() => {
     const pt = formParams.get("project_type");
     if (pt) setProjectType(pt);
-    const ct = formParams.get("checker_type");
-    if (ct) setCheckerType(ct);
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
@@ -171,14 +128,11 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
     return `${(bytes / 1024).toFixed(0)}KB`;
   };
 
-  const toggleItem = (item: string) =>
-    setExpectedItems((prev) => (prev.includes(item) ? prev.filter((i) => i !== item) : [...prev, item]));
-
-  const canSubmit = !!file && !!checkerType && !!projectType && !!email && !isSubmitting;
+  const canSubmit = !!file && !!projectType && !!email && !isSubmitting;
 
   const handleSubmit = async () => {
-    if (!file || !checkerType || !projectType || !email) {
-      toast({ title: "A few things needed", description: "Please upload your quote and tell us who's checking it, the project type and your email.", variant: "destructive" });
+    if (!file || !projectType || !email) {
+      toast({ title: "A few things needed", description: "Please upload your quote, choose the project type and enter your email.", variant: "destructive" });
       return;
     }
     setIsSubmitting(true);
@@ -189,30 +143,46 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
         .upload(fileName, file, { contentType: file.type || "application/octet-stream" });
       if (uploadError) throw uploadError;
 
+      // Turn simple "expected" answers into the relevance list the backend uses.
+      // Only "Yes" adds an item — "No" / "Not sure" never assumes it's included.
+      const expectedItems: string[] = [];
+      if (expectElectrics === "Yes") expectedItems.push("Electrics");
+      if (expectPlumbing === "Yes") expectedItems.push("Plumbing");
+      if (expectHeating === "Yes") expectedItems.push("Heating");
+      if (expectPlastering === "Yes") expectedItems.push("Plastering");
+      if (expectFinishes === "Yes") expectedItems.push("Kitchen", "Bathroom", "Flooring", "Decorating");
+      if (buildingControl === "Included in the quote") expectedItems.push("Building Control");
+
       const intake = {
-        checker_type: checkerType,
+        mode: "simple",
+        checker_type: "homeowner",
         project_type: projectType,
-        postcode,
-        project_size: projectSize,
-        stage,
-        has_drawings: hasDrawings,
-        has_planning: hasPlanning,
-        has_structural: hasStructural,
-        expected_scope: expectedScope,
+        has_drawings: basis === "Drawings" ? "Yes" : basis === "Not sure" ? "Not sure" : "No",
         expected_items: expectedItems,
-        concerns,
-        quote_total: quoteTotal,
-        labour_material: labourMaterial,
-        num_quotes: numQuotes,
+        building_control_status: buildingControl,
+        // Full plain-English context preserved for the backend + audit trail.
+        simple_context: {
+          basis,
+          building_control: buildingControl,
+          expect_electrics: expectElectrics,
+          expect_plumbing: expectPlumbing,
+          expect_heating: expectHeating,
+          expect_plastering: expectPlastering,
+          expect_finishes: expectFinishes,
+          opens_up_house: opensUpHouse,
+          payment_stages_given: paymentStages,
+          timescale_given: timescale,
+          verbal_agreements: verbalAgreements,
+        },
       };
 
       const { data: rpcData, error: insertError } = await supabase.rpc("create_quote_check_v2" as any, {
         _email: email,
         _project_type: projectType,
-        _postcode: postcode,
-        _description: expectedScope || projectType,
+        _postcode: "",
+        _description: projectType,
         _pdf_url: fileName,
-        _checker_type: checkerType,
+        _checker_type: "homeowner",
         _intake: intake,
       });
       if (insertError) throw insertError;
@@ -266,9 +236,9 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
 
   return (
     <div className="space-y-5">
-      {/* SECTION 1 — Upload */}
+      {/* STEP 1 — Upload + project type */}
       <SectionCard step="Step 1" title="Upload your quote" prominent
-        subtitle="We'll check what's included, what's unclear, what may be missing, and what questions to ask before you commit.">
+        subtitle="We'll check what's clear, what's unclear, what appears missing, and what to ask before you accept.">
         <div
           onClick={() => fileInputRef.current?.click()}
           className="border-2 border-dashed border-border rounded-xl p-8 text-center cursor-pointer hover:border-teal/50 transition-colors"
@@ -290,95 +260,42 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
             </div>
           )}
         </div>
-      </SectionCard>
-
-      {/* SECTION 2 — Who is checking */}
-      <SectionCard step="Step 2" title="Who is checking this quote?"
-        subtitle="This tailors the tone and focus of your report.">
-        <Select value={checkerType} onValueChange={setCheckerType}>
-          <SelectTrigger className="font-mono"><SelectValue placeholder="Select who's checking the quote" /></SelectTrigger>
-          <SelectContent>
-            {CHECKER_TYPES.map((c) => (
-              <SelectItem key={c.value} value={c.value} className="font-mono">{c.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {isTrade && (
-          <p className="font-mono text-xs text-teal">
-            We'll show you how to make your quote clearer, stronger and easier for the customer to approve.
-          </p>
-        )}
-      </SectionCard>
-
-      {/* SECTION 3 — Project basics */}
-      <SectionCard step="Step 3" title="Tell us a little about the project"
-        subtitle="This helps us understand the quote, but we'll still analyse the document itself first.">
-        <div className="grid sm:grid-cols-2 gap-4">
-          <MiniSelect label="Project type *" value={projectType} onChange={setProjectType} options={PROJECT_TYPES} placeholder="Select project type" />
-          <div className="space-y-2">
-            <Label className="font-mono text-sm text-navy">Postcode or nearest town</Label>
-            <Input type="text" placeholder="e.g. NG1 or Nottingham" value={postcode} onChange={(e) => setPostcode(e.target.value)} className="font-mono" />
-          </div>
-          <div className="space-y-2">
-            <Label className="font-mono text-sm text-navy">Approximate project size (if known)</Label>
-            <Input type="text" placeholder="e.g. 4m x 3m, or ~40 sqm" value={projectSize} onChange={(e) => setProjectSize(e.target.value)} className="font-mono" />
-          </div>
-          <MiniSelect label="Stage" value={stage} onChange={setStage} options={STAGES} placeholder="Select stage" />
-          <MiniSelect label="Do you have drawings?" value={hasDrawings} onChange={setHasDrawings} options={YES_NO_NOTYET} placeholder="Select" />
-          <MiniSelect label="Planning approval?" value={hasPlanning} onChange={setHasPlanning} options={YES_NO_NR_NS} placeholder="Select" />
-          <MiniSelect label="Structural calculations?" value={hasStructural} onChange={setHasStructural} options={YES_NO_NR_NS} placeholder="Select" />
+        <div className="space-y-2">
+          <Label className="font-mono text-sm text-navy">What type of project is this quote for? *</Label>
+          <Select value={projectType} onValueChange={setProjectType}>
+            <SelectTrigger className="font-mono"><SelectValue placeholder="Select the project type" /></SelectTrigger>
+            <SelectContent>
+              {PROJECT_TYPES.map((p) => (
+                <SelectItem key={p.value} value={p.value} className="font-mono">{p.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </SectionCard>
 
-      {/* SECTION 4 — What did you ask for */}
-      <SectionCard step="Step 4"
-        title={isTrade ? "What was this quote meant to cover?" : "What did you ask the builder to include?"}
-        subtitle="This helps us compare what you expected against what the quote actually says. We still treat the quote as the source of truth.">
-        <textarea
-          placeholder="Example: single-storey rear extension, knock-through, kitchen area, electrics, plumbing, plastering, flooring, decorating, waste removal and Building Control."
-          value={expectedScope} onChange={(e) => setExpectedScope(e.target.value)} rows={3}
-          className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 font-mono resize-none"
-        />
-        <div>
-          <p className="font-mono text-xs text-muted-foreground mb-2">Tick anything you expected or want checked (this won't be assumed as included):</p>
-          <div className="flex flex-wrap gap-2">
-            {EXPECTED_ITEMS.map((item) => {
-              const on = expectedItems.includes(item);
-              return (
-                <button
-                  type="button"
-                  key={item}
-                  onClick={() => toggleItem(item)}
-                  className={`font-mono text-xs px-3 py-1.5 rounded-full border transition-colors ${on ? "bg-teal text-white border-teal" : "bg-background text-muted-foreground border-border hover:border-teal/50"}`}
-                >
-                  {item}
-                </button>
-              );
-            })}
+      {/* STEP 2 — Simple context */}
+      {projectType && (
+        <SectionCard step="Step 2" title="A few quick questions"
+          subtitle="These just help us know what's relevant to your job. If you don't expect something, we won't mark the quote down for leaving it out.">
+          <div className="grid sm:grid-cols-2 gap-4">
+            <AskSelect label="Was this quote based on…" value={basis} onChange={setBasis} options={BASIS} />
+            <AskSelect label="Is Building Control arranged or included?" value={buildingControl} onChange={setBuildingControl} options={BC_STATUS} />
+            {isExtension && (
+              <>
+                <AskSelect label="Do you expect electrics to be included?" value={expectElectrics} onChange={setExpectElectrics} options={YES_NO_UNSURE} />
+                <AskSelect label="Do you expect plumbing to be included?" value={expectPlumbing} onChange={setExpectPlumbing} options={YES_NO_UNSURE} />
+                <AskSelect label="Do you expect heating or gas work to be included?" value={expectHeating} onChange={setExpectHeating} options={YES_NO_UNSURE} />
+                <AskSelect label="Do you expect plastering to be included?" value={expectPlastering} onChange={setExpectPlastering} options={YES_NO_UNSURE} />
+                <AskSelect label="Do you expect decorating, flooring, kitchen/bathroom fittings or tiling to be included?" value={expectFinishes} onChange={setExpectFinishes} options={YES_NO_UNSURE} />
+                <AskSelect label="Does the work involve opening up the existing house or removing walls?" value={opensUpHouse} onChange={setOpensUpHouse} options={YES_NO_UNSURE} />
+              </>
+            )}
+            <AskSelect label="Has the builder given you payment stages separately?" value={paymentStages} onChange={setPaymentStages} options={YES_NO_UNSURE} />
+            <AskSelect label="Has the builder given you a start date or rough timescale separately?" value={timescale} onChange={setTimescale} options={YES_NO_UNSURE} />
+            <AskSelect label="Are there any verbal agreements not written in the quote?" value={verbalAgreements} onChange={setVerbalAgreements} options={YES_NO_UNSURE} />
           </div>
-        </div>
-      </SectionCard>
-
-      {/* SECTION 5 — Concerns */}
-      <SectionCard step="Step 5" title="Is there anything you're worried about?">
-        <textarea
-          placeholder="Example: one quote is much cheaper than the others, I'm not sure if electrics are included, payment terms seem unclear."
-          value={concerns} onChange={(e) => setConcerns(e.target.value)} rows={2}
-          className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 font-mono resize-none"
-        />
-      </SectionCard>
-
-      {/* SECTION 6 — Price context */}
-      <SectionCard step="Step 6" title="Price context (optional)">
-        <div className="grid sm:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label className="font-mono text-sm text-navy">Quote total</Label>
-            <Input type="text" placeholder="e.g. £42,000" value={quoteTotal} onChange={(e) => setQuoteTotal(e.target.value)} className="font-mono" />
-          </div>
-          <MiniSelect label="Is the quote…" value={labourMaterial} onChange={setLabourMaterial} options={LABOUR_MATERIAL} placeholder="Select" />
-          <MiniSelect label="How many quotes have you received?" value={numQuotes} onChange={setNumQuotes} options={NUM_QUOTES} placeholder="Select" />
-        </div>
-      </SectionCard>
+        </SectionCard>
+      )}
 
       {/* Honeypot */}
       <div aria-hidden="true" style={{ position: "absolute", left: "-10000px", top: "auto", width: "1px", height: "1px", overflow: "hidden" }}>
@@ -386,6 +303,7 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
         <input id="website" name="website" type="text" tabIndex={-1} autoComplete="off" value={website} onChange={(e) => setWebsite(e.target.value)} />
       </div>
 
+      {/* STEP 3 — Email + submit */}
       <div className="bg-card rounded-2xl border border-border p-6 md:p-8 space-y-4 shadow-sm">
         <div className="space-y-2">
           <Label className="font-mono text-sm text-navy">Email Address *</Label>
@@ -404,7 +322,7 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
           )}
         </Button>
         <p className="text-center font-mono text-[11px] text-muted-foreground leading-relaxed">
-          This report helps you understand and compare quotes. It is guidance only and does not replace professional advice, surveys, structural design or legal advice.
+          This report helps you understand your quote. It is guidance only and does not replace professional advice, surveys, structural design or legal advice.
         </p>
         <p className="text-center font-mono text-xs text-muted-foreground">Secure payment via Stripe. Report usually ready in 2–5 minutes.</p>
       </div>
@@ -462,10 +380,6 @@ const QuoteChecker = () => {
           }
         } catch (err: any) {
           console.error("[QuoteChecker] verify-quote-payment failed", err);
-          // The analysis may still be running / completed in the background.
-          // If we have a secure token, send the user to the report page so its
-          // poller can pick up the report once it's ready, rather than stranding
-          // them here.
           const stored = localStorage.getItem("pendingQuoteCheck");
           const parsed = stored ? (() => { try { return JSON.parse(stored); } catch { return {}; } })() : {};
           const fallbackToken = parsed.lookupToken || "";
@@ -478,7 +392,6 @@ const QuoteChecker = () => {
         } finally {
           setVerifying(false);
         }
-
       };
       verify();
     }
@@ -504,11 +417,11 @@ const QuoteChecker = () => {
     <AppShell>
       <div className="min-h-screen bg-background">
         <SEO
-          title="Quote Health Check — ProGrafter | Read Your Building Quote for £49"
-          description="We help you read the quotes you've got — where the gaps are, what to ask, and what good looks like. £49 one-off."
+          title="Quote Checker — ProGrafter | Check a Builder's Quote for £49"
+          description="Upload a builder's quote and we'll check what's clear, what's unclear, what appears missing and what to ask before you accept. Plain-English report in minutes."
           path="/quote-checker"
           jsonLd={buildServiceJsonLd({
-            name: "Quote Health Check",
+            name: "Quote Checker",
             description: "An independent, plain-English review of your UK building quote to help you read it and ask the right questions.",
             url: "https://prografter.co.uk/quote-checker",
             serviceType: "Construction quote review",
@@ -521,17 +434,17 @@ const QuoteChecker = () => {
           <div className="relative max-w-2xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-teal-foreground font-mono text-xs px-3 py-1.5 rounded-full mb-5 backdrop-blur-sm">
               <ShieldCheck className="h-3.5 w-3.5" />
-              Quote Health Check — £49
+              Quote Checker — £49
             </div>
             <h1 className="font-heading text-4xl md:text-6xl text-white mb-4 leading-[1.05]">
-              Quote Health{" "}
-              <span className="bg-gradient-to-r from-teal to-[hsl(var(--teal))] bg-clip-text text-transparent">Check</span>
+              Quote{" "}
+              <span className="bg-gradient-to-r from-teal to-[hsl(var(--teal))] bg-clip-text text-transparent">Checker</span>
             </h1>
             <p className="text-white/75 font-mono text-sm max-w-md mx-auto leading-relaxed">
-              We don't quote your job. We help you read the quotes you've got — where the gaps are, what to ask, and what good looks like. <span className="font-semibold text-white">£49.</span>
+              Upload a quote and we'll tell you what's clear, what's unclear, what appears missing, and what to ask before you accept. <span className="font-semibold text-white">£49.</span>
             </p>
             <div className="flex flex-wrap justify-center gap-2 mt-6">
-              {["✓ Quote Quality Score", "✓ Plain-English review", "✓ Questions to ask", "✓ Usually ready in 2–5 mins"].map((t) => (
+              {["✓ Quote Clarity Score", "✓ Plain-English review", "✓ Questions to ask", "✓ Usually ready in 2–5 mins"].map((t) => (
                 <span key={t} className="font-mono text-xs text-white/90 bg-white/8 border border-white/15 px-3 py-1.5 rounded-full">{t}</span>
               ))}
             </div>
@@ -545,7 +458,7 @@ const QuoteChecker = () => {
 
         <div className="pb-16 px-6">
           <div className="max-w-2xl mx-auto -mt-16 relative z-10">
-            <QuoteCheckerForm onSubmitted={(id, _email, lookupToken) => goToReport(id, lookupToken)} />
+            <SimpleQuoteCheckerForm onSubmitted={(id, _email, lookupToken) => goToReport(id, lookupToken)} />
           </div>
         </div>
       </div>
