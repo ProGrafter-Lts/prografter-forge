@@ -16,6 +16,7 @@ const SECTIONS: { to: string; label: string; desc: string }[] = [
   { to: "/admin/trade-scraper", label: "Trade scraper", desc: "Source and import trades" },
   { to: "/admin/email-status", label: "Email status", desc: "Email delivery and queue" },
   { to: "/admin/quote-standards", label: "Quote Standards", desc: "Manage trade-specific quote check standards & versions" },
+  { to: "/admin/advanced-quote-review", label: "Advanced Review Engine", desc: "Full fixed-standard checklist, project-readiness & audit trail (beta)" },
   { to: "/admin/analytics", label: "Analytics", desc: "Traffic and conversions (GA4)" },
 ];
 
