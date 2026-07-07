@@ -1238,7 +1238,7 @@ const StandardHero = ({
   </header>
 );
 
-const FixedStandardReport = ({ report }: { report: ReportJson }) => {
+const FixedStandardReport = ({ report, admin = false }: { report: ReportJson; admin?: boolean }) => {
   const { copied, copy } = useCopy();
   const [showChecklist, setShowChecklist] = useState(false);
   const results = report.checklist_results || [];
