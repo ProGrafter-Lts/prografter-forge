@@ -285,41 +285,69 @@ Deno.serve(async (req) => {
 
     // =========================================================================
     // STAGE A — IDENTIFY + EXTRACT EACH SUPPORTING DOCUMENT SEPARATELY
+    // Extractions run IN PARALLEL (previously sequential — the main cause of the
+    // edge function exceeding its time limit and being killed before saving).
     // =========================================================================
     const supportingFilesRaw: unknown[] = Array.isArray(record.supporting_files) ? record.supporting_files : [];
-    const docExtractions: DocExtraction[] = [];
-    for (const sf of supportingFilesRaw.slice(0, 10)) {
+    console.log(`analyse-quote: ${supportingFilesRaw.length} supporting file(s) attached to ${quoteCheckId}`);
+    const supportingTargets = supportingFilesRaw.slice(0, 10).map((sf) => {
       const obj = (sf && typeof sf === "object") ? sf as Record<string, unknown> : null;
       const path = typeof sf === "string" ? sf : String(obj?.path ?? obj?.url ?? "");
       const name = typeof sf === "string" ? sf : String(obj?.name ?? obj?.path ?? "supporting document");
-      if (!path) continue;
-      const ext = await extractSupportingDoc(supabase, path, name);
-      if (ext) docExtractions.push(ext);
-    }
+      return { path, name };
+    }).filter((t) => t.path);
+    const extractionResults = await Promise.all(
+      supportingTargets.map((t) => extractSupportingDoc(supabase, t.path, t.name)),
+    );
+    const docExtractions: DocExtraction[] = extractionResults.filter((e): e is DocExtraction => !!e);
+    console.log(
+      `analyse-quote: extracted ${docExtractions.length}/${supportingTargets.length} supporting docs — ` +
+      docExtractions.map((d) => `${d.file_name}:${d.detected_type}(${d.facts.length} facts)`).join(", "),
+    );
 
     // =========================================================================
-    // STAGE C — MERGED CHECKLIST (main quote + supporting evidence -> Project Pack Confidence)
+    // STAGE C — LIGHTWEIGHT MERGE (main quote checklist + supporting evidence)
+    // No PDF re-parse and no full re-score: only the currently-open checks are
+    // sent as text alongside the extracted evidence, and only genuine upgrades
+    // are applied. This keeps the merged pass to one small, fast AI call.
     // =========================================================================
     let mergedResults: CheckResult[] = quoteResults;
     let mergedCounts = quoteCounts;
     const evidenceText = mergedEvidenceText(docExtractions);
     if (docExtractions.length > 0 && evidenceText) {
       try {
-        const mPrompt = buildMergedChecklistPrompt(standard, checks, evidenceText);
-        const mRaw = await callAnthropic([contentBlock, { type: "text", text: mPrompt }], 8000);
+        const openChecks = quoteResults
+          .filter((r) => r.verdict !== "ADDRESSED")
+          .map((r) => ({ check_id: r.check_id, check_title: r.check_title, verdict: r.verdict }));
+        const mPrompt = buildMergeUpgradePrompt(standard, openChecks, evidenceText);
+        const mRaw = await callAnthropic([{ type: "text", text: mPrompt }], 2000);
         const mParsed = robustParseJson(mRaw);
-        if (mParsed && Array.isArray(mParsed.checks)) {
-          const mr = assembleResults(checks, mParsed.checks);
-          const mc = scoreChecklist(mr);
-          // Project Pack Confidence must never be LOWER than the quote-only score
-          // just because more documents were supplied.
-          if (mc.score >= quoteCounts.score) {
-            mergedResults = mr;
-            mergedCounts = mc;
-          }
+        const upgrades: Array<Record<string, unknown>> = Array.isArray(mParsed?.upgrades) ? mParsed.upgrades : [];
+        console.log(`analyse-quote: merge pass returned ${upgrades.length} upgrade(s)`);
+        if (upgrades.length > 0) {
+          const rank: Record<string, number> = { MISSING: 0, "NEEDS CLARIFICATION": 1, ADDRESSED: 2 };
+          const byId = new Map(upgrades.map((u) => [String(u.check_id), u]));
+          mergedResults = quoteResults.map((r) => {
+            const u = byId.get(r.check_id);
+            if (!u) return r;
+            const nv = String(u.new_verdict) as CheckResult["verdict"];
+            if (!["ADDRESSED", "NEEDS CLARIFICATION"].includes(nv)) return r;
+            // Only ever upgrade, never downgrade.
+            if ((rank[nv] ?? 0) <= (rank[r.verdict] ?? 0)) return r;
+            return {
+              ...r,
+              verdict: nv,
+              source_type: (String(u.source_type) === "uploaded_quote" ? "uploaded_quote" : "builder_confirmed_separately") as CheckResult["source_type"],
+              evidence_quote: String(u.evidence_quote ?? r.evidence_quote ?? "").slice(0, 1000) || r.evidence_quote,
+            };
+          });
+          const mc = scoreChecklist(mergedResults);
+          // Project Pack Confidence must never be LOWER than the quote-only score.
+          mergedCounts = mc.score >= quoteCounts.score ? mc : quoteCounts;
         }
-      } catch (e) { console.error("analyse-quote: merged checklist pass failed", e); }
+      } catch (e) { console.error("analyse-quote: merge pass failed", e); }
     }
+
 
     // -------------------------------------------------------------------------
     // DETERMINISTIC PAYMENT-SCHEDULE RECONCILIATION
