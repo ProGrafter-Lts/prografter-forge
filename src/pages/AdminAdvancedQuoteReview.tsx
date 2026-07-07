@@ -125,6 +125,8 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [freeAvailable, setFreeAvailable] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [supportingFiles, setSupportingFiles] = useState<File[]>([]);
+  const supportingInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const [formParams] = useSearchParams();
 
