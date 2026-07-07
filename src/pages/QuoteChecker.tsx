@@ -298,6 +298,34 @@ const SimpleQuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, ema
             </div>
           )}
         </div>
+
+        {/* Optional supporting documents */}
+        <div className="space-y-2">
+          <Label className="font-mono text-sm text-navy">Supporting documents <span className="text-muted-foreground">(optional)</span></Label>
+          <p className="font-mono text-xs text-muted-foreground">Add a payment schedule, drawings, specification, scope of works or builder emails. These are checked separately and improve your Project Pack Confidence score.</p>
+          <div
+            onClick={() => supportingInputRef.current?.click()}
+            className="border-2 border-dashed border-border rounded-xl p-4 text-center cursor-pointer hover:border-teal/50 transition-colors"
+          >
+            <input ref={supportingInputRef} type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp" onChange={handleSupportingChange} className="hidden" />
+            <p className="font-mono text-xs text-muted-foreground">Click to add supporting documents — up to 10, max 10MB each</p>
+          </div>
+          {supportingFiles.length > 0 && (
+            <ul className="space-y-1.5">
+              {supportingFiles.map((sf, i) => (
+                <li key={`${sf.name}-${i}`} className="flex items-center justify-between gap-3 rounded-lg border border-border bg-muted/30 px-3 py-2">
+                  <span className="flex items-center gap-2 min-w-0">
+                    <FileText className="h-4 w-4 text-teal shrink-0" />
+                    <span className="font-mono text-xs text-navy truncate">{sf.name}</span>
+                    <span className="font-mono text-[10px] text-muted-foreground shrink-0">{formatFileSize(sf.size)}</span>
+                  </span>
+                  <button type="button" onClick={() => removeSupporting(i)} className="font-mono text-[10px] text-muted-foreground hover:text-navy shrink-0">Remove</button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
         <div className="space-y-2">
           <Label className="font-mono text-sm text-navy">What type of project is this quote for? *</Label>
           <Select value={projectType} onValueChange={setProjectType}>
