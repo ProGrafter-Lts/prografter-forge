@@ -427,13 +427,26 @@ Deno.serve(async (req) => {
           });
           if (Number.isFinite(prevScore) && (Math.abs(counts.score - prevScore) > 3 || changed.length > 0)) {
             consistencyDiagnostic = {
-              warning: "Consistency warning: this quote produced a different result under the same standard.",
+              warning: docExtractions.length > 0
+                ? "Main quote unchanged. Supporting documents added."
+                : "Consistency warning: this quote produced a different result under the same standard.",
+              main_quote_unchanged: true,
+              supporting_documents_added: docExtractions.length,
               previous_run_id: p.id, previous_score: prevScore, new_score: counts.score,
-              changed_checks: changed, compared_at: new Date().toISOString(),
+              changed_checks: changed,
+              improved_by_supporting_docs: improvedChecks,
+              compared_at: new Date().toISOString(),
             };
           }
         }
       } catch (e) { console.error("analyse-quote: consistency check failed", e); }
+    }
+
+    if (noEvidenceMergedWarning) {
+      consistencyDiagnostic = {
+        ...(consistencyDiagnostic || {}),
+        admin_warning: noEvidenceMergedWarning,
+      };
     }
 
     // --- Account + magic link ---
