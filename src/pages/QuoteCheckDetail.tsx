@@ -135,7 +135,7 @@ const QuoteCheckDetail = () => {
           </div>
         )}
 
-        {isAdmin && audit && (audit.evidence || audit.scoring) && (
+        {isAdmin && audit && (audit.evidence || audit.scoring || audit.documentExtractions || audit.supportingDiagnostic) && (
           <QuoteAuditDiagnostic
             fileName={audit.fileName}
             fileHash={audit.fileHash}
@@ -143,6 +143,10 @@ const QuoteCheckDetail = () => {
             validation={audit.validation}
             scoring={audit.scoring}
             reportHtml={audit.reportHtml}
+            documentExtractions={audit.documentExtractions}
+            supportingDiagnostic={audit.supportingDiagnostic}
+            mergedEvidence={audit.mergedEvidence}
+            checklistResults={audit.checklistResults}
           />
         )}
 
