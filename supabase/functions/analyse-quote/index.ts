@@ -82,6 +82,62 @@ async function callAnthropic(content: unknown, maxTokens: number): Promise<strin
   return result.content?.[0]?.text || "";
 }
 
+function contentBlockFromBytes(bytes: Uint8Array, media: { kind: "pdf" | "image" | "text"; mediaType: string }): unknown {
+  if (media.kind === "text") {
+    return { type: "text", text: "DOCUMENT TEXT:\n" + new TextDecoder().decode(bytes) };
+  }
+  let binary = "";
+  const CHUNK = 0x8000;
+  for (let i = 0; i < bytes.length; i += CHUNK) binary += String.fromCharCode(...bytes.subarray(i, i + CHUNK));
+  const base64 = btoa(binary);
+  return media.kind === "image"
+    ? { type: "image", source: { type: "base64", media_type: media.mediaType, data: base64 } }
+    : { type: "document", source: { type: "base64", media_type: "application/pdf", data: base64 } };
+}
+
+// Download + identify + extract facts from ONE supporting document.
+async function extractSupportingDoc(
+  supabase: ReturnType<typeof createClient>,
+  path: string,
+  displayName: string,
+): Promise<DocExtraction | null> {
+  try {
+    const { data: fileData, error } = await supabase.storage.from("quote-pdfs").download(path);
+    if (error || !fileData) {
+      console.error("extractSupportingDoc: download failed", path, error?.message);
+      return null;
+    }
+    const media = mediaForFile(displayName || path);
+    const bytes = new Uint8Array(await fileData.arrayBuffer());
+    const block = contentBlockFromBytes(bytes, media);
+    const hint = guessTypeFromName(displayName || path);
+    const raw = await callAnthropic([block, { type: "text", text: buildDocExtractionPrompt(displayName || path, hint) }], 3000);
+    const parsed = robustParseJson(raw) || {};
+    let detected = String(parsed.detected_type || "").trim() as DocType;
+    if (!DOC_TYPES.includes(detected)) detected = hint;
+    const facts: DocFact[] = Array.isArray(parsed.facts)
+      ? parsed.facts.slice(0, 40).map((f: Record<string, unknown>) => ({
+          label: String(f.label ?? "").slice(0, 200),
+          value: String(f.value ?? "").slice(0, 1000),
+          source_type: String(f.source_type ?? "ai_inference") as DocFact["source_type"],
+          status: String(f.status ?? "stated").slice(0, 80),
+        })).filter((f: DocFact) => f.label || f.value)
+      : [];
+    return {
+      file_name: displayName || path,
+      detected_type: detected,
+      detected_type_label: docTypeLabel(detected),
+      facts,
+      summary: String(parsed.summary ?? "").slice(0, 600) || "No summary available.",
+      affected_report: false,
+      affected_reason: null,
+    };
+  } catch (e) {
+    console.error("extractSupportingDoc: error", path, e);
+    return null;
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
