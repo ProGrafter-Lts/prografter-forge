@@ -239,8 +239,25 @@ export function buildFixedReportHtml(opts: {
   builderMessage: string;
   additionalObservations: string[];
   mismatch: boolean;
+  documentScore?: number;
+  projectConfidenceScore?: number;
+  supportingDocs?: Array<{
+    file_name: string;
+    detected_type_label: string;
+    key_facts: string[];
+    affected_report: boolean;
+    affected_reason: string | null;
+  }>;
+  improvedChecks?: Array<{ check_id: string; check_title: string; quote_verdict: string; merged_verdict: string; note: string }>;
+  paymentSuppliedSeparately?: boolean;
+  paymentImproved?: boolean;
 }): string {
   const { standard, counts, results, figures, questions, builderMessage, additionalObservations, mismatch } = opts;
+  const supportingDocs = opts.supportingDocs || [];
+  const improvedChecks = opts.improvedChecks || [];
+  const documentScore = opts.documentScore ?? counts.score;
+  const projectConfidenceScore = opts.projectConfidenceScore ?? counts.score;
+  const hasSupporting = supportingDocs.length > 0;
   const grouped = new Map<string, CheckResult[]>();
   for (const r of results) {
     const s = r.section_name || "General";
