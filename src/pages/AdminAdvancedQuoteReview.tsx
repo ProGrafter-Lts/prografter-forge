@@ -210,6 +210,16 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
         .upload(fileName, file, { contentType: file.type || "application/octet-stream" });
       if (uploadError) throw uploadError;
 
+      const supportingUploaded: { path: string; name: string; mime: string }[] = [];
+      for (const sf of supportingFiles.slice(0, 10)) {
+        const spName = `${Date.now()}-support-${Math.random().toString(36).slice(2, 8)}-${sf.name}`;
+        const { error: spErr } = await supabase.storage
+          .from("quote-pdfs")
+          .upload(spName, sf, { contentType: sf.type || "application/octet-stream" });
+        if (spErr) { console.warn("Supporting file upload failed", sf.name, spErr); continue; }
+        supportingUploaded.push({ path: spName, name: sf.name, mime: sf.type || "application/octet-stream" });
+      }
+
       const intake = {
         checker_type: checkerType,
         project_type: projectType,
