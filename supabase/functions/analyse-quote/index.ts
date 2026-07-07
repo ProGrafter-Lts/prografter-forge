@@ -12,9 +12,23 @@ import {
   tradeFromContent,
   tradeFromProjectType,
   verdictSummary,
+  type CheckResult,
   type CheckRow,
   type StandardRow,
 } from "./standard-engine.ts";
+import {
+  buildDocExtractionPrompt,
+  buildMergedChecklistPrompt,
+  diffChecklists,
+  docTypeLabel,
+  guessTypeFromName,
+  hasPaymentScheduleDoc,
+  mergedEvidenceText,
+  DOC_TYPES,
+  type DocExtraction,
+  type DocFact,
+  type DocType,
+} from "./document-pipeline.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
