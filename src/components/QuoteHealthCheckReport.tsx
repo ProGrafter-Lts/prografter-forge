@@ -1382,6 +1382,110 @@ const FixedStandardReport = ({ report }: { report: ReportJson }) => {
           )}
         </section>
 
+        {/* Two-score summary + payment note (only when supporting docs supplied) */}
+        {(report.supporting_documents?.length ?? 0) > 0 && (
+          <section className="qr-section2">
+            <div className="qr-section2-head">
+              <div>
+                <h2 className="qr-section2-title">Two Scores: Quote vs Project Pack</h2>
+                <p className="qr-section2-intro">
+                  The Quote Document Score reflects the main builder quote alone. The Project Pack Confidence Score
+                  also includes the supporting documents you supplied.
+                </p>
+              </div>
+            </div>
+            <div className="qr-strip">
+              <div className="qr-strip-card">
+                <div className="qr-strip-label">Quote Document Score</div>
+                <span style={{ fontWeight: 800, fontSize: "1.3rem", color: "#0f2544" }}>
+                  {report.document_score ?? report.checklist_score ?? 0}<span style={{ fontSize: "0.75rem", opacity: 0.6 }}>/100</span>
+                </span>
+                <p className="qr-strip-label" style={{ marginTop: "0.3rem", opacity: 0.7 }}>Main quote only</p>
+              </div>
+              <div className="qr-strip-card">
+                <div className="qr-strip-label">Project Pack Confidence</div>
+                <span style={{ fontWeight: 800, fontSize: "1.3rem", color: "#0f766e" }}>
+                  {report.project_confidence_score ?? report.checklist_score ?? 0}<span style={{ fontSize: "0.75rem", opacity: 0.6 }}>/100</span>
+                </span>
+                <p className="qr-strip-label" style={{ marginTop: "0.3rem", opacity: 0.7 }}>Quote + supporting documents</p>
+              </div>
+            </div>
+            {report.payment_supplied_separately && (
+              <div style={{ marginTop: "0.85rem" }}>
+                <Insight title="Payment structure supplied separately" tone="amber">
+                  Payment schedule is not visible in the main quote, but a payment structure has been supplied
+                  separately. Confirm with the builder that this payment schedule forms part of the agreed
+                  quote/contract.
+                </Insight>
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* Improved by supporting documents */}
+        {(report.improved_checks?.length ?? 0) > 0 && (
+          <section className="qr-section2">
+            <div className="qr-section2-head">
+              <div>
+                <h2 className="qr-section2-title">Improved By Supporting Documents</h2>
+                <p className="qr-section2-intro">These checks changed because of the documents you supplied.</p>
+              </div>
+            </div>
+            <div style={{ display: "grid", gap: "0.7rem" }}>
+              {report.improved_checks!.map((c) => (
+                <div key={c.check_id} className="qr-strip-card" style={{ textAlign: "left" }}>
+                  <div style={{ fontWeight: 700, color: "#0f2544", fontSize: "0.9rem" }}>
+                    {c.check_id} · {c.check_title}
+                  </div>
+                  <div style={{ fontSize: "0.82rem", color: "#374151", marginTop: "0.25rem" }}>
+                    {c.quote_verdict} → <strong>{c.merged_verdict}</strong>
+                  </div>
+                  <div style={{ fontSize: "0.8rem", color: "#6b7280", marginTop: "0.2rem" }}>{c.note}</div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Supporting Documents Reviewed */}
+        {(report.supporting_documents?.length ?? 0) > 0 && (
+          <section className="qr-section2">
+            <div className="qr-section2-head">
+              <div>
+                <h2 className="qr-section2-title">Supporting Documents Reviewed</h2>
+                <p className="qr-section2-intro">
+                  Each document was identified and extracted separately. We show what it added and whether it
+                  affected the report.
+                </p>
+              </div>
+            </div>
+            <div style={{ display: "grid", gap: "0.8rem" }}>
+              {report.supporting_documents!.map((d, i) => (
+                <div key={`${d.file_name}-${i}`} className="qr-strip-card" style={{ textAlign: "left" }}>
+                  <div style={{ fontWeight: 700, color: "#0f2544", fontSize: "0.9rem" }}>{d.file_name}</div>
+                  <div style={{ fontSize: "0.82rem", color: "#374151", marginTop: "0.2rem" }}>
+                    Detected as: {d.detected_type_label || d.detected_type || "Supporting document"}
+                  </div>
+                  {(d.key_facts?.length ?? 0) > 0 ? (
+                    <ul style={{ margin: "0.4rem 0 0", paddingLeft: "1.1rem", fontSize: "0.82rem", color: "#374151" }}>
+                      {d.key_facts!.slice(0, 8).map((f, j) => (
+                        <li key={j}>{f}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <div style={{ fontSize: "0.82rem", color: "#6b7280", marginTop: "0.3rem" }}>No usable facts extracted.</div>
+                  )}
+                  <div style={{ fontSize: "0.8rem", color: d.affected_report ? "#0f766e" : "#6b7280", marginTop: "0.35rem", fontWeight: 600 }}>
+                    {d.affected_report ? "Used in: Project Pack Confidence Score" : "Did not change the report"}
+                    {d.affected_reason ? ` — ${d.affected_reason}` : ""}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+
         {/* Figures */}
         {report.figures && (
           <section className="qr-section2">
