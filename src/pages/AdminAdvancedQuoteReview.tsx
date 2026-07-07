@@ -165,6 +165,27 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
     }
   };
 
+  const handleSupportingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const picked = Array.from(e.target.files || []);
+    const valid: File[] = [];
+    for (const f of picked) {
+      if (!ACCEPTED_TYPES.includes(f.type)) {
+        toast({ title: "Skipped a file", description: `${f.name}: only PDF, JPG, PNG or screenshots are supported.`, variant: "destructive" });
+        continue;
+      }
+      if (f.size > 10 * 1024 * 1024) {
+        toast({ title: "File too large", description: `${f.name} is over 10MB.`, variant: "destructive" });
+        continue;
+      }
+      valid.push(f);
+    }
+    setSupportingFiles((prev) => [...prev, ...valid].slice(0, 10));
+    if (supportingInputRef.current) supportingInputRef.current.value = "";
+  };
+
+  const removeSupporting = (idx: number) =>
+    setSupportingFiles((prev) => prev.filter((_, i) => i !== idx));
+
   const formatFileSize = (bytes: number) => {
     const mb = bytes / (1024 * 1024);
     if (mb >= 0.1) return `${mb.toFixed(1)}MB`;
