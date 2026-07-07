@@ -452,6 +452,11 @@ Deno.serve(async (req) => {
 
     const reportJson = {
       analysis_mode: "fixed_standard",
+      analysis_run_id: crypto.randomUUID(),
+      generated_at: new Date().toISOString(),
+      file_count: 1 + docExtractions.length,
+      supporting_file_count: docExtractions.length,
+
       standard_id: standard.standard_id,
       standard_name: standard.standard_name,
       standard_version: standard.version,
