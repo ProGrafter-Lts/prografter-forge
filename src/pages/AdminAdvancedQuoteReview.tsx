@@ -245,6 +245,7 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
         _pdf_url: fileName,
         _checker_type: checkerType,
         _intake: intake,
+        _supporting_files: supportingUploaded,
       });
       if (insertError) throw insertError;
       const record = (Array.isArray(rpcData) ? rpcData[0] : rpcData) as { id: string; lookup_token: string };
