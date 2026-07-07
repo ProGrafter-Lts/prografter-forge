@@ -61,7 +61,7 @@ const QuoteCheckDetail = () => {
     (async () => {
       const { data, error: err } = await supabase
         .from("quote_checks")
-        .select("status, report_json, report_html, consistency_diagnostic, pdf_url, file_hash, quote_evidence, evidence_validation, qs_scoring")
+        .select("status, report_json, report_html, consistency_diagnostic, pdf_url, file_hash, quote_evidence, evidence_validation, qs_scoring, document_extractions, supporting_docs_diagnostic, merged_evidence, checklist_results")
         .eq("id", id)
         .maybeSingle();
       if (err || !data) {
