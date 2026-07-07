@@ -18,7 +18,7 @@ import {
 } from "./standard-engine.ts";
 import {
   buildDocExtractionPrompt,
-  buildMergedChecklistPrompt,
+  buildMergeUpgradePrompt,
   diffChecklists,
   docTypeLabel,
   guessTypeFromName,
@@ -29,6 +29,7 @@ import {
   type DocFact,
   type DocType,
 } from "./document-pipeline.ts";
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
