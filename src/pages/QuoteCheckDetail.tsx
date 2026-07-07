@@ -184,7 +184,7 @@ const QuoteCheckDetail = () => {
               <p className="font-mono text-sm text-muted-foreground max-w-md mx-auto">{report.error}</p>
             </div>
           ) : (
-            <QuoteHealthCheckReport report={report} />
+            <QuoteHealthCheckReport report={report} admin={isAdmin} />
           )}
         </div>
       </main>
