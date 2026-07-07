@@ -504,16 +504,10 @@ const AdminAdvancedQuoteReview = () => {
     <AppShell>
       <div className="min-h-screen bg-background">
         <SEO
-          title="Quote Health Check — ProGrafter | Read Your Building Quote for £49"
-          description="We help you read the quotes you've got — where the gaps are, what to ask, and what good looks like. £49 one-off."
-          path="/quote-checker"
-          jsonLd={buildServiceJsonLd({
-            name: "Quote Health Check",
-            description: "An independent, plain-English review of your UK building quote to help you read it and ask the right questions.",
-            url: "https://prografter.co.uk/quote-checker",
-            serviceType: "Construction quote review",
-            price: "49.00",
-          })}
+          title="Advanced Review Engine — ProGrafter Admin"
+          description="Internal advanced quote & project-readiness review using the full fixed-standard checklist."
+          path="/admin/advanced-quote-review"
+          noindex
         />
         <div className="relative overflow-hidden bg-navy bg-gradient-to-br from-navy via-navy to-[hsl(var(--teal)/0.4)] pt-28 pb-32 px-6">
           <div className="pointer-events-none absolute -top-20 -right-16 h-72 w-72 rounded-full bg-teal/30 blur-3xl" />
@@ -521,27 +515,21 @@ const AdminAdvancedQuoteReview = () => {
           <div className="relative max-w-2xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-teal-foreground font-mono text-xs px-3 py-1.5 rounded-full mb-5 backdrop-blur-sm">
               <ShieldCheck className="h-3.5 w-3.5" />
-              Quote Health Check — £49
+              Advanced Review Engine — Admin / Beta
             </div>
             <h1 className="font-heading text-4xl md:text-6xl text-white mb-4 leading-[1.05]">
-              Quote Health{" "}
-              <span className="bg-gradient-to-r from-teal to-[hsl(var(--teal))] bg-clip-text text-transparent">Check</span>
+              Advanced Review{" "}
+              <span className="bg-gradient-to-r from-teal to-[hsl(var(--teal))] bg-clip-text text-transparent">Engine</span>
             </h1>
             <p className="text-white/75 font-mono text-sm max-w-md mx-auto leading-relaxed">
-              We don't quote your job. We help you read the quotes you've got — where the gaps are, what to ask, and what good looks like. <span className="font-semibold text-white">£49.</span>
+              Full fixed-standard checklist, project-readiness items, drawing upload, evidence diagnostics and the complete audit trail. Internal / beta tool.
             </p>
             <div className="flex flex-wrap justify-center gap-2 mt-6">
-              {["✓ Quote Quality Score", "✓ Plain-English review", "✓ Questions to ask", "✓ Usually ready in 2–5 mins"].map((t) => (
+              {["✓ Full 100+ point checklist", "✓ Project readiness review", "✓ Evidence diagnostics", "✓ Complete audit trail"].map((t) => (
                 <span key={t} className="font-mono text-xs text-white/90 bg-white/8 border border-white/15 px-3 py-1.5 rounded-full">{t}</span>
               ))}
             </div>
-            <p className="font-mono text-xs text-white/70 mt-6">
-              Don't have a quote yet?{" "}
-              <a href="/quote-checker-ai" className="text-teal-foreground underline underline-offset-2 hover:text-white">Start with the free Project Cost Guide.</a>
-            </p>
-            <TrustSignal tone="light" className="mt-6" text="Independent, construction-aware analysis — never a sales pitch." />
-          </div>
-        </div>
+
 
         <div className="pb-16 px-6">
           <div className="max-w-2xl mx-auto -mt-16 relative z-10">
