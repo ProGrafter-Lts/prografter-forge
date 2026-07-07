@@ -299,17 +299,54 @@ export function buildFixedReportHtml(opts: {
     ? `<div class="mismatch">Project type mismatch flagged for review \u2014 the quote content may not match the selected standard.</div>`
     : "";
 
-  return `<div class="qr-report">
-${mismatchHtml}
-<div class="qr-checked">Checked against: ${esc(standard.standard_name)} \u00b7 Version ${esc(standard.version)}</div>
-<div class="qr-score-band">
+  // Two-score band: Document Score (quote only) vs Project Pack Confidence (merged).
+  const scoreBandHtml = hasSupporting
+    ? `<div class="qr-score-band qr-two-score">
+  <div class="qr-score"><span class="qr-score-num">${documentScore}</span><span class="qr-score-den">/100</span><div class="qr-score-label">Quote Document Score<br/><span class="muted">Main quote only</span></div></div>
+  <div class="qr-score"><span class="qr-score-num">${projectConfidenceScore}</span><span class="qr-score-den">/100</span><div class="qr-score-label">Project Pack Confidence<br/><span class="muted">Quote + supporting documents</span></div></div>
+  <div class="qr-counts">
+    <div class="qc addressed"><span>${counts.addressed_count}</span> Addressed</div>
+    <div class="qc clarify"><span>${counts.clarification_count}</span> Need clarification</div>
+    <div class="qc missing"><span>${counts.missing_count}</span> Missing</div>
+  </div>
+</div>`
+    : `<div class="qr-score-band">
   <div class="qr-score"><span class="qr-score-num">${counts.score}</span><span class="qr-score-den">/100</span><div class="qr-score-label">Quote Check Score</div></div>
   <div class="qr-counts">
     <div class="qc addressed"><span>${counts.addressed_count}</span> Addressed</div>
     <div class="qc clarify"><span>${counts.clarification_count}</span> Need clarification</div>
     <div class="qc missing"><span>${counts.missing_count}</span> Missing</div>
   </div>
-</div>
+</div>`;
+
+  // Payment-structure note when supplied separately.
+  const paymentHtml = opts.paymentSuppliedSeparately
+    ? `<div class="qr-supplied-note"><strong>Payment structure:</strong> Payment schedule is not visible in the main quote, but a payment structure has been supplied separately. Confirm with the builder that this payment schedule forms part of the agreed quote/contract.<br/><span class="muted">Quote Document Score: needs clarification / missing from main quote. Project Pack Confidence Score: supplied separately \u2014 improves confidence, subject to written confirmation.</span></div>`
+    : "";
+
+  // Supporting Documents Reviewed section.
+  const supportingHtml = hasSupporting
+    ? `<h2>Supporting Documents Reviewed</h2>` +
+      supportingDocs.map((d) =>
+        `<div class="qr-support-doc"><p><strong>${esc(d.file_name)}</strong> &mdash; detected as ${esc(d.detected_type_label)}</p>` +
+        (d.key_facts.length ? `<ul>${d.key_facts.map((f) => `<li>${esc(f)}</li>`).join("")}</ul>` : "<p class='muted'>No usable facts extracted.</p>") +
+        `<p class="muted">${d.affected_report ? "Used in: Project Pack Confidence Score." : "Not used"}${d.affected_reason ? ` &mdash; ${esc(d.affected_reason)}` : ""}</p></div>`,
+      ).join("")
+    : "";
+
+  // What improved because of supporting documents.
+  const improvedHtml = improvedChecks.length
+    ? `<h2>Improved by supporting documents</h2><ul>` +
+      improvedChecks.map((c) =>
+        `<li><strong>${esc(c.check_id)}</strong> ${esc(c.check_title)}: <em>${esc(c.quote_verdict)}</em> &rarr; <em>${esc(c.merged_verdict)}</em><br/><span class="muted">${esc(c.note)}</span></li>`,
+      ).join("") + "</ul>"
+    : "";
+
+  return `<div class="qr-report">
+${mismatchHtml}
+<div class="qr-checked">Checked against: ${esc(standard.standard_name)} \u00b7 Version ${esc(standard.version)}</div>
+${scoreBandHtml}
+${paymentHtml}
 <h2>Verdict summary</h2>
 <p>${esc(verdictSummary(counts))}</p>
 <h2>Figures (as stated in the quote)</h2>
@@ -322,6 +359,8 @@ ${opts.figures_reconcile ? "" : "<p class='muted'>The figures shown in the quote
 <h2>What looks addressed</h2>${list(addressed)}
 <h2>What needs clarification</h2>${list(clarify)}
 <h2>What is missing</h2>${list(missing)}
+${improvedHtml}
+${supportingHtml}
 <h2>Top questions to ask the builder</h2>${questionsHtml}
 <h2>Suggested message to builder</h2><pre class="builder-msg">${esc(builderMessage)}</pre>
 <h2>Full checklist results</h2>${checklistHtml}
