@@ -12,9 +12,23 @@ import {
   tradeFromContent,
   tradeFromProjectType,
   verdictSummary,
+  type CheckResult,
   type CheckRow,
   type StandardRow,
 } from "./standard-engine.ts";
+import {
+  buildDocExtractionPrompt,
+  buildMergedChecklistPrompt,
+  diffChecklists,
+  docTypeLabel,
+  guessTypeFromName,
+  hasPaymentScheduleDoc,
+  mergedEvidenceText,
+  DOC_TYPES,
+  type DocExtraction,
+  type DocFact,
+  type DocType,
+} from "./document-pipeline.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -66,6 +80,62 @@ async function callAnthropic(content: unknown, maxTokens: number): Promise<strin
   }
   const result = await resp.json();
   return result.content?.[0]?.text || "";
+}
+
+function contentBlockFromBytes(bytes: Uint8Array, media: { kind: "pdf" | "image" | "text"; mediaType: string }): unknown {
+  if (media.kind === "text") {
+    return { type: "text", text: "DOCUMENT TEXT:\n" + new TextDecoder().decode(bytes) };
+  }
+  let binary = "";
+  const CHUNK = 0x8000;
+  for (let i = 0; i < bytes.length; i += CHUNK) binary += String.fromCharCode(...bytes.subarray(i, i + CHUNK));
+  const base64 = btoa(binary);
+  return media.kind === "image"
+    ? { type: "image", source: { type: "base64", media_type: media.mediaType, data: base64 } }
+    : { type: "document", source: { type: "base64", media_type: "application/pdf", data: base64 } };
+}
+
+// Download + identify + extract facts from ONE supporting document.
+async function extractSupportingDoc(
+  supabase: ReturnType<typeof createClient>,
+  path: string,
+  displayName: string,
+): Promise<DocExtraction | null> {
+  try {
+    const { data: fileData, error } = await supabase.storage.from("quote-pdfs").download(path);
+    if (error || !fileData) {
+      console.error("extractSupportingDoc: download failed", path, error?.message);
+      return null;
+    }
+    const media = mediaForFile(displayName || path);
+    const bytes = new Uint8Array(await fileData.arrayBuffer());
+    const block = contentBlockFromBytes(bytes, media);
+    const hint = guessTypeFromName(displayName || path);
+    const raw = await callAnthropic([block, { type: "text", text: buildDocExtractionPrompt(displayName || path, hint) }], 3000);
+    const parsed = robustParseJson(raw) || {};
+    let detected = String(parsed.detected_type || "").trim() as DocType;
+    if (!DOC_TYPES.includes(detected)) detected = hint;
+    const facts: DocFact[] = Array.isArray(parsed.facts)
+      ? parsed.facts.slice(0, 40).map((f: Record<string, unknown>) => ({
+          label: String(f.label ?? "").slice(0, 200),
+          value: String(f.value ?? "").slice(0, 1000),
+          source_type: String(f.source_type ?? "ai_inference") as DocFact["source_type"],
+          status: String(f.status ?? "stated").slice(0, 80),
+        })).filter((f: DocFact) => f.label || f.value)
+      : [];
+    return {
+      file_name: displayName || path,
+      detected_type: detected,
+      detected_type_label: docTypeLabel(detected),
+      facts,
+      summary: String(parsed.summary ?? "").slice(0, 600) || "No summary available.",
+      affected_report: false,
+      affected_reason: null,
+    };
+  } catch (e) {
+    console.error("extractSupportingDoc: error", path, e);
+    return null;
+  }
 }
 
 Deno.serve(async (req) => {
@@ -134,18 +204,7 @@ Deno.serve(async (req) => {
       fileHash = Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, "0")).join("");
     } catch (e) { console.error("analyse-quote: hashing failed", e); }
 
-    let contentBlock: unknown;
-    if (media.kind === "text") {
-      contentBlock = { type: "text", text: "QUOTE TEXT:\n" + new TextDecoder().decode(bytes) };
-    } else {
-      let binary = "";
-      const CHUNK = 0x8000;
-      for (let i = 0; i < bytes.length; i += CHUNK) binary += String.fromCharCode(...bytes.subarray(i, i + CHUNK));
-      const base64 = btoa(binary);
-      contentBlock = media.kind === "image"
-        ? { type: "image", source: { type: "base64", media_type: media.mediaType, data: base64 } }
-        : { type: "document", source: { type: "base64", media_type: "application/pdf", data: base64 } };
-    }
+    const contentBlock: unknown = contentBlockFromBytes(bytes, media);
 
     // --- Standard selection ---
     const selectedTrade = tradeFromProjectType(record.project_type);
@@ -195,7 +254,7 @@ Deno.serve(async (req) => {
     if (checks.length === 0) throw new Error("Standard has no checks");
 
     // =========================================================================
-    // EVIDENCE EXTRACTION (temperature 0) against the fixed checklist
+    // STAGE B — QUOTE-ONLY EVIDENCE EXTRACTION (main quote only -> Document Score)
     // =========================================================================
     const prompt = buildExtractionPrompt(standard, checks);
     const raw = await callAnthropic([contentBlock, { type: "text", text: prompt }], 8000);
@@ -213,27 +272,105 @@ Deno.serve(async (req) => {
         { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // --- Standard mismatch detection ---
-    // The quote content is compared to the selected trade. When they disagree we
-    // flag the report (admin can review/override in the Standard Manager, Phase 2)
-    // but still generate against the selected standard so a paying user is never
-    // left stranded on a spinner.
     const contentTrade = tradeFromContent({ detected_trade: parsed.detected_trade });
     const mismatch = !!contentTrade && contentTrade !== selectedTrade;
 
-    // --- Assemble fixed results + deterministic score ---
-    const aiChecks = Array.isArray(parsed.checks) ? parsed.checks : [];
-    const results = assembleResults(checks, aiChecks);
-    const counts = scoreChecklist(results);
+    // Quote-only results (Document Score = the main builder quote alone).
+    const quoteResults = assembleResults(checks, Array.isArray(parsed.checks) ? parsed.checks : []);
+    const quoteCounts = scoreChecklist(quoteResults);
     const figures = parsed.figures || {};
     const figuresReconcile = parsed.figures_reconcile !== false;
     const additionalObservations = Array.isArray(parsed.additional_observations) ? parsed.additional_observations : [];
+
+    // =========================================================================
+    // STAGE A — IDENTIFY + EXTRACT EACH SUPPORTING DOCUMENT SEPARATELY
+    // =========================================================================
+    const supportingFilesRaw: unknown[] = Array.isArray(record.supporting_files) ? record.supporting_files : [];
+    const docExtractions: DocExtraction[] = [];
+    for (const sf of supportingFilesRaw.slice(0, 10)) {
+      const obj = (sf && typeof sf === "object") ? sf as Record<string, unknown> : null;
+      const path = typeof sf === "string" ? sf : String(obj?.path ?? obj?.url ?? "");
+      const name = typeof sf === "string" ? sf : String(obj?.name ?? obj?.path ?? "supporting document");
+      if (!path) continue;
+      const ext = await extractSupportingDoc(supabase, path, name);
+      if (ext) docExtractions.push(ext);
+    }
+
+    // =========================================================================
+    // STAGE C — MERGED CHECKLIST (main quote + supporting evidence -> Project Pack Confidence)
+    // =========================================================================
+    let mergedResults: CheckResult[] = quoteResults;
+    let mergedCounts = quoteCounts;
+    const evidenceText = mergedEvidenceText(docExtractions);
+    if (docExtractions.length > 0 && evidenceText) {
+      try {
+        const mPrompt = buildMergedChecklistPrompt(standard, checks, evidenceText);
+        const mRaw = await callAnthropic([contentBlock, { type: "text", text: mPrompt }], 8000);
+        const mParsed = robustParseJson(mRaw);
+        if (mParsed && Array.isArray(mParsed.checks)) {
+          const mr = assembleResults(checks, mParsed.checks);
+          const mc = scoreChecklist(mr);
+          // Project Pack Confidence must never be LOWER than the quote-only score
+          // just because more documents were supplied.
+          if (mc.score >= quoteCounts.score) {
+            mergedResults = mr;
+            mergedCounts = mc;
+          }
+        }
+      } catch (e) { console.error("analyse-quote: merged checklist pass failed", e); }
+    }
+
+    // --- What supporting documents changed, and payment-structure logic ---
+    const improvedChecks = diffChecklists(quoteResults, mergedResults);
+    const paymentSuppliedSeparately = hasPaymentScheduleDoc(docExtractions);
+    const paymentImproved = improvedChecks.some((c) => /payment|stage|instal|deposit|retention/i.test(c.check_title));
+
+    // Attribute whether each document affected the report.
+    for (const d of docExtractions) {
+      if (d.facts.length === 0) {
+        d.affected_report = false;
+        d.affected_reason = "No usable evidence could be extracted from this document.";
+      } else if (d.detected_type === "payment_schedule" && paymentImproved) {
+        d.affected_report = true;
+        d.affected_reason = "Payment structure supplied separately — improved Project Pack Confidence, subject to written confirmation.";
+      } else if (improvedChecks.length > 0) {
+        d.affected_report = true;
+        d.affected_reason = "Evidence merged into the Project Pack Confidence assessment.";
+      } else {
+        d.affected_report = false;
+        d.affected_reason = "Reviewed, but it did not change any checklist result.";
+      }
+    }
+
+    // Admin warning: docs uploaded but nothing merged.
+    const noEvidenceMergedWarning = docExtractions.length > 0 && improvedChecks.length === 0
+      ? "Supporting documents uploaded but no evidence was merged into the report. Review extraction."
+      : null;
+
+    // The report body is generated from the MERGED evidence record.
+    const results = mergedResults;
+    const counts = mergedCounts;
     const questions = buildQuestions(results);
     const builderMessage = buildBuilderMessage(questions);
+
+    const supportingDocsSummary = docExtractions.map((d) => ({
+      file_name: d.file_name,
+      detected_type: d.detected_type,
+      detected_type_label: d.detected_type_label,
+      key_facts: d.facts.slice(0, 8).map((f) => `${f.label}: ${f.value}`),
+      affected_report: d.affected_report,
+      affected_reason: d.affected_reason,
+    }));
 
     const reportHtml = sanitizeReportHtml(buildFixedReportHtml({
       standard, counts, results, figures, figures_reconcile: figuresReconcile,
       questions, builderMessage, additionalObservations, mismatch,
+      documentScore: quoteCounts.score,
+      projectConfidenceScore: mergedCounts.score,
+      supportingDocs: supportingDocsSummary,
+      improvedChecks,
+      paymentSuppliedSeparately,
+      paymentImproved,
     }));
 
     const reportJson = {
@@ -243,6 +380,8 @@ Deno.serve(async (req) => {
       standard_version: standard.version,
       checked_against: `${standard.standard_name} \u00b7 Version ${standard.version}`,
       checklist_score: counts.score,
+      document_score: quoteCounts.score,
+      project_confidence_score: mergedCounts.score,
       total_checks: counts.total_checks,
       addressed_count: counts.addressed_count,
       clarification_count: counts.clarification_count,
@@ -251,11 +390,16 @@ Deno.serve(async (req) => {
       figures,
       figures_reconcile: figuresReconcile,
       checklist_results: results,
+      quote_only_results: quoteResults,
+      supporting_documents: supportingDocsSummary,
+      improved_checks: improvedChecks,
+      payment_supplied_separately: paymentSuppliedSeparately,
       questions_detailed: questions,
       questions_list: questions.map((q) => `${q.check_id}: ${q.question}`),
       builder_message: builderMessage,
       additional_observations: additionalObservations,
       standard_mismatch: mismatch,
+      no_evidence_merged_warning: noEvidenceMergedWarning,
       disclaimer: DISCLAIMER,
       report_html: reportHtml,
     };
@@ -283,13 +427,26 @@ Deno.serve(async (req) => {
           });
           if (Number.isFinite(prevScore) && (Math.abs(counts.score - prevScore) > 3 || changed.length > 0)) {
             consistencyDiagnostic = {
-              warning: "Consistency warning: this quote produced a different result under the same standard.",
+              warning: docExtractions.length > 0
+                ? "Main quote unchanged. Supporting documents added."
+                : "Consistency warning: this quote produced a different result under the same standard.",
+              main_quote_unchanged: true,
+              supporting_documents_added: docExtractions.length,
               previous_run_id: p.id, previous_score: prevScore, new_score: counts.score,
-              changed_checks: changed, compared_at: new Date().toISOString(),
+              changed_checks: changed,
+              improved_by_supporting_docs: improvedChecks,
+              compared_at: new Date().toISOString(),
             };
           }
         }
       } catch (e) { console.error("analyse-quote: consistency check failed", e); }
+    }
+
+    if (noEvidenceMergedWarning) {
+      consistencyDiagnostic = {
+        ...(consistencyDiagnostic || {}),
+        admin_warning: noEvidenceMergedWarning,
+      };
     }
 
     // --- Account + magic link ---
@@ -316,12 +473,26 @@ Deno.serve(async (req) => {
       standard_version: standard.version,
       checklist_results: results,
       checklist_score: counts.score,
+      document_score: quoteCounts.score,
+      project_confidence_score: mergedCounts.score,
       addressed_count: counts.addressed_count,
       clarification_count: counts.clarification_count,
       missing_count: counts.missing_count,
       total_checks: counts.total_checks,
       standard_mismatch: mismatch,
       quote_evidence: { figures, detected_trade: parsed.detected_trade, figures_reconcile: figuresReconcile },
+      document_extractions: docExtractions,
+      merged_evidence: {
+        quote_only_score: quoteCounts.score,
+        project_pack_score: mergedCounts.score,
+        improved_checks: improvedChecks,
+        payment_supplied_separately: paymentSuppliedSeparately,
+      },
+      supporting_docs_diagnostic: {
+        documents: supportingDocsSummary,
+        improved_checks: improvedChecks,
+        no_evidence_merged_warning: noEvidenceMergedWarning,
+      },
       consistency_diagnostic: consistencyDiagnostic,
       report_json: reportJson,
       report_html: reportHtml,

@@ -125,6 +125,8 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [freeAvailable, setFreeAvailable] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [supportingFiles, setSupportingFiles] = useState<File[]>([]);
+  const supportingInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const [formParams] = useSearchParams();
 
@@ -163,6 +165,27 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
     }
   };
 
+  const handleSupportingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const picked = Array.from(e.target.files || []);
+    const valid: File[] = [];
+    for (const f of picked) {
+      if (!ACCEPTED_TYPES.includes(f.type)) {
+        toast({ title: "Skipped a file", description: `${f.name}: only PDF, JPG, PNG or screenshots are supported.`, variant: "destructive" });
+        continue;
+      }
+      if (f.size > 10 * 1024 * 1024) {
+        toast({ title: "File too large", description: `${f.name} is over 10MB.`, variant: "destructive" });
+        continue;
+      }
+      valid.push(f);
+    }
+    setSupportingFiles((prev) => [...prev, ...valid].slice(0, 10));
+    if (supportingInputRef.current) supportingInputRef.current.value = "";
+  };
+
+  const removeSupporting = (idx: number) =>
+    setSupportingFiles((prev) => prev.filter((_, i) => i !== idx));
+
   const formatFileSize = (bytes: number) => {
     const mb = bytes / (1024 * 1024);
     if (mb >= 0.1) return `${mb.toFixed(1)}MB`;
@@ -186,6 +209,16 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
         .from("quote-pdfs")
         .upload(fileName, file, { contentType: file.type || "application/octet-stream" });
       if (uploadError) throw uploadError;
+
+      const supportingUploaded: { path: string; name: string; mime: string }[] = [];
+      for (const sf of supportingFiles.slice(0, 10)) {
+        const spName = `${Date.now()}-support-${Math.random().toString(36).slice(2, 8)}-${sf.name}`;
+        const { error: spErr } = await supabase.storage
+          .from("quote-pdfs")
+          .upload(spName, sf, { contentType: sf.type || "application/octet-stream" });
+        if (spErr) { console.warn("Supporting file upload failed", sf.name, spErr); continue; }
+        supportingUploaded.push({ path: spName, name: sf.name, mime: sf.type || "application/octet-stream" });
+      }
 
       const intake = {
         checker_type: checkerType,
@@ -212,6 +245,7 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
         _pdf_url: fileName,
         _checker_type: checkerType,
         _intake: intake,
+        _supporting_files: supportingUploaded,
       });
       if (insertError) throw insertError;
       const record = (Array.isArray(rpcData) ? rpcData[0] : rpcData) as { id: string; lookup_token: string };
@@ -286,6 +320,33 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
               <p className="font-mono text-sm text-muted-foreground">Click to upload your quote</p>
               <p className="font-mono text-xs text-muted-foreground mt-1">PDF, image or screenshot — Max 10MB. Quote in Word? Save it as a PDF first.</p>
             </div>
+          )}
+        </div>
+
+        {/* Optional supporting documents */}
+        <div className="space-y-2">
+          <Label className="font-mono text-sm text-navy">Supporting documents <span className="text-muted-foreground">(optional)</span></Label>
+          <p className="font-mono text-xs text-muted-foreground">Payment schedule, drawings, specification, scope of works or builder emails. Each is identified and extracted separately and feeds the Project Pack Confidence score.</p>
+          <div
+            onClick={() => supportingInputRef.current?.click()}
+            className="border-2 border-dashed border-border rounded-xl p-4 text-center cursor-pointer hover:border-teal/50 transition-colors"
+          >
+            <input ref={supportingInputRef} type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp" onChange={handleSupportingChange} className="hidden" />
+            <p className="font-mono text-xs text-muted-foreground">Click to add supporting documents — up to 10, max 10MB each</p>
+          </div>
+          {supportingFiles.length > 0 && (
+            <ul className="space-y-1.5">
+              {supportingFiles.map((sf, i) => (
+                <li key={`${sf.name}-${i}`} className="flex items-center justify-between gap-3 rounded-lg border border-border bg-muted/30 px-3 py-2">
+                  <span className="flex items-center gap-2 min-w-0">
+                    <FileText className="h-4 w-4 text-teal shrink-0" />
+                    <span className="font-mono text-xs text-navy truncate">{sf.name}</span>
+                    <span className="font-mono text-[10px] text-muted-foreground shrink-0">{formatFileSize(sf.size)}</span>
+                  </span>
+                  <button type="button" onClick={() => removeSupporting(i)} className="font-mono text-[10px] text-muted-foreground hover:text-navy shrink-0">Remove</button>
+                </li>
+              ))}
+            </ul>
           )}
         </div>
       </SectionCard>

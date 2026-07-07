@@ -2674,6 +2674,7 @@ export type Database = {
           created_at: string
           created_project: boolean
           description: string
+          document_extractions: Json | null
           document_score: number | null
           email: string
           evidence_validation: Json | null
@@ -2682,6 +2683,7 @@ export type Database = {
           intake: Json
           labour_material: string | null
           lookup_token: string
+          merged_evidence: Json | null
           missing_count: number | null
           pdf_url: string
           postcode: string
@@ -2704,6 +2706,8 @@ export type Database = {
           status: string
           stripe_payment_id: string | null
           subtotal_text: string | null
+          supporting_docs_diagnostic: Json | null
+          supporting_files: Json
           top_issues: Json | null
           total_checks: number | null
           total_text: string | null
@@ -2727,6 +2731,7 @@ export type Database = {
           created_at?: string
           created_project?: boolean
           description?: string
+          document_extractions?: Json | null
           document_score?: number | null
           email: string
           evidence_validation?: Json | null
@@ -2735,6 +2740,7 @@ export type Database = {
           intake?: Json
           labour_material?: string | null
           lookup_token?: string
+          merged_evidence?: Json | null
           missing_count?: number | null
           pdf_url: string
           postcode?: string
@@ -2757,6 +2763,8 @@ export type Database = {
           status?: string
           stripe_payment_id?: string | null
           subtotal_text?: string | null
+          supporting_docs_diagnostic?: Json | null
+          supporting_files?: Json
           top_issues?: Json | null
           total_checks?: number | null
           total_text?: string | null
@@ -2780,6 +2788,7 @@ export type Database = {
           created_at?: string
           created_project?: boolean
           description?: string
+          document_extractions?: Json | null
           document_score?: number | null
           email?: string
           evidence_validation?: Json | null
@@ -2788,6 +2797,7 @@ export type Database = {
           intake?: Json
           labour_material?: string | null
           lookup_token?: string
+          merged_evidence?: Json | null
           missing_count?: number | null
           pdf_url?: string
           postcode?: string
@@ -2810,6 +2820,8 @@ export type Database = {
           status?: string
           stripe_payment_id?: string | null
           subtotal_text?: string | null
+          supporting_docs_diagnostic?: Json | null
+          supporting_files?: Json
           top_issues?: Json | null
           total_checks?: number | null
           total_text?: string | null
@@ -4745,6 +4757,7 @@ export type Database = {
           _pdf_url: string
           _postcode: string
           _project_type: string
+          _supporting_files?: Json
         }
         Returns: {
           id: string

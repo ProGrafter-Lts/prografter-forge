@@ -1,83 +1,49 @@
+# Quote Health Check — Staged Multi-Document Pipeline
 
-# ProGrafter — Trust & Distribution Upgrade
+## Root cause (confirmed in code)
+- `QuoteChecker.tsx` line 113 & `AdminAdvancedQuoteReview.tsx` line 154 both do `setFile(e.target.files?.[0])` — **only one file is ever captured**.
+- `create_quote_check_v2` stores a single `_pdf_url`; `quote_checks` has one `pdf_url` column, no supporting-files column.
+- `analyse-quote/index.ts` lines 124-148 download only `record.pdf_url` and send it as one content block in a single AI pass (lines 200-201). No per-document extraction, no merge, no second score.
+- Result: any "extra documents" were never uploaded or read, so the report cannot change. This is a structural gap, not a merge bug.
 
-Improves operational logic, quote quality, and controlled job distribution. No redesign, no subscriptions/payments/insurance/accounting, no removal of working features, magic-link auth and admin scoping preserved.
+## 1. Storage & schema
+- Migration: add `supporting_files jsonb` (array of `{path, name, mime}`) to `quote_checks`, plus `merged_evidence jsonb`, `document_extractions jsonb`, `supporting_docs_diagnostic jsonb`. (`document_score`/`project_confidence_score` already exist.)
+- Update `create_quote_check_v2` RPC to accept `_supporting_files jsonb default '[]'` and persist it. Keep old signature working (default empty).
 
-Because this is large, I'll build it in the phases below and verify each in the live preview before moving on.
+## 2. Upload UI (minimal, no redesign)
+- Add an optional multi-file "Supporting documents (payment schedule, drawings, spec, emails…)" dropzone below the main quote upload in `QuoteChecker.tsx` and `AdminAdvancedQuoteReview.tsx`.
+- Upload each to `quote-pdfs`; pass array to the RPC as `_supporting_files`.
+- Main quote stays the single required `pdf_url`.
 
----
+## 3. Edge function — staged workflow (`analyse-quote/index.ts` + new `document-pipeline.ts`)
+Replace the single-pass block with:
+1. **Identify**: for each file (main + supporting) classify type from filename + a light AI/heuristic pass → one of: main_builder_quote, payment_schedule, drawings, specification, scope_of_works, builder_message, homeowner_notes, building_control, planning, structural_calcs, photo_evidence, unknown_supporting_document.
+2. **Extract per document** (separate temperature-0 call per file, chunk long PDFs by page/section and merge chunk facts): use type-specific extraction schemas (main quote fields, payment-schedule fields, drawings/spec fields, homeowner-notes fields).
+3. **Source-tag every fact**: main_quote, payment_schedule_document, drawing, specification, homeowner_note, builder_message, admin_note, ai_inference, not_found.
+4. **Merged evidence record**: combine all documents; each fact keeps its source + status. Store in `merged_evidence`/`document_extractions`.
+5. **Two scores**:
+   - Document Score = checklist run against **main quote evidence only**.
+   - Project Pack Confidence Score = checklist against **merged evidence**; must not decrease when more docs are added.
+   - Persist to `document_score` and `project_confidence_score`.
+6. **Report generated from merged evidence** (not first doc only).
 
-## Phase A — Data model (one migration)
+## 4. Payment-structure logic
+- If payment stages absent from main quote but present in a supporting doc: Document Score → "Needs clarification / missing from main quote"; Project Pack Confidence → "Supplied separately — confirm it forms part of the agreed quote/contract." Wording exactly as specified.
 
-New tables + columns (all with GRANTs + RLS):
+## 5. Report wording & sections (`QuoteHealthCheckReport.tsx`)
+- Tag each line: Included in quote / Supplied separately / Homeowner supplied / Builder confirmed separately / Not found / AI inference.
+- Add "Supporting Documents Reviewed" section: file name, detected type, key facts, whether it affected the report (and why not if unused).
+- Show both scores distinctly.
 
-```text
-job_trade_invitations
-  id, job_id, trade_id, batch_number, status, invited_at, viewed_at,
-  responded_at, quote_submitted_at, expires_at (default now()+48h),
-  decline_reason, created_at, updated_at
-  status enum-as-text: invited|viewed|interested|declined|quote_submitted|no_response|expired|replaced
+## 6. Consistency check
+- Extend existing file_hash consistency logic: when main quote unchanged but supporting docs added, show "Main quote unchanged. Supporting documents added." + which checks changed (e.g. payment: Missing → Supplied separately). If docs uploaded but nothing merged, set an admin warning "Supporting documents uploaded but no evidence was merged into the report. Review extraction."
 
-job_publish_overrides
-  id, job_id, admin_id, override_reason, blocking_flags (jsonb), created_at
+## 7. Admin diagnostics (`QuoteAuditDiagnostic.tsx`)
+- Panel: all uploaded docs + detected types, extracted facts per doc with source tags, merged evidence record, both score calculations, checks affected by supporting docs, checks still missing after all docs reviewed.
 
-job_brief_files
-  id, job_brief_id, job_id, file_name, file_type, file_size, category,
-  storage_path, uploaded_by, created_at
+## Success criteria
+Every uploaded doc identified & extracted separately; payment schedules recognised when supplied separately; supporting docs raise Project Pack Confidence while Document Score stays quote-only; report shows quote vs supporting provenance; same quote + added payment structure no longer yields identical result without explanation; admin can inspect why docs did/didn't affect the report; long docs chunked; deterministic (temperature 0) extraction.
 
-quotes (add columns)
-  scope_of_works, assumptions, deposit_required (bool), deposit_amount,
-  payment_schedule (jsonb), line_items (jsonb), certifications (jsonb),
-  terms (jsonb), vat_status (text), vat_amount, estimated_duration_text
-```
-
-RLS: trades see/update only their own invitations; homeowners read invitations for their jobs; admins full access via `has_role`. Files readable by owner homeowner, admins, and invited trades once published. Storage bucket `job-brief-files` (private) with scoped policies.
-
----
-
-## Phase B — Controlled 3-trade release (Issue 1)
-
-- `publish-job-brief` edge function: rank matching trades (verified → accepting → category → within radius → closest → cap 3), create `job_trade_invitations` for batch 1 only, plus a waiting list of remaining matches (not invited).
-- New edge function `release-next-batch`: admin-triggered, invites next ≤3.
-- Trade `AvailableJobsView`: show only jobs where the trade has an active invitation; mark `viewed`/`interested`/`declined`; 48h countdown wording.
-- Admin `AdminJobBriefs`: "Matched Trades" panel (auto-select top 3 / manual choose / publish selected / add to waiting list / release next batch) with per-batch counts (viewed/interested/quotes/declined/no-response).
-- Homeowner wording: "Shared with N matched trades. Quotes will appear here as they come in."
-
-## Phase C — Admin publish checklist + override log (Issue 6)
-
-- Pre-publish checklist component in `AdminJobBriefs` computing blocking flags (missing contact/postcode/type, vague description, profanity, needs scoping/planning).
-- Blocking flags disable normal publish; "Publish anyway (override)" opens modal requiring a non-blank reason → writes `job_publish_overrides` (admin id, flags, timestamp).
-
-## Phase D — Bad-brief validation / profanity / nonsense filter (Issue 7)
-
-- Shared helper `src/lib/briefValidation.ts` (min lengths, profanity list, repeated-char/nonsense/spam heuristics, vagueness) reused by `PostJobBrief` (homeowner-facing gentle messages) and admin checklist flags.
-- Example "its a house with a door and window its full of shit" is blocked homeowner-side and flagged admin-side.
-
-## Phase E — Optional file upload in post-a-job (Issue 8)
-
-- Upload block in `PostJobBrief` Step 3 (Scope & Access): multi-file (PDF/JPG/PNG/HEIC/DOC/DOCX), optional category dropdown, reassurance copy. Store to bucket + `job_brief_files`.
-- Final review shows "Files uploaded: N". Admin brief view + invited-trade job view list files.
-
-## Phase F — Structured trade quote builder (Issue 3)
-
-- Rebuild `QuoteSubmitForm` into sections 1–11 (Summary, Scope, Line Items, Materials, Exclusions, Assumptions, Payment Schedule, Certifications & Handover, Terms, Generate PDF, Submit) with Simple vs Detailed mode. Reworded materials toggle. Payment-schedule builder with % + due triggers and total reconciliation warning. Persists to new quote columns. PDF generation kept.
-
-## Phase G — Quote quality gate (Issue 4)
-
-- `src/lib/quoteQuality.ts` computes critical vs warning issues. Pre-submit modal "Quote Quality Check": critical (total, VAT, scope, exclusions, assumptions) block; warnings allow "Submit Anyway" / "Improve Quote".
-
-## Phase H — Homeowner quote review (Issue 5)
-
-- Enhance `QuotesReceived` / quote detail into structured review (trade + verification, price/VAT/validity/start/duration, payment schedule, scope, exclusions, assumptions, certifications, warranty, PDF). "Quote Clarity" status area. Actions: Run Quote Health Check / Ask Builder / Request Revised Quote / Accept. Keeps existing pre-accept confirmation checklist, adds "Continue without Quote Health Check".
-
-## Phase I — Sticky header overlay fix (Issue 2)
-
-- Audit shared `AppLayout`/`AppShell` header + affected pages; correct top padding/offset and z-index so no content sits under the navy bar (post-a-job steps, dashboards, admin brief pages, quote screens) on mobile + desktop.
-
----
-
-## Technical notes
-- Reuse existing `override_reason`/`published_by`/`needs_scoping`/`needs_planning_guidance` columns already on `job_briefs`.
-- All new edge functions validate JWT + admin role in code; CORS included.
-- No changes to magic-link/session creation in `submit-job-brief`.
-- Verify each phase via Playwright against localhost with the injected admin session.
+## Notes / risks
+- Touches the paid analysis pipeline — keep general_guidance mode and single-file fallback intact so existing/paid checks never break.
+- More AI calls per run (one per document + chunks) → higher latency/cost; runs in background via existing `EdgeRuntime.waitUntil`.

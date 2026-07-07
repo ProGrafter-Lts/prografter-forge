@@ -45,6 +45,10 @@ const QuoteCheckDetail = () => {
     validation: any;
     scoring: any;
     reportHtml: string | null;
+    documentExtractions: any;
+    supportingDiagnostic: any;
+    mergedEvidence: any;
+    checklistResults: any;
   } | null>(null);
 
   useEffect(() => {
@@ -57,7 +61,7 @@ const QuoteCheckDetail = () => {
     (async () => {
       const { data, error: err } = await supabase
         .from("quote_checks")
-        .select("status, report_json, report_html, consistency_diagnostic, pdf_url, file_hash, quote_evidence, evidence_validation, qs_scoring")
+        .select("status, report_json, report_html, consistency_diagnostic, pdf_url, file_hash, quote_evidence, evidence_validation, qs_scoring, document_extractions, supporting_docs_diagnostic, merged_evidence, checklist_results")
         .eq("id", id)
         .maybeSingle();
       if (err || !data) {
@@ -78,6 +82,10 @@ const QuoteCheckDetail = () => {
         validation: (data.evidence_validation as any) ?? null,
         scoring: (data.qs_scoring as any) ?? null,
         reportHtml: (data.report_html as string | null) ?? null,
+        documentExtractions: (data as any).document_extractions ?? null,
+        supportingDiagnostic: (data as any).supporting_docs_diagnostic ?? null,
+        mergedEvidence: (data as any).merged_evidence ?? null,
+        checklistResults: (data as any).checklist_results ?? null,
       });
     })();
   }, [isReady, id, user, navigate]);
@@ -127,7 +135,7 @@ const QuoteCheckDetail = () => {
           </div>
         )}
 
-        {isAdmin && audit && (audit.evidence || audit.scoring) && (
+        {isAdmin && audit && (audit.evidence || audit.scoring || audit.documentExtractions || audit.supportingDiagnostic) && (
           <QuoteAuditDiagnostic
             fileName={audit.fileName}
             fileHash={audit.fileHash}
@@ -135,6 +143,10 @@ const QuoteCheckDetail = () => {
             validation={audit.validation}
             scoring={audit.scoring}
             reportHtml={audit.reportHtml}
+            documentExtractions={audit.documentExtractions}
+            supportingDiagnostic={audit.supportingDiagnostic}
+            mergedEvidence={audit.mergedEvidence}
+            checklistResults={audit.checklistResults}
           />
         )}
 
