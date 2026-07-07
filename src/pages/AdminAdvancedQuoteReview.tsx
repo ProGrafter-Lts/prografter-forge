@@ -529,6 +529,10 @@ const AdminAdvancedQuoteReview = () => {
                 <span key={t} className="font-mono text-xs text-white/90 bg-white/8 border border-white/15 px-3 py-1.5 rounded-full">{t}</span>
               ))}
             </div>
+          </div>
+        </div>
+
+
 
 
         <div className="pb-16 px-6">
