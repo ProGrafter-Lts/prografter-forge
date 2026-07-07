@@ -1734,8 +1734,8 @@ const GeneralGuidanceReport = ({ report }: { report: ReportJson }) => {
   );
 };
 
-const QuoteHealthCheckReport = ({ report }: { report: ReportJson }) => {
-  if (report.analysis_mode === "fixed_standard") return <FixedStandardReport report={report} />;
+const QuoteHealthCheckReport = ({ report, admin = false }: { report: ReportJson; admin?: boolean }) => {
+  if (report.analysis_mode === "fixed_standard") return <FixedStandardReport report={report} admin={admin} />;
   if (report.analysis_mode === "general_guidance") return <GeneralGuidanceReport report={report} />;
   const sections = useMemo(() => parseSections(report.report_html || ""), [report.report_html]);
 
