@@ -283,6 +283,20 @@ Deno.serve(async (req) => {
     const figuresReconcile = parsed.figures_reconcile !== false;
     const additionalObservations = Array.isArray(parsed.additional_observations) ? parsed.additional_observations : [];
 
+    // Progressive save: persist a quote-only result up front so that if the
+    // supporting-document merge is interrupted, the record never gets stuck in
+    // 'pending' — the homeowner still receives a valid quote-only report.
+    try {
+      await supabase.from("quote_checks").update({
+        status: "analysing",
+        file_hash: fileHash,
+        document_score: quoteCounts.score,
+        checklist_score: quoteCounts.score,
+      }).eq("id", quoteCheckId);
+    } catch (e) { console.error("analyse-quote: progressive save failed", e); }
+
+
+
     // =========================================================================
     // STAGE A — IDENTIFY + EXTRACT EACH SUPPORTING DOCUMENT SEPARATELY
     // Extractions run IN PARALLEL (previously sequential — the main cause of the
