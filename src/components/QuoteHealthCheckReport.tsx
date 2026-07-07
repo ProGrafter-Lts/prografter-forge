@@ -90,6 +90,18 @@ interface ReportJson {
   additional_observations?: string[];
   disclaimer?: string;
   standard_mismatch?: boolean;
+  // Multi-document staged pipeline fields
+  supporting_documents?: Array<{
+    file_name: string;
+    detected_type?: string;
+    detected_type_label?: string;
+    key_facts?: string[];
+    affected_report?: boolean;
+    affected_reason?: string | null;
+  }>;
+  improved_checks?: Array<{ check_id: string; check_title: string; quote_verdict: string; merged_verdict: string; note: string }>;
+  payment_supplied_separately?: boolean;
+  no_evidence_merged_warning?: string | null;
 }
 
 /* ------------------------------------------------------------------ */
