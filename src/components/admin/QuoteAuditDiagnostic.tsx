@@ -87,6 +87,73 @@ const QuoteAuditDiagnostic = ({ fileName, fileHash, evidence, validation, scorin
         <div><span className="opacity-60">Project confidence:</span> <strong>{scoring?.project_confidence_score ?? "—"}/100</strong></div>
       </div>
 
+      {supportingDiagnostic?.no_evidence_merged_warning && (
+        <div className="rounded-[4px] border border-amber-500 bg-amber-100 p-3 font-mono text-xs text-amber-900">
+          <p className="flex items-center gap-1.5 font-semibold"><AlertTriangle className="h-3.5 w-3.5" /> {supportingDiagnostic.no_evidence_merged_warning}</p>
+        </div>
+      )}
+
+      {docs.length > 0 && (
+        <Section title={`Documents identified & extracted (${docs.length})`} icon={<Database className="h-3.5 w-3.5" />} defaultOpen>
+          <div className="space-y-3">
+            {docs.map((d, i) => (
+              <div key={i} className="rounded-[4px] border border-border/60 bg-card p-3 font-mono text-xs">
+                <p className="font-semibold text-navy">{d.file_name || "—"}</p>
+                <p className="text-muted-foreground">Detected: {d.detected_type_label || d.detected_type || "—"} · {d.affected_report ? "affected report" : "not used"}</p>
+                {d.affected_reason && <p className="text-muted-foreground">{d.affected_reason}</p>}
+                {d.summary && <p className="mt-1 text-navy/80">{d.summary}</p>}
+                {(d.facts?.length ?? 0) > 0 && (
+                  <table className="mt-2 w-full border-collapse">
+                    <thead>
+                      <tr className="text-left text-muted-foreground">
+                        <th className="py-0.5 pr-2">Fact</th><th className="py-0.5 pr-2">Value</th><th className="py-0.5 pr-2">Source</th><th className="py-0.5">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {d.facts!.map((f, j) => (
+                        <tr key={j} className="border-t border-border/40 align-top">
+                          <td className="py-0.5 pr-2">{f.label}</td>
+                          <td className="py-0.5 pr-2">{f.value}</td>
+                          <td className="py-0.5 pr-2">{f.source_type}</td>
+                          <td className="py-0.5">{f.status}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            ))}
+          </div>
+        </Section>
+      )}
+
+      {improved.length > 0 && (
+        <Section title={`Checks improved by supporting docs (${improved.length})`} icon={<Calculator className="h-3.5 w-3.5" />}>
+          <ul className="space-y-1 font-mono text-xs">
+            {improved.map((c, i) => (
+              <li key={i}><strong>{c.check_id}</strong> {c.check_title}: {c.quote_verdict} → {c.merged_verdict} <span className="text-muted-foreground">({c.note})</span></li>
+            ))}
+          </ul>
+        </Section>
+      )}
+
+      {mergedEvidence && (
+        <Section title="Merged evidence record (JSON)" icon={<Database className="h-3.5 w-3.5" />}>
+          <pre className="max-h-80 overflow-auto rounded-[4px] bg-navy/5 p-3 font-mono text-[10px] leading-relaxed text-navy">
+            {JSON.stringify(mergedEvidence, null, 2)}
+          </pre>
+        </Section>
+      )}
+
+      {missingAfterAll.length > 0 && (
+        <Section title={`Still missing after all documents reviewed (${missingAfterAll.length})`} icon={<AlertTriangle className="h-3.5 w-3.5" />}>
+          <ul className="list-disc pl-4 font-mono text-xs">
+            {missingAfterAll.map((m, i) => <li key={i}><strong>{m.check_id}</strong> {m.check_title}</li>)}
+          </ul>
+        </Section>
+      )}
+
+
       {validation?.contradictions && validation.contradictions.length > 0 && (
         <div className="rounded-[4px] border border-rose-300 bg-rose-50 p-3 font-mono text-xs text-rose-800">
           <p className="flex items-center gap-1.5 font-semibold"><AlertTriangle className="h-3.5 w-3.5" /> Contradictions</p>
