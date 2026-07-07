@@ -1566,10 +1566,11 @@ const FixedStandardReport = ({ report, admin = false }: { report: ReportJson; ad
         {/* Builder message */}
         {report.builder_message && <BuilderMessage message={report.builder_message} />}
 
-        {/* Full checklist appendix */}
+        {/* Full checklist appendix — admin-only audit trail (Advanced Review Engine) */}
+        {admin && (
         <SectionCard
           title={`Full Checklist Results (${results.length})`}
-          intro="Every check in the standard, with the evidence found. Kept here so the summary stays easy to scan."
+          intro="Admin audit trail — every check in the standard, with the evidence found. Not shown on the public report."
           collapsible
           defaultOpen={false}
         >
@@ -1615,6 +1616,7 @@ const FixedStandardReport = ({ report, admin = false }: { report: ReportJson; ad
             ))}
           </div>
         </SectionCard>
+        )}
 
         {/* Additional observations */}
         {(report.additional_observations?.length ?? 0) > 0 && (
