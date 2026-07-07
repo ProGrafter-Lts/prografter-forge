@@ -23,6 +23,22 @@ interface Validation {
   blocked?: boolean;
 }
 
+interface DocExtraction {
+  file_name?: string;
+  detected_type?: string;
+  detected_type_label?: string;
+  summary?: string;
+  affected_report?: boolean;
+  affected_reason?: string | null;
+  facts?: Array<{ label?: string; value?: string; source_type?: string; status?: string }>;
+}
+
+interface SupportingDiagnostic {
+  documents?: Array<Record<string, unknown>>;
+  improved_checks?: Array<{ check_id: string; check_title: string; quote_verdict: string; merged_verdict: string; note: string }>;
+  no_evidence_merged_warning?: string | null;
+}
+
 interface Props {
   fileName?: string | null;
   fileHash?: string | null;
@@ -30,6 +46,10 @@ interface Props {
   validation?: Validation | null;
   scoring?: QsScoring | null;
   reportHtml?: string | null;
+  documentExtractions?: DocExtraction[] | null;
+  supportingDiagnostic?: SupportingDiagnostic | null;
+  mergedEvidence?: Record<string, unknown> | null;
+  checklistResults?: Array<{ check_id: string; check_title: string; verdict: string }> | null;
 }
 
 const Section = ({ title, icon, children, defaultOpen = false }: { title: string; icon: React.ReactNode; children: React.ReactNode; defaultOpen?: boolean }) => {
