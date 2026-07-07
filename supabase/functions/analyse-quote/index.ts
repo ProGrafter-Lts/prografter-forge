@@ -204,18 +204,7 @@ Deno.serve(async (req) => {
       fileHash = Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, "0")).join("");
     } catch (e) { console.error("analyse-quote: hashing failed", e); }
 
-    let contentBlock: unknown;
-    if (media.kind === "text") {
-      contentBlock = { type: "text", text: "QUOTE TEXT:\n" + new TextDecoder().decode(bytes) };
-    } else {
-      let binary = "";
-      const CHUNK = 0x8000;
-      for (let i = 0; i < bytes.length; i += CHUNK) binary += String.fromCharCode(...bytes.subarray(i, i + CHUNK));
-      const base64 = btoa(binary);
-      contentBlock = media.kind === "image"
-        ? { type: "image", source: { type: "base64", media_type: media.mediaType, data: base64 } }
-        : { type: "document", source: { type: "base64", media_type: "application/pdf", data: base64 } };
-    }
+    const contentBlock: unknown = contentBlockFromBytes(bytes, media);
 
     // --- Standard selection ---
     const selectedTrade = tradeFromProjectType(record.project_type);
