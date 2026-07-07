@@ -70,7 +70,10 @@ const Section = ({ title, icon, children, defaultOpen = false }: { title: string
   );
 };
 
-const QuoteAuditDiagnostic = ({ fileName, fileHash, evidence, validation, scoring, reportHtml }: Props) => {
+const QuoteAuditDiagnostic = ({ fileName, fileHash, evidence, validation, scoring, reportHtml, documentExtractions, supportingDiagnostic, mergedEvidence, checklistResults }: Props) => {
+  const missingAfterAll = (checklistResults || []).filter((r) => r.verdict === "MISSING");
+  const improved = supportingDiagnostic?.improved_checks || [];
+  const docs = documentExtractions || [];
   return (
     <div className="no-print space-y-3 rounded-[4px] border border-amber-400/50 bg-amber-50/60 p-4">
       <p className="flex items-center gap-2 font-mono text-sm font-semibold text-amber-900">
