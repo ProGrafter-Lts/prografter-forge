@@ -1238,7 +1238,7 @@ const StandardHero = ({
   </header>
 );
 
-const FixedStandardReport = ({ report }: { report: ReportJson }) => {
+const FixedStandardReport = ({ report, admin = false }: { report: ReportJson; admin?: boolean }) => {
   const { copied, copy } = useCopy();
   const [showChecklist, setShowChecklist] = useState(false);
   const results = report.checklist_results || [];
@@ -1566,10 +1566,11 @@ const FixedStandardReport = ({ report }: { report: ReportJson }) => {
         {/* Builder message */}
         {report.builder_message && <BuilderMessage message={report.builder_message} />}
 
-        {/* Full checklist appendix */}
+        {/* Full checklist appendix — admin-only audit trail (Advanced Review Engine) */}
+        {admin && (
         <SectionCard
           title={`Full Checklist Results (${results.length})`}
-          intro="Every check in the standard, with the evidence found. Kept here so the summary stays easy to scan."
+          intro="Admin audit trail — every check in the standard, with the evidence found. Not shown on the public report."
           collapsible
           defaultOpen={false}
         >
@@ -1615,6 +1616,7 @@ const FixedStandardReport = ({ report }: { report: ReportJson }) => {
             ))}
           </div>
         </SectionCard>
+        )}
 
         {/* Additional observations */}
         {(report.additional_observations?.length ?? 0) > 0 && (
@@ -1732,8 +1734,8 @@ const GeneralGuidanceReport = ({ report }: { report: ReportJson }) => {
   );
 };
 
-const QuoteHealthCheckReport = ({ report }: { report: ReportJson }) => {
-  if (report.analysis_mode === "fixed_standard") return <FixedStandardReport report={report} />;
+const QuoteHealthCheckReport = ({ report, admin = false }: { report: ReportJson; admin?: boolean }) => {
+  if (report.analysis_mode === "fixed_standard") return <FixedStandardReport report={report} admin={admin} />;
   if (report.analysis_mode === "general_guidance") return <GeneralGuidanceReport report={report} />;
   const sections = useMemo(() => parseSections(report.report_html || ""), [report.report_html]);
 
