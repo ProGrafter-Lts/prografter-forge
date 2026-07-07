@@ -45,6 +45,10 @@ const QuoteCheckDetail = () => {
     validation: any;
     scoring: any;
     reportHtml: string | null;
+    documentExtractions: any;
+    supportingDiagnostic: any;
+    mergedEvidence: any;
+    checklistResults: any;
   } | null>(null);
 
   useEffect(() => {
