@@ -412,7 +412,7 @@ const QuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, email: st
   );
 };
 
-const QuoteChecker = () => {
+const AdminAdvancedQuoteReview = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -429,7 +429,7 @@ const QuoteChecker = () => {
 
     if (cancelled) {
       toast({ title: "Payment cancelled", description: "Your quote check was not processed.", variant: "destructive" });
-      window.history.replaceState({}, "", "/quote-checker");
+      window.history.replaceState({}, "", "/admin/advanced-quote-review");
       return;
     }
 
@@ -452,7 +452,7 @@ const QuoteChecker = () => {
                 description: "We couldn't find your secure access token. Please check your email for the report link.",
                 variant: "destructive",
               });
-              window.history.replaceState({}, "", "/quote-checker");
+              window.history.replaceState({}, "", "/admin/advanced-quote-review");
               return;
             }
             trackEvent("quote_check", { method: "paid" });
@@ -553,4 +553,4 @@ const QuoteChecker = () => {
   );
 };
 
-export default QuoteChecker;
+export default AdminAdvancedQuoteReview;
