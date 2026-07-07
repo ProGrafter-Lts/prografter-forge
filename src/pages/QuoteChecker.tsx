@@ -86,6 +86,8 @@ const SimpleQuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, ema
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [freeAvailable, setFreeAvailable] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [supportingFiles, setSupportingFiles] = useState<File[]>([]);
+  const supportingInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const [formParams] = useSearchParams();
 
