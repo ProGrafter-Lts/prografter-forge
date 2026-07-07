@@ -211,6 +211,8 @@ const AppRoutes = () => {
             <Route path="/admin/scoping-calls" element={<AdminRoute><AdminCustomerDiscovery /></AdminRoute>} />
             <Route path="/admin/scoping-calls/:id" element={<AdminRoute><AdminCallNote /></AdminRoute>} />
             <Route path="/admin/quote-standards" element={<AdminRoute><AdminQuoteStandards /></AdminRoute>} />
+            <Route path="/admin/advanced-quote-review" element={<AdminRoute><AdminAdvancedQuoteReview /></AdminRoute>} />
+            <Route path="/admin/project-readiness-review" element={<Navigate to="/admin/advanced-quote-review" replace />} />
             <Route path="*" element={<NotFound />} />
       </Routes>
 
