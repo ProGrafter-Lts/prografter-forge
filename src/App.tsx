@@ -89,6 +89,7 @@ const AdminCustomerDiscovery = lazy(() => import("./pages/AdminCustomerDiscovery
 const AdminCallNote = lazy(() => import("./pages/AdminCallNote.tsx"));
 const AdminHome = lazy(() => import("./pages/AdminHome.tsx"));
 const AdminQuoteStandards = lazy(() => import("./pages/AdminQuoteStandards.tsx"));
+const AdminAdvancedQuoteReview = lazy(() => import("./pages/AdminAdvancedQuoteReview.tsx"));
 import AdminRoute from "./components/AdminRoute.tsx";
 import AppLayout from "./components/layout/AppLayout.tsx";
 import DrawerHost from "./components/layout/DrawerHost.tsx";
