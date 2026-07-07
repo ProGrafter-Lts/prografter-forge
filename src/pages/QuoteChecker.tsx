@@ -166,6 +166,20 @@ const SimpleQuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, ema
         .upload(fileName, file, { contentType: file.type || "application/octet-stream" });
       if (uploadError) throw uploadError;
 
+      // Upload supporting documents (payment schedule, drawings, spec, emails…).
+      const supportingUploaded: { path: string; name: string; mime: string }[] = [];
+      for (const sf of supportingFiles.slice(0, 10)) {
+        const spName = `${Date.now()}-support-${Math.random().toString(36).slice(2, 8)}-${sf.name}`;
+        const { error: spErr } = await supabase.storage
+          .from("quote-pdfs")
+          .upload(spName, sf, { contentType: sf.type || "application/octet-stream" });
+        if (spErr) {
+          console.warn("Supporting file upload failed", sf.name, spErr);
+          continue;
+        }
+        supportingUploaded.push({ path: spName, name: sf.name, mime: sf.type || "application/octet-stream" });
+      }
+
       // Turn simple "expected" answers into the relevance list the backend uses.
       // Only "Yes" adds an item — "No" / "Not sure" never assumes it's included.
       const expectedItems: string[] = [];
