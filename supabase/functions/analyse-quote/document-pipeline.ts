@@ -200,6 +200,41 @@ OUTPUT — return ONLY one valid JSON object, no markdown/code fences:
 The "checks" array MUST contain one entry for every check id above, in the same order.`;
 }
 
+// LIGHTWEIGHT merge pass. Instead of re-sending the whole PDF and re-scoring
+// every check (expensive, slow, and the main cause of edge-function timeouts),
+// we give the model ONLY the checks that are currently MISSING or NEEDS
+// CLARIFICATION plus the extracted supporting-document evidence, and ask it to
+// return ONLY the checks that supporting documents genuinely upgrade. No PDF is
+// re-parsed. This keeps the merged pass to a single small, fast call.
+export function buildMergeUpgradePrompt(
+  standard: StandardRow,
+  openChecks: Array<{ check_id: string; check_title: string; verdict: string }>,
+  supportingEvidence: string,
+): string {
+  const lines = openChecks
+    .map((c) => `${c.check_id} | current verdict: ${c.verdict} | ${c.check_title}`)
+    .join("\n");
+  return `You are the MERGE stage of a UK residential quote check for the ProGrafter "${standard.standard_name}" (version ${standard.version}).
+
+The MAIN QUOTE has already been scored. Below are ONLY the checks that are currently NOT fully addressed. Separately, homeowner-supplied SUPPORTING DOCUMENTS were extracted. Decide which of these open checks are improved by the supporting-document evidence.
+
+RULES:
+- Only reference the evidence provided below. Never invent facts. Never re-score the whole quote.
+- A check may only be UPGRADED (MISSING -> NEEDS CLARIFICATION or ADDRESSED; NEEDS CLARIFICATION -> ADDRESSED). Never downgrade.
+- If the evidence is in a SEPARATE supporting document (not the main quote), the best it can reach is "NEEDS CLARIFICATION" with source_type "builder_confirmed_separately", and the evidence_quote must note it was supplied separately and must be confirmed in writing that it forms part of the agreed quote.
+- Only return checks you are actually upgrading. If nothing is upgraded, return an empty array.
+
+OPEN CHECKS:
+${lines || "(none)"}
+
+SUPPORTING DOCUMENT EVIDENCE:
+${supportingEvidence || "(none)"}
+
+OUTPUT — return ONLY valid JSON, no markdown fences:
+{ "upgrades": [ { "check_id": string, "new_verdict": "ADDRESSED|NEEDS CLARIFICATION", "source_type": "builder_confirmed_separately|uploaded_quote", "evidence_quote": string } ] }`;
+}
+
+
 export interface CheckResultLite {
   check_id: string;
   check_title: string;
