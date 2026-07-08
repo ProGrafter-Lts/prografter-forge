@@ -263,9 +263,13 @@ Deno.serve(async (req) => {
 
     content.push({ type: "text", text: buildPrompt(intake ?? {}, supportingNames) });
 
-    const raw = await callAnthropic(content, 4000);
+    const raw = await callAnthropic(content, 8000);
     const parsed = extractJson(raw);
-    if (!parsed) throw new Error("Could not parse the analysis result.");
+    if (!parsed) {
+      console.error("[simple-quote] parse failed. rawLen=", raw?.length,
+        "head=", (raw || "").slice(0, 400), "tail=", (raw || "").slice(-400));
+      throw new Error("Could not parse the analysis result.");
+    }
 
     // Normalise categories: ensure all present, and Building Control always relevant.
     const byKey: Record<string, any> = {};
