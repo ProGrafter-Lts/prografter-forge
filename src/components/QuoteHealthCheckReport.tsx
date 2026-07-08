@@ -1273,7 +1273,29 @@ const FixedStandardReport = ({ report, admin = false }: { report: ReportJson; ad
     [grouped],
   );
 
-  const questions = report.questions_detailed || [];
+  const allQuestions = report.questions_detailed || [];
+  // Focused consumer report: prioritise the questions that matter most (missing items
+  // first, then clarifications) and cap the list so the report stays a good/bad
+  // decision aid rather than an exhaustive 100+ item audit. The full list lives in
+  // the admin Advanced Review Engine.
+  const MAX_CONSUMER_QUESTIONS = 10;
+  const verdictByCheck = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const r of results) m.set(r.check_id, r.verdict || "");
+    return m;
+  }, [results]);
+  const priority = (checkId: string) => {
+    const v = verdictByCheck.get(checkId);
+    if (v === "MISSING") return 0;
+    if (v === "NEEDS CLARIFICATION") return 1;
+    return 2;
+  };
+  const prioritisedQuestions = useMemo(
+    () => [...allQuestions].sort((a, b) => priority(a.check_id) - priority(b.check_id)),
+    [allQuestions, verdictByCheck],
+  );
+  const questions = admin ? prioritisedQuestions : prioritisedQuestions.slice(0, MAX_CONSUMER_QUESTIONS);
+  const hiddenQuestionCount = admin ? 0 : Math.max(0, prioritisedQuestions.length - questions.length);
   const questionsText = questions.map((q, i) => `${i + 1}. ${q.question}`).join("\n");
   // showChecklist retained for potential external toggling; appendix uses SectionCard collapse.
   void showChecklist;
@@ -1525,8 +1547,12 @@ const FixedStandardReport = ({ report, admin = false }: { report: ReportJson; ad
         {/* Questions to ask */}
         {questions.length > 0 && (
           <SectionCard
-            title="Questions To Ask The Builder"
-            intro="Generated from every missing or unclear check — copy any question to raise it directly."
+            title="Key Questions To Ask The Builder"
+            intro={
+              admin
+                ? "Every missing or unclear check — copy any question to raise it directly."
+                : "The most important things to confirm on this quote before you proceed — copy any question to raise it directly."
+            }
           >
             <div className="no-print" style={{ marginBottom: "1rem" }}>
               <button
@@ -1560,6 +1586,12 @@ const FixedStandardReport = ({ report, admin = false }: { report: ReportJson; ad
                 </li>
               ))}
             </ul>
+            {hiddenQuestionCount > 0 && (
+              <p className="qr-section2-intro" style={{ marginTop: "0.85rem", opacity: 0.75 }}>
+                Showing the {questions.length} most important questions. {hiddenQuestionCount} further
+                minor points were checked against the standard but are not critical to your decision.
+              </p>
+            )}
           </SectionCard>
         )}
 
