@@ -19,6 +19,7 @@ import {
 import {
   buildDocExtractionPrompt,
   buildMergeUpgradePrompt,
+  countPaymentScheduleStages,
   diffChecklists,
   docTypeLabel,
   guessTypeFromName,
@@ -101,17 +102,32 @@ async function extractSupportingDoc(
   supabase: ReturnType<typeof createClient>,
   path: string,
   displayName: string,
-): Promise<DocExtraction | null> {
+): Promise<DocExtraction> {
+  const hint = guessTypeFromName(displayName || path);
   try {
     const { data: fileData, error } = await supabase.storage.from("quote-pdfs").download(path);
     if (error || !fileData) {
       console.error("extractSupportingDoc: download failed", path, error?.message);
-      return null;
+      return {
+        path,
+        file_name: displayName || path,
+        detected_type: hint,
+        detected_type_label: docTypeLabel(hint),
+        extraction_success: false,
+        extraction_error: error?.message || "Download failed",
+        facts: [],
+        summary: "Extraction failed: the supporting document could not be downloaded.",
+        affected_report: false,
+        affected_reason: "Extraction failed, so this file could not influence either score.",
+        used_in_quote_document_score: false,
+        used_in_project_pack_confidence_score: false,
+        affected_checks: [],
+        warnings: ["Supporting document could not be downloaded for extraction."],
+      };
     }
     const media = mediaForFile(displayName || path);
     const bytes = new Uint8Array(await fileData.arrayBuffer());
     const block = contentBlockFromBytes(bytes, media);
-    const hint = guessTypeFromName(displayName || path);
     const raw = await callAnthropic([block, { type: "text", text: buildDocExtractionPrompt(displayName || path, hint) }], 3000);
     const parsed = robustParseJson(raw) || {};
     let detected = String(parsed.detected_type || "").trim() as DocType;
@@ -125,17 +141,40 @@ async function extractSupportingDoc(
         })).filter((f: DocFact) => f.label || f.value)
       : [];
     return {
+      path,
       file_name: displayName || path,
       detected_type: detected,
       detected_type_label: docTypeLabel(detected),
+      extraction_success: true,
+      extraction_error: null,
       facts,
       summary: String(parsed.summary ?? "").slice(0, 600) || "No summary available.",
       affected_report: false,
       affected_reason: null,
+      used_in_quote_document_score: false,
+      used_in_project_pack_confidence_score: false,
+      affected_checks: [],
+      warnings: facts.length === 0 ? ["No usable facts extracted from this supporting document."] : [],
     };
   } catch (e) {
     console.error("extractSupportingDoc: error", path, e);
-    return null;
+    const message = e instanceof Error ? e.message : "Unknown extraction error";
+    return {
+      path,
+      file_name: displayName || path,
+      detected_type: hint,
+      detected_type_label: docTypeLabel(hint),
+      extraction_success: false,
+      extraction_error: message,
+      facts: [],
+      summary: "Extraction failed: this supporting document could not be read.",
+      affected_report: false,
+      affected_reason: "Extraction failed, so this file could not influence either score.",
+      used_in_quote_document_score: false,
+      used_in_project_pack_confidence_score: false,
+      affected_checks: [],
+      warnings: [`Extraction failed: ${message.slice(0, 240)}`],
+    };
   }
 }
 
