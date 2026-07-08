@@ -161,13 +161,15 @@ ${standard.excluded_scope ? "Excluded (sourced separately, do NOT mark as missin
 
 ABSOLUTE RULES:
 - Work through the checklist below in the EXACT fixed order given. Do not reorder, skip, merge or add checks.
-- For EVERY check, return exactly ONE verdict: "ADDRESSED", "NEEDS CLARIFICATION", or "MISSING". No other value.
+- For EVERY check, return exactly ONE verdict: "ADDRESSED", "NEEDS CLARIFICATION", "MISSING", or "NOT_APPLICABLE". No other value.
     ADDRESSED = the quote clearly includes the item with adequate detail.
     NEEDS CLARIFICATION = the quote mentions it but it is vague, an allowance/provisional sum, contradictory, or figures do not reconcile.
-    MISSING = the quote does not mention the item at all.
+    MISSING = the item is genuinely relevant to THIS job but the quote does not mention it at all.
+    NOT_APPLICABLE = the item does not apply to THIS specific quote's scope of works, so its absence is not a fault. Examples: a check about an option the homeowner did not choose, a fixture/appliance not part of this job, or work the quote clearly states is out of scope or handled by others.
+- CRITICAL — do NOT overuse NOT_APPLICABLE. Only use it when you have positive evidence the item is irrelevant to this job. If an item WOULD normally be expected for a job of this type and is simply absent, it is MISSING, not NOT_APPLICABLE. When in doubt between MISSING and NOT_APPLICABLE, choose MISSING.
 - Quote figures and evidence VERBATIM from the document. NEVER recompute, re-round or correct subtotal, VAT, totals, line prices, allowances or quantities. If figures do not reconcile, mark the relevant check NEEDS CLARIFICATION.
-- Do not present inference as fact. If no evidence is found, source_type MUST be "not_found" and verdict MUST be "MISSING".
-- Items the standard lists as EXCLUDED must NOT be marked MISSING for being absent.
+- Do not present inference as fact. If no evidence is found AND the item is relevant, source_type MUST be "not_found" and verdict MUST be "MISSING".
+- Items the standard lists as EXCLUDED must be marked NOT_APPLICABLE, never MISSING.
 
 Allowed source_type values: "uploaded_quote", "homeowner_form", "builder_confirmed_separately", "admin_note", "ai_inference", "not_found".
 
