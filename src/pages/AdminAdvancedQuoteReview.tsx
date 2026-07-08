@@ -478,7 +478,7 @@ const AdminAdvancedQuoteReview = () => {
   const [verifying, setVerifying] = useState(false);
 
   const goToReport = (id: string, lookupToken: string) => {
-    navigate(`/report/${id}?t=${encodeURIComponent(lookupToken)}`);
+    navigate(`/report/${id}?t=${encodeURIComponent(lookupToken)}&advanced=1`);
   };
 
   useEffect(() => {
