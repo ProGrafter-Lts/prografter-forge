@@ -413,12 +413,11 @@ Deno.serve(async (req) => {
       const name = typeof sf === "string" ? sf : String(obj?.name ?? obj?.path ?? "supporting document");
       return { path, name };
     }).filter((t) => t.path);
-    const extractionResults = await Promise.all(
+    const docExtractions: DocExtraction[] = await Promise.all(
       supportingTargets.map((t) => extractSupportingDoc(supabase, t.path, t.name)),
     );
-    const docExtractions: DocExtraction[] = extractionResults.filter((e): e is DocExtraction => !!e);
     console.log(
-      `analyse-quote: extracted ${docExtractions.length}/${supportingTargets.length} supporting docs — ` +
+      `analyse-quote: extracted ${docExtractions.filter((d) => d.extraction_success !== false).length}/${supportingTargets.length} supporting docs — ` +
       docExtractions.map((d) => `${d.file_name}:${d.detected_type}(${d.facts.length} facts)`).join(", "),
     );
 
@@ -477,9 +476,6 @@ Deno.serve(async (req) => {
     // Document Score, which stays main-quote-only).
     // -------------------------------------------------------------------------
     if (hasPaymentScheduleDoc(docExtractions)) {
-      const isPaymentCheck = (title: string) =>
-        /\b(payment|deposit|retention|instal)/i.test(title) ||
-        /stage[^.]*paid|paid[^.]*stage|payment[^.]*stage|stage[^.]*payment/i.test(title);
       // Work on a copy so the quote-only results stay untouched.
       mergedResults = mergedResults.map((r) => {
         if (r.verdict === "MISSING" && isPaymentCheck(r.check_title)) {
