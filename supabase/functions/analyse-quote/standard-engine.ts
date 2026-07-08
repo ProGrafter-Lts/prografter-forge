@@ -205,7 +205,8 @@ export function assembleResults(
   }
   return checks.map((c) => {
     const a = byId.get(c.check_id.toUpperCase()) || {};
-    let verdict = String(a.verdict || "MISSING").toUpperCase() as Verdict;
+    let verdict = String(a.verdict || "MISSING").toUpperCase().trim() as Verdict;
+    if (verdict === ("NOT APPLICABLE" as Verdict) || verdict === ("N/A" as Verdict) || verdict === ("NA" as Verdict)) verdict = "NOT_APPLICABLE";
     if (!VERDICTS.includes(verdict)) verdict = "MISSING";
     let source = String(a.source_type || "not_found") as SourceType;
     const evidence = typeof a.evidence_quote === "string" && a.evidence_quote.trim() ? a.evidence_quote.trim() : null;
