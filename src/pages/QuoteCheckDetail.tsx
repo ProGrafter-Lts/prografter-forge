@@ -34,6 +34,11 @@ const QuoteCheckDetail = () => {
   const navigate = useNavigate();
   const { isReady, user } = useAuthReady();
   const { isAdmin } = useIsAdmin();
+  const [searchParams] = useSearchParams();
+  // The full 100+ point checklist, diagnostics and audit trail only appear when an
+  // admin opens the report in advanced mode (via the Advanced Review Engine link).
+  // A normal report view always shows the simplified consumer report — even for admins.
+  const advancedMode = isAdmin && searchParams.get("advanced") === "1";
   const [report, setReport] = useState<ReportJson | null>(null);
   const [status, setStatus] = useState<string>("loading");
   const [error, setError] = useState<string | null>(null);
