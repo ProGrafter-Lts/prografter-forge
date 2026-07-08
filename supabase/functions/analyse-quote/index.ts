@@ -646,6 +646,7 @@ Deno.serve(async (req) => {
       addressed_count: counts.addressed_count,
       clarification_count: counts.clarification_count,
       missing_count: counts.missing_count,
+      not_applicable_count: counts.not_applicable_count,
       verdict_summary: verdictSummary(counts),
       figures,
       figures_reconcile: figuresReconcile,
