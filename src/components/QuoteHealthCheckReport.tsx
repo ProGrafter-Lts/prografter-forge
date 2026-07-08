@@ -81,7 +81,7 @@ interface ReportJson {
     check_id: string;
     check_title: string;
     section_name?: string | null;
-    verdict: "ADDRESSED" | "NEEDS CLARIFICATION" | "MISSING";
+    verdict: "ADDRESSED" | "NEEDS CLARIFICATION" | "MISSING" | "NOT_APPLICABLE";
     evidence_quote?: string | null;
     source_type?: string;
     reason_from_standard?: string | null;
