@@ -78,16 +78,23 @@ export function tradeFromContent(signals: {
 // --- Scoring (transparent derived score, v1) --------------------------------
 
 export function scoreChecklist(results: CheckResult[]) {
-  const total = results.length;
-  const addressed = results.filter((r) => r.verdict === "ADDRESSED").length;
-  const clarify = results.filter((r) => r.verdict === "NEEDS CLARIFICATION").length;
-  const missing = results.filter((r) => r.verdict === "MISSING").length;
+  // Items the AI judges genuinely irrelevant to THIS quote's scope are excluded
+  // from scoring entirely — they are neither credited nor penalised, so the
+  // score reflects the quote against what actually applies, not an exhaustive
+  // 100+ item audit where everything unmentioned drags the score down.
+  const applicable = results.filter((r) => r.verdict !== "NOT_APPLICABLE");
+  const total = applicable.length;
+  const addressed = applicable.filter((r) => r.verdict === "ADDRESSED").length;
+  const clarify = applicable.filter((r) => r.verdict === "NEEDS CLARIFICATION").length;
+  const missing = applicable.filter((r) => r.verdict === "MISSING").length;
+  const notApplicable = results.filter((r) => r.verdict === "NOT_APPLICABLE").length;
   const raw = total > 0 ? ((addressed * 1 + clarify * 0.5) / total) * 100 : 0;
   return {
     total_checks: total,
     addressed_count: addressed,
     clarification_count: clarify,
     missing_count: missing,
+    not_applicable_count: notApplicable,
     score: Math.round(raw),
   };
 }
