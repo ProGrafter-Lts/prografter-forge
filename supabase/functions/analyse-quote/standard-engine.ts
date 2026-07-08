@@ -4,9 +4,9 @@
 // report explains the result. The AI must not invent the checklist, reorder
 // checks, skip checks, add verdict states or recompute figures.
 
-export type Verdict = "ADDRESSED" | "NEEDS CLARIFICATION" | "MISSING";
+export type Verdict = "ADDRESSED" | "NEEDS CLARIFICATION" | "MISSING" | "NOT_APPLICABLE";
 
-export const VERDICTS: Verdict[] = ["ADDRESSED", "NEEDS CLARIFICATION", "MISSING"];
+export const VERDICTS: Verdict[] = ["ADDRESSED", "NEEDS CLARIFICATION", "MISSING", "NOT_APPLICABLE"];
 
 export type SourceType =
   | "uploaded_quote"
@@ -78,16 +78,23 @@ export function tradeFromContent(signals: {
 // --- Scoring (transparent derived score, v1) --------------------------------
 
 export function scoreChecklist(results: CheckResult[]) {
-  const total = results.length;
-  const addressed = results.filter((r) => r.verdict === "ADDRESSED").length;
-  const clarify = results.filter((r) => r.verdict === "NEEDS CLARIFICATION").length;
-  const missing = results.filter((r) => r.verdict === "MISSING").length;
+  // Items the AI judges genuinely irrelevant to THIS quote's scope are excluded
+  // from scoring entirely — they are neither credited nor penalised, so the
+  // score reflects the quote against what actually applies, not an exhaustive
+  // 100+ item audit where everything unmentioned drags the score down.
+  const applicable = results.filter((r) => r.verdict !== "NOT_APPLICABLE");
+  const total = applicable.length;
+  const addressed = applicable.filter((r) => r.verdict === "ADDRESSED").length;
+  const clarify = applicable.filter((r) => r.verdict === "NEEDS CLARIFICATION").length;
+  const missing = applicable.filter((r) => r.verdict === "MISSING").length;
+  const notApplicable = results.filter((r) => r.verdict === "NOT_APPLICABLE").length;
   const raw = total > 0 ? ((addressed * 1 + clarify * 0.5) / total) * 100 : 0;
   return {
     total_checks: total,
     addressed_count: addressed,
     clarification_count: clarify,
     missing_count: missing,
+    not_applicable_count: notApplicable,
     score: Math.round(raw),
   };
 }
@@ -125,10 +132,11 @@ export function buildBuilderMessage(
 }
 
 export function verdictSummary(counts: ReturnType<typeof scoreChecklist>): string {
-  const { addressed_count, clarification_count, missing_count, total_checks, score } = counts;
+  const { addressed_count, clarification_count, missing_count, not_applicable_count, total_checks, score } = counts;
+  const naPart = not_applicable_count > 0 ? ` ${not_applicable_count} not relevant to this quote were excluded.` : "";
   return (
-    `Checked against ${total_checks} fixed checks: ${addressed_count} addressed, ` +
-    `${clarification_count} need clarification, ${missing_count} missing. ` +
+    `Checked against ${total_checks} relevant checks: ${addressed_count} addressed, ` +
+    `${clarification_count} need clarification, ${missing_count} missing.${naPart} ` +
     `Quote Check Score ${score}/100.`
   );
 }
@@ -153,13 +161,15 @@ ${standard.excluded_scope ? "Excluded (sourced separately, do NOT mark as missin
 
 ABSOLUTE RULES:
 - Work through the checklist below in the EXACT fixed order given. Do not reorder, skip, merge or add checks.
-- For EVERY check, return exactly ONE verdict: "ADDRESSED", "NEEDS CLARIFICATION", or "MISSING". No other value.
+- For EVERY check, return exactly ONE verdict: "ADDRESSED", "NEEDS CLARIFICATION", "MISSING", or "NOT_APPLICABLE". No other value.
     ADDRESSED = the quote clearly includes the item with adequate detail.
     NEEDS CLARIFICATION = the quote mentions it but it is vague, an allowance/provisional sum, contradictory, or figures do not reconcile.
-    MISSING = the quote does not mention the item at all.
+    MISSING = the item is genuinely relevant to THIS job but the quote does not mention it at all.
+    NOT_APPLICABLE = the item does not apply to THIS specific quote's scope of works, so its absence is not a fault. Examples: a check about an option the homeowner did not choose, a fixture/appliance not part of this job, or work the quote clearly states is out of scope or handled by others.
+- CRITICAL — do NOT overuse NOT_APPLICABLE. Only use it when you have positive evidence the item is irrelevant to this job. If an item WOULD normally be expected for a job of this type and is simply absent, it is MISSING, not NOT_APPLICABLE. When in doubt between MISSING and NOT_APPLICABLE, choose MISSING.
 - Quote figures and evidence VERBATIM from the document. NEVER recompute, re-round or correct subtotal, VAT, totals, line prices, allowances or quantities. If figures do not reconcile, mark the relevant check NEEDS CLARIFICATION.
-- Do not present inference as fact. If no evidence is found, source_type MUST be "not_found" and verdict MUST be "MISSING".
-- Items the standard lists as EXCLUDED must NOT be marked MISSING for being absent.
+- Do not present inference as fact. If no evidence is found AND the item is relevant, source_type MUST be "not_found" and verdict MUST be "MISSING".
+- Items the standard lists as EXCLUDED must be marked NOT_APPLICABLE, never MISSING.
 
 Allowed source_type values: "uploaded_quote", "homeowner_form", "builder_confirmed_separately", "admin_note", "ai_inference", "not_found".
 
@@ -175,7 +185,7 @@ OUTPUT — return ONLY one valid JSON object, no markdown/code fences. Use exact
   "figures": { "subtotal": string|null, "vat_rate": string|null, "vat_amount": string|null, "total_incl_vat": string|null },
   "figures_reconcile": boolean,
   "checks": [
-    { "check_id": "${checks[0]?.check_id || "XX-01"}", "verdict": "ADDRESSED|NEEDS CLARIFICATION|MISSING", "evidence_quote": string|null, "evidence_location": string|null, "source_type": "uploaded_quote|homeowner_form|builder_confirmed_separately|admin_note|ai_inference|not_found", "confidence": "high|medium|low" }
+    { "check_id": "${checks[0]?.check_id || "XX-01"}", "verdict": "ADDRESSED|NEEDS CLARIFICATION|MISSING|NOT_APPLICABLE", "evidence_quote": string|null, "evidence_location": string|null, "source_type": "uploaded_quote|homeowner_form|builder_confirmed_separately|admin_note|ai_inference|not_found", "confidence": "high|medium|low" }
   ],
   "additional_observations": [ string ]
 }
@@ -195,7 +205,8 @@ export function assembleResults(
   }
   return checks.map((c) => {
     const a = byId.get(c.check_id.toUpperCase()) || {};
-    let verdict = String(a.verdict || "MISSING").toUpperCase() as Verdict;
+    let verdict = String(a.verdict || "MISSING").toUpperCase().trim() as Verdict;
+    if (verdict === ("NOT APPLICABLE" as Verdict) || verdict === ("N/A" as Verdict) || verdict === ("NA" as Verdict)) verdict = "NOT_APPLICABLE";
     if (!VERDICTS.includes(verdict)) verdict = "MISSING";
     let source = String(a.source_type || "not_found") as SourceType;
     const evidence = typeof a.evidence_quote === "string" && a.evidence_quote.trim() ? a.evidence_quote.trim() : null;
@@ -267,6 +278,7 @@ export function buildFixedReportHtml(opts: {
   const addressed = results.filter((r) => r.verdict === "ADDRESSED");
   const clarify = results.filter((r) => r.verdict === "NEEDS CLARIFICATION");
   const missing = results.filter((r) => r.verdict === "MISSING");
+  const notApplicable = results.filter((r) => r.verdict === "NOT_APPLICABLE");
 
   const list = (arr: CheckResult[]) =>
     arr.length === 0
@@ -359,6 +371,7 @@ ${opts.figures_reconcile ? "" : "<p class='muted'>The figures shown in the quote
 <h2>What looks addressed</h2>${list(addressed)}
 <h2>What needs clarification</h2>${list(clarify)}
 <h2>What is missing</h2>${list(missing)}
+${notApplicable.length ? `<h2>Not relevant to this quote</h2><p class='muted'>These checks were excluded from the score because they do not apply to this job's scope.</p>${list(notApplicable)}` : ""}
 ${improvedHtml}
 ${supportingHtml}
 <h2>Top questions to ask the builder</h2>${questionsHtml}

@@ -81,7 +81,7 @@ interface ReportJson {
     check_id: string;
     check_title: string;
     section_name?: string | null;
-    verdict: "ADDRESSED" | "NEEDS CLARIFICATION" | "MISSING";
+    verdict: "ADDRESSED" | "NEEDS CLARIFICATION" | "MISSING" | "NOT_APPLICABLE";
     evidence_quote?: string | null;
     source_type?: string;
     reason_from_standard?: string | null;
@@ -1143,11 +1143,12 @@ const ExecutiveVerdict = ({ report }: { report: ReportJson }) => {
 
 /* ------------------------------------------------------------------ */
 
-const VerdictPill = ({ v }: { v: "ADDRESSED" | "NEEDS CLARIFICATION" | "MISSING" }) => {
+const VerdictPill = ({ v }: { v: "ADDRESSED" | "NEEDS CLARIFICATION" | "MISSING" | "NOT_APPLICABLE" }) => {
   const map = {
     ADDRESSED: { cls: "bg-teal/15 text-teal border-teal/30", Icon: CheckCircle2, label: "Addressed" },
     "NEEDS CLARIFICATION": { cls: "bg-amber-500/15 text-amber-700 border-amber-500/30", Icon: AlertCircle, label: "Clarify" },
     MISSING: { cls: "bg-destructive/15 text-destructive border-destructive/30", Icon: XCircle, label: "Missing" },
+    NOT_APPLICABLE: { cls: "bg-muted text-muted-foreground border-border", Icon: AlertCircle, label: "N/A" },
   }[v];
   return (
     <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide ${map.cls}`}>
@@ -1263,10 +1264,13 @@ const FixedStandardReport = ({ report, admin = false }: { report: ReportJson; ad
   const sectionStats = useMemo(
     () =>
       grouped.map(([section, rows]) => {
-        const total = rows.length;
-        const addressed = rows.filter((r) => r.verdict === "ADDRESSED").length;
-        const clarify = rows.filter((r) => r.verdict === "NEEDS CLARIFICATION").length;
-        const missing = rows.filter((r) => r.verdict === "MISSING").length;
+        // Exclude items that don't apply to this quote from the section total so
+        // completeness reflects relevant checks, not an exhaustive audit.
+        const applicable = rows.filter((r) => r.verdict !== "NOT_APPLICABLE");
+        const total = applicable.length;
+        const addressed = applicable.filter((r) => r.verdict === "ADDRESSED").length;
+        const clarify = applicable.filter((r) => r.verdict === "NEEDS CLARIFICATION").length;
+        const missing = applicable.filter((r) => r.verdict === "MISSING").length;
         const pct = total ? Math.round((addressed / total) * 100) : 0;
         return { section, total, addressed, clarify, missing, pct };
       }),
