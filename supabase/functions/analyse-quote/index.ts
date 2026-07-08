@@ -178,6 +178,70 @@ async function extractSupportingDoc(
   }
 }
 
+const unique = <T,>(items: T[]) => [...new Set(items.filter(Boolean))];
+
+function isPaymentCheck(title: string) {
+  return /\b(payment|deposit|retention|instal)/i.test(title) ||
+    /stage[^.]*paid|paid[^.]*stage|payment[^.]*stage|stage[^.]*payment/i.test(title);
+}
+
+function isBuildingControlCheck(title: string) {
+  return /building.?control|inspection|approval|completion certificate|certificate/i.test(title);
+}
+
+function isProgrammeCheck(title: string) {
+  return /programme|program|timescale|timeline|duration|start date|completion date|schedule/i.test(title);
+}
+
+function textFromDoc(d: DocExtraction) {
+  return `${d.detected_type} ${d.detected_type_label} ${d.file_name} ${d.summary} ${(d.facts || []).map((f) => `${f.label} ${f.value}`).join(" ")}`;
+}
+
+function affectedChecksForDoc(
+  doc: DocExtraction,
+  improvedChecks: Array<{ check_id: string; check_title: string }>,
+) {
+  if (doc.extraction_success === false || improvedChecks.length === 0) return [];
+  const text = textFromDoc(doc).toLowerCase();
+  if (doc.detected_type === "payment_schedule" || /payment|deposit|retention|instalment|installment/.test(text)) {
+    return improvedChecks.filter((c) => isPaymentCheck(c.check_title)).map((c) => c.check_id);
+  }
+  if (doc.detected_type === "building_control" || /building.?control|inspection|completion certificate/.test(text)) {
+    return improvedChecks.filter((c) => isBuildingControlCheck(c.check_title)).map((c) => c.check_id);
+  }
+  if (/programme|timescale|timeline|duration|start date|completion date/.test(text)) {
+    return improvedChecks.filter((c) => isProgrammeCheck(c.check_title)).map((c) => c.check_id);
+  }
+  return improvedChecks.map((c) => c.check_id);
+}
+
+function buildTopicStatus(
+  label: "Payment structure" | "Building Control" | "Programme/timescale",
+  docs: DocExtraction[],
+  improvedChecks: Array<{ check_id: string; check_title: string }>,
+  matcher: (title: string) => boolean,
+  docMatcher: (doc: DocExtraction) => boolean,
+  intakeValue?: unknown,
+) {
+  const matchedDocs = docs.filter((d) => d.extraction_success !== false && docMatcher(d));
+  const affected = improvedChecks.filter((c) => matcher(c.check_title)).map((c) => c.check_id);
+  const intakeText = typeof intakeValue === "string" && intakeValue.trim() ? intakeValue.trim() : null;
+  return {
+    label,
+    found: matchedDocs.length > 0 || !!intakeText,
+    source_files: matchedDocs.map((d) => d.file_name),
+    intake_status: intakeText,
+    used_in_quote_document_score: false,
+    used_in_project_pack_confidence_score: affected.length > 0,
+    affected_checks: affected,
+    status: matchedDocs.length > 0
+      ? `${label} evidence extracted from supporting document${matchedDocs.length === 1 ? "" : "s"}.`
+      : intakeText
+        ? `${label} was stated in the intake form but no supporting document evidence was extracted.`
+        : `${label} was not recognised in supporting documents.`,
+  };
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
