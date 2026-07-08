@@ -435,7 +435,7 @@ Deno.serve(async (req) => {
     if (docExtractions.length > 0 && evidenceText) {
       try {
         const openChecks = quoteResults
-          .filter((r) => r.verdict !== "ADDRESSED")
+          .filter((r) => r.verdict !== "ADDRESSED" && r.verdict !== "NOT_APPLICABLE")
           .map((r) => ({ check_id: r.check_id, check_title: r.check_title, verdict: r.verdict }));
         const mPrompt = buildMergeUpgradePrompt(standard, openChecks, evidenceText);
         const mRaw = await callAnthropic([{ type: "text", text: mPrompt }], 2000);
