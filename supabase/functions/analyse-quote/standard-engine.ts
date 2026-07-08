@@ -371,6 +371,7 @@ ${opts.figures_reconcile ? "" : "<p class='muted'>The figures shown in the quote
 <h2>What looks addressed</h2>${list(addressed)}
 <h2>What needs clarification</h2>${list(clarify)}
 <h2>What is missing</h2>${list(missing)}
+${notApplicable.length ? `<h2>Not relevant to this quote</h2><p class='muted'>These checks were excluded from the score because they do not apply to this job's scope.</p>${list(notApplicable)}` : ""}
 ${improvedHtml}
 ${supportingHtml}
 <h2>Top questions to ask the builder</h2>${questionsHtml}
