@@ -4,9 +4,9 @@
 // report explains the result. The AI must not invent the checklist, reorder
 // checks, skip checks, add verdict states or recompute figures.
 
-export type Verdict = "ADDRESSED" | "NEEDS CLARIFICATION" | "MISSING";
+export type Verdict = "ADDRESSED" | "NEEDS CLARIFICATION" | "MISSING" | "NOT_APPLICABLE";
 
-export const VERDICTS: Verdict[] = ["ADDRESSED", "NEEDS CLARIFICATION", "MISSING"];
+export const VERDICTS: Verdict[] = ["ADDRESSED", "NEEDS CLARIFICATION", "MISSING", "NOT_APPLICABLE"];
 
 export type SourceType =
   | "uploaded_quote"
