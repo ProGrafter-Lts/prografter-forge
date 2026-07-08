@@ -61,12 +61,19 @@ export interface DocFact {
 
 export interface DocExtraction {
   file_name: string;
+  path?: string;
   detected_type: DocType;
   detected_type_label: string;
+  extraction_success?: boolean;
+  extraction_error?: string | null;
   facts: DocFact[];
   summary: string;
   affected_report: boolean;
   affected_reason: string | null;
+  used_in_quote_document_score?: boolean;
+  used_in_project_pack_confidence_score?: boolean;
+  affected_checks?: string[];
+  warnings?: string[];
 }
 
 const TYPE_LABELS: Record<DocType, string> = {
@@ -230,8 +237,10 @@ ${lines || "(none)"}
 SUPPORTING DOCUMENT EVIDENCE:
 ${supportingEvidence || "(none)"}
 
+For every upgrade include the supporting document file name that supplied the evidence. Use the exact DOCUMENT file name from the evidence block.
+
 OUTPUT — return ONLY valid JSON, no markdown fences:
-{ "upgrades": [ { "check_id": string, "new_verdict": "ADDRESSED|NEEDS CLARIFICATION", "source_type": "builder_confirmed_separately|uploaded_quote", "evidence_quote": string } ] }`;
+{ "upgrades": [ { "check_id": string, "new_verdict": "ADDRESSED|NEEDS CLARIFICATION", "source_type": "builder_confirmed_separately|uploaded_quote", "evidence_quote": string, "source_file": string|null } ] }`;
 }
 
 
@@ -254,7 +263,7 @@ const VERDICT_RANK: Record<string, number> = {
 export function diffChecklists(
   quoteOnly: CheckResultLite[],
   merged: CheckResultLite[],
-): Array<{ check_id: string; check_title: string; quote_verdict: string; merged_verdict: string; note: string }> {
+): Array<{ check_id: string; check_title: string; quote_verdict: string; merged_verdict: string; note: string; source_file?: string | null }> {
   const byId = new Map(quoteOnly.map((r) => [r.check_id, r]));
   const improved: Array<{ check_id: string; check_title: string; quote_verdict: string; merged_verdict: string; note: string }> = [];
   for (const m of merged) {
@@ -269,6 +278,7 @@ export function diffChecklists(
         check_title: m.check_title,
         quote_verdict: q.verdict,
         merged_verdict: m.verdict,
+        source_file: m.evidence_location || null,
         note: suppliedSeparately
           ? "Supplied separately — improves confidence, subject to written confirmation."
           : "Clarified by supporting documents.",
@@ -281,6 +291,22 @@ export function diffChecklists(
 // Was a payment schedule supplied as a separate document?
 export function hasPaymentScheduleDoc(extractions: DocExtraction[]): boolean {
   return extractions.some(
-    (d) => d.detected_type === "payment_schedule" && d.facts.length > 0,
+    (d) => d.detected_type === "payment_schedule" && d.extraction_success !== false && d.facts.length > 0,
   );
+}
+
+export function countPaymentScheduleStages(extractions: DocExtraction[]): number {
+  const paymentDocs = extractions.filter(
+    (d) => d.detected_type === "payment_schedule" && d.extraction_success !== false,
+  );
+  let count = 0;
+  for (const d of paymentDocs) {
+    for (const f of d.facts || []) {
+      const text = `${f.label} ${f.value}`.toLowerCase();
+      const explicit = text.match(/(?:stage|payment|instalment|installment)\s*(?:no\.?\s*)?(\d+)/g);
+      if (explicit) count += explicit.length;
+      else if (/\b(deposit|first fix|second fix|completion|final payment|retention|roof|watertight|practical completion)\b/.test(text)) count += 1;
+    }
+  }
+  return count;
 }

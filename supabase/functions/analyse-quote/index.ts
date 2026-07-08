@@ -19,6 +19,7 @@ import {
 import {
   buildDocExtractionPrompt,
   buildMergeUpgradePrompt,
+  countPaymentScheduleStages,
   diffChecklists,
   docTypeLabel,
   guessTypeFromName,
@@ -101,17 +102,32 @@ async function extractSupportingDoc(
   supabase: ReturnType<typeof createClient>,
   path: string,
   displayName: string,
-): Promise<DocExtraction | null> {
+): Promise<DocExtraction> {
+  const hint = guessTypeFromName(displayName || path);
   try {
     const { data: fileData, error } = await supabase.storage.from("quote-pdfs").download(path);
     if (error || !fileData) {
       console.error("extractSupportingDoc: download failed", path, error?.message);
-      return null;
+      return {
+        path,
+        file_name: displayName || path,
+        detected_type: hint,
+        detected_type_label: docTypeLabel(hint),
+        extraction_success: false,
+        extraction_error: error?.message || "Download failed",
+        facts: [],
+        summary: "Extraction failed: the supporting document could not be downloaded.",
+        affected_report: false,
+        affected_reason: "Extraction failed, so this file could not influence either score.",
+        used_in_quote_document_score: false,
+        used_in_project_pack_confidence_score: false,
+        affected_checks: [],
+        warnings: ["Supporting document could not be downloaded for extraction."],
+      };
     }
     const media = mediaForFile(displayName || path);
     const bytes = new Uint8Array(await fileData.arrayBuffer());
     const block = contentBlockFromBytes(bytes, media);
-    const hint = guessTypeFromName(displayName || path);
     const raw = await callAnthropic([block, { type: "text", text: buildDocExtractionPrompt(displayName || path, hint) }], 3000);
     const parsed = robustParseJson(raw) || {};
     let detected = String(parsed.detected_type || "").trim() as DocType;
@@ -125,18 +141,107 @@ async function extractSupportingDoc(
         })).filter((f: DocFact) => f.label || f.value)
       : [];
     return {
+      path,
       file_name: displayName || path,
       detected_type: detected,
       detected_type_label: docTypeLabel(detected),
+      extraction_success: true,
+      extraction_error: null,
       facts,
       summary: String(parsed.summary ?? "").slice(0, 600) || "No summary available.",
       affected_report: false,
       affected_reason: null,
+      used_in_quote_document_score: false,
+      used_in_project_pack_confidence_score: false,
+      affected_checks: [],
+      warnings: facts.length === 0 ? ["No usable facts extracted from this supporting document."] : [],
     };
   } catch (e) {
     console.error("extractSupportingDoc: error", path, e);
-    return null;
+    const message = e instanceof Error ? e.message : "Unknown extraction error";
+    return {
+      path,
+      file_name: displayName || path,
+      detected_type: hint,
+      detected_type_label: docTypeLabel(hint),
+      extraction_success: false,
+      extraction_error: message,
+      facts: [],
+      summary: "Extraction failed: this supporting document could not be read.",
+      affected_report: false,
+      affected_reason: "Extraction failed, so this file could not influence either score.",
+      used_in_quote_document_score: false,
+      used_in_project_pack_confidence_score: false,
+      affected_checks: [],
+      warnings: [`Extraction failed: ${message.slice(0, 240)}`],
+    };
   }
+}
+
+const unique = <T,>(items: T[]) => [...new Set(items.filter(Boolean))];
+
+function isPaymentCheck(title: string) {
+  return /\b(payment|deposit|retention|instal)/i.test(title) ||
+    /stage[^.]*paid|paid[^.]*stage|payment[^.]*stage|stage[^.]*payment/i.test(title);
+}
+
+function isBuildingControlCheck(title: string) {
+  return /building.?control|inspection|approval|completion certificate|certificate/i.test(title);
+}
+
+function isProgrammeCheck(title: string) {
+  return /programme|program|timescale|timeline|duration|start date|completion date|schedule/i.test(title);
+}
+
+function textFromDoc(d: DocExtraction) {
+  return `${d.detected_type} ${d.detected_type_label} ${d.file_name} ${d.summary} ${(d.facts || []).map((f) => `${f.label} ${f.value}`).join(" ")}`;
+}
+
+function affectedChecksForDoc(
+  doc: DocExtraction,
+  improvedChecks: Array<{ check_id: string; check_title: string; source_file?: string | null }>,
+) {
+  if (doc.extraction_success === false || improvedChecks.length === 0) return [];
+  const direct = improvedChecks.filter((c) => c.source_file && c.source_file === doc.file_name).map((c) => c.check_id);
+  if (direct.length > 0) return direct;
+  const text = textFromDoc(doc).toLowerCase();
+  if (doc.detected_type === "payment_schedule" || /payment|deposit|retention|instalment|installment/.test(text)) {
+    return improvedChecks.filter((c) => isPaymentCheck(c.check_title)).map((c) => c.check_id);
+  }
+  if (doc.detected_type === "building_control" || /building.?control|inspection|completion certificate/.test(text)) {
+    return improvedChecks.filter((c) => isBuildingControlCheck(c.check_title)).map((c) => c.check_id);
+  }
+  if (/programme|timescale|timeline|duration|start date|completion date/.test(text)) {
+    return improvedChecks.filter((c) => isProgrammeCheck(c.check_title)).map((c) => c.check_id);
+  }
+  return improvedChecks.map((c) => c.check_id);
+}
+
+function buildTopicStatus(
+  label: "Payment structure" | "Building Control" | "Programme/timescale",
+  docs: DocExtraction[],
+  improvedChecks: Array<{ check_id: string; check_title: string; source_file?: string | null }>,
+  matcher: (title: string) => boolean,
+  docMatcher: (doc: DocExtraction) => boolean,
+  intakeValue?: unknown,
+) {
+  const matchedDocs = docs.filter((d) => d.extraction_success !== false && docMatcher(d));
+  const affected = improvedChecks.filter((c) => matcher(c.check_title)).map((c) => c.check_id);
+  const intakeText = typeof intakeValue === "string" && intakeValue.trim() ? intakeValue.trim() : null;
+  return {
+    label,
+    found: matchedDocs.length > 0 || !!intakeText,
+    source_files: matchedDocs.map((d) => d.file_name),
+    intake_status: intakeText,
+    used_in_quote_document_score: false,
+    used_in_project_pack_confidence_score: affected.length > 0,
+    affected_checks: affected,
+    status: matchedDocs.length > 0
+      ? `${label} evidence extracted from supporting document${matchedDocs.length === 1 ? "" : "s"}.`
+      : intakeText
+        ? `${label} was stated in the intake form but no supporting document evidence was extracted.`
+        : `${label} was not recognised in supporting documents.`,
+  };
 }
 
 Deno.serve(async (req) => {
@@ -310,12 +415,11 @@ Deno.serve(async (req) => {
       const name = typeof sf === "string" ? sf : String(obj?.name ?? obj?.path ?? "supporting document");
       return { path, name };
     }).filter((t) => t.path);
-    const extractionResults = await Promise.all(
+    const docExtractions: DocExtraction[] = await Promise.all(
       supportingTargets.map((t) => extractSupportingDoc(supabase, t.path, t.name)),
     );
-    const docExtractions: DocExtraction[] = extractionResults.filter((e): e is DocExtraction => !!e);
     console.log(
-      `analyse-quote: extracted ${docExtractions.length}/${supportingTargets.length} supporting docs — ` +
+      `analyse-quote: extracted ${docExtractions.filter((d) => d.extraction_success !== false).length}/${supportingTargets.length} supporting docs — ` +
       docExtractions.map((d) => `${d.file_name}:${d.detected_type}(${d.facts.length} facts)`).join(", "),
     );
 
@@ -353,6 +457,7 @@ Deno.serve(async (req) => {
               verdict: nv,
               source_type: (String(u.source_type) === "uploaded_quote" ? "uploaded_quote" : "builder_confirmed_separately") as CheckResult["source_type"],
               evidence_quote: String(u.evidence_quote ?? r.evidence_quote ?? "").slice(0, 1000) || r.evidence_quote,
+              evidence_location: typeof u.source_file === "string" && u.source_file.trim() ? u.source_file.trim().slice(0, 300) : r.evidence_location,
             };
           });
           const mc = scoreChecklist(mergedResults);
@@ -374,9 +479,7 @@ Deno.serve(async (req) => {
     // Document Score, which stays main-quote-only).
     // -------------------------------------------------------------------------
     if (hasPaymentScheduleDoc(docExtractions)) {
-      const isPaymentCheck = (title: string) =>
-        /\b(payment|deposit|retention|instal)/i.test(title) ||
-        /stage[^.]*paid|paid[^.]*stage|payment[^.]*stage|stage[^.]*payment/i.test(title);
+      const paymentSourceFile = docExtractions.find((d) => d.detected_type === "payment_schedule" && d.extraction_success !== false && d.facts.length > 0)?.file_name || null;
       // Work on a copy so the quote-only results stay untouched.
       mergedResults = mergedResults.map((r) => {
         if (r.verdict === "MISSING" && isPaymentCheck(r.check_title)) {
@@ -386,6 +489,7 @@ Deno.serve(async (req) => {
             source_type: "builder_confirmed_separately" as const,
             evidence_quote:
               "A staged payment schedule was supplied as a separate document. Confirm in writing that these payment stages form part of the agreed quote.",
+            evidence_location: paymentSourceFile,
           };
         }
         return r;
@@ -401,9 +505,14 @@ Deno.serve(async (req) => {
     const improvedChecks = diffChecklists(quoteResults, mergedResults);
     const paymentSuppliedSeparately = hasPaymentScheduleDoc(docExtractions);
     const paymentImproved = improvedChecks.some((c) => /payment|stage|instal|deposit|retention/i.test(c.check_title));
+    const paymentStagesExtracted = countPaymentScheduleStages(docExtractions);
 
     // Attribute whether each document affected the report.
     for (const d of docExtractions) {
+      const affectedChecks = affectedChecksForDoc(d, improvedChecks);
+      d.used_in_quote_document_score = false;
+      d.used_in_project_pack_confidence_score = affectedChecks.length > 0;
+      d.affected_checks = affectedChecks;
       if (d.facts.length === 0) {
         d.affected_report = false;
         d.affected_reason = "No usable evidence could be extracted from this document.";
@@ -417,12 +526,76 @@ Deno.serve(async (req) => {
         d.affected_report = false;
         d.affected_reason = "Reviewed, but it did not change any checklist result.";
       }
+      if (d.detected_type === "payment_schedule" && !paymentImproved) {
+        d.warnings = unique([...(d.warnings || []), "Payment schedule found but did not affect Project Pack Confidence Score — review merge/scoring logic."]);
+      }
     }
 
     // Admin warning: docs uploaded but nothing merged.
     const noEvidenceMergedWarning = docExtractions.length > 0 && improvedChecks.length === 0
       ? "Supporting documents uploaded but no evidence was merged into the report. Review extraction."
       : null;
+
+    const intake = (record.intake && typeof record.intake === "object") ? record.intake as Record<string, unknown> : {};
+    const simpleContext = (intake.simple_context && typeof intake.simple_context === "object")
+      ? intake.simple_context as Record<string, unknown>
+      : {};
+    const paymentStatus = {
+      ...buildTopicStatus(
+        "Payment structure",
+        docExtractions,
+        improvedChecks,
+        isPaymentCheck,
+        (d) => d.detected_type === "payment_schedule" || /payment|deposit|retention|instalment|installment/.test(textFromDoc(d).toLowerCase()),
+        simpleContext.payment_stages_given,
+      ),
+      payment_schedule_found: paymentSuppliedSeparately,
+      source: docExtractions.find((d) => d.detected_type === "payment_schedule" && d.extraction_success !== false && d.facts.length > 0)?.file_name ?? null,
+      stages_extracted: paymentStagesExtracted,
+      warning: paymentSuppliedSeparately && !paymentImproved
+        ? "Payment schedule found but did not affect Project Pack Confidence Score — review merge/scoring logic."
+        : null,
+    };
+    const buildingControlStatus = buildTopicStatus(
+      "Building Control",
+      docExtractions,
+      improvedChecks,
+      isBuildingControlCheck,
+      (d) => d.detected_type === "building_control" || /building.?control|inspection|completion certificate/.test(textFromDoc(d).toLowerCase()),
+      simpleContext.building_control,
+    );
+    const programmeStatus = buildTopicStatus(
+      "Programme/timescale",
+      docExtractions,
+      improvedChecks,
+      isProgrammeCheck,
+      (d) => /programme|timescale|timeline|duration|start date|completion date/.test(textFromDoc(d).toLowerCase()),
+      simpleContext.timescale_given,
+    );
+    const warnings = unique([
+      ...docExtractions.flatMap((d) => d.warnings || []),
+      noEvidenceMergedWarning,
+      paymentStatus.warning,
+      supportingTargets.length > docExtractions.filter((d) => d.extraction_success !== false).length
+        ? "One or more supporting documents failed extraction."
+        : null,
+    ].filter((w): w is string => typeof w === "string" && w.length > 0));
+    const mergeStatus = {
+      supporting_documents_uploaded: supportingTargets.length,
+      documents_successfully_extracted: docExtractions.filter((d) => d.extraction_success !== false).length,
+      extracted_evidence_available: docExtractions.some((d) => d.extraction_success !== false && d.facts.length > 0),
+      merge_attempted: docExtractions.length > 0 && !!evidenceText,
+      merged_into_project_pack_confidence: improvedChecks.length > 0,
+      improved_check_count: improvedChecks.length,
+      main_quote_unchanged: supportingTargets.length > 0,
+      explanation: supportingTargets.length > 0
+        ? improvedChecks.length > 0
+          ? "Main quote unchanged. Supporting documents added. Supporting documents changed the findings listed below."
+          : "Main quote unchanged. Supporting documents added. No findings changed; see warnings and per-file extraction details."
+        : "No supporting documents were uploaded; only the main quote was scored.",
+    };
+    const analysisRunId = crypto.randomUUID();
+    const generatedAt = new Date().toISOString();
 
     // The report body is generated from the MERGED evidence record.
     const results = mergedResults;
@@ -434,9 +607,14 @@ Deno.serve(async (req) => {
       file_name: d.file_name,
       detected_type: d.detected_type,
       detected_type_label: d.detected_type_label,
+      extraction_success: d.extraction_success !== false,
       key_facts: d.facts.slice(0, 8).map((f) => `${f.label}: ${f.value}`),
+      used_in_quote_document_score: false,
+      used_in_project_pack_confidence_score: d.used_in_project_pack_confidence_score === true,
+      affected_checks: d.affected_checks || [],
       affected_report: d.affected_report,
       affected_reason: d.affected_reason,
+      warnings: d.warnings || [],
     }));
 
     const reportHtml = sanitizeReportHtml(buildFixedReportHtml({
@@ -452,10 +630,10 @@ Deno.serve(async (req) => {
 
     const reportJson = {
       analysis_mode: "fixed_standard",
-      analysis_run_id: crypto.randomUUID(),
-      generated_at: new Date().toISOString(),
-      file_count: 1 + docExtractions.length,
-      supporting_file_count: docExtractions.length,
+      analysis_run_id: analysisRunId,
+      generated_at: generatedAt,
+      file_count: 1 + supportingTargets.length,
+      supporting_file_count: supportingTargets.length,
 
       standard_id: standard.standard_id,
       standard_name: standard.standard_name,
@@ -476,6 +654,19 @@ Deno.serve(async (req) => {
       supporting_documents: supportingDocsSummary,
       improved_checks: improvedChecks,
       payment_supplied_separately: paymentSuppliedSeparately,
+      payment_structure_status: paymentStatus,
+      building_control_status: buildingControlStatus,
+      programme_timescale_status: programmeStatus,
+      supporting_document_merge_status: mergeStatus,
+      supporting_document_warnings: warnings,
+      score_explanation: {
+        quote_document_score: "Quote Document Score uses only the main builder quote.",
+        project_pack_confidence_score: "Project Pack Confidence Score uses the main quote plus extracted supporting-document evidence.",
+        main_quote_unchanged_supporting_documents_added: supportingTargets.length > 0,
+        supporting_documents_changed_findings: improvedChecks.length > 0,
+        changed_check_ids: improvedChecks.map((c) => c.check_id),
+        explanation: mergeStatus.explanation,
+      },
       questions_detailed: questions,
       questions_list: questions.map((q) => `${q.check_id}: ${q.question}`),
       builder_message: builderMessage,
@@ -569,10 +760,28 @@ Deno.serve(async (req) => {
         project_pack_score: mergedCounts.score,
         improved_checks: improvedChecks,
         payment_supplied_separately: paymentSuppliedSeparately,
+        supporting_documents_changed_findings: improvedChecks.length > 0,
+        explanation: mergeStatus.explanation,
       },
       supporting_docs_diagnostic: {
+        analysis_run_id: analysisRunId,
+        generated_at: generatedAt,
+        selected_standard: standard.standard_name,
+        standard_id: standard.standard_id,
+        standard_version: standard.version,
+        file_count: 1 + supportingTargets.length,
+        uploaded_file_count: 1 + supportingTargets.length,
+        supporting_file_count: supportingTargets.length,
         documents: supportingDocsSummary,
+        document_extractions: docExtractions,
         improved_checks: improvedChecks,
+        quote_document_score: quoteCounts.score,
+        project_pack_confidence_score: mergedCounts.score,
+        payment_structure_status: paymentStatus,
+        building_control_status: buildingControlStatus,
+        programme_timescale_status: programmeStatus,
+        supporting_document_merge_status: mergeStatus,
+        warnings,
         no_evidence_merged_warning: noEvidenceMergedWarning,
       },
       consistency_diagnostic: consistencyDiagnostic,
