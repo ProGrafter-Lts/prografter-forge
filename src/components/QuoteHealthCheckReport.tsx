@@ -1264,10 +1264,13 @@ const FixedStandardReport = ({ report, admin = false }: { report: ReportJson; ad
   const sectionStats = useMemo(
     () =>
       grouped.map(([section, rows]) => {
-        const total = rows.length;
-        const addressed = rows.filter((r) => r.verdict === "ADDRESSED").length;
-        const clarify = rows.filter((r) => r.verdict === "NEEDS CLARIFICATION").length;
-        const missing = rows.filter((r) => r.verdict === "MISSING").length;
+        // Exclude items that don't apply to this quote from the section total so
+        // completeness reflects relevant checks, not an exhaustive audit.
+        const applicable = rows.filter((r) => r.verdict !== "NOT_APPLICABLE");
+        const total = applicable.length;
+        const addressed = applicable.filter((r) => r.verdict === "ADDRESSED").length;
+        const clarify = applicable.filter((r) => r.verdict === "NEEDS CLARIFICATION").length;
+        const missing = applicable.filter((r) => r.verdict === "MISSING").length;
         const pct = total ? Math.round((addressed / total) * 100) : 0;
         return { section, total, addressed, clarify, missing, pct };
       }),
