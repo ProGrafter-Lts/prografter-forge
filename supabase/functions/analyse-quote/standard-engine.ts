@@ -278,6 +278,7 @@ export function buildFixedReportHtml(opts: {
   const addressed = results.filter((r) => r.verdict === "ADDRESSED");
   const clarify = results.filter((r) => r.verdict === "NEEDS CLARIFICATION");
   const missing = results.filter((r) => r.verdict === "MISSING");
+  const notApplicable = results.filter((r) => r.verdict === "NOT_APPLICABLE");
 
   const list = (arr: CheckResult[]) =>
     arr.length === 0
