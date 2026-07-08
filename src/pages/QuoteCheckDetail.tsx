@@ -49,6 +49,7 @@ const QuoteCheckDetail = () => {
     supportingDiagnostic: any;
     mergedEvidence: any;
     checklistResults: any;
+    reportJson: Record<string, any> | null;
   } | null>(null);
 
   useEffect(() => {
@@ -86,6 +87,7 @@ const QuoteCheckDetail = () => {
         supportingDiagnostic: (data as any).supporting_docs_diagnostic ?? null,
         mergedEvidence: (data as any).merged_evidence ?? null,
         checklistResults: (data as any).checklist_results ?? null,
+        reportJson: (data.report_json as Record<string, any> | null) ?? null,
       });
     })();
   }, [isReady, id, user, navigate]);
@@ -147,6 +149,7 @@ const QuoteCheckDetail = () => {
             supportingDiagnostic={audit.supportingDiagnostic}
             mergedEvidence={audit.mergedEvidence}
             checklistResults={audit.checklistResults}
+            reportJson={audit.reportJson}
           />
         )}
 
