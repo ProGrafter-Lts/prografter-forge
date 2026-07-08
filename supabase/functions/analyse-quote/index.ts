@@ -199,9 +199,11 @@ function textFromDoc(d: DocExtraction) {
 
 function affectedChecksForDoc(
   doc: DocExtraction,
-  improvedChecks: Array<{ check_id: string; check_title: string }>,
+  improvedChecks: Array<{ check_id: string; check_title: string; source_file?: string | null }>,
 ) {
   if (doc.extraction_success === false || improvedChecks.length === 0) return [];
+  const direct = improvedChecks.filter((c) => c.source_file && c.source_file === doc.file_name).map((c) => c.check_id);
+  if (direct.length > 0) return direct;
   const text = textFromDoc(doc).toLowerCase();
   if (doc.detected_type === "payment_schedule" || /payment|deposit|retention|instalment|installment/.test(text)) {
     return improvedChecks.filter((c) => isPaymentCheck(c.check_title)).map((c) => c.check_id);
@@ -218,7 +220,7 @@ function affectedChecksForDoc(
 function buildTopicStatus(
   label: "Payment structure" | "Building Control" | "Programme/timescale",
   docs: DocExtraction[],
-  improvedChecks: Array<{ check_id: string; check_title: string }>,
+  improvedChecks: Array<{ check_id: string; check_title: string; source_file?: string | null }>,
   matcher: (title: string) => boolean,
   docMatcher: (doc: DocExtraction) => boolean,
   intakeValue?: unknown,
@@ -455,6 +457,7 @@ Deno.serve(async (req) => {
               verdict: nv,
               source_type: (String(u.source_type) === "uploaded_quote" ? "uploaded_quote" : "builder_confirmed_separately") as CheckResult["source_type"],
               evidence_quote: String(u.evidence_quote ?? r.evidence_quote ?? "").slice(0, 1000) || r.evidence_quote,
+              evidence_location: typeof u.source_file === "string" && u.source_file.trim() ? u.source_file.trim().slice(0, 300) : r.evidence_location,
             };
           });
           const mc = scoreChecklist(mergedResults);
@@ -476,6 +479,7 @@ Deno.serve(async (req) => {
     // Document Score, which stays main-quote-only).
     // -------------------------------------------------------------------------
     if (hasPaymentScheduleDoc(docExtractions)) {
+      const paymentSourceFile = docExtractions.find((d) => d.detected_type === "payment_schedule" && d.extraction_success !== false && d.facts.length > 0)?.file_name || null;
       // Work on a copy so the quote-only results stay untouched.
       mergedResults = mergedResults.map((r) => {
         if (r.verdict === "MISSING" && isPaymentCheck(r.check_title)) {
@@ -485,6 +489,7 @@ Deno.serve(async (req) => {
             source_type: "builder_confirmed_separately" as const,
             evidence_quote:
               "A staged payment schedule was supplied as a separate document. Confirm in writing that these payment stages form part of the agreed quote.",
+            evidence_location: paymentSourceFile,
           };
         }
         return r;
