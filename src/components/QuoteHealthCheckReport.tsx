@@ -1586,6 +1586,12 @@ const FixedStandardReport = ({ report, admin = false }: { report: ReportJson; ad
                 </li>
               ))}
             </ul>
+            {hiddenQuestionCount > 0 && (
+              <p className="qr-section2-intro" style={{ marginTop: "0.85rem", opacity: 0.75 }}>
+                Showing the {questions.length} most important questions. {hiddenQuestionCount} further
+                minor points were checked against the standard but are not critical to your decision.
+              </p>
+            )}
           </SectionCard>
         )}
 
