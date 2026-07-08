@@ -500,9 +500,14 @@ Deno.serve(async (req) => {
     const improvedChecks = diffChecklists(quoteResults, mergedResults);
     const paymentSuppliedSeparately = hasPaymentScheduleDoc(docExtractions);
     const paymentImproved = improvedChecks.some((c) => /payment|stage|instal|deposit|retention/i.test(c.check_title));
+    const paymentStagesExtracted = countPaymentScheduleStages(docExtractions);
 
     // Attribute whether each document affected the report.
     for (const d of docExtractions) {
+      const affectedChecks = affectedChecksForDoc(d, improvedChecks);
+      d.used_in_quote_document_score = false;
+      d.used_in_project_pack_confidence_score = affectedChecks.length > 0;
+      d.affected_checks = affectedChecks;
       if (d.facts.length === 0) {
         d.affected_report = false;
         d.affected_reason = "No usable evidence could be extracted from this document.";
@@ -516,12 +521,76 @@ Deno.serve(async (req) => {
         d.affected_report = false;
         d.affected_reason = "Reviewed, but it did not change any checklist result.";
       }
+      if (d.detected_type === "payment_schedule" && !paymentImproved) {
+        d.warnings = unique([...(d.warnings || []), "Payment schedule found but did not affect Project Pack Confidence Score — review merge/scoring logic."]);
+      }
     }
 
     // Admin warning: docs uploaded but nothing merged.
     const noEvidenceMergedWarning = docExtractions.length > 0 && improvedChecks.length === 0
       ? "Supporting documents uploaded but no evidence was merged into the report. Review extraction."
       : null;
+
+    const intake = (record.intake && typeof record.intake === "object") ? record.intake as Record<string, unknown> : {};
+    const simpleContext = (intake.simple_context && typeof intake.simple_context === "object")
+      ? intake.simple_context as Record<string, unknown>
+      : {};
+    const paymentStatus = {
+      ...buildTopicStatus(
+        "Payment structure",
+        docExtractions,
+        improvedChecks,
+        isPaymentCheck,
+        (d) => d.detected_type === "payment_schedule" || /payment|deposit|retention|instalment|installment/.test(textFromDoc(d).toLowerCase()),
+        simpleContext.payment_stages_given,
+      ),
+      payment_schedule_found: paymentSuppliedSeparately,
+      source: docExtractions.find((d) => d.detected_type === "payment_schedule" && d.extraction_success !== false && d.facts.length > 0)?.file_name ?? null,
+      stages_extracted: paymentStagesExtracted,
+      warning: paymentSuppliedSeparately && !paymentImproved
+        ? "Payment schedule found but did not affect Project Pack Confidence Score — review merge/scoring logic."
+        : null,
+    };
+    const buildingControlStatus = buildTopicStatus(
+      "Building Control",
+      docExtractions,
+      improvedChecks,
+      isBuildingControlCheck,
+      (d) => d.detected_type === "building_control" || /building.?control|inspection|completion certificate/.test(textFromDoc(d).toLowerCase()),
+      simpleContext.building_control,
+    );
+    const programmeStatus = buildTopicStatus(
+      "Programme/timescale",
+      docExtractions,
+      improvedChecks,
+      isProgrammeCheck,
+      (d) => /programme|timescale|timeline|duration|start date|completion date/.test(textFromDoc(d).toLowerCase()),
+      simpleContext.timescale_given,
+    );
+    const warnings = unique([
+      ...docExtractions.flatMap((d) => d.warnings || []),
+      noEvidenceMergedWarning,
+      paymentStatus.warning,
+      supportingTargets.length > docExtractions.filter((d) => d.extraction_success !== false).length
+        ? "One or more supporting documents failed extraction."
+        : null,
+    ].filter((w): w is string => typeof w === "string" && w.length > 0));
+    const mergeStatus = {
+      supporting_documents_uploaded: supportingTargets.length,
+      documents_successfully_extracted: docExtractions.filter((d) => d.extraction_success !== false).length,
+      extracted_evidence_available: docExtractions.some((d) => d.extraction_success !== false && d.facts.length > 0),
+      merge_attempted: docExtractions.length > 0 && !!evidenceText,
+      merged_into_project_pack_confidence: improvedChecks.length > 0,
+      improved_check_count: improvedChecks.length,
+      main_quote_unchanged: supportingTargets.length > 0,
+      explanation: supportingTargets.length > 0
+        ? improvedChecks.length > 0
+          ? "Main quote unchanged. Supporting documents added. Supporting documents changed the findings listed below."
+          : "Main quote unchanged. Supporting documents added. No findings changed; see warnings and per-file extraction details."
+        : "No supporting documents were uploaded; only the main quote was scored.",
+    };
+    const analysisRunId = crypto.randomUUID();
+    const generatedAt = new Date().toISOString();
 
     // The report body is generated from the MERGED evidence record.
     const results = mergedResults;
@@ -533,9 +602,14 @@ Deno.serve(async (req) => {
       file_name: d.file_name,
       detected_type: d.detected_type,
       detected_type_label: d.detected_type_label,
+      extraction_success: d.extraction_success !== false,
       key_facts: d.facts.slice(0, 8).map((f) => `${f.label}: ${f.value}`),
+      used_in_quote_document_score: false,
+      used_in_project_pack_confidence_score: d.used_in_project_pack_confidence_score === true,
+      affected_checks: d.affected_checks || [],
       affected_report: d.affected_report,
       affected_reason: d.affected_reason,
+      warnings: d.warnings || [],
     }));
 
     const reportHtml = sanitizeReportHtml(buildFixedReportHtml({
@@ -551,10 +625,10 @@ Deno.serve(async (req) => {
 
     const reportJson = {
       analysis_mode: "fixed_standard",
-      analysis_run_id: crypto.randomUUID(),
-      generated_at: new Date().toISOString(),
-      file_count: 1 + docExtractions.length,
-      supporting_file_count: docExtractions.length,
+      analysis_run_id: analysisRunId,
+      generated_at: generatedAt,
+      file_count: 1 + supportingTargets.length,
+      supporting_file_count: supportingTargets.length,
 
       standard_id: standard.standard_id,
       standard_name: standard.standard_name,
@@ -575,6 +649,19 @@ Deno.serve(async (req) => {
       supporting_documents: supportingDocsSummary,
       improved_checks: improvedChecks,
       payment_supplied_separately: paymentSuppliedSeparately,
+      payment_structure_status: paymentStatus,
+      building_control_status: buildingControlStatus,
+      programme_timescale_status: programmeStatus,
+      supporting_document_merge_status: mergeStatus,
+      supporting_document_warnings: warnings,
+      score_explanation: {
+        quote_document_score: "Quote Document Score uses only the main builder quote.",
+        project_pack_confidence_score: "Project Pack Confidence Score uses the main quote plus extracted supporting-document evidence.",
+        main_quote_unchanged_supporting_documents_added: supportingTargets.length > 0,
+        supporting_documents_changed_findings: improvedChecks.length > 0,
+        changed_check_ids: improvedChecks.map((c) => c.check_id),
+        explanation: mergeStatus.explanation,
+      },
       questions_detailed: questions,
       questions_list: questions.map((q) => `${q.check_id}: ${q.question}`),
       builder_message: builderMessage,
@@ -668,10 +755,28 @@ Deno.serve(async (req) => {
         project_pack_score: mergedCounts.score,
         improved_checks: improvedChecks,
         payment_supplied_separately: paymentSuppliedSeparately,
+        supporting_documents_changed_findings: improvedChecks.length > 0,
+        explanation: mergeStatus.explanation,
       },
       supporting_docs_diagnostic: {
+        analysis_run_id: analysisRunId,
+        generated_at: generatedAt,
+        selected_standard: standard.standard_name,
+        standard_id: standard.standard_id,
+        standard_version: standard.version,
+        file_count: 1 + supportingTargets.length,
+        uploaded_file_count: 1 + supportingTargets.length,
+        supporting_file_count: supportingTargets.length,
         documents: supportingDocsSummary,
+        document_extractions: docExtractions,
         improved_checks: improvedChecks,
+        quote_document_score: quoteCounts.score,
+        project_pack_confidence_score: mergedCounts.score,
+        payment_structure_status: paymentStatus,
+        building_control_status: buildingControlStatus,
+        programme_timescale_status: programmeStatus,
+        supporting_document_merge_status: mergeStatus,
+        warnings,
         no_evidence_merged_warning: noEvidenceMergedWarning,
       },
       consistency_diagnostic: consistencyDiagnostic,
