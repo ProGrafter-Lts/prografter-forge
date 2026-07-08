@@ -118,7 +118,7 @@ const QuoteCheckDetail = () => {
           )}
         </div>
 
-        {isAdmin && diagnostic && (
+        {advancedMode && diagnostic && (
           <div className="no-print rounded-xl border border-amber-400/50 bg-amber-50 p-4 text-amber-900">
             <p className="flex items-center gap-2 font-mono text-sm font-semibold">
               <AlertTriangle className="h-4 w-4" /> Admin: {diagnostic.warning || "Score changed materially from previous run."}
@@ -142,7 +142,7 @@ const QuoteCheckDetail = () => {
           </div>
         )}
 
-        {isAdmin && audit && (audit.evidence || audit.scoring || audit.documentExtractions || audit.supportingDiagnostic || audit.reportJson) && (
+        {advancedMode && audit && (audit.evidence || audit.scoring || audit.documentExtractions || audit.supportingDiagnostic || audit.reportJson) && (
           <QuoteAuditDiagnostic
             fileName={audit.fileName}
             fileHash={audit.fileHash}
@@ -192,7 +192,7 @@ const QuoteCheckDetail = () => {
               <p className="font-mono text-sm text-muted-foreground max-w-md mx-auto">{report.error}</p>
             </div>
           ) : (
-            <QuoteHealthCheckReport report={report} admin={isAdmin} />
+            <QuoteHealthCheckReport report={report} admin={advancedMode} />
           )}
         </div>
       </main>
