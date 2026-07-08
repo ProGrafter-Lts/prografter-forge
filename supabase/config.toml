@@ -44,3 +44,7 @@ project_id = "xryinqaxjclcmhebdcex"
   [functions.send-tradevault-expiry-reminders]
     verify_jwt = false
 
+  [functions.analyse-simple-quote]
+    verify_jwt = false
+  [functions.read-simple-quote-check]
+    verify_jwt = false

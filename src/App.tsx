@@ -91,6 +91,8 @@ const AdminCallNote = lazy(() => import("./pages/AdminCallNote.tsx"));
 const AdminHome = lazy(() => import("./pages/AdminHome.tsx"));
 const AdminQuoteStandards = lazy(() => import("./pages/AdminQuoteStandards.tsx"));
 const AdminAdvancedQuoteReview = lazy(() => import("./pages/AdminAdvancedQuoteReview.tsx"));
+const SimpleQuoteChecker = lazy(() => import("./pages/SimpleQuoteChecker.tsx"));
+const SimpleQuoteReportPage = lazy(() => import("./pages/SimpleQuoteReport.tsx"));
 import AdminRoute from "./components/AdminRoute.tsx";
 import AppLayout from "./components/layout/AppLayout.tsx";
 import DrawerHost from "./components/layout/DrawerHost.tsx";
@@ -128,6 +130,8 @@ const AppRoutes = () => {
             <Route path="/register/trade" element={<SignupTradeRedirect />} />
             <Route path="/post-a-job" element={<Navigate to="/post-job-brief" replace />} />
             <Route path="/quote-checker" element={<QuoteChecker />} />
+            <Route path="/simple-quote-checker" element={<SimpleQuoteChecker />} />
+            <Route path="/simple-quote-report/:id" element={<SimpleQuoteReportPage />} />
             
             <Route path="/report/:id" element={<QuoteReport />} />
             <Route path="/green" element={<GreenGrants />} />

@@ -3549,6 +3549,51 @@ export type Database = {
         }
         Relationships: []
       }
+      simple_quote_checks: {
+        Row: {
+          created_at: string
+          email: string | null
+          error: string | null
+          id: string
+          intake: Json
+          lookup_token: string
+          pdf_url: string | null
+          project_type: string | null
+          report_json: Json | null
+          status: string
+          supporting_files: Json
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          error?: string | null
+          id?: string
+          intake?: Json
+          lookup_token?: string
+          pdf_url?: string | null
+          project_type?: string | null
+          report_json?: Json | null
+          status?: string
+          supporting_files?: Json
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          error?: string | null
+          id?: string
+          intake?: Json
+          lookup_token?: string
+          pdf_url?: string | null
+          project_type?: string | null
+          report_json?: Json | null
+          status?: string
+          supporting_files?: Json
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       specialisms: {
         Row: {
           applicable_trades: string[]
