@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthReady } from "@/hooks/useAuthReady";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
@@ -34,6 +34,11 @@ const QuoteCheckDetail = () => {
   const navigate = useNavigate();
   const { isReady, user } = useAuthReady();
   const { isAdmin } = useIsAdmin();
+  const [searchParams] = useSearchParams();
+  // The full 100+ point checklist, diagnostics and audit trail only appear when an
+  // admin opens the report in advanced mode (via the Advanced Review Engine link).
+  // A normal report view always shows the simplified consumer report — even for admins.
+  const advancedMode = isAdmin && searchParams.get("advanced") === "1";
   const [report, setReport] = useState<ReportJson | null>(null);
   const [status, setStatus] = useState<string>("loading");
   const [error, setError] = useState<string | null>(null);
@@ -113,7 +118,7 @@ const QuoteCheckDetail = () => {
           )}
         </div>
 
-        {isAdmin && diagnostic && (
+        {advancedMode && diagnostic && (
           <div className="no-print rounded-xl border border-amber-400/50 bg-amber-50 p-4 text-amber-900">
             <p className="flex items-center gap-2 font-mono text-sm font-semibold">
               <AlertTriangle className="h-4 w-4" /> Admin: {diagnostic.warning || "Score changed materially from previous run."}
@@ -137,7 +142,7 @@ const QuoteCheckDetail = () => {
           </div>
         )}
 
-        {isAdmin && audit && (audit.evidence || audit.scoring || audit.documentExtractions || audit.supportingDiagnostic || audit.reportJson) && (
+        {advancedMode && audit && (audit.evidence || audit.scoring || audit.documentExtractions || audit.supportingDiagnostic || audit.reportJson) && (
           <QuoteAuditDiagnostic
             fileName={audit.fileName}
             fileHash={audit.fileHash}
@@ -187,7 +192,7 @@ const QuoteCheckDetail = () => {
               <p className="font-mono text-sm text-muted-foreground max-w-md mx-auto">{report.error}</p>
             </div>
           ) : (
-            <QuoteHealthCheckReport report={report} admin={isAdmin} />
+            <QuoteHealthCheckReport report={report} admin={advancedMode} />
           )}
         </div>
       </main>
