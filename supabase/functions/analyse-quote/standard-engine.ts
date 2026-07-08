@@ -185,7 +185,7 @@ OUTPUT — return ONLY one valid JSON object, no markdown/code fences. Use exact
   "figures": { "subtotal": string|null, "vat_rate": string|null, "vat_amount": string|null, "total_incl_vat": string|null },
   "figures_reconcile": boolean,
   "checks": [
-    { "check_id": "${checks[0]?.check_id || "XX-01"}", "verdict": "ADDRESSED|NEEDS CLARIFICATION|MISSING", "evidence_quote": string|null, "evidence_location": string|null, "source_type": "uploaded_quote|homeowner_form|builder_confirmed_separately|admin_note|ai_inference|not_found", "confidence": "high|medium|low" }
+    { "check_id": "${checks[0]?.check_id || "XX-01"}", "verdict": "ADDRESSED|NEEDS CLARIFICATION|MISSING|NOT_APPLICABLE", "evidence_quote": string|null, "evidence_location": string|null, "source_type": "uploaded_quote|homeowner_form|builder_confirmed_separately|admin_note|ai_inference|not_found", "confidence": "high|medium|low" }
   ],
   "additional_observations": [ string ]
 }
