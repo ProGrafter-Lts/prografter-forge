@@ -132,10 +132,11 @@ export function buildBuilderMessage(
 }
 
 export function verdictSummary(counts: ReturnType<typeof scoreChecklist>): string {
-  const { addressed_count, clarification_count, missing_count, total_checks, score } = counts;
+  const { addressed_count, clarification_count, missing_count, not_applicable_count, total_checks, score } = counts;
+  const naPart = not_applicable_count > 0 ? ` ${not_applicable_count} not relevant to this quote were excluded.` : "";
   return (
-    `Checked against ${total_checks} fixed checks: ${addressed_count} addressed, ` +
-    `${clarification_count} need clarification, ${missing_count} missing. ` +
+    `Checked against ${total_checks} relevant checks: ${addressed_count} addressed, ` +
+    `${clarification_count} need clarification, ${missing_count} missing.${naPart} ` +
     `Quote Check Score ${score}/100.`
   );
 }
