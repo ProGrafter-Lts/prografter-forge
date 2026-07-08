@@ -1143,11 +1143,12 @@ const ExecutiveVerdict = ({ report }: { report: ReportJson }) => {
 
 /* ------------------------------------------------------------------ */
 
-const VerdictPill = ({ v }: { v: "ADDRESSED" | "NEEDS CLARIFICATION" | "MISSING" }) => {
+const VerdictPill = ({ v }: { v: "ADDRESSED" | "NEEDS CLARIFICATION" | "MISSING" | "NOT_APPLICABLE" }) => {
   const map = {
     ADDRESSED: { cls: "bg-teal/15 text-teal border-teal/30", Icon: CheckCircle2, label: "Addressed" },
     "NEEDS CLARIFICATION": { cls: "bg-amber-500/15 text-amber-700 border-amber-500/30", Icon: AlertCircle, label: "Clarify" },
     MISSING: { cls: "bg-destructive/15 text-destructive border-destructive/30", Icon: XCircle, label: "Missing" },
+    NOT_APPLICABLE: { cls: "bg-muted text-muted-foreground border-border", Icon: AlertCircle, label: "N/A" },
   }[v];
   return (
     <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide ${map.cls}`}>
