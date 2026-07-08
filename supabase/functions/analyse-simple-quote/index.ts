@@ -70,20 +70,53 @@ function extractJson(raw: string): any {
   // Strip markdown code fences
   s = s.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "");
   const first = s.indexOf("{");
+  if (first === -1) return null;
   const last = s.lastIndexOf("}");
-  if (first === -1 || last === -1) return null;
-  const candidate = s.slice(first, last + 1);
-  try {
-    return JSON.parse(candidate);
-  } catch {
-    // Best-effort: remove trailing commas
+  const candidate = last > first ? s.slice(first, last + 1) : s.slice(first);
+
+  const attempts = [
+    candidate,
+    candidate.replace(/,(\s*[}\]])/g, "$1"),
+    repairTruncatedJson(candidate),
+  ];
+  for (const a of attempts) {
+    if (!a) continue;
     try {
-      return JSON.parse(candidate.replace(/,(\s*[}\]])/g, "$1"));
-    } catch {
-      return null;
-    }
+      return JSON.parse(a);
+    } catch { /* try next */ }
   }
+  return null;
 }
+
+// Best-effort repair of JSON truncated mid-stream: close any open strings,
+// then close outstanding arrays/objects in the right order.
+function repairTruncatedJson(input: string): string | null {
+  let s = input;
+  // Drop a trailing partial token after the last complete value separator.
+  // Track structure while ignoring string contents.
+  const stack: string[] = [];
+  let inString = false;
+  let escaped = false;
+  for (let i = 0; i < s.length; i++) {
+    const ch = s[i];
+    if (inString) {
+      if (escaped) { escaped = false; continue; }
+      if (ch === "\\") { escaped = true; continue; }
+      if (ch === '"') inString = false;
+      continue;
+    }
+    if (ch === '"') inString = true;
+    else if (ch === "{") stack.push("}");
+    else if (ch === "[") stack.push("]");
+    else if (ch === "}" || ch === "]") stack.pop();
+  }
+  if (inString) s += '"';
+  // Remove trailing comma / dangling colon-key fragments.
+  s = s.replace(/,\s*$/, "").replace(/:\s*$/, ": null");
+  while (stack.length) s += stack.pop();
+  return s;
+}
+
 
 async function callAnthropic(content: unknown, maxTokens: number): Promise<string> {
   const resp = await fetch("https://api.anthropic.com/v1/messages", {
