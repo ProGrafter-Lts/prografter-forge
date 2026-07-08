@@ -237,8 +237,10 @@ ${lines || "(none)"}
 SUPPORTING DOCUMENT EVIDENCE:
 ${supportingEvidence || "(none)"}
 
+For every upgrade include the supporting document file name that supplied the evidence. Use the exact DOCUMENT file name from the evidence block.
+
 OUTPUT — return ONLY valid JSON, no markdown fences:
-{ "upgrades": [ { "check_id": string, "new_verdict": "ADDRESSED|NEEDS CLARIFICATION", "source_type": "builder_confirmed_separately|uploaded_quote", "evidence_quote": string } ] }`;
+{ "upgrades": [ { "check_id": string, "new_verdict": "ADDRESSED|NEEDS CLARIFICATION", "source_type": "builder_confirmed_separately|uploaded_quote", "evidence_quote": string, "source_file": string|null } ] }`;
 }
 
 
@@ -261,7 +263,7 @@ const VERDICT_RANK: Record<string, number> = {
 export function diffChecklists(
   quoteOnly: CheckResultLite[],
   merged: CheckResultLite[],
-): Array<{ check_id: string; check_title: string; quote_verdict: string; merged_verdict: string; note: string }> {
+): Array<{ check_id: string; check_title: string; quote_verdict: string; merged_verdict: string; note: string; source_file?: string | null }> {
   const byId = new Map(quoteOnly.map((r) => [r.check_id, r]));
   const improved: Array<{ check_id: string; check_title: string; quote_verdict: string; merged_verdict: string; note: string }> = [];
   for (const m of merged) {
@@ -276,6 +278,7 @@ export function diffChecklists(
         check_title: m.check_title,
         quote_verdict: q.verdict,
         merged_verdict: m.verdict,
+        source_file: m.evidence_location || null,
         note: suppliedSeparately
           ? "Supplied separately — improves confidence, subject to written confirmation."
           : "Clarified by supporting documents.",
