@@ -146,7 +146,11 @@ const TopicPanel = ({ title, status, payment = false }: { title: string; status?
 const QuoteAuditDiagnostic = ({ fileName, fileHash, evidence, validation, scoring, reportHtml, documentExtractions, supportingDiagnostic, mergedEvidence, checklistResults, reportJson }: Props) => {
   const missingAfterAll = (checklistResults || []).filter((r) => r.verdict === "MISSING");
   const improved = supportingDiagnostic?.improved_checks || reportJson?.improved_checks || [];
-  const docs = documentExtractions || supportingDiagnostic?.document_extractions || supportingDiagnostic?.documents || [];
+  const docs = (documentExtractions && documentExtractions.length > 0)
+    ? documentExtractions
+    : (supportingDiagnostic?.document_extractions && supportingDiagnostic.document_extractions.length > 0)
+      ? supportingDiagnostic.document_extractions
+      : supportingDiagnostic?.documents || [];
   const documentScore = scoring?.document_score ?? supportingDiagnostic?.quote_document_score ?? reportJson?.document_score;
   const projectConfidence = scoring?.project_confidence_score ?? supportingDiagnostic?.project_pack_confidence_score ?? reportJson?.project_confidence_score;
   const fileCount = supportingDiagnostic?.file_count ?? supportingDiagnostic?.uploaded_file_count ?? reportJson?.file_count ?? (1 + docs.length);
@@ -275,40 +279,6 @@ const QuoteAuditDiagnostic = ({ fileName, fileHash, evidence, validation, scorin
             <div>Improved check count: <strong>{mergeStatus.improved_check_count ?? 0}</strong></div>
           </div>
           {mergeStatus.explanation && <p className="mt-2 font-mono text-xs text-muted-foreground">{mergeStatus.explanation}</p>}
-        </Section>
-      )}
-
-      {docs.length > 0 && (
-        <Section title={`Documents identified & extracted (${docs.length})`} icon={<Database className="h-3.5 w-3.5" />} defaultOpen>
-          <div className="space-y-3">
-            {docs.map((d, i) => (
-              <div key={i} className="rounded-[4px] border border-border/60 bg-card p-3 font-mono text-xs">
-                <p className="font-semibold text-navy">{d.file_name || "—"}</p>
-                <p className="text-muted-foreground">Detected: {d.detected_type_label || d.detected_type || "—"} · {d.affected_report ? "affected report" : "not used"}</p>
-                {d.affected_reason && <p className="text-muted-foreground">{d.affected_reason}</p>}
-                {d.summary && <p className="mt-1 text-navy/80">{d.summary}</p>}
-                {(d.facts?.length ?? 0) > 0 && (
-                  <table className="mt-2 w-full border-collapse">
-                    <thead>
-                      <tr className="text-left text-muted-foreground">
-                        <th className="py-0.5 pr-2">Fact</th><th className="py-0.5 pr-2">Value</th><th className="py-0.5 pr-2">Source</th><th className="py-0.5">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {d.facts!.map((f, j) => (
-                        <tr key={j} className="border-t border-border/40 align-top">
-                          <td className="py-0.5 pr-2">{f.label}</td>
-                          <td className="py-0.5 pr-2">{f.value}</td>
-                          <td className="py-0.5 pr-2">{f.source_type}</td>
-                          <td className="py-0.5">{f.status}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
-              </div>
-            ))}
-          </div>
         </Section>
       )}
 
