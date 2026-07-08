@@ -3,7 +3,7 @@
 // supabase function: mcp
 // Bundled from src/lib/mcp/index.ts by @lovable.dev/mcp-js.
 // src/lib/mcp/index.ts
-import { defineMcp } from "npm:@lovable.dev/mcp-js@0.20.0";
+import { auth, defineMcp } from "npm:@lovable.dev/mcp-js@0.20.0";
 
 // src/lib/mcp/tools/echo.ts
 import { defineTool } from "npm:@lovable.dev/mcp-js@0.20.0";
@@ -70,11 +70,16 @@ var get_pricing_default = defineTool3({
 });
 
 // src/lib/mcp/index.ts
+var projectRef = "xryinqaxjclcmhebdcex";
 var mcp_default = defineMcp({
   name: "prografter-mcp",
   title: "ProGrafter MCP",
   version: "0.1.0",
   instructions: "Tools for ProGrafter, a UK construction trust platform. Use `get_platform_overview` to learn what ProGrafter is and how it works, `get_pricing` for the pricing model, and `echo` to verify connectivity.",
+  auth: auth.oauth.issuer({
+    issuer: `https://${projectRef}.supabase.co/auth/v1`,
+    acceptedAudiences: "authenticated"
+  }),
   tools: [get_platform_overview_default, get_pricing_default, echo_default]
 });
 

@@ -44,6 +44,7 @@ const SignupHomeowner = lazy(() => import("./pages/SignupHomeowner.tsx"));
 const SignupHomeownerNext = lazy(() => import("./pages/SignupHomeownerNext.tsx"));
 const SignupCheckEmail = lazy(() => import("./pages/SignupCheckEmail.tsx"));
 const AuthCallback = lazy(() => import("./pages/AuthCallback.tsx"));
+const OAuthConsent = lazy(() => import("./pages/OAuthConsent.tsx"));
 const SignupTradeRedirect = lazy(() => import("./pages/SignupTradeRedirect.tsx"));
 const AdminVerifications = lazy(() => import("./pages/AdminVerifications.tsx"));
 const AdminTradeVault = lazy(() => import("./pages/AdminTradeVault.tsx"));
@@ -133,6 +134,7 @@ const AppRoutes = () => {
             <Route path="/login" element={<Login />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
+            <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
             <Route path="/unsubscribe" element={<Unsubscribe />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/about" element={<About />} />
