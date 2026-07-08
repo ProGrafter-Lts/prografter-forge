@@ -1547,8 +1547,12 @@ const FixedStandardReport = ({ report, admin = false }: { report: ReportJson; ad
         {/* Questions to ask */}
         {questions.length > 0 && (
           <SectionCard
-            title="Questions To Ask The Builder"
-            intro="Generated from every missing or unclear check — copy any question to raise it directly."
+            title="Key Questions To Ask The Builder"
+            intro={
+              admin
+                ? "Every missing or unclear check — copy any question to raise it directly."
+                : "The most important things to confirm on this quote before you proceed — copy any question to raise it directly."
+            }
           >
             <div className="no-print" style={{ marginBottom: "1rem" }}>
               <button
