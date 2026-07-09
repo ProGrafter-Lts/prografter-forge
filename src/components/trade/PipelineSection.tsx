@@ -241,19 +241,22 @@ const PipelineSection = ({ tradeId }: Props) => {
           {CARD_DEFS.map((card) => {
             const value = counts[card.key];
             const isZero = value === 0;
+            const clickable = !!card.filter;
             return (
               <button
                 key={card.key}
                 type="button"
+                disabled={!clickable}
                 onClick={() =>
+                  clickable &&
                   navigate(
-                    `/dashboard/trade?pipeline=${encodeURIComponent(card.key)}#planning-alerts-list`,
+                    `/dashboard/trade?pipeline=${encodeURIComponent(card.filter!)}#planning-alerts-list`,
                   )
                 }
-                className={`text-left rounded-2xl border p-4 transition-all hover:shadow-sm hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-ring ${card.tone} ${
-                  isZero ? "opacity-70" : ""
-                }`}
-                aria-label={`${value} ${card.label} leads. ${card.subtitle}. Click to filter.`}
+                className={`text-left rounded-2xl border p-4 transition-all focus:outline-none focus:ring-2 focus:ring-ring ${card.tone} ${
+                  clickable ? "hover:shadow-sm hover:-translate-y-0.5" : "cursor-default"
+                } ${isZero ? "opacity-70" : ""}`}
+                aria-label={`${value} ${card.label} leads. ${card.subtitle}.${clickable ? " Click to filter." : ""}`}
               >
                 <div
                   className={`font-heading text-3xl md:text-4xl leading-none ${
