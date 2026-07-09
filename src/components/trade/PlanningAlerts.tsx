@@ -164,7 +164,7 @@ export const PlanningAlertsSection = ({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="font-heading text-navy text-2xl mb-1">Planning Intelligence</h2>
+        <h2 className="font-heading text-navy text-2xl mb-1">Planning Hub</h2>
         <p className="font-mono text-xs text-secondary-text">
           Get notified instantly when relevant planning applications are approved in your area.
         </p>
