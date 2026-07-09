@@ -399,9 +399,18 @@ const TradeDashboard = () => {
 
           {activeNav === "dashboard" && (
           <>
+          {/* Slim eligibility / document banners only — shown near the top when action is required */}
           {trade && (
             <TradeVaultBanners tradeId={trade.id} onOpenVault={() => setActiveNav("tradevault")} />
           )}
+
+          {/* PRIORITY 1–5: Morning Briefing, Follow-ups, Jobs Starting Soon, Quotes, Planning Hub */}
+          {trade && <MorningBriefing tradeId={trade.id} quotes={quotes} />}
+
+          {/* PRIORITY 6: Pipeline */}
+          {trade && <PipelineSection tradeId={trade.id} />}
+
+          {/* PRIORITY 7+: Setup, profile strength, stats and margin sit lower */}
           {trade && (
             <AddSpecialismsBanner
               tradeId={trade.id}
@@ -427,8 +436,6 @@ const TradeDashboard = () => {
 
           <CalendarConnect variant="compact" />
 
-          {trade && <PipelineSection tradeId={trade.id} />}
-
           <JobMatchesList matches={matches} />
 
           <ActiveProjectsList projects={activeProjects} />
@@ -443,12 +450,11 @@ const TradeDashboard = () => {
             <QuickBuildDraftsList tradeId={trade.id} />
           )}
 
-          <QuotesList quotes={quotes} />
-
           {trade && <DashboardPlanningAlerts trade={trade} />}
           {trade && trade.is_green_trade && <CertificationsSection trade={trade} />}
           </>
           )}
+
 
             </>
           )}
