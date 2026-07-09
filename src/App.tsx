@@ -93,6 +93,8 @@ const AdminQuoteStandards = lazy(() => import("./pages/AdminQuoteStandards.tsx")
 const AdminAdvancedQuoteReview = lazy(() => import("./pages/AdminAdvancedQuoteReview.tsx"));
 const SimpleQuoteChecker = lazy(() => import("./pages/SimpleQuoteChecker.tsx"));
 const SimpleQuoteReportPage = lazy(() => import("./pages/SimpleQuoteReport.tsx"));
+const QuoteCheckerHome = lazy(() => import("./pages/QuoteCheckerHome.tsx"));
+const AdminQuoteCheckerModules = lazy(() => import("./pages/AdminQuoteCheckerModules.tsx"));
 import AdminRoute from "./components/AdminRoute.tsx";
 import AppLayout from "./components/layout/AppLayout.tsx";
 import DrawerHost from "./components/layout/DrawerHost.tsx";
