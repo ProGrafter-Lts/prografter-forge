@@ -210,13 +210,17 @@ export default function SimpleQuoteReport({ report }: { report: SimpleReportJson
         </Section>
       ) : null}
 
-      {/* 5. What appears missing */}
+      {/* 5. Not found / confirm if required */}
       {report.what_appears_missing?.length ? (
-        <Section title="What Appears Missing" icon={<AlertTriangle className="h-5 w-5 text-rose-600" />}>
+        <Section title="Not Found / Confirm If Required" icon={<AlertTriangle className="h-5 w-5 text-amber-600" />}>
+          <p className="font-mono text-xs text-muted-foreground mb-2">
+            These items were not visible in the main quote or supporting documents. They may simply be
+            outside the agreed scope — confirm with your builder if required.
+          </p>
           <ul className="space-y-2">
             {report.what_appears_missing.map((t, i) => (
               <li key={i} className="flex gap-2 font-mono text-sm text-navy/90">
-                <AlertTriangle className="h-4 w-4 text-rose-600 shrink-0 mt-0.5" />
+                <HelpCircle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
                 <span>{t}</span>
               </li>
             ))}
