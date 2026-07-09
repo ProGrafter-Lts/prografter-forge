@@ -121,11 +121,22 @@ const PipelineSection = ({ tradeId }: Props) => {
       return;
     }
 
-    const next: Counts = { todo: 0, contacted: 0, quoted: 0, won: 0 };
+    const next: Counts = {
+      todo: 0,
+      contacted: 0,
+      awaiting_planning: 0,
+      planning_approved: 0,
+      site_visit: 0,
+      quoted: 0,
+      won: 0,
+      lost: 0,
+    };
     for (const r of data ?? []) {
       const status = r.contact_status as ShortlistStatus;
       if (status === "todo" || status === "contacted" || status === "quoted") {
         next[status] += 1;
+      } else if (status === "dead") {
+        next.lost += 1;
       } else if (status === "won") {
         if (r.last_status_change_at && r.last_status_change_at >= ninetyDaysAgo) {
           next.won += 1;
