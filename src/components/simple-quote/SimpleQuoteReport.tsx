@@ -113,6 +113,27 @@ export default function SimpleQuoteReport({ report }: { report: SimpleReportJson
     setTimeout(() => setCopied(false), 2000);
   };
 
+  // Split the suggested message into a short intro plus numbered points so it is
+  // easy for homeowners to read, copy and send. Presentation only — the copied
+  // text still uses the original message verbatim.
+  const parseSuggestedMessage = (msg: string) => {
+    const cleaned = msg.trim();
+    // Prefer explicit line breaks; fall back to sentence splitting.
+    let parts = cleaned
+      .split(/\n+/)
+      .map((p) => p.replace(/^\s*(?:\d+[.)]|[-•*])\s*/, "").trim())
+      .filter(Boolean);
+    if (parts.length <= 1) {
+      parts = cleaned
+        .split(/(?<=[.?!])\s+/)
+        .map((p) => p.trim())
+        .filter(Boolean);
+    }
+    if (parts.length <= 1) return { intro: cleaned, points: [] as string[] };
+    return { intro: parts[0], points: parts.slice(1) };
+  };
+  const suggested = report.suggested_message ? parseSuggestedMessage(report.suggested_message) : null;
+
   return (
     <div className="space-y-5">
       {/* 1. Executive verdict + Quote Clarity Score */}
