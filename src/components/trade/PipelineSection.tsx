@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { AlertCircle, ArrowRight, RefreshCw } from "lucide-react";
+import { AlertCircle, ArrowRight, RefreshCw, GitBranch } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { ShortlistStatus } from "./ShortlistStatusControl";
+import Workspace from "@/components/trade/Workspace";
 
 interface Props {
   tradeId: string;
@@ -18,63 +19,51 @@ const CARD_DEFS: {
   key: keyof Counts;
   label: string;
   subtitle: string;
-  tone: string;
+  color: string;
   filter?: string;
 }[] = [
   {
     key: "todo",
     label: "To Contact",
     subtitle: "Haven't reached out yet",
-    tone: "bg-muted/40 text-foreground border-border",
+    color: "#94a3b8",
     filter: "todo",
   },
   {
     key: "contacted",
-    label: "Waiting for Reply",
+    label: "Waiting",
     subtitle: "Reached out, awaiting response",
-    tone: "bg-amber-500/10 text-amber-700 border-amber-500/30",
+    color: "#eab308",
     filter: "contacted",
-  },
-  {
-    key: "awaiting_planning",
-    label: "Awaiting Planning Decision",
-    subtitle: "Application still under review",
-    tone: "bg-blue-500/10 text-blue-700 border-blue-500/30",
   },
   {
     key: "planning_approved",
     label: "Planning Approved",
     subtitle: "Approved — ready to approach",
-    tone: "bg-purple-500/10 text-purple-700 border-purple-500/30",
+    color: "#a855f7",
   },
   {
     key: "site_visit",
-    label: "Site Visit Booked",
+    label: "Site Visit",
     subtitle: "Visit scheduled",
-    tone: "bg-teal-500/10 text-teal-700 border-teal-500/30",
+    color: "#14b8a6",
   },
   {
     key: "quoted",
     label: "Quoted",
     subtitle: "Quote submitted, pending decision",
-    tone: "bg-primary/10 text-primary border-primary/30",
+    color: "#60a5fa",
     filter: "quoted",
   },
   {
     key: "won",
     label: "Won",
     subtitle: "Converted in last 90 days",
-    tone: "bg-emerald-500/10 text-emerald-700 border-emerald-500/30",
+    color: "#34d399",
     filter: "won",
   },
-  {
-    key: "lost",
-    label: "Lost",
-    subtitle: "Archived or lost leads",
-    tone: "bg-destructive/10 text-destructive border-destructive/30",
-    filter: "dead",
-  },
 ];
+
 
 const PipelineSection = ({ tradeId }: Props) => {
   const navigate = useNavigate();
@@ -161,53 +150,43 @@ const PipelineSection = ({ tradeId }: Props) => {
   const totalLeads =
     counts.todo + counts.contacted + counts.quoted + counts.won + counts.lost;
 
-  const header = (
-    <div>
-      <h2
-        id="pipeline-heading"
-        className="font-heading text-primary text-xl uppercase tracking-wider"
-      >
-        Your Pipeline
-      </h2>
-      <p className="font-mono text-xs text-muted-foreground mt-1">
-        Leads you're working on
-      </p>
-    </div>
-  );
-
   return (
-    <section aria-labelledby="pipeline-heading" className="space-y-3">
-      {header}
-
+    <Workspace
+      icon={GitBranch}
+      title="Pipeline"
+      subtitle="Every lead, moving left to right toward won work."
+      accent="orange"
+      surface="1"
+      texture="grid"
+    >
       {loading ? (
         <div
-          className="grid grid-cols-2 md:grid-cols-4 gap-3"
+          className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3"
           aria-label="Loading pipeline counts"
           aria-busy="true"
         >
           {CARD_DEFS.map((card) => (
             <div
               key={card.key}
-              className="rounded-2xl border border-border bg-muted/20 p-4 space-y-2"
+              className="premium-card p-4 space-y-2"
             >
               <Skeleton className="h-9 w-12" />
               <Skeleton className="h-3 w-20" />
-              <Skeleton className="h-3 w-28" />
             </div>
           ))}
         </div>
       ) : error ? (
         <div
           role="alert"
-          className="rounded-2xl border border-destructive/40 bg-destructive/5 p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+          className="premium-card p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
         >
           <div className="flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
             <div>
-              <p className="font-sans text-sm text-foreground">
+              <p className="font-sans text-sm text-white">
                 Couldn't load your pipeline right now.
               </p>
-              <p className="font-mono text-xs text-muted-foreground mt-1">
+              <p className="font-mono text-xs text-white/55 mt-1">
                 {error}
               </p>
             </div>
@@ -215,30 +194,35 @@ const PipelineSection = ({ tradeId }: Props) => {
           <button
             type="button"
             onClick={() => void load()}
-            className="inline-flex items-center gap-2 bg-secondary text-white font-mono text-xs px-4 py-2 rounded-xl hover:bg-secondary/90 transition-colors self-start sm:self-auto"
+            className="inline-flex items-center gap-2 bg-secondary text-white font-sans font-semibold text-sm px-4 min-h-[44px] rounded-xl hover:opacity-90 transition-colors self-start sm:self-auto"
           >
-            <RefreshCw className="w-3.5 h-3.5" />
+            <RefreshCw className="w-4 h-4" />
             Retry
           </button>
         </div>
       ) : totalLeads === 0 ? (
-        <div className="rounded-2xl border-2 border-dashed border-border p-6 text-center space-y-3">
-          <p className="font-heading text-primary text-base">No leads in your pipeline yet</p>
-          <p className="font-sans text-sm text-muted-foreground max-w-md mx-auto">
-            Save planning opportunities or submit quotes for matched jobs to start building your
-            pipeline.
-          </p>
-          <button
-            onClick={() => navigate("/planning-alerts")}
-            className="inline-flex items-center gap-2 bg-secondary text-white font-mono text-xs px-4 py-2 rounded-xl hover:bg-secondary/90 transition-colors"
-          >
-            View Planning Hub
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
+        <div className="premium-card p-6 flex items-start gap-4">
+          <span className="ws-accent-bg ws-accent-ring rounded-2xl w-11 h-11 flex items-center justify-center shrink-0">
+            <GitBranch className="w-5 h-5 ws-accent-fg" strokeWidth={1.75} />
+          </span>
+          <div>
+            <p className="font-sans font-semibold text-white text-base">Your pipeline is empty right now.</p>
+            <p className="font-sans text-sm text-white/60 mt-1 max-w-md leading-relaxed">
+              Save a planning opportunity or send a quote and it will start flowing through these
+              stages automatically.
+            </p>
+            <button
+              onClick={() => navigate("/planning-alerts")}
+              className="mt-3 inline-flex items-center gap-2 bg-secondary text-white font-sans font-semibold text-sm px-4 min-h-[44px] rounded-xl hover:opacity-90 transition-colors"
+            >
+              View Planning Hub
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {CARD_DEFS.map((card) => {
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          {CARD_DEFS.map((card, i) => {
             const value = counts[card.key];
             const isZero = value === 0;
             const clickable = !!card.filter;
@@ -253,22 +237,36 @@ const PipelineSection = ({ tradeId }: Props) => {
                     `/dashboard/trade?pipeline=${encodeURIComponent(card.filter!)}#planning-alerts-list`,
                   )
                 }
-                className={`text-left rounded-2xl border p-4 transition-all focus:outline-none focus:ring-2 focus:ring-ring ${card.tone} ${
-                  clickable ? "hover:shadow-sm hover:-translate-y-0.5" : "cursor-default"
+                className={`premium-card relative text-left p-4 focus:outline-none focus:ring-2 focus:ring-ring ${
+                  clickable ? "" : "cursor-default"
                 } ${isZero ? "opacity-70" : ""}`}
+                style={{ ["--ws-accent" as any]: "251 146 60" }}
                 aria-label={`${value} ${card.label} leads. ${card.subtitle}.${clickable ? " Click to filter." : ""}`}
               >
+                {/* Animated connector to the next stage */}
+                {i < CARD_DEFS.length - 1 && (
+                  <span
+                    className="hidden lg:block absolute top-1/2 -right-3 w-3 h-[2px] -translate-y-1/2"
+                    style={{ background: `linear-gradient(90deg, ${card.color}, transparent)` }}
+                    aria-hidden
+                  />
+                )}
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full animate-pin" style={{ backgroundColor: card.color }} />
+                  <span className="font-mono text-[10px] uppercase tracking-wider text-white/55">
+                    Stage {i + 1}
+                  </span>
+                </div>
                 <div
-                  className={`font-heading text-3xl md:text-4xl leading-none ${
-                    isZero ? "text-muted-foreground" : ""
-                  }`}
+                  className="font-heading text-4xl leading-none mt-2 animate-count"
+                  style={{ color: isZero ? "rgba(255,255,255,0.4)" : card.color }}
                 >
                   {value}
                 </div>
-                <div className="mt-2 font-mono text-[11px] uppercase tracking-wider">
+                <div className="mt-2 font-sans font-semibold text-sm text-white">
                   {card.label}
                 </div>
-                <div className="mt-1 font-sans text-[11px] text-muted-foreground leading-snug">
+                <div className="mt-1 font-sans text-[11px] text-white/50 leading-snug">
                   {card.subtitle}
                 </div>
               </button>
@@ -276,8 +274,9 @@ const PipelineSection = ({ tradeId }: Props) => {
           })}
         </div>
       )}
-    </section>
+    </Workspace>
   );
 };
+
 
 export default PipelineSection;
