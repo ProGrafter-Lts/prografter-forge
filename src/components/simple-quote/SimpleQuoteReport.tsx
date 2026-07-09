@@ -16,9 +16,26 @@ export interface SimpleCategory {
   name: string;
   relevant: boolean;
   score: number | null;
-  status: "clear" | "needs_clarifying" | "missing" | "not_scored" | string;
+  score_main?: number | null;
+  score_pack?: number | null;
+  status: "clear" | "supplied_separately" | "needs_clarifying" | "missing" | "not_scored" | string;
   note: string;
-  evidence_source: "in_quote" | "supplied_separately" | "homeowner_supplied" | "not_found" | string;
+  evidence_source:
+    | "in_quote"
+    | "supplied_in_supporting"
+    | "addendum_clarification"
+    | "supplied_separately"
+    | "homeowner_supplied"
+    | "not_found"
+    | string;
+}
+
+export interface SuppliedSeparatelyItem {
+  item?: string;
+  main_quote?: string;
+  supporting?: string;
+  status?: string;
+  note?: string;
 }
 
 export interface SimpleReportJson {
@@ -27,6 +44,8 @@ export interface SimpleReportJson {
   project_type?: string | null;
   verdict?: { level: "clear" | "useful" | "vague" | string; line: string };
   clarity_score?: number;
+  pack_confidence_score?: number;
+  has_supporting_docs?: boolean;
   relevant_categories_count?: number;
   strong_categories?: string[];
   weak_categories?: string[];
@@ -34,10 +53,11 @@ export interface SimpleReportJson {
   what_looks_clear?: string[];
   what_needs_clarifying?: string[];
   what_appears_missing?: string[];
+  supplied_separately?: SuppliedSeparatelyItem[];
   building_control?: { status?: string; detail?: string };
   questions?: string[];
   suggested_message?: string;
-  supporting_docs?: { name: string; type: string; note: string }[];
+  supporting_docs?: { name: string; type: string; note: string; builder_confirmed?: string }[];
 }
 
 const VERDICT_THEME: Record<string, { label: string; ring: string; text: string; bar: string }> = {
