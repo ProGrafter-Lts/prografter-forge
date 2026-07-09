@@ -103,6 +103,10 @@ const DisclaimerBanner = () => (
 const QuoteReport = () => {
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
+  const { isAdmin } = useIsAdmin();
+  // Admins opening the report via the Advanced Review Engine (?advanced=1) see the
+  // full detailed checklist; everyone else gets the streamlined consumer view.
+  const advancedMode = isAdmin && searchParams.get("advanced") === "1";
   const [report, setReport] = useState<ReportJson | null>(null);
   const [status, setStatus] = useState<string>("pending");
   const [accessError, setAccessError] = useState<string | null>(null);
