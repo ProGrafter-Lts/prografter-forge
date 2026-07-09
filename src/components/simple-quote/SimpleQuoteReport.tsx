@@ -113,6 +113,27 @@ export default function SimpleQuoteReport({ report }: { report: SimpleReportJson
     setTimeout(() => setCopied(false), 2000);
   };
 
+  // Split the suggested message into a short intro plus numbered points so it is
+  // easy for homeowners to read, copy and send. Presentation only — the copied
+  // text still uses the original message verbatim.
+  const parseSuggestedMessage = (msg: string) => {
+    const cleaned = msg.trim();
+    // Prefer explicit line breaks; fall back to sentence splitting.
+    let parts = cleaned
+      .split(/\n+/)
+      .map((p) => p.replace(/^\s*(?:\d+[.)]|[-•*])\s*/, "").trim())
+      .filter(Boolean);
+    if (parts.length <= 1) {
+      parts = cleaned
+        .split(/(?<=[.?!])\s+/)
+        .map((p) => p.trim())
+        .filter(Boolean);
+    }
+    if (parts.length <= 1) return { intro: cleaned, points: [] as string[] };
+    return { intro: parts[0], points: parts.slice(1) };
+  };
+  const suggested = report.suggested_message ? parseSuggestedMessage(report.suggested_message) : null;
+
   return (
     <div className="space-y-5">
       {/* 1. Executive verdict + Quote Clarity Score */}
@@ -163,7 +184,11 @@ export default function SimpleQuoteReport({ report }: { report: SimpleReportJson
             </div>
             <div>
               <p className="font-mono text-[10px] uppercase tracking-wider text-rose-600 mb-1">Weaker areas</p>
-              <p className="font-mono text-xs text-navy">{report.weak_categories?.join(", ") || "—"}</p>
+              <p className="font-mono text-xs text-navy">
+                {report.weak_categories?.length
+                  ? report.weak_categories.join(", ")
+                  : "No major weak areas — see clarification items below."}
+              </p>
             </div>
           </div>
         ) : null}
@@ -206,13 +231,17 @@ export default function SimpleQuoteReport({ report }: { report: SimpleReportJson
         </Section>
       ) : null}
 
-      {/* 5. What appears missing */}
+      {/* 5. Not found / confirm if required */}
       {report.what_appears_missing?.length ? (
-        <Section title="What Appears Missing" icon={<AlertTriangle className="h-5 w-5 text-rose-600" />}>
+        <Section title="Not Found / Confirm If Required" icon={<AlertTriangle className="h-5 w-5 text-amber-600" />}>
+          <p className="font-mono text-xs text-muted-foreground mb-2">
+            These items were not visible in the main quote or supporting documents. They may simply be
+            outside the agreed scope — confirm with your builder if required.
+          </p>
           <ul className="space-y-2">
             {report.what_appears_missing.map((t, i) => (
               <li key={i} className="flex gap-2 font-mono text-sm text-navy/90">
-                <AlertTriangle className="h-4 w-4 text-rose-600 shrink-0 mt-0.5" />
+                <HelpCircle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
                 <span>{t}</span>
               </li>
             ))}
@@ -275,7 +304,20 @@ export default function SimpleQuoteReport({ report }: { report: SimpleReportJson
               {copied ? "Copied" : "Copy"}
             </button>
           </div>
-          <p className="font-mono text-sm text-white/90 leading-relaxed whitespace-pre-wrap">{report.suggested_message}</p>
+          {suggested && (
+            <div className="space-y-3">
+              {suggested.intro && (
+                <p className="font-mono text-sm text-white/90 leading-relaxed whitespace-pre-wrap">{suggested.intro}</p>
+              )}
+              {suggested.points.length ? (
+                <ol className="space-y-2 list-decimal list-inside">
+                  {suggested.points.map((p, i) => (
+                    <li key={i} className="font-mono text-sm text-white/90 leading-relaxed">{p}</li>
+                  ))}
+                </ol>
+              ) : null}
+            </div>
+          )}
         </div>
       ) : null}
 
