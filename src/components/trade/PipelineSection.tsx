@@ -232,7 +232,7 @@ const PipelineSection = ({ tradeId }: Props) => {
             onClick={() => navigate("/planning-alerts")}
             className="inline-flex items-center gap-2 bg-secondary text-white font-mono text-xs px-4 py-2 rounded-xl hover:bg-secondary/90 transition-colors"
           >
-            View Planning Intelligence
+            View Planning Hub
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
