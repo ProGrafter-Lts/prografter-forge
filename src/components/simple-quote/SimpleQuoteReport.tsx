@@ -99,8 +99,11 @@ export default function SimpleQuoteReport({ report }: { report: SimpleReportJson
   const verdict = report.verdict ?? { level: "useful", line: "" };
   const theme = VERDICT_THEME[verdict.level] ?? VERDICT_THEME.useful;
   const score = typeof report.clarity_score === "number" ? report.clarity_score : 0;
+  const packScore = typeof report.pack_confidence_score === "number" ? report.pack_confidence_score : null;
+  const hasDocs = !!report.has_supporting_docs && packScore !== null;
   const categories = report.categories ?? [];
   const relevant = categories.filter((c) => c.relevant);
+  const suppliedSeparately = report.supplied_separately ?? [];
   const bc = report.building_control ?? {};
 
   const copyMessage = async () => {
