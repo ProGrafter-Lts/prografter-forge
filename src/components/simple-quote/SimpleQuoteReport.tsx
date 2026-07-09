@@ -282,10 +282,21 @@ export default function SimpleQuoteReport({ report }: { report: SimpleReportJson
       {/* Supporting docs note */}
       {report.supporting_docs?.length ? (
         <Section title="Supporting Documents" icon={<CheckCircle2 className="h-5 w-5 text-teal" />}>
-          <ul className="space-y-2">
+          <ul className="space-y-3">
             {report.supporting_docs.map((d, i) => (
-              <li key={i} className="font-mono text-xs text-navy/90">
-                <span className="font-medium">{d.name}</span> — {d.type}. {d.note}
+              <li key={i} className="rounded-xl border border-border p-3">
+                <p className="font-mono text-sm text-navy font-medium">{d.name}</p>
+                <p className="font-mono text-xs text-navy/80 mt-1">{d.type}. {d.note}</p>
+                <p className="font-mono text-xs text-navy/70 mt-2">
+                  Evidence from this document has been used in the Quote Pack Assessment, but should be
+                  confirmed with the builder before acceptance.
+                </p>
+                <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1">
+                  <p className="font-mono text-[11px] text-muted-foreground">Evidence role: <span className="text-navy/80">supporting clarification</span></p>
+                  <p className="font-mono text-[11px] text-muted-foreground">Builder confirmed: <span className="text-navy/80">{d.builder_confirmed || "unknown"}</span></p>
+                  <p className="font-mono text-[11px] text-muted-foreground">Affects quote score: <span className="text-navy/80">no</span></p>
+                  <p className="font-mono text-[11px] text-muted-foreground">Affects pack confidence: <span className="text-navy/80">yes</span></p>
+                </div>
               </li>
             ))}
           </ul>
