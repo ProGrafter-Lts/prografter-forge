@@ -163,7 +163,11 @@ export default function SimpleQuoteReport({ report }: { report: SimpleReportJson
             </div>
             <div>
               <p className="font-mono text-[10px] uppercase tracking-wider text-rose-600 mb-1">Weaker areas</p>
-              <p className="font-mono text-xs text-navy">{report.weak_categories?.join(", ") || "—"}</p>
+              <p className="font-mono text-xs text-navy">
+                {report.weak_categories?.length
+                  ? report.weak_categories.join(", ")
+                  : "No major weak areas — see clarification items below."}
+              </p>
             </div>
           </div>
         ) : null}
