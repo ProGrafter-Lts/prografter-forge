@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import AppShell from "@/components/AppShell";
 import SEO from "@/components/SEO";
 import QuoteHealthCheckReport from "@/components/QuoteHealthCheckReport";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 import {
   Loader2,
   CheckCircle2,
