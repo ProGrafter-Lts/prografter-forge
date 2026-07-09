@@ -254,11 +254,8 @@ async function downloadBlock(supabase: any, path: string, displayName: string): 
   }
 }
 
-// Deterministic Quote Clarity Score = average of relevant category scores * 10.
-function computeClarityScore(categories: any[]): number {
-  const scores = categories
-    .filter((c) => c && c.relevant && typeof c.score === "number")
-    .map((c) => c.score as number);
+// Deterministic score from a list of numeric scores = average * 10.
+function averageScore(scores: number[]): number {
   if (!scores.length) return 0;
   const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
   return Math.round(avg * 10);
