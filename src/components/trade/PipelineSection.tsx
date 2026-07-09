@@ -9,43 +9,85 @@ interface Props {
   tradeId: string;
 }
 
-type Counts = Record<"todo" | "contacted" | "quoted" | "won", number>;
+type Counts = Record<
+  "todo" | "contacted" | "awaiting_planning" | "planning_approved" | "site_visit" | "quoted" | "won" | "lost",
+  number
+>;
 
 const CARD_DEFS: {
   key: keyof Counts;
   label: string;
   subtitle: string;
   tone: string;
+  filter?: string;
 }[] = [
   {
     key: "todo",
     label: "To Contact",
     subtitle: "Haven't reached out yet",
     tone: "bg-muted/40 text-foreground border-border",
+    filter: "todo",
   },
   {
     key: "contacted",
     label: "Waiting for Reply",
     subtitle: "Reached out, awaiting response",
     tone: "bg-amber-500/10 text-amber-700 border-amber-500/30",
+    filter: "contacted",
+  },
+  {
+    key: "awaiting_planning",
+    label: "Awaiting Planning Decision",
+    subtitle: "Application still under review",
+    tone: "bg-blue-500/10 text-blue-700 border-blue-500/30",
+  },
+  {
+    key: "planning_approved",
+    label: "Planning Approved",
+    subtitle: "Approved — ready to approach",
+    tone: "bg-purple-500/10 text-purple-700 border-purple-500/30",
+  },
+  {
+    key: "site_visit",
+    label: "Site Visit Booked",
+    subtitle: "Visit scheduled",
+    tone: "bg-teal-500/10 text-teal-700 border-teal-500/30",
   },
   {
     key: "quoted",
     label: "Quoted",
     subtitle: "Quote submitted, pending decision",
     tone: "bg-primary/10 text-primary border-primary/30",
+    filter: "quoted",
   },
   {
     key: "won",
     label: "Won",
     subtitle: "Converted in last 90 days",
     tone: "bg-emerald-500/10 text-emerald-700 border-emerald-500/30",
+    filter: "won",
+  },
+  {
+    key: "lost",
+    label: "Lost",
+    subtitle: "Archived or lost leads",
+    tone: "bg-destructive/10 text-destructive border-destructive/30",
+    filter: "dead",
   },
 ];
 
 const PipelineSection = ({ tradeId }: Props) => {
   const navigate = useNavigate();
-  const [counts, setCounts] = useState<Counts>({ todo: 0, contacted: 0, quoted: 0, won: 0 });
+  const [counts, setCounts] = useState<Counts>({
+    todo: 0,
+    contacted: 0,
+    awaiting_planning: 0,
+    planning_approved: 0,
+    site_visit: 0,
+    quoted: 0,
+    won: 0,
+    lost: 0,
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
