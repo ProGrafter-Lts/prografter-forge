@@ -311,28 +311,53 @@ async function runAnalysis(supabase: any, args: RunArgs): Promise<void> {
     const categories = CATEGORIES.map(({ key, name }) => {
       const c = byKey[key] || {};
       const relevant = key === "building_control" ? true : !!c.relevant;
+      // Legacy "score" mirrors the pack score. Support both new and old fields.
+      const rawPack = typeof c.score_pack === "number" ? c.score_pack
+        : typeof c.score === "number" ? c.score : null;
+      const rawMain = typeof c.score_main === "number" ? c.score_main : rawPack;
+      // Pack score must never be lower than the main score — supporting docs
+      // can only help, never penalise.
+      const scoreMain = relevant && typeof rawMain === "number" ? rawMain : null;
+      let scorePack = relevant && typeof rawPack === "number" ? rawPack : null;
+      if (scorePack !== null && scoreMain !== null && scorePack < scoreMain) {
+        scorePack = scoreMain;
+      }
       return {
         key,
         name,
         relevant,
-        score: relevant && typeof c.score === "number" ? c.score : null,
+        score: scorePack,
+        score_main: scoreMain,
+        score_pack: scorePack,
         status: c.status || (relevant ? "needs_clarifying" : "not_scored"),
         note: c.note || "",
         evidence_source: c.evidence_source || "not_found",
       };
     });
 
-    const clarityScore = computeClarityScore(categories);
+    // Two headline scores: Quote (main quote only) and Quote Pack (with docs).
+    const clarityScore = averageScore(
+      categories.filter((c) => c.relevant && typeof c.score_main === "number").map((c) => c.score_main as number),
+    );
+    const packScore = averageScore(
+      categories.filter((c) => c.relevant && typeof c.score_pack === "number").map((c) => c.score_pack as number),
+    );
     const relevantCount = categories.filter((c) => c.relevant).length;
-    const strong = categories.filter((c) => c.relevant && typeof c.score === "number" && c.score >= 7).map((c) => c.name);
-    const weak = categories.filter((c) => c.relevant && typeof c.score === "number" && c.score <= 4).map((c) => c.name);
+    const strong = categories.filter((c) => c.relevant && typeof c.score_pack === "number" && (c.score_pack as number) >= 7).map((c) => c.name);
+    const weak = categories.filter((c) => c.relevant && typeof c.score_pack === "number" && (c.score_pack as number) <= 4).map((c) => c.name);
+
+    const suppliedSeparately = Array.isArray(parsed.supplied_separately)
+      ? parsed.supplied_separately.filter((s: any) => s && (s.item || s.supporting))
+      : [];
 
     const report_json = {
-      version: "simple-v1",
+      version: "simple-v2",
       generated_at: new Date().toISOString(),
       project_type: projectType ?? null,
       verdict: parsed.verdict || { level: "useful", line: "Quote has useful detail, but key points need confirming." },
       clarity_score: clarityScore,
+      pack_confidence_score: packScore,
+      has_supporting_docs: supporting.length > 0,
       relevant_categories_count: relevantCount,
       strong_categories: strong,
       weak_categories: weak,
@@ -340,6 +365,7 @@ async function runAnalysis(supabase: any, args: RunArgs): Promise<void> {
       what_looks_clear: Array.isArray(parsed.what_looks_clear) ? parsed.what_looks_clear : [],
       what_needs_clarifying: Array.isArray(parsed.what_needs_clarifying) ? parsed.what_needs_clarifying : [],
       what_appears_missing: Array.isArray(parsed.what_appears_missing) ? parsed.what_appears_missing : [],
+      supplied_separately: suppliedSeparately,
       building_control: parsed.building_control || { status: "unclear", detail: "Building Control responsibility is not clear from the quote." },
       questions: (Array.isArray(parsed.questions) ? parsed.questions : []).slice(0, 8),
       suggested_message: parsed.suggested_message || "",
