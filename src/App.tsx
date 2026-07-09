@@ -131,7 +131,8 @@ const AppRoutes = () => {
             <Route path="/register" element={<TradeRegister />} />
             <Route path="/register/trade" element={<SignupTradeRedirect />} />
             <Route path="/post-a-job" element={<Navigate to="/post-job-brief" replace />} />
-            <Route path="/quote-checker" element={<QuoteChecker />} />
+            <Route path="/quote-checker" element={<QuoteCheckerHome />} />
+            <Route path="/quote-checker-classic" element={<QuoteChecker />} />
             <Route path="/simple-quote-checker" element={<SimpleQuoteChecker />} />
             <Route path="/simple-quote-report/:id" element={<SimpleQuoteReportPage />} />
             
