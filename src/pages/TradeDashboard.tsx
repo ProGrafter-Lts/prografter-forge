@@ -9,7 +9,7 @@ import TradeSidebar from "@/components/trade/TradeSidebar";
 import StatsRow from "@/components/trade/StatsRow";
 import JobMatchesList from "@/components/trade/JobMatchesList";
 import ActiveProjectsList from "@/components/trade/ActiveProjectsList";
-import QuotesList from "@/components/trade/QuotesList";
+import MorningBriefing from "@/components/trade/MorningBriefing";
 import LiveMarginWidget from "@/components/trade/LiveMarginWidget";
 import CalendarConnect from "@/components/trade/CalendarConnect";
 import TradeProfileSection from "@/components/trade/TradeProfileSection";
