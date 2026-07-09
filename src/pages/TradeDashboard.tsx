@@ -268,7 +268,7 @@ const TradeDashboard = () => {
       />
 
       <main className="flex-1 p-4 md:p-8 overflow-auto">
-        <div className="max-w-5xl mx-auto space-y-8">
+        <div className="max-w-5xl mx-auto space-y-10">
           {!isReady || tradeAccessLoading ? (
             <div className="min-h-[40vh] flex items-center justify-center font-mono text-sm text-muted-foreground">
               Loading dashboard…
@@ -405,7 +405,7 @@ const TradeDashboard = () => {
           )}
 
           {/* PRIORITY 1–5: Morning Briefing, Follow-ups, Jobs Starting Soon, Quotes, Planning Hub */}
-          {trade && <MorningBriefing tradeId={trade.id} quotes={quotes} />}
+          {trade && <MorningBriefing tradeId={trade.id} quotes={quotes} name={trade.name} />}
 
           {/* PRIORITY 6: Pipeline */}
           {trade && <PipelineSection tradeId={trade.id} />}
