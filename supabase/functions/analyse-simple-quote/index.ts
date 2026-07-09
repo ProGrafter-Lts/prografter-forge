@@ -393,84 +393,24 @@ Deno.serve(async (req) => {
     checkId = inserted.id;
     const lookupToken = inserted.lookup_token;
 
-    // Build the AI content: main quote first, then supporting docs.
-    const content: unknown[] = [];
-    const mainBlock = await downloadBlock(supabase, pdfPath, pdfPath);
-    if (!mainBlock) throw new Error("Could not download the main quote file.");
-    content.push({ type: "text", text: "===== MAIN BUILDER QUOTE =====" });
-    content.push(mainBlock);
-
-    const supportingNames: string[] = [];
-    for (const sf of supporting) {
-      const b = await downloadBlock(supabase, sf.path, sf.name);
-      if (b) {
-        content.push({ type: "text", text: `===== SUPPORTING DOCUMENT: ${sf.name} =====` });
-        content.push(b);
-        supportingNames.push(sf.name);
-      }
-    }
-
-    content.push({ type: "text", text: buildPrompt(intake ?? {}, supportingNames) });
-
-    const raw = await callAnthropic(content, 8000);
-    const parsed = extractJson(raw);
-    if (!parsed) {
-      console.error("[simple-quote] parse failed. rawLen=", raw?.length,
-        "head=", (raw || "").slice(0, 400), "tail=", (raw || "").slice(-400));
-      throw new Error("Could not parse the analysis result.");
-    }
-
-    // Normalise categories: ensure all present, and Building Control always relevant.
-    const byKey: Record<string, any> = {};
-    for (const c of Array.isArray(parsed.categories) ? parsed.categories : []) {
-      if (c && typeof c.key === "string") byKey[c.key] = c;
-    }
-    const categories = CATEGORIES.map(({ key, name }) => {
-      const c = byKey[key] || {};
-      const relevant = key === "building_control" ? true : !!c.relevant;
-      return {
-        key,
-        name,
-        relevant,
-        score: relevant && typeof c.score === "number" ? c.score : null,
-        status: c.status || (relevant ? "needs_clarifying" : "not_scored"),
-        note: c.note || "",
-        evidence_source: c.evidence_source || "not_found",
-      };
-    });
-
-    const clarityScore = computeClarityScore(categories);
-    const relevantCount = categories.filter((c) => c.relevant).length;
-    const strong = categories.filter((c) => c.relevant && typeof c.score === "number" && c.score >= 7).map((c) => c.name);
-    const weak = categories.filter((c) => c.relevant && typeof c.score === "number" && c.score <= 4).map((c) => c.name);
-
-    const report_json = {
-      version: "simple-v1",
-      generated_at: new Date().toISOString(),
-      project_type: projectType ?? null,
-      verdict: parsed.verdict || { level: "useful", line: "Quote has useful detail, but key points need confirming." },
-      clarity_score: clarityScore,
-      relevant_categories_count: relevantCount,
-      strong_categories: strong,
-      weak_categories: weak,
-      categories,
-      what_looks_clear: Array.isArray(parsed.what_looks_clear) ? parsed.what_looks_clear : [],
-      what_needs_clarifying: Array.isArray(parsed.what_needs_clarifying) ? parsed.what_needs_clarifying : [],
-      what_appears_missing: Array.isArray(parsed.what_appears_missing) ? parsed.what_appears_missing : [],
-      building_control: parsed.building_control || { status: "unclear", detail: "Building Control responsibility is not clear from the quote." },
-      questions: (Array.isArray(parsed.questions) ? parsed.questions : []).slice(0, 8),
-      suggested_message: parsed.suggested_message || "",
-      supporting_docs: Array.isArray(parsed.supporting_docs) ? parsed.supporting_docs : [],
-    };
-
-    await supabase
-      .from("simple_quote_checks")
-      .update({ status: "complete", report_json })
-      .eq("id", checkId);
+    // Run the analysis in the background so the client gets an immediate
+    // response and can show a live "in progress" state while polling.
+    // @ts-ignore EdgeRuntime is available in the Supabase Edge runtime.
+    EdgeRuntime.waitUntil(
+      runAnalysis(supabase, {
+        checkId,
+        lookupToken,
+        projectType: typeof projectType === "string" ? projectType : undefined,
+        intake: intake ?? {},
+        pdfPath,
+        supporting,
+        email: typeof email === "string" ? email : undefined,
+      }),
+    );
 
     return new Response(
-      JSON.stringify({ id: checkId, lookupToken, report_json }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      JSON.stringify({ id: checkId, lookupToken, status: "processing" }),
+      { status: 202, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (err) {
     console.error("analyse-simple-quote error:", err);
