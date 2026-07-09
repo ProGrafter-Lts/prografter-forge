@@ -215,7 +215,7 @@ const SimpleQuoteChecker = () => {
         description="Upload a builder's extension quote and ProGrafter checks whether it clearly covers the works you expect, what's missing, and what to ask before you accept."
         path="/simple-quote-checker"
       />
-      <div className="max-w-2xl mx-auto px-4 py-10 md:py-16 space-y-6">
+      <div className="max-w-2xl mx-auto px-4 pt-24 pb-10 md:pt-28 md:pb-16 space-y-6">
         <div className="text-center space-y-3">
           <div className="inline-flex items-center gap-2 rounded-full bg-teal/10 px-3 py-1">
             <ShieldCheck className="h-4 w-4 text-teal" />
