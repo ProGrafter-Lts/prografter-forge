@@ -67,8 +67,10 @@ const VERDICT_THEME: Record<string, { label: string; ring: string; text: string;
 };
 
 const SOURCE_LABEL: Record<string, string> = {
-  in_quote: "In the quote",
-  supplied_separately: "Supplied separately",
+  in_quote: "In the main quote",
+  supplied_in_supporting: "Supplied in supporting document",
+  addendum_clarification: "Supplied in addendum — confirm with builder",
+  supplied_separately: "Supplied separately — confirm with builder",
   homeowner_supplied: "You supplied this",
   not_found: "Not found",
 };
