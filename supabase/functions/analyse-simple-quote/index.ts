@@ -227,56 +227,21 @@ function computeClarityScore(categories: any[]): number {
   return Math.round(avg * 10);
 }
 
-Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+interface RunArgs {
+  checkId: string;
+  lookupToken: string;
+  projectType?: string;
+  intake?: Record<string, unknown>;
+  pdfPath: string;
+  supporting: { path: string; name: string }[];
+  email?: string;
+}
 
-  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-  let checkId: string | null = null;
-
+// Runs the full analysis in the background, updates the record, and emails the
+// homeowner when the report is ready.
+async function runAnalysis(supabase: any, args: RunArgs): Promise<void> {
+  const { checkId, lookupToken, projectType, intake, pdfPath, supporting, email } = args;
   try {
-    if (!ANTHROPIC_API_KEY) throw new Error("Missing ANTHROPIC_API_KEY");
-
-    const body = await req.json();
-    const {
-      email,
-      projectType,
-      intake,
-      pdfPath,
-      supportingFiles,
-      userId,
-    } = body ?? {};
-
-    if (!pdfPath || typeof pdfPath !== "string") {
-      return new Response(JSON.stringify({ error: "A quote file is required." }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const supporting: { path: string; name: string }[] = Array.isArray(supportingFiles)
-      ? supportingFiles.slice(0, 10).map((s: any) => ({ path: String(s.path), name: String(s.name || s.path) }))
-      : [];
-
-    // Create the record up-front so we always have an id + lookup token.
-    const { data: inserted, error: insertErr } = await supabase
-      .from("simple_quote_checks")
-      .insert({
-        email: typeof email === "string" ? email : null,
-        project_type: typeof projectType === "string" ? projectType : null,
-        pdf_url: pdfPath,
-        supporting_files: supporting,
-        intake: intake ?? {},
-        status: "processing",
-        user_id: typeof userId === "string" ? userId : null,
-      })
-      .select("id, lookup_token")
-      .single();
-    if (insertErr || !inserted) throw new Error("Failed to create check: " + insertErr?.message);
-    checkId = inserted.id;
-    const lookupToken = inserted.lookup_token;
-
     // Build the AI content: main quote first, then supporting docs.
     const content: unknown[] = [];
     const mainBlock = await downloadBlock(supabase, pdfPath, pdfPath);
@@ -352,9 +317,100 @@ Deno.serve(async (req) => {
       .update({ status: "complete", report_json })
       .eq("id", checkId);
 
+    // Email the homeowner that their report is ready (best-effort).
+    if (email) {
+      try {
+        const base = "https://prografter.co.uk";
+        const reportUrl = `${base}/simple-quote-report/${checkId}?t=${encodeURIComponent(lookupToken)}`;
+        await supabase.functions.invoke("send-transactional-email", {
+          body: {
+            templateName: "quote-health-check-ready",
+            recipientEmail: email,
+            idempotencyKey: `simple-quote-ready-${checkId}`,
+            templateData: { reportUrl, projectType: projectType ?? "" },
+          },
+        });
+      } catch (mailErr) {
+        console.error("[simple-quote] email send failed", (mailErr as Error).message);
+      }
+    }
+  } catch (err) {
+    console.error("analyse-simple-quote background error:", err);
+    await supabase
+      .from("simple_quote_checks")
+      .update({ status: "error", error: String((err as Error).message).slice(0, 500) })
+      .eq("id", checkId);
+  }
+}
+
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+  let checkId: string | null = null;
+
+  try {
+    if (!ANTHROPIC_API_KEY) throw new Error("Missing ANTHROPIC_API_KEY");
+
+    const body = await req.json();
+    const {
+      email,
+      projectType,
+      intake,
+      pdfPath,
+      supportingFiles,
+      userId,
+    } = body ?? {};
+
+    if (!pdfPath || typeof pdfPath !== "string") {
+      return new Response(JSON.stringify({ error: "A quote file is required." }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const supporting: { path: string; name: string }[] = Array.isArray(supportingFiles)
+      ? supportingFiles.slice(0, 10).map((s: any) => ({ path: String(s.path), name: String(s.name || s.path) }))
+      : [];
+
+    // Create the record up-front so we always have an id + lookup token.
+    const { data: inserted, error: insertErr } = await supabase
+      .from("simple_quote_checks")
+      .insert({
+        email: typeof email === "string" ? email : null,
+        project_type: typeof projectType === "string" ? projectType : null,
+        pdf_url: pdfPath,
+        supporting_files: supporting,
+        intake: intake ?? {},
+        status: "processing",
+        user_id: typeof userId === "string" ? userId : null,
+      })
+      .select("id, lookup_token")
+      .single();
+    if (insertErr || !inserted) throw new Error("Failed to create check: " + insertErr?.message);
+    checkId = inserted.id;
+    const lookupToken = inserted.lookup_token;
+
+    // Run the analysis in the background so the client gets an immediate
+    // response and can show a live "in progress" state while polling.
+    // @ts-ignore EdgeRuntime is available in the Supabase Edge runtime.
+    EdgeRuntime.waitUntil(
+      runAnalysis(supabase, {
+        checkId,
+        lookupToken,
+        projectType: typeof projectType === "string" ? projectType : undefined,
+        intake: intake ?? {},
+        pdfPath,
+        supporting,
+        email: typeof email === "string" ? email : undefined,
+      }),
+    );
+
     return new Response(
-      JSON.stringify({ id: checkId, lookupToken, report_json }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      JSON.stringify({ id: checkId, lookupToken, status: "processing" }),
+      { status: 202, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (err) {
     console.error("analyse-simple-quote error:", err);

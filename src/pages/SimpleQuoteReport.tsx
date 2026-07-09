@@ -64,7 +64,7 @@ const SimpleQuoteReportPage = () => {
         path="/simple-quote-report"
         noindex
       />
-      <div className="max-w-3xl mx-auto px-4 py-10 md:py-14">
+      <div className="max-w-3xl mx-auto px-4 pt-24 pb-10 md:pt-28 md:pb-14">
         {status === "loading" && (
           <div className="text-center py-20 space-y-3">
             <Loader2 className="h-8 w-8 text-teal animate-spin mx-auto" />
