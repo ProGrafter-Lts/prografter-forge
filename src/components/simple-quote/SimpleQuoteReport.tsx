@@ -304,7 +304,20 @@ export default function SimpleQuoteReport({ report }: { report: SimpleReportJson
               {copied ? "Copied" : "Copy"}
             </button>
           </div>
-          <p className="font-mono text-sm text-white/90 leading-relaxed whitespace-pre-wrap">{report.suggested_message}</p>
+          {suggested && (
+            <div className="space-y-3">
+              {suggested.intro && (
+                <p className="font-mono text-sm text-white/90 leading-relaxed whitespace-pre-wrap">{suggested.intro}</p>
+              )}
+              {suggested.points.length ? (
+                <ol className="space-y-2 list-decimal list-inside">
+                  {suggested.points.map((p, i) => (
+                    <li key={i} className="font-mono text-sm text-white/90 leading-relaxed">{p}</li>
+                  ))}
+                </ol>
+              ) : null}
+            </div>
+          )}
         </div>
       ) : null}
 
