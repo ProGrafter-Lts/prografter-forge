@@ -160,17 +160,41 @@ RELEVANCE RULES:
 - If the homeowner is "Not sure", keep the category relevant but frame it as "Ask builder to confirm".
 - Finish level drives internal categories: "Shell only" / "Watertight shell" -> do NOT score plastering, joinery, decoration, or most internals. "Plastered finish" -> score plastering but not decoration/flooring/tiling unless expected. "Full finish" -> internals and finishes are relevant.
 
-SCORING — score each RELEVANT category 0–10 using these anchors:
-- 0 = not mentioned at all but expected/relevant
-- 2 = vaguely mentioned only
-- 5 = partly covered but important detail missing
-- 7 = mostly clear but some clarification needed
-- 10 = clear, specific and decision-ready
+===== CRITICAL: MAIN QUOTE vs QUOTE PACK (supporting documents) =====
+You MUST distinguish where each fact came from. For every category assign an evidence_source:
+- "in_quote"                = clearly stated in the MAIN builder quote (strongest evidence)
+- "supplied_in_supporting"  = NOT in the main quote, but found in a builder-issued supporting document (strong evidence)
+- "addendum_clarification"  = found only in a ProGrafter / homeowner clarification addendum (useful clarification, NEEDS builder confirmation)
+- "homeowner_supplied"      = only a homeowner verbal note / context (context only, needs confirmation)
+- "not_found"               = not present in the main quote OR any supporting document (genuinely missing)
+
+DO NOT call something "missing" if it appears in a supporting document or addendum. If a supporting/addendum document (e.g. a ProGrafter Quote Clarification Addendum) contains payment stages, variation process, defects liability, insurance, completion paperwork, or Building Control wording, treat those items as SUPPLIED SEPARATELY, not missing.
+
+===== TWO SCORES PER CATEGORY =====
+For each RELEVANT category provide TWO scores (0–10):
+- "score_main"  = based ONLY on the main builder quote.
+- "score_pack"  = based on the main quote PLUS supporting documents / addendum.
+Anchors:
+- 0  = not mentioned anywhere expected/relevant
+- 2  = vaguely mentioned only
+- 5  = supplied in an addendum only, NOT builder-confirmed (useful clarification)
+- 6  = supplied in a builder-issued supporting document but needs confirming
+- 7  = mostly clear but some clarification needed
+- 8-10 = clear, specific, builder-confirmed and decision-ready
+Rules:
+- If an item is absent from the main quote but present in an addendum: score_main stays LOW (0–2), but score_pack should rise to about 5–6 (NOT 0). It must NOT reach full score unless builder-confirmed.
+- Supporting documents must IMPROVE the pack score, never reduce it. Never penalise the quote simply because an addendum was uploaded.
+- "score" (legacy) should equal score_pack.
 
 CATEGORIES to consider (only score relevant ones):
 ${CATEGORIES.map((c) => `- ${c.key}: ${c.name}`).join("\n")}
 
-SUPPORTING DOCUMENTS: use them only as supporting context. For each fact, distinguish the source: "in_quote", "supplied_separately", "homeowner_supplied", or "not_found". If payment stages were supplied separately, say so and tell the homeowner to confirm they form part of the agreed quote.
+STATUS values per category:
+- "clear"                = clear in the main quote
+- "supplied_separately"  = not in main quote but supplied in a supporting doc / addendum, needs builder confirmation
+- "needs_clarifying"     = partly covered, confirm details
+- "missing"              = not found anywhere (main quote OR supporting docs)
+- "not_scored"           = not relevant
 
 BUILDING CONTROL must ALWAYS be included in "categories" and in a dedicated building_control object, even if unclear.
 
@@ -179,19 +203,32 @@ Respond with STRICT JSON only (no prose, no markdown fences) in EXACTLY this sha
   "verdict": { "level": "clear" | "useful" | "vague", "line": "one homeowner-friendly sentence" },
   "categories": [
     { "key": "<one of the keys above>", "name": "<name>", "relevant": true|false,
-      "score": <0-10 or null if not relevant>,
-      "status": "clear" | "needs_clarifying" | "missing" | "not_scored",
-      "note": "short plain-English explanation",
-      "evidence_source": "in_quote" | "supplied_separately" | "homeowner_supplied" | "not_found" }
+      "score_main": <0-10 or null if not relevant>,
+      "score_pack": <0-10 or null if not relevant>,
+      "score": <same as score_pack, or null if not relevant>,
+      "status": "clear" | "supplied_separately" | "needs_clarifying" | "missing" | "not_scored",
+      "note": "short plain-English explanation. If supplied only in an addendum, say so and that the builder must confirm it.",
+      "evidence_source": "in_quote" | "supplied_in_supporting" | "addendum_clarification" | "homeowner_supplied" | "not_found" }
   ],
   "what_looks_clear": ["..."],
   "what_needs_clarifying": ["..."],
-  "what_appears_missing": ["... only items relevant to expected scope ..."],
-  "building_control": { "status": "included" | "arranged_separately" | "designer_dealing" | "not_arranged" | "unclear", "detail": "plain-English explanation of what the quote says and what to confirm" },
+  "what_appears_missing": ["... ONLY items NOT found in the main quote OR any supporting document ..."],
+  "supplied_separately": [
+    { "item": "<e.g. Payment schedule>",
+      "main_quote": "<what the main quote says, e.g. 'Not visible'>",
+      "supporting": "<what the addendum supplies>",
+      "status": "Supplied separately — confirm builder agreement" | "Suggested in addendum — confirm builder agreement" | "Partly clarified by addendum — confirm in writing",
+      "note": "short homeowner-friendly guidance" }
+  ],
+  "building_control": { "status": "included" | "arranged_separately" | "designer_dealing" | "not_arranged" | "unclear", "detail": "plain-English explanation of what the quote / addendum says and what to confirm" },
   "questions": ["max 8 priority questions to ask the builder"],
   "suggested_message": "a short, polite, copyable message the homeowner can send the builder",
-  "supporting_docs": [ { "name": "<file name>", "type": "<what it appears to be>", "note": "how it was used" } ]
+  "supporting_docs": [ { "name": "<file name>", "type": "<what it appears to be, e.g. ProGrafter clarification addendum>", "builder_confirmed": "no" | "unknown" | "yes", "note": "how it was used" } ]
 }
+
+PAYMENT SCHEDULE: if absent from the main quote but present in an addendum, DO NOT say "no staged payment plan is included — this needs to be provided". Instead say: "Payment schedule: not visible in the main quote, but a staged payment structure is supplied in the supporting addendum. Confirm with the builder that this payment schedule forms part of the agreed quote pack and replace any placeholder dates with real milestone triggers." Classify as supplied_separately, NOT missing.
+
+COMMERCIAL TERMS (quote validity, variations, insurance, defects liability, completion certificates): if included in the addendum, do not list as simply missing — say "Commercial terms are clarified in the supporting addendum, but should be confirmed by the builder before acceptance." Still keep them as questions to ask.
 
 Verdict guidance:
 - "clear" -> "Quote is clear enough to consider, with minor clarifications."
