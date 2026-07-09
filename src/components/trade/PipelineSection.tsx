@@ -9,43 +9,85 @@ interface Props {
   tradeId: string;
 }
 
-type Counts = Record<"todo" | "contacted" | "quoted" | "won", number>;
+type Counts = Record<
+  "todo" | "contacted" | "awaiting_planning" | "planning_approved" | "site_visit" | "quoted" | "won" | "lost",
+  number
+>;
 
 const CARD_DEFS: {
   key: keyof Counts;
   label: string;
   subtitle: string;
   tone: string;
+  filter?: string;
 }[] = [
   {
     key: "todo",
     label: "To Contact",
     subtitle: "Haven't reached out yet",
     tone: "bg-muted/40 text-foreground border-border",
+    filter: "todo",
   },
   {
     key: "contacted",
     label: "Waiting for Reply",
     subtitle: "Reached out, awaiting response",
     tone: "bg-amber-500/10 text-amber-700 border-amber-500/30",
+    filter: "contacted",
+  },
+  {
+    key: "awaiting_planning",
+    label: "Awaiting Planning Decision",
+    subtitle: "Application still under review",
+    tone: "bg-blue-500/10 text-blue-700 border-blue-500/30",
+  },
+  {
+    key: "planning_approved",
+    label: "Planning Approved",
+    subtitle: "Approved — ready to approach",
+    tone: "bg-purple-500/10 text-purple-700 border-purple-500/30",
+  },
+  {
+    key: "site_visit",
+    label: "Site Visit Booked",
+    subtitle: "Visit scheduled",
+    tone: "bg-teal-500/10 text-teal-700 border-teal-500/30",
   },
   {
     key: "quoted",
     label: "Quoted",
     subtitle: "Quote submitted, pending decision",
     tone: "bg-primary/10 text-primary border-primary/30",
+    filter: "quoted",
   },
   {
     key: "won",
     label: "Won",
     subtitle: "Converted in last 90 days",
     tone: "bg-emerald-500/10 text-emerald-700 border-emerald-500/30",
+    filter: "won",
+  },
+  {
+    key: "lost",
+    label: "Lost",
+    subtitle: "Archived or lost leads",
+    tone: "bg-destructive/10 text-destructive border-destructive/30",
+    filter: "dead",
   },
 ];
 
 const PipelineSection = ({ tradeId }: Props) => {
   const navigate = useNavigate();
-  const [counts, setCounts] = useState<Counts>({ todo: 0, contacted: 0, quoted: 0, won: 0 });
+  const [counts, setCounts] = useState<Counts>({
+    todo: 0,
+    contacted: 0,
+    awaiting_planning: 0,
+    planning_approved: 0,
+    site_visit: 0,
+    quoted: 0,
+    won: 0,
+    lost: 0,
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -79,11 +121,22 @@ const PipelineSection = ({ tradeId }: Props) => {
       return;
     }
 
-    const next: Counts = { todo: 0, contacted: 0, quoted: 0, won: 0 };
+    const next: Counts = {
+      todo: 0,
+      contacted: 0,
+      awaiting_planning: 0,
+      planning_approved: 0,
+      site_visit: 0,
+      quoted: 0,
+      won: 0,
+      lost: 0,
+    };
     for (const r of data ?? []) {
       const status = r.contact_status as ShortlistStatus;
       if (status === "todo" || status === "contacted" || status === "quoted") {
         next[status] += 1;
+      } else if (status === "dead") {
+        next.lost += 1;
       } else if (status === "won") {
         if (r.last_status_change_at && r.last_status_change_at >= ninetyDaysAgo) {
           next.won += 1;
@@ -105,7 +158,8 @@ const PipelineSection = ({ tradeId }: Props) => {
     };
   }, [load]);
 
-  const totalLeads = counts.todo + counts.contacted + counts.quoted + counts.won;
+  const totalLeads =
+    counts.todo + counts.contacted + counts.quoted + counts.won + counts.lost;
 
   const header = (
     <div>
@@ -178,7 +232,7 @@ const PipelineSection = ({ tradeId }: Props) => {
             onClick={() => navigate("/planning-alerts")}
             className="inline-flex items-center gap-2 bg-secondary text-white font-mono text-xs px-4 py-2 rounded-xl hover:bg-secondary/90 transition-colors"
           >
-            View Planning Intelligence
+            View Planning Hub
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -187,19 +241,22 @@ const PipelineSection = ({ tradeId }: Props) => {
           {CARD_DEFS.map((card) => {
             const value = counts[card.key];
             const isZero = value === 0;
+            const clickable = !!card.filter;
             return (
               <button
                 key={card.key}
                 type="button"
+                disabled={!clickable}
                 onClick={() =>
+                  clickable &&
                   navigate(
-                    `/dashboard/trade?pipeline=${encodeURIComponent(card.key)}#planning-alerts-list`,
+                    `/dashboard/trade?pipeline=${encodeURIComponent(card.filter!)}#planning-alerts-list`,
                   )
                 }
-                className={`text-left rounded-2xl border p-4 transition-all hover:shadow-sm hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-ring ${card.tone} ${
-                  isZero ? "opacity-70" : ""
-                }`}
-                aria-label={`${value} ${card.label} leads. ${card.subtitle}. Click to filter.`}
+                className={`text-left rounded-2xl border p-4 transition-all focus:outline-none focus:ring-2 focus:ring-ring ${card.tone} ${
+                  clickable ? "hover:shadow-sm hover:-translate-y-0.5" : "cursor-default"
+                } ${isZero ? "opacity-70" : ""}`}
+                aria-label={`${value} ${card.label} leads. ${card.subtitle}.${clickable ? " Click to filter." : ""}`}
               >
                 <div
                   className={`font-heading text-3xl md:text-4xl leading-none ${

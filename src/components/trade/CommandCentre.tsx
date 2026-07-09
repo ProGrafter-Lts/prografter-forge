@@ -147,7 +147,7 @@ const CommandCentre = ({ tradeId, jobMatchCount, onNavigate }: Props) => {
     { key: "upload", label: "Upload Documents", icon: Upload, target: "tradevault" as PriorityTarget, show: priorities.some((p) => p.target === "tradevault") },
     { key: "spec", label: "Add Specialisms", icon: Tag, target: "specialisms" as PriorityTarget, show: priorities.some((p) => p.key === "specialisms") },
     { key: "jobs", label: "View Jobs", icon: Briefcase, target: "jobs" as PriorityTarget, show: true },
-    { key: "planning", label: "View Planning Intelligence", icon: Bell, target: "planning" as PriorityTarget, show: true },
+    { key: "planning", label: "View Planning Hub", icon: Bell, target: "planning" as PriorityTarget, show: true },
     { key: "cal", label: "Connect Calendar", icon: CalendarPlus, target: "settings" as PriorityTarget, show: !calendarConnected(tradeId) },
     { key: "quote", label: "Start a Quote", icon: FileText, target: "jobs" as PriorityTarget, show: true },
   ]).filter((a) => a.show);

@@ -150,7 +150,7 @@ const AvailableJobsView = ({ tradeId }: { tradeId: string }) => {
               </p>
               <p className="font-mono text-xs text-muted-foreground mb-4 max-w-md mx-auto">
                 We'll notify you when suitable homeowner projects appear in your area. In the
-                meantime, complete your profile and check Planning Intelligence for upcoming local
+                meantime, complete your profile and check the Planning Hub for upcoming local
                 opportunities.
               </p>
               <div className="flex flex-wrap gap-2 justify-center">
@@ -165,7 +165,7 @@ const AvailableJobsView = ({ tradeId }: { tradeId: string }) => {
                   onClick={() => navigate("/planning-alerts")}
                   className="inline-flex items-center gap-1 border border-secondary/40 text-secondary font-mono text-xs px-4 py-2 rounded-xl hover:bg-secondary/10 transition-colors"
                 >
-                  View Planning Intelligence
+                  View Planning Hub
                   <ChevronRight className="w-3 h-3" />
                 </button>
               </div>

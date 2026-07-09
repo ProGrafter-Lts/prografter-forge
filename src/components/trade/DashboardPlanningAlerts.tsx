@@ -273,7 +273,7 @@ const DashboardPlanningAlerts = ({ trade }: { trade: TradeProfile }) => {
       <div className="rounded-2xl border-2 border-dashed border-border p-6">
         <div className="flex items-center gap-3 mb-3">
           <Bell className="w-5 h-5 text-secondary" />
-          <h2 className="font-heading text-primary text-xl">Planning Intelligence</h2>
+          <h2 className="font-heading text-primary text-xl">Planning Hub</h2>
         </div>
         <p className="font-mono text-xs text-muted-foreground mb-4">
           Get notified when planning applications are approved in your area. Reach homeowners before your competitors.
@@ -302,7 +302,7 @@ const DashboardPlanningAlerts = ({ trade }: { trade: TradeProfile }) => {
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <Bell className="w-5 h-5 text-secondary" />
-          <h2 className="font-heading text-primary text-xl">Planning Intelligence</h2>
+          <h2 className="font-heading text-primary text-xl">Planning Hub</h2>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <button
