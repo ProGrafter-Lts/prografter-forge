@@ -291,7 +291,7 @@ const QuoteReport = () => {
     // New QS-style report: render the shared white-paper report component so
     // the public page, the in-account view and the printed PDF are identical.
     if (report.report_html) {
-      return <QuoteHealthCheckReport report={report} />;
+      return <QuoteHealthCheckReport report={report} admin={advancedMode} />;
     }
 
 
