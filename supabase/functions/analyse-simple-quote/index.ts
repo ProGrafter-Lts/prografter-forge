@@ -227,6 +227,122 @@ function computeClarityScore(categories: any[]): number {
   return Math.round(avg * 10);
 }
 
+interface RunArgs {
+  checkId: string;
+  lookupToken: string;
+  projectType?: string;
+  intake?: Record<string, unknown>;
+  pdfPath: string;
+  supporting: { path: string; name: string }[];
+  email?: string;
+}
+
+// Runs the full analysis in the background, updates the record, and emails the
+// homeowner when the report is ready.
+async function runAnalysis(supabase: any, args: RunArgs): Promise<void> {
+  const { checkId, lookupToken, projectType, intake, pdfPath, supporting, email } = args;
+  try {
+    // Build the AI content: main quote first, then supporting docs.
+    const content: unknown[] = [];
+    const mainBlock = await downloadBlock(supabase, pdfPath, pdfPath);
+    if (!mainBlock) throw new Error("Could not download the main quote file.");
+    content.push({ type: "text", text: "===== MAIN BUILDER QUOTE =====" });
+    content.push(mainBlock);
+
+    const supportingNames: string[] = [];
+    for (const sf of supporting) {
+      const b = await downloadBlock(supabase, sf.path, sf.name);
+      if (b) {
+        content.push({ type: "text", text: `===== SUPPORTING DOCUMENT: ${sf.name} =====` });
+        content.push(b);
+        supportingNames.push(sf.name);
+      }
+    }
+
+    content.push({ type: "text", text: buildPrompt(intake ?? {}, supportingNames) });
+
+    const raw = await callAnthropic(content, 8000);
+    const parsed = extractJson(raw);
+    if (!parsed) {
+      console.error("[simple-quote] parse failed. rawLen=", raw?.length,
+        "head=", (raw || "").slice(0, 400), "tail=", (raw || "").slice(-400));
+      throw new Error("Could not parse the analysis result.");
+    }
+
+    // Normalise categories: ensure all present, and Building Control always relevant.
+    const byKey: Record<string, any> = {};
+    for (const c of Array.isArray(parsed.categories) ? parsed.categories : []) {
+      if (c && typeof c.key === "string") byKey[c.key] = c;
+    }
+    const categories = CATEGORIES.map(({ key, name }) => {
+      const c = byKey[key] || {};
+      const relevant = key === "building_control" ? true : !!c.relevant;
+      return {
+        key,
+        name,
+        relevant,
+        score: relevant && typeof c.score === "number" ? c.score : null,
+        status: c.status || (relevant ? "needs_clarifying" : "not_scored"),
+        note: c.note || "",
+        evidence_source: c.evidence_source || "not_found",
+      };
+    });
+
+    const clarityScore = computeClarityScore(categories);
+    const relevantCount = categories.filter((c) => c.relevant).length;
+    const strong = categories.filter((c) => c.relevant && typeof c.score === "number" && c.score >= 7).map((c) => c.name);
+    const weak = categories.filter((c) => c.relevant && typeof c.score === "number" && c.score <= 4).map((c) => c.name);
+
+    const report_json = {
+      version: "simple-v1",
+      generated_at: new Date().toISOString(),
+      project_type: projectType ?? null,
+      verdict: parsed.verdict || { level: "useful", line: "Quote has useful detail, but key points need confirming." },
+      clarity_score: clarityScore,
+      relevant_categories_count: relevantCount,
+      strong_categories: strong,
+      weak_categories: weak,
+      categories,
+      what_looks_clear: Array.isArray(parsed.what_looks_clear) ? parsed.what_looks_clear : [],
+      what_needs_clarifying: Array.isArray(parsed.what_needs_clarifying) ? parsed.what_needs_clarifying : [],
+      what_appears_missing: Array.isArray(parsed.what_appears_missing) ? parsed.what_appears_missing : [],
+      building_control: parsed.building_control || { status: "unclear", detail: "Building Control responsibility is not clear from the quote." },
+      questions: (Array.isArray(parsed.questions) ? parsed.questions : []).slice(0, 8),
+      suggested_message: parsed.suggested_message || "",
+      supporting_docs: Array.isArray(parsed.supporting_docs) ? parsed.supporting_docs : [],
+    };
+
+    await supabase
+      .from("simple_quote_checks")
+      .update({ status: "complete", report_json })
+      .eq("id", checkId);
+
+    // Email the homeowner that their report is ready (best-effort).
+    if (email) {
+      try {
+        const base = "https://prografter.co.uk";
+        const reportUrl = `${base}/simple-quote-report/${checkId}?t=${encodeURIComponent(lookupToken)}`;
+        await supabase.functions.invoke("send-transactional-email", {
+          body: {
+            templateName: "quote-health-check-ready",
+            recipientEmail: email,
+            idempotencyKey: `simple-quote-ready-${checkId}`,
+            templateData: { reportUrl, projectType: projectType ?? "" },
+          },
+        });
+      } catch (mailErr) {
+        console.error("[simple-quote] email send failed", (mailErr as Error).message);
+      }
+    }
+  } catch (err) {
+    console.error("analyse-simple-quote background error:", err);
+    await supabase
+      .from("simple_quote_checks")
+      .update({ status: "error", error: String((err as Error).message).slice(0, 500) })
+      .eq("id", checkId);
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
