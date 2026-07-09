@@ -123,7 +123,9 @@ export default function SimpleQuoteReport({ report }: { report: SimpleReportJson
             <p className="font-heading text-xl md:text-2xl text-navy leading-snug">{verdict.line}</p>
           </div>
           <div className="shrink-0 text-center">
-            <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Quote Clarity Score</p>
+            <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
+              {hasDocs ? "Main Quote Score" : "Quote Clarity Score"}
+            </p>
             <div className="relative inline-flex items-center justify-center">
               <span className="font-heading text-4xl md:text-5xl text-navy">{score}</span>
               <span className="font-mono text-sm text-muted-foreground ml-1">/100</span>
@@ -131,9 +133,25 @@ export default function SimpleQuoteReport({ report }: { report: SimpleReportJson
             <div className="mt-2 h-2 w-40 rounded-full bg-muted overflow-hidden">
               <div className={`h-full ${theme.bar}`} style={{ width: `${Math.min(100, Math.max(0, score))}%` }} />
             </div>
-            <p className="font-mono text-[10px] text-muted-foreground mt-2">
-              Based on {report.relevant_categories_count ?? relevant.length} relevant categories
-            </p>
+            {hasDocs ? (
+              <div className="mt-3 pt-3 border-t border-border">
+                <p className="font-mono text-[10px] uppercase tracking-wider text-teal mb-1">Quote Pack Confidence</p>
+                <div className="relative inline-flex items-center justify-center">
+                  <span className="font-heading text-3xl md:text-4xl text-navy">{packScore}</span>
+                  <span className="font-mono text-sm text-muted-foreground ml-1">/100</span>
+                </div>
+                <div className="mt-2 h-2 w-40 rounded-full bg-muted overflow-hidden">
+                  <div className="h-full bg-teal" style={{ width: `${Math.min(100, Math.max(0, packScore ?? 0))}%` }} />
+                </div>
+                <p className="font-mono text-[10px] text-muted-foreground mt-2">
+                  With supporting documents included
+                </p>
+              </div>
+            ) : (
+              <p className="font-mono text-[10px] text-muted-foreground mt-2">
+                Based on {report.relevant_categories_count ?? relevant.length} relevant categories
+              </p>
+            )}
           </div>
         </div>
 
