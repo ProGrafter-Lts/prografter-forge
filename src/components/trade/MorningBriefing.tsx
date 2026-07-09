@@ -24,6 +24,7 @@ interface QuoteItem {
   amount: number;
   status: string;
   created_at: string;
+  job_id?: string;
   jobs: { title: string | null; job_type: string; postcode: string } | null;
 }
 
