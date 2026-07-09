@@ -158,7 +158,8 @@ const PipelineSection = ({ tradeId }: Props) => {
     };
   }, [load]);
 
-  const totalLeads = counts.todo + counts.contacted + counts.quoted + counts.won;
+  const totalLeads =
+    counts.todo + counts.contacted + counts.quoted + counts.won + counts.lost;
 
   const header = (
     <div>
