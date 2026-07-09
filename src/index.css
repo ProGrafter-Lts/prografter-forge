@@ -1468,3 +1468,141 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
 }
 
 
+
+/* ============================================================
+   PROGRAFTER "SITE OFFICE" DESIGN LANGUAGE
+   Blueprint textures, workspace surfaces, premium motion.
+   Applied inside .dashboard-dark. Textures never exceed ~6%.
+   ============================================================ */
+
+/* --- Three navy workspace surfaces (subtle depth of movement) --- */
+.ws-surface {
+  position: relative;
+  border-radius: 1.5rem;
+  padding: 1.75rem;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+@media (min-width: 768px) {
+  .ws-surface { padding: 2.25rem; }
+}
+.ws-bg-1 { background: linear-gradient(160deg, #10233f 0%, #0e1f38 100%); }
+.ws-bg-2 { background: linear-gradient(160deg, #123054 0%, #0f2645 100%); }
+.ws-bg-3 { background: linear-gradient(160deg, #0f2c4d 0%, #0d2340 100%); }
+
+/* --- Blueprint grid overlay (fine CAD grid) --- */
+.blueprint-grid::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(94, 234, 212, 0.5) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(94, 234, 212, 0.5) 1px, transparent 1px);
+  background-size: 28px 28px;
+  opacity: 0.05;
+  mask-image: radial-gradient(ellipse at top left, #000 0%, transparent 75%);
+}
+
+/* --- Survey cross / datum markers overlay --- */
+.blueprint-crosses::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.06;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%235EEAD4' stroke-width='1'%3E%3Cpath d='M20 12v16M12 20h16'/%3E%3Cpath d='M100 92v16M92 100h16'/%3E%3Ccircle cx='60' cy='60' r='4'/%3E%3Cpath d='M60 48v-8M60 72v8M48 60h-8M72 60h8'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 120px 120px;
+}
+
+/* --- Contour lines overlay --- */
+.blueprint-contour::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Cg fill='none' stroke='%235EEAD4' stroke-width='1'%3E%3Cpath d='M-20 200 Q100 120 200 200 T420 200'/%3E%3Cpath d='M-20 240 Q100 160 200 240 T420 240'/%3E%3Cpath d='M-20 160 Q100 80 200 160 T420 160'/%3E%3Cpath d='M-20 280 Q100 200 200 280 T420 280'/%3E%3Cpath d='M-20 120 Q100 40 200 120 T420 120'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 480px 480px;
+}
+
+/* --- Workspace accent tokens (identify each module) --- */
+.ws-accent-teal   { --ws-accent: 94 234 212; }
+.ws-accent-blue   { --ws-accent: 96 165 250; }
+.ws-accent-gold   { --ws-accent: 251 191 36; }
+.ws-accent-orange { --ws-accent: 251 146 60; }
+.ws-accent-green  { --ws-accent: 52 211 153; }
+.ws-accent-purple { --ws-accent: 167 139 250; }
+.ws-accent-fg   { color: rgb(var(--ws-accent)); }
+.ws-accent-bg   { background-color: rgba(var(--ws-accent), 0.12); }
+.ws-accent-ring { box-shadow: inset 0 0 0 1px rgba(var(--ws-accent), 0.35); }
+.ws-accent-bar::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 1.25rem; bottom: 1.25rem;
+  width: 3px;
+  border-radius: 3px;
+  background: linear-gradient(rgb(var(--ws-accent)), transparent);
+}
+
+/* --- Premium glass card with hover lift --- */
+.premium-card {
+  position: relative;
+  border-radius: 1.25rem;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.02));
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 8px 30px -18px rgba(0, 0, 0, 0.6);
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.premium-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(var(--ws-accent, 94 234 212), 0.4);
+  box-shadow: 0 22px 46px -22px rgba(0, 0, 0, 0.75);
+}
+
+/* --- Rounded action chips --- */
+.action-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 56px;
+  padding: 0 1.25rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.92);
+  font-family: var(--font-sans);
+  font-weight: 600;
+  transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+.action-chip:hover {
+  transform: translateY(-2px);
+  background: rgba(var(--ws-accent, 94 234 212), 0.14);
+  border-color: rgba(var(--ws-accent, 94 234 212), 0.45);
+}
+
+/* --- Count-up entrance for big numbers --- */
+@keyframes count-rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-count { animation: count-rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+/* --- Pin pulse for map markers --- */
+@keyframes pin-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(var(--pin, 94 234 212), 0.5); }
+  70%  { box-shadow: 0 0 0 10px rgba(var(--pin, 94 234 212), 0); }
+  100% { box-shadow: 0 0 0 0 rgba(var(--pin, 94 234 212), 0); }
+}
+.animate-pin { animation: pin-pulse 2.4s ease-out infinite; }
+
+/* --- Workspace section heading --- */
+.ws-heading {
+  font-family: var(--font-heading);
+  color: #F5F0E8;
+  letter-spacing: 0.02em;
+  line-height: 1.05;
+}
