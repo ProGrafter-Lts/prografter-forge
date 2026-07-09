@@ -431,13 +431,13 @@ const MorningBriefing = ({ tradeId, quotes }: Props) => {
                   <p className="font-heading text-secondary text-xl">£{Number(q.amount).toLocaleString()}</p>
                   <div className="flex flex-col gap-2">
                     <button
-                      onClick={() => navigate("/planning-alerts")}
+                      onClick={() => navigate(q.job_id ? `/project/${q.job_id}` : "/dashboard/trade?view=jobs")}
                       className="inline-flex items-center gap-1.5 bg-secondary text-secondary-foreground font-mono text-xs px-4 py-2 rounded-xl hover:opacity-90 transition-opacity"
                     >
                       Follow Up
                     </button>
                     <button
-                      onClick={() => navigate(q.jobs ? `/quote-report/${q.id}` : "#")}
+                      onClick={() => navigate(q.job_id ? `/project/${q.job_id}` : "/dashboard/trade?view=jobs")}
                       className="inline-flex items-center gap-1.5 bg-card border border-primary/10 font-mono text-xs px-4 py-2 rounded-xl text-foreground hover:border-secondary/40 transition-colors"
                     >
                       View Quote
