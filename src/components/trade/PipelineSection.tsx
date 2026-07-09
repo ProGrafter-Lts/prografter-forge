@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { AlertCircle, ArrowRight, RefreshCw } from "lucide-react";
+import { AlertCircle, ArrowRight, RefreshCw, GitBranch } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { ShortlistStatus } from "./ShortlistStatusControl";
+import Workspace from "@/components/trade/Workspace";
 
 interface Props {
   tradeId: string;
@@ -18,63 +19,51 @@ const CARD_DEFS: {
   key: keyof Counts;
   label: string;
   subtitle: string;
-  tone: string;
+  color: string;
   filter?: string;
 }[] = [
   {
     key: "todo",
     label: "To Contact",
     subtitle: "Haven't reached out yet",
-    tone: "bg-muted/40 text-foreground border-border",
+    color: "#94a3b8",
     filter: "todo",
   },
   {
     key: "contacted",
-    label: "Waiting for Reply",
+    label: "Waiting",
     subtitle: "Reached out, awaiting response",
-    tone: "bg-amber-500/10 text-amber-700 border-amber-500/30",
+    color: "#eab308",
     filter: "contacted",
-  },
-  {
-    key: "awaiting_planning",
-    label: "Awaiting Planning Decision",
-    subtitle: "Application still under review",
-    tone: "bg-blue-500/10 text-blue-700 border-blue-500/30",
   },
   {
     key: "planning_approved",
     label: "Planning Approved",
     subtitle: "Approved — ready to approach",
-    tone: "bg-purple-500/10 text-purple-700 border-purple-500/30",
+    color: "#a855f7",
   },
   {
     key: "site_visit",
-    label: "Site Visit Booked",
+    label: "Site Visit",
     subtitle: "Visit scheduled",
-    tone: "bg-teal-500/10 text-teal-700 border-teal-500/30",
+    color: "#14b8a6",
   },
   {
     key: "quoted",
     label: "Quoted",
     subtitle: "Quote submitted, pending decision",
-    tone: "bg-primary/10 text-primary border-primary/30",
+    color: "#60a5fa",
     filter: "quoted",
   },
   {
     key: "won",
     label: "Won",
     subtitle: "Converted in last 90 days",
-    tone: "bg-emerald-500/10 text-emerald-700 border-emerald-500/30",
+    color: "#34d399",
     filter: "won",
   },
-  {
-    key: "lost",
-    label: "Lost",
-    subtitle: "Archived or lost leads",
-    tone: "bg-destructive/10 text-destructive border-destructive/30",
-    filter: "dead",
-  },
 ];
+
 
 const PipelineSection = ({ tradeId }: Props) => {
   const navigate = useNavigate();
