@@ -1777,6 +1777,48 @@ export type Database = {
           },
         ]
       }
+      manual_quote_review_requests: {
+        Row: {
+          created_at: string
+          email: string
+          file_name: string | null
+          file_path: string | null
+          id: string
+          name: string
+          note: string | null
+          phone: string | null
+          quote_type: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          file_name?: string | null
+          file_path?: string | null
+          id?: string
+          name: string
+          note?: string | null
+          phone?: string | null
+          quote_type: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          file_name?: string | null
+          file_path?: string | null
+          id?: string
+          name?: string
+          note?: string | null
+          phone?: string | null
+          quote_type?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       materials_log: {
         Row: {
           batch_reference: string | null
