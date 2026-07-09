@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import AppShell from "@/components/AppShell";
 import SEO from "@/components/SEO";
 import QuoteHealthCheckReport from "@/components/QuoteHealthCheckReport";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 import {
   Loader2,
   CheckCircle2,
@@ -102,6 +103,10 @@ const DisclaimerBanner = () => (
 const QuoteReport = () => {
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
+  const { isAdmin } = useIsAdmin();
+  // Admins opening the report via the Advanced Review Engine (?advanced=1) see the
+  // full detailed checklist; everyone else gets the streamlined consumer view.
+  const advancedMode = isAdmin && searchParams.get("advanced") === "1";
   const [report, setReport] = useState<ReportJson | null>(null);
   const [status, setStatus] = useState<string>("pending");
   const [accessError, setAccessError] = useState<string | null>(null);
@@ -286,7 +291,7 @@ const QuoteReport = () => {
     // New QS-style report: render the shared white-paper report component so
     // the public page, the in-account view and the printed PDF are identical.
     if (report.report_html) {
-      return <QuoteHealthCheckReport report={report} />;
+      return <QuoteHealthCheckReport report={report} admin={advancedMode} />;
     }
 
 
