@@ -220,6 +220,37 @@ export default function SimpleQuoteReport({ report }: { report: SimpleReportJson
         </Section>
       ) : null}
 
+      {/* Supplied separately — found in supporting documents, needs builder confirmation */}
+      {suppliedSeparately.length ? (
+        <Section title="Supplied Separately — Confirm With Builder" icon={<ShieldCheck className="h-5 w-5 text-teal" />}>
+          <p className="font-mono text-xs text-muted-foreground mb-3">
+            These items are not in the main quote but appear in your supporting documents. They still need
+            the builder to confirm in writing that they form part of the agreed quote pack.
+          </p>
+          <ul className="space-y-3">
+            {suppliedSeparately.map((s, i) => (
+              <li key={i} className="rounded-xl border border-teal/30 bg-teal/5 p-3">
+                <p className="font-mono text-sm text-navy font-medium">{s.item}</p>
+                <div className="mt-1.5 space-y-1">
+                  {s.main_quote && (
+                    <p className="font-mono text-xs text-navy/80"><span className="text-muted-foreground">Main quote:</span> {s.main_quote}</p>
+                  )}
+                  {s.supporting && (
+                    <p className="font-mono text-xs text-navy/80"><span className="text-muted-foreground">Supporting document:</span> {s.supporting}</p>
+                  )}
+                  {s.status && (
+                    <p className="font-mono text-xs text-teal">{s.status}</p>
+                  )}
+                  {s.note && (
+                    <p className="font-mono text-xs text-navy/70">{s.note}</p>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+        </Section>
+      ) : null}
+
       {/* 7. Main questions to ask the builder */}
       {report.questions?.length ? (
         <Section title="Main Questions To Ask The Builder" icon={<MessageSquare className="h-5 w-5 text-navy" />}>
