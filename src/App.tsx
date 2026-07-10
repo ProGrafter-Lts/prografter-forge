@@ -241,6 +241,19 @@ const AppRoutes = () => {
             <Route path="/admin/advanced-quote-review" element={<AdminRoute><AdminAdvancedQuoteReview /></AdminRoute>} />
             <Route path="/admin/quote-checker-modules" element={<AdminRoute><AdminQuoteCheckerModules /></AdminRoute>} />
             <Route path="/admin/project-readiness-review" element={<Navigate to="/admin/advanced-quote-review" replace />} />
+            {/* ProGrafter Planning Hub — new premium app shell */}
+            <Route path="/hub" element={<HubLayout />}>
+              <Route index element={<HubDashboard />} />
+              <Route path="planning" element={<HubPlanning />} />
+              <Route path="pipeline" element={<HubPipeline />} />
+              <Route path="calendar" element={<HubCalendar />} />
+              <Route path="messages" element={<HubMessages />} />
+              <Route path="profile" element={<HubProfile />} />
+              <Route path="settings" element={<HubSettings />} />
+              <Route path="atlas" element={<HubComingSoon />} />
+              <Route path="quote-checker" element={<HubQuoteCheckerSoon />} />
+              <Route path="marketplace" element={<HubMarketplaceSoon />} />
+            </Route>
             <Route path="*" element={<NotFound />} />
       </Routes>
 
