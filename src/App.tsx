@@ -95,6 +95,24 @@ const SimpleQuoteChecker = lazy(() => import("./pages/SimpleQuoteChecker.tsx"));
 const SimpleQuoteReportPage = lazy(() => import("./pages/SimpleQuoteReport.tsx"));
 const QuoteCheckerHome = lazy(() => import("./pages/QuoteCheckerHome.tsx"));
 const AdminQuoteCheckerModules = lazy(() => import("./pages/AdminQuoteCheckerModules.tsx"));
+// ProGrafter Planning Hub — new application shell
+const HubLayout = lazy(() => import("./hub/layout/HubLayout.tsx"));
+const HubDashboard = lazy(() => import("./hub/pages/HubDashboard.tsx"));
+const HubPlanning = lazy(() => import("./hub/pages/HubPlanning.tsx"));
+const HubPipeline = lazy(() => import("./hub/pages/HubPipeline.tsx"));
+const HubCalendar = lazy(() => import("./hub/pages/HubCalendar.tsx"));
+const HubMessages = lazy(() => import("./hub/pages/HubMessages.tsx"));
+const HubProfile = lazy(() => import("./hub/pages/HubProfile.tsx"));
+const HubSettings = lazy(() => import("./hub/pages/HubSettings.tsx"));
+const HubComingSoon = lazy(() =>
+  import("./hub/pages/HubComingSoon.tsx").then((m) => ({ default: m.HubAtlas })),
+);
+const HubQuoteCheckerSoon = lazy(() =>
+  import("./hub/pages/HubComingSoon.tsx").then((m) => ({ default: m.HubQuoteChecker })),
+);
+const HubMarketplaceSoon = lazy(() =>
+  import("./hub/pages/HubComingSoon.tsx").then((m) => ({ default: m.HubMarketplace })),
+);
 import AdminRoute from "./components/AdminRoute.tsx";
 import AppLayout from "./components/layout/AppLayout.tsx";
 import DrawerHost from "./components/layout/DrawerHost.tsx";
@@ -223,6 +241,19 @@ const AppRoutes = () => {
             <Route path="/admin/advanced-quote-review" element={<AdminRoute><AdminAdvancedQuoteReview /></AdminRoute>} />
             <Route path="/admin/quote-checker-modules" element={<AdminRoute><AdminQuoteCheckerModules /></AdminRoute>} />
             <Route path="/admin/project-readiness-review" element={<Navigate to="/admin/advanced-quote-review" replace />} />
+            {/* ProGrafter Planning Hub — new premium app shell */}
+            <Route path="/hub" element={<HubLayout />}>
+              <Route index element={<HubDashboard />} />
+              <Route path="planning" element={<HubPlanning />} />
+              <Route path="pipeline" element={<HubPipeline />} />
+              <Route path="calendar" element={<HubCalendar />} />
+              <Route path="messages" element={<HubMessages />} />
+              <Route path="profile" element={<HubProfile />} />
+              <Route path="settings" element={<HubSettings />} />
+              <Route path="atlas" element={<HubComingSoon />} />
+              <Route path="quote-checker" element={<HubQuoteCheckerSoon />} />
+              <Route path="marketplace" element={<HubMarketplaceSoon />} />
+            </Route>
             <Route path="*" element={<NotFound />} />
       </Routes>
 
