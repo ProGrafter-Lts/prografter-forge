@@ -165,13 +165,15 @@ export const OPPORTUNITIES: Opportunity[] = [
   {
     id: "op-1004",
     projectType: "Single-storey rear extension",
-    category: "Rear Extension",
+    category: "Single Storey",
     address: "3 Elmwood Close, Guildford",
     postcode: "GU2 9DL",
+    planningRef: "GU/2026/1204",
     distanceMiles: 1.3,
     planningStatus: "Granted",
     applicationDate: "2026-07-10",
     daysOld: 1,
+    estBuildValue: 74000,
     tradesRequired: ["Bricklayer", "Groundworker", "Plasterer"],
     description:
       "Single-storey rear extension with flat roof and large picture window to extend the existing living space.",
