@@ -1062,3 +1062,78 @@
 .hub-today-row-main { font-size: 13px; font-weight: 600; color: var(--hub-ink); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .hub-today-row-meta { font-size: 12px; color: var(--hub-muted); flex-shrink: 0; }
 .hub-today-empty { font-size: 12.5px; color: var(--hub-muted); padding: 6px 0; }
+
+/* ---------- Introduction Letter generator ---------- */
+.hub-letter-overlay {
+  position: fixed; inset: 0; z-index: 60;
+  background: rgba(16, 26, 43, 0.55); backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+  animation: hub-fade-in 0.18s ease-out;
+}
+@keyframes hub-fade-in { from { opacity: 0; } to { opacity: 1; } }
+.hub-letter-modal {
+  background: var(--hub-card); border-radius: 20px; width: 100%; max-width: 720px;
+  max-height: 92vh; display: flex; flex-direction: column; overflow: hidden;
+  box-shadow: 0 24px 60px rgba(16, 26, 43, 0.35);
+}
+.hub-letter-head {
+  display: flex; align-items: center; gap: 16px;
+  padding: 18px 22px; border-bottom: 1px solid #eef1f4;
+}
+.hub-letter-title { font-size: 18px; font-weight: 800; color: var(--hub-ink); }
+.hub-letter-sub { font-size: 13px; color: var(--hub-muted); margin-top: 2px; }
+.hub-letter-toggle {
+  margin-left: auto; display: flex; background: #f2f4f6; border-radius: 10px; padding: 3px;
+}
+.hub-letter-toggle button {
+  display: flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 600;
+  color: var(--hub-muted); padding: 6px 12px; border-radius: 8px; cursor: pointer;
+}
+.hub-letter-toggle button.is-active { background: #fff; color: var(--hub-navy); box-shadow: var(--hub-shadow); }
+.hub-letter-close { color: var(--hub-muted); cursor: pointer; padding: 4px; border-radius: 8px; }
+.hub-letter-close:hover { background: #f2f4f6; color: var(--hub-ink); }
+.hub-letter-scroll { overflow-y: auto; padding: 22px; background: #f6f8fa; flex: 1; }
+.hub-letter-page {
+  background: #fff; border: 1px solid #e7ebef; border-radius: 12px;
+  padding: 40px 44px; font-family: Georgia, "Times New Roman", serif;
+  color: #1a2333; line-height: 1.65; box-shadow: var(--hub-shadow);
+}
+.hub-letter-brand { font-size: 19px; font-weight: 700; }
+.hub-letter-meta { font-size: 13px; color: #5a677a; line-height: 1.5; }
+.hub-letter-para { margin-top: 14px; white-space: pre-wrap; }
+.hub-letter-edit { display: flex; flex-direction: column; }
+.hub-letter-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--hub-muted); }
+.hub-letter-input, .hub-letter-textarea {
+  margin-top: 6px; width: 100%; border: 1px solid #dfe4ea; border-radius: 10px;
+  padding: 10px 12px; font-size: 14px; color: var(--hub-ink); background: #fff;
+  font-family: inherit; line-height: 1.6; resize: vertical;
+}
+.hub-letter-input:read-only { background: #f2f4f6; color: var(--hub-muted); }
+.hub-letter-textarea:focus, .hub-letter-input:focus { outline: none; border-color: var(--hub-teal); }
+.hub-letter-hint { font-size: 12px; color: var(--hub-muted); margin-top: 8px; }
+.hub-letter-actions {
+  display: flex; align-items: center; gap: 12px;
+  padding: 16px 22px; border-top: 1px solid #eef1f4;
+}
+.hub-letter-actions-main { margin-left: auto; display: flex; gap: 10px; }
+@media (max-width: 560px) {
+  .hub-letter-head { flex-wrap: wrap; }
+  .hub-letter-toggle { order: 3; width: 100%; }
+  .hub-letter-page { padding: 24px 22px; }
+  .hub-letter-actions { flex-wrap: wrap; }
+  .hub-letter-actions-main { width: 100%; }
+  .hub-letter-actions-main > * { flex: 1; }
+}
+
+/* ---------- Letter timeline on opportunity detail ---------- */
+.hub-letter-log { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+.hub-letter-log-item {
+  display: flex; align-items: center; gap: 12px; padding: 12px 14px;
+  background: #f6f8fa; border: 1px solid #eef1f4; border-radius: 12px;
+}
+.hub-letter-log-icon {
+  width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0;
+  background: var(--hub-navy-50); color: var(--hub-navy); display: grid; place-items: center;
+}
+.hub-letter-log-main { font-size: 13.5px; font-weight: 600; color: var(--hub-ink); }
+.hub-letter-log-when { font-size: 12px; color: var(--hub-muted); }

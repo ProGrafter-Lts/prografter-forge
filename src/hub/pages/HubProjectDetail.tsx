@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
@@ -21,6 +21,8 @@ import {
 } from "lucide-react";
 import { HubCard, HubButton, HubBadge, HubTag, HubEmpty } from "@/hub/components/ui";
 import { OpportunityScore } from "@/hub/components/OpportunityScore";
+import LetterGenerator from "@/hub/components/LetterGenerator";
+import { getLetters } from "@/hub/data/letters";
 import {
   getOpportunity,
   formatBuildValue,
@@ -46,6 +48,9 @@ const HubProjectDetail = () => {
   const navigate = useNavigate();
   const o = id ? getOpportunity(id) : undefined;
   const [saved, setSaved] = useState(false);
+  const [letterOpen, setLetterOpen] = useState(false);
+  const [letterVersion, setLetterVersion] = useState(0);
+  const letters = useMemo(() => (o ? getLetters(o.id) : []), [o, letterVersion]);
 
   if (!o) {
     return (
@@ -207,7 +212,7 @@ const HubProjectDetail = () => {
               <HubButton
                 variant="secondary"
                 icon={<Mail size={16} />}
-                onClick={() => toast({ title: "Generating introduction letter", description: "Letter generator coming soon." })}
+                onClick={() => setLetterOpen(true)}
               >
                 Generate Introduction Letter
               </HubButton>
@@ -256,6 +261,48 @@ const HubProjectDetail = () => {
             </ul>
           </HubCard>
 
+          {/* Letters sent — timeline */}
+          <HubCard padded>
+            <h3 className="hub-section-title hub-detail-heading" style={{ fontSize: 15 }}>
+              <Mail size={15} /> Introduction Letters
+            </h3>
+            {letters.length === 0 ? (
+              <p style={{ color: "#8a97a8", fontSize: 13, marginTop: 4 }}>
+                No letters generated yet. Create a personalised homeowner letter in one click.
+              </p>
+            ) : (
+              <div className="hub-letter-log">
+                {letters.map((l) => (
+                  <div key={l.id} className="hub-letter-log-item">
+                    <span className="hub-letter-log-icon">
+                      <Mail size={15} />
+                    </span>
+                    <div>
+                      <div className="hub-letter-log-main">Introduction letter generated</div>
+                      <div className="hub-letter-log-when">
+                        {new Date(l.createdAt).toLocaleString("en-GB", {
+                          day: "numeric",
+                          month: "short",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            <HubButton
+              variant="secondary"
+              icon={<Mail size={16} />}
+              onClick={() => setLetterOpen(true)}
+              style={{ marginTop: 14, width: "100%" }}
+            >
+              Generate Letter
+            </HubButton>
+          </HubCard>
+
+
           {/* Important Dates */}
           <HubCard padded>
             <h3 className="hub-section-title hub-detail-heading" style={{ fontSize: 15 }}>
@@ -276,6 +323,14 @@ const HubProjectDetail = () => {
           </HubCard>
         </div>
       </div>
+
+      {letterOpen && (
+        <LetterGenerator
+          opportunity={o}
+          onClose={() => setLetterOpen(false)}
+          onSaved={() => setLetterVersion((v) => v + 1)}
+        />
+      )}
     </>
   );
 };
