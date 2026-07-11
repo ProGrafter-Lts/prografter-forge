@@ -99,6 +99,8 @@ const AdminQuoteCheckerModules = lazy(() => import("./pages/AdminQuoteCheckerMod
 const HubLayout = lazy(() => import("./hub/layout/HubLayout.tsx"));
 const HubDashboard = lazy(() => import("./hub/pages/HubDashboard.tsx"));
 const HubPlanning = lazy(() => import("./hub/pages/HubPlanning.tsx"));
+const HubProjectDetail = lazy(() => import("./hub/pages/HubProjectDetail.tsx"));
+
 const HubPipeline = lazy(() => import("./hub/pages/HubPipeline.tsx"));
 const HubCalendar = lazy(() => import("./hub/pages/HubCalendar.tsx"));
 const HubMessages = lazy(() => import("./hub/pages/HubMessages.tsx"));
