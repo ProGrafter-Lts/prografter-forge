@@ -17,13 +17,23 @@ export type PipelineStage =
 export interface Opportunity {
   id: string;
   projectType: string;
-  category: "Rear Extension" | "Two Storey" | "Loft" | "Renovation" | "Commercial" | "New Build";
+  category:
+    | "Single Storey"
+    | "Rear Extension"
+    | "Two Storey"
+    | "Loft"
+    | "Garage Conversion"
+    | "Renovation"
+    | "Commercial"
+    | "New Build";
   address: string;
   postcode: string;
+  planningRef: string;
   distanceMiles: number;
-  planningStatus: "Granted" | "Pending" | "Awaiting Decision" | "Conditions";
+  planningStatus: "Granted" | "Pending" | "Submitted" | "Awaiting Decision" | "Conditions";
   applicationDate: string; // ISO
   daysOld: number;
+  estBuildValue: number;
   tradesRequired: string[];
   description: string;
   stage: PipelineStage;
