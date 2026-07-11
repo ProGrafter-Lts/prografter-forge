@@ -785,6 +785,46 @@
 .hub-chip-radius { display: inline-flex; align-items: center; gap: 10px; cursor: default; }
 .hub-chip-radius input { accent-color: var(--hub-teal); }
 
+/* ---------- Planning toolbar ---------- */
+.hub-plan-toolbar {
+  display: flex; gap: 10px; align-items: center; margin-top: 20px; flex-wrap: wrap;
+}
+.hub-plan-search { flex: 1; min-width: 240px; max-width: 520px; }
+.hub-filter-toggle {
+  display: inline-flex; align-items: center; gap: 8px; white-space: nowrap;
+}
+.hub-filter-count {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px;
+  background: var(--hub-teal); color: #fff; font-size: 11px; font-weight: 700;
+}
+.hub-chip.is-active .hub-filter-count { background: #fff; color: var(--hub-navy); }
+
+/* ---------- Filter panel ---------- */
+.hub-filter-panel {
+  margin-top: 16px; background: #fff; border: 1px solid var(--hub-line);
+  border-radius: var(--hub-radius); box-shadow: var(--hub-shadow);
+  padding: 22px; display: flex; flex-direction: column; gap: 20px;
+}
+.hub-filter-group { display: flex; flex-direction: column; gap: 10px; }
+.hub-filter-label {
+  font-size: 12px; font-weight: 700; letter-spacing: 0.02em;
+  text-transform: uppercase; color: var(--hub-muted);
+}
+.hub-filter-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.hub-filter-clear {
+  align-self: flex-start; display: inline-flex; align-items: center; gap: 6px;
+  background: none; border: none; cursor: pointer;
+  font-size: 13px; font-weight: 600; color: var(--hub-teal-600);
+}
+.hub-filter-clear:hover { color: var(--hub-navy); }
+
+/* ---------- Clickable card ---------- */
+.hub-opp-card-click { cursor: pointer; }
+.hub-opp-card-click:hover .hub-opp-title { color: var(--hub-teal-600); }
+.hub-opp-card-click:focus-visible { outline: 2px solid var(--hub-teal); outline-offset: 2px; }
+.hub-opp-value { font-weight: 700; color: var(--hub-navy); }
+
 /* ---------- Opportunity list & cards ---------- */
 .hub-opp-list { margin-top: 22px; display: flex; flex-direction: column; gap: 14px; }
 .hub-opp-count { font-size: 13px; color: var(--hub-muted); font-weight: 600; }
