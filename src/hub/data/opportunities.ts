@@ -150,10 +150,12 @@ export const OPPORTUNITIES: Opportunity[] = [
     category: "Renovation",
     address: "22 Church Lane, Farnham",
     postcode: "GU9 8EX",
+    planningRef: "FA/2026/0731",
     distanceMiles: 8.9,
     planningStatus: "Conditions",
     applicationDate: "2026-06-28",
     daysOld: 13,
+    estBuildValue: 148000,
     tradesRequired: ["Builder", "Electrician", "Plumber", "Plasterer", "Tiler"],
     description:
       "Internal reconfiguration and single-storey rear extension forming a large open-plan kitchen/family room with bi-fold doors and roof lantern.",
