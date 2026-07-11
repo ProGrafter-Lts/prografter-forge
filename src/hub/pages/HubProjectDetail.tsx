@@ -21,6 +21,8 @@ import {
 } from "lucide-react";
 import { HubCard, HubButton, HubBadge, HubTag, HubEmpty } from "@/hub/components/ui";
 import { OpportunityScore } from "@/hub/components/OpportunityScore";
+import LetterGenerator from "@/hub/components/LetterGenerator";
+import { getLetters } from "@/hub/data/letters";
 import {
   getOpportunity,
   formatBuildValue,
