@@ -204,10 +204,12 @@ export const OPPORTUNITIES: Opportunity[] = [
     category: "New Build",
     address: "Land adj. 9 Beech Drive, Woking",
     postcode: "GU21 5RT",
+    planningRef: "WO/2026/0688",
     distanceMiles: 6.7,
     planningStatus: "Granted",
     applicationDate: "2026-06-20",
     daysOld: 21,
+    estBuildValue: 520000,
     tradesRequired: ["Groundworker", "Bricklayer", "Roofer", "Electrician", "Plumber", "Plasterer"],
     description:
       "Erection of a four-bedroom detached dwelling with associated parking and landscaping following demolition of existing outbuildings.",
