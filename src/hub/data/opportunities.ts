@@ -388,3 +388,110 @@ export const followUpDate = (o: Opportunity): string => {
   base.setDate(base.getDate() + (offsetByStage[o.stage] ?? 3));
   return base.toISOString().slice(0, 10);
 };
+
+/* ---------------- Dashboard (Home) derived data ---------------- */
+
+/** Format a build value as a full, readable GBP string (£1.24M / £185k). */
+export const formatBuildValueFull = (value: number): string => {
+  if (value >= 1_000_000) return `£${(value / 1_000_000).toFixed(2)}M`;
+  if (value >= 1_000) return `£${Math.round(value / 1000)}k`;
+  return `£${value}`;
+};
+
+/** Opportunities that live in the active pipeline (not new/won/lost). */
+const inPipeline = (o: Opportunity) =>
+  o.stage !== "new" && o.stage !== "won" && o.stage !== "lost";
+
+export interface DashboardTask {
+  id: string;
+  text: string;
+  tone: string;
+  icon: "phone" | "calendar" | "quote" | "radar" | "message";
+  to: string;
+}
+
+export interface DashboardData {
+  potentialValue: string;
+  newApplications: number;
+  nearbyCount: number;
+  followUps: Opportunity[];
+  outstandingQuotes: Opportunity[];
+  siteVisits: Opportunity[];
+  customerReplies: Opportunity[];
+  tasks: DashboardTask[];
+}
+
+/** Everything the Home dashboard needs, derived from the shared dataset. */
+export const dashboardData = (): DashboardData => {
+  const today = new Date().toISOString().slice(0, 10);
+
+  const nearby = OPPORTUNITIES.filter((o) => o.distanceMiles <= 15);
+  const potentialTotal = nearby.reduce((s, o) => s + o.estBuildValue, 0);
+  const newApplications = OPPORTUNITIES.filter((o) => o.daysOld <= 7).length;
+
+  const followUps = OPPORTUNITIES.filter(
+    (o) => inPipeline(o) && followUpDate(o) <= today,
+  ).sort((a, b) => followUpDate(a).localeCompare(followUpDate(b)));
+
+  const outstandingQuotes = OPPORTUNITIES.filter(
+    (o) => o.stage === "quote_sent" || o.stage === "quote_requested",
+  );
+
+  const siteVisits = OPPORTUNITIES.filter((o) => o.stage === "site_visit");
+
+  const customerReplies = OPPORTUNITIES.filter(
+    (o) => o.stage === "contacted" || o.stage === "negotiation",
+  );
+
+  const tasks: DashboardTask[] = [];
+
+  followUps.slice(0, 2).forEach((o) =>
+    tasks.push({
+      id: `t-fu-${o.id}`,
+      text: `Follow up on ${o.projectType} — ${o.address.split(",")[0]}.`,
+      tone: "#c0392b",
+      icon: "phone",
+      to: `/hub/opportunity/${o.id}`,
+    }),
+  );
+
+  siteVisits.slice(0, 1).forEach((o) =>
+    tasks.push({
+      id: `t-sv-${o.id}`,
+      text: `Site visit booked — ${o.address.split(",")[0]}.`,
+      tone: "#0d9488",
+      icon: "calendar",
+      to: `/hub/opportunity/${o.id}`,
+    }),
+  );
+
+  outstandingQuotes.slice(0, 1).forEach((o) =>
+    tasks.push({
+      id: `t-q-${o.id}`,
+      text: `Complete quote for ${o.projectType}.`,
+      tone: "#b8791b",
+      icon: "quote",
+      to: `/hub/opportunity/${o.id}`,
+    }),
+  );
+
+  if (newApplications > 0)
+    tasks.push({
+      id: "t-radar",
+      text: `${newApplications} new planning opportunities near you.`,
+      tone: "#1b3a5c",
+      icon: "radar",
+      to: "/hub/planning",
+    });
+
+  return {
+    potentialValue: formatBuildValueFull(potentialTotal),
+    newApplications,
+    nearbyCount: nearby.length,
+    followUps,
+    outstandingQuotes,
+    siteVisits,
+    customerReplies,
+    tasks,
+  };
+};
