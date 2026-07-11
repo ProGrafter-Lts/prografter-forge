@@ -370,3 +370,21 @@ export const recommendedAction = (o: Opportunity): string => {
     return "Save this opportunity and send an introduction letter within the next few days.";
   return "Review the drawings, then decide whether it's worth pursuing for your business.";
 };
+
+/** Deterministic follow-up date for pipeline cards (ISO string). */
+export const followUpDate = (o: Opportunity): string => {
+  const base = new Date(o.applicationDate);
+  const offsetByStage: Record<PipelineStage, number> = {
+    new: 1,
+    letter_sent: 5,
+    contacted: 3,
+    site_visit: 2,
+    quote_requested: 4,
+    quote_sent: 7,
+    negotiation: 2,
+    won: 14,
+    lost: 30,
+  };
+  base.setDate(base.getDate() + (offsetByStage[o.stage] ?? 3));
+  return base.toISOString().slice(0, 10);
+};
