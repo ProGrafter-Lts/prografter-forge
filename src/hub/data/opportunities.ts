@@ -118,6 +118,7 @@ export const OPPORTUNITIES: Opportunity[] = [
     projectType: "Two-storey side extension",
     category: "Two Storey",
     address: "14 Maple Avenue, Guildford",
+    homeownerName: "Mr & Mrs Smith",
     postcode: "GU1 3AA",
     planningRef: "GU/2026/1187",
     distanceMiles: 2.1,
