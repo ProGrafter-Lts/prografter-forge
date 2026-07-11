@@ -245,7 +245,9 @@ const AppRoutes = () => {
             <Route path="/hub" element={<HubLayout />}>
               <Route index element={<HubDashboard />} />
               <Route path="planning" element={<HubPlanning />} />
+              <Route path="opportunity/:id" element={<HubProjectDetail />} />
               <Route path="pipeline" element={<HubPipeline />} />
+
               <Route path="calendar" element={<HubCalendar />} />
               <Route path="messages" element={<HubMessages />} />
               <Route path="profile" element={<HubProfile />} />
