@@ -914,3 +914,28 @@
   .hub-actions-grid { grid-template-columns: 1fr; }
   .hub-detail-grid { grid-template-columns: 1fr; }
 }
+
+/* ---------- Project detail (Opportunity Detail v2) ---------- */
+.hub-btn-lg { padding: 13px 22px; font-size: 15px; border-radius: var(--hub-radius-sm); }
+.hub-detail-hero { margin-top: 14px; }
+.hub-fact-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px 20px; margin-top: 20px;
+  padding-top: 18px; border-top: 1px solid var(--hub-line);
+}
+.hub-fact { display: flex; gap: 10px; align-items: flex-start; }
+.hub-fact-icon {
+  display: inline-flex; color: var(--hub-teal); margin-top: 1px; flex-shrink: 0;
+}
+.hub-fact-label { font-size: 12px; color: #8a97a8; font-weight: 600; }
+.hub-fact-value { font-size: 14px; color: var(--hub-navy); font-weight: 700; margin-top: 1px; }
+.hub-detail-heading {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 16px; margin-bottom: 12px; color: var(--hub-navy);
+}
+.hub-detail-heading svg { color: var(--hub-teal); }
+.hub-analysis-row { margin-bottom: 16px; }
+.hub-analysis-row:last-child { margin-bottom: 0; }
+.hub-analysis-head { display: flex; justify-content: space-between; margin-bottom: 6px; }
+.hub-analysis-note { font-size: 12.5px; color: #8a97a8; margin-top: 6px; line-height: 1.4; }
+.hub-next-action { border: 1px solid var(--hub-teal-50); background: var(--hub-teal-50); }
