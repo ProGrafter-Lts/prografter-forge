@@ -39,6 +39,8 @@ export interface Opportunity {
   description: string;
   stage: PipelineStage;
   saved?: boolean;
+  /** Homeowner / applicant name where published on the planning record. */
+  homeownerName?: string;
   /** scoring factors 0-1 */
   factors: {
     distance: number;
