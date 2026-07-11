@@ -180,7 +180,7 @@ export const OPPORTUNITIES: Opportunity[] = [
     tradesRequired: ["Bricklayer", "Groundworker", "Plasterer"],
     description:
       "Single-storey rear extension with flat roof and large picture window to extend the existing living space.",
-    stage: "appointment",
+    stage: "site_visit",
     factors: { distance: 1, propertyType: 0.8, planningStage: 1, tradeMatch: 0.9, projectSize: 0.65, freshness: 1 },
   },
   {
@@ -216,7 +216,7 @@ export const OPPORTUNITIES: Opportunity[] = [
     tradesRequired: ["Groundworker", "Bricklayer", "Roofer", "Electrician", "Plumber", "Plasterer"],
     description:
       "Erection of a four-bedroom detached dwelling with associated parking and landscaping following demolition of existing outbuildings.",
-    stage: "quoted",
+    stage: "quote_sent",
     factors: { distance: 0.6, propertyType: 1, planningStage: 1, tradeMatch: 0.8, projectSize: 1, freshness: 0.4 },
   },
   {
