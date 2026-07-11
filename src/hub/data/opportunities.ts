@@ -256,3 +256,33 @@ export const OPPORTUNITIES: Opportunity[] = [
 
 export const getOpportunity = (id: string): Opportunity | undefined =>
   OPPORTUNITIES.find((o) => o.id === id);
+
+/** Format an estimated build value as a compact GBP string. */
+export const formatBuildValue = (value: number): string => {
+  if (value >= 1000) return `£${Math.round(value / 1000)}k`;
+  return `£${value}`;
+};
+
+/** Project-type filter options (aligned to card categories). */
+export const PROJECT_TYPES: Opportunity["category"][] = [
+  "Single Storey",
+  "Two Storey",
+  "Loft",
+  "Garage Conversion",
+  "Renovation",
+  "Commercial",
+  "New Build",
+];
+
+/** Planning-status filter options. */
+export const PLANNING_STATUSES: Opportunity["planningStatus"][] = [
+  "Submitted",
+  "Pending",
+  "Granted",
+];
+
+/** Unique list of every trade referenced across opportunities. */
+export const ALL_TRADES: string[] = Array.from(
+  new Set(OPPORTUNITIES.flatMap((o) => o.tradesRequired)),
+).sort();
+
