@@ -8,9 +8,10 @@ export type PipelineStage =
   | "new"
   | "letter_sent"
   | "contacted"
-  | "appointment"
-  | "atlas"
-  | "quoted"
+  | "site_visit"
+  | "quote_requested"
+  | "quote_sent"
+  | "negotiation"
   | "won"
   | "lost";
 
@@ -86,10 +87,11 @@ export const scoreTone = (score: number): "success" | "warning" | "neutral" => {
 export const STAGE_LABELS: Record<PipelineStage, string> = {
   new: "New Opportunity",
   letter_sent: "Letter Sent",
-  contacted: "Customer Contacted",
-  appointment: "Appointment Booked",
-  atlas: "Atlas Inspection",
-  quoted: "Quote Sent",
+  contacted: "Contacted",
+  site_visit: "Site Visit",
+  quote_requested: "Quote Requested",
+  quote_sent: "Quote Sent",
+  negotiation: "Negotiation",
   won: "Won",
   lost: "Lost",
 };
@@ -98,9 +100,10 @@ export const STAGE_ORDER: PipelineStage[] = [
   "new",
   "letter_sent",
   "contacted",
-  "appointment",
-  "atlas",
-  "quoted",
+  "site_visit",
+  "quote_requested",
+  "quote_sent",
+  "negotiation",
   "won",
   "lost",
 ];
@@ -177,7 +180,7 @@ export const OPPORTUNITIES: Opportunity[] = [
     tradesRequired: ["Bricklayer", "Groundworker", "Plasterer"],
     description:
       "Single-storey rear extension with flat roof and large picture window to extend the existing living space.",
-    stage: "appointment",
+    stage: "site_visit",
     factors: { distance: 1, propertyType: 0.8, planningStage: 1, tradeMatch: 0.9, projectSize: 0.65, freshness: 1 },
   },
   {
@@ -213,7 +216,7 @@ export const OPPORTUNITIES: Opportunity[] = [
     tradesRequired: ["Groundworker", "Bricklayer", "Roofer", "Electrician", "Plumber", "Plasterer"],
     description:
       "Erection of a four-bedroom detached dwelling with associated parking and landscaping following demolition of existing outbuildings.",
-    stage: "quoted",
+    stage: "quote_sent",
     factors: { distance: 0.6, propertyType: 1, planningStage: 1, tradeMatch: 0.8, projectSize: 1, freshness: 0.4 },
   },
   {
@@ -366,4 +369,22 @@ export const recommendedAction = (o: Opportunity): string => {
   if (score >= 60)
     return "Save this opportunity and send an introduction letter within the next few days.";
   return "Review the drawings, then decide whether it's worth pursuing for your business.";
+};
+
+/** Deterministic follow-up date for pipeline cards (ISO string). */
+export const followUpDate = (o: Opportunity): string => {
+  const base = new Date(o.applicationDate);
+  const offsetByStage: Record<PipelineStage, number> = {
+    new: 1,
+    letter_sent: 5,
+    contacted: 3,
+    site_visit: 2,
+    quote_requested: 4,
+    quote_sent: 7,
+    negotiation: 2,
+    won: 14,
+    lost: 30,
+  };
+  base.setDate(base.getDate() + (offsetByStage[o.stage] ?? 3));
+  return base.toISOString().slice(0, 10);
 };
