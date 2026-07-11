@@ -132,10 +132,12 @@ export const OPPORTUNITIES: Opportunity[] = [
     category: "Loft",
     address: "7 Oakfield Road, Woking",
     postcode: "GU22 7PB",
+    planningRef: "WO/2026/0942",
     distanceMiles: 5.4,
     planningStatus: "Pending",
     applicationDate: "2026-07-09",
     daysOld: 2,
+    estBuildValue: 62000,
     tradesRequired: ["Carpenter", "Roofer", "Plasterer"],
     description:
       "Loft conversion with rear dormer and two front rooflights to create a master bedroom with en-suite. Structural steels to be installed.",
