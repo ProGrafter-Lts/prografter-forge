@@ -56,6 +56,19 @@ const HubPlanning = () => {
     setMinScore(0);
   };
 
+  // Flat list of active filters as removable pills
+  const activePills: { key: string; label: string; onRemove: () => void }[] = [
+    ...[...statuses].map((s) => ({ key: `st-${s}`, label: s, onRemove: () => toggle(setStatuses, s) })),
+    ...[...types].map((t) => ({ key: `ty-${t}`, label: t, onRemove: () => toggle(setTypes, t) })),
+    ...[...trades].map((t) => ({ key: `tr-${t}`, label: t, onRemove: () => toggle(setTrades, t) })),
+    ...(dateWindow !== "any"
+      ? [{ key: "dw", label: DATE_OPTIONS.find((d) => d.value === dateWindow)!.label, onRemove: () => setDateWindow("any") }]
+      : []),
+    ...(minScore > 0
+      ? [{ key: "ms", label: `Score ${minScore}%+`, onRemove: () => setMinScore(0) }]
+      : []),
+  ];
+
   const results = useMemo(() => {
     return OPPORTUNITIES.filter((o) => {
       if (o.distanceMiles > radius) return false;
