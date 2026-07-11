@@ -183,13 +183,15 @@ export const OPPORTUNITIES: Opportunity[] = [
   {
     id: "op-1005",
     projectType: "Garage conversion to annexe",
-    category: "Renovation",
+    category: "Garage Conversion",
     address: "45 Highview Road, Aldershot",
     postcode: "GU12 4LP",
+    planningRef: "AL/2026/0555",
     distanceMiles: 11.2,
     planningStatus: "Awaiting Decision",
     applicationDate: "2026-07-01",
     daysOld: 10,
+    estBuildValue: 38000,
     tradesRequired: ["Builder", "Electrician", "Plumber"],
     description:
       "Conversion of integral garage into a self-contained annexe including new insulation, heating and a shower room.",
