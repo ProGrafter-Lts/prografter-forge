@@ -1,107 +1,101 @@
+import { useNavigate } from "react-router-dom";
 import {
-  Users,
+  Phone,
+  CalendarClock,
   FileText,
   Radar,
-  CalendarClock,
-  MapPin,
-  Plus,
+  Search,
+  KanbanSquare,
+  CalendarDays,
+  MessageCircle,
+  Bookmark,
+  GitBranch,
   ArrowRight,
 } from "lucide-react";
-import {
-  HubStatCard,
-  HubCard,
-  HubButton,
-  HubBadge,
-  HubTag,
-  HubSection,
-  HubEmpty,
-} from "@/hub/components/ui";
+import { HubCard } from "@/hub/components/ui";
 
-const PLACEHOLDER_OPPS = [
-  { title: "Two-storey side extension", area: "Guildford, GU1", tag: "Extension", when: "Awaiting details" },
-  { title: "Loft conversion & dormer", area: "Woking, GU22", tag: "Loft", when: "Awaiting details" },
-  { title: "Full rear renovation", area: "Farnham, GU9", tag: "Renovation", when: "Awaiting details" },
+const PRIORITIES = [
+  { icon: <Phone size={18} />, text: "Call Mrs Smith regarding rear extension.", tone: "#1b3a5c" },
+  { icon: <CalendarClock size={18} />, text: "Site visit at 2:00pm.", tone: "#0d9488" },
+  { icon: <FileText size={18} />, text: "Complete kitchen quotation.", tone: "#b8791b" },
+  { icon: <Radar size={18} />, text: "6 new planning opportunities within 10 miles.", tone: "#c0392b" },
 ];
 
-const PIPELINE_STAGES = [
-  { name: "New", count: "—" },
-  { name: "Contacted", count: "—" },
-  { name: "Quoted", count: "—" },
-  { name: "Won", count: "—" },
+const ACTIONS = [
+  { label: "Find Work", sub: "Planning opportunities near you", icon: <Search size={26} />, to: "/hub/planning", variant: "navy" },
+  { label: "Open Pipeline", sub: "Manage every opportunity", icon: <KanbanSquare size={26} />, to: "/hub/pipeline", variant: "teal" },
+  { label: "Today's Jobs", sub: "What's on today", icon: <CalendarDays size={26} />, to: "/hub/calendar", variant: "amber" },
+];
+
+const ACTIVITY = [
+  { icon: <MessageCircle size={16} />, text: "Mrs Smith replied.", when: "12 min ago" },
+  { icon: <Bookmark size={16} />, text: "New planning application saved.", when: "1 hr ago" },
+  { icon: <FileText size={16} />, text: "Quote sent yesterday.", when: "Yesterday" },
+  { icon: <GitBranch size={16} />, text: "Pipeline updated.", when: "Yesterday" },
 ];
 
 const HubDashboard = () => {
+  const navigate = useNavigate();
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Good Morning" : hour < 18 ? "Good Afternoon" : "Good Evening";
+
   return (
     <>
-      {/* Page header */}
-      <div className="flex items-end justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="hub-page-title">Good morning, Lee</h1>
-          <p className="hub-page-sub">Here's your workspace at a glance.</p>
-        </div>
-        <HubButton variant="accent" icon={<Plus size={17} />}>
-          New opportunity
-        </HubButton>
+      {/* Morning Brief */}
+      <div>
+        <h1 className="hub-page-title">{greeting}, Lee</h1>
+        <p className="hub-page-sub">Today's priorities</p>
       </div>
 
-      {/* Stat cards */}
-      <div className="hub-grid-4" style={{ marginTop: 28 }}>
-        <HubStatCard label="Customers Waiting" value="0" icon={<Users size={20} />} accent="navy" hint="No customers waiting yet" />
-        <HubStatCard label="Outstanding Quotes" value="0" icon={<FileText size={20} />} accent="teal" hint="Nothing outstanding" />
-        <HubStatCard label="Planning Opportunities" value="0" icon={<Radar size={20} />} accent="amber" hint="We'll surface nearby leads here" />
-        <HubStatCard label="Today's Follow Ups" value="0" icon={<CalendarClock size={20} />} accent="rose" hint="You're all caught up" />
-      </div>
-
-      {/* Latest Opportunities */}
-      <HubSection
-        title="Latest Opportunities"
-        action={<HubButton variant="ghost" size="sm" icon={<ArrowRight size={15} />}>View all</HubButton>}
-      >
-        <div className="hub-grid-3">
-          {PLACEHOLDER_OPPS.map((o) => (
-            <HubCard key={o.title} interactive>
-              <div className="flex items-center justify-between" style={{ marginBottom: 12 }}>
-                <HubTag>{o.tag}</HubTag>
-                <HubBadge tone="info" dot>
-                  {o.when}
-                </HubBadge>
-              </div>
-              <div style={{ fontWeight: 700, fontSize: 16 }}>{o.title}</div>
-              <div className="flex items-center gap-1" style={{ color: "#8a97a8", fontSize: 13, marginTop: 8 }}>
-                <MapPin size={14} />
-                {o.area}
-              </div>
-              <HubButton variant="secondary" size="sm" className="w-full" style={{ marginTop: 16 }}>
-                View details
-              </HubButton>
-            </HubCard>
+      <HubCard className="hub-brief" padded>
+        <ul className="hub-brief-list">
+          {PRIORITIES.map((p) => (
+            <li key={p.text} className="hub-brief-item">
+              <span className="hub-brief-icon" style={{ background: `${p.tone}14`, color: p.tone }}>
+                {p.icon}
+              </span>
+              <span className="hub-brief-text">{p.text}</span>
+            </li>
           ))}
-        </div>
-      </HubSection>
+        </ul>
+      </HubCard>
 
-      {/* Pipeline Summary */}
-      <HubSection
-        title="Pipeline Summary"
-        action={<HubButton variant="ghost" size="sm" icon={<ArrowRight size={15} />}>Open pipeline</HubButton>}
-      >
-        <HubCard>
-          <div className="hub-grid-4">
-            {PIPELINE_STAGES.map((s) => (
-              <div key={s.name} style={{ textAlign: "center", padding: "8px 0" }}>
-                <div className="hub-stat-value" style={{ fontSize: 28 }}>{s.count}</div>
-                <div className="hub-stat-label" style={{ marginTop: 6 }}>{s.name}</div>
-              </div>
+      {/* Action buttons */}
+      <div className="hub-actions-grid">
+        {ACTIONS.map((a) => (
+          <button
+            key={a.label}
+            type="button"
+            className={`hub-action-btn hub-action-${a.variant}`}
+            onClick={() => navigate(a.to)}
+          >
+            <span className="hub-action-icon">{a.icon}</span>
+            <span className="hub-action-body">
+              <span className="hub-action-label">{a.label}</span>
+              <span className="hub-action-sub">{a.sub}</span>
+            </span>
+            <ArrowRight size={20} className="hub-action-arrow" />
+          </button>
+        ))}
+      </div>
+
+      {/* Recent Activity */}
+      <section style={{ marginTop: 36 }}>
+        <h2 className="hub-section-title" style={{ marginBottom: 16 }}>
+          Recent Activity
+        </h2>
+        <HubCard padded={false}>
+          <ul className="hub-activity">
+            {ACTIVITY.map((a) => (
+              <li key={a.text} className="hub-activity-item">
+                <span className="hub-activity-icon">{a.icon}</span>
+                <span className="hub-activity-text">{a.text}</span>
+                <span className="hub-activity-when">{a.when}</span>
+              </li>
             ))}
-          </div>
-          <div style={{ marginTop: 8 }}>
-            <HubEmpty
-              icon={<Radar size={22} />}
-              title="Your pipeline is empty"
-              description="As opportunities come in they'll flow through your pipeline stages here."
-            />
-          </div>
+          </ul>
         </HubCard>
-      </HubSection>
+      </section>
     </>
   );
 };
