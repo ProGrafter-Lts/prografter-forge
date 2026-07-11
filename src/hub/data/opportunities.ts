@@ -114,10 +114,12 @@ export const OPPORTUNITIES: Opportunity[] = [
     category: "Two Storey",
     address: "14 Maple Avenue, Guildford",
     postcode: "GU1 3AA",
+    planningRef: "GU/2026/1187",
     distanceMiles: 2.1,
     planningStatus: "Granted",
     applicationDate: "2026-07-06",
     daysOld: 5,
+    estBuildValue: 185000,
     tradesRequired: ["Bricklayer", "Groundworker", "Roofer", "Plasterer"],
     description:
       "Proposed two-storey side extension to provide an enlarged kitchen/diner at ground floor and an additional bedroom with en-suite above. Includes new pitched roof to match existing.",
