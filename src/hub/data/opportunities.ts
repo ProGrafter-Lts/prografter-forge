@@ -8,9 +8,10 @@ export type PipelineStage =
   | "new"
   | "letter_sent"
   | "contacted"
-  | "appointment"
-  | "atlas"
-  | "quoted"
+  | "site_visit"
+  | "quote_requested"
+  | "quote_sent"
+  | "negotiation"
   | "won"
   | "lost";
 
