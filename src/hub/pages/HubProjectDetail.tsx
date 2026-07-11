@@ -212,7 +212,7 @@ const HubProjectDetail = () => {
               <HubButton
                 variant="secondary"
                 icon={<Mail size={16} />}
-                onClick={() => toast({ title: "Generating introduction letter", description: "Letter generator coming soon." })}
+                onClick={() => setLetterOpen(true)}
               >
                 Generate Introduction Letter
               </HubButton>
