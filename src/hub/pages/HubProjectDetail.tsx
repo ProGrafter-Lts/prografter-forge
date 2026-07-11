@@ -323,6 +323,14 @@ const HubProjectDetail = () => {
           </HubCard>
         </div>
       </div>
+
+      {letterOpen && (
+        <LetterGenerator
+          opportunity={o}
+          onClose={() => setLetterOpen(false)}
+          onSaved={() => setLetterVersion((v) => v + 1)}
+        />
+      )}
     </>
   );
 };
