@@ -13,14 +13,20 @@ const cx = (...parts: (string | false | undefined)[]) => parts.filter(Boolean).j
 type ButtonVariant = "primary" | "accent" | "secondary" | "ghost";
 interface HubButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
-  size?: "md" | "sm";
+  size?: "md" | "sm" | "lg";
   icon?: ReactNode;
 }
 export const HubButton = forwardRef<HTMLButtonElement, HubButtonProps>(
   ({ variant = "primary", size = "md", icon, className, children, ...rest }, ref) => (
     <button
       ref={ref}
-      className={cx("hub-btn", `hub-btn-${variant}`, size === "sm" && "hub-btn-sm", className)}
+      className={cx(
+        "hub-btn",
+        `hub-btn-${variant}`,
+        size === "sm" && "hub-btn-sm",
+        size === "lg" && "hub-btn-lg",
+        className,
+      )}
       {...rest}
     >
       {icon}
