@@ -1,61 +1,83 @@
 import { useMemo, useState } from "react";
-import { List, Map as MapIcon, MapPin } from "lucide-react";
+import { List, Map as MapIcon, MapPin, SlidersHorizontal, X } from "lucide-react";
 import { HubSearch, HubMap, HubBadge } from "@/hub/components/ui";
 import OpportunityCard from "@/hub/components/OpportunityCard";
-import { OPPORTUNITIES, type Opportunity } from "@/hub/data/opportunities";
+import {
+  OPPORTUNITIES,
+  PROJECT_TYPES,
+  PLANNING_STATUSES,
+  ALL_TRADES,
+  opportunityScore,
+  type Opportunity,
+} from "@/hub/data/opportunities";
 import { toast } from "@/hooks/use-toast";
 
 type View = "list" | "map";
+type DateWindow = "any" | "today" | "week" | "month";
 
-const QUICK_FILTERS = [
-  "Today",
-  "Yesterday",
-  "This Week",
-  "Rear Extensions",
-  "Two Storey",
-  "Lofts",
-  "Renovations",
-  "Commercial",
-  "New Builds",
-] as const;
+const DATE_OPTIONS: { value: DateWindow; label: string }[] = [
+  { value: "any", label: "Any time" },
+  { value: "today", label: "Today" },
+  { value: "week", label: "This week" },
+  { value: "month", label: "This month" },
+];
 
-const CATEGORY_MAP: Record<string, Opportunity["category"]> = {
-  "Rear Extensions": "Rear Extension",
-  "Two Storey": "Two Storey",
-  Lofts: "Loft",
-  Renovations: "Renovation",
-  Commercial: "Commercial",
-  "New Builds": "New Build",
-};
+const SCORE_OPTIONS = [0, 60, 70, 80, 90];
 
 const HubPlanning = () => {
   const [view, setView] = useState<View>("list");
-  const [active, setActive] = useState<string | null>(null);
   const [radius, setRadius] = useState(15);
   const [query, setQuery] = useState("");
   const [saved, setSaved] = useState<Set<string>>(new Set());
+  const [showFilters, setShowFilters] = useState(false);
+
+  // filter state
+  const [statuses, setStatuses] = useState<Set<string>>(new Set());
+  const [types, setTypes] = useState<Set<string>>(new Set());
+  const [trades, setTrades] = useState<Set<string>>(new Set());
+  const [dateWindow, setDateWindow] = useState<DateWindow>("any");
+  const [minScore, setMinScore] = useState(0);
+
+  const toggle = (set: React.Dispatch<React.SetStateAction<Set<string>>>, value: string) =>
+    set((prev) => {
+      const next = new Set(prev);
+      next.has(value) ? next.delete(value) : next.add(value);
+      return next;
+    });
+
+  const activeFilterCount =
+    statuses.size + types.size + trades.size + (dateWindow !== "any" ? 1 : 0) + (minScore > 0 ? 1 : 0);
+
+  const clearFilters = () => {
+    setStatuses(new Set());
+    setTypes(new Set());
+    setTrades(new Set());
+    setDateWindow("any");
+    setMinScore(0);
+  };
 
   const results = useMemo(() => {
     return OPPORTUNITIES.filter((o) => {
       if (o.distanceMiles > radius) return false;
-      if (query && !`${o.projectType} ${o.address} ${o.postcode}`.toLowerCase().includes(query.toLowerCase()))
+      if (
+        query &&
+        !`${o.projectType} ${o.address} ${o.postcode} ${o.planningRef}`
+          .toLowerCase()
+          .includes(query.toLowerCase())
+      )
         return false;
-      if (!active) return true;
-      if (active === "Today") return o.daysOld <= 1;
-      if (active === "Yesterday") return o.daysOld === 1;
-      if (active === "This Week") return o.daysOld <= 7;
-      const cat = CATEGORY_MAP[active];
-      return cat ? o.category === cat : true;
+      if (statuses.size && !statuses.has(o.planningStatus)) return false;
+      if (types.size && !types.has(o.category)) return false;
+      if (trades.size && !o.tradesRequired.some((t) => trades.has(t))) return false;
+      if (dateWindow === "today" && o.daysOld > 1) return false;
+      if (dateWindow === "week" && o.daysOld > 7) return false;
+      if (dateWindow === "month" && o.daysOld > 31) return false;
+      if (minScore > 0 && opportunityScore(o) < minScore) return false;
+      return true;
     }).map((o) => ({ ...o, saved: saved.has(o.id) }));
-  }, [active, radius, query, saved]);
+  }, [radius, query, statuses, types, trades, dateWindow, minScore, saved]);
 
-  const handleSave = (o: Opportunity) => {
-    setSaved((prev) => {
-      const next = new Set(prev);
-      next.has(o.id) ? next.delete(o.id) : next.add(o.id);
-      return next;
-    });
-  };
+  const handleSave = (o: Opportunity) => toggle(setSaved as never, o.id);
 
   const handleAdd = (o: Opportunity) => {
     toast({ title: "Added to pipeline", description: `${o.projectType} is now in New Opportunity.` });
@@ -69,52 +91,132 @@ const HubPlanning = () => {
           <p className="hub-page-sub">Where your next job comes from.</p>
         </div>
         <div className="hub-viewtoggle">
-          <button
-            className={view === "list" ? "is-active" : ""}
-            onClick={() => setView("list")}
-          >
+          <button className={view === "list" ? "is-active" : ""} onClick={() => setView("list")}>
             <List size={15} /> List
           </button>
-          <button
-            className={view === "map" ? "is-active" : ""}
-            onClick={() => setView("map")}
-          >
+          <button className={view === "map" ? "is-active" : ""} onClick={() => setView("map")}>
             <MapIcon size={15} /> Map
           </button>
         </div>
       </div>
 
-      {/* Search */}
-      <div style={{ marginTop: 20, maxWidth: 480 }}>
+      {/* Search + filter toggle */}
+      <div className="hub-plan-toolbar">
         <HubSearch
-          placeholder="Search by postcode or area…"
+          placeholder="Search by postcode, town or planning reference…"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
+          className="hub-plan-search"
         />
+        <button
+          className={`hub-chip hub-filter-toggle ${showFilters ? "is-active" : ""}`}
+          onClick={() => setShowFilters((s) => !s)}
+        >
+          <SlidersHorizontal size={15} />
+          Filters
+          {activeFilterCount > 0 && <span className="hub-filter-count">{activeFilterCount}</span>}
+        </button>
       </div>
 
-      {/* Quick filters */}
+      {/* Radius */}
       <div className="hub-quickfilters">
-        {QUICK_FILTERS.map((f) => (
-          <button
-            key={f}
-            className={`hub-chip ${active === f ? "is-active" : ""}`}
-            onClick={() => setActive(active === f ? null : f)}
-          >
-            {f}
-          </button>
-        ))}
         <label className="hub-chip hub-chip-radius">
           Radius: {radius} mi
           <input
             type="range"
             min={1}
-            max={25}
+            max={50}
             value={radius}
             onChange={(e) => setRadius(Number(e.target.value))}
           />
         </label>
       </div>
+
+      {/* Filter panel */}
+      {showFilters && (
+        <div className="hub-filter-panel">
+          <div className="hub-filter-group">
+            <span className="hub-filter-label">Planning Status</span>
+            <div className="hub-filter-chips">
+              {PLANNING_STATUSES.map((s) => (
+                <button
+                  key={s}
+                  className={`hub-chip ${statuses.has(s) ? "is-active" : ""}`}
+                  onClick={() => toggle(setStatuses, s)}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="hub-filter-group">
+            <span className="hub-filter-label">Project Type</span>
+            <div className="hub-filter-chips">
+              {PROJECT_TYPES.map((t) => (
+                <button
+                  key={t}
+                  className={`hub-chip ${types.has(t) ? "is-active" : ""}`}
+                  onClick={() => toggle(setTypes, t)}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="hub-filter-group">
+            <span className="hub-filter-label">Trade Required</span>
+            <div className="hub-filter-chips">
+              {ALL_TRADES.map((t) => (
+                <button
+                  key={t}
+                  className={`hub-chip ${trades.has(t) ? "is-active" : ""}`}
+                  onClick={() => toggle(setTrades, t)}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="hub-filter-group">
+            <span className="hub-filter-label">Date Submitted</span>
+            <div className="hub-filter-chips">
+              {DATE_OPTIONS.map((d) => (
+                <button
+                  key={d.value}
+                  className={`hub-chip ${dateWindow === d.value ? "is-active" : ""}`}
+                  onClick={() => setDateWindow(d.value)}
+                >
+                  {d.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="hub-filter-group">
+            <span className="hub-filter-label">Opportunity Score</span>
+            <div className="hub-filter-chips">
+              {SCORE_OPTIONS.map((s) => (
+                <button
+                  key={s}
+                  className={`hub-chip ${minScore === s ? "is-active" : ""}`}
+                  onClick={() => setMinScore(s)}
+                >
+                  {s === 0 ? "Any score" : `${s}%+`}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {activeFilterCount > 0 && (
+            <button className="hub-filter-clear" onClick={clearFilters}>
+              <X size={14} /> Clear all filters
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Results */}
       {view === "list" ? (

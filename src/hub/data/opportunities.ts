@@ -17,13 +17,23 @@ export type PipelineStage =
 export interface Opportunity {
   id: string;
   projectType: string;
-  category: "Rear Extension" | "Two Storey" | "Loft" | "Renovation" | "Commercial" | "New Build";
+  category:
+    | "Single Storey"
+    | "Rear Extension"
+    | "Two Storey"
+    | "Loft"
+    | "Garage Conversion"
+    | "Renovation"
+    | "Commercial"
+    | "New Build";
   address: string;
   postcode: string;
+  planningRef: string;
   distanceMiles: number;
-  planningStatus: "Granted" | "Pending" | "Awaiting Decision" | "Conditions";
+  planningStatus: "Granted" | "Pending" | "Submitted" | "Awaiting Decision" | "Conditions";
   applicationDate: string; // ISO
   daysOld: number;
+  estBuildValue: number;
   tradesRequired: string[];
   description: string;
   stage: PipelineStage;
@@ -104,10 +114,12 @@ export const OPPORTUNITIES: Opportunity[] = [
     category: "Two Storey",
     address: "14 Maple Avenue, Guildford",
     postcode: "GU1 3AA",
+    planningRef: "GU/2026/1187",
     distanceMiles: 2.1,
     planningStatus: "Granted",
     applicationDate: "2026-07-06",
     daysOld: 5,
+    estBuildValue: 185000,
     tradesRequired: ["Bricklayer", "Groundworker", "Roofer", "Plasterer"],
     description:
       "Proposed two-storey side extension to provide an enlarged kitchen/diner at ground floor and an additional bedroom with en-suite above. Includes new pitched roof to match existing.",
@@ -120,10 +132,12 @@ export const OPPORTUNITIES: Opportunity[] = [
     category: "Loft",
     address: "7 Oakfield Road, Woking",
     postcode: "GU22 7PB",
+    planningRef: "WO/2026/0942",
     distanceMiles: 5.4,
     planningStatus: "Pending",
     applicationDate: "2026-07-09",
     daysOld: 2,
+    estBuildValue: 62000,
     tradesRequired: ["Carpenter", "Roofer", "Plasterer"],
     description:
       "Loft conversion with rear dormer and two front rooflights to create a master bedroom with en-suite. Structural steels to be installed.",
@@ -136,10 +150,12 @@ export const OPPORTUNITIES: Opportunity[] = [
     category: "Renovation",
     address: "22 Church Lane, Farnham",
     postcode: "GU9 8EX",
+    planningRef: "FA/2026/0731",
     distanceMiles: 8.9,
     planningStatus: "Conditions",
     applicationDate: "2026-06-28",
     daysOld: 13,
+    estBuildValue: 148000,
     tradesRequired: ["Builder", "Electrician", "Plumber", "Plasterer", "Tiler"],
     description:
       "Internal reconfiguration and single-storey rear extension forming a large open-plan kitchen/family room with bi-fold doors and roof lantern.",
@@ -149,13 +165,15 @@ export const OPPORTUNITIES: Opportunity[] = [
   {
     id: "op-1004",
     projectType: "Single-storey rear extension",
-    category: "Rear Extension",
+    category: "Single Storey",
     address: "3 Elmwood Close, Guildford",
     postcode: "GU2 9DL",
+    planningRef: "GU/2026/1204",
     distanceMiles: 1.3,
     planningStatus: "Granted",
     applicationDate: "2026-07-10",
     daysOld: 1,
+    estBuildValue: 74000,
     tradesRequired: ["Bricklayer", "Groundworker", "Plasterer"],
     description:
       "Single-storey rear extension with flat roof and large picture window to extend the existing living space.",
@@ -165,13 +183,15 @@ export const OPPORTUNITIES: Opportunity[] = [
   {
     id: "op-1005",
     projectType: "Garage conversion to annexe",
-    category: "Renovation",
+    category: "Garage Conversion",
     address: "45 Highview Road, Aldershot",
     postcode: "GU12 4LP",
+    planningRef: "AL/2026/0555",
     distanceMiles: 11.2,
     planningStatus: "Awaiting Decision",
     applicationDate: "2026-07-01",
     daysOld: 10,
+    estBuildValue: 38000,
     tradesRequired: ["Builder", "Electrician", "Plumber"],
     description:
       "Conversion of integral garage into a self-contained annexe including new insulation, heating and a shower room.",
@@ -184,10 +204,12 @@ export const OPPORTUNITIES: Opportunity[] = [
     category: "New Build",
     address: "Land adj. 9 Beech Drive, Woking",
     postcode: "GU21 5RT",
+    planningRef: "WO/2026/0688",
     distanceMiles: 6.7,
     planningStatus: "Granted",
     applicationDate: "2026-06-20",
     daysOld: 21,
+    estBuildValue: 520000,
     tradesRequired: ["Groundworker", "Bricklayer", "Roofer", "Electrician", "Plumber", "Plasterer"],
     description:
       "Erection of a four-bedroom detached dwelling with associated parking and landscaping following demolition of existing outbuildings.",
@@ -200,10 +222,12 @@ export const OPPORTUNITIES: Opportunity[] = [
     category: "Commercial",
     address: "112 High Street, Guildford",
     postcode: "GU1 3HH",
+    planningRef: "GU/2026/1150",
     distanceMiles: 2.8,
-    planningStatus: "Pending",
+    planningStatus: "Submitted",
     applicationDate: "2026-07-08",
     daysOld: 3,
+    estBuildValue: 96000,
     tradesRequired: ["Shopfitter", "Electrician", "Glazier"],
     description:
       "Refurbishment of existing retail unit including new shopfront, internal fit-out and signage.",
@@ -216,10 +240,12 @@ export const OPPORTUNITIES: Opportunity[] = [
     category: "Two Storey",
     address: "18 Riverside Gardens, Godalming",
     postcode: "GU7 1AH",
+    planningRef: "GO/2026/0399",
     distanceMiles: 4.2,
     planningStatus: "Granted",
     applicationDate: "2026-07-04",
     daysOld: 7,
+    estBuildValue: 210000,
     tradesRequired: ["Bricklayer", "Groundworker", "Roofer", "Electrician", "Plumber"],
     description:
       "Two-storey rear and side extension providing a larger kitchen and utility at ground floor with two additional bedrooms above.",
@@ -230,3 +256,33 @@ export const OPPORTUNITIES: Opportunity[] = [
 
 export const getOpportunity = (id: string): Opportunity | undefined =>
   OPPORTUNITIES.find((o) => o.id === id);
+
+/** Format an estimated build value as a compact GBP string. */
+export const formatBuildValue = (value: number): string => {
+  if (value >= 1000) return `£${Math.round(value / 1000)}k`;
+  return `£${value}`;
+};
+
+/** Project-type filter options (aligned to card categories). */
+export const PROJECT_TYPES: Opportunity["category"][] = [
+  "Single Storey",
+  "Two Storey",
+  "Loft",
+  "Garage Conversion",
+  "Renovation",
+  "Commercial",
+  "New Build",
+];
+
+/** Planning-status filter options. */
+export const PLANNING_STATUSES: Opportunity["planningStatus"][] = [
+  "Submitted",
+  "Pending",
+  "Granted",
+];
+
+/** Unique list of every trade referenced across opportunities. */
+export const ALL_TRADES: string[] = Array.from(
+  new Set(OPPORTUNITIES.flatMap((o) => o.tradesRequired)),
+).sort();
+
