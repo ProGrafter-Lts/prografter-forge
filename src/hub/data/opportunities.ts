@@ -286,3 +286,84 @@ export const ALL_TRADES: string[] = Array.from(
   new Set(OPPORTUNITIES.flatMap((o) => o.tradesRequired)),
 ).sort();
 
+
+/* ---------------- Derived insights (deterministic, no AI) ---------------- */
+
+/** Plain-English summary of the project for the Overview section. */
+export const opportunitySummary = (o: Opportunity): string => {
+  const trades = o.tradesRequired.length;
+  const value = formatBuildValue(o.estBuildValue);
+  const stageText =
+    o.planningStatus === "Granted"
+      ? "Planning permission has been granted, so this job is ready to progress."
+      : o.planningStatus === "Conditions"
+      ? "Permission is granted subject to conditions — work can proceed once those are discharged."
+      : "The application is still working through the planning process.";
+  return `${o.description} This is a ${o.category.toLowerCase()} project roughly ${o.distanceMiles} miles away, with an estimated build value of ${value}. It typically needs around ${trades} trades on site. ${stageText}`;
+};
+
+/** Rough on-site duration estimate driven by project size. */
+export const estimatedTimeline = (o: Opportunity): string => {
+  const size = o.factors.projectSize;
+  if (size >= 0.9) return "6–9 months on site";
+  if (size >= 0.7) return "4–6 months on site";
+  if (size >= 0.5) return "10–16 weeks on site";
+  return "6–10 weeks on site";
+};
+
+/** Estimated competition level based on how fresh and attractive the lead is. */
+export const estimatedCompetition = (
+  o: Opportunity,
+): { level: "Low" | "Medium" | "High"; note: string } => {
+  const score = opportunityScore(o);
+  if (o.daysOld <= 3 && score >= 75)
+    return { level: "Low", note: "Freshly published — few builders have seen this yet." };
+  if (o.daysOld <= 7)
+    return { level: "Medium", note: "Recently published — worth contacting the owner soon." };
+  return { level: "High", note: "Older listing — other builders may already be in touch." };
+};
+
+/** Human labels for the six scoring factors used in Opportunity Analysis. */
+export const opportunityAnalysis = (
+  o: Opportunity,
+): { label: string; value: number; note: string }[] => {
+  const pct = (n: number) => Math.round(n * 100);
+  const band = (n: number) => (n >= 0.8 ? "Excellent" : n >= 0.6 ? "Good" : n >= 0.4 ? "Fair" : "Low");
+  return [
+    {
+      label: "Distance",
+      value: pct(o.factors.distance),
+      note: `${band(o.factors.distance)} — ${o.distanceMiles} miles from your base.`,
+    },
+    {
+      label: "Project size",
+      value: pct(o.factors.projectSize),
+      note: `${band(o.factors.projectSize)} — ${formatBuildValue(o.estBuildValue)} estimated build value.`,
+    },
+    {
+      label: "Trade match",
+      value: pct(o.factors.tradeMatch),
+      note: `${band(o.factors.tradeMatch)} — strong overlap with the trades you offer.`,
+    },
+    {
+      label: "Planning stage",
+      value: pct(o.factors.planningStage),
+      note: `${band(o.factors.planningStage)} — ${o.planningStatus}.`,
+    },
+    {
+      label: "Estimated competition",
+      value: 100 - pct(o.factors.freshness),
+      note: estimatedCompetition(o).note,
+    },
+  ];
+};
+
+/** Recommended next action driven by pipeline stage & score. */
+export const recommendedAction = (o: Opportunity): string => {
+  const score = opportunityScore(o);
+  if (score >= 80)
+    return "Add this to your pipeline and send an introduction letter to the homeowner today while it's fresh.";
+  if (score >= 60)
+    return "Save this opportunity and send an introduction letter within the next few days.";
+  return "Review the drawings, then decide whether it's worth pursuing for your business.";
+};
