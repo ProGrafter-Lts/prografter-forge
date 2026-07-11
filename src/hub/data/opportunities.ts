@@ -222,10 +222,12 @@ export const OPPORTUNITIES: Opportunity[] = [
     category: "Commercial",
     address: "112 High Street, Guildford",
     postcode: "GU1 3HH",
+    planningRef: "GU/2026/1150",
     distanceMiles: 2.8,
-    planningStatus: "Pending",
+    planningStatus: "Submitted",
     applicationDate: "2026-07-08",
     daysOld: 3,
+    estBuildValue: 96000,
     tradesRequired: ["Shopfitter", "Electrician", "Glazier"],
     description:
       "Refurbishment of existing retail unit including new shopfront, internal fit-out and signage.",
