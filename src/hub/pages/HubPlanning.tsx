@@ -56,6 +56,19 @@ const HubPlanning = () => {
     setMinScore(0);
   };
 
+  // Flat list of active filters as removable pills
+  const activePills: { key: string; label: string; onRemove: () => void }[] = [
+    ...[...statuses].map((s) => ({ key: `st-${s}`, label: s, onRemove: () => toggle(setStatuses, s) })),
+    ...[...types].map((t) => ({ key: `ty-${t}`, label: t, onRemove: () => toggle(setTypes, t) })),
+    ...[...trades].map((t) => ({ key: `tr-${t}`, label: t, onRemove: () => toggle(setTrades, t) })),
+    ...(dateWindow !== "any"
+      ? [{ key: "dw", label: DATE_OPTIONS.find((d) => d.value === dateWindow)!.label, onRemove: () => setDateWindow("any") }]
+      : []),
+    ...(minScore > 0
+      ? [{ key: "ms", label: `Score ${minScore}%+`, onRemove: () => setMinScore(0) }]
+      : []),
+  ];
+
   const results = useMemo(() => {
     return OPPORTUNITIES.filter((o) => {
       if (o.distanceMiles > radius) return false;
@@ -132,11 +145,29 @@ const HubPlanning = () => {
         </label>
       </div>
 
+      {/* Active filter pills */}
+      {activePills.length > 0 && (
+        <div className="hub-active-pills">
+          {activePills.map((p) => (
+            <button key={p.key} className="hub-active-pill" onClick={p.onRemove}>
+              {p.label}
+              <X size={13} />
+            </button>
+          ))}
+          <button className="hub-active-pill-clear" onClick={clearFilters}>
+            Clear all
+          </button>
+        </div>
+      )}
+
       {/* Filter panel */}
       {showFilters && (
         <div className="hub-filter-panel">
           <div className="hub-filter-group">
-            <span className="hub-filter-label">Planning Status</span>
+            <span className="hub-filter-label">
+              Planning Status
+              {statuses.size > 0 && <span className="hub-filter-group-count">{statuses.size}</span>}
+            </span>
             <div className="hub-filter-chips">
               {PLANNING_STATUSES.map((s) => (
                 <button
@@ -151,7 +182,10 @@ const HubPlanning = () => {
           </div>
 
           <div className="hub-filter-group">
-            <span className="hub-filter-label">Project Type</span>
+            <span className="hub-filter-label">
+              Project Type
+              {types.size > 0 && <span className="hub-filter-group-count">{types.size}</span>}
+            </span>
             <div className="hub-filter-chips">
               {PROJECT_TYPES.map((t) => (
                 <button
@@ -166,7 +200,10 @@ const HubPlanning = () => {
           </div>
 
           <div className="hub-filter-group">
-            <span className="hub-filter-label">Trade Required</span>
+            <span className="hub-filter-label">
+              Trade Required
+              {trades.size > 0 && <span className="hub-filter-group-count">{trades.size}</span>}
+            </span>
             <div className="hub-filter-chips">
               {ALL_TRADES.map((t) => (
                 <button
@@ -210,13 +247,21 @@ const HubPlanning = () => {
             </div>
           </div>
 
-          {activeFilterCount > 0 && (
-            <button className="hub-filter-clear" onClick={clearFilters}>
-              <X size={14} /> Clear all filters
+          <div className="hub-filter-footer">
+            <button
+              className="hub-filter-clear"
+              onClick={clearFilters}
+              disabled={activeFilterCount === 0}
+            >
+              <X size={14} /> Clear all
             </button>
-          )}
+            <button className="hub-btn hub-btn-primary" onClick={() => setShowFilters(false)}>
+              Show {results.length} result{results.length === 1 ? "" : "s"}
+            </button>
+          </div>
         </div>
       )}
+
 
       {/* Results */}
       {view === "list" ? (
