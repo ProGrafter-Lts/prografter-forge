@@ -94,8 +94,8 @@ Deno.serve(async (req) => {
       customer_email: (email as string).trim().toLowerCase(),
       line_items: [{ price: PRICE_ID, quantity: 1 }],
       mode: "payment",
-      success_url: `${origin}/quote-checker?session_id={CHECKOUT_SESSION_ID}&quote_id=${quoteCheckId}`,
-      cancel_url: `${origin}/quote-checker?cancelled=true`,
+      success_url: `${origin}/quote-checker-classic?session_id={CHECKOUT_SESSION_ID}&quote_id=${quoteCheckId}`,
+      cancel_url: `${origin}/quote-checker-classic?cancelled=true`,
       metadata: { quoteCheckId },
     });
 
