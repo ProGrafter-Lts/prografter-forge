@@ -240,10 +240,12 @@ export const OPPORTUNITIES: Opportunity[] = [
     category: "Two Storey",
     address: "18 Riverside Gardens, Godalming",
     postcode: "GU7 1AH",
+    planningRef: "GO/2026/0399",
     distanceMiles: 4.2,
     planningStatus: "Granted",
     applicationDate: "2026-07-04",
     daysOld: 7,
+    estBuildValue: 210000,
     tradesRequired: ["Bricklayer", "Groundworker", "Roofer", "Electrician", "Plumber"],
     description:
       "Two-storey rear and side extension providing a larger kitchen and utility at ground floor with two additional bedrooms above.",
