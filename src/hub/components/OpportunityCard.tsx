@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
-import { MapPin, CalendarDays, FileText, Bookmark, GitBranchPlus, Users } from "lucide-react";
+import { MapPin, CalendarDays, FileText, Bookmark, GitBranchPlus, Users, Banknote } from "lucide-react";
 import { HubButton, HubBadge, HubTag } from "@/hub/components/ui";
 import { OpportunityScore } from "@/hub/components/OpportunityScore";
-import type { Opportunity } from "@/hub/data/opportunities";
+import { formatBuildValue, type Opportunity } from "@/hub/data/opportunities";
 
 const statusTone = (s: Opportunity["planningStatus"]) =>
   s === "Granted" ? "success" : s === "Conditions" ? "warning" : "info";
@@ -15,8 +15,28 @@ interface Props {
 
 const OpportunityCard = ({ opportunity: o, onSave, onAddToPipeline }: Props) => {
   const navigate = useNavigate();
+  const open = () => navigate(`/hub/opportunity/${o.id}`);
+
+  const stop =
+    (fn?: () => void) =>
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      fn?.();
+    };
+
   return (
-    <div className="hub-opp-card">
+    <div
+      className="hub-opp-card hub-opp-card-click"
+      role="button"
+      tabIndex={0}
+      onClick={open}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          open();
+        }
+      }}
+    >
       <div className="hub-opp-main">
         <div className="flex items-center justify-between flex-wrap gap-2" style={{ marginBottom: 10 }}>
           <div className="flex items-center gap-2">
@@ -28,13 +48,7 @@ const OpportunityCard = ({ opportunity: o, onSave, onAddToPipeline }: Props) => 
           <OpportunityScore opportunity={o} size="sm" />
         </div>
 
-        <button
-          type="button"
-          className="hub-opp-title"
-          onClick={() => navigate(`/hub/opportunity/${o.id}`)}
-        >
-          {o.projectType}
-        </button>
+        <div className="hub-opp-title">{o.projectType}</div>
 
         <div className="hub-opp-meta">
           <span className="flex items-center gap-1">
@@ -47,6 +61,9 @@ const OpportunityCard = ({ opportunity: o, onSave, onAddToPipeline }: Props) => 
               month: "short",
               year: "numeric",
             })}
+          </span>
+          <span className="flex items-center gap-1 hub-opp-value">
+            <Banknote size={14} /> {formatBuildValue(o.estBuildValue)} est. build value
           </span>
         </div>
 
@@ -65,7 +82,7 @@ const OpportunityCard = ({ opportunity: o, onSave, onAddToPipeline }: Props) => 
           variant="secondary"
           size="sm"
           icon={<FileText size={15} />}
-          onClick={() => navigate(`/hub/opportunity/${o.id}`)}
+          onClick={stop(open)}
         >
           View Drawings
         </HubButton>
@@ -73,7 +90,7 @@ const OpportunityCard = ({ opportunity: o, onSave, onAddToPipeline }: Props) => 
           variant={o.saved ? "primary" : "ghost"}
           size="sm"
           icon={<Bookmark size={15} />}
-          onClick={() => onSave?.(o)}
+          onClick={stop(() => onSave?.(o))}
         >
           {o.saved ? "Saved" : "Save"}
         </HubButton>
@@ -81,7 +98,7 @@ const OpportunityCard = ({ opportunity: o, onSave, onAddToPipeline }: Props) => 
           variant="accent"
           size="sm"
           icon={<GitBranchPlus size={15} />}
-          onClick={() => onAddToPipeline?.(o)}
+          onClick={stop(() => onAddToPipeline?.(o))}
         >
           Add To Pipeline
         </HubButton>
