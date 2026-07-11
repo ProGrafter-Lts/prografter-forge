@@ -99,6 +99,8 @@ const AdminQuoteCheckerModules = lazy(() => import("./pages/AdminQuoteCheckerMod
 const HubLayout = lazy(() => import("./hub/layout/HubLayout.tsx"));
 const HubDashboard = lazy(() => import("./hub/pages/HubDashboard.tsx"));
 const HubPlanning = lazy(() => import("./hub/pages/HubPlanning.tsx"));
+const HubProjectDetail = lazy(() => import("./hub/pages/HubProjectDetail.tsx"));
+
 const HubPipeline = lazy(() => import("./hub/pages/HubPipeline.tsx"));
 const HubCalendar = lazy(() => import("./hub/pages/HubCalendar.tsx"));
 const HubMessages = lazy(() => import("./hub/pages/HubMessages.tsx"));
@@ -245,7 +247,9 @@ const AppRoutes = () => {
             <Route path="/hub" element={<HubLayout />}>
               <Route index element={<HubDashboard />} />
               <Route path="planning" element={<HubPlanning />} />
+              <Route path="opportunity/:id" element={<HubProjectDetail />} />
               <Route path="pipeline" element={<HubPipeline />} />
+
               <Route path="calendar" element={<HubCalendar />} />
               <Route path="messages" element={<HubMessages />} />
               <Route path="profile" element={<HubProfile />} />
