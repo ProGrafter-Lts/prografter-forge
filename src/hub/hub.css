@@ -743,6 +743,22 @@
 .hub-action-arrow { color: #c4ccd6; flex-shrink: 0; }
 .hub-action-btn:hover .hub-action-arrow { color: var(--hub-teal); }
 
+/* Compact action tiles — icon over label, no nav duplication */
+.hub-actions-compact {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+}
+.hub-action-tile {
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  padding: 18px 10px; border-radius: var(--hub-radius);
+  border: 1px solid var(--hub-line); background: #fff; cursor: pointer;
+  box-shadow: var(--hub-shadow);
+  transition: box-shadow 0.18s ease, transform 0.18s ease;
+}
+.hub-action-tile:hover { box-shadow: var(--hub-shadow-lg); transform: translateY(-2px); }
+.hub-action-tile .hub-action-icon { width: 46px; height: 46px; border-radius: 13px; }
+.hub-action-tile .hub-action-label { font-size: 14px; font-weight: 700; color: var(--hub-ink); text-align: center; }
+
+
 /* ---------- Recent activity ---------- */
 .hub-activity { display: flex; flex-direction: column; }
 .hub-activity-item {

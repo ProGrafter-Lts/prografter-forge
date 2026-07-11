@@ -6,11 +6,8 @@ import {
   FileText,
   Radar,
   Search,
-  KanbanSquare,
   CalendarDays,
   MessageCircle,
-  Bookmark,
-  GitBranch,
   ArrowRight,
   TrendingUp,
   ClipboardList,
@@ -35,19 +32,11 @@ const TASK_ICON: Record<DashboardTask["icon"], JSX.Element> = {
 };
 
 const ACTIONS = [
-  { label: "Find Work", sub: "Planning opportunities near you", icon: <Search size={24} />, to: "/hub/planning", variant: "navy" },
-  { label: "Pipeline", sub: "Manage every opportunity", icon: <KanbanSquare size={24} />, to: "/hub/pipeline", variant: "teal" },
-  { label: "Today's Jobs", sub: "What's on today", icon: <CalendarDays size={24} />, to: "/hub/calendar", variant: "amber" },
-  { label: "Generate Quote", sub: "Build a new quotation", icon: <FileText size={24} />, to: "/hub/pipeline", variant: "navy" },
-  { label: "Messages", sub: "Customer conversations", icon: <MessagesSquare size={24} />, to: "/hub/messages", variant: "teal" },
+  { label: "Find Work", icon: <Search size={22} />, to: "/hub/planning", variant: "navy" },
+  { label: "New Quote", icon: <FileText size={22} />, to: "/hub/pipeline", variant: "teal" },
+  { label: "Today's Jobs", icon: <CalendarDays size={22} />, to: "/hub/calendar", variant: "amber" },
 ];
 
-const ACTIVITY = [
-  { icon: <MessageCircle size={16} />, text: "Mrs Smith replied.", when: "12 min ago" },
-  { icon: <Bookmark size={16} />, text: "New planning application saved.", when: "1 hr ago" },
-  { icon: <FileText size={16} />, text: "Quote sent yesterday.", when: "Yesterday" },
-  { icon: <GitBranch size={16} />, text: "Pipeline updated.", when: "Yesterday" },
-];
 
 const HubDashboard = () => {
   const navigate = useNavigate();
@@ -133,29 +122,23 @@ const HubDashboard = () => {
         )}
       </HubCard>
 
-      {/* Quick Actions */}
-      <section style={{ marginTop: 32 }}>
-        <h2 className="hub-section-title" style={{ marginBottom: 16 }}>
-          Quick Actions
-        </h2>
-        <div className="hub-actions-grid">
+      {/* Quick Actions — compact, only shortcuts not in the nav bar */}
+      <section style={{ marginTop: 28 }}>
+        <div className="hub-actions-compact">
           {ACTIONS.map((a) => (
             <button
               key={a.label}
               type="button"
-              className={`hub-action-btn hub-action-${a.variant}`}
+              className={`hub-action-tile hub-action-${a.variant}`}
               onClick={() => navigate(a.to)}
             >
               <span className="hub-action-icon">{a.icon}</span>
-              <span className="hub-action-body">
-                <span className="hub-action-label">{a.label}</span>
-                <span className="hub-action-sub">{a.sub}</span>
-              </span>
-              <ArrowRight size={20} className="hub-action-arrow" />
+              <span className="hub-action-label">{a.label}</span>
             </button>
           ))}
         </div>
       </section>
+
 
       {/* Potential Work Nearby */}
       <section style={{ marginTop: 32 }}>
@@ -218,24 +201,6 @@ const HubDashboard = () => {
             empty="No new replies."
           />
         </div>
-      </section>
-
-      {/* Recent Activity */}
-      <section style={{ marginTop: 32 }}>
-        <h2 className="hub-section-title" style={{ marginBottom: 16 }}>
-          Recent Activity
-        </h2>
-        <HubCard padded={false}>
-          <ul className="hub-activity">
-            {ACTIVITY.map((a) => (
-              <li key={a.text} className="hub-activity-item">
-                <span className="hub-activity-icon">{a.icon}</span>
-                <span className="hub-activity-text">{a.text}</span>
-                <span className="hub-activity-when">{a.when}</span>
-              </li>
-            ))}
-          </ul>
-        </HubCard>
       </section>
     </>
   );

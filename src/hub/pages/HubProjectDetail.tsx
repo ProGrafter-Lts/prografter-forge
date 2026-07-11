@@ -28,8 +28,8 @@ import {
   formatBuildValue,
   opportunitySummary,
   estimatedTimeline,
-  estimatedCompetition,
   opportunityAnalysis,
+
   recommendedAction,
 } from "@/hub/data/opportunities";
 import { toast } from "@/hooks/use-toast";
@@ -67,7 +67,6 @@ const HubProjectDetail = () => {
     );
   }
 
-  const competition = estimatedCompetition(o);
   const analysis = opportunityAnalysis(o);
 
   const facts = [
@@ -229,20 +228,6 @@ const HubProjectDetail = () => {
 
         {/* ---------- Right column ---------- */}
         <div className="hub-detail-side">
-          {/* Estimated competition */}
-          <HubCard padded>
-            <h3 className="hub-section-title hub-detail-heading" style={{ fontSize: 15 }}>
-              <Users size={15} /> Estimated Competition
-            </h3>
-            <HubBadge
-              tone={competition.level === "Low" ? "success" : competition.level === "Medium" ? "warning" : "neutral"}
-              dot
-            >
-              {competition.level}
-            </HubBadge>
-            <p style={{ color: "#8a97a8", fontSize: 13, marginTop: 10 }}>{competition.note}</p>
-          </HubCard>
-
           {/* Planning History */}
           <HubCard padded>
             <h3 className="hub-section-title hub-detail-heading" style={{ fontSize: 15 }}>
@@ -260,6 +245,7 @@ const HubProjectDetail = () => {
               ))}
             </ul>
           </HubCard>
+
 
           {/* Letters sent — timeline */}
           <HubCard padded>
@@ -302,25 +288,6 @@ const HubProjectDetail = () => {
             </HubButton>
           </HubCard>
 
-
-          {/* Important Dates */}
-          <HubCard padded>
-            <h3 className="hub-section-title hub-detail-heading" style={{ fontSize: 15 }}>
-              <CalendarDays size={15} /> Important Dates
-            </h3>
-            <div className="hub-doc-list">
-              <div className="hub-doc-row">
-                <CalendarDays size={15} style={{ color: "#8a97a8" }} />
-                <span>Application submitted</span>
-                <strong style={{ fontSize: 13 }}>{fmtDate(o.applicationDate)}</strong>
-              </div>
-              <div className="hub-doc-row">
-                <CalendarDays size={15} style={{ color: "#8a97a8" }} />
-                <span>Decision issued</span>
-                <strong style={{ fontSize: 13 }}>{fmtDate(HISTORY[HISTORY.length - 1].date)}</strong>
-              </div>
-            </div>
-          </HubCard>
         </div>
       </div>
 
