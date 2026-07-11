@@ -48,6 +48,9 @@ const HubProjectDetail = () => {
   const navigate = useNavigate();
   const o = id ? getOpportunity(id) : undefined;
   const [saved, setSaved] = useState(false);
+  const [letterOpen, setLetterOpen] = useState(false);
+  const [letterVersion, setLetterVersion] = useState(0);
+  const letters = useMemo(() => (o ? getLetters(o.id) : []), [o, letterVersion]);
 
   if (!o) {
     return (
