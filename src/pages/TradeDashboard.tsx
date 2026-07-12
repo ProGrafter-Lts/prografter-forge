@@ -233,7 +233,7 @@ const TradeDashboard = () => {
   };
 
   useEffect(() => {
-    const validViews = ["dashboard", "jobs", "projects", "earnings", "profile", "tradevault"];
+    const validViews = ["dashboard", "jobs", "projects", "earnings", "profile", "tradevault", "pipeline", "quotes", "calendar", "messages"];
 
     if (viewFilter && validViews.includes(viewFilter)) {
       setActiveNav(viewFilter);
