@@ -15,6 +15,7 @@ import CalendarConnect from "@/components/trade/CalendarConnect";
 import TradeProfileSection from "@/components/trade/TradeProfileSection";
 import AddSpecialismsBanner from "@/components/trade/AddSpecialismsBanner";
 import PipelineSection from "@/components/trade/PipelineSection";
+import QuotesList from "@/components/trade/QuotesList";
 import AvailableJobsView from "@/components/trade/AvailableJobsView";
 import TradeVaultSection from "@/components/trade/tradevault/TradeVaultSection";
 import TradeVaultBanners from "@/components/trade/tradevault/TradeVaultBanners";
