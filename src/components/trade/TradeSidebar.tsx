@@ -4,25 +4,27 @@ import { supabase } from "@/integrations/supabase/client";
 import { useVerificationStatus } from "@/hooks/useVerificationStatus";
 import {
   LayoutDashboard,
-  Briefcase,
+  Search,
   FolderKanban,
-  Bell,
-  PoundSterling,
+  FileText,
+  CalendarDays,
+  MessageSquare,
   UserCircle,
   Settings,
   LogOut,
   ShieldCheck,
+  Map,
 } from "lucide-react";
 
 const NAV_ITEMS = [
   { label: "Dashboard", icon: LayoutDashboard, id: "dashboard" },
-  { label: "Available Jobs", icon: Briefcase, id: "jobs" },
-  { label: "Active Projects", icon: FolderKanban, id: "projects" },
+  { label: "Find Work", icon: Search, id: "find-work" },
+  { label: "Pipeline", icon: FolderKanban, id: "pipeline" },
+  { label: "Quotes", icon: FileText, id: "quotes" },
+  { label: "Calendar", icon: CalendarDays, id: "calendar" },
+  { label: "Messages", icon: MessageSquare, id: "messages" },
   { label: "TradeVault", icon: ShieldCheck, id: "tradevault" },
-  { label: "Planning Hub", icon: Bell, id: "alerts" },
-  { label: "Earnings", icon: PoundSterling, id: "earnings" },
-  { label: "My Profile", icon: UserCircle, id: "profile" },
-  { label: "Settings", icon: Settings, id: "settings" },
+  { label: "Profile", icon: UserCircle, id: "profile" },
 ];
 
 interface TradeSidebarProps {
@@ -41,7 +43,7 @@ const TradeSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen }: 
   const routeActiveNav = location.pathname.startsWith("/dashboard/trade/settings")
     ? "settings"
     : location.pathname.startsWith("/planning-alerts")
-      ? "alerts"
+      ? "find-work"
       : currentView || activeNav;
 
   const handleLogout = async () => {
@@ -52,7 +54,7 @@ const TradeSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen }: 
   const handleNavClick = (id: string) => {
     setActiveNav(id);
 
-    if (id === "alerts") {
+    if (id === "find-work") {
       navigate("/planning-alerts");
     } else if (id === "settings") {
       navigate("/dashboard/trade/settings");
@@ -87,7 +89,7 @@ const TradeSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen }: 
           <Logo variant="light" className="h-10 w-auto" />
         </div>
 
-        <nav className="flex-1 p-4 space-y-1">
+        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           {NAV_ITEMS.map((item) => {
             const isActive = routeActiveNav === item.id;
             return (
@@ -105,6 +107,35 @@ const TradeSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen }: 
               </button>
             );
           })}
+
+          {/* Atlas — coming soon, visible but disabled */}
+          <div
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-mono text-sm whitespace-nowrap cursor-not-allowed"
+            style={{ color: "rgba(255,255,255,0.35)" }}
+            aria-disabled="true"
+          >
+            <Map className="w-4 h-4 flex-shrink-0" />
+            Atlas
+            <span
+              className="ml-auto text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full"
+              style={{ backgroundColor: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.5)" }}
+            >
+              Soon
+            </span>
+          </div>
+
+          {/* Settings */}
+          <button
+            onClick={() => handleNavClick("settings")}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-mono text-sm transition-colors whitespace-nowrap"
+            style={{
+              backgroundColor: routeActiveNav === "settings" ? "rgba(13,148,136,0.18)" : "transparent",
+              color: routeActiveNav === "settings" ? "#1AC2BA" : "rgba(255,255,255,0.75)",
+            }}
+          >
+            <Settings className="w-4 h-4 flex-shrink-0" />
+            Settings
+          </button>
         </nav>
 
         {/* Verification status */}
