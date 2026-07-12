@@ -397,6 +397,51 @@ const TradeDashboard = () => {
             <TradeVaultSection tradeId={trade.id} />
           )}
 
+          {/* Pipeline (full view) */}
+          {activeNav === "pipeline" && trade && (
+            <PipelineSection tradeId={trade.id} />
+          )}
+
+          {/* Quotes (full view) */}
+          {activeNav === "quotes" && trade && (
+            <div className="space-y-6">
+              <div>
+                <h1 className="font-heading text-primary text-3xl">Quotes</h1>
+                <p className="font-mono text-sm text-muted-foreground mt-1">Track and manage your submitted quotes.</p>
+              </div>
+              <QuotesList quotes={quotes} />
+            </div>
+          )}
+
+          {/* Calendar (full view) */}
+          {activeNav === "calendar" && trade && (
+            <div className="space-y-6">
+              <div>
+                <h1 className="font-heading text-primary text-3xl">Calendar</h1>
+                <p className="font-mono text-sm text-muted-foreground mt-1">Sync your jobs and site visits to your calendar.</p>
+              </div>
+              <CalendarConnect variant="full" />
+            </div>
+          )}
+
+          {/* Messages (full view) */}
+          {activeNav === "messages" && trade && (
+            <div className="space-y-6">
+              <div>
+                <h1 className="font-heading text-primary text-3xl">Messages</h1>
+                <p className="font-mono text-sm text-muted-foreground mt-1">Conversations with homeowners appear here.</p>
+              </div>
+              <div
+                className="rounded-xl p-12 text-center"
+                style={{ backgroundColor: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
+              >
+                <p className="font-mono text-sm text-muted-foreground">
+                  No messages yet. Once a homeowner starts a conversation, it'll show up here.
+                </p>
+              </div>
+            </div>
+          )}
+
           {activeNav === "dashboard" && (
           <>
           {/* Slim eligibility / document banners only — shown near the top when action is required */}
@@ -404,21 +449,10 @@ const TradeDashboard = () => {
             <TradeVaultBanners tradeId={trade.id} onOpenVault={() => setActiveNav("tradevault")} />
           )}
 
-          {/* PRIORITY 1–5: Morning Briefing, Follow-ups, Jobs Starting Soon, Quotes, Planning Hub */}
+          {/* 1. MORNING BRIEF */}
           {trade && <MorningBriefing tradeId={trade.id} quotes={quotes} name={trade.name} />}
 
-          {/* PRIORITY 6: Pipeline */}
-          {trade && <PipelineSection tradeId={trade.id} />}
-
-          {/* PRIORITY 7+: Setup, profile strength, stats and margin sit lower */}
-          {trade && (
-            <AddSpecialismsBanner
-              tradeId={trade.id}
-              promptSeen={trade.specialisms_prompt_seen}
-              onAdd={() => setActiveNav("profile")}
-            />
-          )}
-
+          {/* 2. QUICK ACTIONS */}
           {trade && (
             <CommandCentre
               tradeId={trade.id}
@@ -427,30 +461,49 @@ const TradeDashboard = () => {
             />
           )}
 
-          <StatsRow
-            jobsWon={completedCount}
-            earningsThisMonth={marginData.totalReceived}
-            activeProjectCount={activeProjects.length}
-            rating={rating}
-          />
+          {/* 3. BUSINESS SNAPSHOT */}
+          <section className="space-y-4">
+            <h2 className="font-heading text-primary text-2xl">Business Snapshot</h2>
+            <StatsRow
+              jobsWon={completedCount}
+              earningsThisMonth={marginData.totalReceived}
+              activeProjectCount={activeProjects.length}
+              rating={rating}
+            />
+            <LiveMarginWidget
+              totalQuoted={marginData.totalQuoted}
+              totalCosts={marginData.totalCosts}
+              totalReceived={marginData.totalReceived}
+            />
+          </section>
 
+          {/* 4. FIND WORK PREVIEW */}
+          {trade && <DashboardPlanningAlerts trade={trade} />}
+
+          {/* 5. PIPELINE PREVIEW */}
+          {trade && <PipelineSection tradeId={trade.id} />}
+
+          {/* 6. TODAY'S ACTIONS */}
+          {trade && (
+            <AddSpecialismsBanner
+              tradeId={trade.id}
+              promptSeen={trade.specialisms_prompt_seen}
+              onAdd={() => setActiveNav("profile")}
+            />
+          )}
+          <JobMatchesList matches={matches} />
           <CalendarConnect variant="compact" />
 
-          <JobMatchesList matches={matches} />
-
-          <ActiveProjectsList projects={activeProjects} />
-
-          <LiveMarginWidget
-            totalQuoted={marginData.totalQuoted}
-            totalCosts={marginData.totalCosts}
-            totalReceived={marginData.totalReceived}
-          />
+          {/* 7. RECENT ACTIVITY */}
+          <section className="space-y-4">
+            <h2 className="font-heading text-primary text-2xl">Recent Activity</h2>
+            <ActiveProjectsList projects={activeProjects} />
+          </section>
 
           {trade && isFeatureEnabled("quickBuild") && (
             <QuickBuildDraftsList tradeId={trade.id} />
           )}
 
-          {trade && <DashboardPlanningAlerts trade={trade} />}
           {trade && trade.is_green_trade && <CertificationsSection trade={trade} />}
           </>
           )}
