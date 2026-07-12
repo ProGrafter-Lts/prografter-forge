@@ -371,7 +371,8 @@ const TradeDashboard = () => {
             );
           })()}
 
-          {/* Welcome header */}
+          {/* Welcome header — hidden on the dashboard view, where the Business Health hero takes over */}
+          {activeNav !== "dashboard" && (
           <div className="flex items-center gap-3 pt-10 md:pt-0">
             <div>
               <h1 className="font-heading text-primary text-3xl md:text-4xl">
@@ -389,6 +390,7 @@ const TradeDashboard = () => {
             )}
             {trade?.is_green_trade && <GreenLeafBadge />}
           </div>
+          )}
 
           {trade && <GreenSpecialistBanner show={trade.is_green_trade} />}
 
