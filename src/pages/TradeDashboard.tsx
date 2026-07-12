@@ -235,6 +235,22 @@ const TradeDashboard = () => {
     }
   };
 
+  const handleHealthNav = (target: PriorityNav) => {
+    const map: Record<PriorityNav, string> = {
+      "find-work": "jobs",
+      pipeline: "pipeline",
+      quotes: "quotes",
+      tradevault: "tradevault",
+      profile: "profile",
+      calendar: "calendar",
+      messages: "messages",
+    };
+    setActiveNav(map[target] ?? "dashboard");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+
+
   useEffect(() => {
     const validViews = ["dashboard", "jobs", "projects", "earnings", "profile", "tradevault", "pipeline", "quotes", "calendar", "messages"];
 
