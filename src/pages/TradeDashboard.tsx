@@ -470,33 +470,20 @@ const TradeDashboard = () => {
             <TradeVaultBanners tradeId={trade.id} onOpenVault={() => setActiveNav("tradevault")} />
           )}
 
-          {/* 1. MORNING BRIEF */}
-          {trade && <MorningBriefing tradeId={trade.id} quotes={quotes} name={trade.name} />}
-
-          {/* 2. QUICK ACTIONS */}
+          {/* 1-3. BUSINESS HEALTH — greeting, health score, priorities, AI briefing, cards, breakdown & score boosters */}
           {trade && (
-            <CommandCentre
+            <BusinessHealthDashboard
               tradeId={trade.id}
-              jobMatchCount={matches.length}
-              onNavigate={goTo}
+              name={trade.name}
+              verificationStatus={trade.verification_status}
+              quotes={quotes}
+              matches={matches}
+              activeProjectsCount={activeProjects.length}
+              wonJobs={completedCount}
+              marginData={marginData}
+              onNavigate={handleHealthNav}
             />
           )}
-
-          {/* 3. BUSINESS SNAPSHOT */}
-          <section className="space-y-4">
-            <h2 className="font-heading text-primary text-2xl">Business Snapshot</h2>
-            <StatsRow
-              jobsWon={completedCount}
-              earningsThisMonth={marginData.totalReceived}
-              activeProjectCount={activeProjects.length}
-              rating={rating}
-            />
-            <LiveMarginWidget
-              totalQuoted={marginData.totalQuoted}
-              totalCosts={marginData.totalCosts}
-              totalReceived={marginData.totalReceived}
-            />
-          </section>
 
           {/* 4. FIND WORK PREVIEW */}
           {trade && <DashboardPlanningAlerts trade={trade} />}
