@@ -40,7 +40,7 @@ export const QUOTE_CHECKER_MODULES: QuoteCheckerModule[] = [
     status: "active",
     description:
       "Extensions, structural building work, shell works, plastered-finish and full-finish extension quotes.",
-    route_or_component: "/simple-quote-checker",
+    route_or_component: "/quote-checker?module=extension_building",
     supported_project_types: [
       "extension",
       "structural building work",
