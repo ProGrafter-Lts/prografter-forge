@@ -7,8 +7,8 @@ const Footer = () => {
         <div className="border-b border-cream/5 pb-6 flex flex-col items-center gap-3">
           <p className="font-mono text-xs uppercase tracking-widest text-teal">ProGrafter Intelligence</p>
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
-            <a href="/quote-checker-ai" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">Project Cost Guide</a>
-            <a href="/quote-checker" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">Quote Health Check</a>
+            <a href="/quote-clarity-score" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">Quote Clarity Score</a>
+            <a href="/quote-checker" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">AI Quote Checker</a>
             <span className="font-mono text-xs text-secondary-text/60">Compare Quotes — Coming Soon</span>
             <span className="font-mono text-xs text-secondary-text/60">Project Confidence Report — Future</span>
           </div>
