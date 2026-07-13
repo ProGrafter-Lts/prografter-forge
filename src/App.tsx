@@ -173,9 +173,12 @@ const AppRoutes = () => {
            <Route path="/how-it-works" element={<HowItWorksPage />} />
            <Route path="/trade-verification" element={<TradeVerificationPage />} />
            <Route path="/homeowner-verification" element={<HomeownerVerificationPage />} />
-           <Route path="/ai-quote-checker" element={<AiQuoteCheckerPage />} />
+           <Route path="/project-cost-guide" element={<QuoteCheckerAI />} />
+           <Route path="/quote-checker-ai" element={<Navigate to="/project-cost-guide" replace />} />
+           <Route path="/ai-quote-checker" element={<Navigate to="/quote-checker" replace />} />
            <Route path="/trust" element={<TrustCentre />} />
-           <Route path="/quote-clarity-score" element={<QuoteClarityScorePage />} />
+           <Route path="/quote-clarity-score" element={<Navigate to="/quote-checker" replace />} />
+           <Route path="/quote-health-check" element={<Navigate to="/quote-checker" replace />} />
            <Route path="/pricing" element={<PricingPage />} />
            <Route path="/faq" element={<FaqPage />} />
            <Route path="/resources" element={<ResourcesPage />} />
