@@ -11,6 +11,7 @@ import SEO from "@/components/SEO";
 import SimpleQuoteChecker from "@/pages/SimpleQuoteChecker";
 import BoilerQuoteChecker from "@/pages/BoilerQuoteChecker";
 import ElectricalQuoteChecker from "@/pages/ElectricalQuoteChecker";
+import BathroomQuoteChecker from "@/pages/BathroomQuoteChecker";
 import {
   QUOTE_CHECKER_MODULES,
   type QuoteCheckerModule,
@@ -51,6 +52,9 @@ const QuoteCheckerHome = () => {
   }
   if (activeModuleId === "electrical_rewire") {
     return <ElectricalQuoteChecker />;
+  }
+  if (activeModuleId === "bathroom") {
+    return <BathroomQuoteChecker />;
   }
 
 
