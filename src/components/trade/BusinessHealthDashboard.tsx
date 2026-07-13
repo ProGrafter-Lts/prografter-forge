@@ -225,8 +225,8 @@ const BusinessHealthDashboard = ({
 
       const buildInput: BusinessHealthInput = {
         pipeline: {
-          toContact: count("todo") || matches.length,
-          waiting: count("contacted") || pending,
+          toContact: count("todo"),
+          waiting: count("contacted"),
           quotesSubmitted: quoteRows.length,
           activeProjects: activeProjectsCount,
           wonJobs: won,
