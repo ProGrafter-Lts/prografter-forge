@@ -90,8 +90,10 @@ const SimpleQuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, ema
   const supportingInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const [formParams] = useSearchParams();
+  const navigate = useNavigate();
 
   const isExtension = projectType === "Single-storey extension" || /extension/i.test(projectType);
+  const isBoiler = /boiler|heating/i.test(projectType);
 
   useEffect(() => {
     const pt = formParams.get("project_type");
