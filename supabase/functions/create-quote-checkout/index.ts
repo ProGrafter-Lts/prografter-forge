@@ -5,7 +5,38 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const PRICE_ID = "price_1TZBDKL4yG1Y84vbBzZwhKBH";
+// Legacy flat-price product (£49) — kept as a safe fallback only. Do not delete
+// until the module-based prices below are confirmed working in production.
+const LEGACY_PRICE_ID = "price_1TZBDKL4yG1Y84vbBzZwhKBH";
+
+// Module-based pricing bands.
+//   Single trade  £19  → boiler/heating, small electrical, plastering, simple windows/doors, small roofing
+//   Standard      £39  → rewire, bathroom, kitchen, roofing, landscaping, larger windows/doors
+//   Extension     £59  → extension / structural building work
+const PRICE_SINGLE = "price_1TssGYL4yG1Y84vbuBugCi1W"; // £19
+const PRICE_STANDARD = "price_1TssHJL4yG1Y84vbzGT7yLTB"; // £39
+const PRICE_EXTENSION = "price_1TssGxL4yG1Y84vbOUNxKOsF"; // £59
+
+const MODULE_PRICES: Record<string, string> = {
+  boiler_heating: PRICE_SINGLE,
+  plastering: PRICE_SINGLE,
+  windows_doors: PRICE_STANDARD,
+  electrical_rewire: PRICE_STANDARD,
+  bathroom: PRICE_STANDARD,
+  kitchen: PRICE_STANDARD,
+  roofing: PRICE_STANDARD,
+  landscaping_driveway: PRICE_STANDARD,
+  extension_building: PRICE_EXTENSION,
+  general_building: PRICE_STANDARD,
+};
+
+function priceForModule(module: unknown): string {
+  if (typeof module === "string" && MODULE_PRICES[module]) {
+    return MODULE_PRICES[module];
+  }
+  // Default to the extension price for the classic/unknown flow.
+  return PRICE_EXTENSION;
+}
 
 // Strict-enough email regex (RFC 5322 lite) with TLD requirement
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;
