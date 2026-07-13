@@ -76,9 +76,7 @@ const AdminApplications = lazy(() => import("./pages/AdminApplications.tsx"));
 const AdminApplicationDetail = lazy(() => import("./pages/AdminApplicationDetail.tsx"));
 const TradeVerificationPage = lazy(() => import("./pages/TradeVerificationPage.tsx"));
 const HomeownerVerificationPage = lazy(() => import("./pages/HomeownerVerificationPage.tsx"));
-const AiQuoteCheckerPage = lazy(() => import("./pages/AiQuoteCheckerPage.tsx"));
 const TrustCentre = lazy(() => import("./pages/TrustCentre.tsx"));
-const QuoteClarityScorePage = lazy(() => import("./pages/QuoteClarityScorePage.tsx"));
 const PricingPage = lazy(() => import("./pages/PricingPage.tsx"));
 const FaqPage = lazy(() => import("./pages/FaqPage.tsx"));
 const ResourcesPage = lazy(() => import("./pages/ResourcesPage.tsx"));
@@ -229,7 +227,6 @@ const AppRoutes = () => {
             <Route path="/apply" element={<Apply />} />
             <Route path="/vetting" element={<Vetting />} />
             <Route path="/post-job-brief" element={<PostJobBrief />} />
-            <Route path="/quote-checker-ai" element={<QuoteCheckerAI />} />
             <Route path="/prografter-intelligence" element={<ProGrafterIntelligence />} />
             <Route path="/traders/:id/reviews" element={<TraderReviews />} />
             <Route path="/admin/disputes" element={<AdminRoute><AdminDisputes /></AdminRoute>} />
