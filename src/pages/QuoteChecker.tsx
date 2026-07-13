@@ -258,7 +258,7 @@ const SimpleQuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, ema
 
       const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke(
         "create-quote-checkout",
-        { body: { quoteCheckId: record.id, email, website } }
+        { body: { quoteCheckId: record.id, email, website, module: "extension_building" } }
       );
       if (checkoutError) throw checkoutError;
 
