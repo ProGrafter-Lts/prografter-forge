@@ -81,7 +81,7 @@ const QuoteClarityScorePage = () => (
     <ContentCta
       title="See your Quote Clarity Score"
       intro="Upload a quote and understand exactly where it's clear — and where to ask more."
-      primary={{ label: "Upload Your Quote", href: "/quote-checker" }}
+      primary={{ label: "Run the full AI Quote Checker", href: "/quote-checker" }}
     />
   </AppShell>
 );
