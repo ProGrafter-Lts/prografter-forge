@@ -19,18 +19,22 @@ const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
 const MODEL = "claude-sonnet-4-6";
 
 // ---- Boiler / heating scoring categories (this module ONLY) -----------------
+// These are boiler-specific ONLY. They MUST NOT overlap with any extension
+// checker categories (foundations, drainage, roof, steels, Building Control for
+// structural works, plastering, scaffold, shell construction, etc.).
 const CATEGORIES: { key: string; name: string }[] = [
-  { key: "scope_clarity", name: "Scope clarity" },
-  { key: "product_specification", name: "Product specification" },
-  { key: "installation_detail", name: "Installation detail" },
-  { key: "compliance_certification", name: "Compliance and certification" },
-  { key: "warranty_clarity", name: "Warranty and guarantee clarity" },
-  { key: "price_payment", name: "Price / VAT / payment terms" },
-  { key: "exclusions_risk", name: "Exclusions and risk clarity" },
-  { key: "timescale_access", name: "Timescale and access assumptions" },
-  { key: "handover_paperwork", name: "Handover paperwork" },
-  { key: "overall_confidence", name: "Overall homeowner confidence" },
+  { key: "quote_basics", name: "Quote Basics" },
+  { key: "product_specification", name: "Boiler Product Specification" },
+  { key: "installation_scope", name: "Installation Scope" },
+  { key: "compliance_certification", name: "Compliance & Certification" },
+  { key: "flue_condensate", name: "Flue / Condensate / External Termination" },
+  { key: "controls_protection", name: "Controls / Filter / System Protection" },
+  { key: "removal_disposal", name: "Existing Boiler Removal & Disposal" },
+  { key: "warranty_handover", name: "Warranty / Guarantee / Handover" },
+  { key: "price_payment", name: "Price / VAT / Payment Terms" },
+  { key: "exclusions_risk", name: "Exclusions / Extras / Risk Items" },
 ];
+
 
 function mediaForFile(name: string): { kind: "pdf" | "image" | "text"; mediaType: string } {
   const lower = (name || "").toLowerCase();
