@@ -8,7 +8,8 @@ const GROUPS: NavGroup[] = [
   {
     label: "For Homeowners",
     items: [
-      { label: "Check a Quote (AI)", href: "/quote-checker", desc: "Instant Quote Clarity Score" },
+      { label: "Project Cost Guide", href: "/project-cost-guide", desc: "Free — for projects without a quote yet" },
+      { label: "Quote Checker", href: "/quote-checker", desc: "Already have a quote? Check it" },
       { label: "Post a Job", href: "/post-job-brief", desc: "Get matched with vetted trades" },
       { label: "How It Works", href: "/how-it-works", desc: "Your project, step by step" },
       { label: "Green Grants", href: "/green", desc: "Funding for energy upgrades" },
@@ -29,7 +30,6 @@ const GROUPS: NavGroup[] = [
       { label: "Trust Centre", href: "/trust", desc: "How we keep construction honest" },
       { label: "Trade Verification", href: "/trade-verification", desc: "Our 5-step check" },
       { label: "Homeowner Verification", href: "/homeowner-verification", desc: "Why we verify everyone" },
-      { label: "Quote Clarity Score", href: "/quote-clarity-score", desc: "How we score quotes" },
     ],
   },
   {

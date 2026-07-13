@@ -76,9 +76,7 @@ const AdminApplications = lazy(() => import("./pages/AdminApplications.tsx"));
 const AdminApplicationDetail = lazy(() => import("./pages/AdminApplicationDetail.tsx"));
 const TradeVerificationPage = lazy(() => import("./pages/TradeVerificationPage.tsx"));
 const HomeownerVerificationPage = lazy(() => import("./pages/HomeownerVerificationPage.tsx"));
-const AiQuoteCheckerPage = lazy(() => import("./pages/AiQuoteCheckerPage.tsx"));
 const TrustCentre = lazy(() => import("./pages/TrustCentre.tsx"));
-const QuoteClarityScorePage = lazy(() => import("./pages/QuoteClarityScorePage.tsx"));
 const PricingPage = lazy(() => import("./pages/PricingPage.tsx"));
 const FaqPage = lazy(() => import("./pages/FaqPage.tsx"));
 const ResourcesPage = lazy(() => import("./pages/ResourcesPage.tsx"));
@@ -173,9 +171,12 @@ const AppRoutes = () => {
            <Route path="/how-it-works" element={<HowItWorksPage />} />
            <Route path="/trade-verification" element={<TradeVerificationPage />} />
            <Route path="/homeowner-verification" element={<HomeownerVerificationPage />} />
-           <Route path="/ai-quote-checker" element={<AiQuoteCheckerPage />} />
+           <Route path="/project-cost-guide" element={<QuoteCheckerAI />} />
+           <Route path="/quote-checker-ai" element={<Navigate to="/project-cost-guide" replace />} />
+           <Route path="/ai-quote-checker" element={<Navigate to="/quote-checker" replace />} />
            <Route path="/trust" element={<TrustCentre />} />
-           <Route path="/quote-clarity-score" element={<QuoteClarityScorePage />} />
+           <Route path="/quote-clarity-score" element={<Navigate to="/quote-checker" replace />} />
+           <Route path="/quote-health-check" element={<Navigate to="/quote-checker" replace />} />
            <Route path="/pricing" element={<PricingPage />} />
            <Route path="/faq" element={<FaqPage />} />
            <Route path="/resources" element={<ResourcesPage />} />
@@ -226,7 +227,6 @@ const AppRoutes = () => {
             <Route path="/apply" element={<Apply />} />
             <Route path="/vetting" element={<Vetting />} />
             <Route path="/post-job-brief" element={<PostJobBrief />} />
-            <Route path="/quote-checker-ai" element={<QuoteCheckerAI />} />
             <Route path="/prografter-intelligence" element={<ProGrafterIntelligence />} />
             <Route path="/traders/:id/reviews" element={<TraderReviews />} />
             <Route path="/admin/disputes" element={<AdminRoute><AdminDisputes /></AdminRoute>} />

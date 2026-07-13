@@ -352,7 +352,7 @@ ${form.quote_text}`;
           <p style={{ fontSize:12, color:C.secondary, textAlign:"center" }}>
             Already got a builder’s quote?{" "}
             <Link to="/quote-checker" style={{ color:C.teal, fontWeight:600, textDecoration:"none" }}>
-              Upload it for a full Quote Health Check →
+              Run it through the Quote Checker →
             </Link>
           </p>
         </div>

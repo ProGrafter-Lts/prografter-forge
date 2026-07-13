@@ -258,7 +258,7 @@ const SimpleQuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, ema
 
       const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke(
         "create-quote-checkout",
-        { body: { quoteCheckId: record.id, email, website } }
+        { body: { quoteCheckId: record.id, email, website, module: "extension_building" } }
       );
       if (checkoutError) throw checkoutError;
 
@@ -399,7 +399,7 @@ const SimpleQuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, ema
           {isSubmitting ? (
             <span className="flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" />{freeAvailable ? "Starting your free check..." : "Preparing checkout..."}</span>
           ) : (
-            freeAvailable ? "Check My Quote — Free" : "Check My Quote — £49"
+            freeAvailable ? "Check My Quote — Free" : "Check My Quote — £59"
           )}
         </Button>
         <p className="text-center font-mono text-[11px] text-muted-foreground leading-relaxed">
@@ -498,7 +498,7 @@ const QuoteChecker = () => {
     <AppShell>
       <div className="min-h-screen bg-background">
         <SEO
-          title="Quote Checker — ProGrafter | Check a Builder's Quote for £49"
+          title="Quote Checker — ProGrafter | Check a Builder's Quote for £59"
           description="Upload a builder's quote and we'll check what's clear, what's unclear, what appears missing and what to ask before you accept. Plain-English report in minutes."
           path="/quote-checker"
           jsonLd={buildServiceJsonLd({
@@ -506,7 +506,7 @@ const QuoteChecker = () => {
             description: "An independent, plain-English review of your UK building quote to help you read it and ask the right questions.",
             url: "https://prografter.co.uk/quote-checker",
             serviceType: "Construction quote review",
-            price: "49.00",
+            price: "59.00",
           })}
         />
         <div className="relative overflow-hidden bg-navy bg-gradient-to-br from-navy via-navy to-[hsl(var(--teal)/0.4)] pt-28 pb-32 px-6">
@@ -515,14 +515,14 @@ const QuoteChecker = () => {
           <div className="relative max-w-2xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-teal-foreground font-mono text-xs px-3 py-1.5 rounded-full mb-5 backdrop-blur-sm">
               <ShieldCheck className="h-3.5 w-3.5" />
-              Quote Checker — £49
+              Quote Checker — £59
             </div>
             <h1 className="font-heading text-4xl md:text-6xl text-white mb-4 leading-[1.05]">
               Quote{" "}
               <span className="bg-gradient-to-r from-teal to-[hsl(var(--teal))] bg-clip-text text-transparent">Checker</span>
             </h1>
             <p className="text-white/75 font-mono text-sm max-w-md mx-auto leading-relaxed">
-              Upload a quote and we'll tell you what's clear, what's unclear, what appears missing, and what to ask before you accept. <span className="font-semibold text-white">£49.</span>
+              Upload a quote and we'll tell you what's clear, what's unclear, what appears missing, and what to ask before you accept. <span className="font-semibold text-white">£59.</span>
             </p>
             <div className="flex flex-wrap justify-center gap-2 mt-6">
               {["✓ Quote Clarity Score", "✓ Plain-English review", "✓ Questions to ask", "✓ Usually ready in 2–5 mins"].map((t) => (
