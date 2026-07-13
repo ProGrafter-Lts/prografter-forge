@@ -97,7 +97,7 @@ const BoilerQuoteReportPage = () => {
             <div className="mb-6">
               <h1 className="font-heading text-2xl md:text-3xl text-navy">Your Boiler Quote Check</h1>
               <p className="font-mono text-xs text-muted-foreground mt-1">
-                A homeowner-friendly review of your boiler / heating quote.
+                A simple, quote-focused review of your boiler or heating quote.
               </p>
             </div>
             <BoilerQuoteReport report={report} />
