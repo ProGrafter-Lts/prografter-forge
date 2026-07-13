@@ -147,12 +147,21 @@ export default function AdminQuoteCheckerModules() {
                   <th className="px-4 py-3">Module</th>
                   <th className="px-4 py-3">Status</th>
                   <th className="px-4 py-3">Submitted checks</th>
+                  <th className="px-4 py-3">Avg score</th>
                   <th className="px-4 py-3">Last run</th>
                 </tr>
               </thead>
               <tbody>
                 {QUOTE_CHECKER_MODULES.map((m) => {
-                  const stats = requestCountByType[m.short_label];
+                  const isBoiler = m.module_id === "boiler_heating";
+                  const manualStats = requestCountByType[m.short_label];
+                  const count = isBoiler
+                    ? boilerStats.count + (manualStats?.count ?? 0)
+                    : manualStats?.count ?? 0;
+                  const last = isBoiler
+                    ? [boilerStats.last, manualStats?.last].filter(Boolean).sort().reverse()[0] ?? null
+                    : manualStats?.last ?? null;
+                  const avg = isBoiler ? boilerStats.avg : null;
                   return (
                     <tr key={m.module_id} className="border-b border-navy/5 last:border-0">
                       <td className="px-4 py-3">
@@ -160,9 +169,10 @@ export default function AdminQuoteCheckerModules() {
                         <div className="font-mono text-[11px] text-secondary-text">{m.short_label}</div>
                       </td>
                       <td className="px-4 py-3"><StatusBadge status={m.status} /></td>
-                      <td className="px-4 py-3 font-mono text-navy">{stats?.count ?? 0}</td>
+                      <td className="px-4 py-3 font-mono text-navy">{count}</td>
+                      <td className="px-4 py-3 font-mono text-navy">{avg !== null ? `${avg}/100` : "—"}</td>
                       <td className="px-4 py-3 font-mono text-secondary-text">
-                        {stats?.last ? format(new Date(stats.last), "d MMM yyyy") : "—"}
+                        {last ? format(new Date(last as string), "d MMM yyyy") : "—"}
                       </td>
                     </tr>
                   );
@@ -171,7 +181,7 @@ export default function AdminQuoteCheckerModules() {
             </table>
           </div>
           <p className="mt-2 font-mono text-[11px] text-secondary-text">
-            Only the Extension module is active. "Submitted checks" here reflects manual review requests per type.
+            Extension and Boiler / heating modules are active. Boiler figures include automated checks; other rows reflect manual review requests per type.
           </p>
         </section>
 
