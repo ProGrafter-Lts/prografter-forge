@@ -87,7 +87,7 @@ export const QUOTE_CHECKER_MODULES: QuoteCheckerModule[] = [
     status: "active",
     description:
       "Boiler replacements, new boilers, repairs and wider heating works. Checks product, installation scope, Gas Safe certification, warranty and exclusions.",
-    route_or_component: "/boiler-quote-checker",
+    route_or_component: "/quote-checker?module=boiler_heating",
     supported_project_types: [
       "new boiler",
       "replacement boiler",
