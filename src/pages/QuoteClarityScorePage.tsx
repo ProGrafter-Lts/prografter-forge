@@ -48,7 +48,7 @@ const QuoteClarityScorePage = () => (
       highlight="a clear decision."
       intro="The Quote Clarity Score turns a dense builder's quotation into a single, defensible number — plus the detail behind it — so you can compare quotes on substance, not just price."
       ghost="SCORE"
-      primaryCta={{ label: "Get your score", href: "/quote-checker" }}
+      primaryCta={{ label: "Run the full AI Quote Checker", href: "/quote-checker" }}
       secondaryCta={{ label: "About the checker", href: "/ai-quote-checker" }}
     />
     <ContentSection title="What the bands mean" intro="Every quote is scored out of 10 and placed in a clear band.">
