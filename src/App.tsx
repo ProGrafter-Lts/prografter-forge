@@ -162,6 +162,8 @@ const AppRoutes = () => {
             <Route path="/boiler-quote-report/:id" element={<BoilerQuoteReportPage />} />
             <Route path="/electrical-quote-checker" element={<Navigate to="/quote-checker?module=electrical_rewire" replace />} />
             <Route path="/electrical-quote-report/:id" element={<ElectricalQuoteReportPage />} />
+            <Route path="/bathroom-quote-checker" element={<Navigate to="/quote-checker?module=bathroom" replace />} />
+            <Route path="/bathroom-quote-report/:id" element={<BathroomQuoteReportPage />} />
             
             <Route path="/report/:id" element={<QuoteReport />} />
             <Route path="/green" element={<GreenGrants />} />
