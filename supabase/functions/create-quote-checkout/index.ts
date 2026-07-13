@@ -122,13 +122,16 @@ Deno.serve(async (req) => {
 
     const origin = req.headers.get("origin") || "https://graft-craft-co.lovable.app";
 
+    const priceId = priceForModule(module);
+    const moduleParam = typeof module === "string" ? `&module=${encodeURIComponent(module)}` : "";
+
     const session = await stripe.checkout.sessions.create({
       customer_email: (email as string).trim().toLowerCase(),
-      line_items: [{ price: PRICE_ID, quantity: 1 }],
+      line_items: [{ price: priceId, quantity: 1 }],
       mode: "payment",
-      success_url: `${origin}/quote-checker-classic?session_id={CHECKOUT_SESSION_ID}&quote_id=${quoteCheckId}`,
+      success_url: `${origin}/quote-checker-classic?session_id={CHECKOUT_SESSION_ID}&quote_id=${quoteCheckId}${moduleParam}`,
       cancel_url: `${origin}/quote-checker-classic?cancelled=true`,
-      metadata: { quoteCheckId },
+      metadata: { quoteCheckId, module: typeof module === "string" ? module : "" },
     });
 
     return new Response(JSON.stringify({ url: session.url }), {
