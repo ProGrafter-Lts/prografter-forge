@@ -53,6 +53,9 @@ const QuoteCheckerHome = () => {
   if (activeModuleId === "electrical_rewire") {
     return <ElectricalQuoteChecker />;
   }
+  if (activeModuleId === "bathroom") {
+    return <BathroomQuoteChecker />;
+  }
 
 
   const handleSelect = (m: QuoteCheckerModule) => {
