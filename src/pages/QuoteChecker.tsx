@@ -160,6 +160,13 @@ const SimpleQuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, ema
       toast({ title: "A few things needed", description: "Please upload your quote, choose the project type and enter your email.", variant: "destructive" });
       return;
     }
+    // Boiler / heating must use its own dedicated module — NEVER the extension
+    // pipeline (which would tag the report with extension categories).
+    if (isBoiler) {
+      toast({ title: "Use the boiler checker", description: "Boiler & heating quotes have their own dedicated checker for accurate results." });
+      navigate("/boiler-quote-checker");
+      return;
+    }
     setIsSubmitting(true);
     try {
       const fileName = `${Date.now()}-${file.name}`;
