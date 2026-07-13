@@ -19,18 +19,22 @@ const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
 const MODEL = "claude-sonnet-4-6";
 
 // ---- Boiler / heating scoring categories (this module ONLY) -----------------
+// These are boiler-specific ONLY. They MUST NOT overlap with any extension
+// checker categories (foundations, drainage, roof, steels, Building Control for
+// structural works, plastering, scaffold, shell construction, etc.).
 const CATEGORIES: { key: string; name: string }[] = [
-  { key: "scope_clarity", name: "Scope clarity" },
-  { key: "product_specification", name: "Product specification" },
-  { key: "installation_detail", name: "Installation detail" },
-  { key: "compliance_certification", name: "Compliance and certification" },
-  { key: "warranty_clarity", name: "Warranty and guarantee clarity" },
-  { key: "price_payment", name: "Price / VAT / payment terms" },
-  { key: "exclusions_risk", name: "Exclusions and risk clarity" },
-  { key: "timescale_access", name: "Timescale and access assumptions" },
-  { key: "handover_paperwork", name: "Handover paperwork" },
-  { key: "overall_confidence", name: "Overall homeowner confidence" },
+  { key: "quote_basics", name: "Quote Basics" },
+  { key: "product_specification", name: "Boiler Product Specification" },
+  { key: "installation_scope", name: "Installation Scope" },
+  { key: "compliance_certification", name: "Compliance & Certification" },
+  { key: "flue_condensate", name: "Flue / Condensate / External Termination" },
+  { key: "controls_protection", name: "Controls / Filter / System Protection" },
+  { key: "removal_disposal", name: "Existing Boiler Removal & Disposal" },
+  { key: "warranty_handover", name: "Warranty / Guarantee / Handover" },
+  { key: "price_payment", name: "Price / VAT / Payment Terms" },
+  { key: "exclusions_risk", name: "Exclusions / Extras / Risk Items" },
 ];
+
 
 function mediaForFile(name: string): { kind: "pdf" | "image" | "text"; mediaType: string } {
   const lower = (name || "").toLowerCase();
@@ -142,8 +146,18 @@ Heating system works: radiator changes, TRVs, pipework alterations, system flush
 Compliance & certification: Gas Safe registered engineer, Gas Safe notification, Building Regulations compliance, Benchmark commissioning checklist, boiler commissioning, flue compliance, CO alarm, electrical connection responsibility.
 Exclusions / risk: gas pipe size upgrades, moving boiler position, making good / boxing-in, roof/flue access, asbestos, condensate soakaway, scaffold/access equipment, defects found after install, radiators/valves not listed, electrical remedial works, decorating.
 
-===== SCORE BEHAVIOUR =====
-Do NOT punish a boiler quote for not including extension/building items. A quote should score WELL if it clearly includes: boiler make/model, supply & install scope, flue, controls, filter, flush/inhibitor, disposal, Gas Safe certification, warranty, VAT/price/payment, timescale, exclusions. A quote should score LOWER if it only says "New boiler supplied and fitted - £X" with no model, warranty, certification, exclusions or detail.
+===== SCORE BEHAVIOUR & CALIBRATION =====
+Do NOT punish a boiler quote for not including extension/building items. Score against the boiler categories ONLY.
+
+Calibrate to these three reference quotes so scoring feels fair to homeowners:
+
+WEAK (target overall 5-15/100): e.g. "Supply and fit new combi boiler. £2,850. Deposit required. Old boiler removed. One day." — very vague, no model, no Gas Safe, no warranty, no VAT, no flue, no controls, no filter, no flush, no exclusions, no handover. Most categories 0-2.
+
+MEDIUM (target overall 55-65/100): e.g. Baxi 830 combi, same location, standard horizontal flue, magnetic filter, wireless thermostat, inhibitor, basic flush, disposal, commissioning, 10-year warranty, £2,950 plus VAT, 1-day install, 50/50 payment, some exclusions. This is a GOOD-but-incomplete quote. It has genuinely useful product and scope detail, so those categories (Boiler Product Specification, Installation Scope, Flue/Condensate, Controls/Filter/System Protection, Existing Boiler Removal & Disposal) should score 7-9. Mark it DOWN — but not to the floor — for missing Gas Safe registration/notification, Building Regulations notification, Benchmark handover, quote validity, insurance, variation process, workmanship guarantee and full VAT total: those categories should sit around 3-5, NOT 0-1. The overall average must land near 55-65, never as low as 34.
+
+STRONG (target overall 80-90/100): e.g. Worcester Bosch Greenstar 4000 30kW combi, Gas Safe registration, 30-day validity, flue, filter, controls, chemical flush, inhibitor, disposal, commissioning, Benchmark, Gas Safe/Building Regs notification, 10-year warranty, exclusions, VAT, payment terms, variation process, insurance. Only sensible final clarifications remain. Most categories 8-10.
+
+Missing compliance details should reduce the score significantly, but must NEVER make an otherwise detailed quote score as if it is almost empty. A quote with clear product, scope, flue, controls, filter, flush, disposal, warranty, price/VAT and some exclusions should always land in at least the moderate band even when compliance paperwork is not spelled out.
 
 ===== MAIN QUOTE vs SUPPORTING DOCUMENTS =====
 Distinguish where each fact came from. If info is supplied in a supporting document but NOT the main quote, classify it as "Supplied separately — confirm with installer". Do NOT mark it as fully confirmed unless it is clearly installer-issued or accepted. Supporting docs may only IMPROVE the pack score, never reduce it. Do not call something "missing" if it appears in a supporting document.
@@ -151,7 +165,7 @@ Distinguish where each fact came from. If info is supplied in a supporting docum
 ===== TWO SCORES PER CATEGORY (0-10) =====
 - "score_main" = based ONLY on the main quote.
 - "score_pack" = main quote PLUS supporting documents.
-Anchors: 0 = not mentioned; 2 = vaguely mentioned; 5 = supplied in supporting doc only, not installer-confirmed; 7 = mostly clear, minor clarification; 8-10 = clear, specific, decision-ready. "score" should equal score_pack.
+Anchors: 0 = not mentioned; 2 = vaguely mentioned; 4-5 = present but missing confirmation/paperwork, or supplied in a supporting doc only; 7 = mostly clear, minor clarification; 8-10 = clear, specific, decision-ready. "score" should equal score_pack.
 
 CATEGORIES to score:
 ${CATEGORIES.map((c) => `- ${c.key}: ${c.name}`).join("\n")}
@@ -297,6 +311,25 @@ async function runAnalysis(supabase: any, args: RunArgs): Promise<void> {
     const strong = categories.filter((c) => c.relevant && typeof c.score_pack === "number" && (c.score_pack as number) >= 7).map((c) => c.name);
     const weak = categories.filter((c) => c.relevant && typeof c.score_pack === "number" && (c.score_pack as number) <= 4).map((c) => c.name);
 
+    // Deterministic boiler verdict wording, banded off the headline (main) score.
+    // Keeps language boiler-specific — never references extensions/building work.
+    const headline = clarityScore;
+    let verdictLevel: "low" | "moderate" | "good" | "strong";
+    let verdictLine: string;
+    if (headline >= 78) {
+      verdictLevel = "strong";
+      verdictLine =
+        "This is a strong boiler replacement quote with clear product detail, installation scope, compliance wording, warranty information and sensible exclusions. A few final confirmation points should be agreed before accepting.";
+    } else if (headline >= 45) {
+      verdictLevel = headline >= 68 ? "good" : "moderate";
+      verdictLine =
+        "This quote covers the basics of a boiler replacement and includes useful product and installation detail, but key compliance, handover and commercial points should be confirmed before accepting.";
+    } else {
+      verdictLevel = "low";
+      verdictLine =
+        "This quote is too vague to accept safely yet. It gives a price, but leaves out key details about the boiler, installation scope, compliance, warranty and exclusions.";
+    }
+
     const suppliedSeparately = Array.isArray(parsed.supplied_separately)
       ? parsed.supplied_separately.filter((s: any) => s && (s.item || s.supporting))
       : [];
@@ -306,7 +339,7 @@ async function runAnalysis(supabase: any, args: RunArgs): Promise<void> {
       generated_at: new Date().toISOString(),
       project_type: projectType ?? null,
       is_boiler_quote: true,
-      verdict: parsed.verdict || { level: "moderate", line: "The quote has useful detail, but key points need confirming." },
+      verdict: { level: verdictLevel, line: verdictLine },
       clarity_score: clarityScore,
       pack_confidence_score: packScore,
       has_supporting_docs: supporting.length > 0,
