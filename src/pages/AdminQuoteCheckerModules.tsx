@@ -49,6 +49,11 @@ const StatusBadge = ({ status }: { status: string }) => {
 export default function AdminQuoteCheckerModules() {
   const [requests, setRequests] = useState<ManualRequest[]>([]);
   const [loading, setLoading] = useState(true);
+  const [boilerStats, setBoilerStats] = useState<{ count: number; last: string | null; avg: number | null }>({
+    count: 0,
+    last: null,
+    avg: null,
+  });
 
   const load = async () => {
     setLoading(true);
@@ -61,6 +66,28 @@ export default function AdminQuoteCheckerModules() {
     } else {
       setRequests((data as ManualRequest[]) ?? []);
     }
+
+    // Automated boiler / heating checks (stored in simple_quote_checks).
+    const { data: boilerRows } = await supabase
+      .from("simple_quote_checks")
+      .select("created_at, report_json, intake")
+      .order("created_at", { ascending: false });
+    if (Array.isArray(boilerRows)) {
+      const boiler = boilerRows.filter((r: any) => {
+        const checker = (r.intake as any)?.checker;
+        const version = (r.report_json as any)?.version;
+        return checker === "boiler" || (typeof version === "string" && version.startsWith("boiler"));
+      });
+      const scores = boiler
+        .map((r: any) => (r.report_json as any)?.clarity_score)
+        .filter((s: any) => typeof s === "number");
+      setBoilerStats({
+        count: boiler.length,
+        last: boiler.length ? (boiler[0].created_at as string) : null,
+        avg: scores.length ? Math.round(scores.reduce((a: number, b: number) => a + b, 0) / scores.length) : null,
+      });
+    }
+
     setLoading(false);
   };
 
@@ -120,12 +147,21 @@ export default function AdminQuoteCheckerModules() {
                   <th className="px-4 py-3">Module</th>
                   <th className="px-4 py-3">Status</th>
                   <th className="px-4 py-3">Submitted checks</th>
+                  <th className="px-4 py-3">Avg score</th>
                   <th className="px-4 py-3">Last run</th>
                 </tr>
               </thead>
               <tbody>
                 {QUOTE_CHECKER_MODULES.map((m) => {
-                  const stats = requestCountByType[m.short_label];
+                  const isBoiler = m.module_id === "boiler_heating";
+                  const manualStats = requestCountByType[m.short_label];
+                  const count = isBoiler
+                    ? boilerStats.count + (manualStats?.count ?? 0)
+                    : manualStats?.count ?? 0;
+                  const last = isBoiler
+                    ? [boilerStats.last, manualStats?.last].filter(Boolean).sort().reverse()[0] ?? null
+                    : manualStats?.last ?? null;
+                  const avg = isBoiler ? boilerStats.avg : null;
                   return (
                     <tr key={m.module_id} className="border-b border-navy/5 last:border-0">
                       <td className="px-4 py-3">
@@ -133,9 +169,10 @@ export default function AdminQuoteCheckerModules() {
                         <div className="font-mono text-[11px] text-secondary-text">{m.short_label}</div>
                       </td>
                       <td className="px-4 py-3"><StatusBadge status={m.status} /></td>
-                      <td className="px-4 py-3 font-mono text-navy">{stats?.count ?? 0}</td>
+                      <td className="px-4 py-3 font-mono text-navy">{count}</td>
+                      <td className="px-4 py-3 font-mono text-navy">{avg !== null ? `${avg}/100` : "—"}</td>
                       <td className="px-4 py-3 font-mono text-secondary-text">
-                        {stats?.last ? format(new Date(stats.last), "d MMM yyyy") : "—"}
+                        {last ? format(new Date(last as string), "d MMM yyyy") : "—"}
                       </td>
                     </tr>
                   );
@@ -144,7 +181,7 @@ export default function AdminQuoteCheckerModules() {
             </table>
           </div>
           <p className="mt-2 font-mono text-[11px] text-secondary-text">
-            Only the Extension module is active. "Submitted checks" here reflects manual review requests per type.
+            Extension and Boiler / heating modules are active. Boiler figures include automated checks; other rows reflect manual review requests per type.
           </p>
         </section>
 
