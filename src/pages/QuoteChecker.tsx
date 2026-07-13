@@ -90,8 +90,10 @@ const SimpleQuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, ema
   const supportingInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const [formParams] = useSearchParams();
+  const navigate = useNavigate();
 
   const isExtension = projectType === "Single-storey extension" || /extension/i.test(projectType);
+  const isBoiler = /boiler|heating/i.test(projectType);
 
   useEffect(() => {
     const pt = formParams.get("project_type");
@@ -109,6 +111,12 @@ const SimpleQuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, ema
       setFreeAvailable(((ent as any) || []).length > 0);
     })();
   }, [formParams]);
+
+  // Boiler / heating has its own dedicated module — never let it fall through to
+  // the extension pipeline. Redirect as soon as it's selected.
+  useEffect(() => {
+    if (isBoiler) navigate("/boiler-quote-checker", { replace: true });
+  }, [isBoiler, navigate]);
 
   const ACCEPTED_TYPES = ["application/pdf", "image/jpeg", "image/png", "image/webp"];
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -156,6 +164,13 @@ const SimpleQuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, ema
   const handleSubmit = async () => {
     if (!file || !projectType || !email) {
       toast({ title: "A few things needed", description: "Please upload your quote, choose the project type and enter your email.", variant: "destructive" });
+      return;
+    }
+    // Boiler / heating must use its own dedicated module — NEVER the extension
+    // pipeline (which would tag the report with extension categories).
+    if (isBoiler) {
+      toast({ title: "Use the boiler checker", description: "Boiler & heating quotes have their own dedicated checker for accurate results." });
+      navigate("/boiler-quote-checker");
       return;
     }
     setIsSubmitting(true);
