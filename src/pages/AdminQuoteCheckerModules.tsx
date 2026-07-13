@@ -49,6 +49,11 @@ const StatusBadge = ({ status }: { status: string }) => {
 export default function AdminQuoteCheckerModules() {
   const [requests, setRequests] = useState<ManualRequest[]>([]);
   const [loading, setLoading] = useState(true);
+  const [boilerStats, setBoilerStats] = useState<{ count: number; last: string | null; avg: number | null }>({
+    count: 0,
+    last: null,
+    avg: null,
+  });
 
   const load = async () => {
     setLoading(true);
@@ -61,6 +66,28 @@ export default function AdminQuoteCheckerModules() {
     } else {
       setRequests((data as ManualRequest[]) ?? []);
     }
+
+    // Automated boiler / heating checks (stored in simple_quote_checks).
+    const { data: boilerRows } = await supabase
+      .from("simple_quote_checks")
+      .select("created_at, report_json, intake")
+      .order("created_at", { ascending: false });
+    if (Array.isArray(boilerRows)) {
+      const boiler = boilerRows.filter((r: any) => {
+        const checker = (r.intake as any)?.checker;
+        const version = (r.report_json as any)?.version;
+        return checker === "boiler" || (typeof version === "string" && version.startsWith("boiler"));
+      });
+      const scores = boiler
+        .map((r: any) => (r.report_json as any)?.clarity_score)
+        .filter((s: any) => typeof s === "number");
+      setBoilerStats({
+        count: boiler.length,
+        last: boiler.length ? (boiler[0].created_at as string) : null,
+        avg: scores.length ? Math.round(scores.reduce((a: number, b: number) => a + b, 0) / scores.length) : null,
+      });
+    }
+
     setLoading(false);
   };
 
