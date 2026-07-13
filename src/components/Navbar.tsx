@@ -30,7 +30,6 @@ const GROUPS: NavGroup[] = [
       { label: "Trust Centre", href: "/trust", desc: "How we keep construction honest" },
       { label: "Trade Verification", href: "/trade-verification", desc: "Our 5-step check" },
       { label: "Homeowner Verification", href: "/homeowner-verification", desc: "Why we verify everyone" },
-      { label: "Quote Clarity Score", href: "/quote-clarity-score", desc: "How we score quotes" },
     ],
   },
   {
