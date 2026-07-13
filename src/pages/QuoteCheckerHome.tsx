@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import AppShell from "@/components/AppShell";
 import SEO from "@/components/SEO";
+import SimpleQuoteChecker from "@/pages/SimpleQuoteChecker";
+import BoilerQuoteChecker from "@/pages/BoilerQuoteChecker";
 import {
   QUOTE_CHECKER_MODULES,
   type QuoteCheckerModule,
