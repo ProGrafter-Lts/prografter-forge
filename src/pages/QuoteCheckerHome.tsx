@@ -10,6 +10,7 @@ import AppShell from "@/components/AppShell";
 import SEO from "@/components/SEO";
 import SimpleQuoteChecker from "@/pages/SimpleQuoteChecker";
 import BoilerQuoteChecker from "@/pages/BoilerQuoteChecker";
+import ElectricalQuoteChecker from "@/pages/ElectricalQuoteChecker";
 import {
   QUOTE_CHECKER_MODULES,
   type QuoteCheckerModule,
@@ -47,6 +48,9 @@ const QuoteCheckerHome = () => {
   }
   if (activeModuleId === "boiler_heating") {
     return <BoilerQuoteChecker />;
+  }
+  if (activeModuleId === "electrical_rewire") {
+    return <ElectricalQuoteChecker />;
   }
 
 
