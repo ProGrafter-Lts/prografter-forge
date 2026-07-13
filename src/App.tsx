@@ -155,9 +155,10 @@ const AppRoutes = () => {
             <Route path="/post-a-job" element={<Navigate to="/post-job-brief" replace />} />
             <Route path="/quote-checker" element={<QuoteCheckerHome />} />
             <Route path="/quote-checker-classic" element={<QuoteChecker />} />
-            <Route path="/simple-quote-checker" element={<SimpleQuoteChecker />} />
+            <Route path="/simple-quote-checker" element={<Navigate to="/quote-checker?module=extension_building" replace />} />
             <Route path="/simple-quote-report/:id" element={<SimpleQuoteReportPage />} />
-            <Route path="/boiler-quote-checker" element={<BoilerQuoteChecker />} />
+            <Route path="/boiler-quote-checker" element={<Navigate to="/quote-checker?module=boiler_heating" replace />} />
+
             <Route path="/boiler-quote-report/:id" element={<BoilerQuoteReportPage />} />
             
             <Route path="/report/:id" element={<QuoteReport />} />

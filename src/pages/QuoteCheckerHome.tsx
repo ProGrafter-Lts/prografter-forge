@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import AppShell from "@/components/AppShell";
 import SEO from "@/components/SEO";
+import SimpleQuoteChecker from "@/pages/SimpleQuoteChecker";
+import BoilerQuoteChecker from "@/pages/BoilerQuoteChecker";
 import {
   QUOTE_CHECKER_MODULES,
   type QuoteCheckerModule,
@@ -21,9 +23,12 @@ type View = "select" | "coming_soon" | "manual" | "manual_done";
 const QuoteCheckerHome = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
+  const activeModuleId = searchParams.get("module");
 
   const [view, setView] = useState<View>("select");
   const [selected, setSelected] = useState<QuoteCheckerModule | null>(null);
+
 
   // Manual review form state
   const [name, setName] = useState("");
@@ -33,6 +38,17 @@ const QuoteCheckerHome = () => {
   const [file, setFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // When a module is selected via the query param, load the working checker
+  // for that module inline inside the AI Quote Checker flow. This reuses the
+  // existing checker logic without rebuilding or altering it.
+  if (activeModuleId === "extension_building") {
+    return <SimpleQuoteChecker />;
+  }
+  if (activeModuleId === "boiler_heating") {
+    return <BoilerQuoteChecker />;
+  }
+
 
   const handleSelect = (m: QuoteCheckerModule) => {
     setSelected(m);
