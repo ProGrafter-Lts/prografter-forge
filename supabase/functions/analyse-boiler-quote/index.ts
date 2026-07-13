@@ -339,7 +339,7 @@ async function runAnalysis(supabase: any, args: RunArgs): Promise<void> {
       generated_at: new Date().toISOString(),
       project_type: projectType ?? null,
       is_boiler_quote: true,
-      verdict: parsed.verdict || { level: "moderate", line: "The quote has useful detail, but key points need confirming." },
+      verdict: { level: verdictLevel, line: verdictLine },
       clarity_score: clarityScore,
       pack_confidence_score: packScore,
       has_supporting_docs: supporting.length > 0,
