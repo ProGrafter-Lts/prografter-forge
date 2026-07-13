@@ -23,9 +23,12 @@ type View = "select" | "coming_soon" | "manual" | "manual_done";
 const QuoteCheckerHome = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
+  const activeModuleId = searchParams.get("module");
 
   const [view, setView] = useState<View>("select");
   const [selected, setSelected] = useState<QuoteCheckerModule | null>(null);
+
 
   // Manual review form state
   const [name, setName] = useState("");
