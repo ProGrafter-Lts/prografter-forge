@@ -12,6 +12,7 @@ import SimpleQuoteChecker from "@/pages/SimpleQuoteChecker";
 import BoilerQuoteChecker from "@/pages/BoilerQuoteChecker";
 import ElectricalQuoteChecker from "@/pages/ElectricalQuoteChecker";
 import BathroomQuoteChecker from "@/pages/BathroomQuoteChecker";
+import RoofingQuoteChecker from "@/pages/RoofingQuoteChecker";
 import {
   QUOTE_CHECKER_MODULES,
   type QuoteCheckerModule,
@@ -55,6 +56,9 @@ const QuoteCheckerHome = () => {
   }
   if (activeModuleId === "bathroom") {
     return <BathroomQuoteChecker />;
+  }
+  if (activeModuleId === "roofing") {
+    return <RoofingQuoteChecker />;
   }
 
 
