@@ -331,12 +331,6 @@ export default function BoilerQuoteReport({ report }: { report: BoilerReportJson
                 </span>
               </div>
             ))}
-            {categories.filter((c) => !c.relevant).length > 0 && (
-              <p className="font-mono text-[11px] text-muted-foreground pt-3 border-t border-border">
-                Not scored (not relevant to your expected scope):{" "}
-                {categories.filter((c) => !c.relevant).map((c) => c.name).join(", ")}
-              </p>
-            )}
           </div>
         )}
       </div>
