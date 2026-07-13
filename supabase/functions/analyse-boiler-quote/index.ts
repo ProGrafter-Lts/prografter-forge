@@ -311,6 +311,25 @@ async function runAnalysis(supabase: any, args: RunArgs): Promise<void> {
     const strong = categories.filter((c) => c.relevant && typeof c.score_pack === "number" && (c.score_pack as number) >= 7).map((c) => c.name);
     const weak = categories.filter((c) => c.relevant && typeof c.score_pack === "number" && (c.score_pack as number) <= 4).map((c) => c.name);
 
+    // Deterministic boiler verdict wording, banded off the headline (main) score.
+    // Keeps language boiler-specific — never references extensions/building work.
+    const headline = clarityScore;
+    let verdictLevel: "low" | "moderate" | "good" | "strong";
+    let verdictLine: string;
+    if (headline >= 78) {
+      verdictLevel = "strong";
+      verdictLine =
+        "This is a strong boiler replacement quote with clear product detail, installation scope, compliance wording, warranty information and sensible exclusions. A few final confirmation points should be agreed before accepting.";
+    } else if (headline >= 45) {
+      verdictLevel = headline >= 68 ? "good" : "moderate";
+      verdictLine =
+        "This quote covers the basics of a boiler replacement and includes useful product and installation detail, but key compliance, handover and commercial points should be confirmed before accepting.";
+    } else {
+      verdictLevel = "low";
+      verdictLine =
+        "This quote is too vague to accept safely yet. It gives a price, but leaves out key details about the boiler, installation scope, compliance, warranty and exclusions.";
+    }
+
     const suppliedSeparately = Array.isArray(parsed.supplied_separately)
       ? parsed.supplied_separately.filter((s: any) => s && (s.item || s.supporting))
       : [];
