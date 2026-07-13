@@ -39,6 +39,17 @@ const QuoteCheckerHome = () => {
   const [submitting, setSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // When a module is selected via the query param, load the working checker
+  // for that module inline inside the AI Quote Checker flow. This reuses the
+  // existing checker logic without rebuilding or altering it.
+  if (activeModuleId === "extension_building") {
+    return <SimpleQuoteChecker />;
+  }
+  if (activeModuleId === "boiler_heating") {
+    return <BoilerQuoteChecker />;
+  }
+
+
   const handleSelect = (m: QuoteCheckerModule) => {
     setSelected(m);
     if (m.status === "active" && m.route_or_component) {
