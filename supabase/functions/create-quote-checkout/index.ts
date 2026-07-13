@@ -78,10 +78,11 @@ Deno.serve(async (req) => {
 
   try {
     const body = await req.json().catch(() => ({}));
-    const { quoteCheckId, email, website } = body as {
+    const { quoteCheckId, email, website, module } = body as {
       quoteCheckId?: unknown;
       email?: unknown;
       website?: unknown;
+      module?: unknown;
     };
 
     // Honeypot: legitimate users won't fill the hidden "website" field.
