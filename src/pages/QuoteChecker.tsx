@@ -112,6 +112,12 @@ const SimpleQuoteCheckerForm = ({ onSubmitted }: { onSubmitted: (id: string, ema
     })();
   }, [formParams]);
 
+  // Boiler / heating has its own dedicated module — never let it fall through to
+  // the extension pipeline. Redirect as soon as it's selected.
+  useEffect(() => {
+    if (isBoiler) navigate("/boiler-quote-checker", { replace: true });
+  }, [isBoiler, navigate]);
+
   const ACCEPTED_TYPES = ["application/pdf", "image/jpeg", "image/png", "image/webp"];
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0];
