@@ -20,6 +20,7 @@ const PRICE_EXTENSION = "price_1TssGxL4yG1Y84vbOUNxKOsF"; // £59
 const MODULE_PRICES: Record<string, string> = {
   boiler_heating: PRICE_SINGLE,
   plastering: PRICE_SINGLE,
+  plastering_rendering: PRICE_SINGLE,
   windows_doors: PRICE_SINGLE,
   electrical_rewire: PRICE_STANDARD,
   bathroom: PRICE_STANDARD,
