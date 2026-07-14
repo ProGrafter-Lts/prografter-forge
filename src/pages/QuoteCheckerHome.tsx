@@ -14,6 +14,7 @@ import ElectricalQuoteChecker from "@/pages/ElectricalQuoteChecker";
 import BathroomQuoteChecker from "@/pages/BathroomQuoteChecker";
 import RoofingQuoteChecker from "@/pages/RoofingQuoteChecker";
 import KitchenQuoteChecker from "@/pages/KitchenQuoteChecker";
+import WindowsDoorsQuoteChecker from "@/pages/WindowsDoorsQuoteChecker";
 import {
   QUOTE_CHECKER_MODULES,
   type QuoteCheckerModule,
