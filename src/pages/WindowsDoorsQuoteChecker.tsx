@@ -122,6 +122,7 @@ const WindowsDoorsQuoteChecker = () => {
     }
     setIsSubmitting(true);
     try {
+      const projectType = "Windows & Doors";
       const intake = {
         checker: "windows_doors",
         project_type: projectType,
@@ -136,8 +137,6 @@ const WindowsDoorsQuoteChecker = () => {
           guarantees_certificates_expected: guarantees,
         },
       };
-
-      const projectType = "Windows & Doors";
       await startModuleQuotePayment({
         moduleId: "windows_doors",
         email,

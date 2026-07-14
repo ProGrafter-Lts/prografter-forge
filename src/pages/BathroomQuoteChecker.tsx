@@ -132,6 +132,7 @@ const BathroomQuoteChecker = () => {
     }
     setIsSubmitting(true);
     try {
+      const projectType = "Bathroom";
       const intake = {
         checker: "bathroom",
         module_id: "bathroom",
@@ -149,8 +150,6 @@ const BathroomQuoteChecker = () => {
           guarantees_certificates_expected: guarantees,
         },
       };
-
-      const projectType = "Bathroom";
       await startModuleQuotePayment({
         moduleId: "bathroom",
         email,

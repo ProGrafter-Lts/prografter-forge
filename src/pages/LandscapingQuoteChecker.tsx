@@ -124,6 +124,7 @@ const LandscapingQuoteChecker = () => {
     }
     setIsSubmitting(true);
     try {
+      const projectType = "Landscaping / Driveway";
       const intake = {
         checker: "landscaping_driveway",
         project_type: projectType,
@@ -140,8 +141,6 @@ const LandscapingQuoteChecker = () => {
           guarantees_expected: guarantees,
         },
       };
-
-      const projectType = "Landscaping / Driveway";
       await startModuleQuotePayment({
         moduleId: "landscaping_driveway",
         email,

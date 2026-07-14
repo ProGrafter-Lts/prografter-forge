@@ -130,6 +130,7 @@ const BoilerQuoteChecker = () => {
     }
     setIsSubmitting(true);
     try {
+      const projectType = workType || "Boiler / heating";
       const intake = {
         checker: "boiler",
         project_type: projectType,
@@ -146,8 +147,6 @@ const BoilerQuoteChecker = () => {
           gas_safe_building_regs_expected: certificationExpected,
         },
       };
-
-      const projectType = workType || "Boiler / heating";
       await startModuleQuotePayment({
         moduleId: "boiler_heating",
         email,

@@ -133,6 +133,7 @@ const RoofingQuoteChecker = () => {
     }
     setIsSubmitting(true);
     try {
+      const projectType = "Roofing";
       const intake = {
         checker: "roofing",
         project_type: projectType,
@@ -149,8 +150,6 @@ const RoofingQuoteChecker = () => {
           building_regulations_involved: buildingRegs,
         },
       };
-
-      const projectType = "Roofing";
       await startModuleQuotePayment({
         moduleId: "roofing",
         email,

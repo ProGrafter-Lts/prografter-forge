@@ -122,6 +122,7 @@ const PlasteringQuoteChecker = () => {
     }
     setIsSubmitting(true);
     try {
+      const projectType = "Plastering";
       const intake = {
         checker: "plastering_rendering",
         project_type: projectType,
@@ -138,8 +139,6 @@ const PlasteringQuoteChecker = () => {
           guarantees_expected: guarantees,
         },
       };
-
-      const projectType = "Plastering";
       await startModuleQuotePayment({
         moduleId: "plastering_rendering",
         email,

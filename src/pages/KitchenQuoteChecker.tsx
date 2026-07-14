@@ -124,6 +124,7 @@ const KitchenQuoteChecker = () => {
     }
     setIsSubmitting(true);
     try {
+      const projectType = "Kitchen";
       const intake = {
         checker: "kitchen",
         project_type: projectType,
@@ -140,8 +141,6 @@ const KitchenQuoteChecker = () => {
           making_good_decoration_included: makingGood,
         },
       };
-
-      const projectType = "Kitchen";
       await startModuleQuotePayment({
         moduleId: "kitchen",
         email,

@@ -133,6 +133,7 @@ const ElectricalQuoteChecker = () => {
     }
     setIsSubmitting(true);
     try {
+      const projectType = workType || "Electrical / Rewire";
       const intake = {
         checker: "electrical",
         project_type: projectType,
@@ -149,8 +150,6 @@ const ElectricalQuoteChecker = () => {
           certification_part_p_expected: certification,
         },
       };
-
-      const projectType = workType || "Electrical / Rewire";
       await startModuleQuotePayment({
         moduleId: "electrical_rewire",
         email,
