@@ -98,6 +98,7 @@ const ElectricalQuoteReportPage = lazy(() => import("./pages/ElectricalQuoteRepo
 const BathroomQuoteReportPage = lazy(() => import("./pages/BathroomQuoteReport.tsx"));
 const RoofingQuoteReportPage = lazy(() => import("./pages/RoofingQuoteReport.tsx"));
 const KitchenQuoteReportPage = lazy(() => import("./pages/KitchenQuoteReport.tsx"));
+const WindowsDoorsQuoteReportPage = lazy(() => import("./pages/WindowsDoorsQuoteReport.tsx"));
 const AdminQuoteCheckerModules = lazy(() => import("./pages/AdminQuoteCheckerModules.tsx"));
 // ProGrafter Planning Hub — new application shell
 const HubLayout = lazy(() => import("./hub/layout/HubLayout.tsx"));
