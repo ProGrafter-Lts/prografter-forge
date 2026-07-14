@@ -158,13 +158,28 @@ Do NOT punish a kitchen quote for not including extension, boiler, electrical (b
 
 Calibrate to these three reference quotes so scoring feels fair to homeowners:
 
-WEAK (target overall 5-15/100): e.g. "Fit kitchen £3,000." — no scope, no worktops, no appliances, no plumbing/electrics, no rip-out, no VAT, no guarantee. Most categories 0-2.
+WEAK (target overall 5-15/100): e.g. "Fit kitchen £3,000." — no scope, no worktops, no appliances, no plumbing/electrics, no rip-out, no VAT, no guarantee. Most categories 0-2. Keep weak scoring low.
 
 MEDIUM (target overall 45-60/100): e.g. "Fit supplied kitchen, connect sink, install worktops, waste included, £4,500." Reasonable scope so Kitchen Supply / Install Scope 5-7, Units / Worktops / Appliances 4-6, Rip-Out / Waste 5-7. Mark it DOWN — but not to the floor — for missing appliance install detail, gas/electrical interface clarity, tiling/flooring, making good, guarantees, payment terms and timescale: those categories should sit around 2-4, NOT 0-1. Overall must land near 45-60.
 
-STRONG (target overall 80-90/100): a detailed kitchen quote with units/worktops/appliances specified, plumbing/electrical scope, gas hob and cooker circuit clarity, extractor termination, rip-out and waste, tiling/flooring/making good, VAT, payment stages, timescale, warranties and clear exclusions. Only sensible final clarifications remain. Most categories 8-10.
+STRONG (target overall 78-84/100 for a clear fit-only quote): a fit-only kitchen quote covering clear fit-only scope, customer-supplied kitchen stated, number of base and wall units, laminate worktops with sink and hob cut-outs, customer-supplied sink and tap fitted, sink waste and hot/cold connections to existing pipework, dishwasher/washing machine connected to existing services, extractor hood fitted to existing outlet, upstands, silicone finish, door/drawer adjustment, removal and disposal of old kitchen and packaging, clear exclusions, timescale, VAT-inclusive price, staged payment terms, workmanship guarantee and quote validity. This is a good, mostly decision-ready fit-only quote — most categories 7-9 and the overall score MUST land in 78-84, not in the low 70s. A fully itemised supply-and-fit quote with the same clarity plus appliance/worktop brands can push into 85-90.
+
+===== FIT-ONLY CLARITY (do not penalise) =====
+If the quote clearly states the kitchen is customer-supplied, treat this as a CLEAR scope boundary. Do NOT penalise Units / Worktops / Appliances for not supplying units, worktops or appliances — score that category on what IS included (fit of units, worktops with cut-outs, sink/tap fit, appliance connection). Use wording like "This is a fit-only quote. The kitchen is customer-supplied, which is clear."
+
+===== REWARD CLARITY (do not penalise) =====
+- Clear exclusions (e.g. supplying units, supplying worktops, supplying appliances, gas work, electrical alterations, plastering, tiling, flooring, decoration, moving services, damaged or missing customer-supplied parts) are a POSITIVE feature — they reduce dispute risk. "Exclusions / Extras / Risk Items" MUST score high (8-10) where exclusions are clearly stated.
+- Tiling / Splashback / Flooring: if these are clearly EXCLUDED, treat as clear exclusion, not absence. Score around 6-8/10 with a note like "Tiling, splashback and flooring are not included, but this is clearly stated. Confirm separately if you expected these works." Do NOT score low just because they are not in scope.
+- Making Good / Decoration / Finishes: if decoration, plastering and tiling are clearly excluded, this should score 5-7/10, NOT very low. Still ask whether small making good around worktop/upstand/sink/extractor areas is included.
+
+===== CATEGORY CALIBRATION =====
+- Plumbing / Gas / Electrical Interfaces: if the quote includes sink and tap fitting, sink waste connection, hot/cold water connection, dishwasher/washing machine connection to existing services and extractor hood fitting to existing outlet, score 6-8/10. It is fine to ask whether the extractor electrical connection is included, whether any gas work is required and whether existing services are suitable — but do NOT score this category low where connections to existing services are clearly stated.
+- Rip-Out / Waste Removal: if the quote includes removal of the existing kitchen and disposal of old units and packaging, score this category 8-10/10.
 
 Missing detail should reduce the score, but a quote with clear scope, worktops and price should always land in at least the moderate band even when guarantees or making good are not spelled out.
+
+===== STRONG QUOTE RULE (overall >= 78) =====
+If the overall main score is 78 or above, keep the "not_found" list SHORT (max 6) and SOFT. Only include genuinely useful final confirmations, drawn from: contractor company/contact details, quote date/start date, whether plinths/end panels are included, whether extractor electrical connection is included, whether existing plumbing/electrical services are assumed suitable, how unexpected issues will be priced, whether small making good is included. Use softer wording such as "Worth confirming before acceptance.", "Minor confirmation point.", "Not a major issue, but useful to agree in writing." Do NOT make a good fit-only kitchen quote feel worse than it is.
 
 ===== MAIN QUOTE vs SUPPORTING DOCUMENTS =====
 Distinguish where each fact came from. If info is supplied in a supporting document but NOT the main quote, classify it as "Supplied separately — confirm with kitchen installer". Do NOT mark it as fully confirmed unless it is clearly installer-issued or accepted. Do NOT treat homeowner-written notes as installer-confirmed unless clearly stated. Supporting docs may only IMPROVE the pack score, never reduce it. Do not call something "missing" if it appears in a supporting document.
