@@ -98,6 +98,7 @@ export default function ElectricalQuoteReport({ report }: { report: ElectricalRe
   const verdict = report.verdict ?? { level: "moderate", line: "" };
   const theme = VERDICT_THEME[verdict.level] ?? VERDICT_THEME.moderate;
   const score = typeof report.clarity_score === "number" ? report.clarity_score : 0;
+  const isStrong = score > 80;
   const packScore = typeof report.pack_confidence_score === "number" ? report.pack_confidence_score : null;
   const hasDocs = !!report.has_supporting_docs && packScore !== null;
   const categories = report.categories ?? [];
@@ -232,19 +233,30 @@ export default function ElectricalQuoteReport({ report }: { report: ElectricalRe
 
       {/* 3 & 4. What Needs Clarifying / Not Found */}
       {report.not_found_grouped?.length ? (
-        <Section title="Not Found / Confirm If Required" icon={<HelpCircle className="h-5 w-5 text-amber-600" />}>
-          <p className="font-mono text-xs text-muted-foreground mb-3">
-            These items were not visible in the main quote or supporting documents. They may simply be outside the
-            agreed scope — confirm with your electrician if required.
-          </p>
+        <Section
+          title={isStrong ? "Final Confirmations" : "Not Found / Confirm If Required"}
+          icon={<HelpCircle className={`h-5 w-5 ${isStrong ? "text-teal" : "text-amber-600"}`} />}
+        >
+          {isStrong ? (
+            <p className="font-mono text-xs text-muted-foreground mb-3">
+              Worth confirming before acceptance. These are minor points — not major issues, but useful to agree in writing.
+            </p>
+          ) : (
+            <p className="font-mono text-xs text-muted-foreground mb-3">
+              These items were not visible in the main quote or supporting documents. They may simply be outside the
+              agreed scope — confirm with your electrician if required.
+            </p>
+          )}
           <div className="space-y-4">
             {report.not_found_grouped.map((g, gi) => (
               <div key={gi}>
-                <p className="font-mono text-xs uppercase tracking-wider text-amber-700 mb-1.5">{g.category}</p>
+                <p className={`font-mono text-xs uppercase tracking-wider mb-1.5 ${isStrong ? "text-teal" : "text-amber-700"}`}>
+                  {g.category}
+                </p>
                 <ul className="space-y-1.5">
                   {g.items.map((t, i) => (
                     <li key={i} className="flex gap-2 font-mono text-sm text-navy/90">
-                      <HelpCircle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+                      <HelpCircle className={`h-4 w-4 shrink-0 mt-0.5 ${isStrong ? "text-teal" : "text-amber-600"}`} />
                       <span>{t}</span>
                     </li>
                   ))}
@@ -254,15 +266,24 @@ export default function ElectricalQuoteReport({ report }: { report: ElectricalRe
           </div>
         </Section>
       ) : report.not_found?.length ? (
-        <Section title="Not Found / Confirm If Required" icon={<HelpCircle className="h-5 w-5 text-amber-600" />}>
-          <p className="font-mono text-xs text-muted-foreground mb-2">
-            These items were not visible in the main quote or supporting documents. They may simply be outside the
-            agreed scope — confirm with your electrician if required.
-          </p>
+        <Section
+          title={isStrong ? "Final Confirmations" : "Not Found / Confirm If Required"}
+          icon={<HelpCircle className={`h-5 w-5 ${isStrong ? "text-teal" : "text-amber-600"}`} />}
+        >
+          {isStrong ? (
+            <p className="font-mono text-xs text-muted-foreground mb-2">
+              Worth confirming before acceptance. These are minor points — not major issues, but useful to agree in writing.
+            </p>
+          ) : (
+            <p className="font-mono text-xs text-muted-foreground mb-2">
+              These items were not visible in the main quote or supporting documents. They may simply be outside the
+              agreed scope — confirm with your electrician if required.
+            </p>
+          )}
           <ul className="space-y-2">
             {report.not_found.map((t, i) => (
               <li key={i} className="flex gap-2 font-mono text-sm text-navy/90">
-                <HelpCircle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+                <HelpCircle className={`h-4 w-4 shrink-0 mt-0.5 ${isStrong ? "text-teal" : "text-amber-600"}`} />
                 <span>{t}</span>
               </li>
             ))}
@@ -289,7 +310,7 @@ export default function ElectricalQuoteReport({ report }: { report: ElectricalRe
       {report.questions?.length ? (
         <Section title="Main Questions To Ask The Electrician" icon={<MessageSquare className="h-5 w-5 text-navy" />}>
           <ol className="space-y-2 list-decimal list-inside">
-            {report.questions.slice(0, 10).map((q, i) => (
+            {report.questions.slice(0, isStrong ? 8 : 10).map((q, i) => (
               <li key={i} className="font-mono text-sm text-navy/90">{q}</li>
             ))}
           </ol>
