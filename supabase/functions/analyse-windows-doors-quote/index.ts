@@ -158,11 +158,19 @@ Do NOT punish a windows/doors quote for not including extension, boiler, electri
 
 Calibrate to these three reference quotes so scoring feels fair to homeowners:
 
-WEAK (target overall 10-25/100): e.g. "Supply and fit new front door £1,100." — no product, no material, no glazing, no colour, no security, no guarantee, no certification, no VAT. Most categories 0-2.
+WEAK (target overall 5-15/100): e.g. "Supply and fit new front door £1,100." — no product, no material, no glazing, no colour, no security, no guarantee, no certification, no VAT. Most categories 0-2.
 
 MEDIUM (target overall 45-65/100): e.g. "Supply and fit white uPVC windows, dispose old windows, 10-year guarantee, £4,500." Reasonable scope so Product Specification 4-6, Disposal 6-7, Certification/Guarantees 5-6. Mark it DOWN — but not to the floor — for missing sizes, glazing spec, trickle vents, security detail, making good, VAT, payment terms and timescale: those categories should sit around 2-4, NOT 0-1. Overall must land near 45-65.
 
-STRONG (target overall 80-90/100): a detailed windows/doors quote with product spec, sizes per opening, glazing spec, trickle vents, security/locks, colour inside and outside, installation and making good, disposal, FENSA/CERTASS certificate, manufacturer and installer guarantees, VAT, payment stages and clear exclusions. Only sensible final clarifications remain. Most categories 8-10.
+STRONG (target overall 82-88/100): a detailed windows/doors quote — e.g. a composite front door with product type, external colour and internal finish, matching uPVC frame, handle / letterbox / lock spec, glazed panel detail, trickle vent, new cill and trims, foam-fix-seal and weatherproofing, basic making good, removal and disposal of old door/frame, FENSA certificate, product guarantee, clear exclusions, timescale, VAT-inclusive price, payment terms and quote validity. Only sensible final clarifications remain. Most categories 8-10. Do NOT hold this back into the 60s just because exact manufacturer profile, PAS 24 rating, U-value or exact dimensions are not stated — those should be minor confirmation points, not major failures.
+
+Category-level calibration (apply on top of the anchors below):
+- Product Specification: if the quote clearly states product type, colour, frame, handle/letterbox/lock, glazing, trickle vent, cill and trims, score 8-9/10 even if the exact manufacturer profile or door brand is not named. Missing brand = minor confirmation only.
+- Certification / Guarantees: if the quote states a FENSA (or CERTASS) certificate will be provided, score 8-10/10. Do NOT score this low because the exact certificate issue date is not stated — treat that as a minor confirmation point.
+- Exclusions / Extras / Risk Items: if the quote clearly excludes structural alterations, new lintels, plastering beyond basic making good, decoration and alarm sensor re-fitting, score 8-10/10. Clear exclusions reduce dispute risk and should be rewarded.
+- Glazing / Security / Ventilation: if the quote gives a cylinder lock, handle set and glazing type, score 6-8/10. Missing PAS 24 or exact U-value is a useful confirmation, not a major failure. Only score very low (0-3) if there is NO lock, glazing or safety detail at all.
+- Sizes / Openings / Measurements: if the quote says the door/window is fitted to the existing opening and structural alterations are excluded, do NOT heavily penalise missing exact dimensions — score 5-7/10 and phrase as "Exact dimensions are not stated, but the quote is for replacement into the existing opening. Confirm final survey before manufacture."
+- Installation / Making Good: if the quote includes remove old door/frame, fit new frame, foam-fix-seal-weatherproof, new cill and trims and basic making good, score 8-9/10.
 
 Missing detail should reduce the score, but a quote with clear product, disposal and guarantee should always land in at least the moderate band even when sizes or trickle vents are not spelled out.
 
@@ -178,6 +186,18 @@ CATEGORIES to score:
 ${CATEGORIES.map((c) => `- ${c.key}: ${c.name}`).join("\n")}
 
 STATUS values per category: "clear" | "supplied_separately" | "needs_clarifying" | "missing" | "not_scored".
+
+===== STRONG QUOTE RULE (clarity_score ≥ 80) =====
+If the overall main-quote clarity is 80 or higher, the "not_found" list MUST be short (max 6 items) and MUST only include genuinely useful final confirmations, such as:
+- installer company / contact details if not shown
+- exact door manufacturer / profile
+- PAS 24 or security rating if important
+- glazing spec / U-value if required
+- technical survey date
+- final lead time
+- when FENSA certificate and guarantee are issued
+- what happens if hidden defects are found during removal
+Use softer wording: "Worth confirming before acceptance.", "Minor confirmation point.", "Not a major issue, but useful to agree in writing." Do NOT make a strong door quote feel worse than it is.
 
 WORDING STYLE: practical, calm and homeowner-friendly. Never accuse the window & door installer. Never sound like legal advice. Use phrases like "Not visible in the quote — confirm if required.", "Worth confirming before accepting.", "Good detail, but ask for written confirmation on…", "Trickle vents are now a Building Regs requirement for replacement windows — worth checking they're included.".
 
@@ -354,7 +374,7 @@ async function runAnalysis(supabase: any, args: RunArgs): Promise<void> {
       quick_verdict: parsed.quick_verdict || "",
       what_looks_clear: Array.isArray(parsed.what_looks_clear) ? parsed.what_looks_clear : [],
       supplied_separately: suppliedSeparately,
-      not_found: Array.isArray(parsed.not_found) ? parsed.not_found : [],
+      not_found: (Array.isArray(parsed.not_found) ? parsed.not_found : []).slice(0, clarityScore >= 80 ? 6 : 20),
       key_risks: Array.isArray(parsed.key_risks) ? parsed.key_risks : [],
       questions: (Array.isArray(parsed.questions) ? parsed.questions : []).slice(0, 10),
       suggested_message: parsed.suggested_message || "",
