@@ -230,7 +230,7 @@ export default function BoilerQuoteReport({ report }: { report: BoilerReportJson
 
       {/* 4. Not Found / Confirm If Required */}
       {report.not_found?.length ? (
-        <Section title="Not Found / Confirm If Required" icon={<HelpCircle className="h-5 w-5 text-amber-600" />}>
+        <Section title={score >= 80 ? "Final Confirmations" : "Not Found / Confirm If Required"} icon={<HelpCircle className={`h-5 w-5 ${score >= 80 ? "text-teal" : "text-amber-600"}`} />}>
           <p className="font-mono text-xs text-muted-foreground mb-2">
             These items were not visible in the main quote or supporting documents. They may simply be outside the
             agreed scope — confirm with your installer if required.
@@ -248,7 +248,7 @@ export default function BoilerQuoteReport({ report }: { report: BoilerReportJson
 
       {/* 5. Key Risks To Clarify */}
       {report.key_risks?.length ? (
-        <Section title="Key Risks To Clarify" icon={<AlertTriangle className="h-5 w-5 text-rose-500" />}>
+        <Section title={score >= 80 ? "Final Confirmation Points" : "Key Risks To Clarify"} icon={<AlertTriangle className={`h-5 w-5 ${score >= 80 ? "text-teal" : "text-rose-500"}`} />}>
           <ul className="space-y-2">
             {report.key_risks.map((t, i) => (
               <li key={i} className="flex gap-2 font-mono text-sm text-navy/90">
