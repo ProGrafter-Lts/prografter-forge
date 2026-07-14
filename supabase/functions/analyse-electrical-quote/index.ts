@@ -190,12 +190,19 @@ WORDING STYLE: practical, calm and homeowner-friendly. Never accuse the electric
 
 ===== NOT FOUND — GROUPING RULE =====
 Do NOT return a long flat list of every missing electrical item. Instead group missing items into the following homeowner-friendly categories, and only include a group if it has at least one missing item:
-- "Scope detail missing" — e.g. number of rooms, socket quantities, light points, switches, appliance circuits.
+- "Scope detail missing" — e.g. number of rooms, socket quantities, light points, switches, appliance circuits, exact light fittings / downlights.
 - "Consumer unit detail missing" — e.g. whether a new consumer unit is included, brand/model, number of ways, RCBO/RCD arrangement, SPD, bonding/earthing assumptions.
 - "Certification missing" — e.g. Electrical Installation Certificate, Part P / Building Regulations notification, NICEIC/NAPIT or competent person registration, testing and commissioning.
-- "Site impact missing" — e.g. chasing, making good, dust protection, furniture moving, temporary power.
-- "Commercial terms missing" — e.g. VAT status, quote validity, deposit amount, duration, workmanship guarantee, exclusions.
+- "Site impact missing" — e.g. chasing, making good, dust protection, furniture moving, temporary power, whether the property remains liveable during works.
+- "Commercial terms missing" — e.g. VAT status, quote validity, deposit amount, start date, duration, workmanship guarantee, exclusions, how unexpected issues / hidden defects will be priced.
 Return this as "not_found_grouped". Keep "not_found" as a short flat fallback (max 6 items) covering only the single most important gaps.
+
+// ===== STRONG QUOTE RULE (overall score > 80) =====
+If the overall score is above 80, the quote is already mostly clear. Do NOT make it feel risky.
+- Keep "not_found_grouped" very short: only include genuinely useful final confirmations such as start date if not confirmed, exact light fittings / downlights if not specified, whether the property remains liveable during works, dust protection / working arrangements, how unexpected issues will be priced, and hidden defects that could affect cost.
+- Use soft, non-alarming phrasing: "Worth confirming before acceptance.", "Minor confirmation point.", "Not a major issue, but useful to agree in writing."
+- Do NOT include certification, consumer unit, or extensive scope gaps in this section unless they are genuinely missing and relevant.
+- Keep "not_found" fallback to a maximum of 3 items.
 
 Respond with STRICT JSON only (no prose, no markdown fences) in EXACTLY this shape:
 {
