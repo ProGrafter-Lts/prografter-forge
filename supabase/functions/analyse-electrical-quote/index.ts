@@ -186,7 +186,16 @@ ${CATEGORIES.map((c) => `- ${c.key}: ${c.name}`).join("\n")}
 
 STATUS values per category: "clear" | "supplied_separately" | "needs_clarifying" | "missing" | "not_scored".
 
-WORDING STYLE: practical, calm and homeowner-friendly. Never accuse the electrician. Never sound like legal advice. Use phrases like "Not visible in the quote — confirm if required.", "Worth confirming before accepting.", "Good detail, but ask for written confirmation on…", "Making good is often excluded from electrical rewires, but it should be clearly stated.".
+WORDING STYLE: practical, calm and homeowner-friendly. Never accuse the electrician. Never sound like legal advice, and never use absolute regulatory language. Prefer softened guidance wording. For example, instead of "A full rewire legally requires an EIC and Part P notification", say "A full domestic rewire would normally require an Electrical Installation Certificate and Building Regulations / Part P notification." Use phrases like "Not visible in the quote — confirm if required.", "Worth confirming before accepting.", "would normally include…", "is typically expected on a full rewire…", "Making good is often excluded from electrical rewires, but it should be clearly stated.".
+
+===== NOT FOUND — GROUPING RULE =====
+Do NOT return a long flat list of every missing electrical item. Instead group missing items into the following homeowner-friendly categories, and only include a group if it has at least one missing item:
+- "Scope detail missing" — e.g. number of rooms, socket quantities, light points, switches, appliance circuits.
+- "Consumer unit detail missing" — e.g. whether a new consumer unit is included, brand/model, number of ways, RCBO/RCD arrangement, SPD, bonding/earthing assumptions.
+- "Certification missing" — e.g. Electrical Installation Certificate, Part P / Building Regulations notification, NICEIC/NAPIT or competent person registration, testing and commissioning.
+- "Site impact missing" — e.g. chasing, making good, dust protection, furniture moving, temporary power.
+- "Commercial terms missing" — e.g. VAT status, quote validity, deposit amount, duration, workmanship guarantee, exclusions.
+Return this as "not_found_grouped". Keep "not_found" as a short flat fallback (max 6 items) covering only the single most important gaps.
 
 Respond with STRICT JSON only (no prose, no markdown fences) in EXACTLY this shape:
 {
@@ -206,15 +215,20 @@ Respond with STRICT JSON only (no prose, no markdown fences) in EXACTLY this sha
     { "item": "<e.g. Consumer unit spec>", "main_quote": "<what the main quote says>", "supporting": "<what the supporting doc supplies>",
       "status": "Supplied separately — confirm with electrician", "note": "short homeowner-friendly guidance" }
   ],
-  "not_found": ["... items NOT visible in the main quote OR supporting documents — phrase as 'Not visible in the quote — confirm if required.' ..."],
+  "not_found_grouped": [
+    { "category": "Scope detail missing" | "Consumer unit detail missing" | "Certification missing" | "Site impact missing" | "Commercial terms missing",
+      "items": ["short homeowner-friendly item", "..."] }
+  ],
+  "not_found": ["max 6 short fallback items — the single most important gaps only"],
   "key_risks": ["... the most important things worth confirming before accepting ..."],
-  "questions": ["max 10 priority questions to ask the electrician"],
+  "questions": ["max 10 priority questions to ask the electrician — softened wording, no absolute legal claims"],
   "suggested_message": "a short, polite, copyable message the homeowner can send the electrician asking only for the most important clarifications based on the actual quote — do not generate a huge list if the quote is already strong",
   "summary": "a short ProGrafter summary paragraph"
 }
 
-Include EVERY category from the list in "categories" (mark not-relevant ones relevant:false, score null). Keep questions to a maximum of 10, prioritised.`;
+Include EVERY category from the list in "categories" (mark not-relevant ones relevant:false, score null). Keep questions to a maximum of 10, prioritised. Always use softened, non-absolute wording about certification and Part P.`;
 }
+
 
 async function downloadBlock(supabase: any, path: string, displayName: string): Promise<unknown | null> {
   try {
@@ -341,8 +355,9 @@ async function runAnalysis(supabase: any, args: RunArgs): Promise<void> {
     } else {
       verdictLevel = "low";
       verdictLine =
-        "This quote is too vague to accept safely yet. It gives a price, but leaves out key details about the scope, consumer unit, certification, making good and exclusions.";
+        "This quote is too vague to accept safely yet. It gives a price, but leaves out important detail that would normally be included on a rewire — scope quantities, consumer unit spec, certification, making good and commercial terms.";
     }
+
 
     const suppliedSeparately = Array.isArray(parsed.supplied_separately)
       ? parsed.supplied_separately.filter((s: any) => s && (s.item || s.supporting))
@@ -364,7 +379,13 @@ async function runAnalysis(supabase: any, args: RunArgs): Promise<void> {
       quick_verdict: parsed.quick_verdict || "",
       what_looks_clear: Array.isArray(parsed.what_looks_clear) ? parsed.what_looks_clear : [],
       supplied_separately: suppliedSeparately,
-      not_found: Array.isArray(parsed.not_found) ? parsed.not_found : [],
+      not_found: Array.isArray(parsed.not_found) ? parsed.not_found.slice(0, 6) : [],
+      not_found_grouped: Array.isArray(parsed.not_found_grouped)
+        ? parsed.not_found_grouped
+            .filter((g: any) => g && typeof g.category === "string" && Array.isArray(g.items) && g.items.length)
+            .map((g: any) => ({ category: String(g.category), items: g.items.map((x: any) => String(x)).filter(Boolean) }))
+        : [],
+
       key_risks: Array.isArray(parsed.key_risks) ? parsed.key_risks : [],
       questions: (Array.isArray(parsed.questions) ? parsed.questions : []).slice(0, 10),
       suggested_message: parsed.suggested_message || "",
