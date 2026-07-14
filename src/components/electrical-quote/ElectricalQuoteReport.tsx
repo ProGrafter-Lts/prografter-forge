@@ -50,11 +50,13 @@ export interface ElectricalReportJson {
   what_looks_clear?: string[];
   supplied_separately?: ElectricalSuppliedSeparatelyItem[];
   not_found?: string[];
+  not_found_grouped?: { category: string; items: string[] }[];
   key_risks?: string[];
   questions?: string[];
   suggested_message?: string;
   summary?: string;
 }
+
 
 const VERDICT_THEME: Record<string, { label: string; ring: string; text: string; bar: string }> = {
   low: { label: "Too vague to accept safely yet", ring: "ring-rose-200", text: "text-rose-700", bar: "bg-rose-500" },
