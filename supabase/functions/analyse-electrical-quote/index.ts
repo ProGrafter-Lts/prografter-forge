@@ -379,7 +379,13 @@ async function runAnalysis(supabase: any, args: RunArgs): Promise<void> {
       quick_verdict: parsed.quick_verdict || "",
       what_looks_clear: Array.isArray(parsed.what_looks_clear) ? parsed.what_looks_clear : [],
       supplied_separately: suppliedSeparately,
-      not_found: Array.isArray(parsed.not_found) ? parsed.not_found : [],
+      not_found: Array.isArray(parsed.not_found) ? parsed.not_found.slice(0, 6) : [],
+      not_found_grouped: Array.isArray(parsed.not_found_grouped)
+        ? parsed.not_found_grouped
+            .filter((g: any) => g && typeof g.category === "string" && Array.isArray(g.items) && g.items.length)
+            .map((g: any) => ({ category: String(g.category), items: g.items.map((x: any) => String(x)).filter(Boolean) }))
+        : [],
+
       key_risks: Array.isArray(parsed.key_risks) ? parsed.key_risks : [],
       questions: (Array.isArray(parsed.questions) ? parsed.questions : []).slice(0, 10),
       suggested_message: parsed.suggested_message || "",
