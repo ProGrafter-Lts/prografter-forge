@@ -228,17 +228,21 @@ export default function KitchenQuoteReport({ report }: { report: KitchenReportJs
         </Section>
       ) : null}
 
-      {/* Not Found / Confirm If Required */}
+      {/* Not Found / Confirm If Required (softened for strong quotes) */}
       {report.not_found?.length ? (
-        <Section title="Not Found / Confirm If Required" icon={<HelpCircle className="h-5 w-5 text-amber-600" />}>
+        <Section
+          title={score >= 78 ? "Final Confirmations" : "Not Found / Confirm If Required"}
+          icon={<HelpCircle className={`h-5 w-5 ${score >= 78 ? "text-teal" : "text-amber-600"}`} />}
+        >
           <p className="font-mono text-xs text-muted-foreground mb-2">
-            These items were not visible in the main quote or supporting documents. They may simply be outside the
-            agreed scope — confirm with your kitchen installer if required.
+            {score >= 78
+              ? "Worth confirming before acceptance. These are minor points — not major issues, but useful to agree in writing."
+              : "These items were not visible in the main quote or supporting documents. They may simply be outside the agreed scope — confirm with your kitchen installer if required."}
           </p>
           <ul className="space-y-2">
             {report.not_found.map((t, i) => (
               <li key={i} className="flex gap-2 font-mono text-sm text-navy/90">
-                <HelpCircle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+                <HelpCircle className={`h-4 w-4 shrink-0 mt-0.5 ${score >= 78 ? "text-teal" : "text-amber-600"}`} />
                 <span>{t}</span>
               </li>
             ))}
