@@ -164,13 +164,24 @@ Do NOT punish a bathroom quote for not including extension/building, boiler or w
 
 Calibrate to these three reference quotes so scoring feels fair to homeowners:
 
-WEAK (target overall 5-15/100): e.g. "Fit new bathroom £4,500." — no strip-out detail, no sanitaryware list, no tiling area, no waterproofing, no VAT, no timescale, no exclusions. Most categories 0-2.
+WEAK (target overall 5-15/100): e.g. "Fit new bathroom £4,500." — no strip-out detail, no sanitaryware list, no tiling area, no waterproofing, no VAT, no timescale, no exclusions. Most categories 0-2. Keep the weak quote scoring low.
 
 MEDIUM (target overall 45-60/100): e.g. "Strip out bathroom, fit new suite, tile shower area, fit fan, waste included, £6,000 plus VAT." Some real scope — strip-out, a suite, some tiling and an extractor fan — so Strip-Out & Waste Removal, Plumbing Scope and Sanitaryware should score around 5-7. Mark it DOWN — but not to the floor — for missing detail on tiling area in m², who supplies tiles/sanitaryware, waterproofing/tanking, flooring, making good, payment terms, timescale and guarantees: those categories should sit around 3-5, NOT 0-1. The overall average must land near 45-60, never near 30.
 
-STRONG (target overall 80-90/100): a fully itemised bathroom quote with strip-out, disposal, plumbing scope, full sanitaryware list, tile areas in m², waterproofing/tanking, extractor fan and bathroom electrics, flooring, making good, waste removal, exclusions, VAT, payment terms, timescale and warranties. Clear and mostly decision-ready. Only sensible final clarifications remain. Most categories 8-10.
+STRONG (target overall 82-88/100): a fully itemised bathroom quote covering strip-out, removal/disposal, sanitaryware list, hot/cold/waste pipework, moisture-resistant plasterboard, tanking/waterproofing to wet areas, wall and floor tiling, extractor fan, bathroom light fitting, silicone finish, final clean, waste removal, clear exclusions, timescale, VAT-inclusive price, staged payments, 12-month workmanship guarantee and quote validity. This is clear and mostly decision-ready — only sensible final clarifications remain. Most categories 8-10 and the overall score MUST land in 82-88, not in the 70s.
+
+===== REWARD CLARITY (do not penalise) =====
+- Clear exclusions (e.g. decoration, moving soil pipe, underfloor heating, rotten floor repairs, electrical circuit upgrades, tiles above an allowance) are a POSITIVE feature — they reduce dispute risk. "Exclusions / Extras / Risk Items" MUST score high (8-10) where exclusions are clearly stated. Do not penalise clear exclusions.
+- Clear allowances (e.g. "Tiles over £35/m² unless agreed as extra") are useful clarity, NOT a weakness. Do not reduce the score materially — instead raise a minor clarification question such as "Confirm the final tile choice and whether it stays within the £35/m² allowance."
+
+===== CATEGORY CALIBRATION FOR STRONG QUOTES =====
+- Sanitaryware & Fixtures: if the quote lists the key items (bath, basin, toilet, vanity unit, taps, shower screen), score 7-9/10. Only reduce slightly if exact brands/models are not stated — never score low for this alone.
+- Electrical & Ventilation: if the quote includes an extractor fan AND a bathroom light fitting, this category MUST NOT score low. Suggested range 6-8/10 depending on detail. It is fine to ask whether bathroom electrics are certified, whether the existing circuit is suitable, and whether fan model/location is confirmed — but do not treat this as a major gap.
 
 Missing waterproofing or certification detail should reduce the score, but must NEVER make an otherwise detailed quote score as if it is almost empty. A quote with clear strip-out, plumbing, sanitaryware, tiling and price should always land in at least the moderate band even when tanking / guarantees are not spelled out.
+
+===== STRONG QUOTE RULE (overall >= 80) =====
+If the overall main score is 80 or above, keep the "not_found" list SHORT (max 6) and SOFT. Only include genuinely useful final confirmations, drawn from: contractor details if not shown, exact sanitaryware makes/models if not stated, final tile choice and allowance, extractor fan model/location, bathroom electrical certification, rotten floor / hidden defect process, start date. Use softer wording such as "Worth confirming before acceptance.", "Minor confirmation point.", "Not a major issue, but useful to agree in writing." Do NOT make a strong bathroom quote feel risky.
 
 ===== MAIN QUOTE vs SUPPORTING DOCUMENTS =====
 Distinguish where each fact came from. If info is supplied in a supporting document but NOT the main quote, classify it as "Supplied separately — confirm with bathroom installer". Do NOT mark it as fully confirmed unless it is clearly contractor-issued or accepted. Do NOT treat homeowner-written notes as contractor-confirmed unless clearly stated. Supporting docs may only IMPROVE the pack score, never reduce it. Do not call something "missing" if it appears in a supporting document.
@@ -362,9 +373,9 @@ async function runAnalysis(supabase: any, args: RunArgs): Promise<void> {
       quick_verdict: parsed.quick_verdict || "",
       what_looks_clear: Array.isArray(parsed.what_looks_clear) ? parsed.what_looks_clear : [],
       supplied_separately: suppliedSeparately,
-      not_found: Array.isArray(parsed.not_found) ? parsed.not_found : [],
+      not_found: Array.isArray(parsed.not_found) ? parsed.not_found.slice(0, clarityScore >= 80 ? 6 : 12) : [],
       key_risks: Array.isArray(parsed.key_risks) ? parsed.key_risks : [],
-      questions: (Array.isArray(parsed.questions) ? parsed.questions : []).slice(0, 10),
+      questions: (Array.isArray(parsed.questions) ? parsed.questions : []).slice(0, clarityScore >= 80 ? 8 : 10),
       suggested_message: parsed.suggested_message || "",
       summary: parsed.summary || "",
     };
