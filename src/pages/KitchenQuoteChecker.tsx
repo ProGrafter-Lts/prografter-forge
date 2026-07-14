@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { startModuleQuotePayment } from "@/lib/quoteCheckerPayment";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -123,25 +124,6 @@ const KitchenQuoteChecker = () => {
     }
     setIsSubmitting(true);
     try {
-      const fileName = `kitchen-${Date.now()}-${file.name}`;
-      const { error: uploadError } = await supabase.storage
-        .from("quote-pdfs")
-        .upload(fileName, file, { contentType: file.type || "application/octet-stream" });
-      if (uploadError) throw uploadError;
-
-      const supportingUploaded: { path: string; name: string }[] = [];
-      for (const sf of supportingFiles.slice(0, 10)) {
-        const spName = `kitchen-${Date.now()}-support-${Math.random().toString(36).slice(2, 8)}-${sf.name}`;
-        const { error: spErr } = await supabase.storage
-          .from("quote-pdfs")
-          .upload(spName, sf, { contentType: sf.type || "application/octet-stream" });
-        if (spErr) { console.warn("supporting upload failed", sf.name, spErr); continue; }
-        supportingUploaded.push({ path: spName, name: sf.name });
-      }
-
-      const { data: { user } } = await supabase.auth.getUser();
-
-      const projectType = "Kitchen";
       const intake = {
         checker: "kitchen",
         project_type: projectType,
@@ -159,23 +141,19 @@ const KitchenQuoteChecker = () => {
         },
       };
 
-      const { data, error } = await supabase.functions.invoke("analyse-kitchen-quote", {
-        body: {
-          email,
-          projectType,
-          intake,
-          pdfPath: fileName,
-          supportingFiles: supportingUploaded,
-          userId: user?.id ?? null,
-        },
+      const projectType = "Kitchen";
+      await startModuleQuotePayment({
+        moduleId: "kitchen",
+        email,
+        projectType,
+        intake,
+        file,
+        supportingFiles,
+        filePrefix: "kitchen",
       });
-      if (error) throw error;
-      if (!data?.id || !data?.lookupToken) throw new Error("No report returned.");
-
-      navigate(`/kitchen-quote-report/${data.id}?t=${encodeURIComponent(data.lookupToken)}`);
     } catch (err) {
       console.error(err);
-      toast({ title: "Something went wrong", description: "We couldn't check your quote. Please try again.", variant: "destructive" });
+      toast({ title: "Something went wrong", description: "We couldn't start payment. Please try again.", variant: "destructive" });
       setIsSubmitting(false);
     }
   };
