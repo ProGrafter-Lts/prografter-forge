@@ -1872,6 +1872,72 @@ export type Database = {
           },
         ]
       }
+      pending_module_checks: {
+        Row: {
+          amount_due: number | null
+          amount_paid: number | null
+          analysed_at: string | null
+          analysed_check_id: string | null
+          created_at: string
+          currency: string
+          email: string
+          id: string
+          intake: Json
+          module_id: string
+          paid_at: string | null
+          payment_status: string
+          pdf_path: string
+          price_band: string | null
+          project_type: string | null
+          stripe_payment_intent_id: string | null
+          stripe_session_id: string | null
+          supporting_files: Json
+          user_id: string | null
+        }
+        Insert: {
+          amount_due?: number | null
+          amount_paid?: number | null
+          analysed_at?: string | null
+          analysed_check_id?: string | null
+          created_at?: string
+          currency?: string
+          email: string
+          id?: string
+          intake?: Json
+          module_id: string
+          paid_at?: string | null
+          payment_status?: string
+          pdf_path: string
+          price_band?: string | null
+          project_type?: string | null
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
+          supporting_files?: Json
+          user_id?: string | null
+        }
+        Update: {
+          amount_due?: number | null
+          amount_paid?: number | null
+          analysed_at?: string | null
+          analysed_check_id?: string | null
+          created_at?: string
+          currency?: string
+          email?: string
+          id?: string
+          intake?: Json
+          module_id?: string
+          paid_at?: string | null
+          payment_status?: string
+          pdf_path?: string
+          price_band?: string | null
+          project_type?: string | null
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
+          supporting_files?: Json
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       planning_access: {
         Row: {
           access_level: string
