@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { startModuleQuotePayment } from "@/lib/quoteCheckerPayment";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -131,24 +132,6 @@ const BathroomQuoteChecker = () => {
     }
     setIsSubmitting(true);
     try {
-      const fileName = `bathroom-${Date.now()}-${file.name}`;
-      const { error: uploadError } = await supabase.storage
-        .from("quote-pdfs")
-        .upload(fileName, file, { contentType: file.type || "application/octet-stream" });
-      if (uploadError) throw uploadError;
-
-      const supportingUploaded: { path: string; name: string }[] = [];
-      for (const sf of supportingFiles.slice(0, 10)) {
-        const spName = `bathroom-${Date.now()}-support-${Math.random().toString(36).slice(2, 8)}-${sf.name}`;
-        const { error: spErr } = await supabase.storage
-          .from("quote-pdfs")
-          .upload(spName, sf, { contentType: sf.type || "application/octet-stream" });
-        if (spErr) { console.warn("supporting upload failed", sf.name, spErr); continue; }
-        supportingUploaded.push({ path: spName, name: sf.name });
-      }
-
-      const { data: { user } } = await supabase.auth.getUser();
-
       const projectType = "Bathroom";
       const intake = {
         checker: "bathroom",
@@ -167,24 +150,18 @@ const BathroomQuoteChecker = () => {
           guarantees_certificates_expected: guarantees,
         },
       };
-
-      const { data, error } = await supabase.functions.invoke("analyse-bathroom-quote", {
-        body: {
-          email,
-          projectType,
-          intake,
-          pdfPath: fileName,
-          supportingFiles: supportingUploaded,
-          userId: user?.id ?? null,
-        },
+      await startModuleQuotePayment({
+        moduleId: "bathroom",
+        email,
+        projectType,
+        intake,
+        file,
+        supportingFiles,
+        filePrefix: "bathroom",
       });
-      if (error) throw error;
-      if (!data?.id || !data?.lookupToken) throw new Error("No report returned.");
-
-      navigate(`/bathroom-quote-report/${data.id}?t=${encodeURIComponent(data.lookupToken)}`);
     } catch (err) {
       console.error(err);
-      toast({ title: "Something went wrong", description: "We couldn't check your quote. Please try again.", variant: "destructive" });
+      toast({ title: "Something went wrong", description: "We couldn't start payment. Please try again.", variant: "destructive" });
       setIsSubmitting(false);
     }
   };

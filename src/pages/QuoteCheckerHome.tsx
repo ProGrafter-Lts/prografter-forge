@@ -21,6 +21,7 @@ import {
   QUOTE_CHECKER_MODULES,
   type QuoteCheckerModule,
 } from "@/lib/quoteCheckerModules";
+import { moduleDisplayPrice } from "@/lib/quoteCheckerPayment";
 import { ShieldCheck, ArrowRight, ArrowLeft, Clock, Upload, FileText, Loader2, CheckCircle2 } from "lucide-react";
 
 const ACCEPTED_TYPES = ["application/pdf", "image/jpeg", "image/png", "image/webp"];
@@ -175,6 +176,7 @@ const QuoteCheckerHome = () => {
             <div className="grid sm:grid-cols-2 gap-3">
               {QUOTE_CHECKER_MODULES.map((m) => {
                 const active = m.status === "active";
+                const price = moduleDisplayPrice(m.module_id);
                 return (
                   <button
                     key={m.module_id}
@@ -188,7 +190,14 @@ const QuoteCheckerHome = () => {
                     <div className="flex items-start justify-between gap-3">
                       <span className="font-heading text-base text-navy leading-snug">{m.short_label}</span>
                       {active ? (
-                        <ArrowRight className="h-4 w-4 text-teal shrink-0 mt-1 transition-transform group-hover:translate-x-0.5" />
+                        <div className="flex items-center gap-2 shrink-0">
+                          {price && (
+                            <span className="font-mono text-xs font-semibold text-teal bg-white border border-teal/30 rounded-full px-2 py-0.5">
+                              {price}
+                            </span>
+                          )}
+                          <ArrowRight className="h-4 w-4 text-teal mt-0.5 transition-transform group-hover:translate-x-0.5" />
+                        </div>
                       ) : (
                         <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 font-mono text-[9px] uppercase tracking-wider text-muted-foreground shrink-0">
                           <Clock className="h-3 w-3" /> Soon
@@ -199,6 +208,12 @@ const QuoteCheckerHome = () => {
                   </button>
                 );
               })}
+            </div>
+
+            <div className="rounded-2xl border border-border bg-card p-4 text-center">
+              <p className="font-mono text-[11px] text-muted-foreground">
+                Secure Stripe checkout · One-off payment · Full report saved to your dashboard
+              </p>
             </div>
 
             <div className="rounded-2xl border border-border bg-card p-5 text-center">

@@ -48,3 +48,9 @@ project_id = "xryinqaxjclcmhebdcex"
     verify_jwt = false
   [functions.read-simple-quote-check]
     verify_jwt = false
+  [functions.create-module-quote-checkout]
+    verify_jwt = false
+  [functions.run-paid-module-check]
+    verify_jwt = false
+  [functions.stripe-module-webhook]
+    verify_jwt = false

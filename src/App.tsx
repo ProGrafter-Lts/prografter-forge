@@ -92,6 +92,8 @@ const AdminAdvancedQuoteReview = lazy(() => import("./pages/AdminAdvancedQuoteRe
 const SimpleQuoteChecker = lazy(() => import("./pages/SimpleQuoteChecker.tsx"));
 const SimpleQuoteReportPage = lazy(() => import("./pages/SimpleQuoteReport.tsx"));
 const QuoteCheckerHome = lazy(() => import("./pages/QuoteCheckerHome.tsx"));
+const QuoteCheckerSuccess = lazy(() => import("./pages/QuoteCheckerSuccess.tsx"));
+const QuoteCheckerCancel = lazy(() => import("./pages/QuoteCheckerCancel.tsx"));
 const BoilerQuoteChecker = lazy(() => import("./pages/BoilerQuoteChecker.tsx"));
 const BoilerQuoteReportPage = lazy(() => import("./pages/BoilerQuoteReport.tsx"));
 const ElectricalQuoteReportPage = lazy(() => import("./pages/ElectricalQuoteReport.tsx"));
@@ -159,6 +161,8 @@ const AppRoutes = () => {
             <Route path="/register/trade" element={<SignupTradeRedirect />} />
             <Route path="/post-a-job" element={<Navigate to="/post-job-brief" replace />} />
             <Route path="/quote-checker" element={<QuoteCheckerHome />} />
+            <Route path="/quote-checker/success" element={<QuoteCheckerSuccess />} />
+            <Route path="/quote-checker/cancel" element={<QuoteCheckerCancel />} />
             <Route path="/quote-checker-classic" element={<QuoteChecker />} />
             <Route path="/simple-quote-checker" element={<Navigate to="/quote-checker?module=extension_building" replace />} />
             <Route path="/simple-quote-report/:id" element={<SimpleQuoteReportPage />} />
