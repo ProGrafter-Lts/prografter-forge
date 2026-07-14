@@ -59,8 +59,8 @@ export interface RoofingReportJson {
 const VERDICT_THEME: Record<string, { label: string; ring: string; text: string; bar: string }> = {
   low: { label: "Too vague to accept safely yet", ring: "ring-rose-200", text: "text-rose-700", bar: "bg-rose-500" },
   moderate: { label: "Useful, but confirm key points", ring: "ring-amber-200", text: "text-amber-700", bar: "bg-amber-500" },
-  good: { label: "Clear and mostly decision-ready", ring: "ring-emerald-200", text: "text-emerald-700", bar: "bg-emerald-500" },
-  strong: { label: "Strong quote with minor confirmations", ring: "ring-emerald-300", text: "text-emerald-700", bar: "bg-emerald-600" },
+  good: { label: "Decent quote, but key points should be confirmed", ring: "ring-emerald-200", text: "text-emerald-700", bar: "bg-emerald-500" },
+  strong: { label: "Strong quote, with final confirmations", ring: "ring-emerald-300", text: "text-emerald-700", bar: "bg-emerald-600" },
 };
 
 const SOURCE_LABEL: Record<string, string> = {
@@ -248,7 +248,7 @@ export default function RoofingQuoteReport({ report }: { report: RoofingReportJs
 
       {/* Key Risks To Clarify */}
       {report.key_risks?.length ? (
-        <Section title="Key Risks To Clarify" icon={<AlertTriangle className="h-5 w-5 text-rose-500" />}>
+        <Section title={score >= 80 ? "Final Confirmation Points" : "Key Risks To Clarify"} icon={<AlertTriangle className={`h-5 w-5 ${score >= 80 ? "text-teal" : "text-rose-500"}`} />}>
           <ul className="space-y-2">
             {report.key_risks.map((t, i) => (
               <li key={i} className="flex gap-2 font-mono text-sm text-navy/90">
