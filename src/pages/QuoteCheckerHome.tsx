@@ -65,6 +65,9 @@ const QuoteCheckerHome = () => {
   if (activeModuleId === "kitchen") {
     return <KitchenQuoteChecker />;
   }
+  if (activeModuleId === "windows_doors") {
+    return <WindowsDoorsQuoteChecker />;
+  }
 
 
   const handleSelect = (m: QuoteCheckerModule) => {
