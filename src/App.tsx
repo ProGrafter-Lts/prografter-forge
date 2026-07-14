@@ -171,6 +171,9 @@ const AppRoutes = () => {
             <Route path="/roofing-quote-report/:id" element={<RoofingQuoteReportPage />} />
             <Route path="/kitchen-quote-checker" element={<Navigate to="/quote-checker?module=kitchen" replace />} />
             <Route path="/kitchen-quote-report/:id" element={<KitchenQuoteReportPage />} />
+            <Route path="/windows-doors-quote-checker" element={<Navigate to="/quote-checker?module=windows_doors" replace />} />
+            <Route path="/windows-doors-quote-report/:id" element={<WindowsDoorsQuoteReportPage />} />
+            
             
             <Route path="/report/:id" element={<QuoteReport />} />
             <Route path="/green" element={<GreenGrants />} />
