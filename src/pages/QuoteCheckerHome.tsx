@@ -15,6 +15,7 @@ import BathroomQuoteChecker from "@/pages/BathroomQuoteChecker";
 import RoofingQuoteChecker from "@/pages/RoofingQuoteChecker";
 import KitchenQuoteChecker from "@/pages/KitchenQuoteChecker";
 import WindowsDoorsQuoteChecker from "@/pages/WindowsDoorsQuoteChecker";
+import LandscapingQuoteChecker from "@/pages/LandscapingQuoteChecker";
 import {
   QUOTE_CHECKER_MODULES,
   type QuoteCheckerModule,
@@ -67,6 +68,9 @@ const QuoteCheckerHome = () => {
   }
   if (activeModuleId === "windows_doors") {
     return <WindowsDoorsQuoteChecker />;
+  }
+  if (activeModuleId === "landscaping_driveway") {
+    return <LandscapingQuoteChecker />;
   }
 
 

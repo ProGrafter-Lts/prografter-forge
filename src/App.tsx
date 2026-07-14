@@ -99,6 +99,7 @@ const BathroomQuoteReportPage = lazy(() => import("./pages/BathroomQuoteReport.t
 const RoofingQuoteReportPage = lazy(() => import("./pages/RoofingQuoteReport.tsx"));
 const KitchenQuoteReportPage = lazy(() => import("./pages/KitchenQuoteReport.tsx"));
 const WindowsDoorsQuoteReportPage = lazy(() => import("./pages/WindowsDoorsQuoteReport.tsx"));
+const LandscapingQuoteReportPage = lazy(() => import("./pages/LandscapingQuoteReport.tsx"));
 const AdminQuoteCheckerModules = lazy(() => import("./pages/AdminQuoteCheckerModules.tsx"));
 // ProGrafter Planning Hub — new application shell
 const HubLayout = lazy(() => import("./hub/layout/HubLayout.tsx"));
@@ -173,6 +174,8 @@ const AppRoutes = () => {
             <Route path="/kitchen-quote-report/:id" element={<KitchenQuoteReportPage />} />
             <Route path="/windows-doors-quote-checker" element={<Navigate to="/quote-checker?module=windows_doors" replace />} />
             <Route path="/windows-doors-quote-report/:id" element={<WindowsDoorsQuoteReportPage />} />
+            <Route path="/landscaping-quote-checker" element={<Navigate to="/quote-checker?module=landscaping_driveway" replace />} />
+            <Route path="/landscaping-quote-report/:id" element={<LandscapingQuoteReportPage />} />
             
             
             <Route path="/report/:id" element={<QuoteReport />} />
