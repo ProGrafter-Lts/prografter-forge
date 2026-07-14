@@ -231,7 +231,29 @@ export default function ElectricalQuoteReport({ report }: { report: ElectricalRe
       ) : null}
 
       {/* 3 & 4. What Needs Clarifying / Not Found */}
-      {report.not_found?.length ? (
+      {report.not_found_grouped?.length ? (
+        <Section title="Not Found / Confirm If Required" icon={<HelpCircle className="h-5 w-5 text-amber-600" />}>
+          <p className="font-mono text-xs text-muted-foreground mb-3">
+            These items were not visible in the main quote or supporting documents. They may simply be outside the
+            agreed scope — confirm with your electrician if required.
+          </p>
+          <div className="space-y-4">
+            {report.not_found_grouped.map((g, gi) => (
+              <div key={gi}>
+                <p className="font-mono text-xs uppercase tracking-wider text-amber-700 mb-1.5">{g.category}</p>
+                <ul className="space-y-1.5">
+                  {g.items.map((t, i) => (
+                    <li key={i} className="flex gap-2 font-mono text-sm text-navy/90">
+                      <HelpCircle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+                      <span>{t}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </Section>
+      ) : report.not_found?.length ? (
         <Section title="Not Found / Confirm If Required" icon={<HelpCircle className="h-5 w-5 text-amber-600" />}>
           <p className="font-mono text-xs text-muted-foreground mb-2">
             These items were not visible in the main quote or supporting documents. They may simply be outside the
@@ -247,6 +269,7 @@ export default function ElectricalQuoteReport({ report }: { report: ElectricalRe
           </ul>
         </Section>
       ) : null}
+
 
       {/* 5. Key Risks To Clarify */}
       {report.key_risks?.length ? (
