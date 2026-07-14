@@ -355,8 +355,9 @@ async function runAnalysis(supabase: any, args: RunArgs): Promise<void> {
     } else {
       verdictLevel = "low";
       verdictLine =
-        "This quote is too vague to accept safely yet. It gives a price, but leaves out key details about the scope, consumer unit, certification, making good and exclusions.";
+        "This quote is too vague to accept safely yet. It gives a price, but leaves out important detail that would normally be included on a rewire — scope quantities, consumer unit spec, certification, making good and commercial terms.";
     }
+
 
     const suppliedSeparately = Array.isArray(parsed.supplied_separately)
       ? parsed.supplied_separately.filter((s: any) => s && (s.item || s.supporting))
