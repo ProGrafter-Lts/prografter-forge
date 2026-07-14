@@ -186,16 +186,23 @@ ${CATEGORIES.map((c) => `- ${c.key}: ${c.name}`).join("\n")}
 
 STATUS values per category: "clear" | "supplied_separately" | "needs_clarifying" | "missing" | "not_scored".
 
-WORDING STYLE: practical, calm and homeowner-friendly. Never accuse the electrician. Never sound like legal advice, and never use absolute regulatory language. Prefer softened guidance wording. For example, instead of "A full rewire legally requires an EIC and Part P notification", say "A full domestic rewire would normally require an Electrical Installation Certificate and Building Regulations / Part P notification." Use phrases like "Not visible in the quote — confirm if required.", "Worth confirming before accepting.", "would normally include…", "is typically expected on a full rewire…", "Making good is often excluded from electrical rewires, but it should be clearly stated.".
+WORDING STYLE: practical, calm and homeowner-friendly. Never accuse the electrician. Never sound like legal advice, and never use absolute regulatory language. Prefer softened guidance wording. For example, instead of "A full rewire legally requires an EIC and Part P notification", say "A full domestic rewire would normally require an Electrical Installation Certificate and Building Regulations / Part P notification." Use phrases like "Not visible in the quote — confirm if required.", "Worth confirming before accepting.", "would normally include…", "is typically expected on a full rewire…", "Making good is often excluded from electrical rewires, but it should be clearly stated." For strong quotes (overall score above 80), use soft, non-alarming phrasing such as "Worth confirming before acceptance.", "Minor confirmation point.", and "Not a major issue, but useful to agree in writing." Do not make a strong quote feel risky.
 
 ===== NOT FOUND — GROUPING RULE =====
 Do NOT return a long flat list of every missing electrical item. Instead group missing items into the following homeowner-friendly categories, and only include a group if it has at least one missing item:
-- "Scope detail missing" — e.g. number of rooms, socket quantities, light points, switches, appliance circuits.
+- "Scope detail missing" — e.g. number of rooms, socket quantities, light points, switches, appliance circuits, exact light fittings / downlights.
 - "Consumer unit detail missing" — e.g. whether a new consumer unit is included, brand/model, number of ways, RCBO/RCD arrangement, SPD, bonding/earthing assumptions.
 - "Certification missing" — e.g. Electrical Installation Certificate, Part P / Building Regulations notification, NICEIC/NAPIT or competent person registration, testing and commissioning.
-- "Site impact missing" — e.g. chasing, making good, dust protection, furniture moving, temporary power.
-- "Commercial terms missing" — e.g. VAT status, quote validity, deposit amount, duration, workmanship guarantee, exclusions.
+- "Site impact missing" — e.g. chasing, making good, dust protection, furniture moving, temporary power, whether the property remains liveable during works.
+- "Commercial terms missing" — e.g. VAT status, quote validity, deposit amount, start date, duration, workmanship guarantee, exclusions, how unexpected issues / hidden defects will be priced.
 Return this as "not_found_grouped". Keep "not_found" as a short flat fallback (max 6 items) covering only the single most important gaps.
+
+// ===== STRONG QUOTE RULE (overall score > 80) =====
+If the overall score is above 80, the quote is already mostly clear. Do NOT make it feel risky.
+- Keep "not_found_grouped" very short: only include genuinely useful final confirmations such as start date if not confirmed, exact light fittings / downlights if not specified, whether the property remains liveable during works, dust protection / working arrangements, how unexpected issues will be priced, and hidden defects that could affect cost.
+- Use soft, non-alarming phrasing: "Worth confirming before acceptance.", "Minor confirmation point.", "Not a major issue, but useful to agree in writing."
+- Do NOT include certification, consumer unit, or extensive scope gaps in this section unless they are genuinely missing and relevant.
+- Keep "not_found" fallback to a maximum of 3 items.
 
 Respond with STRICT JSON only (no prose, no markdown fences) in EXACTLY this shape:
 {
@@ -335,6 +342,12 @@ async function runAnalysis(supabase: any, args: RunArgs): Promise<void> {
     const packScore = averageScore(
       categories.filter((c) => c.relevant && typeof c.score_pack === "number").map((c) => c.score_pack as number),
     );
+    const isStrong = clarityScore > 80;
+    const strongAllowedCategories = [
+      "Scope detail missing",
+      "Site impact missing",
+      "Commercial terms missing",
+    ];
     const relevantCount = categories.filter((c) => c.relevant).length;
     const strong = categories.filter((c) => c.relevant && typeof c.score_pack === "number" && (c.score_pack as number) >= 7).map((c) => c.name);
     const weak = categories.filter((c) => c.relevant && typeof c.score_pack === "number" && (c.score_pack as number) <= 4).map((c) => c.name);
@@ -379,15 +392,27 @@ async function runAnalysis(supabase: any, args: RunArgs): Promise<void> {
       quick_verdict: parsed.quick_verdict || "",
       what_looks_clear: Array.isArray(parsed.what_looks_clear) ? parsed.what_looks_clear : [],
       supplied_separately: suppliedSeparately,
-      not_found: Array.isArray(parsed.not_found) ? parsed.not_found.slice(0, 6) : [],
+      not_found: Array.isArray(parsed.not_found) ? parsed.not_found.slice(0, isStrong ? 3 : 6) : [],
       not_found_grouped: Array.isArray(parsed.not_found_grouped)
-        ? parsed.not_found_grouped
-            .filter((g: any) => g && typeof g.category === "string" && Array.isArray(g.items) && g.items.length)
-            .map((g: any) => ({ category: String(g.category), items: g.items.map((x: any) => String(x)).filter(Boolean) }))
+        ? (() => {
+            let remaining = isStrong ? 6 : Infinity;
+            return parsed.not_found_grouped
+              .filter((g: any) => g && typeof g.category === "string" && Array.isArray(g.items) && g.items.length)
+              .map((g: any) => ({ category: String(g.category), items: g.items.map((x: any) => String(x)).filter(Boolean) }))
+              .reduce((acc: any[], g: any) => {
+                if (isStrong && !strongAllowedCategories.includes(g.category)) return acc;
+                const take = Math.min(g.items.length, remaining);
+                if (take > 0) {
+                  acc.push({ category: g.category, items: g.items.slice(0, take) });
+                  remaining -= take;
+                }
+                return acc;
+              }, []);
+          })()
         : [],
 
       key_risks: Array.isArray(parsed.key_risks) ? parsed.key_risks : [],
-      questions: (Array.isArray(parsed.questions) ? parsed.questions : []).slice(0, 10),
+      questions: (Array.isArray(parsed.questions) ? parsed.questions : []).slice(0, isStrong ? 8 : 10),
       suggested_message: parsed.suggested_message || "",
       summary: parsed.summary || "",
     };
