@@ -164,15 +164,36 @@ Timescale / Handover: start date, duration in days, drying allowance, clear hand
 ===== SCORE BEHAVIOUR & CALIBRATION =====
 Do NOT punish a plastering quote for not including extension, boiler, electrical, bathroom, kitchen, roofing, windows or landscaping items. Score against the plastering / rendering categories ONLY.
 
+First identify the JOB TYPE and judge proportionately:
+A. Small room skim (e.g. one bedroom, walls + ceiling)
+B. Full house plastering
+C. Boarding and skim
+D. Rendering (external)
+E. Patch repair
+F. Damp / blown plaster repair
+Do NOT judge a small bedroom skim as if it were a full renovation package or an external render job. For a small skim, the quote does NOT need full technical spec (board thickness, bead schedules, render systems, scaffold) if the core scope is clear.
+
 Calibrate to these three reference quotes:
 
-WEAK (target overall 10-25/100): e.g. "Plaster room £600." — no area, no walls/ceilings, no prep, no materials, no waste, no VAT. Most categories 0-2.
+WEAK (target overall 5-15/100): e.g. "Plaster room £600." — no area, no walls/ceilings, no prep, no materials, no waste, no VAT. Most categories 0-2.
 
 MEDIUM (target overall 45-65/100): e.g. "Skim walls and ceiling in bedroom, materials included, £750." — reasonable scope so Areas 5-6, Boards/Materials 4-5, Finish 5-6. Mark it DOWN — but not to the floor — for missing m², prep detail, beads, protection, waste, drying, VAT and payment terms: those should sit around 2-4, NOT 0-1.
 
-STRONG (target overall 80-90/100): detailed room/area, walls/ceilings, prep, materials, finish, waste, protection, exclusions, VAT/payment and timescale. Most categories 8-10.
+STRONG SMALL SKIM (target overall 78-84/100): a small bedroom/room skim quote that includes room/area identified, approximate room size, walls and ceiling, preparation stated (PVA/bonding where required, scrim to minor cracks), plaster and standard materials included, floor protection, waste removal, left ready for decoration after drying, decoration excluded, drying guidance, VAT-inclusive price, payment on completion and quote validity. Only sensible clarifications remain. Most relevant categories 7-9.
 
-Missing detail should reduce the score, but a quote with clear rooms, finish type and materials should always land in at least the moderate band even when m² or drying time aren't spelled out.
+STRONG COMPLEX (target overall 82-90/100): a full house plaster, boarding-and-skim or rendering quote with detailed areas, board type/thickness, beads, prep, finish, scaffold, waste, exclusions, VAT/payment and timescale.
+
+Missing detail should reduce the score, but a small skim quote with clear rooms, prep, materials, protection, waste and exclusions should always land in the strong band even when exact m² or plaster brand aren't spelled out.
+
+Category-level calibration for a small skim (apply on top of anchors below):
+- Areas / Measurements / Rooms: if the room is named with an approximate size and walls + ceiling are covered, score 7-9/10. Do NOT score low just because exact m² are missing.
+- Preparation / Removal / Protection: if prep of existing plaster, PVA/bonding where required and scrim to minor cracks are stated, score 7-9/10. Blown plaster / major defect handling can be a clarification, not a failure.
+- Boards / Materials / Beads: if plaster and standard materials are included, score 6-8/10. Missing plaster brand is NOT a critical homeowner decision on a bedroom skim — treat as minor confirmation only.
+- Finish Specification: if a skim finish left ready for decoration is stated, score 7-9/10.
+- Access / Scaffold / Waste: for internal skim, if floor protection and waste removal are included, score 7-9/10. Scaffold is not relevant for an internal room — mark that item not-relevant rather than penalising.
+- Drying / Aftercare / Decoration: if drying guidance is given and decoration is clearly excluded (left ready for decoration after drying), score 7-9/10. Do NOT treat decoration as missing when it is clearly excluded.
+- Exclusions / Extras / Risk Items: if the quote clearly excludes blown plaster removal, reboarding, major crack repairs, damp treatment, painting/decorating, moving large furniture and hidden defects, score 8-10/10.
+- Timescale / Handover: a stated start date or duration with drying allowance should score 7-9/10.
 
 ===== MAIN QUOTE vs SUPPORTING DOCUMENTS =====
 Distinguish where each fact came from. If info is supplied in a supporting document but NOT the main quote, classify it as "Supplied separately — confirm with plasterer". Supporting docs may only IMPROVE the pack score, never reduce it. Do not call something "missing" if it appears in a supporting document.
@@ -186,6 +207,16 @@ CATEGORIES to score:
 ${CATEGORIES.map((c) => `- ${c.key}: ${c.name}`).join("\n")}
 
 STATUS values per category: "clear" | "supplied_separately" | "needs_clarifying" | "missing" | "not_scored".
+
+===== STRONG QUOTE RULE (clarity_score ≥ 78) =====
+If the overall main-quote clarity is 78 or higher, the "not_found" list MUST be short (max 6 items) and MUST only include genuinely useful final confirmations, such as:
+- plasterer / company contact details if missing
+- whether price is fixed if wall condition is as expected
+- what happens if blown plaster is found
+- exact drying time before decorating
+- whether furniture moving is required
+- start date
+Use softer wording: "Worth confirming before acceptance.", "Minor confirmation point.", "Not a major issue, but useful to agree in writing." Do NOT make a good small plastering quote feel worse than it is.
 
 WORDING STYLE: practical, calm and homeowner-friendly. Never accuse the plasterer. Never sound like legal advice. Use phrases like "Not visible in the quote — confirm if required.", "Worth confirming before accepting.", "Good detail, but ask for written confirmation on…", "Hidden damp or lath and plaster can surprise — worth flagging as a risk item.".
 
@@ -362,7 +393,7 @@ async function runAnalysis(supabase: any, args: RunArgs): Promise<void> {
       quick_verdict: parsed.quick_verdict || "",
       what_looks_clear: Array.isArray(parsed.what_looks_clear) ? parsed.what_looks_clear : [],
       supplied_separately: suppliedSeparately,
-      not_found: Array.isArray(parsed.not_found) ? parsed.not_found : [],
+      not_found: (Array.isArray(parsed.not_found) ? parsed.not_found : []).slice(0, clarityScore >= 78 ? 6 : 20),
       key_risks: Array.isArray(parsed.key_risks) ? parsed.key_risks : [],
       questions: (Array.isArray(parsed.questions) ? parsed.questions : []).slice(0, 10),
       suggested_message: parsed.suggested_message || "",
