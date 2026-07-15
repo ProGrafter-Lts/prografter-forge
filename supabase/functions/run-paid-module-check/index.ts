@@ -99,13 +99,25 @@ Deno.serve(async (req) => {
     if (aErr) throw aErr;
     if (!analysed?.id) throw new Error("Analyse function returned no id");
 
+    let lookupToken: string | null = analysed.lookupToken ?? null;
+    if (!lookupToken) {
+      const { data: row } = await supabase
+        .from("simple_quote_checks")
+        .select("lookup_token")
+        .eq("id", analysed.id)
+        .maybeSingle();
+      lookupToken = row?.lookup_token ?? null;
+    }
+
     await supabase
       .from("pending_module_checks")
       .update({
         analysed_check_id: analysed.id,
         analysed_at: new Date().toISOString(),
+        lookup_token: lookupToken,
       })
       .eq("id", pendingId);
+
 
     return new Response(JSON.stringify({
       paid: true,
