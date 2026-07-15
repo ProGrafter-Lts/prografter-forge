@@ -83,6 +83,28 @@ export interface StartPaymentArgs {
 
 const ACCEPTED_TYPES = ["application/pdf", "image/jpeg", "image/png", "image/webp"];
 
+function writeCheckoutRedirectPage(targetWindow: Window, checkoutUrl: string) {
+  const safeUrl = JSON.stringify(checkoutUrl);
+  targetWindow.document.open();
+  targetWindow.document.write(`<!doctype html>
+<html>
+  <head>
+    <title>Opening checkout…</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
+  <body style="font-family: system-ui, sans-serif; padding: 32px; color: #122033; line-height: 1.5;">
+    <h1 style="font-size: 20px; margin: 0 0 8px;">Opening secure checkout…</h1>
+    <p style="margin: 0 0 16px;">Stripe Checkout should open automatically.</p>
+    <a href=${safeUrl} rel="noreferrer" style="color: #0f766e; font-weight: 700;">Open checkout manually</a>
+    <script>
+      window.opener = null;
+      window.location.replace(${safeUrl});
+    </script>
+  </body>
+</html>`);
+  targetWindow.document.close();
+}
+
 /**
  * Uploads the quote & supporting docs to Storage, creates a Stripe Checkout
  * Session for the module's price band, and redirects the browser to Stripe.
@@ -94,7 +116,8 @@ export async function startModuleQuotePayment(args: StartPaymentArgs): Promise<v
   const checkoutWindow = isEmbeddedPreview ? window.open("", "_blank") : null;
 
   if (checkoutWindow) {
-    checkoutWindow.document.write(`<!doctype html><html><head><title>Opening checkout…</title></head><body style="font-family: system-ui, sans-serif; padding: 32px; color: #122033;"><h1 style="font-size: 20px; margin: 0 0 8px;">Opening secure checkout…</h1><p style="margin: 0;">Please keep this tab open while we prepare Stripe.</p></body></html>`);
+    checkoutWindow.document.write(`<!doctype html><html><head><title>Opening checkout…</title></head><body style="font-family: system-ui, sans-serif; padding: 32px; color: #122033;"><h1 style="font-size: 20px; margin: 0 0 8px;">Preparing secure checkout…</h1><p style="margin: 0;">Please keep this tab open while Stripe is prepared.</p></body></html>`);
+    checkoutWindow.document.close();
   }
 
   if (!ACCEPTED_TYPES.includes(file.type)) {
@@ -148,12 +171,28 @@ export async function startModuleQuotePayment(args: StartPaymentArgs): Promise<v
     throw new Error("Payment session could not be created.");
   }
 
-  if (checkoutWindow) {
-    checkoutWindow.opener = null;
-    checkoutWindow.location.href = data.url;
-    checkoutWindow.focus();
+  const checkoutUrl = String(data.url);
+
+  if (checkoutWindow && !checkoutWindow.closed) {
+    try {
+      writeCheckoutRedirectPage(checkoutWindow, checkoutUrl);
+      checkoutWindow.focus();
+      return;
+    } catch (navErr) {
+      console.warn("Could not update checkout popup", navErr);
+      checkoutWindow.close();
+    }
+  }
+
+  const opened = window.open(checkoutUrl, "_blank", "noopener,noreferrer");
+  if (opened) {
+    opened.focus();
     return;
   }
 
-  window.location.assign(data.url);
+  if (isEmbeddedPreview) {
+    throw new Error("Your browser blocked Stripe Checkout. Please allow pop-ups for this preview and try again.");
+  }
+
+  window.location.assign(checkoutUrl);
 }
