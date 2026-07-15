@@ -1883,6 +1883,7 @@ export type Database = {
           email: string
           id: string
           intake: Json
+          lookup_token: string | null
           module_id: string
           paid_at: string | null
           payment_status: string
@@ -1904,6 +1905,7 @@ export type Database = {
           email: string
           id?: string
           intake?: Json
+          lookup_token?: string | null
           module_id: string
           paid_at?: string | null
           payment_status?: string
@@ -1925,6 +1927,7 @@ export type Database = {
           email?: string
           id?: string
           intake?: Json
+          lookup_token?: string | null
           module_id?: string
           paid_at?: string | null
           payment_status?: string
