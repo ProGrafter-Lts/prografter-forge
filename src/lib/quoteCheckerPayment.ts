@@ -90,8 +90,15 @@ const ACCEPTED_TYPES = ["application/pdf", "image/jpeg", "image/png", "image/web
  */
 export async function startModuleQuotePayment(args: StartPaymentArgs): Promise<void> {
   const { moduleId, email, projectType, intake, file, supportingFiles = [], filePrefix = moduleId } = args;
+  const isEmbeddedPreview = window.self !== window.top;
+  const checkoutWindow = isEmbeddedPreview ? window.open("", "_blank") : null;
+
+  if (checkoutWindow) {
+    checkoutWindow.document.write(`<!doctype html><html><head><title>Opening checkout…</title></head><body style="font-family: system-ui, sans-serif; padding: 32px; color: #122033;"><h1 style="font-size: 20px; margin: 0 0 8px;">Opening secure checkout…</h1><p style="margin: 0;">Please keep this tab open while we prepare Stripe.</p></body></html>`);
+  }
 
   if (!ACCEPTED_TYPES.includes(file.type)) {
+    checkoutWindow?.close();
     throw new Error("Please upload a PDF, JPG, PNG or screenshot for the main quote.");
   }
 
@@ -100,7 +107,10 @@ export async function startModuleQuotePayment(args: StartPaymentArgs): Promise<v
   const { error: upErr } = await supabase.storage
     .from("quote-pdfs")
     .upload(pdfPath, file, { contentType: file.type || "application/octet-stream" });
-  if (upErr) throw upErr;
+  if (upErr) {
+    checkoutWindow?.close();
+    throw upErr;
+  }
 
   // 2. Upload supporting docs (best-effort)
   const uploadedSupporting: { path: string; name: string }[] = [];
@@ -129,15 +139,18 @@ export async function startModuleQuotePayment(args: StartPaymentArgs): Promise<v
       userId: user?.id ?? null,
     },
   });
-  if (error) throw error;
-  if (!data?.url) throw new Error("Payment session could not be created.");
+  if (error) {
+    checkoutWindow?.close();
+    throw error;
+  }
+  if (!data?.url) {
+    checkoutWindow?.close();
+    throw new Error("Payment session could not be created.");
+  }
 
-  const isEmbeddedPreview = window.self !== window.top;
-  if (isEmbeddedPreview) {
-    const checkoutWindow = window.open(data.url, "_blank", "noopener,noreferrer");
-    if (!checkoutWindow) {
-      throw new Error("Your browser blocked the Stripe checkout window. Please allow pop-ups and try again.");
-    }
+  if (checkoutWindow) {
+    checkoutWindow.opener = null;
+    checkoutWindow.location.href = data.url;
     checkoutWindow.focus();
     return;
   }
