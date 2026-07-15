@@ -123,7 +123,7 @@ Deno.serve(async (req) => {
       paid: true,
       module_id: pending.module_id,
       id: analysed.id,
-      lookupToken: analysed.lookupToken ?? null,
+      lookupToken,
     }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (err) {
     console.error("run-paid-module-check error:", err);
