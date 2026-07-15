@@ -132,5 +132,15 @@ export async function startModuleQuotePayment(args: StartPaymentArgs): Promise<v
   if (error) throw error;
   if (!data?.url) throw new Error("Payment session could not be created.");
 
-  window.location.href = data.url;
+  const isEmbeddedPreview = window.self !== window.top;
+  if (isEmbeddedPreview) {
+    const checkoutWindow = window.open(data.url, "_blank", "noopener,noreferrer");
+    if (!checkoutWindow) {
+      throw new Error("Your browser blocked the Stripe checkout window. Please allow pop-ups and try again.");
+    }
+    checkoutWindow.focus();
+    return;
+  }
+
+  window.location.assign(data.url);
 }
