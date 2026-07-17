@@ -23,6 +23,11 @@ const Verification = lazy(() => import("./pages/Verification.tsx"));
 const PostAJob = lazy(() => import("./pages/PostAJob.tsx"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword.tsx"));
 const TradeDashboard = lazy(() => import("./pages/TradeDashboard.tsx"));
+const AtlasLanding = lazy(() => import("./atlas/pages/AtlasLanding.tsx"));
+const AtlasNewSurvey = lazy(() => import("./atlas/pages/AtlasNewSurvey.tsx"));
+const AtlasWorkspace = lazy(() => import("./atlas/pages/AtlasWorkspace.tsx"));
+const AtlasReview = lazy(() => import("./atlas/pages/AtlasReview.tsx"));
+const AtlasSummary = lazy(() => import("./atlas/pages/AtlasSummary.tsx"));
 const TradeSettings = lazy(() => import("./pages/TradeSettings.tsx"));
 const HomeownerDashboard = lazy(() => import("./pages/HomeownerDashboard.tsx"));
 const ProjectDetail = lazy(() => import("./pages/ProjectDetail.tsx"));
@@ -221,6 +226,11 @@ const AppRoutes = () => {
             >
               <Route path="/dashboard/trade" element={<TradeDashboard />} />
               <Route path="/dashboard/trade/settings" element={<TradeSettings />} />
+              <Route path="/atlas" element={<AtlasLanding />} />
+              <Route path="/atlas/new" element={<AtlasNewSurvey />} />
+              <Route path="/atlas/:id" element={<AtlasWorkspace />} />
+              <Route path="/atlas/:id/review" element={<AtlasReview />} />
+              <Route path="/atlas/:id/summary" element={<AtlasSummary />} />
               <Route path="/dashboard/homeowner" element={<HomeownerDashboard />} />
               <Route path="/dashboard/quote-checks" element={<MyQuoteChecks />} />
               <Route path="/dashboard/quote-checks/:id" element={<QuoteCheckDetail />} />
