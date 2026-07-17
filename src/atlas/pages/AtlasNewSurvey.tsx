@@ -9,7 +9,13 @@ import { toast } from "sonner";
 import AtlasShell from "../AtlasShell";
 import { PROJECT_TYPES, TRADE_CATEGORIES } from "../sections";
 import { ensureAtlasSections, logAtlasAudit } from "../lib";
-import { ArrowLeft, ArrowRight, Sun, CloudRain, Compass } from "lucide-react";
+import { ArrowLeft, ArrowRight, Sun, CloudRain, Cloud, Compass, Home, Users, CheckCircle2 } from "lucide-react";
+
+const STEPS = [
+  { n: 1, label: "Project" },
+  { n: 2, label: "Scope" },
+  { n: 3, label: "Review" },
+];
 
 export default function AtlasNewSurvey() {
   const navigate = useNavigate();
@@ -85,50 +91,81 @@ export default function AtlasNewSurvey() {
     <AtlasShell>
       <button
         onClick={() => navigate("/atlas")}
-        className="font-mono text-xs text-muted-foreground hover:text-white flex items-center gap-1 mb-4"
+        className="font-mono text-xs text-white/60 hover:text-white flex items-center gap-1.5 mb-8 transition"
       >
-        <ArrowLeft className="w-3 h-3" /> All surveys
+        <ArrowLeft className="w-3.5 h-3.5" /> All surveys
       </button>
 
-      <h1 className="font-heading text-primary text-3xl mb-2">New Atlas survey</h1>
-      <p className="font-mono text-xs text-muted-foreground mb-6">Step {step} of 3</p>
+      <div className="mb-10">
+        <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-teal-300">New survey</span>
+        <h1 className="font-heading text-white text-4xl md:text-5xl mt-2">Set the scene.</h1>
+        <p className="font-body text-[15px] text-white/60 mt-2 max-w-lg">
+          Three short steps. Once complete, Atlas will guide the walk-through in the order that matches
+          how the property flows.
+        </p>
+      </div>
 
-      <div className="w-full h-1 bg-white/10 rounded-full mb-8 overflow-hidden">
-        <div className="h-full bg-teal-400 transition-all" style={{ width: `${(step / 3) * 100}%` }} />
+      {/* Segmented progress */}
+      <div className="grid grid-cols-3 gap-3 mb-10">
+        {STEPS.map((s) => {
+          const active = step === s.n;
+          const done = step > s.n;
+          return (
+            <div key={s.n} className="space-y-2">
+              <div
+                className={`h-1 rounded-full transition-all ${
+                  done ? "bg-teal-400" : active ? "bg-teal-400" : "bg-white/10"
+                }`}
+              />
+              <div className="flex items-center gap-2">
+                <span
+                  className={`font-mono text-[10px] w-5 h-5 rounded-full flex items-center justify-center ${
+                    done ? "bg-teal-400 text-[#0F2238]" : active ? "bg-white text-[#0F2238]" : "bg-white/10 text-white/50"
+                  }`}
+                >
+                  {done ? <CheckCircle2 className="w-3 h-3" /> : s.n}
+                </span>
+                <span className={`font-mono text-xs uppercase tracking-widest ${active || done ? "text-white" : "text-white/40"}`}>
+                  {s.label}
+                </span>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       {step === 1 && (
-        <section className="space-y-4 rounded-2xl border border-white/10 bg-white/[0.03] p-6">
-          <h2 className="font-heading text-primary text-xl">Project & property</h2>
-          <div className="grid md:grid-cols-2 gap-4">
-            <Field label="Project title *">
-              <Input value={form.project_title} onChange={(e) => setField("project_title", e.target.value)} placeholder="Smith — rear extension" />
+        <Panel eyebrow="Step 1" title="Project & property" hint="Who is this survey for and where?">
+          <div className="grid md:grid-cols-2 gap-5">
+            <Field label="Project title" required>
+              <Input value={form.project_title} onChange={(e) => setField("project_title", e.target.value)} placeholder="Smith — rear extension" className="h-11" />
             </Field>
             <Field label="Project type">
               <select
-                className="w-full h-10 rounded-md bg-background border border-input px-3 text-sm"
+                className="w-full h-11 rounded-md bg-white/[0.04] border border-white/10 px-3 text-sm text-white"
                 value={form.project_type}
                 onChange={(e) => setField("project_type", e.target.value)}
               >
                 {PROJECT_TYPES.map((p) => <option key={p} value={p}>{p}</option>)}
               </select>
             </Field>
-            <Field label="Property address"><Input value={form.property_address} onChange={(e) => setField("property_address", e.target.value)} /></Field>
-            <Field label="Postcode"><Input value={form.postcode} onChange={(e) => setField("postcode", e.target.value)} /></Field>
-            <Field label="Customer name"><Input value={form.customer_name} onChange={(e) => setField("customer_name", e.target.value)} /></Field>
-            <Field label="Customer phone"><Input value={form.customer_phone} onChange={(e) => setField("customer_phone", e.target.value)} /></Field>
-            <Field label="Customer email"><Input type="email" value={form.customer_email} onChange={(e) => setField("customer_email", e.target.value)} /></Field>
+            <Field label="Property address"><Input className="h-11" value={form.property_address} onChange={(e) => setField("property_address", e.target.value)} /></Field>
+            <Field label="Postcode"><Input className="h-11" value={form.postcode} onChange={(e) => setField("postcode", e.target.value)} /></Field>
+            <Field label="Customer name"><Input className="h-11" value={form.customer_name} onChange={(e) => setField("customer_name", e.target.value)} /></Field>
+            <Field label="Customer phone"><Input className="h-11" value={form.customer_phone} onChange={(e) => setField("customer_phone", e.target.value)} /></Field>
+            <div className="md:col-span-2">
+              <Field label="Customer email"><Input className="h-11" type="email" value={form.customer_email} onChange={(e) => setField("customer_email", e.target.value)} /></Field>
+            </div>
           </div>
-          <Field label="Customer intent (what they say they want)">
+          <Field label="Customer intent" hint="What they say they want, in their own words">
             <Textarea rows={3} value={form.customer_intent} onChange={(e) => setField("customer_intent", e.target.value)} placeholder="Open-plan kitchen-diner, keep utility, ready before school year…" />
           </Field>
-        </section>
+        </Panel>
       )}
 
       {step === 2 && (
-        <section className="space-y-5 rounded-2xl border border-white/10 bg-white/[0.03] p-6">
-          <h2 className="font-heading text-primary text-xl">Survey scope</h2>
-          <Field label="Relevant trades">
+        <Panel eyebrow="Step 2" title="Survey scope" hint="Which trades and how you'll walk the site">
+          <Field label="Relevant trades" hint="Pick everything that may bear on this project">
             <div className="flex flex-wrap gap-2">
               {TRADE_CATEGORIES.map((t) => {
                 const on = form.relevant_trades.includes(t);
@@ -137,8 +174,10 @@ export default function AtlasNewSurvey() {
                     key={t}
                     type="button"
                     onClick={() => toggleTrade(t)}
-                    className={`font-mono text-xs px-3 py-1.5 rounded-full border transition ${
-                      on ? "bg-teal-500/20 border-teal-400/50 text-teal-100" : "bg-transparent border-white/15 text-muted-foreground hover:text-white"
+                    className={`font-mono text-xs px-3.5 py-1.5 rounded-full border transition ${
+                      on
+                        ? "bg-teal-500/20 border-teal-400/50 text-teal-100"
+                        : "bg-white/[0.02] border-white/10 text-white/60 hover:text-white hover:border-white/20"
                     }`}
                   >
                     {t}
@@ -148,82 +187,104 @@ export default function AtlasNewSurvey() {
             </div>
           </Field>
 
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid md:grid-cols-2 gap-5">
             <Field label="Start route">
               <div className="grid grid-cols-2 gap-2">
                 {(["outside", "inside"] as const).map((r) => (
-                  <button
+                  <ChoiceCard
                     key={r}
-                    type="button"
+                    active={form.start_route === r}
                     onClick={() => setField("start_route", r)}
-                    className={`h-10 rounded-md border font-mono text-xs flex items-center justify-center gap-2 ${
-                      form.start_route === r ? "border-teal-400 bg-teal-500/15 text-teal-100" : "border-white/15 text-muted-foreground"
-                    }`}
-                  >
-                    <Compass className="w-3.5 h-3.5" />
-                    {r === "outside" ? "Start outside" : "Start inside"}
-                  </button>
+                    icon={<Compass className="w-4 h-4" />}
+                    label={r === "outside" ? "Start outside" : "Start inside"}
+                  />
                 ))}
               </div>
             </Field>
             <Field label="Weather">
-              <div className="flex gap-2">
-                {[{ v: "Dry", i: <Sun className="w-3.5 h-3.5" /> }, { v: "Wet", i: <CloudRain className="w-3.5 h-3.5" /> }, { v: "Overcast", i: null }].map((w) => (
-                  <button
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { v: "Dry", i: <Sun className="w-4 h-4" /> },
+                  { v: "Wet", i: <CloudRain className="w-4 h-4" /> },
+                  { v: "Overcast", i: <Cloud className="w-4 h-4" /> },
+                ].map((w) => (
+                  <ChoiceCard
                     key={w.v}
-                    type="button"
+                    active={form.weather_conditions === w.v}
                     onClick={() => setField("weather_conditions", w.v)}
-                    className={`flex-1 h-10 rounded-md border font-mono text-xs flex items-center justify-center gap-2 ${
-                      form.weather_conditions === w.v ? "border-teal-400 bg-teal-500/15 text-teal-100" : "border-white/15 text-muted-foreground"
-                    }`}
-                  >
-                    {w.i}
-                    {w.v}
-                  </button>
+                    icon={w.i}
+                    label={w.v}
+                  />
                 ))}
               </div>
             </Field>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-4">
-            <Toggle label="Customer present" value={form.customer_present} onChange={(v) => setField("customer_present", v)} />
-            <Toggle label="Property occupied" value={form.property_occupied} onChange={(v) => setField("property_occupied", v)} />
+          <div className="grid md:grid-cols-2 gap-5">
+            <ToggleCard
+              icon={<Users className="w-4 h-4" />}
+              label="Customer present"
+              hint="Available to answer questions in person"
+              value={form.customer_present}
+              onChange={(v) => setField("customer_present", v)}
+            />
+            <ToggleCard
+              icon={<Home className="w-4 h-4" />}
+              label="Property occupied"
+              hint="Tenanted or lived-in during survey"
+              value={form.property_occupied}
+              onChange={(v) => setField("property_occupied", v)}
+            />
           </div>
 
           <Field label="Anticipated access limitations">
             <Textarea rows={2} value={form.access_limitations} onChange={(e) => setField("access_limitations", e.target.value)} placeholder="Locked outbuilding, tenanted upper floor…" />
           </Field>
-        </section>
+        </Panel>
       )}
 
       {step === 3 && (
-        <section className="space-y-4 rounded-2xl border border-white/10 bg-white/[0.03] p-6">
-          <h2 className="font-heading text-primary text-xl">Ready to begin</h2>
-          <p className="font-body text-sm text-muted-foreground">
-            Atlas will seed guided sections based on your project type and trades. You can pause and resume, and every
-            observation is auto-saved as you go.
-          </p>
-          <div className="rounded-lg border border-white/10 bg-white/[0.02] p-4 font-mono text-xs text-muted-foreground space-y-1">
-            <div><span className="text-white">Project:</span> {form.project_title || "—"} ({form.project_type})</div>
-            <div><span className="text-white">Property:</span> {form.property_address || "—"} {form.postcode}</div>
-            <div><span className="text-white">Customer:</span> {form.customer_name || "—"}</div>
-            <div><span className="text-white">Trades:</span> {form.relevant_trades.join(", ") || "None selected"}</div>
-            <div><span className="text-white">Start:</span> {form.start_route}</div>
+        <Panel eyebrow="Step 3" title="Ready to begin" hint="Atlas will seed sections based on this project">
+          <div className="grid gap-3">
+            <Summary label="Project" value={`${form.project_title || "—"} · ${form.project_type}`} />
+            <Summary label="Property" value={`${form.property_address || "—"} ${form.postcode}`} />
+            <Summary label="Customer" value={form.customer_name || "—"} />
+            <Summary label="Trades" value={form.relevant_trades.join(", ") || "None selected"} />
+            <Summary label="Start route" value={form.start_route === "outside" ? "Outside first" : "Inside first"} />
+            <Summary label="Weather" value={form.weather_conditions || "—"} />
           </div>
-        </section>
+          <p className="font-body text-sm text-white/60 mt-4 leading-relaxed">
+            You can pause and resume at any point. Every observation is auto-saved with a timestamp and,
+            once completed, the survey is locked and versioned for audit.
+          </p>
+        </Panel>
       )}
 
-      <div className="mt-6 flex items-center justify-between">
-        <Button variant="outline" disabled={step === 1} onClick={() => setStep((s) => Math.max(1, s - 1))} className="gap-2">
+      <div className="mt-8 flex items-center justify-between gap-3">
+        <Button
+          variant="ghost"
+          disabled={step === 1}
+          onClick={() => setStep((s) => Math.max(1, s - 1))}
+          className="gap-2 text-white/70 hover:text-white hover:bg-white/[0.06] rounded-full h-11 px-5"
+        >
           <ArrowLeft className="w-4 h-4" /> Back
         </Button>
         {step < 3 ? (
-          <Button onClick={() => setStep((s) => s + 1)} className="gap-2" style={{ background: "#0D9488", color: "white" }}>
+          <Button
+            onClick={() => setStep((s) => s + 1)}
+            className="gap-2 rounded-full h-11 px-6 shadow-lg shadow-teal-500/20"
+            style={{ background: "linear-gradient(180deg,#14B8A6,#0D9488)", color: "white" }}
+          >
             Continue <ArrowRight className="w-4 h-4" />
           </Button>
         ) : (
-          <Button disabled={saving} onClick={handleCreate} className="gap-2" style={{ background: "#0D9488", color: "white" }}>
-            {saving ? "Creating…" : "Start survey"} <ArrowRight className="w-4 h-4" />
+          <Button
+            disabled={saving}
+            onClick={handleCreate}
+            className="gap-2 rounded-full h-11 px-6 shadow-lg shadow-teal-500/20"
+            style={{ background: "linear-gradient(180deg,#14B8A6,#0D9488)", color: "white" }}
+          >
+            {saving ? "Creating…" : "Begin walk-through"} <ArrowRight className="w-4 h-4" />
           </Button>
         )}
       </div>
@@ -231,28 +292,77 @@ export default function AtlasNewSurvey() {
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Panel({ eyebrow, title, hint, children }: { eyebrow: string; title: string; hint: string; children: React.ReactNode }) {
+  return (
+    <section className="rounded-3xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-sm p-6 md:p-8 space-y-6 shadow-2xl shadow-black/20">
+      <div>
+        <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-teal-300">{eyebrow}</span>
+        <h2 className="font-heading text-white text-2xl md:text-3xl mt-1">{title}</h2>
+        <p className="font-body text-sm text-white/50 mt-1">{hint}</p>
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function Field({ label, hint, required, children }: { label: string; hint?: string; required?: boolean; children: React.ReactNode }) {
   return (
     <div>
-      <Label className="font-mono text-xs text-muted-foreground mb-1.5 block">{label}</Label>
+      <Label className="font-mono text-[11px] uppercase tracking-wider text-white/60 mb-2 block">
+        {label}{required && <span className="text-teal-300 ml-1">*</span>}
+        {hint && <span className="normal-case tracking-normal text-white/40 ml-2 font-body">— {hint}</span>}
+      </Label>
       {children}
     </div>
   );
 }
 
-function Toggle({ label, value, onChange }: { label: string; value: boolean; onChange: (v: boolean) => void }) {
+function ChoiceCard({ active, onClick, icon, label }: { active: boolean; onClick: () => void; icon: React.ReactNode; label: string }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`h-14 rounded-xl border font-mono text-xs flex items-center justify-center gap-2 transition ${
+        active
+          ? "border-teal-400/60 bg-teal-500/15 text-teal-100 shadow-[inset_0_0_0_1px_rgba(45,212,191,0.25)]"
+          : "border-white/10 bg-white/[0.02] text-white/60 hover:text-white hover:border-white/20"
+      }`}
+    >
+      {icon} {label}
+    </button>
+  );
+}
+
+function ToggleCard({ icon, label, hint, value, onChange }: { icon: React.ReactNode; label: string; hint: string; value: boolean; onChange: (v: boolean) => void }) {
   return (
     <button
       type="button"
       onClick={() => onChange(!value)}
-      className={`h-10 rounded-md border px-3 flex items-center justify-between font-mono text-xs ${
-        value ? "border-teal-400 bg-teal-500/15 text-teal-100" : "border-white/15 text-muted-foreground"
+      className={`text-left rounded-xl border p-4 flex items-start gap-3 transition ${
+        value
+          ? "border-teal-400/50 bg-teal-500/10"
+          : "border-white/10 bg-white/[0.02] hover:border-white/20"
       }`}
     >
-      {label}
-      <span className={`w-8 h-4 rounded-full relative transition ${value ? "bg-teal-400" : "bg-white/15"}`}>
-        <span className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-all ${value ? "left-4" : "left-0.5"}`} />
+      <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${value ? "bg-teal-500/20 text-teal-200" : "bg-white/[0.04] text-white/50"}`}>
+        {icon}
+      </div>
+      <div className="flex-1">
+        <div className="font-body text-sm text-white">{label}</div>
+        <div className="font-mono text-[10px] text-white/50 mt-0.5">{hint}</div>
+      </div>
+      <span className={`w-9 h-5 rounded-full relative transition shrink-0 mt-1 ${value ? "bg-teal-400" : "bg-white/15"}`}>
+        <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-all ${value ? "left-4" : "left-0.5"}`} />
       </span>
     </button>
+  );
+}
+
+function Summary({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="grid grid-cols-[110px_1fr] gap-3 py-2 border-b border-white/[0.06] last:border-0">
+      <span className="font-mono text-[11px] uppercase tracking-wider text-white/50">{label}</span>
+      <span className="font-body text-sm text-white/90">{value}</span>
+    </div>
   );
 }
