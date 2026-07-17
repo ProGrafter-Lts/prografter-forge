@@ -20,6 +20,7 @@ const NAV_ITEMS = [
   { label: "Dashboard", icon: LayoutDashboard, id: "dashboard" },
   { label: "Find Work", icon: Search, id: "find-work" },
   { label: "Pipeline", icon: FolderKanban, id: "pipeline" },
+  { label: "Atlas", icon: Map, id: "atlas" },
   { label: "Quotes", icon: FileText, id: "quotes" },
   { label: "Calendar", icon: CalendarDays, id: "calendar" },
   { label: "Messages", icon: MessageSquare, id: "messages" },
@@ -42,9 +43,11 @@ const TradeSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen }: 
   const currentView = new URLSearchParams(location.search).get("view");
   const routeActiveNav = location.pathname.startsWith("/dashboard/trade/settings")
     ? "settings"
-    : location.pathname.startsWith("/planning-alerts")
-      ? "find-work"
-      : currentView || activeNav;
+    : location.pathname.startsWith("/atlas")
+      ? "atlas"
+      : location.pathname.startsWith("/planning-alerts")
+        ? "find-work"
+        : currentView || activeNav;
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -58,6 +61,8 @@ const TradeSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen }: 
       navigate("/planning-alerts");
     } else if (id === "settings") {
       navigate("/dashboard/trade/settings");
+    } else if (id === "atlas") {
+      navigate("/atlas");
     } else if (id === "dashboard") {
       navigate("/dashboard/trade");
     } else {

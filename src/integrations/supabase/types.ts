@@ -14,6 +14,418 @@ export type Database = {
   }
   public: {
     Tables: {
+      atlas_audit_events: {
+        Row: {
+          action: string
+          created_at: string
+          entity_id: string | null
+          entity_type: string
+          id: string
+          new_value: Json | null
+          performed_by: string | null
+          previous_value: Json | null
+          reason: string | null
+          survey_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+          new_value?: Json | null
+          performed_by?: string | null
+          previous_value?: Json | null
+          reason?: string | null
+          survey_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+          new_value?: Json | null
+          performed_by?: string | null
+          previous_value?: Json | null
+          reason?: string | null
+          survey_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "atlas_audit_events_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "atlas_surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      atlas_evidence: {
+        Row: {
+          archived_at: string | null
+          caption: string | null
+          captured_at: string
+          captured_by: string | null
+          corrected_transcript: string | null
+          created_at: string
+          duration_seconds: number | null
+          elevation: string | null
+          evidence_type: string
+          file_url: string | null
+          id: string
+          is_ai_suggestion: boolean
+          mime_type: string | null
+          observation_id: string | null
+          room_name: string | null
+          storage_path: string | null
+          survey_id: string
+          transcript: string | null
+          updated_at: string
+        }
+        Insert: {
+          archived_at?: string | null
+          caption?: string | null
+          captured_at?: string
+          captured_by?: string | null
+          corrected_transcript?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          elevation?: string | null
+          evidence_type: string
+          file_url?: string | null
+          id?: string
+          is_ai_suggestion?: boolean
+          mime_type?: string | null
+          observation_id?: string | null
+          room_name?: string | null
+          storage_path?: string | null
+          survey_id: string
+          transcript?: string | null
+          updated_at?: string
+        }
+        Update: {
+          archived_at?: string | null
+          caption?: string | null
+          captured_at?: string
+          captured_by?: string | null
+          corrected_transcript?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          elevation?: string | null
+          evidence_type?: string
+          file_url?: string | null
+          id?: string
+          is_ai_suggestion?: boolean
+          mime_type?: string | null
+          observation_id?: string | null
+          room_name?: string | null
+          storage_path?: string | null
+          survey_id?: string
+          transcript?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "atlas_evidence_observation_id_fkey"
+            columns: ["observation_id"]
+            isOneToOne: false
+            referencedRelation: "atlas_observations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "atlas_evidence_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "atlas_surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      atlas_observations: {
+        Row: {
+          acknowledged_at_completion: boolean | null
+          classification: string
+          confidence_level: string
+          created_at: string
+          customer_visible_note: string | null
+          elevation: string | null
+          further_action: string | null
+          id: string
+          internal_note: string | null
+          is_critical: boolean
+          is_required: boolean
+          location: string | null
+          measurement_method: string | null
+          measurement_unit: string | null
+          measurement_value: number | null
+          observation_text: string | null
+          observed_at: string
+          observed_by: string | null
+          recommendation: string | null
+          response_status: string
+          responsible_professional: string | null
+          room_name: string | null
+          section_id: string
+          severity: string | null
+          skip_reason: string | null
+          survey_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          acknowledged_at_completion?: boolean | null
+          classification?: string
+          confidence_level?: string
+          created_at?: string
+          customer_visible_note?: string | null
+          elevation?: string | null
+          further_action?: string | null
+          id?: string
+          internal_note?: string | null
+          is_critical?: boolean
+          is_required?: boolean
+          location?: string | null
+          measurement_method?: string | null
+          measurement_unit?: string | null
+          measurement_value?: number | null
+          observation_text?: string | null
+          observed_at?: string
+          observed_by?: string | null
+          recommendation?: string | null
+          response_status?: string
+          responsible_professional?: string | null
+          room_name?: string | null
+          section_id: string
+          severity?: string | null
+          skip_reason?: string | null
+          survey_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          acknowledged_at_completion?: boolean | null
+          classification?: string
+          confidence_level?: string
+          created_at?: string
+          customer_visible_note?: string | null
+          elevation?: string | null
+          further_action?: string | null
+          id?: string
+          internal_note?: string | null
+          is_critical?: boolean
+          is_required?: boolean
+          location?: string | null
+          measurement_method?: string | null
+          measurement_unit?: string | null
+          measurement_value?: number | null
+          observation_text?: string | null
+          observed_at?: string
+          observed_by?: string | null
+          recommendation?: string | null
+          response_status?: string
+          responsible_professional?: string | null
+          room_name?: string | null
+          section_id?: string
+          severity?: string | null
+          skip_reason?: string | null
+          survey_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "atlas_observations_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "atlas_sections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "atlas_observations_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "atlas_surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      atlas_sections: {
+        Row: {
+          category: string
+          completion_percentage: number
+          completion_status: string
+          created_at: string
+          critical_outstanding_count: number
+          id: string
+          relevance_status: string
+          section_key: string
+          sequence: number
+          survey_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          completion_percentage?: number
+          completion_status?: string
+          created_at?: string
+          critical_outstanding_count?: number
+          id?: string
+          relevance_status?: string
+          section_key: string
+          sequence?: number
+          survey_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          completion_percentage?: number
+          completion_status?: string
+          created_at?: string
+          critical_outstanding_count?: number
+          id?: string
+          relevance_status?: string
+          section_key?: string
+          sequence?: number
+          survey_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "atlas_sections_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "atlas_surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      atlas_surveys: {
+        Row: {
+          access_limitations: string | null
+          acknowledged_outstanding: boolean | null
+          completed_at: string | null
+          completion_percentage: number
+          created_at: string
+          created_by: string
+          customer_email: string | null
+          customer_intent: string | null
+          customer_name: string | null
+          customer_phone: string | null
+          customer_present: boolean | null
+          final_notes: string | null
+          id: string
+          job_id: string | null
+          paused_at: string | null
+          postcode: string | null
+          project_title: string
+          project_type: string
+          property_address: string | null
+          property_occupied: boolean | null
+          relevant_trades: string[]
+          revision_number: number
+          revision_reason: string | null
+          start_route: string
+          started_at: string | null
+          status: string
+          supersedes_survey_id: string | null
+          survey_limitations: string | null
+          survey_type: string
+          surveyor_company: string | null
+          surveyor_name: string | null
+          updated_at: string
+          weather_conditions: string | null
+        }
+        Insert: {
+          access_limitations?: string | null
+          acknowledged_outstanding?: boolean | null
+          completed_at?: string | null
+          completion_percentage?: number
+          created_at?: string
+          created_by: string
+          customer_email?: string | null
+          customer_intent?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          customer_present?: boolean | null
+          final_notes?: string | null
+          id?: string
+          job_id?: string | null
+          paused_at?: string | null
+          postcode?: string | null
+          project_title: string
+          project_type: string
+          property_address?: string | null
+          property_occupied?: boolean | null
+          relevant_trades?: string[]
+          revision_number?: number
+          revision_reason?: string | null
+          start_route?: string
+          started_at?: string | null
+          status?: string
+          supersedes_survey_id?: string | null
+          survey_limitations?: string | null
+          survey_type?: string
+          surveyor_company?: string | null
+          surveyor_name?: string | null
+          updated_at?: string
+          weather_conditions?: string | null
+        }
+        Update: {
+          access_limitations?: string | null
+          acknowledged_outstanding?: boolean | null
+          completed_at?: string | null
+          completion_percentage?: number
+          created_at?: string
+          created_by?: string
+          customer_email?: string | null
+          customer_intent?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          customer_present?: boolean | null
+          final_notes?: string | null
+          id?: string
+          job_id?: string | null
+          paused_at?: string | null
+          postcode?: string | null
+          project_title?: string
+          project_type?: string
+          property_address?: string | null
+          property_occupied?: boolean | null
+          relevant_trades?: string[]
+          revision_number?: number
+          revision_reason?: string | null
+          start_route?: string
+          started_at?: string | null
+          status?: string
+          supersedes_survey_id?: string | null
+          survey_limitations?: string | null
+          survey_type?: string
+          surveyor_company?: string | null
+          surveyor_name?: string | null
+          updated_at?: string
+          weather_conditions?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "atlas_surveys_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "atlas_surveys_supersedes_survey_id_fkey"
+            columns: ["supersedes_survey_id"]
+            isOneToOne: false
+            referencedRelation: "atlas_surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chatbot_usage: {
         Row: {
           created_at: string
@@ -5150,6 +5562,10 @@ export type Database = {
       }
       user_is_job_participant: {
         Args: { _job_id: string; _user_id: string }
+        Returns: boolean
+      }
+      user_owns_atlas_survey: {
+        Args: { _survey: string; _user: string }
         Returns: boolean
       }
       user_owns_homeowner: {
