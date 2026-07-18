@@ -168,7 +168,7 @@ export default function AtlasWorkspace() {
         section_id: activeSection,
         title,
         classification,
-        response_status: classification === "risk" ? "answered" : "answered",
+        response_status: classification === "risk" ? "outstanding" : "answered",
         is_critical: classification === "risk",
         observed_by: sess.session?.user.id,
       })
