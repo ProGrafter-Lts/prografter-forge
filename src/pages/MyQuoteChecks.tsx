@@ -87,16 +87,21 @@ const MyQuoteChecks = () => {
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
-      const legacyRows: Row[] = (legacy ?? []).map((r: any) => ({
-        id: r.id,
-        reportPath: `/dashboard/quote-checks/${r.id}`,
-        title: r.project_type || "Quote Check",
-        postcode: r.postcode ?? null,
-        created_at: r.created_at,
-        status: r.status,
-        score: r.report_json?.score_addressed,
-        assessment: r.report_json?.assessment,
-      }));
+      const legacyRows: Row[] = (legacy ?? []).map((r: any) => {
+        const raw = r.report_json?.score_addressed;
+        const normalisedScore =
+          typeof raw === "number" ? Math.round((raw / 43) * 100) : undefined;
+        return {
+          id: r.id,
+          reportPath: `/dashboard/quote-checks/${r.id}`,
+          title: r.project_type || "Quote Check",
+          postcode: r.postcode ?? null,
+          created_at: r.created_at,
+          status: r.status,
+          score: normalisedScore,
+          assessment: r.report_json?.assessment,
+        };
+      });
 
       const merged = [...modularRows, ...legacyRows].sort(
         (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
