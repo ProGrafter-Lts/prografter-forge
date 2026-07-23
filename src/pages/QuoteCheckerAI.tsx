@@ -69,9 +69,10 @@ const G2 = ({ children }: any) => (
 );
 
 const VERDICT_CONFIG: Record<string, any> = {
-  WITHIN:  { bg:C.greenBg, border:C.greenBorder, text:C.green, label:"Budget looks commercially realistic", icon:"✅" },
-  BELOW:   { bg:C.amberBg, border:C.amberBorder, text:C.amber, label:"Budget looks light for this project",  icon:"🔍" },
-  ABOVE:   { bg:C.redBg,   border:C.redBorder,   text:C.red,   label:"Budget looks high for this project",  icon:"⚠️" },
+  WITHIN:  { bg:C.greenBg, border:C.greenBorder, text:C.green, label:"Your budget appears commercially realistic", icon:"✅" },
+  BELOW:   { bg:C.amberBg, border:C.amberBorder, text:C.amber, label:"Your budget appears below the expected construction cost", icon:"🔍" },
+  FAR_BELOW:{bg:C.redBg,   border:C.redBorder,   text:C.red,   label:"Your budget is unlikely to deliver this specification", icon:"⚠️" },
+  ABOVE:   { bg:C.redBg,   border:C.redBorder,   text:C.red,   label:"Your budget appears above the expected construction cost", icon:"⚠️" },
   UNKNOWN: { bg:"#F3F4F6", border:C.border,      text:C.secondary, label:"Early-stage guidance",             icon:"💡" },
 };
 
@@ -85,6 +86,12 @@ const CONF_CONFIG: Record<string, any> = {
   HIGH:   { color:C.green,     label:"High confidence" },
   MEDIUM: { color:C.amber,     label:"Medium confidence" },
   LOW:    { color:C.secondary, label:"Low confidence" },
+};
+
+const SNAPSHOT_CONFIG: Record<string, any> = {
+  TYPICAL: { color:C.green, bg:C.greenBg, border:C.greenBorder, icon:"✔", label:"Typical" },
+  REVIEW:  { color:C.amber, bg:C.amberBg, border:C.amberBorder, icon:"⚠", label:"Review" },
+  CONFIRM: { color:C.navy,  bg:C.cream,   border:C.border,      icon:"?", label:"Confirm scope" },
 };
 
 const renderText = (text: string) => {
@@ -154,13 +161,13 @@ type PackageAssessment = {
 // Extract a JSON block delimited by ```json ... ``` or a raw {..} after PACKAGES:
 const extractPackages = (text: string): PackageAssessment[] => {
   if (!text) return [];
-  const fenced = text.match(/```json\s*([\s\S]*?)```/i);
+  const fenced = text.match(/```json\s+packages\s*([\s\S]*?)```/i) || text.match(/```json\s*([\s\S]*?)```/i);
   const raw = fenced?.[1] ?? text.match(/PACKAGES_JSON:\s*(\[[\s\S]*?\])/i)?.[1];
   if (!raw) return [];
   try {
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    return parsed.filter(p => p && typeof p.name === "string").map((p: any) => ({
+    return parsed.filter(p => p && typeof p.name === "string" && typeof p.assessment === "string").map((p: any) => ({
       name: String(p.name),
       user_value: typeof p.user_value === "number" ? p.user_value : null,
       range_low: typeof p.range_low === "number" ? p.range_low : null,
@@ -169,6 +176,30 @@ const extractPackages = (text: string): PackageAssessment[] => {
       confidence: (["HIGH","MEDIUM","LOW"].includes(p.confidence) ? p.confidence : "MEDIUM") as any,
       note: typeof p.note === "string" ? p.note : undefined,
     }));
+  } catch { return []; }
+};
+
+type SnapshotItem = {
+  name: string;
+  status: "TYPICAL" | "REVIEW" | "CONFIRM";
+  reason?: string;
+};
+
+const extractSnapshot = (text: string): SnapshotItem[] => {
+  if (!text) return [];
+  const m = text.match(/```json\s+snapshot\s*([\s\S]*?)```/i);
+  if (!m) return [];
+  try {
+    const parsed = JSON.parse(m[1]);
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter((p: any) => p && typeof p.name === "string")
+      .map((p: any) => ({
+        name: String(p.name),
+        status: (["TYPICAL","REVIEW","CONFIRM"].includes(p.status) ? p.status : "REVIEW") as any,
+        reason: typeof p.reason === "string" ? p.reason : undefined,
+      }))
+      .slice(0, 8);
   } catch { return []; }
 };
 
@@ -222,23 +253,27 @@ export default function QuoteCheckerAI() {
       .filter(p => p.name && p.value !== null);
     const hasPackages = cleanedPackages.length > 0;
 
-    const systemPrompt = `You are ProGrafter Construction Intelligence — a UK construction-aware budget and package-allowance analyst for homeowners at the pre-quotation stage.
+    const systemPrompt = `You are ProGrafter Construction Intelligence — a UK construction-aware budget and package-allowance analyst for homeowners at the pre-quotation stage. Write like an experienced chartered estimator: precise, calm, commercially confident. No AI padding, no essay tone.
 
-You do NOT validate quotations. You do NOT comment on contracts, scope wording, exclusions, payment schedules, retentions, warranties or legal terms. Your job is to give a commercial reality check on the overall budget and, when supplied, on individual package allowances.
-
-The reader should finish this report thinking: "these people clearly understand construction." Be precise, calm and specific to UK regional pricing — never generic.
+You do NOT validate quotations. You do NOT comment on contracts, scope wording, exclusions, payment schedules, retentions, warranties or legal terms.
 
 Output structure — follow EXACTLY, in this order.
 
 First, on their own lines:
 RANGE_LOW: [integer GBP — low end of a realistic total project cost range in ${form.region}]
 RANGE_HIGH: [integer GBP — high end of a realistic total project cost range in ${form.region}]
-VERDICT: [BELOW / WITHIN / ABOVE / UNKNOWN — how the homeowner's expected budget sits versus the realistic range. UNKNOWN if no budget was provided.]
-BUDGET_CONFIDENCE: [HIGH / MEDIUM / LOW — how confident you are in the overall budget assessment, based on the detail supplied.]
+VERDICT: [FAR_BELOW / BELOW / WITHIN / ABOVE / UNKNOWN — how the homeowner's expected budget sits versus the realistic range. FAR_BELOW = budget under ~85% of RANGE_LOW (unlikely to deliver spec). BELOW = budget between ~85% of RANGE_LOW and RANGE_LOW. WITHIN = inside the range. ABOVE = above RANGE_HIGH. UNKNOWN if no budget was provided.]
+BUDGET_CONFIDENCE: [HIGH / MEDIUM / LOW]
 
-Then, IF AND ONLY IF the user has supplied package allowances, output a fenced JSON block of package assessments. Every package supplied MUST appear. Do not invent packages the user did not provide.
+DYNAMIC RANGE RULES — the range must narrow as more information is supplied:
+- Little detail (only trade + region + short description): allow a wider band, but never wider than ±35% around the midpoint.
+- Property type + clear scope + size clues (dimensions, storeys, m²): tighten to roughly ±20–25%.
+- Package allowances supplied OR detailed specification given: tighten to roughly ±10–15%.
+- Never return a range wider than £20,000 unless the true project cost genuinely warrants it (major new-build or full renovation over £150k). For small works, avoid sprawling ranges — commit to a tight, defensible band.
 
-\`\`\`json
+Then, IF AND ONLY IF the user has supplied package allowances, output a fenced JSON block tagged \`json packages\` with each supplied package assessed. Do not invent packages the user did not provide.
+
+\`\`\`json packages
 [
   {
     "name": "Foundations",
@@ -252,23 +287,34 @@ Then, IF AND ONLY IF the user has supplied package allowances, output a fenced J
 ]
 \`\`\`
 
-Rules for the JSON:
-- assessment ∈ {FAIR, LOW, HIGH} — FAIR = within a realistic regional range; LOW = likely under-priced; HIGH = likely over-priced.
-- confidence ∈ {HIGH, MEDIUM, LOW} — reflects how much of the input actually supports a firm conclusion for that package (scope detail, spec, size clues).
-- range_low / range_high in GBP for that single package in ${form.region}.
-- note: one short sentence — construction reasoning, no waffle.
-- If the user has NOT supplied any package allowances, omit the JSON block entirely.
+Then ALWAYS output a fenced JSON block tagged \`json snapshot\` covering 5–8 of the most material work packages for THIS project type (e.g. Foundations, Structure, Roof, Windows & Doors, Drainage, M&E, Finishes, External works). Base status on what the description reveals — this is not per-package pricing, it's a scope snapshot.
+
+\`\`\`json snapshot
+[
+  { "name": "Foundations", "status": "TYPICAL", "reason": "Standard strip footings suit the described ground." },
+  { "name": "Windows & Doors", "status": "REVIEW", "reason": "Spec not stated — glazing choice moves cost materially." },
+  { "name": "Drainage", "status": "CONFIRM", "reason": "Connection point and run length not described." }
+]
+\`\`\`
+
+Snapshot status meaning:
+- TYPICAL — no unusual risk expected for this project type.
+- REVIEW — meaningful commercial variance possible; homeowner should firm up spec.
+- CONFIRM — scope is unclear or missing; ask the builder to confirm.
 
 Then the markdown sections, in this exact order:
 
 ## ProGrafter opinion
-[3–4 sentences. Plain-English commercial verdict on the overall budget and (if provided) the package mix. Sound like a construction professional, not a chatbot.]
+[Maximum 3 short sentences. Authoritative commercial verdict on the overall budget and (if provided) the package mix. No hedging language, no repetition of the verdict label.]
+
+## Potential cost optimisation
+[Exactly 4–5 concise bullets. Do NOT promise or quantify savings. Frame opportunities under: procurement, logistics, construction sequencing, supplier selection, spec choices. End with the exact line: "The AI Quote Checker identifies these opportunities in greater detail once you upload a written quotation."]
 
 ## Biggest cost drivers
-[3–5 concise bullets — the things that most move the price for this project type in this region.]
+[3–5 concise bullets.]
 
 ## Typical missing costs
-[3–5 concise bullets — items homeowners commonly forget to budget for on this type of project.]
+[3–5 concise bullets.]
 
 ## Factors that increase cost
 [3–4 concise bullets.]
@@ -277,15 +323,14 @@ Then the markdown sections, in this exact order:
 [3–4 concise bullets.]
 
 ## What to do next
-- Clarify any package flagged LOW or HIGH before requesting final quotations.
+- Clarify any package flagged LOW, HIGH, REVIEW or CONFIRM before requesting final quotations.
 - Collect 2–3 detailed written quotations from vetted trades on a like-for-like scope.
 - When you receive a written quotation, upload it to the ProGrafter AI Quote Checker for a full professional review of scope, contract, payment terms and exclusions.
 
 Hard rules:
 - Never critique a quotation document — the user has not uploaded one.
-- Never comment on contracts, exclusions, payment terms, retentions, warranties or legal wording. That belongs to the AI Quote Checker.
+- Never comment on contracts, exclusions, payment terms, retentions, warranties or legal wording.
 - Never invent line-item pricing beyond what the user supplied.
-- If only a total budget is supplied (no package breakdown), assess only overall commercial realism and skip the JSON block.
 - Keep bullets under ~15 words. No preamble. No closing disclaimer (the UI shows one).`;
 
     const packageBlock = hasPackages
@@ -352,7 +397,7 @@ ${form.job_description}${packageBlock}`;
                 fullText += parsed.delta.text;
                 setStreaming(fullText);
 
-                const vMatch = fullText.match(/VERDICT:\s*(BELOW|WITHIN|ABOVE|UNKNOWN)/i);
+                const vMatch = fullText.match(/VERDICT:\s*(FAR_BELOW|BELOW|WITHIN|ABOVE|UNKNOWN)/i);
                 if (vMatch) setVerdict(vMatch[1].toUpperCase());
                 const loMatch = fullText.match(/RANGE_LOW:\s*([\d,]+)/i);
                 if (loMatch) setRangeLow(parseInt(loMatch[1].replace(/,/g, ""), 10));
@@ -398,15 +443,27 @@ ${form.job_description}${packageBlock}`;
   const userValue = parseMoney(form.estimated_value);
 
   const packageResults = extractPackages(displayText);
-  // Strip the JSON block for markdown rendering
+  const snapshot = extractSnapshot(displayText);
+  // Strip both fenced JSON blocks for markdown rendering
   const markdownOnly = displayText.replace(/```json[\s\S]*?```/gi, "").trim();
 
-  const opinion    = extractSection(markdownOnly, "ProGrafter opinion");
-  const drivers    = extractSection(markdownOnly, "Biggest cost drivers");
-  const missing    = extractSection(markdownOnly, "Typical missing costs");
-  const increases  = extractSection(markdownOnly, "Factors that increase cost");
-  const reductions = extractSection(markdownOnly, "Factors that reduce cost");
-  const nextSteps  = extractSection(markdownOnly, "What to do next");
+  const opinion      = extractSection(markdownOnly, "ProGrafter opinion");
+  const optimisation = extractSection(markdownOnly, "Potential cost optimisation");
+  const drivers      = extractSection(markdownOnly, "Biggest cost drivers");
+  const missing      = extractSection(markdownOnly, "Typical missing costs");
+  const increases    = extractSection(markdownOnly, "Factors that increase cost");
+  const reductions   = extractSection(markdownOnly, "Factors that reduce cost");
+  const nextSteps    = extractSection(markdownOnly, "What to do next");
+
+  // Confidence reasons — deterministic, computed from what the user actually supplied.
+  const confidenceReasons: { ok: boolean; label: string }[] = [
+    { ok: !!form.trade, label: "Project type identified" },
+    { ok: !!form.region, label: "Regional pricing applied" },
+    { ok: !!form.property_type, label: "Property type provided" },
+    { ok: form.job_description.trim().length >= 120, label: "Detailed scope described" },
+    { ok: userValue !== null, label: "Target budget supplied" },
+    { ok: packages.some(p => p.name && parseMoney(p.value) !== null), label: "Package costs supplied" },
+  ];
 
   return (
     <div style={{ minHeight:"100vh", background:C.cream, fontFamily:"'DM Sans', system-ui, sans-serif" }}>
@@ -568,7 +625,84 @@ ${form.job_description}${packageBlock}`;
                 </div>
               )}
 
-              {/* Package assessments */}
+              {/* Confidence explanation */}
+              {budgetConfidence && (
+                <div style={{ marginBottom:16, background:C.white,
+                  border:`1px solid ${C.border}`, borderRadius:12, padding:"14px 16px" }}>
+                  <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", gap:10, flexWrap:"wrap" }}>
+                    <p style={{ fontSize:11, fontWeight:700, color:C.navy,
+                      textTransform:"uppercase", letterSpacing:"0.08em", margin:0 }}>
+                      Confidence
+                    </p>
+                    <span style={{ fontSize:12, fontWeight:700,
+                      color: CONF_CONFIG[budgetConfidence]?.color ?? C.secondary,
+                      background:C.cream, border:`1px solid ${C.border}`,
+                      padding:"3px 10px", borderRadius:20 }}>
+                      {budgetConfidence === "HIGH" ? "High" : budgetConfidence === "MEDIUM" ? "Medium" : "Low"}
+                    </span>
+                  </div>
+                  <p style={{ fontSize:11, fontWeight:600, color:C.secondary,
+                    textTransform:"uppercase", letterSpacing:"0.06em", margin:"10px 0 4px" }}>
+                    Reason
+                  </p>
+                  <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"4px 14px" }}>
+                    {confidenceReasons.map((r, i) => (
+                      <div key={i} style={{ display:"flex", gap:6, alignItems:"center" }}>
+                        <span style={{ fontSize:12, fontWeight:700,
+                          color: r.ok ? C.green : C.secondary, width:14, textAlign:"center" }}>
+                          {r.ok ? "✓" : "·"}
+                        </span>
+                        <span style={{ fontSize:12,
+                          color: r.ok ? C.body : C.secondary,
+                          textDecoration: r.ok ? "none" : "none",
+                          opacity: r.ok ? 1 : 0.7 }}>
+                          {r.label}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                  <p style={{ fontSize:11, color:C.secondary, margin:"10px 0 0", lineHeight:1.55 }}>
+                    Confidence rises as you add scope detail, dimensions and package allowances.
+                  </p>
+                </div>
+              )}
+
+              {/* Package Snapshot */}
+              {snapshot.length > 0 && (
+                <div style={{ marginBottom:18, background:C.white,
+                  border:`1px solid ${C.border}`, borderRadius:12, padding:"14px 16px" }}>
+                  <p style={{ fontSize:11, fontWeight:700, color:C.navy,
+                    textTransform:"uppercase", letterSpacing:"0.08em", margin:"0 0 4px" }}>
+                    Package snapshot
+                  </p>
+                  <p style={{ fontSize:11, color:C.secondary, margin:"0 0 10px" }}>
+                    Scope-level view of the main work packages. Expand for reasoning.
+                  </p>
+                  <div style={{ display:"flex", flexDirection:"column" }}>
+                    {snapshot.map((s, i) => {
+                      const cfg = SNAPSHOT_CONFIG[s.status] || SNAPSHOT_CONFIG.REVIEW;
+                      return (
+                        <Expandable key={i} title={
+                          <span style={{ display:"inline-flex", alignItems:"center", gap:10 }}>
+                            <span style={{ fontSize:13, fontWeight:600, color:C.deep }}>{s.name}</span>
+                            <span style={{ fontSize:11, fontWeight:700, color:cfg.color,
+                              background:cfg.bg, border:`1px solid ${cfg.border}`,
+                              padding:"2px 8px", borderRadius:20 }}>
+                              {cfg.icon} {cfg.label}
+                            </span>
+                          </span>
+                        }>
+                          <p style={{ fontSize:12, color:C.body, lineHeight:1.6, margin:0 }}>
+                            {s.reason || "No further detail supplied — request scope confirmation from the builder."}
+                          </p>
+                        </Expandable>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Package assessments (only when user supplied their own allowances) */}
               {packageResults.length > 0 && (
                 <div style={{ marginBottom:18 }}>
                   <p style={{ fontSize:11, fontWeight:600, color:C.secondary,
@@ -619,6 +753,21 @@ ${form.job_description}${packageBlock}`;
                       );
                     })}
                   </div>
+                </div>
+              )}
+
+              {/* Potential cost optimisation */}
+              {optimisation && (
+                <div style={{ marginBottom:16, background:C.tealDim,
+                  border:`1px solid ${C.tealLight}`, borderRadius:12, padding:"14px 16px" }}>
+                  <p style={{ fontSize:11, fontWeight:700, color:C.navy,
+                    textTransform:"uppercase", letterSpacing:"0.08em", margin:"0 0 4px" }}>
+                    Potential cost optimisation
+                  </p>
+                  <p style={{ fontSize:11, color:C.secondary, margin:"0 0 8px" }}>
+                    Opportunities may exist — no savings are guaranteed.
+                  </p>
+                  <div>{renderText(optimisation)}</div>
                 </div>
               )}
 
