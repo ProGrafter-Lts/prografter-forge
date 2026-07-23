@@ -69,9 +69,10 @@ const G2 = ({ children }: any) => (
 );
 
 const VERDICT_CONFIG: Record<string, any> = {
-  WITHIN:  { bg:C.greenBg, border:C.greenBorder, text:C.green, label:"Budget looks commercially realistic", icon:"✅" },
-  BELOW:   { bg:C.amberBg, border:C.amberBorder, text:C.amber, label:"Budget looks light for this project",  icon:"🔍" },
-  ABOVE:   { bg:C.redBg,   border:C.redBorder,   text:C.red,   label:"Budget looks high for this project",  icon:"⚠️" },
+  WITHIN:  { bg:C.greenBg, border:C.greenBorder, text:C.green, label:"Your budget appears commercially realistic", icon:"✅" },
+  BELOW:   { bg:C.amberBg, border:C.amberBorder, text:C.amber, label:"Your budget appears below the expected construction cost", icon:"🔍" },
+  FAR_BELOW:{bg:C.redBg,   border:C.redBorder,   text:C.red,   label:"Your budget is unlikely to deliver this specification", icon:"⚠️" },
+  ABOVE:   { bg:C.redBg,   border:C.redBorder,   text:C.red,   label:"Your budget appears above the expected construction cost", icon:"⚠️" },
   UNKNOWN: { bg:"#F3F4F6", border:C.border,      text:C.secondary, label:"Early-stage guidance",             icon:"💡" },
 };
 
@@ -85,6 +86,12 @@ const CONF_CONFIG: Record<string, any> = {
   HIGH:   { color:C.green,     label:"High confidence" },
   MEDIUM: { color:C.amber,     label:"Medium confidence" },
   LOW:    { color:C.secondary, label:"Low confidence" },
+};
+
+const SNAPSHOT_CONFIG: Record<string, any> = {
+  TYPICAL: { color:C.green, bg:C.greenBg, border:C.greenBorder, icon:"✔", label:"Typical" },
+  REVIEW:  { color:C.amber, bg:C.amberBg, border:C.amberBorder, icon:"⚠", label:"Review" },
+  CONFIRM: { color:C.navy,  bg:C.cream,   border:C.border,      icon:"?", label:"Confirm scope" },
 };
 
 const renderText = (text: string) => {
