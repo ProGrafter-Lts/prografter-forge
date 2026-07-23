@@ -443,15 +443,27 @@ ${form.job_description}${packageBlock}`;
   const userValue = parseMoney(form.estimated_value);
 
   const packageResults = extractPackages(displayText);
-  // Strip the JSON block for markdown rendering
+  const snapshot = extractSnapshot(displayText);
+  // Strip both fenced JSON blocks for markdown rendering
   const markdownOnly = displayText.replace(/```json[\s\S]*?```/gi, "").trim();
 
-  const opinion    = extractSection(markdownOnly, "ProGrafter opinion");
-  const drivers    = extractSection(markdownOnly, "Biggest cost drivers");
-  const missing    = extractSection(markdownOnly, "Typical missing costs");
-  const increases  = extractSection(markdownOnly, "Factors that increase cost");
-  const reductions = extractSection(markdownOnly, "Factors that reduce cost");
-  const nextSteps  = extractSection(markdownOnly, "What to do next");
+  const opinion      = extractSection(markdownOnly, "ProGrafter opinion");
+  const optimisation = extractSection(markdownOnly, "Potential cost optimisation");
+  const drivers      = extractSection(markdownOnly, "Biggest cost drivers");
+  const missing      = extractSection(markdownOnly, "Typical missing costs");
+  const increases    = extractSection(markdownOnly, "Factors that increase cost");
+  const reductions   = extractSection(markdownOnly, "Factors that reduce cost");
+  const nextSteps    = extractSection(markdownOnly, "What to do next");
+
+  // Confidence reasons — deterministic, computed from what the user actually supplied.
+  const confidenceReasons: { ok: boolean; label: string }[] = [
+    { ok: !!form.trade, label: "Project type identified" },
+    { ok: !!form.region, label: "Regional pricing applied" },
+    { ok: !!form.property_type, label: "Property type provided" },
+    { ok: form.job_description.trim().length >= 120, label: "Detailed scope described" },
+    { ok: userValue !== null, label: "Target budget supplied" },
+    { ok: packages.some(p => p.name && parseMoney(p.value) !== null), label: "Package costs supplied" },
+  ];
 
   return (
     <div style={{ minHeight:"100vh", background:C.cream, fontFamily:"'DM Sans', system-ui, sans-serif" }}>
