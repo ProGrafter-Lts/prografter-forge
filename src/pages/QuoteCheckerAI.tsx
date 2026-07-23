@@ -625,7 +625,84 @@ ${form.job_description}${packageBlock}`;
                 </div>
               )}
 
-              {/* Package assessments */}
+              {/* Confidence explanation */}
+              {budgetConfidence && (
+                <div style={{ marginBottom:16, background:C.white,
+                  border:`1px solid ${C.border}`, borderRadius:12, padding:"14px 16px" }}>
+                  <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", gap:10, flexWrap:"wrap" }}>
+                    <p style={{ fontSize:11, fontWeight:700, color:C.navy,
+                      textTransform:"uppercase", letterSpacing:"0.08em", margin:0 }}>
+                      Confidence
+                    </p>
+                    <span style={{ fontSize:12, fontWeight:700,
+                      color: CONF_CONFIG[budgetConfidence]?.color ?? C.secondary,
+                      background:C.cream, border:`1px solid ${C.border}`,
+                      padding:"3px 10px", borderRadius:20 }}>
+                      {budgetConfidence === "HIGH" ? "High" : budgetConfidence === "MEDIUM" ? "Medium" : "Low"}
+                    </span>
+                  </div>
+                  <p style={{ fontSize:11, fontWeight:600, color:C.secondary,
+                    textTransform:"uppercase", letterSpacing:"0.06em", margin:"10px 0 4px" }}>
+                    Reason
+                  </p>
+                  <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"4px 14px" }}>
+                    {confidenceReasons.map((r, i) => (
+                      <div key={i} style={{ display:"flex", gap:6, alignItems:"center" }}>
+                        <span style={{ fontSize:12, fontWeight:700,
+                          color: r.ok ? C.green : C.secondary, width:14, textAlign:"center" }}>
+                          {r.ok ? "✓" : "·"}
+                        </span>
+                        <span style={{ fontSize:12,
+                          color: r.ok ? C.body : C.secondary,
+                          textDecoration: r.ok ? "none" : "none",
+                          opacity: r.ok ? 1 : 0.7 }}>
+                          {r.label}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                  <p style={{ fontSize:11, color:C.secondary, margin:"10px 0 0", lineHeight:1.55 }}>
+                    Confidence rises as you add scope detail, dimensions and package allowances.
+                  </p>
+                </div>
+              )}
+
+              {/* Package Snapshot */}
+              {snapshot.length > 0 && (
+                <div style={{ marginBottom:18, background:C.white,
+                  border:`1px solid ${C.border}`, borderRadius:12, padding:"14px 16px" }}>
+                  <p style={{ fontSize:11, fontWeight:700, color:C.navy,
+                    textTransform:"uppercase", letterSpacing:"0.08em", margin:"0 0 4px" }}>
+                    Package snapshot
+                  </p>
+                  <p style={{ fontSize:11, color:C.secondary, margin:"0 0 10px" }}>
+                    Scope-level view of the main work packages. Expand for reasoning.
+                  </p>
+                  <div style={{ display:"flex", flexDirection:"column" }}>
+                    {snapshot.map((s, i) => {
+                      const cfg = SNAPSHOT_CONFIG[s.status] || SNAPSHOT_CONFIG.REVIEW;
+                      return (
+                        <Expandable key={i} title={
+                          <span style={{ display:"inline-flex", alignItems:"center", gap:10 }}>
+                            <span style={{ fontSize:13, fontWeight:600, color:C.deep }}>{s.name}</span>
+                            <span style={{ fontSize:11, fontWeight:700, color:cfg.color,
+                              background:cfg.bg, border:`1px solid ${cfg.border}`,
+                              padding:"2px 8px", borderRadius:20 }}>
+                              {cfg.icon} {cfg.label}
+                            </span>
+                          </span>
+                        }>
+                          <p style={{ fontSize:12, color:C.body, lineHeight:1.6, margin:0 }}>
+                            {s.reason || "No further detail supplied — request scope confirmation from the builder."}
+                          </p>
+                        </Expandable>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Package assessments (only when user supplied their own allowances) */}
               {packageResults.length > 0 && (
                 <div style={{ marginBottom:18 }}>
                   <p style={{ fontSize:11, fontWeight:600, color:C.secondary,
@@ -676,6 +753,21 @@ ${form.job_description}${packageBlock}`;
                       );
                     })}
                   </div>
+                </div>
+              )}
+
+              {/* Potential cost optimisation */}
+              {optimisation && (
+                <div style={{ marginBottom:16, background:C.tealDim,
+                  border:`1px solid ${C.tealLight}`, borderRadius:12, padding:"14px 16px" }}>
+                  <p style={{ fontSize:11, fontWeight:700, color:C.navy,
+                    textTransform:"uppercase", letterSpacing:"0.08em", margin:"0 0 4px" }}>
+                    Potential cost optimisation
+                  </p>
+                  <p style={{ fontSize:11, color:C.secondary, margin:"0 0 8px" }}>
+                    Opportunities may exist — no savings are guaranteed.
+                  </p>
+                  <div>{renderText(optimisation)}</div>
                 </div>
               )}
 
