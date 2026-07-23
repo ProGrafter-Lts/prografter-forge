@@ -39,6 +39,12 @@ const REGIONS = [
   "South East","London","South West","East of England","Wales","Scotland",
 ];
 
+const COMMON_PACKAGES = [
+  "Foundations","Drainage","Substructure","Structure / frame","External walls","Roof",
+  "Windows & Doors","Insulation","Plastering","Electrics","Plumbing","Heating",
+  "Kitchen","Bathroom","Flooring","Decoration","Landscaping","Scaffolding","Waste / skip",
+];
+
 const inp = (err?: boolean): React.CSSProperties => ({
   width:"100%", padding:"10px 12px", borderRadius:8,
   border:`1.5px solid ${err ? C.error : C.border}`,
@@ -63,10 +69,22 @@ const G2 = ({ children }: any) => (
 );
 
 const VERDICT_CONFIG: Record<string, any> = {
-  WITHIN:  { bg:C.greenBg, border:C.greenBorder, text:C.green, label:"Within typical range", icon:"✅" },
-  BELOW:   { bg:C.amberBg, border:C.amberBorder, text:C.amber, label:"Below typical range",  icon:"🔍" },
-  ABOVE:   { bg:C.redBg,   border:C.redBorder,   text:C.red,   label:"Above typical range",  icon:"⚠️" },
-  UNKNOWN: { bg:"#F3F4F6", border:C.border,      text:C.secondary, label:"Guidance only",    icon:"💡" },
+  WITHIN:  { bg:C.greenBg, border:C.greenBorder, text:C.green, label:"Budget looks commercially realistic", icon:"✅" },
+  BELOW:   { bg:C.amberBg, border:C.amberBorder, text:C.amber, label:"Budget looks light for this project",  icon:"🔍" },
+  ABOVE:   { bg:C.redBg,   border:C.redBorder,   text:C.red,   label:"Budget looks high for this project",  icon:"⚠️" },
+  UNKNOWN: { bg:"#F3F4F6", border:C.border,      text:C.secondary, label:"Early-stage guidance",             icon:"💡" },
+};
+
+const ASSESS_CONFIG: Record<string, any> = {
+  FAIR: { color:C.green, bg:C.greenBg, border:C.greenBorder, icon:"✔", label:"Fair" },
+  LOW:  { color:C.amber, bg:C.amberBg, border:C.amberBorder, icon:"⚠", label:"Low" },
+  HIGH: { color:C.red,   bg:C.redBg,   border:C.redBorder,   icon:"⚠", label:"High" },
+};
+
+const CONF_CONFIG: Record<string, any> = {
+  HIGH:   { color:C.green,     label:"High confidence" },
+  MEDIUM: { color:C.amber,     label:"Medium confidence" },
+  LOW:    { color:C.secondary, label:"Low confidence" },
 };
 
 const renderText = (text: string) => {
@@ -86,7 +104,6 @@ const renderText = (text: string) => {
   });
 };
 
-// Extract a labelled section (## Heading … up to next ## or end) from AI markdown.
 const extractSection = (text: string, heading: string): string => {
   if (!text) return "";
   const re = new RegExp(`##\\s*${heading}\\s*\\n([\\s\\S]*?)(?=\\n##\\s|$)`, "i");
@@ -122,11 +139,45 @@ const parseMoney = (v: string): number | null => {
 const formatMoney = (n: number) =>
   n >= 1000 ? `£${Math.round(n).toLocaleString()}` : `£${Math.round(n)}`;
 
+type PackageRow = { name: string; value: string };
+
+type PackageAssessment = {
+  name: string;
+  user_value: number | null;
+  range_low: number | null;
+  range_high: number | null;
+  assessment: "FAIR" | "LOW" | "HIGH";
+  confidence: "HIGH" | "MEDIUM" | "LOW";
+  note?: string;
+};
+
+// Extract a JSON block delimited by ```json ... ``` or a raw {..} after PACKAGES:
+const extractPackages = (text: string): PackageAssessment[] => {
+  if (!text) return [];
+  const fenced = text.match(/```json\s*([\s\S]*?)```/i);
+  const raw = fenced?.[1] ?? text.match(/PACKAGES_JSON:\s*(\[[\s\S]*?\])/i)?.[1];
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(p => p && typeof p.name === "string").map((p: any) => ({
+      name: String(p.name),
+      user_value: typeof p.user_value === "number" ? p.user_value : null,
+      range_low: typeof p.range_low === "number" ? p.range_low : null,
+      range_high: typeof p.range_high === "number" ? p.range_high : null,
+      assessment: (["FAIR","LOW","HIGH"].includes(p.assessment) ? p.assessment : "FAIR") as any,
+      confidence: (["HIGH","MEDIUM","LOW"].includes(p.confidence) ? p.confidence : "MEDIUM") as any,
+      note: typeof p.note === "string" ? p.note : undefined,
+    }));
+  } catch { return []; }
+};
+
 export default function QuoteCheckerAI() {
   const [form, setForm] = useState({
     trade:"", region:"East Midlands", property_type:"",
     job_description:"", estimated_value:"",
   });
+  const [packages, setPackages] = useState<PackageRow[]>([]);
   const [errors, setErrors] = useState<Record<string,string>>({});
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
@@ -134,8 +185,15 @@ export default function QuoteCheckerAI() {
   const [verdict, setVerdict] = useState<string | null>(null);
   const [rangeLow, setRangeLow] = useState<number | null>(null);
   const [rangeHigh, setRangeHigh] = useState<number | null>(null);
+  const [budgetConfidence, setBudgetConfidence] = useState<string | null>(null);
 
   const upd = (k: string) => (e: any) => setForm(p => ({ ...p, [k]: e.target.value }));
+
+  const addPackage = () => setPackages(p => [...p, { name: "", value: "" }]);
+  const updPackage = (i: number, k: keyof PackageRow, v: string) =>
+    setPackages(p => p.map((row, idx) => idx === i ? { ...row, [k]: v } : row));
+  const removePackage = (i: number) =>
+    setPackages(p => p.filter((_, idx) => idx !== i));
 
   const validate = () => {
     const e: Record<string,string> = {};
@@ -156,54 +214,93 @@ export default function QuoteCheckerAI() {
     setVerdict(null);
     setRangeLow(null);
     setRangeHigh(null);
+    setBudgetConfidence(null);
 
     const userValue = parseMoney(form.estimated_value);
+    const cleanedPackages = packages
+      .map(p => ({ name: p.name.trim(), value: parseMoney(p.value) }))
+      .filter(p => p.name && p.value !== null);
+    const hasPackages = cleanedPackages.length > 0;
 
-    const systemPrompt = `You are ProGrafter's Project Cost Guide — an early-stage budgeting and education tool for UK homeowners. You are NOT a quote validator. You do NOT analyse line items, packages, or scrutinise a specific quotation. Your job is to give a fast, plain-English budget orientation before the homeowner collects real quotes.
+    const systemPrompt = `You are ProGrafter Construction Intelligence — a UK construction-aware budget and package-allowance analyst for homeowners at the pre-quotation stage.
 
-Homeowners must be able to read your output in under 60 seconds.
+You do NOT validate quotations. You do NOT comment on contracts, scope wording, exclusions, payment schedules, retentions, warranties or legal terms. Your job is to give a commercial reality check on the overall budget and, when supplied, on individual package allowances.
 
-Output structure — follow EXACTLY, in this order, using these headings:
+The reader should finish this report thinking: "these people clearly understand construction." Be precise, calm and specific to UK regional pricing — never generic.
 
-RANGE_LOW: [integer GBP, low end of typical UK cost range for this project in ${form.region}]
-RANGE_HIGH: [integer GBP, high end of typical UK cost range for this project in ${form.region}]
-VERDICT: [one of: BELOW / WITHIN / ABOVE / UNKNOWN — how the homeowner's estimated value sits versus the range. Use UNKNOWN if they didn't provide a value.]
+Output structure — follow EXACTLY, in this order.
 
-## Cost range summary
-[2 short sentences. State the typical range and, if the user gave an estimated value, say plainly whether it sits below, within, or above the range and by roughly how much.]
+First, on their own lines:
+RANGE_LOW: [integer GBP — low end of a realistic total project cost range in ${form.region}]
+RANGE_HIGH: [integer GBP — high end of a realistic total project cost range in ${form.region}]
+VERDICT: [BELOW / WITHIN / ABOVE / UNKNOWN — how the homeowner's expected budget sits versus the realistic range. UNKNOWN if no budget was provided.]
+BUDGET_CONFIDENCE: [HIGH / MEDIUM / LOW — how confident you are in the overall budget assessment, based on the detail supplied.]
+
+Then, IF AND ONLY IF the user has supplied package allowances, output a fenced JSON block of package assessments. Every package supplied MUST appear. Do not invent packages the user did not provide.
+
+\`\`\`json
+[
+  {
+    "name": "Foundations",
+    "user_value": 12000,
+    "range_low": 9000,
+    "range_high": 15000,
+    "assessment": "FAIR",
+    "confidence": "MEDIUM",
+    "note": "Reasonable for a standard strip foundation on this footprint; assumes no ground complications."
+  }
+]
+\`\`\`
+
+Rules for the JSON:
+- assessment ∈ {FAIR, LOW, HIGH} — FAIR = within a realistic regional range; LOW = likely under-priced; HIGH = likely over-priced.
+- confidence ∈ {HIGH, MEDIUM, LOW} — reflects how much of the input actually supports a firm conclusion for that package (scope detail, spec, size clues).
+- range_low / range_high in GBP for that single package in ${form.region}.
+- note: one short sentence — construction reasoning, no waffle.
+- If the user has NOT supplied any package allowances, omit the JSON block entirely.
+
+Then the markdown sections, in this exact order:
+
+## ProGrafter opinion
+[3–4 sentences. Plain-English commercial verdict on the overall budget and (if provided) the package mix. Sound like a construction professional, not a chatbot.]
 
 ## Biggest cost drivers
-[3–5 short bullets — the things that most move the price for this type of project.]
+[3–5 concise bullets — the things that most move the price for this project type in this region.]
 
 ## Typical missing costs
-[3–5 short bullets — items homeowners commonly forget to budget for.]
+[3–5 concise bullets — items homeowners commonly forget to budget for on this type of project.]
 
 ## Factors that increase cost
-[3–4 short bullets.]
+[3–4 concise bullets.]
 
 ## Factors that reduce cost
-[3–4 short bullets.]
+[3–4 concise bullets.]
 
 ## What to do next
-- Collect 2–3 detailed quotations from vetted trades.
-- Compare them like-for-like on scope, spec and inclusions.
-- When you receive a written quotation, upload it to the ProGrafter AI Quote Checker for a full professional review.
+- Clarify any package flagged LOW or HIGH before requesting final quotations.
+- Collect 2–3 detailed written quotations from vetted trades on a like-for-like scope.
+- When you receive a written quotation, upload it to the ProGrafter AI Quote Checker for a full professional review of scope, contract, payment terms and exclusions.
 
-Rules:
-- Keep every bullet under ~15 words.
-- Do NOT invent line-item pricing.
-- Do NOT critique a specific quote — the user has not provided one.
-- No preamble, no closing paragraph, no disclaimers (the UI already shows them).`;
+Hard rules:
+- Never critique a quotation document — the user has not uploaded one.
+- Never comment on contracts, exclusions, payment terms, retentions, warranties or legal wording. That belongs to the AI Quote Checker.
+- Never invent line-item pricing beyond what the user supplied.
+- If only a total budget is supplied (no package breakdown), assess only overall commercial realism and skip the JSON block.
+- Keep bullets under ~15 words. No preamble. No closing disclaimer (the UI shows one).`;
 
-    const userMessage = `Give an early-stage cost guide for this project:
+    const packageBlock = hasPackages
+      ? `\n\nPackage allowances supplied by the homeowner (assess each one):\n${cleanedPackages.map(p => `- ${p.name}: £${p.value!.toLocaleString()}`).join("\n")}`
+      : `\n\nThe homeowner has NOT supplied a package breakdown — assess overall budget realism only and omit the JSON block.`;
 
-Trade: ${form.trade}
+    const userMessage = `Give a construction-intelligence budget assessment for this project:
+
+Trade / lead discipline: ${form.trade}
 Region: ${form.region}
 Property type: ${form.property_type || "Not specified"}
-Homeowner's estimated / target project value: ${userValue ? `£${userValue.toLocaleString()}` : "Not provided"}
+Homeowner's expected budget: ${userValue ? `£${userValue.toLocaleString()}` : "Not provided"}
 
 Project description:
-${form.job_description}`;
+${form.job_description}${packageBlock}`;
 
     try {
       const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
@@ -211,7 +308,7 @@ ${form.job_description}`;
 
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.access_token) {
-        throw new Error("Please sign in to use the Project Cost Guide.");
+        throw new Error("Please sign in to use the Quote Clarity Score.");
       }
 
       const response = await fetch(
@@ -230,7 +327,7 @@ ${form.job_description}`;
         },
       );
       if (response.status === 401) {
-        throw new Error("Please sign in to use the Project Cost Guide.");
+        throw new Error("Please sign in to use the Quote Clarity Score.");
       }
       if (!response.ok || !response.body) {
         throw new Error(`Proxy error ${response.status}`);
@@ -261,6 +358,8 @@ ${form.job_description}`;
                 if (loMatch) setRangeLow(parseInt(loMatch[1].replace(/,/g, ""), 10));
                 const hiMatch = fullText.match(/RANGE_HIGH:\s*([\d,]+)/i);
                 if (hiMatch) setRangeHigh(parseInt(hiMatch[1].replace(/,/g, ""), 10));
+                const bcMatch = fullText.match(/BUDGET_CONFIDENCE:\s*(HIGH|MEDIUM|LOW)/i);
+                if (bcMatch) setBudgetConfidence(bcMatch[1].toUpperCase());
               }
             } catch {}
           }
@@ -271,12 +370,13 @@ ${form.job_description}`;
         .replace(/^RANGE_LOW:.*\n?/mi, "")
         .replace(/^RANGE_HIGH:.*\n?/mi, "")
         .replace(/^VERDICT:.*\n?/mi, "")
+        .replace(/^BUDGET_CONFIDENCE:.*\n?/mi, "")
         .trim();
       setResult(cleaned);
       setStreaming("");
-      trackEvent("quote_check", { method: "cost_guide" });
+      trackEvent("quote_check", { method: "clarity_score" });
     } catch (err) {
-      setResult("Unable to generate a cost guide right now. Please try again in a moment.");
+      setResult("Unable to generate an assessment right now. Please try again in a moment.");
       setVerdict("UNKNOWN");
     } finally {
       setLoading(false);
@@ -289,6 +389,7 @@ ${form.job_description}`;
     setVerdict(null);
     setRangeLow(null);
     setRangeHigh(null);
+    setBudgetConfidence(null);
     setErrors({});
   };
 
@@ -296,13 +397,16 @@ ${form.job_description}`;
   const displayText = result || streaming;
   const userValue = parseMoney(form.estimated_value);
 
-  // Extract sections for the streamlined always-open view + expandables.
-  const summary       = extractSection(displayText, "Cost range summary");
-  const drivers       = extractSection(displayText, "Biggest cost drivers");
-  const missing       = extractSection(displayText, "Typical missing costs");
-  const increases     = extractSection(displayText, "Factors that increase cost");
-  const reductions    = extractSection(displayText, "Factors that reduce cost");
-  const nextSteps     = extractSection(displayText, "What to do next");
+  const packageResults = extractPackages(displayText);
+  // Strip the JSON block for markdown rendering
+  const markdownOnly = displayText.replace(/```json[\s\S]*?```/gi, "").trim();
+
+  const opinion    = extractSection(markdownOnly, "ProGrafter opinion");
+  const drivers    = extractSection(markdownOnly, "Biggest cost drivers");
+  const missing    = extractSection(markdownOnly, "Typical missing costs");
+  const increases  = extractSection(markdownOnly, "Factors that increase cost");
+  const reductions = extractSection(markdownOnly, "Factors that reduce cost");
+  const nextSteps  = extractSection(markdownOnly, "What to do next");
 
   return (
     <div style={{ minHeight:"100vh", background:C.cream, fontFamily:"'DM Sans', system-ui, sans-serif" }}>
@@ -319,10 +423,10 @@ ${form.job_description}`;
             background:`linear-gradient(135deg, ${C.teal}, ${C.tealHover})`,
             padding:"4px 11px", borderRadius:20, fontWeight:700, letterSpacing:"0.05em",
             boxShadow:"0 2px 10px rgba(20,168,161,0.4)" }}>
-            EARLY BUDGETING
+            CONSTRUCTION INTELLIGENCE
           </span>
           <span style={{ fontSize:12, color:"rgba(245,240,232,0.55)", letterSpacing:"0.06em" }}>
-            PROJECT COST GUIDE
+            QUOTE CLARITY SCORE
           </span>
         </div>
       </div>
@@ -343,22 +447,22 @@ ${form.job_description}`;
             border:"1px solid rgba(20,168,161,0.4)",
             padding:"5px 14px", borderRadius:20, letterSpacing:"0.12em",
             marginBottom:18 }}>
-            FREE EARLY-STAGE GUIDANCE
+            FREE BUDGET & PACKAGE ASSESSMENT
           </span>
           <h1 className="font-heading" style={{ fontSize:48, color:C.white,
             margin:"0 0 14px", letterSpacing:"0.01em", lineHeight:1.05 }}>
-            What could your{" "}
+            Is your budget{" "}
             <span style={{ background:`linear-gradient(135deg, ${C.tealHover}, ${C.tealLight})`,
               WebkitBackgroundClip:"text", backgroundClip:"text",
-              WebkitTextFillColor:"transparent" }}>project cost?</span>
+              WebkitTextFillColor:"transparent" }}>commercially realistic?</span>
           </h1>
-          <p style={{ fontSize:15, color:"rgba(245,240,232,0.82)", maxWidth:500,
+          <p style={{ fontSize:15, color:"rgba(245,240,232,0.82)", maxWidth:520,
             margin:"0 auto", lineHeight:1.7 }}>
-            A 60-second budget orientation before you start collecting quotes — typical cost range,
-            biggest cost drivers, and what to do next. Not a quote review.
+            A construction-aware review of your overall budget — and, if you supply them, each
+            package allowance — benchmarked against typical UK regional pricing.
           </p>
           <div style={{ display:"flex", justifyContent:"center", gap:10, marginTop:22, flexWrap:"wrap" }}>
-            {["Typical cost range","Cost drivers","Missing-cost prompts","What to do next"].map(t=>(
+            {["Package-by-package check","Regional ranges","Commercial opinion","Confidence indicators"].map(t=>(
               <span key={t} style={{ fontSize:12, color:C.white, fontWeight:500,
                 background:"rgba(255,255,255,0.08)", border:"1px solid rgba(255,255,255,0.14)",
                 padding:"6px 12px", borderRadius:20 }}>{t}</span>
@@ -367,14 +471,15 @@ ${form.job_description}`;
         </div>
       </div>
 
-      <div style={{ maxWidth:700, margin:"-4rem auto 0", padding:"0 1rem 2rem", position:"relative", zIndex:1 }}>
+      <div style={{ maxWidth:760, margin:"-4rem auto 0", padding:"0 1rem 2rem", position:"relative", zIndex:1 }}>
 
         <div style={{ marginBottom:20 }}>
           <div style={{ background:C.amberBg, border:`1px solid ${C.amberBorder}`,
             borderRadius:12, padding:"12px 14px", marginBottom:14 }}>
             <p style={{ fontSize:12, color:C.body, lineHeight:1.6, margin:0 }}>
-              Early-stage guidance only. Not a quote, valuation or survey. Costs vary with drawings,
-              specification, access, site conditions, region, finishes and contractor availability.
+              This is a budget and package-allowance assessment — not a quotation review. It does not
+              comment on scope, contracts, payment terms, exclusions or legal wording.
+              For that, use the AI Quote Checker once you have a written quotation.
             </p>
           </div>
           <p style={{ fontSize:12, color:C.secondary, textAlign:"center" }}>
@@ -394,7 +499,7 @@ ${form.job_description}`;
             {vc && (
               <div style={{ background:vc.bg, borderBottom:`1px solid ${vc.border}`,
                 padding:"14px 20px", display:"flex", alignItems:"center",
-                justifyContent:"space-between", gap:12 }}>
+                justifyContent:"space-between", gap:12, flexWrap:"wrap" }}>
                 <div style={{ display:"flex", alignItems:"center", gap:10 }}>
                   <span style={{ fontSize:24 }}>{vc.icon}</span>
                   <div>
@@ -403,6 +508,7 @@ ${form.job_description}`;
                     </p>
                     <p style={{ fontSize:11, color:vc.text, margin:"2px 0 0", opacity:0.8 }}>
                       {form.trade} · {form.region}
+                      {budgetConfidence ? ` · ${CONF_CONFIG[budgetConfidence]?.label ?? ""}` : ""}
                     </p>
                   </div>
                 </div>
@@ -413,14 +519,14 @@ ${form.job_description}`;
                   <div style={{ fontSize:10, color:vc.text, background:C.white,
                     padding:"3px 8px", borderRadius:20, fontWeight:600,
                     border:`1px solid ${vc.border}`, opacity:0.8 }}>
-                    ProGrafter AI
+                    ProGrafter Intelligence
                   </div>
                 </div>
               </div>
             )}
 
             <div style={{ padding:"20px 24px" }}>
-              {/* Headline range card */}
+              {/* Budget headline */}
               {(rangeLow !== null || rangeHigh !== null) && (
                 <div style={{ background:C.cream, border:`1px solid ${C.border}`,
                   borderRadius:12, padding:"14px 16px", marginBottom:16,
@@ -428,7 +534,7 @@ ${form.job_description}`;
                   <div>
                     <p style={{ fontSize:11, fontWeight:600, color:C.secondary,
                       textTransform:"uppercase", letterSpacing:"0.06em", margin:"0 0 4px" }}>
-                      Estimated project cost range
+                      Realistic project range
                     </p>
                     <p className="font-heading" style={{ fontSize:22, color:C.deep, margin:0 }}>
                       {rangeLow !== null ? formatMoney(rangeLow) : "—"}
@@ -440,7 +546,7 @@ ${form.job_description}`;
                     <div>
                       <p style={{ fontSize:11, fontWeight:600, color:C.secondary,
                         textTransform:"uppercase", letterSpacing:"0.06em", margin:"0 0 4px" }}>
-                        Your estimated value
+                        Your expected budget
                       </p>
                       <p className="font-heading" style={{ fontSize:22, color:C.deep, margin:0 }}>
                         {formatMoney(userValue)}
@@ -450,19 +556,75 @@ ${form.job_description}`;
                 </div>
               )}
 
-              {/* Streamlined always-visible summary + next steps */}
-              {summary && (
-                <div style={{ marginBottom:6 }}>
-                  <p style={{ fontSize:14, fontWeight:700, color:C.deep, margin:"0 0 6px" }}>
-                    Summary
+              {/* ProGrafter opinion */}
+              {opinion && (
+                <div style={{ marginBottom:16, background:C.tealDim,
+                  border:`1px solid ${C.tealLight}`, borderRadius:12, padding:"14px 16px" }}>
+                  <p style={{ fontSize:11, fontWeight:700, color:C.navy,
+                    textTransform:"uppercase", letterSpacing:"0.08em", margin:"0 0 6px" }}>
+                    ProGrafter opinion
                   </p>
-                  <div>{renderText(summary)}</div>
+                  <div>{renderText(opinion)}</div>
+                </div>
+              )}
+
+              {/* Package assessments */}
+              {packageResults.length > 0 && (
+                <div style={{ marginBottom:18 }}>
+                  <p style={{ fontSize:11, fontWeight:600, color:C.secondary,
+                    textTransform:"uppercase", letterSpacing:"0.07em", margin:"0 0 8px" }}>
+                    Package-by-package assessment
+                  </p>
+                  <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+                    {packageResults.map((p, i) => {
+                      const a = ASSESS_CONFIG[p.assessment] || ASSESS_CONFIG.FAIR;
+                      const c = CONF_CONFIG[p.confidence] || CONF_CONFIG.MEDIUM;
+                      return (
+                        <div key={i} style={{ background:C.white, border:`1px solid ${C.border}`,
+                          borderRadius:10, padding:"12px 14px" }}>
+                          <div style={{ display:"flex", justifyContent:"space-between",
+                            alignItems:"flex-start", gap:12, flexWrap:"wrap" }}>
+                            <div style={{ minWidth:0, flex:"1 1 200px" }}>
+                              <p style={{ fontSize:14, fontWeight:700, color:C.deep, margin:0 }}>
+                                {p.name}
+                              </p>
+                              <p style={{ fontSize:12, color:C.secondary, margin:"3px 0 0" }}>
+                                {p.user_value !== null ? formatMoney(p.user_value) : "—"}
+                                {" · typical "}
+                                {p.range_low !== null ? formatMoney(p.range_low) : "—"}
+                                {"–"}
+                                {p.range_high !== null ? formatMoney(p.range_high) : "—"}
+                              </p>
+                            </div>
+                            <div style={{ display:"flex", gap:6, flexShrink:0 }}>
+                              <span style={{ fontSize:11, fontWeight:700, color:a.color,
+                                background:a.bg, border:`1px solid ${a.border}`,
+                                padding:"3px 9px", borderRadius:20 }}>
+                                {a.icon} {a.label}
+                              </span>
+                              <span style={{ fontSize:11, fontWeight:600, color:c.color,
+                                background:C.white, border:`1px solid ${C.border}`,
+                                padding:"3px 9px", borderRadius:20 }}>
+                                {c.label}
+                              </span>
+                            </div>
+                          </div>
+                          {p.note && (
+                            <p style={{ fontSize:12, color:C.body, lineHeight:1.6,
+                              margin:"8px 0 0" }}>
+                              {p.note}
+                            </p>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
 
               {nextSteps && (
-                <div style={{ marginTop:14, background:C.tealDim,
-                  border:`1px solid ${C.tealLight}`, borderRadius:12, padding:"12px 14px" }}>
+                <div style={{ marginTop:14, background:C.cream,
+                  border:`1px solid ${C.border}`, borderRadius:12, padding:"12px 14px" }}>
                   <p style={{ fontSize:13, fontWeight:700, color:C.navy, margin:"0 0 6px" }}>
                     What should you do next?
                   </p>
@@ -475,8 +637,8 @@ ${form.job_description}`;
                     Open the AI Quote Checker →
                   </Link>
                   <p style={{ fontSize:11, color:C.secondary, margin:"8px 0 0", lineHeight:1.55 }}>
-                    When you receive a written quotation, upload it to the AI Quote Checker for a
-                    full professional review.
+                    The AI Quote Checker reviews the quotation itself — scope, contract, payment
+                    terms, exclusions and legal risk.
                   </p>
                 </div>
               )}
@@ -512,9 +674,9 @@ ${form.job_description}`;
               )}
 
               {/* Fallback: while streaming and no sections yet, show raw text */}
-              {!summary && !nextSteps && (
+              {!opinion && !nextSteps && packageResults.length === 0 && (
                 <div style={{ lineHeight:1.7 }}>
-                  {renderText(displayText)}
+                  {renderText(markdownOnly)}
                 </div>
               )}
 
@@ -532,7 +694,7 @@ ${form.job_description}`;
                   style={{ background:C.navy, color:C.white, border:"none",
                     borderRadius:8, padding:"9px 18px", fontSize:13,
                     fontWeight:600, cursor:"pointer" }}>
-                  Guide another project
+                  Assess another project
                 </button>
                 <span style={{ fontSize:12, color:C.secondary }}>
                   Ready to find a vetted trade?
@@ -565,7 +727,7 @@ ${form.job_description}`;
                   Tell us about the project
                 </h2>
                 <p style={{ fontSize:13, color:C.secondary, margin:0 }}>
-                  A quick description is enough — no quote or line items needed.
+                  A short description is enough. Add package allowances for a package-by-package check.
                 </p>
               </div>
             </div>
@@ -593,27 +755,75 @@ ${form.job_description}`;
                   ))}
                 </select>
               </F>
-              <F label="Your estimated value (£)" hint="Optional — your rough target budget">
+              <F label="Your expected budget (£)" hint="Optional — your rough target budget">
                 <input type="number" style={inp()} value={form.estimated_value}
-                  onChange={upd("estimated_value")} placeholder="e.g. 3500" min="0" />
+                  onChange={upd("estimated_value")} placeholder="e.g. 45000" min="0" />
               </F>
             </G2>
 
             <F label="Describe the project" req err={errors.job_description}
-              hint="What are you planning? A few sentences on scope, size and finish level is enough.">
+              hint="Scope, size and finish level. The more context, the higher the confidence.">
               <textarea rows={4} style={{
                 ...inp(!!errors.job_description),
                 resize:"vertical", minHeight:100,
               }} value={form.job_description} onChange={upd("job_description")}
-                placeholder="e.g. Full rewire of a 3-bedroom semi-detached house in Nottingham, including new consumer unit, cabling, sockets and lights throughout, plus EIC certificate on completion." />
+                placeholder="e.g. Single-storey rear extension, 4m x 6m, on a semi-detached house in Nottingham. Kitchen relocation, bifold doors, underfloor heating, plaster and paint finish. Existing rear wall to be removed with structural steel." />
             </F>
+
+            {/* Optional package allowances */}
+            <div style={{ marginBottom:16, border:`1px solid ${C.border}`, borderRadius:12,
+              padding:"14px 14px 6px", background:"rgba(245,240,232,0.4)" }}>
+              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center",
+                marginBottom:6, flexWrap:"wrap", gap:8 }}>
+                <div>
+                  <p style={{ fontSize:12, fontWeight:700, color:C.navy, margin:0, letterSpacing:"0.03em" }}>
+                    Package allowances <span style={{ color:C.secondary, fontWeight:500 }}>(optional)</span>
+                  </p>
+                  <p style={{ fontSize:11, color:C.secondary, margin:"3px 0 0", lineHeight:1.5 }}>
+                    Add any package amounts you already have and we'll benchmark each one against
+                    typical regional ranges — with a confidence indicator.
+                  </p>
+                </div>
+                <button type="button" onClick={addPackage}
+                  style={{ background:C.white, color:C.navy, border:`1px solid ${C.border}`,
+                    borderRadius:8, padding:"6px 12px", fontSize:12, fontWeight:600,
+                    cursor:"pointer" }}>
+                  + Add package
+                </button>
+              </div>
+
+              {packages.length === 0 && (
+                <p style={{ fontSize:11, color:C.secondary, margin:"6px 0 10px", fontStyle:"italic" }}>
+                  No packages added — we'll assess overall budget realism only.
+                </p>
+              )}
+
+              {packages.map((row, i) => (
+                <div key={i} style={{ display:"grid",
+                  gridTemplateColumns:"1.4fr 1fr auto", gap:8, marginBottom:8, alignItems:"center" }}>
+                  <input list="pg-package-suggestions" style={inp()}
+                    placeholder="Package (e.g. Foundations)" value={row.name}
+                    onChange={(e) => updPackage(i, "name", e.target.value)} />
+                  <input type="number" style={inp()} placeholder="Amount (£)"
+                    value={row.value} min="0"
+                    onChange={(e) => updPackage(i, "value", e.target.value)} />
+                  <button type="button" onClick={() => removePackage(i)}
+                    style={{ background:"none", border:"none", color:C.secondary,
+                      fontSize:18, cursor:"pointer", padding:"0 6px" }} aria-label="Remove">
+                    ×
+                  </button>
+                </div>
+              ))}
+              <datalist id="pg-package-suggestions">
+                {COMMON_PACKAGES.map(p => <option key={p} value={p} />)}
+              </datalist>
+            </div>
 
             <div style={{ background:C.amberBg, border:`1px solid ${C.amberBorder}`,
               borderRadius:8, padding:"10px 12px", fontSize:11,
               color:C.amber, lineHeight:1.65, marginBottom:20 }}>
-              <strong>Please note:</strong> This is early-stage AI-assisted guidance, not a professional
-              valuation. Once you receive a written quotation, run it through the AI Quote Checker for a
-              full professional review.
+              <strong>Please note:</strong> This validates budgets and package allowances only. It does
+              not review contracts, scope, payment terms or exclusions — that's the AI Quote Checker's job.
             </div>
 
             <button onClick={analyse} disabled={loading}
@@ -630,17 +840,16 @@ ${form.job_description}`;
                     border:"2px solid rgba(255,255,255,0.3)",
                     borderTopColor:"#fff", borderRadius:"50%",
                     animation:"spin 0.8s linear infinite" }} />
-                  Generating your cost guide...
+                  Assessing your budget...
                 </>
               ) : (
-                "Get Free Cost Guide →"
+                "Get My Budget Assessment →"
               )}
             </button>
             {loading && (
               <p style={{ fontSize:12, color:C.secondary, textAlign:"center",
                 marginTop:12, lineHeight:1.55 }}>
-                Building your early-stage cost range
-                {form.trade ? ` for ${form.trade}` : ""}
+                Benchmarking against typical UK regional pricing
                 {form.region ? ` in ${form.region}` : ""}…
                 <br />
                 This usually takes about 30 seconds — please don&apos;t refresh.
@@ -659,10 +868,10 @@ ${form.job_description}`;
             </p>
             <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(160px,1fr))", gap:12 }}>
               {[
-                { n:"01", title:"Describe the project", body:"A short description of what you're planning — no quote needed." },
-                { n:"02", title:"Get a cost range", body:"Typical UK cost range for that project in your region." },
-                { n:"03", title:"See cost drivers", body:"Biggest cost drivers, missing costs, and what moves the price up or down." },
-                { n:"04", title:"Know what to do next", body:"Get 2–3 quotes, then run the winning one through the AI Quote Checker." },
+                { n:"01", title:"Describe the project", body:"A short scope description — plus your expected budget if you have one." },
+                { n:"02", title:"Add package allowances", body:"Optional — but the more you add, the higher the confidence per package." },
+                { n:"03", title:"Get a construction opinion", body:"Realistic range, ProGrafter opinion and package-by-package Fair / Low / High." },
+                { n:"04", title:"Take it further", body:"Once quoted, run the winning quotation through the AI Quote Checker." },
               ].map(s => (
                 <div key={s.n} style={{ background:C.white, border:`1px solid ${C.border}`,
                   borderRadius:14, padding:"18px 16px", position:"relative", overflow:"hidden",
