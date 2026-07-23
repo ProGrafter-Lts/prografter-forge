@@ -63,18 +63,17 @@ const G2 = ({ children }: any) => (
 );
 
 const VERDICT_CONFIG: Record<string, any> = {
-  FAIR:        { bg:C.greenBg,  border:C.greenBorder, text:C.green,  label:"Fair quote",        icon:"✅" },
-  OVERPRICED:  { bg:C.redBg,    border:C.redBorder,   text:C.red,    label:"Overpriced",        icon:"⚠️" },
-  UNDERPRICED: { bg:C.amberBg,  border:C.amberBorder, text:C.amber,  label:"Unusually low",     icon:"🔍" },
-  INCOMPLETE:  { bg:C.amberBg,  border:C.amberBorder, text:C.amber,  label:"Incomplete quote",  icon:"📋" },
-  UNKNOWN:     { bg:"#F3F4F6",  border:C.border,      text:C.secondary, label:"Unable to assess", icon:"❓" },
+  WITHIN:  { bg:C.greenBg, border:C.greenBorder, text:C.green, label:"Within typical range", icon:"✅" },
+  BELOW:   { bg:C.amberBg, border:C.amberBorder, text:C.amber, label:"Below typical range",  icon:"🔍" },
+  ABOVE:   { bg:C.redBg,   border:C.redBorder,   text:C.red,   label:"Above typical range",  icon:"⚠️" },
+  UNKNOWN: { bg:"#F3F4F6", border:C.border,      text:C.secondary, label:"Guidance only",    icon:"💡" },
 };
 
 const renderText = (text: string) => {
   if (!text) return null;
   return text.split("\n").map((line, i) => {
     if (line.startsWith("### ")) return <p key={i} style={{ fontSize:13, fontWeight:700, color:C.navy, margin:"14px 0 4px" }}>{line.slice(4)}</p>;
-    if (line.startsWith("## ")) return <p key={i} style={{ fontSize:14, fontWeight:700, color:C.deep, margin:"16px 0 6px" }}>{line.slice(3)}</p>;
+    if (line.startsWith("## "))  return <p key={i} style={{ fontSize:14, fontWeight:700, color:C.deep, margin:"16px 0 6px" }}>{line.slice(3)}</p>;
     if (line.startsWith("**") && line.endsWith("**")) return <p key={i} style={{ fontSize:13, fontWeight:600, color:C.body, margin:"6px 0 2px" }}>{line.slice(2,-2)}</p>;
     if (line.startsWith("- ") || line.startsWith("• ")) return (
       <div key={i} style={{ display:"flex", gap:8, margin:"3px 0" }}>
@@ -87,40 +86,54 @@ const renderText = (text: string) => {
   });
 };
 
-const ScoreMeter = ({ score }: { score: number | null }) => {
-  if (score === null || score === undefined) return null;
-  const pct = Math.max(0, Math.min(100, score));
-  const colour = pct >= 70 ? C.green : pct >= 40 ? C.amber : C.red;
+// Extract a labelled section (## Heading … up to next ## or end) from AI markdown.
+const extractSection = (text: string, heading: string): string => {
+  if (!text) return "";
+  const re = new RegExp(`##\\s*${heading}\\s*\\n([\\s\\S]*?)(?=\\n##\\s|$)`, "i");
+  const m = text.match(re);
+  return m ? m[1].trim() : "";
+};
+
+const Expandable = ({ title, children, defaultOpen = false }: any) => {
+  const [open, setOpen] = useState(defaultOpen);
   return (
-    <div style={{ marginBottom:16 }}>
-      <div style={{ display:"flex", justifyContent:"space-between", marginBottom:6 }}>
-        <span style={{ fontSize:12, color:C.secondary }}>Value for money score</span>
-        <span style={{ fontSize:14, fontWeight:700, color:colour }}>{pct}/100</span>
-      </div>
-      <div style={{ height:8, borderRadius:4, background:"#E5E1D8", overflow:"hidden" }}>
-        <div style={{ height:"100%", width:`${pct}%`, background:colour,
-          borderRadius:4, transition:"width 1s ease" }} />
-      </div>
-      <div style={{ display:"flex", justifyContent:"space-between", marginTop:4 }}>
-        <span style={{ fontSize:10, color:C.secondary }}>Overpriced</span>
-        <span style={{ fontSize:10, color:C.secondary }}>Fair</span>
-        <span style={{ fontSize:10, color:C.secondary }}>Excellent</span>
-      </div>
+    <div style={{ borderTop:`1px solid ${C.cream}` }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{
+          width:"100%", background:"none", border:"none", cursor:"pointer",
+          display:"flex", justifyContent:"space-between", alignItems:"center",
+          padding:"14px 0", fontSize:13, fontWeight:600, color:C.navy, textAlign:"left",
+        }}
+      >
+        <span>{title}</span>
+        <span style={{ color:C.teal, fontSize:16 }}>{open ? "−" : "+"}</span>
+      </button>
+      {open && <div style={{ paddingBottom:14 }}>{children}</div>}
     </div>
   );
 };
 
+const parseMoney = (v: string): number | null => {
+  const n = parseFloat(v.replace(/[^0-9.]/g, ""));
+  return isNaN(n) ? null : n;
+};
+
+const formatMoney = (n: number) =>
+  n >= 1000 ? `£${Math.round(n).toLocaleString()}` : `£${Math.round(n)}`;
+
 export default function QuoteCheckerAI() {
   const [form, setForm] = useState({
     trade:"", region:"East Midlands", property_type:"",
-    job_description:"", quote_text:"", quote_total:"",
+    job_description:"", estimated_value:"",
   });
   const [errors, setErrors] = useState<Record<string,string>>({});
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [streaming, setStreaming] = useState("");
   const [verdict, setVerdict] = useState<string | null>(null);
-  const [score, setScore] = useState<number | null>(null);
+  const [rangeLow, setRangeLow] = useState<number | null>(null);
+  const [rangeHigh, setRangeHigh] = useState<number | null>(null);
 
   const upd = (k: string) => (e: any) => setForm(p => ({ ...p, [k]: e.target.value }));
 
@@ -128,8 +141,7 @@ export default function QuoteCheckerAI() {
     const e: Record<string,string> = {};
     if (!form.trade) e.trade = "Required";
     if (!form.region) e.region = "Required";
-    if (form.job_description.trim().length < 30) e.job_description = "Please describe the job in more detail";
-    if (form.quote_text.trim().length < 20) e.quote_text = "Please paste the quote content";
+    if (form.job_description.trim().length < 30) e.job_description = "Please describe the project in more detail";
     return e;
   };
 
@@ -142,51 +154,56 @@ export default function QuoteCheckerAI() {
     setResult(null);
     setStreaming("");
     setVerdict(null);
-    setScore(null);
+    setRangeLow(null);
+    setRangeHigh(null);
 
-    const systemPrompt = `You are ProGrafter's Quote Checker AI — an expert in UK construction costs, trades pricing, and regional labour rates. You assess quotes submitted by homeowners to determine whether they represent fair value.
+    const userValue = parseMoney(form.estimated_value);
 
-Your role is to:
-1. Analyse the quote against current regional UK market rates
-2. Identify any missing items, ambiguous scope, or red flags
-3. Give an honest, balanced verdict
-4. Help the homeowner make an informed decision — not scare them away from good trades or push them toward cheap ones
+    const systemPrompt = `You are ProGrafter's Project Cost Guide — an early-stage budgeting and education tool for UK homeowners. You are NOT a quote validator. You do NOT analyse line items, packages, or scrutinise a specific quotation. Your job is to give a fast, plain-English budget orientation before the homeowner collects real quotes.
 
-You must structure your response EXACTLY as follows:
+Homeowners must be able to read your output in under 60 seconds.
 
-VERDICT: [one of: FAIR / OVERPRICED / UNDERPRICED / INCOMPLETE / UNKNOWN]
-SCORE: [integer 0-100, where 100 = exceptional value, 50 = fair market rate, below 30 = significantly overpriced]
+Output structure — follow EXACTLY, in this order, using these headings:
 
-## Summary
-[2-3 sentences: the headline verdict and why]
+RANGE_LOW: [integer GBP, low end of typical UK cost range for this project in ${form.region}]
+RANGE_HIGH: [integer GBP, high end of typical UK cost range for this project in ${form.region}]
+VERDICT: [one of: BELOW / WITHIN / ABOVE / UNKNOWN — how the homeowner's estimated value sits versus the range. Use UNKNOWN if they didn't provide a value.]
 
-## What's included in this quote
-[List what the quote appears to cover based on the text provided]
+## Cost range summary
+[2 short sentences. State the typical range and, if the user gave an estimated value, say plainly whether it sits below, within, or above the range and by roughly how much.]
 
-## Rate assessment
-[Break down the pricing against typical ${form.region} regional rates for ${form.trade} work. Be specific — reference day rates, material costs, typical job costs where relevant. Acknowledge uncertainty where you cannot be precise.]
+## Biggest cost drivers
+[3–5 short bullets — the things that most move the price for this type of project.]
 
-## What to watch out for
-[Any missing items, ambiguous terms, payment terms red flags, or things the homeowner should clarify before accepting]
+## Typical missing costs
+[3–5 short bullets — items homeowners commonly forget to budget for.]
 
-## Questions to ask the trade
-[3-5 specific questions the homeowner should ask before accepting this quote]
+## Factors that increase cost
+[3–4 short bullets.]
 
-## Our recommendation
-[Clear, actionable advice — accept, negotiate, get another quote, or walk away — and why]
+## Factors that reduce cost
+[3–4 short bullets.]
 
-Be honest. If a quote looks fair, say so clearly and don't manufacture concerns. If it looks high, say so directly with evidence. Homeowners deserve straight answers.`;
+## What to do next
+- Collect 2–3 detailed quotations from vetted trades.
+- Compare them like-for-like on scope, spec and inclusions.
+- When you receive a written quotation, upload it to the ProGrafter AI Quote Checker for a full professional review.
 
-    const userMessage = `Please analyse this quote:
+Rules:
+- Keep every bullet under ~15 words.
+- Do NOT invent line-item pricing.
+- Do NOT critique a specific quote — the user has not provided one.
+- No preamble, no closing paragraph, no disclaimers (the UI already shows them).`;
+
+    const userMessage = `Give an early-stage cost guide for this project:
 
 Trade: ${form.trade}
 Region: ${form.region}
 Property type: ${form.property_type || "Not specified"}
-Job description: ${form.job_description}
-Quoted total: ${form.quote_total ? `£${form.quote_total}` : "Not separately stated — see quote below"}
+Homeowner's estimated / target project value: ${userValue ? `£${userValue.toLocaleString()}` : "Not provided"}
 
-Quote content:
-${form.quote_text}`;
+Project description:
+${form.job_description}`;
 
     try {
       const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
@@ -194,7 +211,7 @@ ${form.quote_text}`;
 
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.access_token) {
-        throw new Error("Please sign in to use the AI Quote Checker.");
+        throw new Error("Please sign in to use the Project Cost Guide.");
       }
 
       const response = await fetch(
@@ -213,7 +230,7 @@ ${form.quote_text}`;
         },
       );
       if (response.status === 401) {
-        throw new Error("Please sign in to use the AI Quote Checker.");
+        throw new Error("Please sign in to use the Project Cost Guide.");
       }
       if (!response.ok || !response.body) {
         throw new Error(`Proxy error ${response.status}`);
@@ -238,10 +255,12 @@ ${form.quote_text}`;
                 fullText += parsed.delta.text;
                 setStreaming(fullText);
 
-                const vMatch = fullText.match(/VERDICT:\s*(FAIR|OVERPRICED|UNDERPRICED|INCOMPLETE|UNKNOWN)/);
-                if (vMatch) setVerdict(vMatch[1]);
-                const sMatch = fullText.match(/SCORE:\s*(\d+)/);
-                if (sMatch) setScore(parseInt(sMatch[1]));
+                const vMatch = fullText.match(/VERDICT:\s*(BELOW|WITHIN|ABOVE|UNKNOWN)/i);
+                if (vMatch) setVerdict(vMatch[1].toUpperCase());
+                const loMatch = fullText.match(/RANGE_LOW:\s*([\d,]+)/i);
+                if (loMatch) setRangeLow(parseInt(loMatch[1].replace(/,/g, ""), 10));
+                const hiMatch = fullText.match(/RANGE_HIGH:\s*([\d,]+)/i);
+                if (hiMatch) setRangeHigh(parseInt(hiMatch[1].replace(/,/g, ""), 10));
               }
             } catch {}
           }
@@ -249,14 +268,15 @@ ${form.quote_text}`;
       }
 
       const cleaned = fullText
-        .replace(/^VERDICT:.*\n?/m, "")
-        .replace(/^SCORE:.*\n?/m, "")
+        .replace(/^RANGE_LOW:.*\n?/mi, "")
+        .replace(/^RANGE_HIGH:.*\n?/mi, "")
+        .replace(/^VERDICT:.*\n?/mi, "")
         .trim();
       setResult(cleaned);
       setStreaming("");
-      trackEvent("quote_check", { method: "ai" });
+      trackEvent("quote_check", { method: "cost_guide" });
     } catch (err) {
-      setResult("Unable to analyse this quote right now. Please try again in a moment.");
+      setResult("Unable to generate a cost guide right now. Please try again in a moment.");
       setVerdict("UNKNOWN");
     } finally {
       setLoading(false);
@@ -267,12 +287,22 @@ ${form.quote_text}`;
     setResult(null);
     setStreaming("");
     setVerdict(null);
-    setScore(null);
+    setRangeLow(null);
+    setRangeHigh(null);
     setErrors({});
   };
 
   const vc = verdict ? (VERDICT_CONFIG[verdict] || VERDICT_CONFIG.UNKNOWN) : null;
   const displayText = result || streaming;
+  const userValue = parseMoney(form.estimated_value);
+
+  // Extract sections for the streamlined always-open view + expandables.
+  const summary       = extractSection(displayText, "Cost range summary");
+  const drivers       = extractSection(displayText, "Biggest cost drivers");
+  const missing       = extractSection(displayText, "Typical missing costs");
+  const increases     = extractSection(displayText, "Factors that increase cost");
+  const reductions    = extractSection(displayText, "Factors that reduce cost");
+  const nextSteps     = extractSection(displayText, "What to do next");
 
   return (
     <div style={{ minHeight:"100vh", background:C.cream, fontFamily:"'DM Sans', system-ui, sans-serif" }}>
@@ -289,7 +319,7 @@ ${form.quote_text}`;
             background:`linear-gradient(135deg, ${C.teal}, ${C.tealHover})`,
             padding:"4px 11px", borderRadius:20, fontWeight:700, letterSpacing:"0.05em",
             boxShadow:"0 2px 10px rgba(20,168,161,0.4)" }}>
-            AI POWERED
+            EARLY BUDGETING
           </span>
           <span style={{ fontSize:12, color:"rgba(245,240,232,0.55)", letterSpacing:"0.06em" }}>
             PROJECT COST GUIDE
@@ -313,7 +343,7 @@ ${form.quote_text}`;
             border:"1px solid rgba(20,168,161,0.4)",
             padding:"5px 14px", borderRadius:20, letterSpacing:"0.12em",
             marginBottom:18 }}>
-            FREE FIRST LOOK
+            FREE EARLY-STAGE GUIDANCE
           </span>
           <h1 className="font-heading" style={{ fontSize:48, color:C.white,
             margin:"0 0 14px", letterSpacing:"0.01em", lineHeight:1.05 }}>
@@ -324,12 +354,11 @@ ${form.quote_text}`;
           </h1>
           <p style={{ fontSize:15, color:"rgba(245,240,232,0.82)", maxWidth:500,
             margin:"0 auto", lineHeight:1.7 }}>
-            Describe the project you’re planning and ProGrafter will give you early guidance on
-            likely cost ranges, key cost drivers, common missing items and questions to ask before
-            you start collecting quotes.
+            A 60-second budget orientation before you start collecting quotes — typical cost range,
+            biggest cost drivers, and what to do next. Not a quote review.
           </p>
           <div style={{ display:"flex", justifyContent:"center", gap:10, marginTop:22, flexWrap:"wrap" }}>
-            {["Free first look","Early budget guidance","Scope prompts","No quote required"].map(t=>(
+            {["Typical cost range","Cost drivers","Missing-cost prompts","What to do next"].map(t=>(
               <span key={t} style={{ fontSize:12, color:C.white, fontWeight:500,
                 background:"rgba(255,255,255,0.08)", border:"1px solid rgba(255,255,255,0.14)",
                 padding:"6px 12px", borderRadius:20 }}>{t}</span>
@@ -344,15 +373,14 @@ ${form.quote_text}`;
           <div style={{ background:C.amberBg, border:`1px solid ${C.amberBorder}`,
             borderRadius:12, padding:"12px 14px", marginBottom:14 }}>
             <p style={{ fontSize:12, color:C.body, lineHeight:1.6, margin:0 }}>
-              This is early-stage guidance only. It is not a quote, valuation, survey or professional
-              advice. Costs vary depending on drawings, specification, access, site conditions,
-              region, finishes and contractor availability.
+              Early-stage guidance only. Not a quote, valuation or survey. Costs vary with drawings,
+              specification, access, site conditions, region, finishes and contractor availability.
             </p>
           </div>
           <p style={{ fontSize:12, color:C.secondary, textAlign:"center" }}>
-            Already got a builder’s quote?{" "}
+            Already got a written quotation?{" "}
             <Link to="/quote-checker" style={{ color:C.teal, fontWeight:600, textDecoration:"none" }}>
-              Run it through the Quote Checker →
+              Run it through the AI Quote Checker →
             </Link>
           </p>
         </div>
@@ -375,13 +403,12 @@ ${form.quote_text}`;
                     </p>
                     <p style={{ fontSize:11, color:vc.text, margin:"2px 0 0", opacity:0.8 }}>
                       {form.trade} · {form.region}
-                      {form.quote_total ? ` · £${parseFloat(form.quote_total).toLocaleString()}` : ""}
                     </p>
                   </div>
                 </div>
                 <div style={{ display:"flex", alignItems:"center", gap:8 }}>
                   {loading && (
-                    <span style={{ fontSize:11, color:vc.text, opacity:0.7 }}>Analysing...</span>
+                    <span style={{ fontSize:11, color:vc.text, opacity:0.7 }}>Generating…</span>
                   )}
                   <div style={{ fontSize:10, color:vc.text, background:C.white,
                     padding:"3px 8px", borderRadius:20, fontWeight:600,
@@ -393,10 +420,104 @@ ${form.quote_text}`;
             )}
 
             <div style={{ padding:"20px 24px" }}>
-              <ScoreMeter score={score} />
-              <div style={{ lineHeight:1.7 }}>
-                {renderText(displayText)}
-              </div>
+              {/* Headline range card */}
+              {(rangeLow !== null || rangeHigh !== null) && (
+                <div style={{ background:C.cream, border:`1px solid ${C.border}`,
+                  borderRadius:12, padding:"14px 16px", marginBottom:16,
+                  display:"grid", gridTemplateColumns:userValue ? "1fr 1fr" : "1fr", gap:14 }}>
+                  <div>
+                    <p style={{ fontSize:11, fontWeight:600, color:C.secondary,
+                      textTransform:"uppercase", letterSpacing:"0.06em", margin:"0 0 4px" }}>
+                      Estimated project cost range
+                    </p>
+                    <p className="font-heading" style={{ fontSize:22, color:C.deep, margin:0 }}>
+                      {rangeLow !== null ? formatMoney(rangeLow) : "—"}
+                      {" – "}
+                      {rangeHigh !== null ? formatMoney(rangeHigh) : "—"}
+                    </p>
+                  </div>
+                  {userValue !== null && (
+                    <div>
+                      <p style={{ fontSize:11, fontWeight:600, color:C.secondary,
+                        textTransform:"uppercase", letterSpacing:"0.06em", margin:"0 0 4px" }}>
+                        Your estimated value
+                      </p>
+                      <p className="font-heading" style={{ fontSize:22, color:C.deep, margin:0 }}>
+                        {formatMoney(userValue)}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Streamlined always-visible summary + next steps */}
+              {summary && (
+                <div style={{ marginBottom:6 }}>
+                  <p style={{ fontSize:14, fontWeight:700, color:C.deep, margin:"0 0 6px" }}>
+                    Summary
+                  </p>
+                  <div>{renderText(summary)}</div>
+                </div>
+              )}
+
+              {nextSteps && (
+                <div style={{ marginTop:14, background:C.tealDim,
+                  border:`1px solid ${C.tealLight}`, borderRadius:12, padding:"12px 14px" }}>
+                  <p style={{ fontSize:13, fontWeight:700, color:C.navy, margin:"0 0 6px" }}>
+                    What should you do next?
+                  </p>
+                  <div>{renderText(nextSteps)}</div>
+                  <Link to="/quote-checker"
+                    style={{ display:"inline-flex", alignItems:"center", gap:6,
+                      marginTop:10, background:C.teal, color:C.white,
+                      padding:"9px 14px", borderRadius:8, fontSize:13, fontWeight:700,
+                      textDecoration:"none" }}>
+                    Open the AI Quote Checker →
+                  </Link>
+                  <p style={{ fontSize:11, color:C.secondary, margin:"8px 0 0", lineHeight:1.55 }}>
+                    When you receive a written quotation, upload it to the AI Quote Checker for a
+                    full professional review.
+                  </p>
+                </div>
+              )}
+
+              {/* Expandable detail */}
+              {(drivers || missing || increases || reductions) && (
+                <div style={{ marginTop:18 }}>
+                  <p style={{ fontSize:11, fontWeight:600, color:C.secondary,
+                    textTransform:"uppercase", letterSpacing:"0.07em", margin:"0 0 4px" }}>
+                    More detail
+                  </p>
+                  {drivers && (
+                    <Expandable title="Biggest cost drivers">
+                      {renderText(drivers)}
+                    </Expandable>
+                  )}
+                  {missing && (
+                    <Expandable title="Typical missing costs">
+                      {renderText(missing)}
+                    </Expandable>
+                  )}
+                  {increases && (
+                    <Expandable title="Factors that increase cost">
+                      {renderText(increases)}
+                    </Expandable>
+                  )}
+                  {reductions && (
+                    <Expandable title="Factors that reduce cost">
+                      {renderText(reductions)}
+                    </Expandable>
+                  )}
+                </div>
+              )}
+
+              {/* Fallback: while streaming and no sections yet, show raw text */}
+              {!summary && !nextSteps && (
+                <div style={{ lineHeight:1.7 }}>
+                  {renderText(displayText)}
+                </div>
+              )}
+
               {loading && streaming && (
                 <span style={{ display:"inline-block", width:8, height:16,
                   background:C.teal, borderRadius:2, marginLeft:2,
@@ -411,10 +532,10 @@ ${form.quote_text}`;
                   style={{ background:C.navy, color:C.white, border:"none",
                     borderRadius:8, padding:"9px 18px", fontSize:13,
                     fontWeight:600, cursor:"pointer" }}>
-                  Check another quote
+                  Guide another project
                 </button>
                 <span style={{ fontSize:12, color:C.secondary }}>
-                  Want to find a vetted trade instead?
+                  Ready to find a vetted trade?
                 </span>
                 <Link to="/post-job-brief" style={{ background:"none", border:`1.5px solid ${C.teal}`,
                   color:C.teal, borderRadius:8, padding:"8px 16px",
@@ -438,13 +559,13 @@ ${form.quote_text}`;
               <div style={{ width:42, height:42, borderRadius:12, flexShrink:0,
                 display:"flex", alignItems:"center", justifyContent:"center", fontSize:20,
                 background:`linear-gradient(135deg, ${C.navy}, ${C.teal})`,
-                boxShadow:"0 4px 14px rgba(20,168,161,0.35)" }}>📝</div>
+                boxShadow:"0 4px 14px rgba(20,168,161,0.35)" }}>💡</div>
               <div>
                 <h2 className="font-heading" style={{ fontSize:22, color:C.deep, margin:"0 0 2px", letterSpacing:"0.01em" }}>
-                  Tell us about the quote
+                  Tell us about the project
                 </h2>
                 <p style={{ fontSize:13, color:C.secondary, margin:0 }}>
-                  The more detail you provide, the more accurate the analysis.
+                  A quick description is enough — no quote or line items needed.
                 </p>
               </div>
             </div>
@@ -472,46 +593,27 @@ ${form.quote_text}`;
                   ))}
                 </select>
               </F>
-              <F label="Total quoted (£)" hint="If stated separately in the quote">
-                <input type="number" style={inp()} value={form.quote_total}
-                  onChange={upd("quote_total")} placeholder="e.g. 3500" min="0" />
+              <F label="Your estimated value (£)" hint="Optional — your rough target budget">
+                <input type="number" style={inp()} value={form.estimated_value}
+                  onChange={upd("estimated_value")} placeholder="e.g. 3500" min="0" />
               </F>
             </G2>
 
-            <F label="Describe the job" req err={errors.job_description}
-              hint="What work are you having done? Briefly describe the job scope.">
-              <textarea rows={3} style={{
+            <F label="Describe the project" req err={errors.job_description}
+              hint="What are you planning? A few sentences on scope, size and finish level is enough.">
+              <textarea rows={4} style={{
                 ...inp(!!errors.job_description),
-                resize:"vertical", minHeight:80,
+                resize:"vertical", minHeight:100,
               }} value={form.job_description} onChange={upd("job_description")}
-                placeholder="e.g. Full rewire of a 3-bedroom semi-detached house in Nottingham, including new consumer unit, all new cabling, sockets and lights throughout, EIC on completion." />
-            </F>
-
-            <F label="Paste the quote here" req err={errors.quote_text}
-              hint="Copy and paste the quote content — line items, descriptions, materials, anything included. The more detail, the better the analysis.">
-              <textarea rows={8} style={{
-                ...inp(!!errors.quote_text),
-                resize:"vertical", minHeight:180,
-                fontFamily:"'DM Mono', ui-monospace, monospace", fontSize:13,
-              }} value={form.quote_text} onChange={upd("quote_text")}
-                placeholder={`Supply and fit new Hager 18th edition consumer unit with surge protection: £380
-Strip out all existing wiring (3 bed semi, approx 85m² floor area): £420
-1st fix wiring — all circuits, 15 double sockets, 6 single sockets: £680
-2 x smoke detectors, hard wired: £95
-Lighting circuits x4, LED downlights throughout: £520
-Final fix and testing: £340
-EIC (Electrical Installation Certificate): £150
-Materials: included above
-VAT: Not registered
-Total: £2,585`} />
+                placeholder="e.g. Full rewire of a 3-bedroom semi-detached house in Nottingham, including new consumer unit, cabling, sockets and lights throughout, plus EIC certificate on completion." />
             </F>
 
             <div style={{ background:C.amberBg, border:`1px solid ${C.amberBorder}`,
               borderRadius:8, padding:"10px 12px", fontSize:11,
               color:C.amber, lineHeight:1.65, marginBottom:20 }}>
-              <strong>Please note:</strong> This is an AI-assisted analysis for guidance only. It is not a
-              professional valuation. Regional rates vary and individual job complexity can significantly
-              affect pricing. Always make your own informed decision before accepting any quote.
+              <strong>Please note:</strong> This is early-stage AI-assisted guidance, not a professional
+              valuation. Once you receive a written quotation, run it through the AI Quote Checker for a
+              full professional review.
             </div>
 
             <button onClick={analyse} disabled={loading}
@@ -528,7 +630,7 @@ Total: £2,585`} />
                     border:"2px solid rgba(255,255,255,0.3)",
                     borderTopColor:"#fff", borderRadius:"50%",
                     animation:"spin 0.8s linear infinite" }} />
-                  Analysing your quote...
+                  Generating your cost guide...
                 </>
               ) : (
                 "Get Free Cost Guide →"
@@ -537,11 +639,11 @@ Total: £2,585`} />
             {loading && (
               <p style={{ fontSize:12, color:C.secondary, textAlign:"center",
                 marginTop:12, lineHeight:1.55 }}>
-                Analysing your quote against current UK regional rates
+                Building your early-stage cost range
                 {form.trade ? ` for ${form.trade}` : ""}
                 {form.region ? ` in ${form.region}` : ""}…
                 <br />
-                This usually takes about 60 seconds — please don&apos;t refresh.
+                This usually takes about 30 seconds — please don&apos;t refresh.
               </p>
             )}
             </div>
@@ -557,10 +659,10 @@ Total: £2,585`} />
             </p>
             <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(160px,1fr))", gap:12 }}>
               {[
-                { n:"01", title:"Paste your quote", body:"Copy in the full quote — line items, totals, materials, anything included." },
-                { n:"02", title:"AI analysis", body:"Our AI checks it against current regional UK rates for that specific trade and location." },
-                { n:"03", title:"Honest verdict", body:"You get a clear fair / overpriced / low-ball verdict with the reasoning behind it." },
-                { n:"04", title:"Know what to ask", body:"Specific questions to put to the trade before you sign anything." },
+                { n:"01", title:"Describe the project", body:"A short description of what you're planning — no quote needed." },
+                { n:"02", title:"Get a cost range", body:"Typical UK cost range for that project in your region." },
+                { n:"03", title:"See cost drivers", body:"Biggest cost drivers, missing costs, and what moves the price up or down." },
+                { n:"04", title:"Know what to do next", body:"Get 2–3 quotes, then run the winning one through the AI Quote Checker." },
               ].map(s => (
                 <div key={s.n} style={{ background:C.white, border:`1px solid ${C.border}`,
                   borderRadius:14, padding:"18px 16px", position:"relative", overflow:"hidden",
