@@ -397,7 +397,7 @@ ${form.job_description}${packageBlock}`;
                 fullText += parsed.delta.text;
                 setStreaming(fullText);
 
-                const vMatch = fullText.match(/VERDICT:\s*(BELOW|WITHIN|ABOVE|UNKNOWN)/i);
+                const vMatch = fullText.match(/VERDICT:\s*(FAR_BELOW|BELOW|WITHIN|ABOVE|UNKNOWN)/i);
                 if (vMatch) setVerdict(vMatch[1].toUpperCase());
                 const loMatch = fullText.match(/RANGE_LOW:\s*([\d,]+)/i);
                 if (loMatch) setRangeLow(parseInt(loMatch[1].replace(/,/g, ""), 10));
