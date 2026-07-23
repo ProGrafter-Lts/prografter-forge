@@ -161,13 +161,13 @@ type PackageAssessment = {
 // Extract a JSON block delimited by ```json ... ``` or a raw {..} after PACKAGES:
 const extractPackages = (text: string): PackageAssessment[] => {
   if (!text) return [];
-  const fenced = text.match(/```json\s*([\s\S]*?)```/i);
+  const fenced = text.match(/```json\s+packages\s*([\s\S]*?)```/i) || text.match(/```json\s*([\s\S]*?)```/i);
   const raw = fenced?.[1] ?? text.match(/PACKAGES_JSON:\s*(\[[\s\S]*?\])/i)?.[1];
   if (!raw) return [];
   try {
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    return parsed.filter(p => p && typeof p.name === "string").map((p: any) => ({
+    return parsed.filter(p => p && typeof p.name === "string" && typeof p.assessment === "string").map((p: any) => ({
       name: String(p.name),
       user_value: typeof p.user_value === "number" ? p.user_value : null,
       range_low: typeof p.range_low === "number" ? p.range_low : null,
@@ -176,6 +176,30 @@ const extractPackages = (text: string): PackageAssessment[] => {
       confidence: (["HIGH","MEDIUM","LOW"].includes(p.confidence) ? p.confidence : "MEDIUM") as any,
       note: typeof p.note === "string" ? p.note : undefined,
     }));
+  } catch { return []; }
+};
+
+type SnapshotItem = {
+  name: string;
+  status: "TYPICAL" | "REVIEW" | "CONFIRM";
+  reason?: string;
+};
+
+const extractSnapshot = (text: string): SnapshotItem[] => {
+  if (!text) return [];
+  const m = text.match(/```json\s+snapshot\s*([\s\S]*?)```/i);
+  if (!m) return [];
+  try {
+    const parsed = JSON.parse(m[1]);
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter((p: any) => p && typeof p.name === "string")
+      .map((p: any) => ({
+        name: String(p.name),
+        status: (["TYPICAL","REVIEW","CONFIRM"].includes(p.status) ? p.status : "REVIEW") as any,
+        reason: typeof p.reason === "string" ? p.reason : undefined,
+      }))
+      .slice(0, 8);
   } catch { return []; }
 };
 
