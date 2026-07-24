@@ -115,6 +115,9 @@ export default function AtlasSummary() {
         </Card>
       )}
 
+      {/* Atlas Alpha summary — Known / Unknown / Risks / Next steps */}
+      <AtlasBreakdown obs={obs} />
+
       {sections.map((sec) => {
         const rows = bySection[sec.id];
         if (!rows || !rows.length) return null;
@@ -182,5 +185,50 @@ function Kv({ label, value }: { label: string; value: string }) {
       <span className="font-mono text-[11px] uppercase tracking-wider text-white/50">{label}</span>
       <span className="text-white/90">{value}</span>
     </div>
+  );
+}
+
+function AtlasBreakdown({ obs }: { obs: any[] }) {
+  const known = obs.filter(
+    (o) => o.response_status === "answered" && ["known_fact", "customer_statement", "document_statement"].includes(o.classification),
+  );
+  const unknowns = obs.filter(
+    (o) => o.classification === "unknown" || o.classification === "further_investigation" || (o.response_status && o.response_status !== "answered" && o.response_status !== "not_applicable"),
+  );
+  const risks = obs.filter((o) => o.classification === "risk");
+  const nextSteps = obs.filter(
+    (o) => o.classification === "recommendation" || o.response_status === "specialist_required" || o.response_status === "return_visit_required" || o.response_status === "customer_to_confirm" || o.recommendation,
+  );
+
+  return (
+    <>
+      <BreakdownCard title={`Known information (${known.length})`} tone="emerald" items={known.map((o) => o.title)} />
+      <BreakdownCard title={`Unknown information (${unknowns.length})`} tone="amber" items={unknowns.map((o) => `${o.title}${o.skip_reason ? ` — ${o.skip_reason}` : ""}`)} />
+      <BreakdownCard title={`Commercial risks (${risks.length})`} tone="rose" items={risks.map((o) => `${o.title}${o.observation_text ? ` — ${o.observation_text}` : ""}`)} />
+      <BreakdownCard title={`Recommended next steps (${nextSteps.length})`} tone="teal" items={nextSteps.map((o) => o.recommendation || o.title)} />
+    </>
+  );
+}
+
+function BreakdownCard({ title, tone, items }: { title: string; tone: "emerald" | "amber" | "rose" | "teal"; items: string[] }) {
+  const toneCls = {
+    emerald: "text-emerald-300",
+    amber: "text-amber-300",
+    rose: "text-rose-300",
+    teal: "text-teal-300",
+  }[tone];
+  return (
+    <section className="rounded-3xl border border-white/[0.08] bg-white/[0.03] p-6 md:p-7 mb-4">
+      <h2 className={`font-heading text-xl md:text-2xl mb-4 ${toneCls}`}>{title}</h2>
+      {items.length === 0 ? (
+        <p className="font-mono text-xs text-white/40">Nothing recorded.</p>
+      ) : (
+        <ul className="space-y-2 font-body text-sm text-white/85 leading-relaxed">
+          {items.map((t, i) => (
+            <li key={i} className="border-l-2 border-white/10 pl-3">{t}</li>
+          ))}
+        </ul>
+      )}
+    </section>
   );
 }
