@@ -115,6 +115,9 @@ export default function AtlasSummary() {
         </Card>
       )}
 
+      {/* Atlas Alpha summary — Known / Unknown / Risks / Next steps */}
+      <AtlasBreakdown obs={obs} />
+
       {sections.map((sec) => {
         const rows = bySection[sec.id];
         if (!rows || !rows.length) return null;
