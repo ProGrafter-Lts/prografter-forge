@@ -3,6 +3,7 @@ import SEO from "@/components/SEO";
 import { localBusinessJsonLd, homepageFaqJsonLd } from "@/lib/seoSchemas";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
+import AtlasAlphaCTA from "@/components/AtlasAlphaCTA";
 import WhyProGrafter from "@/components/WhyProGrafter";
 import TrustStats from "@/components/TrustStats";
 import WhereAreYouSection from "@/components/WhereAreYouSection";
