@@ -1,7 +1,6 @@
 /**
- * Default Atlas section templates + starter observation prompts.
- * Sections are seeded when a survey is first opened. Prompts appear as
- * suggested observations the surveyor can answer, skip or delete.
+ * Atlas Alpha v0.1 — section templates and starter prompts.
+ * Aligned with the alpha field-test checklist.
  */
 
 export type SectionCategory = "outside" | "inside" | "customer" | "reference";
@@ -22,151 +21,195 @@ export interface PromptTemplate {
 }
 
 export const ATLAS_SECTIONS: SectionTemplate[] = [
-  // Customer intent
+  // 1. Project details / customer intent
   {
     key: "customer_intent",
-    title: "Customer intent",
+    title: "Project & customer",
     category: "customer",
     sequence: 5,
     prompts: [
-      { title: "What the customer believes they want", is_required: true },
-      { title: "Intended use of new / altered space" },
-      { title: "Customer priorities and preferred finishes" },
-      { title: "Known budget constraints or ceiling" },
+      { title: "What the customer wants (in their words)", is_required: true },
+      { title: "Objectives & intended use of new space", is_required: true },
+      { title: "Planning reference (if applicable)" },
+      { title: "Priorities & preferred finishes" },
+      { title: "Known budget or ceiling" },
       { title: "Required completion date", is_critical: true },
-      { title: "Items the customer expects to supply themselves" },
-      { title: "Items the customer assumes are included" },
+      { title: "Customer-supplied items" },
       { title: "Customer's known concerns" },
     ],
   },
 
-  // Outside
+  // 2. External survey
   {
-    key: "site_access",
-    title: "Site & access",
+    key: "ext_access",
+    title: "Access & parking",
     category: "outside",
     sequence: 10,
     prompts: [
-      { title: "Parking & delivery access", is_required: true },
-      { title: "Materials route to work area", is_required: true, is_critical: true },
-      { title: "Skip / storage location" },
-      { title: "Scaffold space & overhead obstructions" },
-      { title: "Neighbouring property constraints" },
-      { title: "Working hour restrictions" },
+      { title: "Vehicle access to property", is_required: true },
+      { title: "Parking arrangements", is_required: true },
+      { title: "Skip location", is_required: true },
+      { title: "Material storage area", is_required: true, is_critical: true },
+      { title: "Route from street to work area" },
+      { title: "Overhead obstructions (cables, branches)" },
+      { title: "Working hour or noise restrictions" },
     ],
   },
   {
-    key: "property_overview",
-    title: "Property overview",
+    key: "ext_services",
+    title: "External services",
     category: "outside",
     sequence: 20,
     prompts: [
-      { title: "Property type, age & storeys", is_required: true },
-      { title: "Visible construction type" },
-      { title: "Existing extensions or outbuildings" },
-      { title: "Boundaries & levels" },
-      { title: "Signs of previous alterations" },
+      { title: "Electric meter location", is_required: true, is_critical: true },
+      { title: "Gas meter location", is_required: true },
+      { title: "Water supply / external stop tap", is_required: true },
+      { title: "Drainage layout (foul & surface)", is_required: true },
+      { title: "Manholes — location & condition", is_required: true },
+      { title: "Soil stack & downpipes" },
+      { title: "Telecoms / fibre entry" },
     ],
   },
   {
-    key: "external_materials",
-    title: "External materials",
+    key: "ext_fabric",
+    title: "External fabric",
     category: "outside",
     sequence: 30,
     prompts: [
       { title: "Brick type, mortar colour & profile", is_required: true },
-      { title: "Render / stone / cladding" },
-      { title: "Roof covering, pitch & condition" },
-      { title: "Guttering, soffits, fascias" },
-      { title: "Windows & external doors" },
+      { title: "Roof covering, pitch & condition", is_required: true },
+      { title: "Gutters, fascias & soffits", is_required: true },
+      { title: "Windows — style, material, condition", is_required: true },
+      { title: "External doors" },
+      { title: "Render / cladding / stonework" },
     ],
   },
   {
-    key: "utilities_external",
-    title: "Utilities (external)",
+    key: "ext_site",
+    title: "Boundaries & site",
     category: "outside",
     sequence: 40,
     prompts: [
-      { title: "Electricity meter & incoming supply position", is_required: true, is_critical: true },
-      { title: "Gas meter position" },
-      { title: "Water entry & external stop tap", is_required: true },
-      { title: "Telecoms entry" },
-      { title: "Manholes, gullies, soil stacks, downpipes" },
-    ],
-  },
-  {
-    key: "ground_conditions",
-    title: "Ground conditions",
-    category: "outside",
-    sequence: 50,
-    prompts: [
-      { title: "Visible soil type & slopes" },
-      { title: "Nearby trees (species & distance)", is_critical: true },
-      { title: "Retaining walls, drainage or flooding evidence" },
-      { title: "Access for excavation equipment" },
-      { title: "Trial holes completed or required" },
+      { title: "Boundaries — walls, fences, ownership", is_required: true },
+      { title: "Trees — species & distance to works", is_required: true, is_critical: true },
+      { title: "Neighbouring properties — Party Wall risk", is_critical: true },
+      { title: "Ground levels & slopes" },
+      { title: "Retaining walls or flooding evidence" },
     ],
   },
 
-  // Inside
+  // 3. Internal survey
   {
-    key: "rooms",
-    title: "Rooms & internal spaces",
+    key: "int_electrics",
+    title: "Consumer unit & electrics",
     category: "inside",
     sequence: 60,
     prompts: [
-      { title: "Room-by-room record — add one card per room", is_required: true, hint: "Duplicate this observation per room and note dimensions, current + intended use, defects, retained/removed items." },
+      { title: "Consumer unit location & apparent spare capacity", is_required: true },
+      { title: "Meter arrangement & earthing observations" },
+      { title: "Existing certification available?" },
+      { title: "Proposed new loads (kitchen, EV, heating)" },
     ],
   },
   {
-    key: "existing_structure",
-    title: "Existing structure",
+    key: "int_heating",
+    title: "Boiler & heating",
     category: "inside",
     sequence: 70,
     prompts: [
-      { title: "Walls proposed for removal / openings", is_required: true, is_critical: true },
-      { title: "Visible cracking or previous alterations" },
+      { title: "Boiler location, type & apparent age", is_required: true },
+      { title: "Hot water cylinder & pressure notes" },
+      { title: "Radiator / UFH layout" },
+      { title: "Additional demand from proposed works" },
+    ],
+  },
+  {
+    key: "int_structure",
+    title: "Existing structure & knock-throughs",
+    category: "inside",
+    sequence: 80,
+    prompts: [
+      { title: "Walls to remove / new openings", is_required: true, is_critical: true },
       { title: "Load paths where known" },
+      { title: "Visible cracking or previous alterations" },
       { title: "Structural drawings available?" },
       { title: "Engineer engaged?" },
     ],
   },
   {
-    key: "electrical",
-    title: "Electrical",
-    category: "inside",
-    sequence: 80,
-    prompts: [
-      { title: "Consumer unit location & apparent spare capacity", is_required: true },
-      { title: "Meter arrangement & earthing observations" },
-      { title: "Smoke / heat alarms present" },
-      { title: "Proposed new loads (EV charger, electric heating, kitchen)" },
-      { title: "Existing certification available?" },
-    ],
-  },
-  {
-    key: "plumbing_heating",
-    title: "Plumbing & heating",
+    key: "int_services",
+    title: "Internal services",
     category: "inside",
     sequence: 90,
     prompts: [
-      { title: "Boiler location, type & apparent age", is_required: true },
-      { title: "Cylinder & incoming main pressure concerns" },
-      { title: "Drainage / soil / waste routes" },
-      { title: "Radiator locations & underfloor heating" },
-      { title: "Proposed additional demand from works" },
+      { title: "Soil / waste routes to be affected", is_required: true },
+      { title: "Water & heating pipe runs" },
+      { title: "Existing ventilation & extract" },
+      { title: "Smoke / heat alarms" },
     ],
   },
   {
-    key: "fire_safety",
-    title: "Fire & safety",
+    key: "int_loft",
+    title: "Loft",
     category: "inside",
     sequence: 100,
     prompts: [
-      { title: "Escape routes & stair access" },
-      { title: "Smoke / heat alarms" },
-      { title: "Fire doors & glazing concerns" },
-      { title: "Occupied-property risks (children / vulnerable occupants)", is_critical: true },
+      { title: "Loft access & headroom", is_required: true },
+      { title: "Roof structure — trussed / cut" },
+      { title: "Insulation type & depth" },
+      { title: "Water tanks or services in loft" },
+    ],
+  },
+  {
+    key: "int_floors_ceilings",
+    title: "Floors & ceilings",
+    category: "inside",
+    sequence: 110,
+    prompts: [
+      { title: "Ground floor construction (suspended / solid)", is_required: true },
+      { title: "Upper floor construction" },
+      { title: "Ceiling type (plaster / lath / board)" },
+      { title: "Signs of movement or damp" },
+    ],
+  },
+  {
+    key: "int_rooms",
+    title: "Room-by-room record",
+    category: "inside",
+    sequence: 120,
+    prompts: [
+      { title: "Add one card per room", is_required: true, hint: "Duplicate this observation per room — dimensions, current + intended use, retained/removed items, defects." },
+    ],
+  },
+
+  // 4. Unknowns register
+  {
+    key: "unknowns_register",
+    title: "Unknowns register",
+    category: "reference",
+    sequence: 200,
+    prompts: [
+      {
+        title: "Log each unknown — what, why unknown, action, who is responsible",
+        hint: "Duplicate this observation per unknown. Use classification = Unknown or Further investigation.",
+      },
+    ],
+  },
+
+  // 5. Commercial risk register
+  {
+    key: "risk_register",
+    title: "Commercial risk register",
+    category: "reference",
+    sequence: 210,
+    prompts: [
+      { title: "Restricted access impact", is_critical: true },
+      { title: "Excavation concerns (services, trees, ground)", is_critical: true },
+      { title: "Temporary works required" },
+      { title: "Tree influence on foundations" },
+      { title: "Occupied property — dust, welfare, security", is_critical: true },
+      { title: "Service diversions required" },
+      { title: "Party Wall Act risks", is_critical: true },
     ],
   },
 ];
