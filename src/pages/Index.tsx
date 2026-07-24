@@ -43,6 +43,7 @@ const Index = () => {
       />
       <Navbar />
       <Hero />
+      <AtlasAlphaCTA />
       <AiQuoteCheckerDemo />
       <WhyProGrafter />
       <WhereAreYouSection />
