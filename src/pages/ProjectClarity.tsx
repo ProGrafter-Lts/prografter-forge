@@ -817,104 +817,329 @@ const AnalysingStep = () => {
 };
 
 // ---------------------------------------------------------------------------
-// Results step
+// Results step — Project Clarity readiness dashboard
 // ---------------------------------------------------------------------------
+
+const STAGE_LABEL: Record<string, string> = {
+  ideas: "Ideas",
+  budgeting: "Budgeting",
+  drawings: "Drawings in progress",
+  planning_submitted: "Planning submitted",
+  planning_approved: "Planning approved",
+  ready_for_quotes: "Ready for quotes",
+  already_have_quotes: "Has existing quotes",
+};
+
+const bandFor = (score: number) => {
+  if (score >= 80) return { label: "READY FOR QUOTATIONS", tone: "green" as const };
+  if (score >= 60) return { label: "NEARLY READY", tone: "green" as const };
+  if (score >= 40) return { label: "TAKING SHAPE", tone: "amber" as const };
+  return { label: "EARLY STAGE", tone: "blue" as const };
+};
+
+const ClarityRing = ({ value }: { value: number }) => {
+  const size = 220, stroke = 14, r = (size - stroke) / 2;
+  const c = 2 * Math.PI * r;
+  const pct = Math.max(0, Math.min(100, value));
+  const dash = (pct / 100) * c;
+  const color = pct >= 60 ? "#0EA5A4" : pct >= 40 ? "#D97706" : "#1E3A8A";
+  return (
+    <div className="relative inline-flex items-center justify-center" style={{ width: size, height: size }}>
+      <svg width={size} height={size} className="-rotate-90">
+        <circle cx={size / 2} cy={size / 2} r={r} stroke="rgba(15,23,42,0.08)" strokeWidth={stroke} fill="none" />
+        <circle
+          cx={size / 2} cy={size / 2} r={r} stroke={color} strokeWidth={stroke}
+          strokeLinecap="round" fill="none"
+          strokeDasharray={`${dash} ${c - dash}`}
+          style={{ transition: "stroke-dasharray 900ms ease" }}
+        />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="font-heading text-6xl text-navy tracking-tight leading-none">{pct}</span>
+        <span className="font-mono text-[10px] uppercase tracking-widest text-navy/50 mt-2">out of 100</span>
+      </div>
+    </div>
+  );
+};
+
+type ReadinessItem = { key: string; label: string; ready: boolean; why: string };
+
+const buildReadiness = (r: Record): ReadinessItem[] => {
+  const b = r.builder_data ?? {};
+  const hasDim = !!(b.dimensions?.width && b.dimensions?.projection);
+  const hasDrawings = r.documents.some((d) => d.kind === "drawings");
+  const hasStructural = r.documents.some((d) => d.kind === "structural");
+  const planning = r.current_stage === "planning_approved" || r.current_stage === "ready_for_quotes"
+    || r.current_stage === "already_have_quotes" || b.existing?.planningApproved === "yes";
+  return [
+    { key: "type", label: "Project type", ready: !!r.project_type, why: "Sets the scope trades quote against." },
+    { key: "property", label: "Property details", ready: !!r.property_type, why: "Detached/terraced changes access, sequencing and cost." },
+    { key: "dimensions", label: "Project dimensions", ready: hasDim, why: "Width and projection let trades size structure, glazing and roof." },
+    { key: "drawings", label: "Architectural drawings", ready: hasDrawings, why: "Trades quote much more accurately with a plan in front of them." },
+    { key: "structural", label: "Structural information", ready: hasStructural, why: "Confirms steels, padstones and foundations for a real price." },
+    { key: "planning", label: "Planning status", ready: planning, why: "Trades need to know they can build what you're asking for." },
+    { key: "roof", label: "Roof specification", ready: !!b.spec?.roofType, why: "Roof type drives labour, materials and warranty." },
+    { key: "wall", label: "External wall type", ready: !!b.spec?.externalWall, why: "Brick, block or timber frame changes trade mix and cost." },
+    { key: "glazing", label: "Glazing selected", ready: !!(b.glazing?.bifoldDoors || b.glazing?.slidingDoors || b.glazing?.frenchDoors || b.glazing?.roofLantern || b.glazing?.windowQuality), why: "Doors and rooflights are one of the largest package costs." },
+    { key: "finish", label: "Internal finish level", ready: !!b.finishLevel, why: "Shell vs turnkey can double a project cost — trades must know." },
+    { key: "services", label: "Service alterations", ready: (b.services?.length ?? 0) > 0, why: "Electrics, plumbing and heating changes are often missed on quotes." },
+    { key: "drainage", label: "Drainage & manholes", ready: b.existing?.drainsAffected === "yes" || b.existing?.drainsAffected === "no", why: "Builders need this to allow for underground work." },
+    { key: "external", label: "External works", ready: (b.externalWorks?.length ?? 0) > 0, why: "Patios, drainage runs and landscaping are commonly excluded." },
+  ];
+};
+
+const StatCard = ({ label, value }: { label: string; value: string }) => (
+  <div className="rounded-2xl border border-navy/10 bg-white p-5">
+    <p className="font-mono text-[10px] uppercase tracking-widest text-navy/50">{label}</p>
+    <p className="font-heading text-lg text-navy mt-2 tracking-wide leading-snug">{value || "—"}</p>
+  </div>
+);
+
+const JourneyTimeline = () => {
+  const nodes = [
+    { label: "Project Clarity", active: true, done: true },
+    { label: "Construction Cost Builder", active: false, done: false },
+    { label: "AI Quote Checker", active: false, done: false },
+    { label: "Find Trusted Trades", active: false, done: false },
+    { label: "Project Dashboard", active: false, done: false },
+  ];
+  return (
+    <div className="rounded-2xl border border-navy/10 bg-white p-6 md:p-8">
+      <p className="font-mono text-[10px] uppercase tracking-widest text-navy/50">Your ProGrafter journey</p>
+      <ol className="mt-6 space-y-4">
+        {nodes.map((n, i) => (
+          <li key={n.label} className="flex items-center gap-4">
+            <div className="flex flex-col items-center">
+              <span className={`flex h-9 w-9 items-center justify-center rounded-full font-mono text-xs ${
+                n.done ? "bg-teal text-cream" : "bg-navy/5 text-navy/50"
+              }`}>{String(i + 1).padStart(2, "0")}</span>
+              {i < nodes.length - 1 && <span className={`w-px h-6 mt-1 ${n.done ? "bg-teal/40" : "bg-navy/10"}`} />}
+            </div>
+            <span className={`font-heading text-lg tracking-wide ${n.done ? "text-navy" : "text-navy/50"}`}>{n.label}</span>
+            {n.done && <span className="ml-auto font-mono text-[10px] uppercase tracking-widest text-teal">You are here</span>}
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+};
 
 const ResultsStep = ({ record, onEdit, onNavigate }: {
   record: Record; onEdit: () => void; onNavigate: (path: string) => void;
 }) => {
-  const a = record.analysis ?? {};
-  const score = a.readiness?.score ?? 0;
-  const scoreTone = score >= 70 ? "teal" : score >= 40 ? "amber" : "navy";
-  const toneClasses =
-    scoreTone === "teal" ? "text-teal border-teal/30 bg-teal/5"
-    : scoreTone === "amber" ? "text-amber-600 border-amber-400/40 bg-amber-50"
-    : "text-navy border-navy/20 bg-navy/5";
+  const score = record.analysis?.readiness?.score ?? 0;
+  const band = bandFor(score);
+  const bandTone =
+    band.tone === "green" ? "text-emerald-700 bg-emerald-50 border-emerald-200"
+    : band.tone === "amber" ? "text-amber-700 bg-amber-50 border-amber-200"
+    : "text-navy bg-navy/5 border-navy/15";
+
+  const readiness = buildReadiness(record);
+  const ready = readiness.filter((i) => i.ready);
+  const missing = readiness.filter((i) => !i.ready);
+
+  // Construction confidence stars — from ready-item count (max 13)
+  const stars = Math.max(1, Math.min(5, Math.round((ready.length / readiness.length) * 5)));
+  const confidenceLabel = stars >= 4 ? "High Confidence" : stars === 3 ? "Solid Confidence" : "Building Confidence";
+
+  // Snapshot values
+  const b = record.builder_data ?? {};
+  const projectLabel = PROJECT_TYPES.find((p) => p.id === record.project_type)?.label ?? "—";
+  const propertyLabel = record.property_type ?? "—";
+  const size = b.dimensions?.floorArea ? `${b.dimensions.floorArea} m²` : "—";
+  const planningLabel = record.current_stage === "planning_approved" ? "Approved"
+    : record.current_stage === "planning_submitted" ? "Submitted"
+    : b.existing?.planningApproved === "yes" ? "Approved"
+    : b.existing?.planningApproved === "no" ? "Not yet applied"
+    : STAGE_LABEL[record.current_stage ?? ""] ?? "—";
+  const docLabel = record.documents.length === 0 ? "None uploaded yet"
+    : record.documents.map((d) => d.name).slice(0, 2).join(", ") + (record.documents.length > 2 ? ` +${record.documents.length - 2} more` : "");
+  const budgetLabel = BUDGET_BANDS.find((x) => x.id === record.budget_band)?.label ?? "Not set";
+
+  // Single next step
+  const nextTitle: string = record.analysis?.next_action?.title
+    ?? (missing.length === 0 ? "Project Ready" : `Add ${missing[0].label.toLowerCase()}`);
+  const nextDetail: string = record.analysis?.next_action?.detail
+    ?? (missing.length === 0 ? "Continue to the Construction Cost Builder to price your project." : missing[0].why);
+  const nextHref = missing.length === 0 ? "/project-builder" : "/project-builder";
 
   return (
-    <div className="animate-fade-in space-y-8">
+    <div className="animate-fade-in space-y-10">
+      {/* Header */}
       <div>
-        <div className="inline-flex items-center gap-2 rounded-full bg-teal/10 px-3 py-1 mb-4">
-          <CheckCircle2 className="h-3.5 w-3.5 text-teal" />
-          <span className="font-mono text-[10px] uppercase tracking-widest text-teal">Analysis complete</span>
-        </div>
-        <h1 className="font-heading text-3xl md:text-5xl text-navy tracking-wide">Your project intelligence.</h1>
-        <p className="mt-3 font-sans text-secondary-text max-w-2xl">
-          A live snapshot of where your project stands. Everything is saved — you can edit any answer and re-analyse.
+        <p className="font-mono text-[10px] uppercase tracking-widest text-teal">Project Clarity</p>
+        <h1 className="font-heading text-4xl md:text-5xl text-navy tracking-wide mt-2">Project Clarity</h1>
+        <p className="mt-3 font-sans text-secondary-text max-w-2xl leading-relaxed">
+          Know exactly where your project stands before speaking to builders.
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <div className={`rounded-2xl border-2 p-6 ${toneClasses}`}>
-          <p className="font-mono text-[10px] uppercase tracking-widest opacity-70">Readiness Score</p>
-          <div className="flex items-baseline gap-2 mt-2">
-            <span className="font-heading text-6xl tracking-tight">{score}</span>
-            <span className="font-mono text-sm opacity-60">/100</span>
+      {/* Primary card — Construction Readiness Score */}
+      <section className="rounded-3xl border border-navy/10 bg-white p-8 md:p-12">
+        <div className="flex flex-col md:flex-row items-center gap-10">
+          <ClarityRing value={score} />
+          <div className="flex-1 text-center md:text-left">
+            <p className="font-mono text-[10px] uppercase tracking-widest text-navy/50">Construction Readiness Score</p>
+            <p className={`inline-block mt-3 rounded-full border px-4 py-1.5 font-mono text-xs tracking-widest ${bandTone}`}>
+              {band.label}
+            </p>
+            <p className="mt-5 font-sans text-navy/70 max-w-md leading-relaxed">
+              A live measure of how ready your project is to receive accurate quotations from trades.
+            </p>
           </div>
-          <p className="font-heading text-lg mt-1 tracking-wide">{a.readiness?.label ?? "—"}</p>
-          {a.readiness?.reasons?.length > 0 && (
-            <ul className="mt-4 space-y-1">
-              {a.readiness.reasons.slice(0, 4).map((r: string) => (
-                <li key={r} className="flex items-start gap-2 font-sans text-xs opacity-80">
-                  <CheckCircle2 className="h-3 w-3 mt-0.5 shrink-0" /> {r}
+        </div>
+
+        {/* Legend — no red */}
+        <div className="mt-10 grid gap-3 sm:grid-cols-2 md:grid-cols-4">
+          {[
+            { dot: "bg-emerald-500", title: "Green", sub: "Information Complete" },
+            { dot: "bg-amber-500", title: "Amber", sub: "Needs Attention" },
+            { dot: "bg-sky-500", title: "Blue", sub: "Helpful Extras" },
+            { dot: "bg-navy/40", title: "Grey", sub: "Future Improvements" },
+          ].map((l) => (
+            <div key={l.title} className="flex items-center gap-3 rounded-xl border border-navy/10 bg-cream/60 px-4 py-3">
+              <span className={`h-2.5 w-2.5 rounded-full ${l.dot}`} />
+              <div>
+                <p className="font-heading text-sm text-navy tracking-wide">{l.title}</p>
+                <p className="font-mono text-[10px] uppercase tracking-widest text-navy/50">{l.sub}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Section 2 — Project Snapshot */}
+      <section>
+        <p className="font-mono text-[10px] uppercase tracking-widest text-navy/50">Section 02</p>
+        <h2 className="font-heading text-2xl md:text-3xl text-navy tracking-wide mt-1">Project Snapshot</h2>
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+          <StatCard label="Project" value={projectLabel} />
+          <StatCard label="Property" value={propertyLabel} />
+          <StatCard label="Project size" value={size} />
+          <StatCard label="Planning" value={planningLabel} />
+          <StatCard label="Documents" value={docLabel} />
+          <StatCard label="Budget" value={budgetLabel} />
+        </div>
+      </section>
+
+      {/* Section 3 — Construction Confidence */}
+      <section>
+        <p className="font-mono text-[10px] uppercase tracking-widest text-navy/50">Section 03</p>
+        <h2 className="font-heading text-2xl md:text-3xl text-navy tracking-wide mt-1">Construction Confidence</h2>
+        <div className="mt-6 rounded-2xl border border-navy/10 bg-white p-6 md:p-8">
+          <div className="flex items-center gap-3">
+            <div className="flex gap-1" aria-label={`${stars} out of 5 stars`}>
+              {Array.from({ length: 5 }).map((_, i) => (
+                <span key={i} className={`text-2xl leading-none ${i < stars ? "text-teal" : "text-navy/15"}`}>★</span>
+              ))}
+            </div>
+            <p className="font-heading text-xl text-navy tracking-wide">{confidenceLabel}</p>
+          </div>
+          <div className="mt-6 grid gap-6 md:grid-cols-2">
+            <div>
+              <p className="font-mono text-[10px] uppercase tracking-widest text-navy/50 mb-3">Based on</p>
+              <ul className="space-y-2">
+                {ready.slice(0, 8).map((i) => (
+                  <li key={i.key} className="flex items-start gap-2 font-sans text-sm text-navy/80">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600 mt-0.5 shrink-0" />
+                    {i.label}
+                  </li>
+                ))}
+                {ready.length === 0 && <li className="font-sans text-sm text-navy/50">Nothing captured yet.</li>}
+              </ul>
+            </div>
+            <div>
+              <p className="font-mono text-[10px] uppercase tracking-widest text-navy/50 mb-3">Missing</p>
+              <ul className="space-y-2">
+                {missing.slice(0, 8).map((i) => (
+                  <li key={i.key} className="flex items-start gap-2 font-sans text-sm text-navy/70">
+                    <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-navy/30 shrink-0" />
+                    {i.label}
+                  </li>
+                ))}
+                {missing.length === 0 && <li className="font-sans text-sm text-navy/50">Nothing missing.</li>}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Section 4 — Quote Readiness (centrepiece) */}
+      <section>
+        <p className="font-mono text-[10px] uppercase tracking-widest text-navy/50">Section 04</p>
+        <h2 className="font-heading text-2xl md:text-3xl text-navy tracking-wide mt-1">Quote Readiness</h2>
+        <p className="mt-2 font-sans text-navy/60">Everything trades need in order to price your project accurately.</p>
+
+        <div className="mt-6 grid gap-4 md:grid-cols-2">
+          <div className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-6">
+            <p className="font-mono text-[10px] uppercase tracking-widest text-emerald-700">Ready</p>
+            <ul className="mt-4 space-y-2.5">
+              {ready.map((i) => (
+                <li key={i.key} className="flex items-start gap-2.5 font-sans text-sm text-navy">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600 mt-0.5 shrink-0" />
+                  {i.label}
                 </li>
               ))}
+              {ready.length === 0 && <li className="font-sans text-sm text-navy/50">Nothing yet — start with a project type.</li>}
             </ul>
-          )}
+          </div>
+          <div className="rounded-2xl border border-amber-200 bg-amber-50/60 p-6">
+            <p className="font-mono text-[10px] uppercase tracking-widest text-amber-700">Needs adding</p>
+            <ul className="mt-4 space-y-4">
+              {missing.map((i) => (
+                <li key={i.key}>
+                  <div className="flex items-start gap-2.5">
+                    <span className="mt-1.5 h-2 w-2 rounded-full border border-amber-500 shrink-0" />
+                    <div>
+                      <p className="font-heading text-base text-navy tracking-wide">{i.label}</p>
+                      <p className="font-sans text-xs text-navy/60 mt-0.5 leading-relaxed">{i.why}</p>
+                    </div>
+                  </div>
+                </li>
+              ))}
+              {missing.length === 0 && (
+                <li className="font-sans text-sm text-navy/60">All essentials captured. You're ready to compare quotes.</li>
+              )}
+            </ul>
+          </div>
         </div>
+      </section>
 
-        <div className="rounded-2xl border-2 border-navy/10 bg-white/70 p-6">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-navy/50">Budget Guidance</p>
-          <p className="font-heading text-xl text-navy mt-2 tracking-wide leading-snug">{a.budget?.headline ?? "—"}</p>
-          {a.budget?.detail && <p className="font-sans text-sm text-navy/70 mt-3 leading-relaxed">{a.budget.detail}</p>}
+      {/* Section 5 — Recommended Next Step (only one) */}
+      <section>
+        <p className="font-mono text-[10px] uppercase tracking-widest text-navy/50">Section 05</p>
+        <h2 className="font-heading text-2xl md:text-3xl text-navy tracking-wide mt-1">Recommended Next Step</h2>
+        <div className="mt-6 rounded-2xl border border-navy/10 bg-white p-6 md:p-8 flex flex-col md:flex-row md:items-center gap-6">
+          <div className="flex-1">
+            <p className="font-heading text-2xl text-navy tracking-wide">{nextTitle}</p>
+            <p className="mt-2 font-sans text-navy/70 leading-relaxed max-w-xl">{nextDetail}</p>
+          </div>
+          <Button
+            size="lg"
+            onClick={() => onNavigate(nextHref)}
+            className="bg-teal text-cream hover:bg-teal-deep font-mono rounded-xl h-14 px-8 shrink-0"
+          >
+            Continue <ArrowRight className="h-4 w-4 ml-2" />
+          </Button>
         </div>
-
-        <div className="rounded-2xl border-2 border-navy/10 bg-white/70 p-6">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-navy/50">Project Status</p>
-          <p className="font-heading text-xl text-navy mt-2 tracking-wide capitalize">{a.status?.stage_label ?? "—"}</p>
-          <p className="font-sans text-sm text-navy/70 mt-3 leading-relaxed">{a.status?.summary ?? ""}</p>
+        <div className="mt-4 flex flex-wrap gap-3">
+          <button
+            onClick={onEdit}
+            className="inline-flex items-center gap-1.5 rounded-full bg-navy/5 hover:bg-navy/10 text-navy px-4 py-2 font-mono text-xs transition"
+          >
+            <Pencil className="h-3 w-3" /> Edit answers
+          </button>
+          <button
+            onClick={() => onNavigate("/signup/homeowner")}
+            className="inline-flex items-center gap-1.5 rounded-full bg-navy/5 hover:bg-navy/10 text-navy px-4 py-2 font-mono text-xs transition"
+          >
+            <Save className="h-3 w-3" /> Save project
+          </button>
         </div>
+      </section>
 
-        <div className="rounded-2xl border-2 border-teal/30 bg-teal/5 p-6">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-teal/80">Recommended Next Action</p>
-          <p className="font-heading text-xl text-teal mt-2 tracking-wide leading-snug">{a.next_action?.title ?? "—"}</p>
-          <p className="font-sans text-sm text-navy/80 mt-3 leading-relaxed">{a.next_action?.detail ?? ""}</p>
-        </div>
-      </div>
-
-      <div className="grid gap-3 md:grid-cols-2">
-        <Button
-          size="lg"
-          onClick={() => onNavigate("/quote-checker")}
-          className="bg-teal text-cream hover:bg-teal-deep font-mono rounded-xl h-14"
-        >
-          <ShieldCheck className="h-4 w-4 mr-2" /> Run AI Quote Checker
-        </Button>
-        <Button
-          size="lg"
-          variant="outline"
-          onClick={() => onNavigate("/post-job-brief")}
-          className="border-navy/20 text-navy hover:bg-navy hover:text-cream font-mono rounded-xl h-14"
-        >
-          <Search className="h-4 w-4 mr-2" /> Find Trades
-        </Button>
-        <Button
-          size="lg"
-          variant="outline"
-          onClick={onEdit}
-          className="border-navy/20 text-navy hover:bg-navy/5 font-mono rounded-xl h-14"
-        >
-          <Pencil className="h-4 w-4 mr-2" /> Edit Answers
-        </Button>
-        <Button
-          size="lg"
-          variant="outline"
-          onClick={() => onNavigate("/signup/homeowner")}
-          className="border-navy/20 text-navy hover:bg-navy/5 font-mono rounded-xl h-14"
-        >
-          <Save className="h-4 w-4 mr-2" /> Save Project
-        </Button>
-      </div>
+      {/* Journey timeline */}
+      <JourneyTimeline />
     </div>
   );
 };
