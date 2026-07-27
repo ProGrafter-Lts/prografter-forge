@@ -2963,6 +2963,8 @@ export type Database = {
           address: Json | null
           analysis: Json | null
           budget_band: string | null
+          builder_data: Json
+          construction_confidence: number | null
           created_at: string
           current_stage: string | null
           current_step: number
@@ -2981,6 +2983,8 @@ export type Database = {
           address?: Json | null
           analysis?: Json | null
           budget_band?: string | null
+          builder_data?: Json
+          construction_confidence?: number | null
           created_at?: string
           current_stage?: string | null
           current_step?: number
@@ -2999,6 +3003,8 @@ export type Database = {
           address?: Json | null
           analysis?: Json | null
           budget_band?: string | null
+          builder_data?: Json
+          construction_confidence?: number | null
           created_at?: string
           current_stage?: string | null
           current_step?: number

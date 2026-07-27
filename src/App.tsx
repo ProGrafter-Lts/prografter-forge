@@ -69,6 +69,7 @@ const Vetting = lazy(() => import("./pages/Vetting.tsx"));
 const PostJobBrief = lazy(() => import("./pages/PostJobBrief.tsx"));
 const QuoteCheckerAI = lazy(() => import("./pages/QuoteCheckerAI.tsx"));
 const ProjectClarity = lazy(() => import("./pages/ProjectClarity.tsx"));
+const ProjectBuilder = lazy(() => import("./pages/ProjectBuilder.tsx"));
 const ProGrafterIntelligence = lazy(() => import("./pages/ProGrafterIntelligence.tsx"));
 const JobOS = lazy(() => import("./pages/JobOS.tsx"));
 const ReviewSubmit = lazy(() => import("./pages/ReviewSubmit.tsx"));
@@ -206,6 +207,8 @@ const AppRoutes = () => {
             <Route path="/project-cost-guide" element={<QuoteCheckerAI />} />
             <Route path="/project-clarity" element={<ProjectClarity />} />
             <Route path="/project-clarity/:recordId" element={<ProjectClarity />} />
+            <Route path="/project-builder" element={<ProjectBuilder />} />
+            <Route path="/project-builder/:id" element={<ProjectBuilder />} />
            <Route path="/quote-checker-ai" element={<Navigate to="/project-cost-guide" replace />} />
            <Route path="/ai-quote-checker" element={<Navigate to="/quote-checker" replace />} />
            <Route path="/trust" element={<TrustCentre />} />
