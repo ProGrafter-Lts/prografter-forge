@@ -2,7 +2,7 @@
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 
-type Record = {
+type PIRecord = {
   id: string;
   project_type?: string | null;
   address?: any;
