@@ -820,7 +820,7 @@ const AnalysingStep = () => {
 // Results step — Project Clarity readiness dashboard
 // ---------------------------------------------------------------------------
 
-const STAGE_LABEL: Record<string, string> = {
+const STAGE_LABEL: { [k: string]: string } = {
   ideas: "Ideas",
   budgeting: "Budgeting",
   drawings: "Drawings in progress",
