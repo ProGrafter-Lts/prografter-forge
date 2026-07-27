@@ -46,7 +46,7 @@ const TYPICAL: Record<string, [number, number]> = {
   other: [10000, 60000],
 };
 
-function scoreRecord(r: Record) {
+function scoreRecord(r: PIRecord) {
   let score = 0;
   const reasons: string[] = [];
 
@@ -85,7 +85,7 @@ function readinessLabel(score: number) {
   return { label: "Early stage", tone: "amber" };
 }
 
-function budgetGuidance(r: Record) {
+function budgetGuidance(r: PIRecord) {
   if (!r.project_type) return { headline: "Add a project type to benchmark your budget.", detail: "" };
   const range = TYPICAL[r.project_type] ?? TYPICAL.other;
   const band = r.budget_band ? BAND_RANGES[r.budget_band] : null;
@@ -102,7 +102,7 @@ function budgetGuidance(r: Record) {
   };
 }
 
-function nextAction(r: Record, score: number) {
+function nextAction(r: PIRecord, score: number) {
   const docs = r.documents ?? [];
   if (!r.project_type || !r.current_stage) return { title: "Complete your project profile", detail: "A few more details unlock accurate guidance." };
   if (score < 40) return { title: "Firm up your scope", detail: "Sketch what you want and roughly where — you don't need drawings yet." };
@@ -135,9 +135,9 @@ Deno.serve(async (req) => {
     if (error) throw error;
     if (!record) throw new Error("Record not found");
 
-    const { score, reasons } = scoreRecord(record as Record);
+    const { score, reasons } = scoreRecord(record as PIRecord);
     const readiness = readinessLabel(score);
-    const budget = budgetGuidance(record as Record);
+    const budget = budgetGuidance(record as PIRecord);
     const action = nextAction(record as Record, score);
 
     const analysis = {
