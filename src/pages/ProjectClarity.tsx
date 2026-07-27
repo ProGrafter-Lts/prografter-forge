@@ -36,6 +36,8 @@ type Record = {
   budget_band: string | null;
   documents: DocItem[];
   analysis: any | null;
+  builder_data?: any | null;
+  construction_confidence?: number | null;
 };
 
 const PROJECT_TYPES = [
