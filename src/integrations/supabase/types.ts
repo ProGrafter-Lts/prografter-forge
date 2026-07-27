@@ -2958,6 +2958,63 @@ export type Database = {
           },
         ]
       }
+      project_intelligence_records: {
+        Row: {
+          address: Json | null
+          analysis: Json | null
+          budget_band: string | null
+          created_at: string
+          current_stage: string | null
+          current_step: number
+          description: string | null
+          documents: Json
+          edit_token: string
+          id: string
+          project_type: string | null
+          property_age: string | null
+          property_type: string | null
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          address?: Json | null
+          analysis?: Json | null
+          budget_band?: string | null
+          created_at?: string
+          current_stage?: string | null
+          current_step?: number
+          description?: string | null
+          documents?: Json
+          edit_token?: string
+          id?: string
+          project_type?: string | null
+          property_age?: string | null
+          property_type?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          address?: Json | null
+          analysis?: Json | null
+          budget_band?: string | null
+          created_at?: string
+          current_stage?: string | null
+          current_step?: number
+          description?: string | null
+          documents?: Json
+          edit_token?: string
+          id?: string
+          project_type?: string | null
+          property_age?: string | null
+          property_type?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       project_messages: {
         Row: {
           created_at: string
