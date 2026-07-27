@@ -1,49 +1,80 @@
-# Quote Health Check — Staged Multi-Document Pipeline
+# Project Clarity — Homeowner Onboarding Journey
 
-## Root cause (confirmed in code)
-- `QuoteChecker.tsx` line 113 & `AdminAdvancedQuoteReview.tsx` line 154 both do `setFile(e.target.files?.[0])` — **only one file is ever captured**.
-- `create_quote_check_v2` stores a single `_pdf_url`; `quote_checks` has one `pdf_url` column, no supporting-files column.
-- `analyse-quote/index.ts` lines 124-148 download only `record.pdf_url` and send it as one content block in a single AI pass (lines 200-201). No per-document extraction, no merge, no second score.
-- Result: any "extra documents" were never uploaded or read, so the report cannot change. This is a structural gap, not a merge bug.
+A guided, multi-step discovery flow that captures a homeowner's project details, uploads, description, budget and current stage, then analyses readiness and shows a results dashboard. All data is stored in a new "Project Intelligence Record" so the flow is fully resumable and editable, and the components are reusable across the wider ProGrafter OS.
 
-## 1. Storage & schema
-- Migration: add `supporting_files jsonb` (array of `{path, name, mime}`) to `quote_checks`, plus `merged_evidence jsonb`, `document_extractions jsonb`, `supporting_docs_diagnostic jsonb`. (`document_score`/`project_confidence_score` already exist.)
-- Update `create_quote_check_v2` RPC to accept `_supporting_files jsonb default '[]'` and persist it. Keep old signature working (default empty).
+## Route & entry points
 
-## 2. Upload UI (minimal, no redesign)
-- Add an optional multi-file "Supporting documents (payment schedule, drawings, spec, emails…)" dropzone below the main quote upload in `QuoteChecker.tsx` and `AdminAdvancedQuoteReview.tsx`.
-- Upload each to `quote-pdfs`; pass array to the RPC as `_supporting_files`.
-- Main quote stays the single required `pdf_url`.
+- New route: `/project-clarity` (main flow) and `/project-clarity/:recordId` (resume/edit)
+- Homepage: link the existing "I'm planning a project" card to `/project-clarity` (currently points to `/project-cost-guide`, which stays available)
 
-## 3. Edge function — staged workflow (`analyse-quote/index.ts` + new `document-pipeline.ts`)
-Replace the single-pass block with:
-1. **Identify**: for each file (main + supporting) classify type from filename + a light AI/heuristic pass → one of: main_builder_quote, payment_schedule, drawings, specification, scope_of_works, builder_message, homeowner_notes, building_control, planning, structural_calcs, photo_evidence, unknown_supporting_document.
-2. **Extract per document** (separate temperature-0 call per file, chunk long PDFs by page/section and merge chunk facts): use type-specific extraction schemas (main quote fields, payment-schedule fields, drawings/spec fields, homeowner-notes fields).
-3. **Source-tag every fact**: main_quote, payment_schedule_document, drawing, specification, homeowner_note, builder_message, admin_note, ai_inference, not_found.
-4. **Merged evidence record**: combine all documents; each fact keeps its source + status. Store in `merged_evidence`/`document_extractions`.
-5. **Two scores**:
-   - Document Score = checklist run against **main quote evidence only**.
-   - Project Pack Confidence Score = checklist against **merged evidence**; must not decrease when more docs are added.
-   - Persist to `document_score` and `project_confidence_score`.
-6. **Report generated from merged evidence** (not first doc only).
+## Data model (Lovable Cloud)
 
-## 4. Payment-structure logic
-- If payment stages absent from main quote but present in a supporting doc: Document Score → "Needs clarification / missing from main quote"; Project Pack Confidence → "Supplied separately — confirm it forms part of the agreed quote/contract." Wording exactly as specified.
+New table `project_intelligence_records`:
 
-## 5. Report wording & sections (`QuoteHealthCheckReport.tsx`)
-- Tag each line: Included in quote / Supplied separately / Homeowner supplied / Builder confirmed separately / Not found / AI inference.
-- Add "Supporting Documents Reviewed" section: file name, detected type, key facts, whether it affected the report (and why not if unused).
-- Show both scores distinctly.
+- `id uuid pk`, `user_id uuid` (nullable — supports pre-auth guest capture with localStorage handoff)
+- `status text` — `draft` | `analysing` | `complete`
+- `current_step smallint` (0–9)
+- `project_type text`, `address jsonb`, `property_type text`, `property_age text`
+- `current_stage text`, `description text`, `budget_band text`
+- `documents jsonb` (array of `{path, name, size, kind}`)
+- `analysis jsonb` — readiness score, budget guidance, status assessment, next action
+- `created_at`, `updated_at`
 
-## 6. Consistency check
-- Extend existing file_hash consistency logic: when main quote unchanged but supporting docs added, show "Main quote unchanged. Supporting documents added." + which checks changed (e.g. payment: Missing → Supplied separately). If docs uploaded but nothing merged, set an admin warning "Supporting documents uploaded but no evidence was merged into the report. Review extraction."
+RLS: owner-only read/write when `user_id` matches; anon can insert + read/update rows they created via localStorage-stored record id (guarded by a per-row `edit_token`). Grants added per project convention.
 
-## 7. Admin diagnostics (`QuoteAuditDiagnostic.tsx`)
-- Panel: all uploaded docs + detected types, extracted facts per doc with source tags, merged evidence record, both score calculations, checks affected by supporting docs, checks still missing after all docs reviewed.
+Storage: reuse existing `job-brief-files` bucket for uploads under `project-clarity/<recordId>/…`, or add a new `project-clarity` private bucket if the bucket doesn't fit — decided at implementation time based on current bucket policies.
 
-## Success criteria
-Every uploaded doc identified & extracted separately; payment schedules recognised when supplied separately; supporting docs raise Project Pack Confidence while Document Score stays quote-only; report shows quote vs supporting provenance; same quote + added payment structure no longer yields identical result without explanation; admin can inspect why docs did/didn't affect the report; long docs chunked; deterministic (temperature 0) extraction.
+## Screens
 
-## Notes / risks
-- Touches the paid analysis pipeline — keep general_guidance mode and single-file fallback intact so existing/paid checks never break.
-- More AI calls per run (one per document + chunks) → higher latency/cost; runs in background via existing `EdgeRuntime.waitUntil`.
+Single-page shell (`ProjectClarity.tsx`) with an animated step router and sticky progress bar (segmented, 9 steps). Each step is its own component under `src/project-clarity/steps/` so they can be embedded elsewhere later.
+
+1. **Welcome** — Editorial hero, single CTA "Start Project Clarity".
+2. **Project Type** — Grid of large tactile cards (11 options listed in the brief).
+3. **Property Information** — Address (with simple UK postcode helper), property type select, approx age select.
+4. **Current Stage** — 7 selectable pill cards.
+5. **Document Upload** — Drag-and-drop zone with categorised buckets (Drawings, Structural, Quotes, Images), per-file progress, remove/replace.
+6. **Project Description** — Rich textarea + voice-input button that uses the existing Lovable AI transcription pattern (calls a small edge function `transcribe-clarity-voice` wrapping the gateway STT endpoint).
+7. **Budget Expectations** — Segmented slider with 5 bands.
+8. **Review** — Grouped summary cards, each with an Edit button that jumps back to that step without losing data.
+9. **Analysis** — Animated multi-line status ticker ("Reading uploads…", "Assessing readiness…", "Benchmarking budget…") while a new edge function `analyse-project-clarity` returns the results.
+10. **Results Dashboard** — Four hero cards (Readiness Score ring, Budget Guidance, Project Status, Recommended Next Action) + CTA row: View Detailed Report, Run AI Quote Checker, Find Trades, Save Project.
+
+## Analysis logic (`analyse-project-clarity`)
+
+Deterministic scoring first (project type + stage + docs presence + description length + budget band) that produces a 0–100 readiness score, a budget-vs-typical-range verdict, a stage summary and a single recommended next action. Optional Lovable AI polish pass generates the human-readable copy for each of the four dashboard cards. Result written back to `project_intelligence_records.analysis`.
+
+## UX & design
+
+- Palette: existing navy / teal / cream tokens only, no hardcoded colours.
+- Typography: existing `font-heading` and `font-mono` system.
+- Motion: framer-motion-free — use existing Tailwind `animate-fade-in`, `animate-scale-in`, and a small custom transition wrapper for step changes.
+- One primary CTA per step, generous whitespace, mobile-first with `md:` refinements.
+- Progress bar visible on every step from 2 onward; back button on every step (never destructive).
+
+## Reusability
+
+- `useProjectIntelligenceRecord(recordId?)` hook — load/create/update/patch, plus autosave-on-change (debounced).
+- Step components accept `{ record, onPatch, onNext, onBack }` props so they can be reused inside the trade dashboard's brief-builder later.
+- `ReadinessScoreCard`, `BudgetGuidanceCard`, `ProjectStatusCard`, `NextActionCard` exported from `src/project-clarity/components/` for reuse elsewhere in the OS.
+
+## Files to create / change
+
+Created:
+- `supabase/migrations/<ts>_project_intelligence_records.sql`
+- `supabase/functions/analyse-project-clarity/index.ts`
+- `supabase/functions/transcribe-clarity-voice/index.ts`
+- `src/pages/ProjectClarity.tsx`
+- `src/project-clarity/hooks/useProjectIntelligenceRecord.ts`
+- `src/project-clarity/components/*` (progress bar, step shell, upload zone, voice input, result cards)
+- `src/project-clarity/steps/*` (10 step components)
+
+Changed:
+- `src/App.tsx` — register `/project-clarity` and `/project-clarity/:recordId` routes
+- `src/components/WhereAreYouSection.tsx` — repoint "I'm planning a project" CTA to `/project-clarity`
+
+## Out of scope for this pass
+
+- Deep integration into the trade-facing Job Brief flow (kept for a follow-up so we don't destabilise existing brief tables).
+- Payments / paid analysis tiers.
+
+Once the plan is approved I'll implement everything above in one pass, run typecheck, and verify the flow renders end-to-end in the preview.
