@@ -778,13 +778,25 @@ export default function PlanningPipeline() {
       toast({ title: "Ingest failed", description: error.message, variant: "destructive" });
       return;
     }
-    const r = data as { inserted?: number; fetched?: number; councils?: number };
-    toast({
-      title: "Planning ingest complete",
-      description: `${r.inserted ?? 0} new Notts leads from ${r.councils ?? 0} councils (${r.fetched ?? 0} scanned)`,
-    });
-    load();
+    const r = data as { started?: boolean; inserted?: number; fetched?: number; councils?: number };
+    if (r.started) {
+      toast({
+        title: "Planning ingest started",
+        description: `Scanning ${r.councils ?? 8} Notts councils in the background. Leads will appear over the next 30–60s.`,
+      });
+      // Poll refresh a few times so new leads show without a manual reload
+      setTimeout(load, 15000);
+      setTimeout(load, 45000);
+      setTimeout(load, 90000);
+    } else {
+      toast({
+        title: "Planning ingest complete",
+        description: `${r.inserted ?? 0} new Notts leads from ${r.councils ?? 0} councils (${r.fetched ?? 0} scanned)`,
+      });
+      load();
+    }
   };
+
 
   useEffect(() => { load(); }, []);
 
