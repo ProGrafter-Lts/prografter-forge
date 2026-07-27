@@ -193,90 +193,101 @@ serve(async (req) => {
     const url = new URL(req.url);
     const recentDays = Math.min(365, Math.max(7, parseInt(url.searchParams.get("days") ?? "60", 10)));
 
-    let totalFetched = 0;
-    let totalRelevant = 0;
-    let totalInserted = 0;
-    const perCouncil: Record<string, { fetched: number; relevant: number; inserted: number }> = {};
+    // Run ingestion in parallel across councils to avoid the 150s idle timeout.
+    const run = async () => {
+      const perCouncil: Record<string, { fetched: number; relevant: number; inserted: number }> = {};
+      let totalFetched = 0, totalRelevant = 0, totalInserted = 0;
 
-    for (const council of NOTTS_COUNCILS) {
-      const records = await fetchPlanItForAuthority(council, recentDays);
-      totalFetched += records.length;
-      const relevant = records.filter(isRelevant);
-      totalRelevant += relevant.length;
+      const results = await Promise.all(
+        NOTTS_COUNCILS.map(async (council) => {
+          const records = await fetchPlanItForAuthority(council, recentDays);
+          const relevant = records.filter(isRelevant);
 
-      // Dedupe vs existing rows
-      const refs = relevant
-        .map((r) => r.uid ?? r.reference ?? "")
-        .filter(Boolean);
-      const existingSet = new Set<string>();
-      if (refs.length) {
-        const { data: existing } = await supabase
-          .from("planning_leads")
-          .select("application_ref")
-          .eq("council_name", council)
-          .in("application_ref", refs);
-        for (const e of existing ?? []) existingSet.add(e.application_ref);
+          const refs = relevant.map((r) => r.uid ?? r.reference ?? "").filter(Boolean);
+          const existingSet = new Set<string>();
+          if (refs.length) {
+            const { data: existing } = await supabase
+              .from("planning_leads")
+              .select("application_ref")
+              .eq("council_name", council)
+              .in("application_ref", refs);
+            for (const e of existing ?? []) existingSet.add(e.application_ref);
+          }
+
+          const rows = relevant
+            .filter((r) => {
+              const ref = r.uid ?? r.reference;
+              return ref && !existingSet.has(ref);
+            })
+            .map((r) => {
+              const desc = r.description ?? "";
+              const value = estimateValue(desc);
+              const score = scoreLead(r, value.max);
+              const of = r.other_fields ?? {};
+              return {
+                application_ref: r.uid ?? r.reference!,
+                council_name: council,
+                site_address: r.address ?? r.name ?? "Address not provided",
+                postcode: r.postcode ?? null,
+                application_type: r.app_type ?? "Planning Application",
+                status: mapStatus(r.app_state),
+                description: desc,
+                submitted_date: r.start_date ?? null,
+                applicant_name: of.applicant_name ?? null,
+                applicant_address: of.applicant_address ?? null,
+                trades_likely: inferTrades(desc),
+                estimated_value_min: value.min,
+                estimated_value_max: value.max,
+                priority_score: score,
+                pipeline_status: "new",
+                documents_available: !!(r.url ?? r.link),
+                council_application_url: r.url ?? r.link ?? null,
+                notes: of.agent_name
+                  ? `Agent: ${of.agent_name}${of.agent_company ? ` (${of.agent_company})` : ""}${of.agent_address ? ` — ${of.agent_address}` : ""}`
+                  : "",
+                next_action: "",
+              };
+            });
+
+          let inserted = 0;
+          // Insert in chunks to avoid large single payloads
+          for (let i = 0; i < rows.length; i += 100) {
+            const chunk = rows.slice(i, i + 100);
+            const { error } = await supabase.from("planning_leads").insert(chunk);
+            if (error) console.error(`[INSERT] ${council} failed:`, error.message);
+            else inserted += chunk.length;
+          }
+          return { council, fetched: records.length, relevant: relevant.length, inserted };
+        }),
+      );
+
+      for (const r of results) {
+        perCouncil[r.council] = { fetched: r.fetched, relevant: r.relevant, inserted: r.inserted };
+        totalFetched += r.fetched;
+        totalRelevant += r.relevant;
+        totalInserted += r.inserted;
       }
+      console.log("[INGEST-PLANNING] complete", { totalFetched, totalRelevant, totalInserted, perCouncil });
+    };
 
-      const rows = relevant
-        .filter((r) => {
-          const ref = r.uid ?? r.reference;
-          return ref && !existingSet.has(ref);
-        })
-        .map((r) => {
-          const desc = r.description ?? "";
-          const value = estimateValue(desc);
-          const score = scoreLead(r, value.max);
-          const of = r.other_fields ?? {};
-          return {
-            application_ref: r.uid ?? r.reference!,
-            council_name: council,
-            site_address: r.address ?? r.name ?? "Address not provided",
-            postcode: r.postcode ?? null,
-            application_type: r.app_type ?? "Planning Application",
-            status: mapStatus(r.app_state),
-            description: desc,
-            submitted_date: r.start_date ?? null,
-            applicant_name: of.applicant_name ?? null,
-            applicant_address: of.applicant_address ?? null,
-            trades_likely: inferTrades(desc),
-            estimated_value_min: value.min,
-            estimated_value_max: value.max,
-            priority_score: score,
-            pipeline_status: "new",
-            documents_available: !!(r.url ?? r.link),
-            council_application_url: r.url ?? r.link ?? null,
-            notes: of.agent_name
-              ? `Agent: ${of.agent_name}${of.agent_company ? ` (${of.agent_company})` : ""}${of.agent_address ? ` — ${of.agent_address}` : ""}`
-              : "",
-            next_action: "",
-          };
-        });
-
-      perCouncil[council] = { fetched: records.length, relevant: relevant.length, inserted: 0 };
-
-      if (rows.length) {
-        const { error } = await supabase.from("planning_leads").insert(rows);
-        if (error) {
-          console.error(`[INSERT] ${council} failed:`, error.message);
-        } else {
-          totalInserted += rows.length;
-          perCouncil[council].inserted = rows.length;
-        }
-      }
+    // Fire-and-forget so we respond before the 150s idle timeout.
+    // @ts-expect-error EdgeRuntime is provided by Supabase edge runtime
+    if (typeof EdgeRuntime !== "undefined" && EdgeRuntime?.waitUntil) {
+      // @ts-expect-error see above
+      EdgeRuntime.waitUntil(run());
+    } else {
+      run().catch((e) => console.error("[INGEST-PLANNING] bg error:", e));
     }
 
     return new Response(
       JSON.stringify({
         ok: true,
+        started: true,
+        message: "Ingestion running in background. Refresh the leads list in ~30–60s.",
         lookback_days: recentDays,
         councils: NOTTS_COUNCILS.length,
-        fetched: totalFetched,
-        relevant: totalRelevant,
-        inserted: totalInserted,
-        per_council: perCouncil,
       }),
-      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      { status: 202, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (e) {
     console.error("[INGEST-PLANNING] error:", e);
@@ -285,3 +296,4 @@ serve(async (req) => {
     });
   }
 });
+
