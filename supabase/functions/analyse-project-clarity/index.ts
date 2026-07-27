@@ -138,7 +138,7 @@ Deno.serve(async (req) => {
     const { score, reasons } = scoreRecord(record as PIRecord);
     const readiness = readinessLabel(score);
     const budget = budgetGuidance(record as PIRecord);
-    const action = nextAction(record as Record, score);
+    const action = nextAction(record as PIRecord, score);
 
     const analysis = {
       readiness: { score, label: readiness.label, tone: readiness.tone, reasons },
