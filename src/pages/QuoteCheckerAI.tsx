@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { trackEvent } from "@/lib/analytics";
 import Logo from "@/components/Logo";
+import { getProcessGuide, PERMISSIONS_DISCLAIMER } from "@/lib/projectProcessGuide";
 
 // ── ProGrafter Brand Palette ──────────────────────────────────────────────────
 const C = {
@@ -451,6 +452,7 @@ ${form.job_description}${packageBlock}`;
   const userValue = parseMoney(form.estimated_value);
 
   const selectedModule = PROJECT_TYPES.find(t => t.label === form.trade)?.module;
+  const processGuide = getProcessGuide(selectedModule);
   const checkerHref = selectedModule
     ? `/quote-checker?module=${selectedModule}`
     : "/quote-checker";
@@ -780,6 +782,71 @@ ${form.job_description}${packageBlock}`;
                   <div>{renderText(optimisation)}</div>
                 </div>
               )}
+
+              {/* SECTION 2 — What typically happens next */}
+              {processGuide && (
+                <div style={{ marginTop:18, background:C.white,
+                  border:`1px solid ${C.border}`, borderRadius:12, padding:"14px 16px" }}>
+                  <p style={{ fontSize:11, fontWeight:700, color:C.navy,
+                    textTransform:"uppercase", letterSpacing:"0.08em", margin:"0 0 4px" }}>
+                    What typically happens next
+                  </p>
+                  <p style={{ fontSize:11, color:C.secondary, margin:"0 0 12px" }}>
+                    Typical-case guidance for this kind of project — your project may differ.
+                  </p>
+
+                  <p style={{ fontSize:12, fontWeight:700, color:C.deep, margin:"0 0 6px" }}>
+                    Typical stages
+                  </p>
+                  <ol style={{ margin:"0 0 14px", paddingLeft:18 }}>
+                    {processGuide.stages.map((s) => (
+                      <li key={s} style={{ fontSize:13, color:C.body, lineHeight:1.7 }}>{s}</li>
+                    ))}
+                  </ol>
+
+                  <p style={{ fontSize:12, fontWeight:700, color:C.deep, margin:"0 0 6px" }}>
+                    Trades commonly involved, in typical order
+                  </p>
+                  <div style={{ display:"flex", flexWrap:"wrap", gap:6, marginBottom:14 }}>
+                    {processGuide.trades.map((t, i) => (
+                      <span key={t} style={{ fontSize:12, color:C.navy, background:C.cream,
+                        border:`1px solid ${C.border}`, padding:"4px 10px", borderRadius:20 }}>
+                        {i + 1}. {t}
+                      </span>
+                    ))}
+                  </div>
+
+                  <p style={{ fontSize:12, fontWeight:700, color:C.deep, margin:"0 0 4px" }}>
+                    Typical time on site
+                  </p>
+                  <p style={{ fontSize:13, color:C.body, lineHeight:1.7, margin:0 }}>
+                    {processGuide.timeline}
+                  </p>
+                </div>
+              )}
+
+              {/* SECTION 3 — Permissions & regs signal */}
+              {processGuide && (
+                <div style={{ marginTop:14, background:C.amberBg,
+                  border:`1px solid ${C.amberBorder}`, borderRadius:12, padding:"14px 16px" }}>
+                  <p style={{ fontSize:11, fontWeight:700, color:C.navy,
+                    textTransform:"uppercase", letterSpacing:"0.08em", margin:"0 0 8px" }}>
+                    Permissions &amp; regulations signal
+                  </p>
+                  <p style={{ fontSize:14, color:C.deep, lineHeight:1.65, margin:"0 0 8px", fontWeight:600 }}>
+                    Based on what you've told us, this project <strong>typically {processGuide.permissions.likelihood}</strong>{" "}
+                    need {processGuide.permissions.requirement}.
+                  </p>
+                  <p style={{ fontSize:13, color:C.body, lineHeight:1.7, margin:"0 0 10px" }}>
+                    {processGuide.permissions.reason}
+                  </p>
+                  <p style={{ fontSize:12, color:C.secondary, lineHeight:1.6, margin:0,
+                    borderTop:`1px solid ${C.amberBorder}`, paddingTop:10 }}>
+                    {PERMISSIONS_DISCLAIMER}
+                  </p>
+                </div>
+              )}
+
 
               {nextSteps && (
                 <div style={{ marginTop:14, background:C.cream,
