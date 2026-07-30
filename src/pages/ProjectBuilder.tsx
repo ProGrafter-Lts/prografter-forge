@@ -223,6 +223,7 @@ const TOTAL_STEPS = 11; // 10 sections + summary
 export default function ProjectBuilder() {
   const navigate = useNavigate();
   const { id: routeId } = useParams();
+  const ANON_DRAFT_KEY = "progrfater:project-builder:anon-draft";
   const [step, setStep] = useState(1);
   const [data, setData] = useState<BuilderData>({});
   const [recordId, setRecordId] = useState<string | null>(routeId ?? null);
@@ -265,6 +266,18 @@ export default function ProjectBuilder() {
             setData((row as any).builder_data ?? {});
             setStep((row as any).current_step ?? 1);
           }
+        } else {
+          // Anonymous: restore any locally stored draft
+          try {
+            const raw = localStorage.getItem(ANON_DRAFT_KEY);
+            if (raw) {
+              const parsed = JSON.parse(raw);
+              if (parsed?.data) setData(parsed.data);
+              if (parsed?.step) setStep(parsed.step);
+            }
+          } catch (e) {
+            console.error("[project-builder] local draft load failed", e);
+          }
         }
       }
       setLoading(false);
@@ -286,7 +299,15 @@ export default function ProjectBuilder() {
   }, [data, step]);
 
   async function persist(opts: { silent?: boolean } = {}) {
-    if (!userId) return; // anon drafts skipped for now
+    if (!userId) {
+      // Anonymous visitors: keep the draft locally so nothing is lost on refresh.
+      try {
+        localStorage.setItem(ANON_DRAFT_KEY, JSON.stringify({ data, step }));
+      } catch (e) {
+        console.error("[project-builder] local draft save failed", e);
+      }
+      return;
+    }
     setSaving(true);
     try {
       const payload = {
@@ -675,7 +696,8 @@ export default function ProjectBuilder() {
       saving={saving}
       onSave={async () => {
         await persist();
-        toast.success("Project saved.");
+        if (userId) toast.success("Project saved.");
+        else toast.warning("Saved on this device only — sign in to save your project to your account.");
       }}
       onContinue={async (dest) => {
         await persist();
