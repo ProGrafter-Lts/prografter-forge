@@ -347,7 +347,20 @@ const ProjectClarity = () => {
             concern: clarity.concern ?? null,
           });
           if (row.status === "complete") setShowResults(true);
-          else setStep(Math.max(0, row.current_step ?? 0));
+          else {
+            // Records can arrive from other modules (e.g. Project Builder) with a
+            // step number from that flow, so clamp into Clarity's own range and
+            // resume at the first unanswered question.
+            const clarityExisting = Array.isArray(clarity.existing) ? clarity.existing : [];
+            let resume = Math.min(Math.max(0, row.current_step ?? 0), TOTAL_STEPS - 1);
+            if ((row.current_step ?? 0) > TOTAL_STEPS - 1) {
+              if (!row.project_type) resume = 1;
+              else if (!row.current_stage) resume = 2;
+              else if (clarityExisting.length === 0) resume = 3;
+              else resume = 4;
+            }
+            setStep(resume);
+          }
         }
       }
       setLoading(false);
