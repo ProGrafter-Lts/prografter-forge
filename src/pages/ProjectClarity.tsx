@@ -331,11 +331,22 @@ const ProjectClarity = () => {
       const local = readLocal();
       const targetId = recordId ?? local?.id;
       if (targetId) {
-        const { data: row } = await supabase
-          .from("project_intelligence_records")
-          .select("*")
-          .eq("id", targetId)
-          .maybeSingle();
+        const { data: { user } } = await supabase.auth.getUser();
+        let row: any = null;
+        if (user) {
+          const res = await supabase
+            .from("project_intelligence_records")
+            .select("*")
+            .eq("id", targetId)
+            .maybeSingle();
+          row = res.data;
+        }
+        if (!row && local?.token && local.id === targetId) {
+          // Guest access is scoped by the secret edit token issued at creation.
+          const res = await supabase.rpc("pir_guest_get", { _id: targetId, _token: local.token });
+          row = Array.isArray(res.data) ? res.data[0] : res.data;
+        }
+
         if (row) {
           const bd = (row.builder_data as any) ?? {};
           const clarity = bd.clarity ?? {};
