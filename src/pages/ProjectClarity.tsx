@@ -397,6 +397,26 @@ const ProjectClarity = () => {
     return r;
   }, [record, toast]);
 
+  // ---- Persist helper (owner rows via RLS, guest rows via token-scoped RPC) ----
+  const persistRecord = useCallback(
+    async (r: ClarityRecord, patchPayload: Record<string, any>) => {
+      if (r.user_id) {
+        await supabase.from("project_intelligence_records").update(patchPayload).eq("id", r.id);
+        return;
+      }
+      await supabase.rpc("pir_guest_update", {
+        _id: r.id,
+        _token: r.edit_token,
+        _project_type: patchPayload.project_type ?? null,
+        _current_stage: patchPayload.current_stage ?? null,
+        _builder_data: patchPayload.builder_data ?? null,
+        _current_step: patchPayload.current_step ?? null,
+        _status: patchPayload.status ?? null,
+      });
+    },
+    [],
+  );
+
   // ---- Autosave whenever data changes ----
   useEffect(() => {
     if (!record) return;
@@ -413,17 +433,15 @@ const ProjectClarity = () => {
           next_recommended_step: nxt.title,
         },
       };
-      await supabase
-        .from("project_intelligence_records")
-        .update({
-          project_type: data.project_type,
-          current_stage: data.stage,
-          builder_data,
-          current_step: step,
-        })
-        .eq("id", record.id);
+      await persistRecord(record, {
+        project_type: data.project_type,
+        current_stage: data.stage,
+        builder_data,
+        current_step: step,
+      });
     }, 400);
-  }, [data, step, record]);
+  }, [data, step, record, persistRecord]);
+
 
   const patch = (updates: Partial<ClarityData>) => setData((d) => ({ ...d, ...updates }));
 
