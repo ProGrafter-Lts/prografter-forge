@@ -37,6 +37,8 @@ const CREAM = "#FAF8F3";
 const FONT_VERSION_PATHS = {
   DMSans400: "dm-sans@5.2.6/latin-400-normal.ttf",
   DMSans700: "dm-sans@5.2.6/latin-700-normal.ttf",
+  DMSans400Italic: "dm-sans@5.2.6/latin-400-italic.ttf",
+  DMSans700Italic: "dm-sans@5.2.6/latin-700-italic.ttf",
   Bebas400: "bebas-neue@5.2.6/latin-400-normal.ttf",
   DMMono400: "dm-mono@5.2.6/latin-400-normal.ttf",
 };
