@@ -37,6 +37,8 @@ const CREAM = "#FAF8F3";
 const FONT_VERSION_PATHS = {
   DMSans400: "dm-sans@5.2.6/latin-400-normal.ttf",
   DMSans700: "dm-sans@5.2.6/latin-700-normal.ttf",
+  DMSans400Italic: "dm-sans@5.2.6/latin-400-italic.ttf",
+  DMSans700Italic: "dm-sans@5.2.6/latin-700-italic.ttf",
   Bebas400: "bebas-neue@5.2.6/latin-400-normal.ttf",
   DMMono400: "dm-mono@5.2.6/latin-400-normal.ttf",
 };
@@ -61,9 +63,11 @@ const fetchFontDataUri = async (path: string): Promise<string | null> => {
 let fontsReady = false;
 const ensureFonts = async () => {
   if (fontsReady) return;
-  const [dm400, dm700, bebas, mono] = await Promise.all([
+  const [dm400, dm700, dm400i, dm700i, bebas, mono] = await Promise.all([
     fetchFontDataUri(FONT_VERSION_PATHS.DMSans400),
     fetchFontDataUri(FONT_VERSION_PATHS.DMSans700),
+    fetchFontDataUri(FONT_VERSION_PATHS.DMSans400Italic),
+    fetchFontDataUri(FONT_VERSION_PATHS.DMSans700Italic),
     fetchFontDataUri(FONT_VERSION_PATHS.Bebas400),
     fetchFontDataUri(FONT_VERSION_PATHS.DMMono400),
   ]);
@@ -73,15 +77,35 @@ const ensureFonts = async () => {
   Font.register({
     family: "DMSans",
     fonts: [
-      { src: dm400, fontWeight: 400 },
-      { src: dm700, fontWeight: 700 },
+      { src: dm400, fontWeight: 400, fontStyle: "normal" },
+      { src: dm700, fontWeight: 700, fontStyle: "normal" },
+      // Italic variants are required: styles use fontStyle: "italic" and
+      // @react-pdf resolves sources by style first — a missing italic source
+      // throws "Could not resolve font for DMSans, fontWeight 400".
+      { src: dm400i || dm400, fontWeight: 400, fontStyle: "italic" },
+      { src: dm700i || dm700, fontWeight: 700, fontStyle: "italic" },
     ],
   });
-  Font.register({ family: "Bebas", src: bebas });
-  Font.register({ family: "DMMono", src: mono });
+  Font.register({
+    family: "Bebas",
+    fonts: [
+      { src: bebas, fontWeight: 400, fontStyle: "normal" },
+      { src: bebas, fontWeight: 400, fontStyle: "italic" },
+    ],
+  });
+  Font.register({
+    family: "DMMono",
+    fonts: [
+      { src: mono, fontWeight: 400, fontStyle: "normal" },
+      { src: mono, fontWeight: 700, fontStyle: "normal" },
+      { src: mono, fontWeight: 400, fontStyle: "italic" },
+    ],
+  });
   Font.registerHyphenationCallback((word: string) => [word]);
   fontsReady = true;
 };
+
+
 
 
 
