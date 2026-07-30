@@ -5,6 +5,7 @@
 
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.100.1";
+import { isV2Enabled } from "../_shared/quote-checker-v2-flags.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -21,6 +22,13 @@ const MODULE_ANALYSE_FN: Record<string, string> = {
   windows_doors: "analyse-windows-doors-quote",
   landscaping_driveway: "analyse-landscaping-quote",
   plastering_rendering: "analyse-plastering-quote",
+};
+
+// Categories with a Pass 0/1/2 rebuild available, routed through
+// extract-quote instead of their legacy MODULE_ANALYSE_FN entry once their
+// flag in quote-checker-v2-flags.ts is turned on.
+const MODULE_V2_FN: Record<string, string> = {
+  landscaping_driveway: "extract-quote",
 };
 
 Deno.serve(async (req) => {
@@ -83,7 +91,8 @@ Deno.serve(async (req) => {
       })
       .eq("id", pendingId);
 
-    const fnName = MODULE_ANALYSE_FN[pending.module_id];
+    const useV2 = isV2Enabled(pending.module_id) && !!MODULE_V2_FN[pending.module_id];
+    const fnName = useV2 ? MODULE_V2_FN[pending.module_id] : MODULE_ANALYSE_FN[pending.module_id];
     if (!fnName) throw new Error(`No analyse function for module ${pending.module_id}`);
 
     const { data: analysed, error: aErr } = await supabase.functions.invoke(fnName, {
@@ -94,6 +103,7 @@ Deno.serve(async (req) => {
         pdfPath: pending.pdf_path,
         supportingFiles: pending.supporting_files || [],
         userId: pending.user_id,
+        ...(useV2 ? { category: pending.module_id } : {}),
       },
     });
     if (aErr) throw aErr;
