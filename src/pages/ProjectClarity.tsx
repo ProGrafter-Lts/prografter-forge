@@ -467,10 +467,7 @@ const ProjectClarity = () => {
     } else {
       // Finish → mark complete and show results
       if (record) {
-        await supabase
-          .from("project_intelligence_records")
-          .update({ status: "complete" })
-          .eq("id", record.id);
+        await persistRecord(record, { status: "complete" });
       }
       setShowResults(true);
     }
