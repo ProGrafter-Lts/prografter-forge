@@ -450,6 +450,11 @@ ${form.job_description}${packageBlock}`;
   const displayText = result || streaming;
   const userValue = parseMoney(form.estimated_value);
 
+  const selectedModule = PROJECT_TYPES.find(t => t.label === form.trade)?.module;
+  const checkerHref = selectedModule
+    ? `/quote-checker?module=${selectedModule}`
+    : "/quote-checker";
+
   const packageResults = extractPackages(displayText);
   const snapshot = extractSnapshot(displayText);
   // Strip both fenced JSON blocks for markdown rendering
