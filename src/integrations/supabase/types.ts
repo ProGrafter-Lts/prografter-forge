@@ -5600,6 +5600,47 @@ export type Database = {
         Args: { _trade_id: string; _user_id: string }
         Returns: boolean
       }
+      pir_guest_get: {
+        Args: { _id: string; _token: string }
+        Returns: {
+          address: Json | null
+          analysis: Json | null
+          budget_band: string | null
+          builder_data: Json
+          construction_confidence: number | null
+          created_at: string
+          current_stage: string | null
+          current_step: number
+          description: string | null
+          documents: Json
+          edit_token: string
+          id: string
+          project_type: string | null
+          property_age: string | null
+          property_type: string | null
+          status: string
+          updated_at: string
+          user_id: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "project_intelligence_records"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      pir_guest_update: {
+        Args: {
+          _builder_data?: Json
+          _current_stage?: string
+          _current_step?: number
+          _id: string
+          _project_type?: string
+          _status?: string
+          _token: string
+        }
+        Returns: undefined
+      }
       propose_variation: {
         Args: {
           _contract_id: string

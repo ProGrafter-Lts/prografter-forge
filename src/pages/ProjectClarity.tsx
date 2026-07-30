@@ -40,7 +40,9 @@ type ClarityData = {
 
 type ClarityRecord = {
   id: string;
+  user_id: string | null;
   edit_token: string;
+
   status: "draft" | "analysing" | "complete";
   current_step: number;
   project_type: string | null;
@@ -331,11 +333,22 @@ const ProjectClarity = () => {
       const local = readLocal();
       const targetId = recordId ?? local?.id;
       if (targetId) {
-        const { data: row } = await supabase
-          .from("project_intelligence_records")
-          .select("*")
-          .eq("id", targetId)
-          .maybeSingle();
+        const { data: { user } } = await supabase.auth.getUser();
+        let row: any = null;
+        if (user) {
+          const res = await supabase
+            .from("project_intelligence_records")
+            .select("*")
+            .eq("id", targetId)
+            .maybeSingle();
+          row = res.data;
+        }
+        if (!row && local?.token && local.id === targetId) {
+          // Guest access is scoped by the secret edit token issued at creation.
+          const res = await supabase.rpc("pir_guest_get", { _id: targetId, _token: local.token });
+          row = Array.isArray(res.data) ? res.data[0] : res.data;
+        }
+
         if (row) {
           const bd = (row.builder_data as any) ?? {};
           const clarity = bd.clarity ?? {};
@@ -386,6 +399,26 @@ const ProjectClarity = () => {
     return r;
   }, [record, toast]);
 
+  // ---- Persist helper (owner rows via RLS, guest rows via token-scoped RPC) ----
+  const persistRecord = useCallback(
+    async (r: ClarityRecord, patchPayload: Record<string, any>) => {
+      if (r.user_id) {
+        await supabase.from("project_intelligence_records").update(patchPayload as any).eq("id", r.id);
+        return;
+      }
+      await supabase.rpc("pir_guest_update", {
+        _id: r.id,
+        _token: r.edit_token,
+        _project_type: patchPayload.project_type ?? null,
+        _current_stage: patchPayload.current_stage ?? null,
+        _builder_data: patchPayload.builder_data ?? null,
+        _current_step: patchPayload.current_step ?? null,
+        _status: patchPayload.status ?? null,
+      });
+    },
+    [],
+  );
+
   // ---- Autosave whenever data changes ----
   useEffect(() => {
     if (!record) return;
@@ -402,17 +435,15 @@ const ProjectClarity = () => {
           next_recommended_step: nxt.title,
         },
       };
-      await supabase
-        .from("project_intelligence_records")
-        .update({
-          project_type: data.project_type,
-          current_stage: data.stage,
-          builder_data,
-          current_step: step,
-        })
-        .eq("id", record.id);
+      await persistRecord(record, {
+        project_type: data.project_type,
+        current_stage: data.stage,
+        builder_data,
+        current_step: step,
+      });
     }, 400);
-  }, [data, step, record]);
+  }, [data, step, record, persistRecord]);
+
 
   const patch = (updates: Partial<ClarityData>) => setData((d) => ({ ...d, ...updates }));
 
@@ -436,10 +467,7 @@ const ProjectClarity = () => {
     } else {
       // Finish → mark complete and show results
       if (record) {
-        await supabase
-          .from("project_intelligence_records")
-          .update({ status: "complete" })
-          .eq("id", record.id);
+        await persistRecord(record, { status: "complete" });
       }
       setShowResults(true);
     }
