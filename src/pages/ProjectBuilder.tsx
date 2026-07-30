@@ -696,7 +696,8 @@ export default function ProjectBuilder() {
       saving={saving}
       onSave={async () => {
         await persist();
-        toast.success("Project saved.");
+        if (userId) toast.success("Project saved.");
+        else toast.warning("Saved on this device only — sign in to save your project to your account.");
       }}
       onContinue={async (dest) => {
         await persist();
