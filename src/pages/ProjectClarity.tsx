@@ -40,7 +40,9 @@ type ClarityData = {
 
 type ClarityRecord = {
   id: string;
+  user_id: string | null;
   edit_token: string;
+
   status: "draft" | "analysing" | "complete";
   current_step: number;
   project_type: string | null;
