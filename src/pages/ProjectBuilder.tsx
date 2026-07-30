@@ -266,6 +266,18 @@ export default function ProjectBuilder() {
             setData((row as any).builder_data ?? {});
             setStep((row as any).current_step ?? 1);
           }
+        } else {
+          // Anonymous: restore any locally stored draft
+          try {
+            const raw = localStorage.getItem(ANON_DRAFT_KEY);
+            if (raw) {
+              const parsed = JSON.parse(raw);
+              if (parsed?.data) setData(parsed.data);
+              if (parsed?.step) setStep(parsed.step);
+            }
+          } catch (e) {
+            console.error("[project-builder] local draft load failed", e);
+          }
         }
       }
       setLoading(false);
