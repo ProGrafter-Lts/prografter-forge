@@ -2353,6 +2353,54 @@ export type Database = {
         }
         Relationships: []
       }
+      plan_my_project_submissions: {
+        Row: {
+          answers: Json
+          category: string
+          category_label: string | null
+          considerations: Json
+          cost_band_high: number | null
+          cost_band_label: string | null
+          cost_band_low: number | null
+          created_at: string
+          drivers: Json
+          email: string | null
+          exclusions_acknowledged: boolean
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          answers?: Json
+          category: string
+          category_label?: string | null
+          considerations?: Json
+          cost_band_high?: number | null
+          cost_band_label?: string | null
+          cost_band_low?: number | null
+          created_at?: string
+          drivers?: Json
+          email?: string | null
+          exclusions_acknowledged?: boolean
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          answers?: Json
+          category?: string
+          category_label?: string | null
+          considerations?: Json
+          cost_band_high?: number | null
+          cost_band_label?: string | null
+          cost_band_low?: number | null
+          created_at?: string
+          drivers?: Json
+          email?: string | null
+          exclusions_acknowledged?: boolean
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       planning_access: {
         Row: {
           access_level: string
