@@ -286,7 +286,15 @@ export default function ProjectBuilder() {
   }, [data, step]);
 
   async function persist(opts: { silent?: boolean } = {}) {
-    if (!userId) return; // anon drafts skipped for now
+    if (!userId) {
+      // Anonymous visitors: keep the draft locally so nothing is lost on refresh.
+      try {
+        localStorage.setItem(ANON_DRAFT_KEY, JSON.stringify({ data, step }));
+      } catch (e) {
+        console.error("[project-builder] local draft save failed", e);
+      }
+      return;
+    }
     setSaving(true);
     try {
       const payload = {
