@@ -29,9 +29,17 @@ const C = {
   redBorder:  "#FECACA",
 };
 
-const TRADES = [
-  "Electrician","Gas Engineer","General Builder","Plasterer",
-  "Carpenter / Joiner","Tiler","Decorator / Painter","Roofer","Plumber","Landscaper",
+const PROJECT_TYPES: { label: string; module: string }[] = [
+  { label: "Extension / structural building work", module: "extension_building" },
+  { label: "Boiler / heating", module: "boiler_heating" },
+  { label: "Electrical / rewire", module: "electrical_rewire" },
+  { label: "Bathroom", module: "bathroom" },
+  { label: "Kitchen", module: "kitchen" },
+  { label: "Roofing", module: "roofing" },
+  { label: "Windows & doors", module: "windows_doors" },
+  { label: "Plastering / rendering", module: "plastering_rendering" },
+  { label: "Landscaping / driveway", module: "landscaping_driveway" },
+  { label: "General building / not sure", module: "general_building" },
 ];
 
 const REGIONS = [
@@ -442,6 +450,11 @@ ${form.job_description}${packageBlock}`;
   const displayText = result || streaming;
   const userValue = parseMoney(form.estimated_value);
 
+  const selectedModule = PROJECT_TYPES.find(t => t.label === form.trade)?.module;
+  const checkerHref = selectedModule
+    ? `/quote-checker?module=${selectedModule}`
+    : "/quote-checker";
+
   const packageResults = extractPackages(displayText);
   const snapshot = extractSnapshot(displayText);
   // Strip both fenced JSON blocks for markdown rendering
@@ -481,9 +494,6 @@ ${form.job_description}${packageBlock}`;
             padding:"4px 11px", borderRadius:20, fontWeight:700, letterSpacing:"0.05em",
             boxShadow:"0 2px 10px rgba(20,168,161,0.4)" }}>
             CONSTRUCTION INTELLIGENCE
-          </span>
-          <span style={{ fontSize:12, color:"rgba(245,240,232,0.55)", letterSpacing:"0.06em" }}>
-            QUOTE CLARITY SCORE
           </span>
         </div>
       </div>
@@ -882,10 +892,10 @@ ${form.job_description}${packageBlock}`;
             </div>
 
             <G2>
-              <F label="Type of trade" req err={errors.trade}>
+              <F label="Type of project" req err={errors.trade}>
                 <select style={inp(!!errors.trade)} value={form.trade} onChange={upd("trade")}>
-                  <option value="">Select trade...</option>
-                  {TRADES.map(t=><option key={t} value={t}>{t}</option>)}
+                  <option value="">Select project type...</option>
+                  {PROJECT_TYPES.map(t=><option key={t.module} value={t.label}>{t.label}</option>)}
                 </select>
               </F>
               <F label="Your region" req err={errors.region}>
@@ -1020,10 +1030,12 @@ ${form.job_description}${packageBlock}`;
                 { n:"01", title:"Describe the project", body:"A short scope description — plus your expected budget if you have one." },
                 { n:"02", title:"Add package allowances", body:"Optional — but the more you add, the higher the confidence per package." },
                 { n:"03", title:"Get a construction opinion", body:"Realistic range, ProGrafter opinion and package-by-package Fair / Low / High." },
-                { n:"04", title:"Take it further", body:"Once quoted, run the winning quotation through the AI Quote Checker." },
+                { n:"04", title:"Take it further", body:"Once quoted, run the winning quotation through the AI Quote Checker.", href: checkerHref },
               ].map(s => (
-                <div key={s.n} style={{ background:C.white, border:`1px solid ${C.border}`,
+                <a key={s.n} href={(s as { href?: string }).href ?? undefined}
+                  style={{ background:C.white, border:`1px solid ${C.border}`,
                   borderRadius:14, padding:"18px 16px", position:"relative", overflow:"hidden",
+                  display:"block", textDecoration:"none",
                   boxShadow:"0 4px 16px rgba(15,34,56,0.05)" }}>
                   <div style={{ width:36, height:36, borderRadius:10, marginBottom:10,
                     display:"flex", alignItems:"center", justifyContent:"center",
@@ -1031,7 +1043,7 @@ ${form.job_description}${packageBlock}`;
                     background:`linear-gradient(135deg, ${C.navy}, ${C.teal})` }}>{s.n}</div>
                   <p className="font-heading" style={{ fontSize:16, color:C.navy, margin:"0 0 4px", letterSpacing:"0.01em" }}>{s.title}</p>
                   <p style={{ fontSize:12, color:C.secondary, margin:0, lineHeight:1.55 }}>{s.body}</p>
-                </div>
+                </a>
               ))}
             </div>
           </div>
