@@ -452,6 +452,7 @@ ${form.job_description}${packageBlock}`;
   const userValue = parseMoney(form.estimated_value);
 
   const selectedModule = PROJECT_TYPES.find(t => t.label === form.trade)?.module;
+  const processGuide = getProcessGuide(selectedModule);
   const checkerHref = selectedModule
     ? `/quote-checker?module=${selectedModule}`
     : "/quote-checker";
