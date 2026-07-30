@@ -7,7 +7,7 @@ type Card = {
 };
 
 const CARDS: Card[] = [
-  { title: "I’m planning a project", cta: "Start Project Clarity", route: "/project-clarity" },
+  { title: "I’m planning a project", cta: "Get a Project Cost Guide", route: "/project-cost-guide" },
   { title: "I already have a quote", cta: "Run Quote Checker", route: "/quote-checker" },
   { title: "I need trusted trades", cta: "Post a Project", route: "/post-job-brief" },
   { title: "I’m a trade", cta: "Join ProGrafter", route: "/signup/trade" },
