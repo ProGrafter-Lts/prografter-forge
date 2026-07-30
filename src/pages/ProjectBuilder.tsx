@@ -223,6 +223,7 @@ const TOTAL_STEPS = 11; // 10 sections + summary
 export default function ProjectBuilder() {
   const navigate = useNavigate();
   const { id: routeId } = useParams();
+  const ANON_DRAFT_KEY = "progrfater:project-builder:anon-draft";
   const [step, setStep] = useState(1);
   const [data, setData] = useState<BuilderData>({});
   const [recordId, setRecordId] = useState<string | null>(routeId ?? null);
