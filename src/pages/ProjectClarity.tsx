@@ -403,7 +403,7 @@ const ProjectClarity = () => {
   const persistRecord = useCallback(
     async (r: ClarityRecord, patchPayload: Record<string, any>) => {
       if (r.user_id) {
-        await supabase.from("project_intelligence_records").update(patchPayload).eq("id", r.id);
+        await supabase.from("project_intelligence_records").update(patchPayload as any).eq("id", r.id);
         return;
       }
       await supabase.rpc("pir_guest_update", {
