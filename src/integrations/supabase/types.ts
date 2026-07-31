@@ -5600,6 +5600,13 @@ export type Database = {
         Args: { _trade_id: string; _user_id: string }
         Returns: boolean
       }
+      pir_guest_create: {
+        Args: never
+        Returns: {
+          edit_token: string
+          id: string
+        }[]
+      }
       pir_guest_get: {
         Args: { _id: string; _token: string }
         Returns: {
