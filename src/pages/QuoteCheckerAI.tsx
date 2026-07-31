@@ -263,12 +263,15 @@ export default function QuoteCheckerAI() {
     }
     setWaitlistSaving(true);
     setWaitlistError(null);
-    const { error } = await supabase.from("early_signups" as any).insert({
-      name: "Cost Guide lead",
+    const pc = normalisePostcode(form.postcode).slice(0, 12);
+    const { error } = await supabase.from("cost_guide_area_waitlist" as any).insert({
       email,
-      postcode: normalisePostcode(form.postcode).slice(0, 12),
-      user_type: "homeowner",
+      postcode: pc,
+      outcode: outcodeOf(form.postcode) || null,
+      region: form.region || null,
+      project_type: form.trade || null,
     } as any);
+
     setWaitlistSaving(false);
     if (error) {
       setWaitlistError("Couldn't save that just now — please try again.");
