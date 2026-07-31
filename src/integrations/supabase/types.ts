@@ -866,6 +866,42 @@ export type Database = {
           },
         ]
       }
+      cost_guide_area_waitlist: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          notified: boolean
+          outcode: string | null
+          postcode: string
+          project_type: string | null
+          region: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          notified?: boolean
+          outcode?: string | null
+          postcode: string
+          project_type?: string | null
+          region?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          notified?: boolean
+          outcode?: string | null
+          postcode?: string
+          project_type?: string | null
+          region?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       customer_call_insights: {
         Row: {
           agent_training_note: string | null
