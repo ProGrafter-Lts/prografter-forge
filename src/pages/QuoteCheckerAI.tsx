@@ -1021,6 +1021,15 @@ ${form.job_description}${packageBlock}`;
             </G2>
 
             <G2>
+              <F label="Project postcode" req err={errors.postcode}
+                hint="Used to check whether we're matching trades in your area yet">
+                <input type="text" style={inp(!!errors.postcode)} value={form.postcode}
+                  onChange={upd("postcode")} placeholder="e.g. NG1 5FS" maxLength={12} />
+              </F>
+              <div />
+            </G2>
+
+            <G2>
               <F label="Property type" hint="Optional but helps with context">
                 <select style={inp()} value={form.property_type} onChange={upd("property_type")}>
                   <option value="">Select...</option>
