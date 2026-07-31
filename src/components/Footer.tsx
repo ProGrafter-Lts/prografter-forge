@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import Logo from "@/components/Logo";
 
 const Footer = () => {
@@ -17,7 +18,7 @@ const Footer = () => {
           <Logo variant="light" className="h-10 w-auto" />
 
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
-            <a href="/trust" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">Trust Centre</a>
+            <Link to="/trust" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">Trust Centre</Link>
             <a href="/about" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">About</a>
             <a href="/privacy" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">Privacy</a>
             <a href="/terms" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">Terms</a>
