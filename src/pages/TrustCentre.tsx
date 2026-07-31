@@ -85,7 +85,7 @@ const TrustCentre = () => {
         title="Trust you can"
         highlight="actually verify."
         intro="ProGrafter isn't a directory that sells leads. We restore trust to domestic construction through genuine verification, transparent pricing and intelligent guidance. Here's exactly how — and how you can check it."
-        primaryCta={{ label: "Check a Quote Free", href: "/quote-checker" }}
+        primaryCta={{ label: "Check a Quote", href: "/quote-checker" }}
         secondaryCta={{ label: "How It Works", href: "/how-it-works" }}
         ghost="TRUST"
       />
@@ -124,8 +124,8 @@ const TrustCentre = () => {
 
       <ContentCta
         title="See trust in action"
-        intro="Upload a builder's quote and get an instant, construction-aware Clarity Score — free, no account needed."
-        primary={{ label: "Check My Quote", href: "/quote-checker" }}
+        intro="Upload a builder's quote for a detailed, construction-aware AI review. One-off fee from £19 to £59 depending on the project type."
+        primary={{ label: "Check a Quote", href: "/quote-checker" }}
         secondary={{ label: "Read the FAQ", href: "/faq" }}
       />
       <Footer />

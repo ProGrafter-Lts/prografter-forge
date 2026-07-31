@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import Logo from "@/components/Logo";
 
 type NavItem = { label: string; href: string; desc?: string };
@@ -75,14 +76,14 @@ const Navbar = () => {
                 <div className="absolute left-0 top-full pt-2 w-64 animate-fade-in">
                   <div className="rounded-2xl border border-border/60 bg-cream shadow-xl p-2">
                     {g.items.map((it) => (
-                      <a
+                      <Link
                         key={it.label}
-                        href={it.href}
+                        to={it.href}
                         className="block rounded-xl px-3 py-2.5 hover:bg-teal/10 transition-colors"
                       >
                         <div className="font-mono text-sm text-navy">{it.label}</div>
                         {it.desc && <div className="font-body text-xs text-secondary-text mt-0.5">{it.desc}</div>}
-                      </a>
+                      </Link>
                     ))}
                   </div>
                 </div>
@@ -131,9 +132,9 @@ const Navbar = () => {
               {mobileGroup === g.label && (
                 <div className="pb-2 pl-3 flex flex-col gap-1">
                   {g.items.map((it) => (
-                    <a key={it.label} href={it.href} className="py-2 font-mono text-sm text-body-text" onClick={() => setMenuOpen(false)}>
+                    <Link key={it.label} to={it.href} className="py-2 font-mono text-sm text-body-text" onClick={() => setMenuOpen(false)}>
                       {it.label}
-                    </a>
+                    </Link>
                   ))}
                 </div>
               )}
