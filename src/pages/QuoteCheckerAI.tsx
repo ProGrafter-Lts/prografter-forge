@@ -987,10 +987,18 @@ ${form.job_description}${packageBlock}`;
                 ) : (
                   <div style={{ flex:"1 1 320px", minWidth:260 }}>
                     {waitlistDone ? (
-                      <p style={{ fontSize:13, color:C.body, margin:0 }}>
-                        Thanks — we'll email you when ProGrafter starts matching trades in {form.region}.
-                      </p>
+                      <div style={{ background:"rgba(13,148,136,0.08)", border:`1.5px solid ${C.teal}`,
+                        borderRadius:10, padding:"14px 16px" }}>
+                        <p style={{ fontSize:14, fontWeight:700, color:C.teal, margin:"0 0 4px" }}>
+                          ✓ You're on the list
+                        </p>
+                        <p style={{ fontSize:13, color:C.body, margin:0 }}>
+                          We've saved <strong>{waitlistEmail.trim()}</strong> and we'll email you as soon as
+                          ProGrafter starts matching verified trades in {form.region}. No spam, one email only.
+                        </p>
+                      </div>
                     ) : (
+
                       <>
                         <p style={{ fontSize:13, color:C.body, margin:"0 0 8px" }}>
                           We're not matching trades in your area yet. Leave your email and we'll let you
