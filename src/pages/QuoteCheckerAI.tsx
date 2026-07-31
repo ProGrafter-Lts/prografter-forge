@@ -970,16 +970,53 @@ ${form.job_description}${packageBlock}`;
                     fontWeight:600, cursor:"pointer" }}>
                   Assess another project
                 </button>
-                <span style={{ fontSize:12, color:C.secondary }}>
-                  Ready to find a vetted trade?
-                </span>
-                <Link to="/post-job-brief" style={{ background:"none", border:`1.5px solid ${C.teal}`,
-                  color:C.teal, borderRadius:8, padding:"8px 16px",
-                  fontSize:13, fontWeight:600, cursor:"pointer", textDecoration:"none" }}>
-                  Post a job on ProGrafter →
-                </Link>
+                {inLiveArea ? (
+                  <>
+                    <span style={{ fontSize:12, color:C.secondary }}>
+                      Ready to find a vetted trade?
+                    </span>
+                    <Link to="/post-job-brief" style={{ background:"none", border:`1.5px solid ${C.teal}`,
+                      color:C.teal, borderRadius:8, padding:"8px 16px",
+                      fontSize:13, fontWeight:600, cursor:"pointer", textDecoration:"none" }}>
+                      Post this job and get matched to verified local trades →
+                    </Link>
+                  </>
+                ) : (
+                  <div style={{ flex:"1 1 320px", minWidth:260 }}>
+                    {waitlistDone ? (
+                      <p style={{ fontSize:13, color:C.body, margin:0 }}>
+                        Thanks — we'll email you when ProGrafter starts matching trades in {form.region}.
+                      </p>
+                    ) : (
+                      <>
+                        <p style={{ fontSize:13, color:C.body, margin:"0 0 8px" }}>
+                          We're not matching trades in your area yet. Leave your email and we'll let you
+                          know when ProGrafter expands to {form.region}.
+                        </p>
+                        <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+                          <input type="email" value={waitlistEmail}
+                            onChange={(e)=>setWaitlistEmail(e.target.value)}
+                            placeholder="you@example.com" maxLength={255}
+                            style={{ flex:"1 1 200px", minWidth:180, padding:"9px 12px", fontSize:13,
+                              border:`1.5px solid ${C.border}`, borderRadius:8, background:C.white,
+                              color:C.body }} />
+                          <button onClick={joinWaitlist} disabled={waitlistSaving}
+                            style={{ background:C.teal, color:C.white, border:"none", borderRadius:8,
+                              padding:"9px 18px", fontSize:13, fontWeight:600,
+                              cursor: waitlistSaving ? "default" : "pointer", opacity: waitlistSaving ? 0.7 : 1 }}>
+                            {waitlistSaving ? "Saving…" : "Notify me"}
+                          </button>
+                        </div>
+                        {waitlistError && (
+                          <p style={{ fontSize:12, color:"#B91C1C", margin:"6px 0 0" }}>{waitlistError}</p>
+                        )}
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
             )}
+
           </div>
         )}
 
