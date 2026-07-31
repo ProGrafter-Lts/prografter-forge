@@ -384,20 +384,32 @@ const ProjectClarity = () => {
   const ensureRecord = useCallback(async (): Promise<ClarityRecord | null> => {
     if (record) return record;
     const { data: { user } } = await supabase.auth.getUser();
-    const { data: row, error } = await supabase
-      .from("project_intelligence_records")
-      .insert({ user_id: user?.id ?? null, current_step: 1 })
-      .select()
-      .single();
-    if (error) {
-      toast({ title: "Couldn't start", description: error.message, variant: "destructive" });
+    // Guests have no SELECT policy, so creation goes through a token-issuing RPC.
+    const { data: created, error } = await supabase.rpc("pir_guest_create");
+    const head = Array.isArray(created) ? created[0] : (created as any);
+    if (error || !head) {
+      toast({
+        title: "Couldn't start",
+        description: error?.message ?? "Please try again.",
+        variant: "destructive",
+      });
       return null;
     }
-    const r = row as any as ClarityRecord;
+    const r = {
+      id: head.id,
+      edit_token: head.edit_token,
+      user_id: user?.id ?? null,
+      current_step: 1,
+      status: "draft",
+      project_type: null,
+      current_stage: null,
+      builder_data: {},
+    } as any as ClarityRecord;
     setRecord(r);
     saveLocal(r.id, r.edit_token);
     return r;
   }, [record, toast]);
+
 
   // ---- Persist helper (owner rows via RLS, guest rows via token-scoped RPC) ----
   const persistRecord = useCallback(
