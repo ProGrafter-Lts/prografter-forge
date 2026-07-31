@@ -212,9 +212,24 @@ const extractSnapshot = (text: string): SnapshotItem[] => {
   } catch { return []; }
 };
 
+// Live matching area — East Midlands outcodes (same list used for trade geography)
+const LIVE_AREA_PREFIXES = ["NG", "DE", "LE", "LN", "S", "DN"] as const;
+const normalisePostcode = (pc: string) => pc.trim().toUpperCase().replace(/\s+/g, "");
+const outcodeOf = (pc: string) => {
+  const p = normalisePostcode(pc);
+  const m = p.match(/^([A-Z]{1,2}\d[A-Z\d]?)/);
+  return m ? m[1] : "";
+};
+const isInLiveArea = (pc: string) => {
+  const out = outcodeOf(pc);
+  if (!out) return false;
+  const letters = out.match(/^[A-Z]+/)?.[0] || "";
+  return LIVE_AREA_PREFIXES.includes(letters as any);
+};
+
 export default function QuoteCheckerAI() {
   const [form, setForm] = useState({
-    trade:"", region:"East Midlands", property_type:"",
+    trade:"", region:"East Midlands", property_type:"", postcode:"",
     job_description:"", estimated_value:"",
   });
   const [packages, setPackages] = useState<PackageRow[]>([]);
@@ -226,6 +241,11 @@ export default function QuoteCheckerAI() {
   const [rangeLow, setRangeLow] = useState<number | null>(null);
   const [rangeHigh, setRangeHigh] = useState<number | null>(null);
   const [budgetConfidence, setBudgetConfidence] = useState<string | null>(null);
+  const [inLiveArea, setInLiveArea] = useState(true);
+  const [waitlistEmail, setWaitlistEmail] = useState("");
+  const [waitlistSaving, setWaitlistSaving] = useState(false);
+  const [waitlistDone, setWaitlistDone] = useState(false);
+  const [waitlistError, setWaitlistError] = useState<string | null>(null);
 
   const upd = (k: string) => (e: any) => setForm(p => ({ ...p, [k]: e.target.value }));
 
@@ -235,13 +255,38 @@ export default function QuoteCheckerAI() {
   const removePackage = (i: number) =>
     setPackages(p => p.filter((_, idx) => idx !== i));
 
+  const joinWaitlist = async () => {
+    const email = waitlistEmail.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 255) {
+      setWaitlistError("Please enter a valid email address");
+      return;
+    }
+    setWaitlistSaving(true);
+    setWaitlistError(null);
+    const { error } = await supabase.from("early_signups" as any).insert({
+      name: "Cost Guide lead",
+      email,
+      postcode: normalisePostcode(form.postcode).slice(0, 12),
+      user_type: "homeowner",
+    } as any);
+    setWaitlistSaving(false);
+    if (error) {
+      setWaitlistError("Couldn't save that just now — please try again.");
+      return;
+    }
+    setWaitlistDone(true);
+    trackEvent("cost_guide_out_of_area_waitlist", { region: form.region });
+  };
+
   const validate = () => {
     const e: Record<string,string> = {};
     if (!form.trade) e.trade = "Required";
     if (!form.region) e.region = "Required";
+    if (!outcodeOf(form.postcode)) e.postcode = "Enter a valid UK postcode";
     if (form.job_description.trim().length < 30) e.job_description = "Please describe the project in more detail";
     return e;
   };
+
 
   const analyse = async () => {
     const e = validate();
