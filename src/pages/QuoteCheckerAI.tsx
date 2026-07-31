@@ -293,6 +293,9 @@ export default function QuoteCheckerAI() {
     setErrors(e);
     if (Object.keys(e).length) return;
 
+    setInLiveArea(isInLiveArea(form.postcode));
+    setWaitlistDone(false);
+    setWaitlistError(null);
     setLoading(true);
     setResult(null);
     setStreaming("");
