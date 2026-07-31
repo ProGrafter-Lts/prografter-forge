@@ -212,9 +212,24 @@ const extractSnapshot = (text: string): SnapshotItem[] => {
   } catch { return []; }
 };
 
+// Live matching area — East Midlands outcodes (same list used for trade geography)
+const LIVE_AREA_PREFIXES = ["NG", "DE", "LE", "LN", "S", "DN"] as const;
+const normalisePostcode = (pc: string) => pc.trim().toUpperCase().replace(/\s+/g, "");
+const outcodeOf = (pc: string) => {
+  const p = normalisePostcode(pc);
+  const m = p.match(/^([A-Z]{1,2}\d[A-Z\d]?)/);
+  return m ? m[1] : "";
+};
+const isInLiveArea = (pc: string) => {
+  const out = outcodeOf(pc);
+  if (!out) return false;
+  const letters = out.match(/^[A-Z]+/)?.[0] || "";
+  return LIVE_AREA_PREFIXES.includes(letters as any);
+};
+
 export default function QuoteCheckerAI() {
   const [form, setForm] = useState({
-    trade:"", region:"East Midlands", property_type:"",
+    trade:"", region:"East Midlands", property_type:"", postcode:"",
     job_description:"", estimated_value:"",
   });
   const [packages, setPackages] = useState<PackageRow[]>([]);
@@ -226,6 +241,11 @@ export default function QuoteCheckerAI() {
   const [rangeLow, setRangeLow] = useState<number | null>(null);
   const [rangeHigh, setRangeHigh] = useState<number | null>(null);
   const [budgetConfidence, setBudgetConfidence] = useState<string | null>(null);
+  const [inLiveArea, setInLiveArea] = useState(true);
+  const [waitlistEmail, setWaitlistEmail] = useState("");
+  const [waitlistSaving, setWaitlistSaving] = useState(false);
+  const [waitlistDone, setWaitlistDone] = useState(false);
+  const [waitlistError, setWaitlistError] = useState<string | null>(null);
 
   const upd = (k: string) => (e: any) => setForm(p => ({ ...p, [k]: e.target.value }));
 
@@ -235,19 +255,47 @@ export default function QuoteCheckerAI() {
   const removePackage = (i: number) =>
     setPackages(p => p.filter((_, idx) => idx !== i));
 
+  const joinWaitlist = async () => {
+    const email = waitlistEmail.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 255) {
+      setWaitlistError("Please enter a valid email address");
+      return;
+    }
+    setWaitlistSaving(true);
+    setWaitlistError(null);
+    const { error } = await supabase.from("early_signups" as any).insert({
+      name: "Cost Guide lead",
+      email,
+      postcode: normalisePostcode(form.postcode).slice(0, 12),
+      user_type: "homeowner",
+    } as any);
+    setWaitlistSaving(false);
+    if (error) {
+      setWaitlistError("Couldn't save that just now — please try again.");
+      return;
+    }
+    setWaitlistDone(true);
+    trackEvent("cost_guide_out_of_area_waitlist", { region: form.region });
+  };
+
   const validate = () => {
     const e: Record<string,string> = {};
     if (!form.trade) e.trade = "Required";
     if (!form.region) e.region = "Required";
+    if (!outcodeOf(form.postcode)) e.postcode = "Enter a valid UK postcode";
     if (form.job_description.trim().length < 30) e.job_description = "Please describe the project in more detail";
     return e;
   };
+
 
   const analyse = async () => {
     const e = validate();
     setErrors(e);
     if (Object.keys(e).length) return;
 
+    setInLiveArea(isInLiveArea(form.postcode));
+    setWaitlistDone(false);
+    setWaitlistError(null);
     setLoading(true);
     setResult(null);
     setStreaming("");
@@ -922,16 +970,53 @@ ${form.job_description}${packageBlock}`;
                     fontWeight:600, cursor:"pointer" }}>
                   Assess another project
                 </button>
-                <span style={{ fontSize:12, color:C.secondary }}>
-                  Ready to find a vetted trade?
-                </span>
-                <Link to="/post-job-brief" style={{ background:"none", border:`1.5px solid ${C.teal}`,
-                  color:C.teal, borderRadius:8, padding:"8px 16px",
-                  fontSize:13, fontWeight:600, cursor:"pointer", textDecoration:"none" }}>
-                  Post a job on ProGrafter →
-                </Link>
+                {inLiveArea ? (
+                  <>
+                    <span style={{ fontSize:12, color:C.secondary }}>
+                      Ready to find a vetted trade?
+                    </span>
+                    <Link to="/post-job-brief" style={{ background:"none", border:`1.5px solid ${C.teal}`,
+                      color:C.teal, borderRadius:8, padding:"8px 16px",
+                      fontSize:13, fontWeight:600, cursor:"pointer", textDecoration:"none" }}>
+                      Post this job and get matched to verified local trades →
+                    </Link>
+                  </>
+                ) : (
+                  <div style={{ flex:"1 1 320px", minWidth:260 }}>
+                    {waitlistDone ? (
+                      <p style={{ fontSize:13, color:C.body, margin:0 }}>
+                        Thanks — we'll email you when ProGrafter starts matching trades in {form.region}.
+                      </p>
+                    ) : (
+                      <>
+                        <p style={{ fontSize:13, color:C.body, margin:"0 0 8px" }}>
+                          We're not matching trades in your area yet. Leave your email and we'll let you
+                          know when ProGrafter expands to {form.region}.
+                        </p>
+                        <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+                          <input type="email" value={waitlistEmail}
+                            onChange={(e)=>setWaitlistEmail(e.target.value)}
+                            placeholder="you@example.com" maxLength={255}
+                            style={{ flex:"1 1 200px", minWidth:180, padding:"9px 12px", fontSize:13,
+                              border:`1.5px solid ${C.border}`, borderRadius:8, background:C.white,
+                              color:C.body }} />
+                          <button onClick={joinWaitlist} disabled={waitlistSaving}
+                            style={{ background:C.teal, color:C.white, border:"none", borderRadius:8,
+                              padding:"9px 18px", fontSize:13, fontWeight:600,
+                              cursor: waitlistSaving ? "default" : "pointer", opacity: waitlistSaving ? 0.7 : 1 }}>
+                            {waitlistSaving ? "Saving…" : "Notify me"}
+                          </button>
+                        </div>
+                        {waitlistError && (
+                          <p style={{ fontSize:12, color:"#B91C1C", margin:"6px 0 0" }}>{waitlistError}</p>
+                        )}
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
             )}
+
           </div>
         )}
 
@@ -970,6 +1055,15 @@ ${form.job_description}${packageBlock}`;
                   {REGIONS.map(r=><option key={r} value={r}>{r}</option>)}
                 </select>
               </F>
+            </G2>
+
+            <G2>
+              <F label="Project postcode" req err={errors.postcode}
+                hint="Used to check whether we're matching trades in your area yet">
+                <input type="text" style={inp(!!errors.postcode)} value={form.postcode}
+                  onChange={upd("postcode")} placeholder="e.g. NG1 5FS" maxLength={12} />
+              </F>
+              <div />
             </G2>
 
             <G2>
