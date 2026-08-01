@@ -142,7 +142,14 @@ Return ONLY one JSON object, no prose, no markdown code fences, no preamble. Sha
 
 // ---- Substring anti-hallucination check ------------------------------------
 function normalize(s: string): string {
-  return s.toLowerCase().replace(/\s+/g, " ").trim();
+  return s
+    .normalize("NFKC")
+    .toLowerCase()
+    .replace(/[‘’‚‛]/g, "'")
+    .replace(/[“”„‟]/g, '"')
+    .replace(/[–—−]/g, "-")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function verifyExtractionAgainstSource(extraction: ExtractionRecord, sourceText: string | null): void {
