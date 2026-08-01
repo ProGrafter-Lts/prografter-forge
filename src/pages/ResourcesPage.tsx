@@ -72,7 +72,7 @@ const ResourcesPage = () => (
     </ContentSection>
     <ContentCta
       title="Make your next project a good one"
-      intro="Start with a free Project Cost Guide or check a builder's quote in minutes."
+      intro="Start with Plan My Project or check a builder's quote in minutes."
       primary={{ label: "Upload Your Quote", href: "/quote-checker" }}
       secondary={{ label: "Post a job — free", href: "/post-job-brief" }}
     />

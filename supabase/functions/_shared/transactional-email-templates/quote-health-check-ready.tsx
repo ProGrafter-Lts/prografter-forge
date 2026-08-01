@@ -10,13 +10,13 @@ interface QuoteHealthCheckReadyProps {
 
 const QuoteHealthCheckReadyEmail = ({ reportUrl, projectType }: QuoteHealthCheckReadyProps) => (
   <ProGrafterShell
-    preview={`Your Quote Health Check${projectType ? ` for ${projectType}` : ''} is ready`}
-    heading="Your Quote Health Check is ready"
+    preview={`Your Quote Checker report${projectType ? ` for ${projectType}` : ''} is ready`}
+    heading="Your Quote Checker report is ready"
   >
     <Para>Hi there,</Para>
     <Para>
       We've finished reviewing{projectType ? ` your ${projectType} quote` : ' your building quote'}.
-      Your independent, plain-English Quote Health Check is now saved to your account.
+      Your independent, plain-English Quote Checker report is now saved to your account.
     </Para>
     <CTA href={reportUrl || 'https://prografter.co.uk/dashboard/quote-checks'} label="View your report" />
     <Text style={note}>
@@ -36,8 +36,8 @@ const note = {
 export const template = {
   component: QuoteHealthCheckReadyEmail,
   subject: (data: Record<string, any>) =>
-    `Your Quote Health Check${data?.projectType ? ` for ${data.projectType}` : ''} is ready`,
-  displayName: 'Quote Health Check ready',
+    `Your Quote Checker report${data?.projectType ? ` for ${data.projectType}` : ''} is ready`,
+  displayName: 'Quote Checker report ready',
   previewData: {
     reportUrl: 'https://prografter.co.uk/dashboard/quote-checks',
     projectType: 'single-storey rear extension',
