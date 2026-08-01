@@ -54,3 +54,8 @@ project_id = "xryinqaxjclcmhebdcex"
     verify_jwt = false
   [functions.stripe-module-webhook]
     verify_jwt = false
+  [functions.extract-quote]
+    verify_jwt = false
+  [functions.score-quote]
+    verify_jwt = false
+

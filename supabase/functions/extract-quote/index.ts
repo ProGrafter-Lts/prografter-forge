@@ -12,7 +12,7 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.100.1";
 import { robustParseJson } from "../_shared/json-repair.ts";
-import { SCHEMAS, type CategoryDef, type ExtractionRecord } from "../_shared/quote-checker-schemas.ts";
+import { SCHEMAS, emptyExtraction, type CategoryDef, type ExtractionRecord } from "../_shared/quote-checker-schemas.ts";
 import { extractPdfText, runPass0Regex, describePass0Candidates, type Pass0Candidates } from "./pass0.ts";
 
 const corsHeaders = {
