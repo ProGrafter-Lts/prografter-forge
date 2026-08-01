@@ -60,7 +60,7 @@ const SignupTradeAssessmentPending = () => {
 
           <div className="flex flex-wrap gap-3">
             <Link
-              to="/trade/dashboard"
+              to="/dashboard/trade"
               className="bg-teal text-cream font-mono text-sm px-5 py-3 rounded-xl hover:bg-teal-hover transition-colors"
             >
               Go to my dashboard
