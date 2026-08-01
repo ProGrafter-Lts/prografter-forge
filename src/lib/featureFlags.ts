@@ -12,7 +12,7 @@ export const FEATURE_FLAGS = {
   // supabase/functions/_shared/quote-checker-v2-flags.ts (flipped once the
   // consistency gate passes). This flag doesn't gate anything on its own;
   // it's here for any future UI indicator that v2 is live.
-  quoteCheckerV2Landscaping: false,
+  quoteCheckerV2Landscaping: true,
 } as const;
 
 export type FeatureFlag = keyof typeof FEATURE_FLAGS;

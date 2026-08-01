@@ -12,7 +12,7 @@
 // anything server-side — this map is what run-paid-module-check actually
 // checks.
 export const QUOTE_CHECKER_V2_ENABLED: Record<string, boolean> = {
-  landscaping_driveway: false,
+  landscaping_driveway: true,
 };
 
 export function isV2Enabled(moduleId: string): boolean {
