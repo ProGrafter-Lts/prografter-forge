@@ -257,6 +257,7 @@ const AppRoutes = () => {
             {/* Unified spine: posting a brief IS the homeowner sign-up (passwordless). */}
             <Route path="/signup/homeowner" element={<Navigate to="/post-job-brief" replace />} />
             <Route path="/signup/homeowner/next" element={<Navigate to="/dashboard/homeowner" replace />} />
+            <Route path="/signup/homeowner/check-email" element={<SignupCheckEmail />} />
             <Route path="/verification" element={<Verification />} />
             <Route path="/signup/trade" element={<SignupTradeRedirect />} />
             <Route path="/admin/verifications" element={<AdminRoute><AdminVerifications /></AdminRoute>} />
