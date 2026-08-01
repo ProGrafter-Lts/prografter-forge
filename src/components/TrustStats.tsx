@@ -25,7 +25,7 @@ const METRICS: Metric[] = [
   { key: "homeowners", label: "Homeowners", fallback: "Every brief reviewed", threshold: 25, format: (n) => `${n}` },
   { key: "quotes_analysed", label: "Quotes analysed", fallback: "AI Quote Checker live", threshold: 10, format: (n) => `${n}` },
   { key: "jobs_completed", label: "Jobs completed", fallback: "Two-way accountability", threshold: 5, format: (n) => `${n}` },
-  { key: "avg_clarity", label: "Avg Clarity Score", fallback: "Clarity Scored", threshold: 1, format: (n) => `${n.toFixed(1)}/10` },
+  { key: "avg_clarity", label: "Avg Clarity Score", fallback: "Clarity Scored", threshold: 1, format: (n) => `${Math.round(n)}/100` },
 ];
 
 const CountUp = ({ text }: { text: string }) => {
