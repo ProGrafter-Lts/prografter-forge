@@ -1,4 +1,4 @@
-// Descriptive, typical-case guidance for the free Project Cost Guide.
+// Descriptive, typical-case guidance for the free Plan My Project tool.
 // This is education only — never a commitment, ruling or quotation.
 
 export type PermissionLikelihood = "does" | "does not" | "may";

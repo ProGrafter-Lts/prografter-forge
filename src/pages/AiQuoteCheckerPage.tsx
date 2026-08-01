@@ -30,7 +30,7 @@ const CHECKS = [
 const FAQ = [
   { q: "What is the AI Quote Checker?", a: "It's a tool that reviews a builder's quotation using construction-aware AI, then gives you a Quote Clarity Score and a plain-English breakdown of what's included, unclear or missing — plus the questions to ask before you commit." },
   { q: "Is it a replacement for a surveyor?", a: "No. It's a fast, affordable first check that helps you understand a quote and prepare better questions. It doesn't replace professional advice on complex or structural projects, but it makes every conversation sharper." },
-  { q: "How much does it cost?", a: "There's a free Project Cost Guide for early planning, and a paid Quote Health Check for a detailed review of a specific quotation. See the ProGrafter Intelligence page for current options." },
+  { q: "How much does it cost?", a: "There's a free Plan My Project tool for early planning, and a paid Quote Checker for a detailed review of a specific quotation. See the ProGrafter Intelligence page for current options." },
   { q: "Will more project detail improve my result?", a: "Yes. Adding genuine project and payment context helps the AI recognise what's already been provided — it improves your Project Confidence Score and reduces unnecessary flags." },
   { q: "What file types can I upload?", a: "PDFs and clear photos or scans of your quotation work best. The clearer the document, the more accurate the review." },
 ];
