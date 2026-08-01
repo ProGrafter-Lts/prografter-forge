@@ -17,7 +17,7 @@ type Card = {
 const CARDS: Card[] = [
   {
     badge: "FREE",
-    title: "Project Cost Guide",
+    title: "Plan My Project",
     subtitle: "Planning a project but don’t have a quote yet?",
     description:
       "Describe the work you’re considering and get early guidance on likely cost ranges, key cost drivers, common missing items and questions to ask before inviting builders.",
@@ -28,12 +28,12 @@ const CARDS: Card[] = [
       "Questions to ask before getting quotes",
       "Helps you prepare a clearer brief",
     ],
-    cta: "Start Free Cost Guide",
-    route: "/quote-checker-ai",
+    cta: "Start Plan My Project",
+    route: "/plan-my-project",
   },
   {
     badge: "£49",
-    title: "Quote Health Check",
+    title: "Quote Checker",
     subtitle: "Already got a builder’s quote?",
     description:
       "Upload your quote and ProGrafter will check what’s included, what’s unclear, what may be missing, and what questions to ask before you commit.",
@@ -49,7 +49,7 @@ const CARDS: Card[] = [
   },
   {
     badge: "COMING SOON",
-    title: "Compare Quotes",
+    title: "Quote Comparison",
     subtitle: "Got more than one quote?",
     description:
       "Upload multiple quotes and compare them side by side — not just on price, but on scope, clarity, exclusions, risk and value.",
@@ -82,9 +82,9 @@ const CARDS: Card[] = [
 ];
 
 const JOURNEY = [
-  { step: "Have an idea", detail: "Use the Project Cost Guide." },
-  { step: "Get builder quotes", detail: "Use the Quote Health Check." },
-  { step: "Compare options", detail: "Use Compare Quotes when available." },
+  { step: "Have an idea", detail: "Use Plan My Project." },
+  { step: "Get builder quotes", detail: "Use the Quote Checker." },
+  { step: "Compare options", detail: "Use Quote Comparison when available." },
   { step: "Choose with confidence", detail: "Use matched ProGrafter trades and the future Project Hub." },
   { step: "Build with accountability", detail: "Track documents, payments, certificates and completion." },
 ];

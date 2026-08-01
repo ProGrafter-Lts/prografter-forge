@@ -413,7 +413,7 @@ ${form.job_description}${packageBlock}`;
 
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.access_token) {
-        throw new Error("Please sign in to use the Quote Clarity Score.");
+        throw new Error("Please sign in to use the Project Cost Guide.");
       }
 
       const response = await fetch(
@@ -432,7 +432,7 @@ ${form.job_description}${packageBlock}`;
         },
       );
       if (response.status === 401) {
-        throw new Error("Please sign in to use the Quote Clarity Score.");
+        throw new Error("Please sign in to use the Project Cost Guide.");
       }
       if (!response.ok || !response.body) {
         throw new Error(`Proxy error ${response.status}`);
