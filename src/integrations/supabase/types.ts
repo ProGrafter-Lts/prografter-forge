@@ -3300,6 +3300,45 @@ export type Database = {
         }
         Relationships: []
       }
+      quote_check_consistency_tests: {
+        Row: {
+          category: string
+          created_at: string
+          extraction_json: Json
+          id: string
+          passed: boolean | null
+          run_number: number
+          test_quote_label: string
+          test_quote_path: string
+          tested_at: string
+          tested_by: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          extraction_json: Json
+          id?: string
+          passed?: boolean | null
+          run_number: number
+          test_quote_label: string
+          test_quote_path: string
+          tested_at?: string
+          tested_by?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          extraction_json?: Json
+          id?: string
+          passed?: boolean | null
+          run_number?: number
+          test_quote_label?: string
+          test_quote_path?: string
+          tested_at?: string
+          tested_by?: string | null
+        }
+        Relationships: []
+      }
       quote_check_entitlements: {
         Row: {
           consumed_at: string | null
@@ -3326,6 +3365,53 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      quote_check_extractions: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          model: string | null
+          pass0_json: Json
+          pass1_json: Json
+          quote_check_id: string
+          raw_model_output: string | null
+          schema_version: string
+          source_text_available: boolean
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          id?: string
+          model?: string | null
+          pass0_json?: Json
+          pass1_json?: Json
+          quote_check_id: string
+          raw_model_output?: string | null
+          schema_version: string
+          source_text_available?: boolean
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          model?: string | null
+          pass0_json?: Json
+          pass1_json?: Json
+          quote_check_id?: string
+          raw_model_output?: string | null
+          schema_version?: string
+          source_text_available?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quote_check_extractions_quote_check_id_fkey"
+            columns: ["quote_check_id"]
+            isOneToOne: false
+            referencedRelation: "simple_quote_checks"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       quote_checks: {
         Row: {
