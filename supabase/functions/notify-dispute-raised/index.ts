@@ -97,6 +97,15 @@ Deno.serve(async (req) => {
     }
   }
 
+  // Only a party to this dispute (or an admin) may trigger these notifications.
+  const callerId = authData.user.id
+  const { data: isAdmin } = await supabase.rpc('has_role', { _user_id: callerId, _role: 'admin' })
+  if (!isAdmin && callerId !== homeowner?.user_id && callerId !== trade?.user_id) {
+    return new Response(JSON.stringify({ error: 'Forbidden' }), {
+      status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
+  }
+
   const reference = job?.ref || dispute.ref || '—'
   const projectTitle = job?.title || job?.job_type || 'the project'
   const issue = dispute.reason_label || undefined
