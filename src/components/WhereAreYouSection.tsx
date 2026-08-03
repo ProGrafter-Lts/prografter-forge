@@ -7,7 +7,7 @@ type Card = {
 };
 
 const CARDS: Card[] = [
-  { title: "I’m planning a project", cta: "Plan My Project", route: "/plan-my-project" },
+  { title: "I’m planning a project", cta: "Project Cost Guide", route: "/plan-my-project" },
   { title: "I already have a quote", cta: "Run Quote Checker", route: "/quote-checker" },
   { title: "I need trusted trades", cta: "Post a Project", route: "/post-job-brief" },
   { title: "I’m a trade", cta: "Join ProGrafter", route: "/signup/trade" },
@@ -43,3 +43,4 @@ const WhereAreYouSection = () => {
 };
 
 export default WhereAreYouSection;
+
