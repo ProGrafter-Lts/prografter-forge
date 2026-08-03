@@ -119,10 +119,11 @@ Deno.serve(async (req) => {
   // homeowner. We never overwrite an existing non-homeowner user_type — we just
   // ensure a homeowner record exists alongside it.
   let existingUserType: string | null = null
-  // A one-use browser handoff password establishes day-one session access.
-  // The homeowner never sees or chooses a password; returning homeowners use
-  // the separate magic-link path.
+  // A one-use browser handoff password is ONLY ever issued for accounts this
+  // request creates. For any pre-existing account we never touch credentials
+  // and never return them — the caller has not proven ownership of the email.
   const sessionPassword = randomSessionPassword()
+  let accountIsNew = false
   const emailLower = email.toLowerCase()
   try {
     const { data: existingProfile } = await supabase
@@ -133,16 +134,7 @@ Deno.serve(async (req) => {
     if (existingProfile?.user_id) {
       existingUserType = existingProfile.user_type ?? null
       homeownerUserId = existingProfile.user_id
-      // Keep a trade account's type intact; only default new/plain accounts to homeowner.
-      const metaUserType = existingUserType && existingUserType !== 'homeowner' ? existingUserType : 'homeowner'
-      const { error: updateErr } = await supabase.auth.admin.updateUserById(homeownerUserId, {
-        password: sessionPassword,
-        email_confirm: true,
-        user_metadata: { user_type: metaUserType, full_name, phone, postcode },
-      })
-      if (updateErr) console.error('[submit-job-brief] existing account password handoff failed', updateErr)
     }
-
 
     // Try to create if no existing profile was found. If the auth user already
     // exists without a profile, fall back to a return link rather than touching
@@ -156,10 +148,14 @@ Deno.serve(async (req) => {
         user_metadata: { user_type: 'homeowner', full_name, phone, postcode },
       })
       createErr = error
-      if (!error) homeownerUserId = created.user?.id ?? null
+      if (!error) {
+        homeownerUserId = created.user?.id ?? null
+        accountIsNew = !!homeownerUserId
+      }
     }
 
     if (!homeownerUserId && createErr) {
+      // Account already exists (no profile row). Do NOT alter its credentials.
       const { data: linkData, error: linkErr } = await supabase.auth.admin.generateLink({
         type: 'magiclink',
         email: emailLower,
@@ -172,21 +168,22 @@ Deno.serve(async (req) => {
           existingUserType = linkData.user.user_metadata.user_type
         }
         homeownerUserId = linkData?.user?.id ?? null
-        if (homeownerUserId) {
-          const metaUserType = existingUserType && existingUserType !== 'homeowner' ? existingUserType : 'homeowner'
-          const { error: updateErr } = await supabase.auth.admin.updateUserById(homeownerUserId, {
-            password: sessionPassword,
-            email_confirm: true,
-            user_metadata: { user_type: metaUserType, full_name, phone, postcode },
-          })
-          if (updateErr) console.error('[submit-job-brief] fallback account password handoff failed', updateErr)
-        }
       }
     }
 
+    // Returning account: send a sign-in link to the account's OWN address.
+    if (homeownerUserId && !accountIsNew) {
+      const anon = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY')!)
+      const { error: otpErr } = await anon.auth.signInWithOtp({
+        email: emailLower,
+        options: { emailRedirectTo: `${SITE_URL}${DASHBOARD_PATH}` },
+      })
+      if (otpErr) console.error('[submit-job-brief] magic link send failed', otpErr)
+    }
   } catch (e) {
     console.error('[submit-job-brief] account creation failed', e)
   }
+
 
   if (homeownerUserId) {
     // The handle_new_user trigger creates profile + homeowner for new users.
@@ -342,9 +339,13 @@ Deno.serve(async (req) => {
     ref,
     briefId: insertedBrief?.id ?? null,
     loginUrl,
-    sessionEmail: homeownerUserId ? emailLower : null,
-    sessionPassword: homeownerUserId ? sessionPassword : null,
-    accountCreated: !!homeownerUserId,
+    // Credentials are only ever handed back for an account created by THIS
+    // request. Returning users get a magic link emailed to their own address.
+    sessionEmail: accountIsNew ? emailLower : null,
+    sessionPassword: accountIsNew ? sessionPassword : null,
+    accountCreated: accountIsNew,
+    magicLinkSent: !!homeownerUserId && !accountIsNew,
+
   }), {
 
     status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
