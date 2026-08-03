@@ -452,7 +452,7 @@ const HomeownerDashboard = () => {
                   href="/quote-checker"
                   className="inline-flex items-center gap-1.5 bg-secondary text-secondary-foreground font-mono text-xs px-4 py-2 rounded-xl hover:opacity-90 transition-opacity shadow-sm whitespace-nowrap"
                 >
-                  Run Quote Health Check
+                  Run AI Quote Checker
                   <ArrowRight className="w-3.5 h-3.5" />
                 </a>
               </div>
@@ -467,7 +467,7 @@ const HomeownerDashboard = () => {
                       <SearchCheck className="w-5 h-5" /> My Quote Checks
                     </h3>
                     <p className="font-mono text-xs text-muted-foreground mt-1">
-                      View and download PDFs of every Quote Health Check saved to your account.
+                      View and download PDFs of every AI Quote Checker report saved to your account.
                     </p>
                   </div>
                   <ArrowRight className="w-4 h-4 text-muted-foreground" />
@@ -505,7 +505,7 @@ const HomeownerDashboard = () => {
                     href={quoteCheckerPrompt.href}
                     className="inline-flex items-center gap-1.5 bg-secondary text-secondary-foreground font-mono text-xs px-4 py-2 rounded-xl hover:opacity-90 transition-opacity shadow-sm whitespace-nowrap"
                   >
-                    {freeChecks > 0 ? "Run free Quote Health Check" : "Run Quote Health Check"}
+                    {freeChecks > 0 ? "Run free AI Quote Checker" : "Run AI Quote Checker"}
                     <ArrowRight className="w-3.5 h-3.5" />
                   </a>
                 </div>
@@ -537,3 +537,4 @@ const HomeownerDashboard = () => {
 };
 
 export default HomeownerDashboard;
+
