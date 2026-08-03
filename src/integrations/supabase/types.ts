@@ -5722,6 +5722,10 @@ export type Database = {
         Args: { _trade_id: string; _user_id: string }
         Returns: boolean
       }
+      pc_path_belongs_to_user: {
+        Args: { _name: string; _uid: string }
+        Returns: boolean
+      }
       pir_guest_create: {
         Args: never
         Returns: {
