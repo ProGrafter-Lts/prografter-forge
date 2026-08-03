@@ -171,10 +171,19 @@ Deno.serve(async (req) => {
       }
     }
 
-
+    // Returning account: send a sign-in link to the account's OWN address.
+    if (homeownerUserId && !accountIsNew) {
+      const anon = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY')!)
+      const { error: otpErr } = await anon.auth.signInWithOtp({
+        email: emailLower,
+        options: { emailRedirectTo: `${SITE_URL}${DASHBOARD_PATH}` },
+      })
+      if (otpErr) console.error('[submit-job-brief] magic link send failed', otpErr)
+    }
   } catch (e) {
     console.error('[submit-job-brief] account creation failed', e)
   }
+
 
   if (homeownerUserId) {
     // The handle_new_user trigger creates profile + homeowner for new users.
