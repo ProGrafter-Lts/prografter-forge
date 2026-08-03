@@ -93,11 +93,11 @@ export function buildNextSteps(input: Inputs): NextStep[] {
       action: { kind: "tab", tab: "quotes" },
     });
 
-    // Recommend a Quote Health Check before committing (esp. while free).
+    // Recommend an AI Quote Checker review before committing (esp. while free).
     steps.push({
       id: "run-quote-check",
       priority: "medium",
-      title: "Run Quote Health Check",
+      title: "Run AI Quote Checker",
       description:
         freeChecks > 0
           ? "Before accepting, run a free AI review to spot missing items, unclear wording and questions worth asking."
@@ -153,3 +153,4 @@ export function buildNextSteps(input: Inputs): NextStep[] {
 
   return steps.sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]);
 }
+
