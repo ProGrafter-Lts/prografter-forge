@@ -75,7 +75,7 @@ Deno.serve(async (req) => {
 
   const { data: homeowner } = await supabase
     .from('homeowners')
-    .select('name, email, phone')
+    .select('name, email, phone, user_id')
     .eq('id', job?.homeowner_id)
     .maybeSingle()
 
@@ -85,12 +85,22 @@ Deno.serve(async (req) => {
     .eq('id', quote.trade_id)
     .maybeSingle()
 
+  // Only a party to this quote (or an admin) may trigger these notifications.
+  const callerId = authData.user.id
+  const { data: isAdmin } = await supabase.rpc('has_role', { _user_id: callerId, _role: 'admin' })
+  if (!isAdmin && callerId !== homeowner?.user_id && callerId !== trade?.user_id) {
+    return new Response(JSON.stringify({ error: 'Forbidden' }), {
+      status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
+  }
+
   let tradeEmail: string | null = null
   if (trade?.user_id) {
     const { data: tp } = await supabase
       .from('profiles').select('email').eq('user_id', trade.user_id).maybeSingle()
     tradeEmail = tp?.email ?? null
   }
+
 
   const reference = job?.ref || quote.reference || '—'
   const projectTitle = job?.title || job?.job_type || 'the project'
