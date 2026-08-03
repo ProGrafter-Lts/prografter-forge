@@ -339,9 +339,13 @@ Deno.serve(async (req) => {
     ref,
     briefId: insertedBrief?.id ?? null,
     loginUrl,
-    sessionEmail: homeownerUserId ? emailLower : null,
-    sessionPassword: homeownerUserId ? sessionPassword : null,
-    accountCreated: !!homeownerUserId,
+    // Credentials are only ever handed back for an account created by THIS
+    // request. Returning users get a magic link emailed to their own address.
+    sessionEmail: accountIsNew ? emailLower : null,
+    sessionPassword: accountIsNew ? sessionPassword : null,
+    accountCreated: accountIsNew,
+    magicLinkSent: !!homeownerUserId && !accountIsNew,
+
   }), {
 
     status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
