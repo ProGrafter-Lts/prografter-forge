@@ -373,13 +373,13 @@ const QuotesReceived = ({ quotes, onQuoteAccepted }: QuotesReceivedProps) => {
                 </p>
               )}
 
-              {/* Quote Clarity */}
+              {/* AI Quote Checker status */}
               {(() => {
                 const clarity = quoteClarity(q);
                 return (
                   <div className="mt-3 rounded-lg border border-border p-3">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="font-heading text-xs text-primary">Quote Clarity</span>
+                      <span className="font-heading text-xs text-primary">AI Quote Checker</span>
                       <Badge className={`${clarity.cls} font-mono text-[10px]`}>{clarity.label}</Badge>
                     </div>
                     {!q.ai_verdict && (
@@ -533,3 +533,4 @@ const QuotesReceived = ({ quotes, onQuoteAccepted }: QuotesReceivedProps) => {
 };
 
 export default QuotesReceived;
+
