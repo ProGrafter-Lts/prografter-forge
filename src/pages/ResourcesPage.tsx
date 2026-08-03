@@ -17,8 +17,7 @@ type Resource = {
 
 const GUIDES: Resource[] = [
   { title: "How ProGrafter Works", desc: "Verification, contracts, staged payments and the Homeowner Manual — the whole journey explained.", href: "/how-it-works", tag: "Guide" },
-  { title: "AI Quote Checker", desc: "What it checks, how it works, and how to read your results before committing to a builder.", href: "/ai-quote-checker", tag: "AI Tools" },
-  { title: "Understanding the Quote Clarity Score", desc: "What the score means, the bands, and Document vs Project Confidence scores.", href: "/quote-clarity-score", tag: "AI Tools" },
+  { title: "AI Quote Checker", desc: "What it checks, how the score bands work, and how to read your results before committing to a builder.", href: "/ai-quote-checker", tag: "AI Tools" },
   { title: "Trade Verification Explained", desc: "The five checks every trade passes before they reach homeowners.", href: "/trade-verification", tag: "Trust" },
   { title: "Homeowner Verification", desc: "Why we verify homeowners and manually review every brief.", href: "/homeowner-verification", tag: "Trust" },
   { title: "Pricing & Commission", desc: "Exactly what ProGrafter costs — and why there are no monthly or lead fees.", href: "/pricing", tag: "Pricing" },
@@ -80,3 +79,4 @@ const ResourcesPage = () => (
 );
 
 export default ResourcesPage;
+
