@@ -204,7 +204,7 @@ export const BOILER_SCHEMA: CategoryDef[] = [
       {
         key: "sizing_basis_or_survey",
         label: "Basis for sizing — heat loss calculation or site survey",
-        criteria: "present only if the document explicitly states a heat loss calculation, radiator sizing exercise, or a site survey/visit that took place or is included. Detailed measurements or a room list alone are NOT evidence of a survey — absent. A passing social reference ('thanks for having us round', 'good to meet you') is ambiguous, not present. 'Survey to be carried out before works' is ambiguous (promised, not done).",
+        criteria: "present only if the document explicitly states a heat loss calculation, radiator sizing exercise, or a site survey/visit that took place or is included. NEAR-MISS = ABSENT: detailed measurements or a room list alone, a claim that the boiler is 'correctly sized' or 'we'll size it properly' with no named calculation, and passing social references ('thanks for the call the other day', 'good to meet you', 'thanks for having us round') are all ABSENT, not ambiguous — none of them name a heat loss calculation or survey. 'Survey to be carried out before works' names the subject but is only promised = ambiguous.",
       },
     ],
   },
@@ -235,7 +235,7 @@ export const BOILER_SCHEMA: CategoryDef[] = [
       {
         key: "making_good_and_waste_removal",
         label: "Making good, protection of the property and removal of old appliance / waste",
-        criteria: "present if the document states removal/disposal of the old boiler or waste, OR making good / protecting the property (dust sheets, boarding, decoration limits) — either one qualifies. Explicit exclusion ('making good not included') is also present. Silence is absent. 'We leave things tidy' is ambiguous.",
+        criteria: "EITHER/OR FIELD — present if the document states ANY ONE of: removal/disposal of the old boiler or waste, OR making good / protecting the property (dust sheets, boarding, decoration limits). One clear qualifying statement (e.g. 'we'll take the old one away') makes this PRESENT even if other wording in the same quote is vague — vague wording elsewhere does not downgrade solid evidence. Explicit exclusion ('making good not included') is also present. NEAR-MISS = ABSENT: 'we leave things tidy' / 'we're clean workers' on their own do not name waste removal or making good and are absent. Silence is absent.",
       },
     ],
   },
