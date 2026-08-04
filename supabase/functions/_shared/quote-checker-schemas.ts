@@ -243,6 +243,12 @@ export const BOILER_SCHEMA: CategoryDef[] = [
         label: "Making good, protection of the property and removal of old appliance / waste",
         criteria: "EITHER/OR FIELD — present if the document states ANY ONE of: removal/disposal of the old boiler or waste, OR making good / protecting the property (dust sheets, boarding, decoration limits). One clear qualifying statement (e.g. 'we'll take the old one away') makes this PRESENT even if other wording in the same quote is vague — vague wording elsewhere does not downgrade solid evidence. Explicit exclusion ('making good not included') is also present. NEAR-MISS = ABSENT: 'we leave things tidy' / 'we're clean workers' on their own do not name waste removal or making good and are absent. Silence is absent.",
       },
+      {
+        key: "radiators_and_cylinder_scope",
+        label: "Radiators, valves and hot water cylinder — what is and is not included",
+        criteria: "EITHER/OR FIELD — present if the document states the position on ANY ONE of: radiators (number supplied/replaced/reused, or radiators explicitly excluded), TRVs/valves, or the hot water cylinder (new cylinder, cylinder retained, or cylinder removed). A clear exclusion counts as present — 'radiators not included in this price' is a stated scope decision. One solid statement makes this present even if other wording nearby is vague. NEAR-MISS = ABSENT: 'full central heating system', 'everything you need', 'boiler swap' do not state radiator, valve or cylinder scope — absent, not ambiguous. 'We can look at radiators if needed' or 'some radiators may need replacing' is ambiguous. Silence is absent.",
+      },
+
     ],
   },
   {
