@@ -63,7 +63,7 @@ export const LANDSCAPING_SCHEMA: CategoryDef[] = [
     fields: [
       { key: "work_type", label: "Type of work (patio, driveway, fencing, turfing, landscaping, drainage, mixed)" },
       { key: "area_m2", label: "Area in square metres", criteria: "present only if an area figure in m2 (or dimensions that are explicitly the works area) is stated." },
-      { key: "site_visit_or_survey", label: "Confirmation of a site visit or measured survey", criteria: "present only if the document explicitly states a site visit, site survey or measured survey took place or is included. Detailed measurements, areas or levels alone are NOT evidence of a visit — mark absent." },
+      { key: "site_visit_or_survey", label: "Confirmation of a site visit or measured survey", criteria: "present only if the document explicitly states a site visit, site survey or measured survey took place or is included. Detailed measurements, areas or levels alone are NOT evidence of a visit — mark absent. A passing or social reference to having attended (e.g. 'thanks for having us round', 'good to meet you') is NOT a stated survey — mark ambiguous, not present." },
     ],
   },
   {
@@ -137,7 +137,7 @@ export const LANDSCAPING_SCHEMA: CategoryDef[] = [
     name: "Timescale / Guarantees / Handover",
     fields: [
       { key: "start_date", label: "Start date", criteria: "present only if a start date, start window or lead time is stated. \"Subject to availability\" alone is ambiguous." },
-      { key: "duration", label: "Duration", criteria: "present only if a duration or number of days/weeks on site is stated." },
+      { key: "duration", label: "Duration", criteria: "present only if a specific, committed duration or number of days/weeks on site is stated. Approximate or hedged durations ('about a week or so', 'roughly 2-3 weeks', 'typically around a fortnight') are ambiguous, not present." },
       { key: "workmanship_guarantee", label: "Workmanship guarantee", criteria: "present only if a workmanship guarantee/warranty with or without a period is stated." },
       { key: "material_warranty", label: "Material / manufacturer warranty", criteria: "present only if a manufacturer or material warranty is stated. A workmanship guarantee alone is absent." },
       { key: "aftercare_guidance", label: "Aftercare guidance", criteria: "present only if aftercare, maintenance or curing guidance is given. Silence is absent." },
