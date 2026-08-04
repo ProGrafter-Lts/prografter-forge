@@ -137,7 +137,7 @@ export const LANDSCAPING_SCHEMA: CategoryDef[] = [
     name: "Timescale / Guarantees / Handover",
     fields: [
       { key: "start_date", label: "Start date", criteria: "present only if a start date, start window or lead time is stated. \"Subject to availability\" alone is ambiguous." },
-      { key: "duration", label: "Duration", criteria: "present only if a specific, committed duration or number of days/weeks on site is stated. Approximate or hedged durations ('about a week or so', 'roughly 2-3 weeks', 'typically around a fortnight') are ambiguous, not present." },
+      { key: "duration", label: "Duration", criteria: "present if a specific number of days or weeks on site is stated, even where a reasonable real-world qualifier is attached ('8 working days, subject to weather', 'estimated at 10 days' — the figure is still actionable). Ambiguous only where the hedge REPLACES the figure ('about a week or so', 'a few weeks', 'depends how it goes')." },
       { key: "workmanship_guarantee", label: "Workmanship guarantee", criteria: "present only if a workmanship guarantee/warranty with or without a period is stated." },
       { key: "material_warranty", label: "Material / manufacturer warranty", criteria: "present only if a manufacturer or material warranty is stated. A workmanship guarantee alone is absent." },
       { key: "aftercare_guidance", label: "Aftercare guidance", criteria: "present only if aftercare, maintenance or curing guidance is given. Silence is absent." },
