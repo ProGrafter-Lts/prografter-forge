@@ -291,6 +291,17 @@ export const BOILER_SCHEMA: CategoryDef[] = [
         label: "Manufacturer warranty and workmanship guarantee",
         criteria: "COMPOUND FACT — needs BOTH a manufacturer/appliance warranty (with or without a period) AND an installer workmanship guarantee. Both = present. Only one (e.g. '10 year Worcester warranty' with nothing on the installer's own work) = ambiguous. Neither = absent. HEDGING: 'up to 10 years subject to registration and annual servicing' still names a period — that half counts as stated.",
       },
+      {
+        key: "price_fixed_or_estimate",
+        label: "Whether the price is fixed or an estimate",
+        criteria: "present if the document states the status of the price: 'fixed price', 'no hidden extras', 'this price is guaranteed', or equally clearly that it is an 'estimate', 'guide price', or 'subject to survey'. Either direction counts — the homeowner needs to know which. NEAR-MISS = ABSENT: a bare total with no status wording does not state fixed-or-estimate — absent, not ambiguous (a price alone is a different subject and is already covered by total_price_and_vat). Contradictory wording ('fixed price, subject to change on the day') is ambiguous. NOTE: shared evidence is allowed — the same price line may also evidence total_price_and_vat.",
+      },
+      {
+        key: "exclusions_and_variations",
+        label: "Exclusions and how extra work / variations are handled",
+        criteria: "EITHER/OR FIELD — present if the document states ANY ONE of: a named exclusion (e.g. 'electrical work not included', 'asbestos removal excluded'), or how variations/extras are priced and agreed ('any additional work agreed in writing before starting', 'day rate £x for extras'). One clear qualifying statement makes this present. 'Extra costs may apply' or 'anything else will be chargeable' with no named exclusion and no process is ambiguous — it flags cost but sets no terms. NEAR-MISS = ABSENT: 'price includes everything listed above' merely restates the scope and names no exclusion or variation process — absent. Silence is absent.",
+      },
+
     ],
   },
 ];
