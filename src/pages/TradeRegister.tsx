@@ -2,6 +2,7 @@ import { useState, FormEvent, ChangeEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import { useSetupRedirect, SetupRedirectLoader } from "@/hooks/useSetupRedirect";
+import SEO from "@/components/SEO";
 
 const TRADE_TYPES = [
   "Plumber",
@@ -122,6 +123,11 @@ const TradeRegister = () => {
 
   return (
     <div className="min-h-screen bg-deep flex flex-col">
+      <SEO
+        title="Join ProGrafter — Register as a Verified UK Trade"
+        description="Register your trade business with ProGrafter. No monthly fees, verified-only membership, and you pay only when a job completes."
+        path="/register"
+      />
       {/* Header */}
       <header className="py-6 px-6">
         <Link to="/" className="font-heading text-cream text-2xl tracking-wider">
