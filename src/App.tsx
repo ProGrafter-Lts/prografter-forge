@@ -167,7 +167,7 @@ const AppRoutes = () => {
             <Route path="/register/trade" element={<SignupTradeRedirect />} />
             <Route path="/post-a-job" element={<Navigate to="/post-job-brief" replace />} />
             <Route path="/project-cost-guide" element={<PlanMyProject />} />
-            <Route path="/project-cost-guide" element={<Navigate to="/project-cost-guide" replace />} />
+            <Route path="/plan-my-project" element={<Navigate to="/project-cost-guide" replace />} />
             <Route path="/quote-checker" element={<QuoteCheckerHome />} />
             <Route path="/quote-checker/success" element={<QuoteCheckerSuccess />} />
             <Route path="/quote-checker/cancel" element={<QuoteCheckerCancel />} />

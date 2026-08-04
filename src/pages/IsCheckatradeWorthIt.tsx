@@ -43,10 +43,8 @@ const IsCheckatradeWorthIt = () => {
         title="Is Checkatrade Worth It in 2026? An Honest Trade Review — ProGrafter"
         description="Is Checkatrade worth £299–£1,959/month for UK trades? An honest review by an electrician of 20 years, with real numbers, and the platform he built as the alternative."
         path="/is-checkatrade-worth-it"
+        jsonLd={articleJsonLd}
       />
-      <Helmet>
-        <script type="application/ld+json">{JSON.stringify(articleJsonLd)}</script>
-      </Helmet>
       <Navbar />
 
       {/* Hero */}
