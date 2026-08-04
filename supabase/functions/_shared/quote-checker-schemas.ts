@@ -48,7 +48,7 @@ export const LANDSCAPING_SCHEMA: CategoryDef[] = [
     key: "quote_basics",
     name: "Quote Basics",
     fields: [
-      { key: "contractor_name", label: "Contractor / landscaper name" },
+      { key: "contractor_name", label: "Contractor / landscaper name", criteria: "present if any business or trading name identifying the contractor appears (letterhead, header, sign-off). A trading name without a legal suffix such as Ltd/Limited still counts as present. Only a first name with no business name, or no name at all, is ambiguous/absent respectively." },
       { key: "contractor_contact", label: "Contractor contact details (phone, email or address)" },
       { key: "customer_name_address", label: "Customer name and site address", criteria: "COMPOUND FACT — this field requires BOTH a customer name AND a site address. Both present (address may be a full address, street + town, or postcode) = \"present\". Only one of the two (e.g. a name in a greeting such as \"Hi Dave,\" with no address, or an address with no named customer) = \"ambiguous\". Neither = \"absent\"." },
       { key: "quote_date", label: "Quote date" },
