@@ -51,7 +51,6 @@ const SINGLES: NavItem[] = [
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [openGroup, setOpenGroup] = useState<string | null>(null);
   const [mobileGroup, setMobileGroup] = useState<string | null>(null);
 
   return (
@@ -62,32 +61,25 @@ const Navbar = () => {
         {/* Desktop */}
         <div className="hidden craft:flex items-center gap-1">
           {GROUPS.map((g) => (
-            <div
-              key={g.label}
-              className="relative"
-              onMouseEnter={() => setOpenGroup(g.label)}
-              onMouseLeave={() => setOpenGroup((cur) => (cur === g.label ? null : cur))}
-            >
+            <div key={g.label} className="relative group">
               <button className="font-mono text-sm text-body-text hover:text-teal transition-colors px-3 py-2 flex items-center gap-1">
                 {g.label}
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" d="M6 9l6 6 6-6" /></svg>
               </button>
-              {openGroup === g.label && (
-                <div className="absolute left-0 top-full pt-2 w-64 animate-fade-in">
-                  <div className="rounded-2xl border border-border/60 bg-cream shadow-xl p-2">
-                    {g.items.map((it) => (
-                      <Link
-                        key={it.label}
-                        to={it.href}
-                        className="block rounded-xl px-3 py-2.5 hover:bg-teal/10 transition-colors"
-                      >
-                        <div className="font-mono text-sm text-navy">{it.label}</div>
-                        {it.desc && <div className="font-body text-xs text-secondary-text mt-0.5">{it.desc}</div>}
-                      </Link>
-                    ))}
-                  </div>
+              <div className="absolute left-0 top-full pt-2 w-64 opacity-0 invisible pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto transition-opacity duration-150">
+                <div className="rounded-2xl border border-border/60 bg-cream shadow-xl p-2">
+                  {g.items.map((it) => (
+                    <Link
+                      key={it.label}
+                      to={it.href}
+                      className="block rounded-xl px-3 py-2.5 hover:bg-teal/10 transition-colors"
+                    >
+                      <div className="font-mono text-sm text-navy">{it.label}</div>
+                      {it.desc && <div className="font-body text-xs text-secondary-text mt-0.5">{it.desc}</div>}
+                    </Link>
+                  ))}
                 </div>
-              )}
+              </div>
             </div>
           ))}
           {SINGLES.map((s) => (
@@ -155,3 +147,4 @@ const Navbar = () => {
 };
 
 export default Navbar;
+
