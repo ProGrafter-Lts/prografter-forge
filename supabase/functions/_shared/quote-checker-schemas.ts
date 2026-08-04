@@ -197,6 +197,12 @@ export const BOILER_SCHEMA: CategoryDef[] = [
         criteria: "COMPOUND FACT — needs BOTH manufacturer AND a specific model/range name or number (e.g. 'Worcester Bosch Greenstar 4000 30kW'). Both = present. Make only ('a Worcester boiler'), or model with no make, = ambiguous. 'A quality A-rated combi' with neither = absent. HEDGING: 'Vaillant ecoTEC Plus 832 or equivalent' still names a base spec — present. 'A Worcester or similar' names no model — ambiguous.",
       },
       {
+        key: "boiler_output_kw",
+        label: "Boiler output rating in kW",
+        criteria: "present if a specific kW output figure for the boiler is stated (e.g. '30kW', '24 kW output', or a model name whose number IS the stated output such as 'Greenstar 4000 30kW'). HEDGING (precision vs commitment): 'approximately 30kW' keeps a usable figure — present; 'a bigger boiler', 'the right size for you', 'sufficient output' replace the figure — ambiguous. NEAR-MISS = ABSENT: a model/range name with no kW figure anywhere (e.g. 'Vaillant ecoTEC Plus') does not state output — absent, not ambiguous. NOTE: shared evidence is allowed — the same spec line may also evidence boiler_make_and_model.",
+      },
+
+      {
         key: "system_type",
         label: "System type (combi, system, regular / heat-only) and any conversion",
         criteria: "present if the system type is named, or if a conversion is described (e.g. 'convert from regular to combi', 'remove cylinder and tanks'). Naming the boiler model alone is NOT evidence of system type — that is absent, not ambiguous. Mentioning 'new boiler' with no type is absent. Contradictory or unclear type wording is ambiguous.",
@@ -237,6 +243,12 @@ export const BOILER_SCHEMA: CategoryDef[] = [
         label: "Making good, protection of the property and removal of old appliance / waste",
         criteria: "EITHER/OR FIELD — present if the document states ANY ONE of: removal/disposal of the old boiler or waste, OR making good / protecting the property (dust sheets, boarding, decoration limits). One clear qualifying statement (e.g. 'we'll take the old one away') makes this PRESENT even if other wording in the same quote is vague — vague wording elsewhere does not downgrade solid evidence. Explicit exclusion ('making good not included') is also present. NEAR-MISS = ABSENT: 'we leave things tidy' / 'we're clean workers' on their own do not name waste removal or making good and are absent. Silence is absent.",
       },
+      {
+        key: "radiators_and_cylinder_scope",
+        label: "Radiators, valves and hot water cylinder — what is and is not included",
+        criteria: "EITHER/OR FIELD — present if the document states the position on ANY ONE of: radiators (number supplied/replaced/reused, or radiators explicitly excluded), TRVs/valves, or the hot water cylinder (new cylinder, cylinder retained, or cylinder removed). A clear exclusion counts as present — 'radiators not included in this price' is a stated scope decision. One solid statement makes this present even if other wording nearby is vague. NEAR-MISS = ABSENT: 'full central heating system', 'everything you need', 'boiler swap' do not state radiator, valve or cylinder scope — absent, not ambiguous. 'We can look at radiators if needed' or 'some radiators may need replacing' is ambiguous. Silence is absent.",
+      },
+
     ],
   },
   {
@@ -279,6 +291,17 @@ export const BOILER_SCHEMA: CategoryDef[] = [
         label: "Manufacturer warranty and workmanship guarantee",
         criteria: "COMPOUND FACT — needs BOTH a manufacturer/appliance warranty (with or without a period) AND an installer workmanship guarantee. Both = present. Only one (e.g. '10 year Worcester warranty' with nothing on the installer's own work) = ambiguous. Neither = absent. HEDGING: 'up to 10 years subject to registration and annual servicing' still names a period — that half counts as stated.",
       },
+      {
+        key: "price_fixed_or_estimate",
+        label: "Whether the price is fixed or an estimate",
+        criteria: "present if the document states the status of the price: 'fixed price', 'no hidden extras', 'this price is guaranteed', or equally clearly that it is an 'estimate', 'guide price', or 'subject to survey'. Either direction counts — the homeowner needs to know which. NEAR-MISS = ABSENT: a bare total with no status wording does not state fixed-or-estimate — absent, not ambiguous (a price alone is a different subject and is already covered by total_price_and_vat). Contradictory wording ('fixed price, subject to change on the day') is ambiguous. NOTE: shared evidence is allowed — the same price line may also evidence total_price_and_vat.",
+      },
+      {
+        key: "exclusions_and_variations",
+        label: "Exclusions and how extra work / variations are handled",
+        criteria: "EITHER/OR FIELD — present if the document states ANY ONE of: a named exclusion (e.g. 'electrical work not included', 'asbestos removal excluded'), or how variations/extras are priced and agreed ('any additional work agreed in writing before starting', 'day rate £x for extras'). One clear qualifying statement makes this present. 'Extra costs may apply' or 'anything else will be chargeable' with no named exclusion and no process is ambiguous — it flags cost but sets no terms. NEAR-MISS = ABSENT: 'price includes everything listed above' merely restates the scope and names no exclusion or variation process — absent. Silence is absent.",
+      },
+
     ],
   },
 ];
@@ -329,8 +352,8 @@ export const CATEGORY_META: Record<string, CategoryMeta> = {
   boiler_heating: {
     title: "BOILER / HEATING",
     tradeNoun: "heating engineer",
-    schemaVersion: "boiler-extraction-v1",
-    reportVersion: "boiler-v2",
+    schemaVersion: "boiler-extraction-v2",
+    reportVersion: "boiler-v3",
     contextKey: "boiler_context",
     projectType: "Boiler / Heating",
     reportRoute: "boiler-quote-report",
