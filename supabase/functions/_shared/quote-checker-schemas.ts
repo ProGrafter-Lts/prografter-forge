@@ -173,7 +173,7 @@ export const BOILER_SCHEMA: CategoryDef[] = [
       {
         key: "gas_safe_registration",
         label: "Gas Safe registration (registered business and registration number)",
-        criteria: "COMPOUND FACT — needs BOTH a claim of Gas Safe registration AND a registration number. Both = present. Only one part (e.g. 'we are Gas Safe registered' with no number, or a bare number with no context) = ambiguous. Neither = absent. 'Corgi registered', 'fully qualified' or 'certified engineers' without Gas Safe wording is ambiguous, not present. NOTE: the same header block may also evidence installer_name and installer_contact — shared evidence is allowed.",
+        criteria: "COMPOUND FACT — needs BOTH a claim of Gas Safe registration AND a registration number. Both = present. Only one part (e.g. 'we are Gas Safe registered' with no number, or a bare number with no context) = ambiguous. NEAR-MISS = ABSENT: 'fully qualified', 'certified engineers', 'time served', '20 years experience', 'Corgi registered' do NOT name Gas Safe registration and are absent, not ambiguous. Neither part mentioned = absent. NOTE: the same header block may also evidence installer_name and installer_contact — shared evidence is allowed.",
       },
       {
         key: "customer_name_address",
