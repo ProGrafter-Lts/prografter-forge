@@ -261,7 +261,7 @@ const DisclaimerBanner = () => (
   <div className="qr-disclaimer">
     <AlertTriangle className="h-5 w-5 shrink-0 mt-0.5" />
     <div>
-      ProGrafter's Quote Health Check is guidance only. It is based on the information provided in the
+      ProGrafter's AI Quote Checker is guidance only. It is based on the information provided in the
       uploaded quote and does not replace professional legal, surveying, structural, tax or building
       control advice. Pricing, VAT, compliance and scope should be confirmed directly with the
       contractor and relevant professionals before work begins.
@@ -314,10 +314,10 @@ const ReportHero = ({
     <header className="qr-hero">
       <div className="qr-hero-top">
         <img src={logoLight.url} alt="ProGrafter" className="qr-hero-logo" />
-        <span className="qr-hero-kicker">Quote Health Check</span>
+        <span className="qr-hero-kicker">AI Quote Checker</span>
       </div>
       <div className="qr-hero-rule" />
-      <h1 className="qr-hero-title">Quote Health Check</h1>
+      <h1 className="qr-hero-title">AI Quote Checker</h1>
       <p className="qr-hero-prepared">Prepared by ProGrafter · Independent quote intelligence</p>
 
       <div className="qr-hero-meta">
@@ -1194,10 +1194,10 @@ const StandardHero = ({
   <header className="qr-hero">
     <div className="qr-hero-top">
       <img src={logoLight.url} alt="ProGrafter" className="qr-hero-logo" />
-      <span className="qr-hero-kicker">Quote Health Check</span>
+      <span className="qr-hero-kicker">AI Quote Checker</span>
     </div>
     <div className="qr-hero-rule" />
-    <h1 className="qr-hero-title">Quote Health Check</h1>
+    <h1 className="qr-hero-title">AI Quote Checker</h1>
     <p className="qr-hero-prepared">Prepared by ProGrafter · Fixed-standard compliance audit</p>
 
     <div className="qr-hero-meta">
@@ -1687,10 +1687,10 @@ const GeneralGuidanceReport = ({ report }: { report: ReportJson }) => {
       <header className="qr-hero">
         <div className="qr-hero-top">
           <img src={logoLight.url} alt="ProGrafter" className="qr-hero-logo" />
-          <span className="qr-hero-kicker">Quote Health Check</span>
+          <span className="qr-hero-kicker">AI Quote Checker</span>
         </div>
         <div className="qr-hero-rule" />
-        <h1 className="qr-hero-title">Quote Health Check</h1>
+        <h1 className="qr-hero-title">AI Quote Checker</h1>
         <p className="qr-hero-prepared">Prepared by ProGrafter · General guidance</p>
         <div className="qr-hero-meta">
           <div className="qr-hero-metaitem">

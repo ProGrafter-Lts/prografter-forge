@@ -99,7 +99,7 @@ const QuoteCheckDetail = () => {
 
   return (
     <div className="min-h-screen dashboard-dark">
-      <SEO title="Quote Health Check — ProGrafter" description="Your saved Quote Health Check report." path={`/dashboard/quote-checks/${id}`} noindex />
+      <SEO title="AI Quote Checker — ProGrafter" description="Your saved AI Quote Checker report." path={`/dashboard/quote-checks/${id}`} noindex />
       <main className="max-w-3xl mx-auto p-4 md:p-8 space-y-6">
         <div className="no-print flex items-center justify-between gap-3 flex-wrap">
           <Link
@@ -177,7 +177,7 @@ const QuoteCheckDetail = () => {
               <p className="font-heading text-xl text-foreground">Under manual review</p>
               <p className="font-mono text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
                 This quote produced some conflicting details, so our team is reviewing it
-                by hand to keep your Quote Health Check accurate. We'll email you as soon
+                by hand to keep your AI Quote Checker accurate. We'll email you as soon
                 as it's ready — usually within one working day.
               </p>
             </div>

@@ -17,7 +17,7 @@ type Card = {
 const CARDS: Card[] = [
   {
     badge: "FREE",
-    title: "Plan My Project",
+    title: "Project Cost Guide",
     subtitle: "Planning a project but don’t have a quote yet?",
     description:
       "Describe the work you’re considering and get early guidance on likely cost ranges, key cost drivers, common missing items and questions to ask before inviting builders.",
@@ -28,8 +28,8 @@ const CARDS: Card[] = [
       "Questions to ask before getting quotes",
       "Helps you prepare a clearer brief",
     ],
-    cta: "Start Plan My Project",
-    route: "/plan-my-project",
+    cta: "Start Project Cost Guide",
+    route: "/project-cost-guide",
   },
   {
     badge: "£49",
@@ -82,7 +82,7 @@ const CARDS: Card[] = [
 ];
 
 const JOURNEY = [
-  { step: "Have an idea", detail: "Use Plan My Project." },
+  { step: "Have an idea", detail: "Use Project Cost Guide." },
   { step: "Get builder quotes", detail: "Use the Quote Checker." },
   { step: "Compare options", detail: "Use Quote Comparison when available." },
   { step: "Choose with confidence", detail: "Use matched ProGrafter trades and the future Project Hub." },
@@ -147,7 +147,7 @@ const ProGrafterIntelligence = () => {
     <div className="min-h-screen bg-cream">
       <SEO
         title="ProGrafter Intelligence™ — Cost Guidance & Quote Checking Tools"
-        description="Choose the right tool for where you are in your project — free early cost guidance or a paid Quote Health Check on a builder’s quote."
+        description="Choose the right tool for where you are in your project — free early cost guidance or a paid AI Quote Checker on a builder’s quote."
         path="/prografter-intelligence"
       />
       <Navbar />

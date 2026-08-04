@@ -348,11 +348,11 @@ const PlanMyProject = () => {
 
       <SEO
 
-        title="Plan My Project | Free UK Build Cost Estimate | ProGrafter"
+        title="Project Cost Guide | Free UK Build Cost Estimate | ProGrafter"
 
         description="Answer a few questions about your project and get a free, rule-based cost band plus the things to consider before you ask builders to quote."
 
-        path="/plan-my-project"
+        path="/project-cost-guide"
 
       />
 
@@ -376,7 +376,7 @@ const PlanMyProject = () => {
 
             </div>
 
-            <h1 className="font-heading text-3xl md:text-4xl text-navy">Plan My Project</h1>
+            <h1 className="font-heading text-3xl md:text-4xl text-navy">Project Cost Guide</h1>
 
             <p className="font-mono text-sm text-muted-foreground max-w-xl mx-auto leading-relaxed">
 
@@ -1084,7 +1084,7 @@ const PlanMyProject = () => {
 
               <p className="font-mono text-sm text-muted-foreground">
 
-                Plan My Project gives you a band before a quote exists. Once a builder has priced it, our AI Quote
+                Project Cost Guide gives you a band before a quote exists. Once a builder has priced it, our AI Quote
 
                 Checker reviews that actual document line by line against our standard for this trade.
 

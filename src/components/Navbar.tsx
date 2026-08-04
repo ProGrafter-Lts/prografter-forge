@@ -9,7 +9,7 @@ const GROUPS: NavGroup[] = [
   {
     label: "For Homeowners",
     items: [
-      { label: "Plan My Project", href: "/plan-my-project", desc: "Free — for projects without a quote yet" },
+      { label: "Project Cost Guide", href: "/project-cost-guide", desc: "Free — for projects without a quote yet" },
       { label: "Quote Checker", href: "/quote-checker", desc: "Already have a quote? Check it" },
       { label: "Post a Job", href: "/post-job-brief", desc: "Get matched with vetted trades" },
       { label: "How It Works", href: "/how-it-works", desc: "Your project, step by step" },

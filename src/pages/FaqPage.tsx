@@ -14,7 +14,7 @@ const GENERAL = [
   { q: "What is ProGrafter?", a: "ProGrafter is the UK's AI-powered construction trust platform. We connect verified tradespeople with homeowners and add intelligent tools — like the AI Quote Checker — to remove uncertainty from building work for both sides." },
   { q: "How is ProGrafter different from Checkatrade, MyBuilder or Rated People?", a: "Those platforms largely sell leads. ProGrafter builds trust: five-step trade verification, homeowner verification, two-way reviews, manual brief review, AI quote checking and transparent commission-only pricing with no monthly fees." },
   { q: "Where is ProGrafter available?", a: "ProGrafter operates across the United Kingdom, with initial coverage focused on Nottinghamshire and the East Midlands and expanding nationally." },
-  { q: "Is ProGrafter free to use?", a: "It's free to register and free to post a job. Trades pay a 7.5% commission only on completed, paid jobs, capped at £900. Homeowners can use the free Plan My Project tool, with a paid Quote Checker available for detailed reviews." },
+  { q: "Is ProGrafter free to use?", a: "It's free to register and free to post a job. Trades pay a 7.5% commission only on completed, paid jobs, capped at £900. Homeowners can use the free Project Cost Guide tool, with a paid Quote Checker available for detailed reviews." },
 ];
 
 const HOMEOWNERS = [

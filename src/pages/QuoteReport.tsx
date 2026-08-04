@@ -220,7 +220,7 @@ const QuoteReport = () => {
           <h2 className="font-heading text-2xl text-navy">Your report is under manual review</h2>
           <p className="font-mono text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
             Your quote produced some conflicting details, so a member of our team is
-            reviewing it by hand to make sure your Quote Health Check is accurate.
+            reviewing it by hand to make sure your AI Quote Checker is accurate.
             We'll email your secure report link as soon as it's ready — usually within
             one working day. You haven't lost your check.
           </p>
@@ -251,8 +251,8 @@ const QuoteReport = () => {
           </h2>
           <p className="font-mono text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
             {isTimeout
-              ? "Your Quote Health Check is still being prepared. Give it a moment, then reload to check again. We've also emailed you a secure link to your report."
-              : "Your Quote Health Check has finished processing. Reload to open it. We've also emailed you a secure link to your report."}
+              ? "Your AI Quote Checker is still being prepared. Give it a moment, then reload to check again. We've also emailed you a secure link to your report."
+              : "Your AI Quote Checker has finished processing. Reload to open it. We've also emailed you a secure link to your report."}
           </p>
           <button
             type="button"
@@ -269,9 +269,9 @@ const QuoteReport = () => {
       return (
         <div className="text-center py-16 space-y-4">
           <Loader2 className="mx-auto h-10 w-10 text-teal animate-spin" />
-          <h2 className="font-heading text-2xl text-navy">Preparing your Quote Health Check…</h2>
+          <h2 className="font-heading text-2xl text-navy">Preparing your AI Quote Checker…</h2>
           <p className="font-mono text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
-            Your Quote Health Check is being prepared. This usually takes a few minutes.
+            Your AI Quote Checker is being prepared. This usually takes a few minutes.
           </p>
         </div>
       );
@@ -544,7 +544,7 @@ const QuoteReport = () => {
     <AppShell>
       <div className="min-h-screen bg-background">
         <SEO
-          title="Your Quote Health Check — ProGrafter"
+          title="Your AI Quote Checker — ProGrafter"
           description="An independent, plain-English review of your building quote to help you ask the right questions."
           path={`/report/${id ?? ""}`}
           noindex
@@ -554,9 +554,9 @@ const QuoteReport = () => {
             <div className="text-center mb-8">
               <div className="inline-flex items-center gap-2 bg-teal/10 text-teal font-mono text-xs px-3 py-1.5 rounded-full mb-4">
                 <ShieldCheck className="h-3.5 w-3.5" />
-                Quote Health Check
+                AI Quote Checker
               </div>
-              <h1 className="font-heading text-3xl md:text-4xl text-navy">Your Quote Health Check</h1>
+              <h1 className="font-heading text-3xl md:text-4xl text-navy">Your AI Quote Checker</h1>
             </div>
             {renderBody()}
           </div>

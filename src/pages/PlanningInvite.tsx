@@ -138,7 +138,7 @@ export default function PlanningInvite() {
                   to="/quote-checker"
                   className="w-full flex items-center justify-center gap-2 bg-card border-2 border-primary text-primary font-mono text-xs px-4 py-3 rounded-xl hover:bg-primary/5 transition-colors uppercase tracking-wider"
                 >
-                  <Upload className="w-4 h-4" /> Upload quote for Quote Health Check
+                  <Upload className="w-4 h-4" /> Upload quote for AI Quote Checker
                 </Link>
                 <Link
                   to="/post-job-brief"

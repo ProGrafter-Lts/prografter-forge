@@ -525,7 +525,7 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
 }
 
 /* ============================================================
-   Quote Health Check renders as a self-contained white "paper"
+   AI Quote Checker renders as a self-contained white "paper"
    document (.qr-paper). Colours are fixed (not theme tokens) so it
    stays legible and identical on the dark dashboard, the public page
    and in print. The dark-dashboard remaps that used to lighten the
@@ -584,7 +584,7 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
 }
 
 /* ============================================================
-   Quote Health Check — white "paper" document (.qr-paper / .qr-report)
+   AI Quote Checker — white "paper" document (.qr-paper / .qr-report)
    Fixed colours only, so it is identical on screen and in print.
    ============================================================ */
 .qr-paper {
@@ -770,7 +770,7 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
 
 
 /* ============================================================
-   Quote Health Check — v2 section hierarchy, action plan,
+   AI Quote Checker — v2 section hierarchy, action plan,
    copyable questions and suggested builder message.
    ============================================================ */
 .qr-report-stack > .qr-section2,
@@ -981,7 +981,7 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
 
 
 /* ============================================================
-   Quote Health Check — v2 premium "construction intelligence"
+   AI Quote Checker — v2 premium "construction intelligence"
    presentation. Fixed navy / teal / cream / white palette so the
    on-screen report and the printed PDF are identical.
    ============================================================ */
@@ -1348,7 +1348,7 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
 
 /* ============================================================
    Print stylesheet — window.print() produces a clean PDF of the
-   Quote Health Check. Hides nav/sidebar/buttons/footer chrome and
+   AI Quote Checker. Hides nav/sidebar/buttons/footer chrome and
    prints only the report card (.qr-print-area), keeping the
    ProGrafter navy/teal styling, the score, all sections and the
    disclaimer footer. The printed PDF == the on-screen report.
@@ -1459,7 +1459,7 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
       color: #6b7280;
     }
     @bottom-left {
-      content: "ProGrafter — Quote Health Check";
+      content: "ProGrafter — AI Quote Checker";
       font-family: monospace;
       font-size: 9px;
       color: #6b7280;

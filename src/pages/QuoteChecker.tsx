@@ -531,7 +531,7 @@ const QuoteChecker = () => {
             </div>
             <p className="font-mono text-xs text-white/70 mt-6">
               Don't have a quote yet?{" "}
-              <a href="/plan-my-project" className="text-teal-foreground underline underline-offset-2 hover:text-white">Start with Plan My Project.</a>
+              <a href="/project-cost-guide" className="text-teal-foreground underline underline-offset-2 hover:text-white">Start with Project Cost Guide.</a>
             </p>
             <TrustSignal tone="light" className="mt-6" text="Independent, construction-aware analysis — never a sales pitch." />
           </div>
