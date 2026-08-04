@@ -29,6 +29,7 @@ interface Brief {
   scoping_notes?: string | null; scoped_at?: string | null;
   planning_notes?: string | null; planning_guidance_at?: string | null;
   override_reason?: string | null;
+  archived_at?: string | null; archived_by?: string | null;
 }
 
 const STATUS_LABELS: Record<string, { label: string; bg: string; fg: string }> = {
@@ -62,6 +63,7 @@ export default function AdminJobBriefs() {
   const [briefs, setBriefs] = useState<Brief[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState<string | null>(null);
+  const [showArchived, setShowArchived] = useState(false);
 
   const startScopingCall = async (b: Brief, callType: string) => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -164,7 +166,42 @@ export default function AdminJobBriefs() {
     });
   };
 
+  // Archive: reversible, hides the brief from the working list without
+  // deleting it. Just an UPDATE — no new RLS needed.
+  const archiveBrief = async (b: Brief) => {
+    if (!confirm(`Archive "${b.job_title || b.ref}"? It'll be hidden from the working list but not deleted — you can unarchive it any time.`)) return;
+    setBusy(b.id);
+    const { data: u } = await supabase.auth.getUser();
+    const archived_at = new Date().toISOString();
+    const { error } = await supabase.from("job_briefs" as any).update({
+      archived_at, archived_by: u.user?.id ?? null,
+    }).eq("id", b.id);
+    setBusy(null);
+    if (error) { alert("Archive failed: " + error.message); return; }
+    patchBrief(b.id, { archived_at, archived_by: u.user?.id ?? null });
+  };
 
+  const unarchiveBrief = async (b: Brief) => {
+    setBusy(b.id);
+    const { error } = await supabase.from("job_briefs" as any).update({
+      archived_at: null, archived_by: null,
+    }).eq("id", b.id);
+    setBusy(null);
+    if (error) { alert("Unarchive failed: " + error.message); return; }
+    patchBrief(b.id, { archived_at: null, archived_by: null });
+  };
+
+  // Delete: permanent. For bad/test entries only — archive covers the
+  // "don't need to see this right now" case.
+  const deleteBrief = async (b: Brief) => {
+    if (!confirm(`Permanently delete "${b.job_title || b.ref}"? This cannot be undone. Use Archive instead if you might need this later.`)) return;
+    setBusy(b.id);
+    const { error } = await supabase.from("job_briefs" as any).delete().eq("id", b.id);
+    setBusy(null);
+    if (error) { alert("Delete failed: " + error.message); return; }
+    setBriefs((prev) => prev.filter((x) => x.id !== b.id));
+    setOpen((cur) => (cur === b.id ? null : cur));
+  };
 
 
 
@@ -176,13 +213,26 @@ export default function AdminJobBriefs() {
         subtitle="Review homeowner job briefs, record scoping calls, and publish to matched trades."
       />
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
-        {loading ? (
-          <p style={{ color: C.secondary }}>Loading…</p>
-        ) : briefs.length === 0 ? (
-          <p style={{ color: C.secondary }}>No job briefs submitted yet.</p>
-        ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {briefs.map((b) => (
+        {(() => {
+          const archivedCount = briefs.filter((b) => b.archived_at).length;
+          const visibleBriefs = briefs.filter((b) => (showArchived ? true : !b.archived_at));
+          return (
+            <>
+              {archivedCount > 0 && (
+                <button
+                  onClick={() => setShowArchived((v) => !v)}
+                  style={{ marginBottom: 12, background: "transparent", color: C.secondary, border: `1px solid ${C.border}`, borderRadius: 8, padding: "6px 12px", fontSize: 12, cursor: "pointer" }}
+                >
+                  {showArchived ? "Hide archived" : `Show archived (${archivedCount})`}
+                </button>
+              )}
+              {loading ? (
+                <p style={{ color: C.secondary }}>Loading…</p>
+              ) : visibleBriefs.length === 0 ? (
+                <p style={{ color: C.secondary }}>{briefs.length === 0 ? "No job briefs submitted yet." : "No briefs to show."}</p>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {visibleBriefs.map((b) => (
               <div key={b.id} style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 12, overflow: "hidden" }}>
                 <button
                   onClick={() => setOpen(open === b.id ? null : b.id)}
@@ -191,6 +241,7 @@ export default function AdminJobBriefs() {
                   <div>
                     <span style={{ fontFamily: "monospace", color: C.teal, fontWeight: 700, fontSize: 13 }}>{b.ref}</span>
                     {b.is_test && <span style={{ marginLeft: 8, fontSize: 10, background: "#FEF3C7", color: "#92400E", padding: "2px 6px", borderRadius: 4 }}>TEST</span>}
+                    {b.archived_at && <span style={{ marginLeft: 8, fontSize: 10, background: "#E5E7EB", color: "#4B5563", padding: "2px 6px", borderRadius: 4 }}>ARCHIVED</span>}
                     <span style={{ marginLeft: 8 }}><StatusPill status={b.status} /></span>
                     {b.needs_scoping && <span style={{ marginLeft: 8, fontSize: 10, background: "#CCFBF1", color: "#0F766E", padding: "2px 6px", borderRadius: 4, fontWeight: 700 }}>NEEDS SCOPING</span>}
                     {b.needs_planning_guidance && <span style={{ marginLeft: 8, fontSize: 10, background: "#FEE2E2", color: "#991B1B", padding: "2px 6px", borderRadius: 4, fontWeight: 700 }}>PLANNING GUIDANCE</span>}
@@ -309,13 +360,44 @@ export default function AdminJobBriefs() {
                       }
                     />
 
+                    <div style={{ marginTop: 14, paddingTop: 14, borderTop: `1px solid ${C.border}`, display: "flex", gap: 8 }}>
+                      {b.archived_at ? (
+                        <button
+                          onClick={() => unarchiveBrief(b)}
+                          disabled={busy === b.id}
+                          style={{ background: "transparent", color: C.deep, border: `1px solid ${C.border}`, borderRadius: 8, padding: "9px 14px", fontSize: 13, fontWeight: 700, cursor: "pointer", opacity: busy === b.id ? 0.6 : 1 }}
+                        >
+                          {busy === b.id ? "Working…" : "Unarchive"}
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => archiveBrief(b)}
+                          disabled={busy === b.id}
+                          style={{ background: "transparent", color: C.deep, border: `1px solid ${C.border}`, borderRadius: 8, padding: "9px 14px", fontSize: 13, fontWeight: 700, cursor: "pointer", opacity: busy === b.id ? 0.6 : 1 }}
+                        >
+                          {busy === b.id ? "Working…" : "Archive"}
+                        </button>
+                      )}
+                      <button
+                        onClick={() => deleteBrief(b)}
+                        disabled={busy === b.id}
+                        style={{ background: "transparent", color: "#991B1B", border: "1px solid #991B1B", borderRadius: 8, padding: "9px 14px", fontSize: 13, fontWeight: 700, cursor: "pointer", opacity: busy === b.id ? 0.6 : 1 }}
+                      >
+                        {busy === b.id ? "Working…" : "Delete permanently"}
+                      </button>
+                    </div>
+
                   </div>
                 )}
               </div>
-            ))}
-          </div>
-        )}
+                  ))}
+                </div>
+              )}
+            </>
+          );
+        })()}
       </div>
     </div>
   );
 }
+
