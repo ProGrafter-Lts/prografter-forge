@@ -13,6 +13,7 @@
 // checks.
 export const QUOTE_CHECKER_V2_ENABLED: Record<string, boolean> = {
   landscaping_driveway: true,
+  boiler_heating: true,
 };
 
 export function isV2Enabled(moduleId: string): boolean {
