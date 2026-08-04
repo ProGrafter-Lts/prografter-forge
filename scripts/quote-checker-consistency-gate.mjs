@@ -37,6 +37,8 @@ const AGREEMENT_THRESHOLD = Number(process.env.AGREEMENT_THRESHOLD || 0.95);
 const POLL_TIMEOUT_MS = Number(process.env.POLL_TIMEOUT_MS || 90_000);
 const POLL_INTERVAL_MS = 3_000;
 const TESTED_BY = process.env.TESTED_BY || "automated-script";
+const PROJECT_TYPE = process.env.PROJECT_TYPE || "Landscaping / Driveway";
+const CONTEXT_KEY = process.env.CONTEXT_KEY || "landscaping_context";
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
   console.error("SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required.");
@@ -71,8 +73,8 @@ async function runExtraction(storagePath) {
   const { data, error } = await supabase.functions.invoke("extract-quote", {
     body: {
       category: CATEGORY,
-      projectType: "Landscaping / Driveway",
-      intake: { checker: CATEGORY, project_type: "Landscaping / Driveway", landscaping_context: {} },
+      projectType: PROJECT_TYPE,
+      intake: { checker: CATEGORY, project_type: PROJECT_TYPE, [CONTEXT_KEY]: {} },
       pdfPath: storagePath,
       supportingFiles: [],
     },
@@ -98,7 +100,7 @@ async function pollForExtraction(quoteCheckId) {
 }
 
 /** Flatten a category -> field -> {status,...} extraction into "category.field": status. */
-function flattenStatuses(extraction) {
+export function flattenStatuses(extraction) {
   const flat = {};
   for (const [catKey, fields] of Object.entries(extraction || {})) {
     if (!fields || typeof fields !== "object") continue;

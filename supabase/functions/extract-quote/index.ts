@@ -12,7 +12,7 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.100.1";
 import { robustParseJson } from "../_shared/json-repair.ts";
-import { SCHEMAS, emptyExtraction, type CategoryDef, type ExtractionRecord } from "../_shared/quote-checker-schemas.ts";
+import { SCHEMAS, metaFor, emptyExtraction, type CategoryDef, type ExtractionRecord } from "../_shared/quote-checker-schemas.ts";
 import { extractPdfText, runPass0Regex, describePass0Candidates, type Pass0Candidates } from "./pass0.ts";
 
 const corsHeaders = {
@@ -24,7 +24,6 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
 const MODEL = "claude-sonnet-4-6";
-const SCHEMA_VERSION = "landscaping-extraction-v1";
 
 // ---- File handling (duplicated from analyse-landscaping-quote — each Edge
 // Function deploys independently, and this repo's convention is to keep
@@ -96,11 +95,13 @@ async function callAnthropic(content: unknown, maxTokens: number): Promise<strin
 
 // ---- Pass 1 prompt ----------------------------------------------------------
 function buildPass1Prompt(
+  category: string,
   schema: CategoryDef[],
   pass0: Pass0Candidates,
   intake: Record<string, unknown>,
   supportingNames: string[],
 ): string {
+  const meta = metaFor(category);
   const schemaLines = schema
     .map(
       (c) =>
@@ -116,9 +117,9 @@ function buildPass1Prompt(
     .join("\n\n");
 
 
-  const ctx = (intake as any)?.landscaping_context ?? intake ?? {};
+  const ctx = (intake as any)?.[meta.contextKey] ?? intake ?? {};
 
-  return `You are ProGrafter's LANDSCAPING / DRIVEWAY QUOTE EXTRACTION engine (Pass 1 of a two-pass pipeline).
+  return `You are ProGrafter's ${meta.title} QUOTE EXTRACTION engine (Pass 1 of a two-pass pipeline).
 
 Your ONLY job is EXTRACTION, not judgment or scoring. A separate pass will score and write the homeowner report from your output. Do not editorialise, do not score, do not write prose commentary.
 
@@ -282,7 +283,7 @@ async function runExtraction(supabase: any, args: RunArgs): Promise<void> {
     // Build the same multimodal content the model reads, main quote then
     // supporting docs, matching today's analyse-landscaping-quote behaviour.
     const content: unknown[] = [];
-    content.push({ type: "text", text: "===== MAIN LANDSCAPING / DRIVEWAY QUOTE =====" });
+    content.push({ type: "text", text: `===== MAIN ${metaFor(category).title} QUOTE =====` });
     content.push(contentBlockFromBytes(mainBytes, mainMedia));
 
     const supportingNames: string[] = [];
@@ -295,7 +296,7 @@ async function runExtraction(supabase: any, args: RunArgs): Promise<void> {
       supportingNames.push(sf.name);
     }
 
-    content.push({ type: "text", text: buildPass1Prompt(schema, pass0, intake ?? {}, supportingNames) });
+    content.push({ type: "text", text: buildPass1Prompt(category, schema, pass0, intake ?? {}, supportingNames) });
 
     const raw = await callAnthropic(content, 8000);
     const parsed = extractJson(raw);
@@ -317,7 +318,7 @@ async function runExtraction(supabase: any, args: RunArgs): Promise<void> {
       .insert({
         quote_check_id: checkId,
         category,
-        schema_version: SCHEMA_VERSION,
+        schema_version: metaFor(category).schemaVersion,
         pass0_json: pass0,
         pass1_json: extraction,
         model: MODEL,

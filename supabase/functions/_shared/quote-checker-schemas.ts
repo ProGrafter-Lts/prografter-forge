@@ -145,9 +145,207 @@ export const LANDSCAPING_SCHEMA: CategoryDef[] = [
   },
 ];
 
+// ---- Boiler / Heating (18 fields across 5 categories) ----------------------
+//
+// Written after the Landscaping pilot, so the three bug classes that pilot
+// surfaced are designed in rather than discovered again:
+//   1. NO-REUSE: a single sentence may legitimately evidence several fields
+//      (a price line can evidence total price AND VAT; a payment sentence can
+//      evidence deposit AND schedule). Criteria below say so explicitly where
+//      the overlap is predictable. The prohibition is only on transferring
+//      evidence about a DIFFERENT subject.
+//   2. COMPOUND FACTS: every field that needs two or more things together is
+//      labelled COMPOUND FACT and spells out "one part only = ambiguous".
+//   3. VAGUENESS / HEDGING: fields where hedged wording is common in real
+//      boiler quotes state what counts as a genuine figure vs a vague one,
+//      applying the precision-hedge (figure survives) vs commitment-hedge
+//      (figure replaced) distinction.
+export const BOILER_SCHEMA: CategoryDef[] = [
+  {
+    key: "quote_basics",
+    name: "Quote Basics",
+    fields: [
+      {
+        key: "installer_name",
+        label: "Installer / heating company name",
+        criteria: "present if any business or trading name identifying the installer appears (letterhead, header, sign-off). A trading name without Ltd/Limited still counts. A first name only with no business name is ambiguous; no name at all is absent.",
+      },
+      {
+        key: "gas_safe_registration",
+        label: "Gas Safe registration (registered business and registration number)",
+        criteria: "COMPOUND FACT — needs BOTH a claim of Gas Safe registration AND a registration number. Both = present. Only one part (e.g. 'we are Gas Safe registered' with no number, or a bare number with no context) = ambiguous. Neither = absent. 'Corgi registered', 'fully qualified' or 'certified engineers' without Gas Safe wording is ambiguous, not present. NOTE: the same header block may also evidence installer_name and installer_contact — shared evidence is allowed.",
+      },
+      {
+        key: "customer_name_address",
+        label: "Customer name and installation address",
+        criteria: "COMPOUND FACT — needs BOTH a customer name AND an installation/site address. Both = present (address may be full, street + town, or postcode). Only one (a greeting such as 'Hi Dave,' with no address, or an address with no named customer) = ambiguous. Neither = absent.",
+      },
+      {
+        key: "quote_date_and_validity",
+        label: "Quote date and how long the price is held",
+        criteria: "COMPOUND FACT — needs BOTH a quote/issue date AND a validity or expiry period for the price. Both = present. Only one = ambiguous. Neither = absent. 'Prices subject to change' with no period is not a validity period — treat as the missing half. HEDGING: 'valid for approximately 30 days' is still present (figure survives the hedge); 'valid for a short while' is ambiguous (hedge replaced the figure).",
+      },
+    ],
+  },
+  {
+    key: "appliance_system_spec",
+    name: "Appliance / System Specification",
+    fields: [
+      {
+        key: "boiler_make_and_model",
+        label: "Boiler make and model",
+        criteria: "COMPOUND FACT — needs BOTH manufacturer AND a specific model/range name or number (e.g. 'Worcester Bosch Greenstar 4000 30kW'). Both = present. Make only ('a Worcester boiler'), or model with no make, = ambiguous. 'A quality A-rated combi' with neither = absent. HEDGING: 'Vaillant ecoTEC Plus 832 or equivalent' still names a base spec — present. 'A Worcester or similar' names no model — ambiguous.",
+      },
+      {
+        key: "system_type",
+        label: "System type (combi, system, regular / heat-only) and any conversion",
+        criteria: "present if the system type is named, or if a conversion is described (e.g. 'convert from regular to combi', 'remove cylinder and tanks'). Naming the boiler model alone is NOT evidence of system type — that is absent, not ambiguous. Mentioning 'new boiler' with no type is absent. Contradictory or unclear type wording is ambiguous.",
+      },
+      {
+        key: "sizing_basis_or_survey",
+        label: "Basis for sizing — heat loss calculation or site survey",
+        criteria: "present only if the document explicitly states a heat loss calculation, radiator sizing exercise, or a site survey/visit that took place or is included. Detailed measurements or a room list alone are NOT evidence of a survey — absent. A passing social reference ('thanks for having us round', 'good to meet you') is ambiguous, not present. 'Survey to be carried out before works' is ambiguous (promised, not done).",
+      },
+    ],
+  },
+  {
+    key: "installation_works",
+    name: "Installation Works",
+    fields: [
+      {
+        key: "flue_route_and_termination",
+        label: "Flue route and termination point",
+        criteria: "COMPOUND FACT — needs BOTH the flue run/route AND where it terminates (wall, roof, rear, vertical, above a specified height). Both = present. Only one, e.g. 'new flue supplied' or 'horizontal flue' with no location, = ambiguous. No flue mention = absent.",
+      },
+      {
+        key: "system_flush_and_filter",
+        label: "System cleanse / power flush and magnetic filter",
+        criteria: "COMPOUND FACT — needs BOTH a cleanse of the system (chemical flush, power flush, hot flush) AND a magnetic system filter fitted. Both = present. Only one = ambiguous. Neither = absent. Inhibitor dosing alone is NOT a flush and NOT a filter — absent unless one of the two is separately stated. Note the flush and filter often appear in one sentence that also evidences nothing else; if the same sentence also names controls, it may evidence controls_and_thermostat too.",
+      },
+      {
+        key: "controls_and_thermostat",
+        label: "Heating controls and thermostat supplied",
+        criteria: "present only if a control or thermostat is named or specified (room thermostat, programmer, smart control, TRVs, brand named). 'Existing controls reused' is also present — it is a stated decision. 'Controls as required' or 'we can look at controls' is ambiguous. No mention is absent.",
+      },
+      {
+        key: "gas_supply_and_pipework",
+        label: "Gas supply / pipework — upgrade, re-run or condensate route",
+        criteria: "present if the document states gas pipe sizing/upgrade, pipework re-runs, or the condensate discharge route. Any ONE of these three is enough — this is NOT a compound field. 'Any pipework needed' or 'pipe upgrade may be required at extra cost' is ambiguous. Silence is absent.",
+      },
+      {
+        key: "making_good_and_waste_removal",
+        label: "Making good, protection of the property and removal of old appliance / waste",
+        criteria: "present if the document states removal/disposal of the old boiler or waste, OR making good / protecting the property (dust sheets, boarding, decoration limits) — either one qualifies. Explicit exclusion ('making good not included') is also present. Silence is absent. 'We leave things tidy' is ambiguous.",
+      },
+    ],
+  },
+  {
+    key: "compliance_certification",
+    name: "Compliance / Certification",
+    fields: [
+      {
+        key: "building_regs_notification",
+        label: "Building Regulations notification (Gas Safe / local authority)",
+        criteria: "present only if the document states the installation will be notified to Building Control or Gas Safe, or that a Building Regulations compliance certificate will be issued. A Gas Safe registration number alone is NOT notification — absent (different subject: registration vs notification). 'All certificates provided' with no named certificate is ambiguous.",
+      },
+      {
+        key: "commissioning_and_benchmark",
+        label: "Commissioning and Benchmark checklist / handover documentation",
+        criteria: "present only if commissioning of the appliance, completion of the Benchmark checklist, or issue of the manufacturer's commissioning record is stated. 'We will test it works' is ambiguous. Silence is absent. A warranty registration promise alone belongs to the warranty field, not here.",
+      },
+    ],
+  },
+  {
+    key: "price_terms_guarantees",
+    name: "Price / Terms / Guarantees",
+    fields: [
+      {
+        key: "total_price_and_vat",
+        label: "Total price and VAT position",
+        criteria: "COMPOUND FACT — needs BOTH a total price figure AND its VAT position (inclusive, exclusive, a VAT line, a VAT number, or a stated 0%/5% rate). Both = present. A total with no VAT position stated, or a VAT statement with no total, = ambiguous. Neither = absent. The SAME price line may evidence both halves (e.g. 'Total £3,450 including VAT') and may also be reused by payment_terms — evidence is not consumed by another field.",
+      },
+      {
+        key: "payment_terms",
+        label: "Payment terms — deposit and/or staged payments",
+        criteria: "present if the document states when money is due: a deposit with a balance point, two or more payment points, or a stage schedule. A deposit alone with no stated balance point is ambiguous. The SAME sentence may also have been used for total_price_and_vat — that is allowed. 'Payment on completion' alone IS a stated single term — present. 'Terms to be agreed' or 'usual terms' is ambiguous. No mention is absent.",
+      },
+      {
+        key: "installation_date_and_duration",
+        label: "Installation date and how long the job takes",
+        criteria: "Either a start date/window OR an on-site duration qualifies — this is NOT a compound field. HEDGING (precision vs commitment): 'usually a one-day install', 'estimated 2 days', 'anticipated start 16 March' all keep a concrete figure or date — present. 'We'll fit you in soon', 'about a day or so', 'as soon as we can' leave nothing concrete — ambiguous. No mention is absent.",
+      },
+      {
+        key: "warranty_manufacturer_and_workmanship",
+        label: "Manufacturer warranty and workmanship guarantee",
+        criteria: "COMPOUND FACT — needs BOTH a manufacturer/appliance warranty (with or without a period) AND an installer workmanship guarantee. Both = present. Only one (e.g. '10 year Worcester warranty' with nothing on the installer's own work) = ambiguous. Neither = absent. HEDGING: 'up to 10 years subject to registration and annual servicing' still names a period — that half counts as stated.",
+      },
+    ],
+  },
+];
+
 export const SCHEMAS: Record<string, CategoryDef[]> = {
   landscaping_driveway: LANDSCAPING_SCHEMA,
+  boiler_heating: BOILER_SCHEMA,
 };
+
+/** Per-category wording + versioning so Pass 1 and Pass 2 are not hardcoded
+ *  to the Landscaping pilot. */
+export interface CategoryMeta {
+  /** Uppercase name used in the Pass 1 / Pass 2 prompt headers. */
+  title: string;
+  /** How the report refers to the tradesperson. */
+  tradeNoun: string;
+  /** Stored on quote_check_extractions.schema_version. */
+  schemaVersion: string;
+  /** report_json.version. */
+  reportVersion: string;
+  /** intake sub-key holding the homeowner context for this module. */
+  contextKey: string;
+  /** Default project_type label. */
+  projectType: string;
+  /** Frontend report route prefix. */
+  reportRoute: string;
+  verdictStrong: string;
+  verdictModerate: string;
+  verdictLow: string;
+}
+
+export const CATEGORY_META: Record<string, CategoryMeta> = {
+  landscaping_driveway: {
+    title: "LANDSCAPING / DRIVEWAY",
+    tradeNoun: "landscaper",
+    schemaVersion: "landscaping-extraction-v1",
+    reportVersion: "landscaping-v2",
+    contextKey: "landscaping_context",
+    projectType: "Landscaping / Driveway",
+    reportRoute: "landscaping-quote-report",
+    verdictStrong:
+      "This is a strong landscaping quote with clear area, ground preparation, materials, drainage and access. A few final confirmation points should be agreed before accepting.",
+    verdictModerate:
+      "This quote covers the basics of the landscaping work and includes useful scope, but sub-base depth, drainage/falls, waste handling and commercial points should be confirmed before accepting.",
+    verdictLow:
+      "This quote is too vague to accept safely yet. It gives a price, but leaves out key details about area, ground preparation, sub-base, drainage, materials and waste handling.",
+  },
+  boiler_heating: {
+    title: "BOILER / HEATING",
+    tradeNoun: "heating engineer",
+    schemaVersion: "boiler-extraction-v1",
+    reportVersion: "boiler-v2",
+    contextKey: "boiler_context",
+    projectType: "Boiler / Heating",
+    reportRoute: "boiler-quote-report",
+    verdictStrong:
+      "This is a strong heating quote — the appliance, system works, compliance paperwork and commercial terms are all clearly set out. A few final confirmation points are worth agreeing before accepting.",
+    verdictModerate:
+      "This quote covers the main boiler works, but points such as flue route, system cleanse, controls, certification and payment terms should be confirmed in writing before accepting.",
+    verdictLow:
+      "This quote is too vague to accept safely yet. It gives a price, but leaves out key details about the appliance specification, installation works, Gas Safe certification and guarantees.",
+  },
+};
+
+export function metaFor(category: string): CategoryMeta {
+  return CATEGORY_META[category] ?? CATEGORY_META.landscaping_driveway;
+}
 
 export function fieldCount(schema: CategoryDef[]): number {
   return schema.reduce((n, c) => n + c.fields.length, 0);
