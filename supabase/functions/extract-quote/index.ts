@@ -134,7 +134,14 @@ ${describePass0Candidates(pass0)}
 ${schemaLines}
 
 ===== RULES =====
-- For EVERY field, decide "status": "present" (clearly stated), "absent" (not mentioned anywhere), or "ambiguous" (mentioned but vague, contradictory, or only a provisional/allowance figure).
+- Where a field has a RULE line above, that RULE is binding and overrides your own judgement. Apply it literally.
+- Default adjudication (used when no RULE is given, and never in conflict with one):
+  * "present" = the document EXPLICITLY states the thing named by the field. Explicit means stated in words, not implied, not inferable from adjacent facts, not a reasonable industry assumption.
+  * "ambiguous" = the thing IS mentioned, but the statement is vague, self-contradictory, conditional, or only a provisional sum/allowance.
+  * "absent" = the thing is not mentioned. Silence, implication, and "a competent contractor would obviously do this" are ALL absent.
+- Never use "ambiguous" as a hedge for evidence you had to infer. If you had to reason from a related fact to get there, the answer is "absent".
+- Judge each field ONLY on evidence for that field. Evidence already used for a different field does not make this field present.
+
 - If status is "present", "quote" MUST be a VERBATIM substring copied exactly from the document text — never paraphrase, never recompute, never invent. If you cannot find an exact verbatim span, use "ambiguous" instead of "present".
 - If status is "absent" or you found nothing, "quote" MUST be null.
 - "evidence_source": "in_quote" if the fact comes from the MAIN quote document; "supplied_in_supporting" if it is ONLY in a supporting document (not the main quote); "not_found" if status is "absent".
