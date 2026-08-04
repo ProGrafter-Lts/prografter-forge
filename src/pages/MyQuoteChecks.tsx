@@ -124,7 +124,7 @@ const MyQuoteChecks = () => {
             <SearchCheck className="w-7 h-7" /> My Quote Checks
           </h1>
           <p className="font-mono text-sm text-muted-foreground mt-1">
-            Every AI Quote Checker saved to your account.
+            Every AI Quote Checker report saved to your account.
           </p>
         </div>
 

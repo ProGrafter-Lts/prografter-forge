@@ -177,7 +177,7 @@ const QuoteCheckDetail = () => {
               <p className="font-heading text-xl text-foreground">Under manual review</p>
               <p className="font-mono text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
                 This quote produced some conflicting details, so our team is reviewing it
-                by hand to keep your AI Quote Checker accurate. We'll email you as soon
+                by hand to keep your AI Quote Checker report accurate. We'll email you as soon
                 as it's ready — usually within one working day.
               </p>
             </div>

@@ -238,7 +238,7 @@ export const SECTIONS: Record<string, GuideSection> = {
       "Would you like a revised quote?",
       "Would you like matched trades to quote?",
       "Would you like ProGrafter to help create a clearer project brief?",
-      "Would you like to run a AI Quote Checker?",
+      "Would you like to run an AI Quote Checker review?",
     ],
     fields: [
       { key: "decision_blocker", label: "Decision blocker", kind: "textarea" },
