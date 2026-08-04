@@ -16,7 +16,7 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.100.1";
 import { robustParseJson } from "../_shared/json-repair.ts";
-import { SCHEMAS, type CategoryDef, type ExtractionRecord, type ExtractedField } from "../_shared/quote-checker-schemas.ts";
+import { SCHEMAS, metaFor, type CategoryDef, type ExtractionRecord, type ExtractedField } from "../_shared/quote-checker-schemas.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -97,12 +97,14 @@ function statusLabel(f: ExtractedField): string {
 
 // ---- Pass 2 prompt: narrative only, sourced only from Pass 1's JSON --------
 function buildPass2Prompt(
+  category: string,
   schema: CategoryDef[],
   extraction: ExtractionRecord,
   categoryScores: CategoryScore[],
   intake: Record<string, unknown>,
 ): string {
-  const ctx = (intake as any)?.landscaping_context ?? intake ?? {};
+  const meta = metaFor(category);
+  const ctx = (intake as any)?.[meta.contextKey] ?? intake ?? {};
 
   const evidenceLines = schema
     .map((c) => {
@@ -118,7 +120,7 @@ function buildPass2Prompt(
     })
     .join("\n\n");
 
-  return `You are ProGrafter's LANDSCAPING / DRIVEWAY QUOTE CHECKER — Pass 2 (narrative) of a two-pass pipeline.
+  return `You are ProGrafter's ${meta.title} QUOTE CHECKER — Pass 2 (narrative) of a two-pass pipeline.
 
 You do NOT have the original quote document. You have ONLY the structured evidence below, already extracted and verified by a separate pass, and category scores that are ALREADY COMPUTED (do not recompute or contradict them). Your job is ONLY to write clear, homeowner-friendly narrative text from this evidence. Never state that something is present, confirmed, or missing unless the evidence below says so — you have no other source of truth.
 
@@ -128,9 +130,9 @@ ${JSON.stringify(ctx, null, 2)}
 EXTRACTED EVIDENCE (status: present | absent | ambiguous; evidence_source: in_quote | supplied_in_supporting | not_found):
 ${evidenceLines}
 
-WORDING STYLE: practical, calm and homeowner-friendly. Never accuse the landscaper. Never sound like legal advice. Use phrases like "Not visible in the quote — confirm if required.", "Worth confirming before accepting.", "Good detail, but ask for written confirmation on…", "Ground conditions can surprise — worth flagging as a risk item."
+WORDING STYLE: practical, calm and homeowner-friendly. Never accuse the ${meta.tradeNoun}. Never sound like legal advice. Use phrases like "Not visible in the quote — confirm if required.", "Worth confirming before accepting.", "Good detail, but ask for written confirmation on…", "Ground conditions can surprise — worth flagging as a risk item."
 
-Refer to the tradesperson as the "landscaper" (or "driveway installer" where clearly a driveway), never the "builder" or "roofer".
+Refer to the tradesperson as the "${meta.tradeNoun}", never a different trade.
 
 Respond with STRICT JSON only (no prose, no markdown fences) in EXACTLY this shape:
 {
@@ -140,8 +142,8 @@ Respond with STRICT JSON only (no prose, no markdown fences) in EXACTLY this sha
   "supplied_separately_notes": { "<category_key>.<field_key>": "short homeowner-friendly guidance for a field marked supplied_in_supporting" },
   "not_found": ["... items marked absent above, phrased as 'Not visible in the quote — confirm if required.' ..."],
   "key_risks": ["... the most important things worth confirming before accepting, based only on absent/ambiguous items above ..."],
-  "questions": ["max 10 priority questions to ask the landscaper, based only on absent/ambiguous items above"],
-  "suggested_message": "a short, polite, copyable message the homeowner can send the landscaper asking only for the most important clarifications — do not generate a huge list if the evidence is already strong",
+  "questions": ["max 10 priority questions to ask the ${meta.tradeNoun}, based only on absent/ambiguous items above"],
+  "suggested_message": "a short, polite, copyable message the homeowner can send the ${meta.tradeNoun} asking only for the most important clarifications — do not generate a huge list if the evidence is already strong",
   "summary": "a short ProGrafter summary paragraph"
 }
 Category keys available: ${schema.map((c) => c.key).join(", ")}.`;
@@ -185,6 +187,7 @@ Deno.serve(async (req) => {
       .single();
     if (checkErr || !checkRow) throw new Error("simple_quote_checks row not found: " + checkErr?.message);
 
+    const meta = metaFor(extractionRow.category);
     const categoryScores = scoreCategories(schema, extraction);
     const clarityScore = averageScore(categoryScores.map((c) => c.score_main));
     const packScore = averageScore(categoryScores.map((c) => c.score_pack));
@@ -195,20 +198,17 @@ Deno.serve(async (req) => {
     let verdictLine: string;
     if (clarityScore >= 78) {
       verdictLevel = "strong";
-      verdictLine =
-        "This is a strong landscaping quote with clear area, ground preparation, materials, drainage and access. A few final confirmation points should be agreed before accepting.";
+      verdictLine = meta.verdictStrong;
     } else if (clarityScore >= 45) {
       verdictLevel = clarityScore >= 68 ? "good" : "moderate";
-      verdictLine =
-        "This quote covers the basics of the landscaping work and includes useful scope, but sub-base depth, drainage/falls, waste handling and commercial points should be confirmed before accepting.";
+      verdictLine = meta.verdictModerate;
     } else {
       verdictLevel = "low";
-      verdictLine =
-        "This quote is too vague to accept safely yet. It gives a price, but leaves out key details about area, ground preparation, sub-base, drainage, materials and waste handling.";
+      verdictLine = meta.verdictLow;
     }
 
     const raw = await callAnthropic(
-      [{ type: "text", text: buildPass2Prompt(schema, extraction, categoryScores, checkRow.intake ?? {}) }],
+      [{ type: "text", text: buildPass2Prompt(extractionRow.category, schema, extraction, categoryScores, checkRow.intake ?? {}) }],
       4000,
     );
     const parsed = robustParseJson(raw) ?? {};
@@ -252,18 +252,18 @@ Deno.serve(async (req) => {
             item: f.label,
             main_quote: "Not visible in the main quote",
             supporting: field.quote || "",
-            status: "Supplied separately — confirm with landscaper",
-            note: suppliedNotes[`${c.key}.${f.key}`] || "Confirm the landscaper agrees this forms part of the agreed quote.",
+            status: `Supplied separately — confirm with ${meta.tradeNoun}`,
+            note: suppliedNotes[`${c.key}.${f.key}`] || `Confirm the ${meta.tradeNoun} agrees this forms part of the agreed quote.`,
           });
         }
       }
     }
 
     const report_json = {
-      version: "landscaping-v2",
+      version: meta.reportVersion,
       generated_at: new Date().toISOString(),
       project_type: checkRow.project_type ?? null,
-      is_landscaping_quote: true,
+      is_landscaping_quote: extractionRow.category === "landscaping_driveway",
       verdict: { level: verdictLevel, line: verdictLine },
       clarity_score: clarityScore,
       pack_confidence_score: packScore,
@@ -287,12 +287,12 @@ Deno.serve(async (req) => {
     if (checkRow.email) {
       try {
         const base = "https://prografter.co.uk";
-        const reportUrl = `${base}/landscaping-quote-report/${checkId}?t=${encodeURIComponent(checkRow.lookup_token)}`;
+        const reportUrl = `${base}/${meta.reportRoute}/${checkId}?t=${encodeURIComponent(checkRow.lookup_token)}`;
         await supabase.functions.invoke("send-transactional-email", {
           body: {
             templateName: "quote-health-check-ready",
             recipientEmail: checkRow.email,
-            idempotencyKey: `landscaping-quote-ready-${checkId}`,
+            idempotencyKey: `${extractionRow.category}-quote-ready-${checkId}`,
             templateData: { reportUrl, projectType: checkRow.project_type ?? "" },
           },
         });
