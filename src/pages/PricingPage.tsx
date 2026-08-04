@@ -29,7 +29,7 @@ const HOME_POINTS = [
 
 const FAQ = [
   { q: "How much does ProGrafter cost tradespeople?", a: "It's free to register and there are no monthly fees or lead fees. Trades pay a 7.5% commission only when a job completes and they've been paid, capped at £900 per job." },
-  { q: "How much does it cost homeowners?", a: "Homeowners post jobs for free and are matched with verified trades at no cost. ProGrafter offers free Project Cost Guide guidance, with a paid Quote Checker report for detailed reviews of a specific quote." },
+  { q: "How much does it cost homeowners?", a: "Homeowners post jobs for free and are matched with verified trades at no cost. ProGrafter offers the free Project Cost Guide, with a paid AI Quote Checker report for detailed reviews of a specific quote." },
   { q: "When exactly does commission apply?", a: "Only after a job is marked complete and the trade has been paid. There's nothing to pay up front and nothing to pay if a job doesn't go ahead." },
   { q: "Are there any hidden fees or rank-boosting charges?", a: "No. There's no pay-to-play, no boosted rankings and no surprise charges. One fair, capped commission — that's it." },
   { q: "What is the Founding Member offer?", a: "The first 50 verified trades get their first 5 jobs at a reduced 6% commission, a permanent Founding Member badge, and a personal welcome call from founder Lee Palfreeman." },

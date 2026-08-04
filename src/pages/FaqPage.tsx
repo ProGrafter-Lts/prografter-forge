@@ -14,13 +14,13 @@ const GENERAL = [
   { q: "What is ProGrafter?", a: "ProGrafter is the UK's AI-powered construction trust platform. We connect verified tradespeople with homeowners and add intelligent tools — like the AI Quote Checker — to remove uncertainty from building work for both sides." },
   { q: "How is ProGrafter different from Checkatrade, MyBuilder or Rated People?", a: "Those platforms largely sell leads. ProGrafter builds trust: five-step trade verification, homeowner verification, two-way reviews, manual brief review, AI quote checking and transparent commission-only pricing with no monthly fees." },
   { q: "Where is ProGrafter available?", a: "ProGrafter operates across the United Kingdom, with initial coverage focused on Nottinghamshire and the East Midlands and expanding nationally." },
-  { q: "Is ProGrafter free to use?", a: "It's free to register and free to post a job. Trades pay a 7.5% commission only on completed, paid jobs, capped at £900. Homeowners can use the free Project Cost Guide tool, with a paid Quote Checker available for detailed reviews." },
+  { q: "Is ProGrafter free to use?", a: "It's free to register and free to post a job. Trades pay a 7.5% commission only on completed, paid jobs, capped at £900. Homeowners can use the free Project Cost Guide, with the paid AI Quote Checker available for detailed reviews of a builder's quote." },
 ];
 
 const HOMEOWNERS = [
   { q: "How many quotes will I get?", a: "You're matched with up to three vetted, local, available trades — not thirty — so you choose on the quality of the work, not just the lowest price." },
   { q: "Are the trades insured and qualified?", a: "Yes. Every trade passes a five-step verification covering ID, public liability insurance, qualifications, references and history before their profile goes live." },
-  { q: "Can I check a builder's quote before I commit?", a: "Yes. Upload it to the AI Quote Checker to get a Quote Clarity Score and a breakdown of what's included, unclear or missing — plus the questions to ask." },
+  { q: "Can I check a builder's quote before I commit?", a: "Yes. Upload it to the AI Quote Checker to get a Clarity Score (0–100) and a breakdown of what's included, unclear or missing — plus the questions to ask." },
   { q: "What protection do I get during the project?", a: "Depending on your project you can benefit from written contracts, staged payments, site photo updates and a record of certificates and warranties at completion." },
 ];
 
