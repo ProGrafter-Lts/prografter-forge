@@ -352,8 +352,8 @@ export const CATEGORY_META: Record<string, CategoryMeta> = {
   boiler_heating: {
     title: "BOILER / HEATING",
     tradeNoun: "heating engineer",
-    schemaVersion: "boiler-extraction-v1",
-    reportVersion: "boiler-v2",
+    schemaVersion: "boiler-extraction-v2",
+    reportVersion: "boiler-v3",
     contextKey: "boiler_context",
     projectType: "Boiler / Heating",
     reportRoute: "boiler-quote-report",
