@@ -102,8 +102,19 @@ function buildPass1Prompt(
   supportingNames: string[],
 ): string {
   const schemaLines = schema
-    .map((c) => `${c.key} (${c.name}):\n` + c.fields.map((f) => `  - ${c.key}.${f.key}: ${f.label}`).join("\n"))
+    .map(
+      (c) =>
+        `${c.key} (${c.name}):\n` +
+        c.fields
+          .map(
+            (f) =>
+              `  - ${c.key}.${f.key}: ${f.label}` +
+              (f.criteria ? `\n      RULE: ${f.criteria}` : ""),
+          )
+          .join("\n"),
+    )
     .join("\n\n");
+
 
   const ctx = (intake as any)?.landscaping_context ?? intake ?? {};
 
