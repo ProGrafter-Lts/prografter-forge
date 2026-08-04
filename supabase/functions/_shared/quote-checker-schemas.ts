@@ -48,9 +48,9 @@ export const LANDSCAPING_SCHEMA: CategoryDef[] = [
     key: "quote_basics",
     name: "Quote Basics",
     fields: [
-      { key: "contractor_name", label: "Contractor / landscaper name" },
+      { key: "contractor_name", label: "Contractor / landscaper name", criteria: "present if any business or trading name identifying the contractor appears (letterhead, header, sign-off). A trading name without a legal suffix such as Ltd/Limited still counts as present. Only a first name with no business name, or no name at all, is ambiguous/absent respectively." },
       { key: "contractor_contact", label: "Contractor contact details (phone, email or address)" },
-      { key: "customer_name_address", label: "Customer name and site address" },
+      { key: "customer_name_address", label: "Customer name and site address", criteria: "COMPOUND FACT — this field requires BOTH a customer name AND a site address. Both present (address may be a full address, street + town, or postcode) = \"present\". Only one of the two (e.g. a name in a greeting such as \"Hi Dave,\" with no address, or an address with no named customer) = \"ambiguous\". Neither = \"absent\"." },
       { key: "quote_date", label: "Quote date" },
       { key: "quote_validity_period", label: "Quote validity period", criteria: "present only if a validity period or expiry for the price is stated." },
       { key: "vat_status", label: "VAT status (inclusive, exclusive, exempt, or VAT number given)" },
@@ -137,7 +137,7 @@ export const LANDSCAPING_SCHEMA: CategoryDef[] = [
     name: "Timescale / Guarantees / Handover",
     fields: [
       { key: "start_date", label: "Start date", criteria: "present only if a start date, start window or lead time is stated. \"Subject to availability\" alone is ambiguous." },
-      { key: "duration", label: "Duration", criteria: "present only if a specific, committed duration or number of days/weeks on site is stated. Approximate or hedged durations ('about a week or so', 'roughly 2-3 weeks', 'typically around a fortnight') are ambiguous, not present." },
+      { key: "duration", label: "Duration", criteria: "present if a specific number of days or weeks on site is stated, even where a reasonable real-world qualifier is attached ('8 working days, subject to weather', 'estimated at 10 days' — the figure is still actionable). Ambiguous only where the hedge REPLACES the figure ('about a week or so', 'a few weeks', 'depends how it goes')." },
       { key: "workmanship_guarantee", label: "Workmanship guarantee", criteria: "present only if a workmanship guarantee/warranty with or without a period is stated." },
       { key: "material_warranty", label: "Material / manufacturer warranty", criteria: "present only if a manufacturer or material warranty is stated. A workmanship guarantee alone is absent." },
       { key: "aftercare_guidance", label: "Aftercare guidance", criteria: "present only if aftercare, maintenance or curing guidance is given. Silence is absent." },
