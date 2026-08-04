@@ -197,6 +197,12 @@ export const BOILER_SCHEMA: CategoryDef[] = [
         criteria: "COMPOUND FACT — needs BOTH manufacturer AND a specific model/range name or number (e.g. 'Worcester Bosch Greenstar 4000 30kW'). Both = present. Make only ('a Worcester boiler'), or model with no make, = ambiguous. 'A quality A-rated combi' with neither = absent. HEDGING: 'Vaillant ecoTEC Plus 832 or equivalent' still names a base spec — present. 'A Worcester or similar' names no model — ambiguous.",
       },
       {
+        key: "boiler_output_kw",
+        label: "Boiler output rating in kW",
+        criteria: "present if a specific kW output figure for the boiler is stated (e.g. '30kW', '24 kW output', or a model name whose number IS the stated output such as 'Greenstar 4000 30kW'). HEDGING (precision vs commitment): 'approximately 30kW' keeps a usable figure — present; 'a bigger boiler', 'the right size for you', 'sufficient output' replace the figure — ambiguous. NEAR-MISS = ABSENT: a model/range name with no kW figure anywhere (e.g. 'Vaillant ecoTEC Plus') does not state output — absent, not ambiguous. NOTE: shared evidence is allowed — the same spec line may also evidence boiler_make_and_model.",
+      },
+
+      {
         key: "system_type",
         label: "System type (combi, system, regular / heat-only) and any conversion",
         criteria: "present if the system type is named, or if a conversion is described (e.g. 'convert from regular to combi', 'remove cylinder and tanks'). Naming the boiler model alone is NOT evidence of system type — that is absent, not ambiguous. Mentioning 'new boiler' with no type is absent. Contradictory or unclear type wording is ambiguous.",
