@@ -129,7 +129,7 @@ export const LANDSCAPING_SCHEMA: CategoryDef[] = [
     fields: [
       { key: "total_price", label: "Total price" },
       { key: "deposit_amount", label: "Deposit amount" },
-      { key: "staged_payment_schedule", label: "Staged payment schedule", criteria: "present only if two or more payment points, or a stage-by-stage schedule, are stated. A deposit alone is absent." },
+      { key: "staged_payment_schedule", label: "Staged payment schedule", criteria: "present if the document states TWO OR MORE distinct payment points, or a stage-by-stage schedule. A deposit counts as one payment point, and the SAME sentence used for deposit_amount may also be used here — evidence is not consumed by another field. Examples of present: 'deposit on acceptance, balance on completion'; 'deposit, interim payment at sub-base, final balance'. absent only if a single payment point (or none) is stated. ambiguous if payment points are mentioned but the timing or split is vague or non-committal (e.g. 'stage payments as work progresses')." },
     ],
   },
   {
