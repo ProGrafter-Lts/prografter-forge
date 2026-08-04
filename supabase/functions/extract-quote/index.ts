@@ -134,13 +134,15 @@ ${describePass0Candidates(pass0)}
 ${schemaLines}
 
 ===== RULES =====
-- Where a field has a RULE line above, that RULE is binding and overrides your own judgement. Apply it literally.
+- Where a field has a RULE line above, that RULE is binding and overrides your own judgement. Apply it literally. A RULE narrows how you judge a field; it never removes evidence from view.
 - Default adjudication (used when no RULE is given, and never in conflict with one):
-  * "present" = the document EXPLICITLY states the thing named by the field. Explicit means stated in words, not implied, not inferable from adjacent facts, not a reasonable industry assumption.
-  * "ambiguous" = the thing IS mentioned, but the statement is vague, self-contradictory, conditional, or only a provisional sum/allowance.
-  * "absent" = the thing is not mentioned. Silence, implication, and "a competent contractor would obviously do this" are ALL absent.
-- Never use "ambiguous" as a hedge for evidence you had to infer. If you had to reason from a related fact to get there, the answer is "absent".
-- Judge each field ONLY on evidence for that field. Evidence already used for a different field does not make this field present.
+  * "present" = the document EXPLICITLY and SPECIFICALLY states the thing named by the field. Explicit means stated in words, not implied, not inferable from adjacent facts, not a reasonable industry assumption.
+  * "ambiguous" = the thing IS mentioned, but the statement is vague, hedged, approximate, non-committal, conditional, self-contradictory, or only a provisional sum/allowance.
+  * "absent" = the thing is not mentioned at all. Silence, implication, and "a competent contractor would obviously do this" are ALL absent.
+- GLOBAL VAGUENESS RULE (applies to EVERY field, including fields with a RULE line): if the field expects a specific fact — a date, a figure, a measurement, a duration, a named material, or a confirmed action — and the document only gestures at it with vague, hedged, approximate or non-committal wording, the answer is "ambiguous", NEVER "present". Hedging markers include: "about", "around", "approximately", "roughly", "or so", "circa", "typically", "usually", "normally", "should", "aim to", "hope to", "expect to", "in the region of", "TBC", "to be confirmed", "as required", "where necessary", "subject to", "if needed", "similar", "or equivalent" (when no base spec is named), and any passing social or conversational reference rather than a stated commitment. Only mark "present" when the document COMMITS to the specific fact.
+- "ambiguous" is the correct answer for vague-but-mentioned wording. Do NOT use "ambiguous" for evidence you had to infer from an unrelated fact — that is "absent". Vague mention → ambiguous. No mention → absent.
+- Judge each field on evidence for that field's own subject. A single sentence, clause or section MAY legitimately evidence more than one field (for example a payment sentence can evidence both the deposit and the payment schedule) — do NOT withhold evidence from a field merely because you already cited it elsewhere. What you must not do is transfer evidence about a DIFFERENT subject to fill a field it does not actually speak to.
+
 
 - If status is "present", "quote" MUST be a VERBATIM substring copied exactly from the document text — never paraphrase, never recompute, never invent. If you cannot find an exact verbatim span, use "ambiguous" instead of "present".
 - If status is "absent" or you found nothing, "quote" MUST be null.
