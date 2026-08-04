@@ -1,4 +1,3 @@
-import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import SEO from "@/components/SEO";
 import Navbar from "@/components/Navbar";
@@ -68,11 +67,8 @@ const CheckatradeAlternative = () => {
         description="Tired of paying £299–£1,959/month to Checkatrade before earning a penny? ProGrafter is the UK alternative — no monthly fees, 7.5% on completed jobs."
         path="/checkatrade-alternative"
         ogType="article"
+        jsonLd={[articleJsonLd, faqJsonLd]}
       />
-      <Helmet>
-        <script type="application/ld+json">{JSON.stringify(articleJsonLd)}</script>
-        <script type="application/ld+json">{JSON.stringify(faqJsonLd)}</script>
-      </Helmet>
       <Navbar />
 
       {/* Hero */}

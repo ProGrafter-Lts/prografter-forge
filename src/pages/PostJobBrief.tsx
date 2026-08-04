@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { trackEvent } from "@/lib/analytics";
 import Logo from "@/components/Logo";
 import { validateBrief } from "@/lib/briefValidation";
+import SEO from "@/components/SEO";
 
 
 // ── ProGrafter Brand Palette ──────────────────────────────────────────────────
@@ -1026,6 +1027,11 @@ export default function PostJobBrief() {
 
   return (
     <div style={{ minHeight: "100vh", background: C.cream, fontFamily: "'DM Sans', system-ui, sans-serif" }}>
+      <SEO
+        title="Post a Job Brief — Get Matched with Verified UK Trades"
+        description="Tell us about your project and ProGrafter matches you with verified, insured local trades. Free to post, no obligation, no cold calls."
+        path="/post-job-brief"
+      />
       {submitting && <SubmitProgressOverlay stage={progressStep} />}
       <div style={{ background: C.deep, padding: "16px 24px",
         display: "flex", alignItems: "center", justifyContent: "space-between",
