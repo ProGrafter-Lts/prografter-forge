@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------------
-// Plan My Project — deterministic cost-band rulesets
+// Project Cost Guide — deterministic cost-band rulesets
 // -----------------------------------------------------------------------------
 // RULES:
 //  * No AI. Every band is rule-based arithmetic on the homeowner's answers.

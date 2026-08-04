@@ -525,13 +525,13 @@ const QuoteChecker = () => {
               Upload a quote and we'll tell you what's clear, what's unclear, what appears missing, and what to ask before you accept. <span className="font-semibold text-white">£59.</span>
             </p>
             <div className="flex flex-wrap justify-center gap-2 mt-6">
-              {["✓ Quote Clarity Score", "✓ Plain-English review", "✓ Questions to ask", "✓ Usually ready in 2–5 mins"].map((t) => (
+              {["✓ Clarity Score (0–100)", "✓ Plain-English review", "✓ Questions to ask", "✓ Usually ready in 2–5 mins"].map((t) => (
                 <span key={t} className="font-mono text-xs text-white/90 bg-white/8 border border-white/15 px-3 py-1.5 rounded-full">{t}</span>
               ))}
             </div>
             <p className="font-mono text-xs text-white/70 mt-6">
               Don't have a quote yet?{" "}
-              <a href="/plan-my-project" className="text-teal-foreground underline underline-offset-2 hover:text-white">Start with Plan My Project.</a>
+              <a href="/project-cost-guide" className="text-teal-foreground underline underline-offset-2 hover:text-white">Start with Project Cost Guide.</a>
             </p>
             <TrustSignal tone="light" className="mt-6" text="Independent, construction-aware analysis — never a sales pitch." />
           </div>

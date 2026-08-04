@@ -25,8 +25,8 @@ const PILLARS = [
     icon: "✦",
   },
   {
-    title: "Quote Clarity Score",
-    desc: "A clear, defensible score that separates document quality from overall project confidence.",
+    title: "AI Quote Checker",
+    desc: "A construction-aware review of a builder's quote, scored 0–100 for clarity and completeness.",
     icon: "◆",
   },
   {

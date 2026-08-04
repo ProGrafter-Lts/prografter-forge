@@ -113,7 +113,7 @@ const MyQuoteChecks = () => {
 
   return (
     <div className="min-h-screen dashboard-dark">
-      <SEO title="My Quote Checks — ProGrafter" description="Your saved Quote Health Check reports." path="/dashboard/quote-checks" noindex />
+      <SEO title="My Quote Checks — ProGrafter" description="Your saved AI Quote Checker reports." path="/dashboard/quote-checks" noindex />
       <main className="max-w-4xl mx-auto p-4 md:p-8 space-y-6">
         <Link to="/dashboard/homeowner?tab=quotes" className="inline-flex items-center gap-1.5 font-mono text-xs text-secondary hover:opacity-80">
           <ArrowLeft className="w-3.5 h-3.5" /> Back to dashboard
@@ -124,7 +124,7 @@ const MyQuoteChecks = () => {
             <SearchCheck className="w-7 h-7" /> My Quote Checks
           </h1>
           <p className="font-mono text-sm text-muted-foreground mt-1">
-            Every Quote Health Check saved to your account.
+            Every AI Quote Checker report saved to your account.
           </p>
         </div>
 

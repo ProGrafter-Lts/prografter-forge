@@ -125,7 +125,7 @@ const CONFIRM_ITEMS = [
   "I understand the VAT status.",
   "I understand the expected project duration.",
   "I understand how changes / variations will be handled.",
-  "I have reviewed the Quote Health Check, or chosen to continue without one.",
+  "I have reviewed the AI Quote Checker report, or chosen to continue without one.",
 ];
 
 const VAT_LABEL: Record<string, string> = {
@@ -384,7 +384,7 @@ const QuotesReceived = ({ quotes, onQuoteAccepted }: QuotesReceivedProps) => {
                     </div>
                     {!q.ai_verdict && (
                       <p className="font-mono text-[10px] text-muted-foreground leading-relaxed">
-                        Not checked yet — run a Quote Health Check before accepting to understand what is included,
+                        Not checked yet — run an AI Quote Checker review before accepting to understand what is included,
                         missing or unclear.
                       </p>
                     )}
