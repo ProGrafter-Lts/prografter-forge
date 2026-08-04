@@ -29,6 +29,7 @@ const MODULE_ANALYSE_FN: Record<string, string> = {
 // flag in quote-checker-v2-flags.ts is turned on.
 const MODULE_V2_FN: Record<string, string> = {
   landscaping_driveway: "extract-quote",
+  boiler_heating: "extract-quote",
 };
 
 Deno.serve(async (req) => {
