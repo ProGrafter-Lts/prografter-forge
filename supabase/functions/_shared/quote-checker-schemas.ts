@@ -50,7 +50,7 @@ export const LANDSCAPING_SCHEMA: CategoryDef[] = [
     fields: [
       { key: "contractor_name", label: "Contractor / landscaper name" },
       { key: "contractor_contact", label: "Contractor contact details (phone, email or address)" },
-      { key: "customer_name_address", label: "Customer name and site address" },
+      { key: "customer_name_address", label: "Customer name and site address", criteria: "COMPOUND FACT — this field requires BOTH a customer name AND a site address. Both present (address may be a full address, street + town, or postcode) = \"present\". Only one of the two (e.g. a name in a greeting such as \"Hi Dave,\" with no address, or an address with no named customer) = \"ambiguous\". Neither = \"absent\"." },
       { key: "quote_date", label: "Quote date" },
       { key: "quote_validity_period", label: "Quote validity period", criteria: "present only if a validity period or expiry for the price is stated." },
       { key: "vat_status", label: "VAT status (inclusive, exclusive, exempt, or VAT number given)" },
