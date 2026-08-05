@@ -259,11 +259,33 @@ Deno.serve(async (req) => {
       }
     }
 
+    // ---- Wrong-document guard -------------------------------------------
+    // Any trade's quote will populate the generic categories (who/price), so
+    // those are ignored. If NOT ONE trade-specific field turned up evidence,
+    // the uploaded document almost certainly isn't a quote for this category.
+    const GENERIC_CATEGORY_KEYS = new Set([
+      "quote_basics",
+      "price_vat_payment",
+      "price_payment_terms",
+      "price_and_payment",
+    ]);
+    const tradeSpecific = schema.filter((c) => !GENERIC_CATEGORY_KEYS.has(c.key));
+    const tradeEvidenceCount = tradeSpecific.reduce(
+      (n, c) => n + c.fields.filter((f) => extraction[c.key][f.key].status !== "absent").length,
+      0,
+    );
+    const isRightCategory = tradeSpecific.length === 0 || tradeEvidenceCount > 0;
+    const notCategoryNote = `This document doesn't appear to be a ${meta.tradeNoun} quote — we couldn't find any ${meta.tradeNoun}-specific detail in it. Please check you uploaded the right file, or choose a different quote type.`;
+
     const report_json = {
       version: meta.reportVersion,
       generated_at: new Date().toISOString(),
       project_type: checkRow.project_type ?? null,
-      is_landscaping_quote: extractionRow.category === "landscaping_driveway",
+      is_landscaping_quote: extractionRow.category === "landscaping_driveway" ? isRightCategory : undefined,
+      is_boiler_quote: extractionRow.category === "boiler_heating" ? isRightCategory : undefined,
+      wrong_document: !isRightCategory,
+      ...(isRightCategory ? {} : { not_boiler_note: notCategoryNote, wrong_document_note: notCategoryNote }),
+
       verdict: { level: verdictLevel, line: verdictLine },
       clarity_score: clarityScore,
       pack_confidence_score: packScore,
