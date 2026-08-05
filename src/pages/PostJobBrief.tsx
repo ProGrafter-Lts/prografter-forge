@@ -586,8 +586,18 @@ export default function PostJobBrief() {
       if (error || !data?.ref) throw error || new Error("No reference returned");
       setRef(data.ref);
 
+      // Returning homeowners are NOT handed credentials (they get a magic link
+      // emailed instead). That is a success path, not an error — upload any
+      // attachments if they happen to already be signed in, then confirm.
       if (!data.sessionEmail || !data.sessionPassword) {
-        throw new Error("Your brief was saved, but automatic sign-in was not available. Please use the secure link we emailed you.");
+        const { data: existing } = await supabase.auth.getUser();
+        const existingUid = existing.user?.id;
+        if (existingUid && uploads.length && data.briefId) {
+          await uploadBriefFiles(existingUid, data.briefId);
+        }
+        trackEvent("generate_lead", { reference: data.ref, needs_scoping: needsScoping });
+        setSubmitted(true);
+        return;
       }
 
       const { error: signInError } = await supabase.auth.signInWithPassword({
@@ -595,6 +605,7 @@ export default function PostJobBrief() {
         password: data.sessionPassword,
       });
       if (signInError) throw signInError;
+
 
       // Upload any optional homeowner files now that a session exists.
       if (uploads.length && data.briefId) {
