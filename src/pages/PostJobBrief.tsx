@@ -546,7 +546,31 @@ export default function PostJobBrief() {
     if (!Object.keys(e).length) setStep(s => s + 1);
   };
   const back = () => { setErrors({}); setStep(s => s - 1); };
+
+  // Persist any attached drawings/photos for a signed-in homeowner.
+  const uploadBriefFiles = async (uid: string, briefId: string) => {
+    for (const u of uploads) {
+      try {
+        const safe = u.file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+        const path = `${uid}/${briefId}/${Date.now()}-${safe}`;
+        const { error: upErr } = await supabase.storage
+          .from("job-brief-files").upload(path, u.file, { upsert: false });
+        if (upErr) { console.warn("file upload failed", upErr); continue; }
+        await supabase.from("job_brief_files" as any).insert({
+          job_brief_id: briefId,
+          file_name: u.file.name,
+          file_type: u.file.type || null,
+          file_size: u.file.size,
+          category: u.category || "Other",
+          storage_path: path,
+          uploaded_by: uid,
+        });
+      } catch (e) { console.warn("file save failed", e); }
+    }
+  };
+
   const submit = async () => {
+
     if (submitting || !consent) return;
     setSubmitError("");
     setSubmitting(true);
@@ -586,8 +610,18 @@ export default function PostJobBrief() {
       if (error || !data?.ref) throw error || new Error("No reference returned");
       setRef(data.ref);
 
+      // Returning homeowners are NOT handed credentials (they get a magic link
+      // emailed instead). That is a success path, not an error — upload any
+      // attachments if they happen to already be signed in, then confirm.
       if (!data.sessionEmail || !data.sessionPassword) {
-        throw new Error("Your brief was saved, but automatic sign-in was not available. Please use the secure link we emailed you.");
+        const { data: existing } = await supabase.auth.getUser();
+        const existingUid = existing.user?.id;
+        if (existingUid && uploads.length && data.briefId) {
+          await uploadBriefFiles(existingUid, data.briefId);
+        }
+        trackEvent("generate_lead", { reference: data.ref, needs_scoping: needsScoping });
+        setSubmitted(true);
+        return;
       }
 
       const { error: signInError } = await supabase.auth.signInWithPassword({
@@ -596,31 +630,14 @@ export default function PostJobBrief() {
       });
       if (signInError) throw signInError;
 
+
       // Upload any optional homeowner files now that a session exists.
       if (uploads.length && data.briefId) {
         const { data: sess } = await supabase.auth.getUser();
         const uid = sess.user?.id;
-        if (uid) {
-          for (const u of uploads) {
-            try {
-              const safe = u.file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-              const path = `${uid}/${data.briefId}/${Date.now()}-${safe}`;
-              const { error: upErr } = await supabase.storage
-                .from("job-brief-files").upload(path, u.file, { upsert: false });
-              if (upErr) { console.warn("file upload failed", upErr); continue; }
-              await supabase.from("job_brief_files" as any).insert({
-                job_brief_id: data.briefId,
-                file_name: u.file.name,
-                file_type: u.file.type || null,
-                file_size: u.file.size,
-                category: u.category || "Other",
-                storage_path: path,
-                uploaded_by: uid,
-              });
-            } catch (e) { console.warn("file save failed", e); }
-          }
-        }
+        if (uid) await uploadBriefFiles(uid, data.briefId);
       }
+
 
 
       const burnPassword = `${crypto.randomUUID()}Aa1!`;
