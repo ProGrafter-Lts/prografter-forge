@@ -611,27 +611,9 @@ export default function PostJobBrief() {
       if (uploads.length && data.briefId) {
         const { data: sess } = await supabase.auth.getUser();
         const uid = sess.user?.id;
-        if (uid) {
-          for (const u of uploads) {
-            try {
-              const safe = u.file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-              const path = `${uid}/${data.briefId}/${Date.now()}-${safe}`;
-              const { error: upErr } = await supabase.storage
-                .from("job-brief-files").upload(path, u.file, { upsert: false });
-              if (upErr) { console.warn("file upload failed", upErr); continue; }
-              await supabase.from("job_brief_files" as any).insert({
-                job_brief_id: data.briefId,
-                file_name: u.file.name,
-                file_type: u.file.type || null,
-                file_size: u.file.size,
-                category: u.category || "Other",
-                storage_path: path,
-                uploaded_by: uid,
-              });
-            } catch (e) { console.warn("file save failed", e); }
-          }
-        }
+        if (uid) await uploadBriefFiles(uid, data.briefId);
       }
+
 
 
       const burnPassword = `${crypto.randomUUID()}Aa1!`;
