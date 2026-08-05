@@ -339,7 +339,7 @@ export const BATHROOM_SCHEMA: CategoryDef[] = [
       {
         key: "quote_date_and_validity",
         label: "Quote date and how long the price is held",
-        criteria: "COMPOUND FACT — needs BOTH a quote/issue date AND a validity or expiry period for the price. Both = present. Only one = ambiguous. Neither = absent. 'Prices subject to change' with no period is NOT a validity period — treat it as the missing half. HEDGING: 'valid for approximately 30 days' is present (figure survives the hedge); 'valid for a short while' is ambiguous (hedge replaced the figure).",
+        criteria: "COMPOUND FACT — needs BOTH a quote/issue date AND a validity or expiry period for the price. SEARCH THE WHOLE DOCUMENT FOR BOTH HALVES BEFORE GRADING: the date is usually in the header and the validity clause is very often in a closing line at the very bottom ('this quotation is valid for 30 days from the date above'). If both halves appear anywhere in the document, however far apart, the answer is PRESENT — do not grade ambiguous merely because they are not in the same sentence or section. Only one half found anywhere = ambiguous. Neither = absent. 'Prices subject to change' with no period is NOT a validity period — treat it as the missing half. HEDGING: 'valid for approximately 30 days' is present (figure survives the hedge); 'valid for a short while' is ambiguous (hedge replaced the figure).",
       },
     ],
   },
