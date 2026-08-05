@@ -306,10 +306,171 @@ export const BOILER_SCHEMA: CategoryDef[] = [
   },
 ];
 
+// ---- Bathroom (21 fields across 6 categories) ------------------------------
+//
+// Written after the Landscaping pilot and the Boiler build, so all four rule
+// classes those two surfaced are designed in from the start:
+//   1. NO-REUSE is scoped: shared evidence between fields is explicitly
+//      allowed where the overlap is predictable (a price line evidencing both
+//      total and VAT; a strip-out line evidencing both scope and waste).
+//   2. COMPOUND FACTS: fields needing two things together are labelled and
+//      spell out "one part only = ambiguous".
+//   3. HEDGING: precision hedge (figure survives) = present; commitment hedge
+//      (figure replaced) = ambiguous.
+//   4. NEAR-MISS: wording gesturing at an adjacent subject without naming this
+//      field's actual subject is ABSENT, not ambiguous.
+//   5. EITHER/OR: one solid qualifying fact is enough; vague wording nearby
+//      does not downgrade it.
+export const BATHROOM_SCHEMA: CategoryDef[] = [
+  {
+    key: "quote_basics",
+    name: "Quote Basics",
+    fields: [
+      {
+        key: "installer_name",
+        label: "Installer / bathroom fitting company name",
+        criteria: "present if any business or trading name identifying the installer appears (letterhead, header, sign-off). A trading name without Ltd/Limited still counts. A first name only with no business name is ambiguous. No name at all is absent. NOTE: the same header block may also evidence customer_name_address and quote_date_and_validity — shared evidence is allowed.",
+      },
+      {
+        key: "customer_name_address",
+        label: "Customer name and installation address",
+        criteria: "COMPOUND FACT — needs BOTH a customer name AND an installation/site address. Both = present (address may be full, street + town, or postcode). Only one (a greeting such as 'Hi Sarah,' with no address, or an address with no named customer) = ambiguous. Neither = absent.",
+      },
+      {
+        key: "quote_date_and_validity",
+        label: "Quote date and how long the price is held",
+        criteria: "COMPOUND FACT — needs BOTH a quote/issue date AND a validity or expiry period for the price. SEARCH THE WHOLE DOCUMENT FOR BOTH HALVES BEFORE GRADING: the date is usually in the header and the validity clause is very often in a closing line at the very bottom ('this quotation is valid for 30 days from the date above'). If both halves appear anywhere in the document, however far apart, the answer is PRESENT — do not grade ambiguous merely because they are not in the same sentence or section. Only one half found anywhere = ambiguous. Neither = absent. 'Prices subject to change' with no period is NOT a validity period — treat it as the missing half. HEDGING: 'valid for approximately 30 days' is present (figure survives the hedge); 'valid for a short while' is ambiguous (hedge replaced the figure).",
+      },
+    ],
+  },
+  {
+    key: "scope_and_layout",
+    name: "Scope and Layout",
+    fields: [
+      {
+        key: "room_size_or_layout",
+        label: "Bathroom size or layout — dimensions, or a stated layout change",
+        criteria: "EITHER/OR FIELD — present if the document states EITHER room dimensions/floor area (e.g. '2.4m x 1.8m', '4.3 m2') OR a specific layout position/change ('bath moves to the window wall', 'WC stays in the existing position', 'basin relocated to the left-hand wall'). One solid qualifying fact makes this present even if other wording nearby is vague. HEDGING: 'approximately 2.4m x 1.8m' keeps the figures — present; 'a small bathroom', 'standard size', 'a decent sized room' replace the figures and name no layout position — ambiguous. NEAR-MISS = ABSENT: 'full bathroom refurbishment', 'complete new bathroom' describe the job, not the room's size or layout — absent, not ambiguous. Silence is absent.",
+      },
+      {
+        key: "strip_out_and_waste_removal",
+        label: "Strip-out of the existing bathroom and removal of waste",
+        criteria: "EITHER/OR FIELD — present if the document states EITHER removal/strip-out of the existing suite, tiles or floor, OR removal/disposal of the resulting waste (skip, tip runs, 'we take it all away'). One clear statement makes this present even if other wording is vague. Explicit exclusion ('skip to be provided by the customer', 'strip-out not included') is ALSO present — it is a stated scope decision. NEAR-MISS = ABSENT: 'we leave the place tidy', 'clean and respectful workers' name neither strip-out nor waste removal — absent, not ambiguous. Silence is absent. NOTE: one strip-out sentence may evidence this field and also making_good_and_decoration where it names both.",
+      },
+      {
+        key: "suite_items_scope",
+        label: "Which sanitaryware items are included (bath, shower, WC, basin, screen, furniture)",
+        criteria: "present if the document lists the specific items being supplied or fitted (bath, shower enclosure/tray, WC, basin, vanity unit, screen). At least two named items, or an itemised list, = present. A single named item with nothing else and no list = ambiguous. NEAR-MISS = ABSENT: 'supply and fit new bathroom suite', 'all sanitaryware included', 'everything you need' name no individual items — absent, not ambiguous. An explicit exclusion of a named item ('shower screen supplied by customer') counts towards present. Silence is absent.",
+      },
+      {
+        key: "tiling_scope_and_area",
+        label: "Tiling scope — which surfaces are tiled and how much",
+        criteria: "COMPOUND FACT — needs BOTH which surfaces are tiled (walls, floor, full-height, splashback, shower area only) AND an extent (m2, number of walls, 'full height to ceiling', 'floor to ceiling in the shower enclosure only'). Both = present. Only one, e.g. 'tiling included' or 'walls and floor tiled' with no extent, = ambiguous. HEDGING: 'approximately 18 m2 of wall tiling' keeps the figure — present; 'a fair bit of tiling' is ambiguous. Neither part = absent. Explicit exclusion of tiling with the surfaces named ('floor tiling not included, walls only') = present.",
+      },
+    ],
+  },
+  {
+    key: "materials_and_specification",
+    name: "Materials and Specification",
+    fields: [
+      {
+        key: "sanitaryware_make_and_model",
+        label: "Sanitaryware make and model / range",
+        criteria: "COMPOUND FACT — needs BOTH a manufacturer/brand AND a specific range or model name for at least one main item (e.g. 'Roca The Gap close-coupled WC', 'Ideal Standard Tesi basin'). Both = present. Brand only ('Roca sanitaryware'), or a range name with no brand, = ambiguous. HEDGING: 'Roca The Gap or equivalent' still names a base spec — present; 'Roca or similar' names no range — ambiguous. NEAR-MISS = ABSENT: 'quality branded sanitaryware', 'white ceramic suite', 'premium fittings' name no manufacturer or range — absent, not ambiguous.",
+      },
+      {
+        key: "brassware_and_shower_spec",
+        label: "Taps, shower valve and shower type specified",
+        criteria: "EITHER/OR FIELD — present if the document specifies EITHER the shower type/valve (thermostatic mixer, electric shower with kW rating, digital, bar valve) OR the brassware/taps by brand, model or type. One solid specification makes this present even if other brassware wording is vague. HEDGING: 'a 8.5kW electric shower' or 'thermostatic bar mixer' are concrete — present. AMBIGUOUS (not absent): wording that names the shower or the taps and makes a QUALITY CLAIM about them without any type, brand or rating — 'you'll get a good shower out of it', 'nice modern taps', 'a decent shower' — the subject is named but nothing is specified. NEAR-MISS = ABSENT: a bare scope listing with no claim and no specification, e.g. 'shower fitted', 'taps included', 'new shower' in an items list — that states only that the item is in scope (which belongs to suite_items_scope). Silence is absent.",
+      },
+      {
+        key: "material_allowances_and_supply_responsibility",
+        label: "Material allowances (PC / budget sums) and who supplies the materials",
+        criteria: "EITHER/OR FIELD — present if the document states EITHER a money allowance/PC sum for materials ('£1,200 allowance for tiles and sanitaryware', 'tiles budgeted at £35/m2') OR who is supplying the materials ('all materials supplied by us', 'customer to supply tiles and sanitaryware'). One clear statement makes this present. HEDGING: 'an allowance of around £1,200' keeps the figure — present; 'a sensible allowance for tiles' replaces the figure and names no supplier — ambiguous. NEAR-MISS = ABSENT: 'materials included' alone states neither an allowance figure nor who chooses/buys them at what budget — absent, not ambiguous. Silence is absent.",
+      },
+    ],
+  },
+  {
+    key: "installation_works",
+    name: "Installation Works",
+    fields: [
+      {
+        key: "plumbing_alterations_and_pipework",
+        label: "Plumbing alterations — pipework re-runs, soil/waste moves, isolation valves",
+        criteria: "present if the document states specific plumbing work: pipework re-runs or first-fix, moving or extending soil/waste connections, new isolation valves, or a stated position that no pipework moves ('all services stay in their current positions'). Any ONE of these is enough — NOT a compound field. 'Any pipework required' or 'plumbing as needed' is ambiguous. NEAR-MISS = ABSENT: 'plumbing included', 'we do all the plumbing' name no alteration, re-run or position — absent, not ambiguous. Silence is absent.",
+      },
+      {
+        key: "electrical_works_and_extractor",
+        label: "Electrical works and extractor fan / ventilation installation",
+        criteria: "EITHER/OR FIELD — present if the document states EITHER specific electrical work (new spur, shower circuit, downlights, IP-rated fittings, lighting alteration) OR supply/fitting of an extractor fan or mechanical ventilation. One clear statement makes this present even if other electrical wording is vague. Explicit exclusion ('electrical works by others') is also present. 'Electrics may need upgrading' with nothing named is ambiguous. NEAR-MISS = ABSENT: 'we'll sort the lights out', 'electrician available if needed' name no works and commit to nothing — absent. Silence is absent. NOTE: this is the WORKS field; the certificate for those works is a different subject and belongs to electrical_certification_part_p.",
+      },
+      {
+        key: "waterproofing_and_substrate_prep",
+        label: "Waterproofing / tanking and preparation of walls and floor before tiling",
+        criteria: "EITHER/OR FIELD — present if the document states EITHER waterproofing/tanking of wet areas (tanking kit, wet-room membrane, waterproof boarding to the shower area) OR substrate preparation before tiling (over-boarding, cement board, plasterboarding, plywood/floor overlay, levelling compound). One solid statement makes this present. 'Walls prepared as necessary' or 'we'll make sure it's ready for tiling' is ambiguous. NEAR-MISS = ABSENT: 'sealed around the bath', 'silicone applied' name a finishing seal, not tanking or substrate prep — absent, not ambiguous. Silence is absent.",
+      },
+      {
+        key: "making_good_and_decoration",
+        label: "Making good and decoration after the works",
+        criteria: "EITHER/OR FIELD — present if the document states EITHER making good (plastering, patching, filling, reinstating skirting/architrave) OR the decoration position (painting included, ceiling painted, or explicitly 'decoration not included'). One clear statement, including a clear exclusion, makes this present even if other wording is vague. 'We'll leave it ready for decorating' IS a stated position — present. NEAR-MISS = ABSENT: 'we clean up after ourselves', 'dust sheets used' name protection/cleaning, not making good or decoration — absent, not ambiguous. Silence is absent.",
+      },
+    ],
+  },
+  {
+    key: "compliance_certification",
+    name: "Compliance and Certification",
+    fields: [
+      {
+        key: "electrical_certification_part_p",
+        label: "Electrical certification — Part P / minor works certificate by a registered electrician",
+        criteria: "present only if the document states that an electrical certificate will be issued, or that the electrical work is notified under Part P, or names a registered electrician's scheme (NICEIC, NAPIT, ELECSA) in connection with the work. NEAR-MISS = ABSENT: 'our electrician is fully qualified', 'time served spark', 'all work to regulations' do not name a certificate, Part P or a scheme — absent, not ambiguous. 'All certificates provided' with no named certificate is ambiguous. Doing the electrical work (electrical_works_and_extractor) is a DIFFERENT subject and does not evidence certification. Silence is absent.",
+      },
+      {
+        key: "building_regs_and_ventilation_compliance",
+        label: "Building Regulations compliance — ventilation rate, zoning, or notification",
+        criteria: "present only if the document names a Building Regulations requirement being met: a ventilation/extract rate (e.g. '15 l/s intermittent extract', 'Part F compliant fan'), bathroom electrical zoning/IP ratings, or notification to Building Control. NEAR-MISS = ABSENT: fitting an extractor fan with no rate or regulation named (that is electrical_works_and_extractor), and generic 'all work meets current regulations', are absent, not ambiguous — they name no requirement. 'Building Control to be notified if required' is ambiguous. Silence is absent.",
+      },
+    ],
+  },
+  {
+    key: "price_terms_guarantees",
+    name: "Price, Terms and Guarantees",
+    fields: [
+      {
+        key: "total_price_and_vat",
+        label: "Total price and VAT position",
+        criteria: "COMPOUND FACT — needs BOTH a total price figure AND its VAT position (inclusive, exclusive, a VAT line, a VAT number, or a stated rate). Both = present. A total with no VAT position, or a VAT statement with no total, = ambiguous. Neither = absent. The SAME price line may evidence both halves ('Total £8,450 including VAT') and may also be reused by payment_terms and price status wording — evidence is not consumed by another field.",
+      },
+      {
+        key: "payment_terms",
+        label: "Payment terms — deposit and/or staged payments",
+        criteria: "present if the document states when money is due: a deposit with a balance point, two or more payment points, or a stage schedule. A deposit alone with no stated balance point is ambiguous. 'Payment on completion' alone IS a stated single term — present. 'Terms to be agreed' or 'usual terms' is ambiguous. The same sentence may also have been used for total_price_and_vat — that is allowed and does not weaken this field. No mention is absent.",
+      },
+      {
+        key: "programme_dates_and_duration",
+        label: "Start date and how long the bathroom will be out of use",
+        criteria: "EITHER/OR FIELD — a start date/window OR an on-site duration qualifies; NOT a compound field. HEDGING (precision vs commitment): 'estimated 8 working days', 'usually 7-10 days', 'anticipated start 3 March, subject to material lead times' all keep a concrete figure or date — present. 'We'll fit you in soon', 'about a week or so', 'as soon as we can' leave nothing concrete — ambiguous. No mention is absent.",
+      },
+      {
+        key: "warranty_and_workmanship_guarantee",
+        label: "Workmanship guarantee and product/manufacturer warranty",
+        criteria: "COMPOUND FACT — needs BOTH an installer workmanship guarantee AND a product/manufacturer warranty on the goods supplied. Both = present. Only one (e.g. '10 year guarantee on the shower valve' with nothing on the installer's own work, or '2 year workmanship guarantee' with nothing on the products) = ambiguous. Neither = absent. HEDGING: 'up to 10 years subject to registration' still names a period — that half counts as stated. NEAR-MISS = ABSENT for a bare 'we stand by our work' with no guarantee named on either side.",
+      },
+      {
+        key: "exclusions_and_variations",
+        label: "Exclusions and how extra work / variations are handled",
+        criteria: "EITHER/OR FIELD — present if the document states ANY ONE of: a named exclusion ('asbestos removal excluded', 'no allowance for replacing rotten floor joists'), or how variations are priced and agreed ('any additional work agreed in writing before starting', 'extras charged at £250/day'). One clear qualifying statement makes this present. 'Extra costs may apply' or 'anything unforeseen will be chargeable' with no named exclusion and no process is ambiguous — it flags cost but sets no terms. NEAR-MISS = ABSENT: 'price includes everything listed above' merely restates scope and names no exclusion or process — absent. Silence is absent.",
+      },
+    ],
+  },
+];
+
 export const SCHEMAS: Record<string, CategoryDef[]> = {
   landscaping_driveway: LANDSCAPING_SCHEMA,
   boiler_heating: BOILER_SCHEMA,
+  bathroom: BATHROOM_SCHEMA,
 };
+
 
 /** Per-category wording + versioning so Pass 1 and Pass 2 are not hardcoded
  *  to the Landscaping pilot. */
@@ -364,7 +525,23 @@ export const CATEGORY_META: Record<string, CategoryMeta> = {
     verdictLow:
       "This quote is too vague to accept safely yet. It gives a price, but leaves out key details about the appliance specification, installation works, Gas Safe certification and guarantees.",
   },
+  bathroom: {
+    title: "BATHROOM",
+    tradeNoun: "bathroom fitter",
+    schemaVersion: "bathroom-extraction-v1",
+    reportVersion: "bathroom-v2",
+    contextKey: "bathroom_context",
+    projectType: "Bathroom",
+    reportRoute: "bathroom-quote-report",
+    verdictStrong:
+      "This is a strong bathroom quote — the room scope, sanitaryware specification, installation works, certification and commercial terms are all clearly set out. A few final confirmation points are worth agreeing before accepting.",
+    verdictModerate:
+      "This quote covers the main bathroom works, but points such as tiling extent, material allowances, waterproofing, electrical certification and payment terms should be confirmed in writing before accepting.",
+    verdictLow:
+      "This quote is too vague to accept safely yet. It gives a price, but leaves out key details about the room scope, sanitaryware specification, tiling, waterproofing, electrical certification and guarantees.",
+  },
 };
+
 
 export function metaFor(category: string): CategoryMeta {
   return CATEGORY_META[category] ?? CATEGORY_META.landscaping_driveway;
