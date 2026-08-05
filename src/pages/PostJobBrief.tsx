@@ -546,7 +546,31 @@ export default function PostJobBrief() {
     if (!Object.keys(e).length) setStep(s => s + 1);
   };
   const back = () => { setErrors({}); setStep(s => s - 1); };
+
+  // Persist any attached drawings/photos for a signed-in homeowner.
+  const uploadBriefFiles = async (uid: string, briefId: string) => {
+    for (const u of uploads) {
+      try {
+        const safe = u.file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+        const path = `${uid}/${briefId}/${Date.now()}-${safe}`;
+        const { error: upErr } = await supabase.storage
+          .from("job-brief-files").upload(path, u.file, { upsert: false });
+        if (upErr) { console.warn("file upload failed", upErr); continue; }
+        await supabase.from("job_brief_files" as any).insert({
+          job_brief_id: briefId,
+          file_name: u.file.name,
+          file_type: u.file.type || null,
+          file_size: u.file.size,
+          category: u.category || "Other",
+          storage_path: path,
+          uploaded_by: uid,
+        });
+      } catch (e) { console.warn("file save failed", e); }
+    }
+  };
+
   const submit = async () => {
+
     if (submitting || !consent) return;
     setSubmitError("");
     setSubmitting(true);
