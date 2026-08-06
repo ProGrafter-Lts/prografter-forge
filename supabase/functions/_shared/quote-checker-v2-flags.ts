@@ -15,6 +15,8 @@ export const QUOTE_CHECKER_V2_ENABLED: Record<string, boolean> = {
   landscaping_driveway: true,
   boiler_heating: true,
   bathroom: true,
+  // Electrical/Rewire V2 (42 fields) built and gate-tested; stays OFF until sign-off.
+  electrical_rewire: false,
 };
 
 export function isV2Enabled(moduleId: string): boolean {
