@@ -64,6 +64,7 @@ const IsCheckatradeWorthIt = lazy(() => import("./pages/IsCheckatradeWorthIt.tsx
 const ContractPage = lazy(() => import("./pages/ContractPage.tsx"));
 const LegalReview = lazy(() => import("./pages/LegalReview.tsx"));
 const QuickBuildPage = lazy(() => import("./pages/QuickBuildPage.tsx"));
+const QuoteBuilder = lazy(() => import("./pages/QuoteBuilder.tsx"));
 const Apply = lazy(() => import("./pages/Apply.tsx"));
 const Vetting = lazy(() => import("./pages/Vetting.tsx"));
 const PostJobBrief = lazy(() => import("./pages/PostJobBrief.tsx"));
