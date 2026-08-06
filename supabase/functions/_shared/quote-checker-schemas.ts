@@ -10,6 +10,9 @@
 // this repo's convention is that only _shared/ is importable across function
 // directories.
 
+import { EXTENSION_SCHEMA } from "./quote-checker-extension-schema.ts";
+export { EXTENSION_SCHEMA };
+
 export type FieldStatus = "present" | "absent" | "ambiguous";
 export type EvidenceSource = "in_quote" | "supplied_in_supporting" | "not_found";
 
@@ -757,6 +760,7 @@ export const SCHEMAS: Record<string, CategoryDef[]> = {
   boiler_heating: BOILER_SCHEMA,
   bathroom: BATHROOM_SCHEMA,
   electrical_rewire: ELECTRICAL_SCHEMA,
+  extension_building: EXTENSION_SCHEMA,
 };
 
 
@@ -842,6 +846,21 @@ export const CATEGORY_META: Record<string, CategoryMeta> = {
       "This quote covers the main electrical works, but points such as circuit schedule, consumer unit specification, Part P notification, making good and payment terms should be confirmed in writing before accepting.",
     verdictLow:
       "This quote is too vague to accept safely yet. It gives a price, but leaves out key details about the extent of the rewire, quantities, consumer unit and circuit specification, certification and making good.",
+  },
+  extension_building: {
+    title: "EXTENSION / BUILDING WORKS",
+    tradeNoun: "builder",
+    schemaVersion: "extension-extraction-v1",
+    reportVersion: "extension-v2",
+    contextKey: "extension_context",
+    projectType: "Extension / Building Works",
+    reportRoute: "simple-quote-report",
+    verdictStrong:
+      "This is a strong extension quote — the scope, drawings, foundations, structure, fabric, services, Building Control route, party wall position and commercial terms are all clearly set out. A few final confirmation points are worth agreeing before accepting.",
+    verdictModerate:
+      "This quote covers the main extension works, but points such as foundation specification, steelwork sizes, insulation values, Building Control notification, party wall status and stage payments should be confirmed in writing before accepting.",
+    verdictLow:
+      "This quote is too vague to accept safely yet. It gives a price, but leaves out key details about the scope and drawings, foundations, structure, insulation, drainage, Building Regulations, party wall position and payment terms.",
   },
 };
 
