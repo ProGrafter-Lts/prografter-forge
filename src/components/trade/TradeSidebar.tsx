@@ -40,6 +40,8 @@ const TradeSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen }: 
   const navigate = useNavigate();
   const location = useLocation();
   const verification = useVerificationStatus();
+  const newMatchCount = useNewJobMatchCount();
+
 
   const currentView = new URLSearchParams(location.search).get("view");
   const routeActiveNav = location.pathname.startsWith("/dashboard/trade/settings")
