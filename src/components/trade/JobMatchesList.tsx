@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDrawerNavigate } from "@/hooks/useDrawerNavigate";
 import { Briefcase, MapPin, Clock, ChevronRight, ShieldCheck } from "lucide-react";
+import { markJobMatchSeen } from "@/hooks/useNewJobMatches";
 
 interface JobMatch {
   id: string;
