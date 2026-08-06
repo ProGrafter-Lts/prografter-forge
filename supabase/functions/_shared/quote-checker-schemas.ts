@@ -61,9 +61,9 @@ export const LANDSCAPING_SCHEMA: CategoryDef[] = [
     key: "scope_area_measurements",
     name: "Scope / Area / Measurements",
     fields: [
-      { key: "work_type", label: "Type of work (patio, driveway, fencing, turfing, landscaping, drainage, mixed)" },
+      { key: "work_type", label: "Type of work (patio, driveway, fencing, turfing, landscaping, drainage, mixed)", criteria: "present if the document names the actual type of work (driveway, patio, fencing, turfing, drainage, or a named combination). COLLECTIVE-NOUN / QUALITY-CLAIM RULE (overrides everything else in this field): wording that refers to the job collectively or makes a quality claim without naming a work type — 'landscaping works', 'the garden project', 'a first-class job', 'transform your outside space', 'full external works' — is ABSENT, NEVER ambiguous, however confident or repeated. Only a named work type moves this field off absent. Silence is absent." },
       { key: "area_m2", label: "Area in square metres", criteria: "present only if an area figure in m2 (or dimensions that are explicitly the works area) is stated." },
-      { key: "site_visit_or_survey", label: "Confirmation of a site visit or measured survey", criteria: "present only if the document explicitly states a site visit, site survey or measured survey took place or is included. Detailed measurements, areas or levels alone are NOT evidence of a visit — mark absent. A passing or social reference to having attended (e.g. 'thanks for having us round', 'good to meet you') is NOT a stated survey — mark ambiguous, not present." },
+      { key: "site_visit_or_survey", label: "Confirmation of a site visit or measured survey", criteria: "present only if the document explicitly states a site visit, site survey or measured survey took place or is included. Detailed measurements, areas or levels alone are NOT evidence of a visit — absent. NEAR-MISS = ABSENT: social or passing pleasantries about having attended — 'thanks for having us round', 'good to meet you', 'as discussed at yours' — state no visit, survey or measurement activity and are ABSENT, never ambiguous. Silence is absent." },
     ],
   },
   {
@@ -79,10 +79,10 @@ export const LANDSCAPING_SCHEMA: CategoryDef[] = [
     key: "sub_base_drainage_falls",
     name: "Sub-Base / Drainage / Falls",
     fields: [
-      { key: "sub_base_material_depth", label: "Sub-base material and depth" },
+      { key: "sub_base_material_depth", label: "Sub-base material and depth", criteria: "COMPOUND FACT — needs BOTH a named sub-base material (MOT Type 1, hardcore, scalpings, concrete) AND a depth figure. Both = present. One of the two only = ambiguous. COLLECTIVE-NOUN / QUALITY-CLAIM RULE (overrides everything else in this field): wording that asserts a sub-base was done well without naming material or depth — 'proper sub-base laid', 'solid foundation', 'prepared to a high standard', 'correct base put down' — is ABSENT, NEVER ambiguous, because it carries no specification. Silence is absent." },
       { key: "compaction_method", label: "Compaction method", criteria: "present only if a compaction action or plant is named (e.g. \"whacker plate\", \"vibrating roller\", \"compacted in layers\"). \"Sub-base laid to depth\" alone is absent." },
       { key: "falls_gradient", label: "Falls / gradient for water run-off", criteria: "present only if a fall, gradient, crossfall or drainage slope is explicitly stated. Mentioning drainage alone is absent." },
-      { key: "drainage_provision", label: "Drainage provision (channel drains, ACO, soakaway etc.)" },
+      { key: "drainage_provision", label: "Drainage provision (channel drains, ACO, soakaway etc.)", criteria: "present only if a drainage device or measure is named (channel drain, ACO, linear drain, gully, soakaway, permeable build-up). COLLECTIVE-NOUN / QUALITY-CLAIM RULE (overrides everything else in this field): wording that claims drainage is handled without naming any device or measure — 'proper drainage throughout', 'water will run away fine', 'drainage all taken care of', 'fully draining surface' — is ABSENT, NEVER ambiguous. Silence is absent." },
       { key: "drainage_discharge_point", label: "Drainage discharge point", criteria: "present only if the destination of water is named (soakaway, existing gully, surface water drain, etc.). Naming only the collection device is absent." },
     ],
   },
@@ -90,8 +90,8 @@ export const LANDSCAPING_SCHEMA: CategoryDef[] = [
     key: "materials_finish_spec",
     name: "Materials / Finish Specification",
     fields: [
-      { key: "material_type_brand", label: "Material type / brand" },
-      { key: "thickness_colour_pattern", label: "Thickness, colour and laying pattern" },
+      { key: "material_type_brand", label: "Material type / brand", criteria: "present if a specific material product, range or brand is named (e.g. 'Marshalls Drivesett Tegula', 'Indian sandstone', 'tumbled concrete block paving'). A bare generic category with no product, range or brand ('block paving', 'slabs') = ambiguous. COLLECTIVE-NOUN / QUALITY-CLAIM RULE (overrides everything else in this field): a quality or collective claim about the materials with no product, range or brand named — 'quality block paving throughout', 'top-grade materials', 'premium slabs', 'best materials used' — is ABSENT, NEVER ambiguous, however confident the wording. Silence is absent." },
+      { key: "thickness_colour_pattern", label: "Thickness, colour and laying pattern", criteria: "present if at least two of thickness, colour and laying pattern are stated with actual values (e.g. '50mm, charcoal, herringbone'). One of the three only = ambiguous. COLLECTIVE-NOUN / QUALITY-CLAIM RULE (overrides everything else in this field): wording that praises or generalises the finish without stating a thickness, colour or named pattern — 'laid to a lovely finish', 'attractive pattern', 'nice colour to suit the house', 'laid neatly throughout' — is ABSENT, NEVER ambiguous. Silence is absent." },
       { key: "jointing_method", label: "Jointing method", criteria: "present if the jointing/pointing material or method is named (kiln-dried sand, resin, mortar)." },
       { key: "sealing_finishing", label: "Sealing / finishing", criteria: "present only if a sealant, sealing coat or surface finishing treatment of the laid surface is stated. Jointing sand, brushing-in, jet washing or site clean-down are NOT sealing — mark absent." },
     ],
@@ -128,7 +128,7 @@ export const LANDSCAPING_SCHEMA: CategoryDef[] = [
     name: "Price / VAT / Payment Terms",
     fields: [
       { key: "total_price", label: "Total price" },
-      { key: "deposit_amount", label: "Deposit amount" },
+      { key: "deposit_amount", label: "Deposit amount", criteria: "present if a deposit or up-front payment is stated as a determinate figure — a cash sum ('£2,000 deposit') OR a percentage where a total price is also stated ('50% up front' alongside a £8,500 total), since the amount is then calculable. ambiguous if a deposit is mentioned with no figure and no calculable percentage ('a deposit will be required', 'small payment up front'). NEAR-MISS = ABSENT: payment wording that names no deposit or up-front element at all. Silence is absent. NOTE: shared evidence is allowed — the same sentence may also evidence staged_payment_schedule." },
       { key: "staged_payment_schedule", label: "Staged payment schedule", criteria: "present if the document states TWO OR MORE distinct payment points, or a stage-by-stage schedule. A deposit counts as one payment point, and the SAME sentence used for deposit_amount may also be used here — evidence is not consumed by another field. Examples of present: 'deposit on acceptance, balance on completion'; 'deposit, interim payment at sub-base, final balance'. absent only if a single payment point (or none) is stated. ambiguous if payment points are mentioned but the timing or split is vague or non-committal (e.g. 'stage payments as work progresses')." },
     ],
   },
