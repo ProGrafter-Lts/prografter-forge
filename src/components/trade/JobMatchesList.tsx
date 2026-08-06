@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDrawerNavigate } from "@/hooks/useDrawerNavigate";
 import { Briefcase, MapPin, Clock, ChevronRight, ShieldCheck } from "lucide-react";
+import { markJobMatchSeen } from "@/hooks/useNewJobMatches";
 
 interface JobMatch {
   id: string;
@@ -32,11 +33,24 @@ const JobMatchesList = ({ matches }: { matches: JobMatch[] }) => {
   const openDrawer = useDrawerNavigate();
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const visible = verifiedOnly ? matches.filter((m) => m.jobs?.funds_verified) : matches;
+  const hasLive = visible.length > 0;
 
   return (
-    <section>
+    <section
+      className={hasLive ? "rounded-3xl p-5 md:p-7 border-2 border-secondary/50 shadow-lg" : ""}
+      style={hasLive ? { backgroundColor: "hsl(var(--secondary) / 0.12)" } : undefined}
+    >
       <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
-        <h2 className="font-heading text-primary text-2xl">New Job Matches</h2>
+        <div>
+          <h2 className={`font-heading text-primary ${hasLive ? "text-3xl md:text-4xl" : "text-2xl"}`}>
+            New Job Matches
+          </h2>
+          {hasLive && (
+            <p className="font-mono text-xs text-secondary mt-1 uppercase tracking-widest">
+              Live homeowner work — respond first, win more
+            </p>
+          )}
+        </div>
         <div className="flex items-center gap-3">
           <label className="flex items-center gap-2 cursor-pointer select-none">
             <input
@@ -49,7 +63,13 @@ const JobMatchesList = ({ matches }: { matches: JobMatch[] }) => {
               Funds Verified only
             </span>
           </label>
-          <span className="bg-secondary/10 text-secondary font-mono text-xs px-3 py-1 rounded-full">
+          <span
+            className={
+              hasLive
+                ? "bg-secondary text-secondary-foreground font-mono text-sm font-semibold px-4 py-1.5 rounded-full shadow-sm"
+                : "bg-secondary/10 text-secondary font-mono text-xs px-3 py-1 rounded-full"
+            }
+          >
             {visible.length} new
           </span>
         </div>
@@ -90,7 +110,8 @@ const JobMatchesList = ({ matches }: { matches: JobMatch[] }) => {
       ) : (
         <div className="space-y-3">
           {visible.map((match) => (
-            <div key={match.id} className="bg-card rounded-2xl p-5 border border-primary/10 shadow-sm hover:shadow-md transition-shadow">
+            <div key={match.id} className="bg-card rounded-2xl p-5 md:p-6 border border-secondary/30 shadow-md hover:shadow-lg transition-shadow">
+
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
@@ -126,9 +147,10 @@ const JobMatchesList = ({ matches }: { matches: JobMatch[] }) => {
                 <button
                   onClick={() => {
                     const jobId = match.jobs?.id || match.job_id;
+                    markJobMatchSeen(match.id);
                     if (jobId) openDrawer(`/project/${jobId}`);
                   }}
-                  className="flex items-center gap-1 bg-secondary text-secondary-foreground font-mono text-xs px-4 py-2 rounded-xl hover:opacity-90 transition-opacity whitespace-nowrap ml-4 shadow-sm cursor-pointer"
+                  className="flex items-center gap-1.5 bg-secondary text-secondary-foreground font-mono text-sm font-semibold px-5 py-2.5 rounded-xl hover:opacity-90 transition-opacity whitespace-nowrap ml-4 shadow-sm cursor-pointer"
                 >
                   View & Quote
                   <ChevronRight className="w-3 h-3" />

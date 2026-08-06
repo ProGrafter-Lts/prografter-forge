@@ -470,7 +470,16 @@ const TradeDashboard = () => {
             <TradeVaultBanners tradeId={trade.id} onOpenVault={() => setActiveNav("tradevault")} />
           )}
 
-          {/* 1-3. BUSINESS HEALTH — greeting, health score, priorities, AI briefing, cards, breakdown & score boosters */}
+          {/* 1. LIVE WORK — job matches lead the page, above everything else */}
+          <JobMatchesList matches={matches} />
+
+          {/* 2. FIND WORK PREVIEW */}
+          {trade && <DashboardPlanningAlerts trade={trade} />}
+
+          {/* 3. PIPELINE PREVIEW */}
+          {trade && <PipelineSection tradeId={trade.id} />}
+
+          {/* 4. BUSINESS HEALTH — pulse score, priorities, AI briefing, breakdown & score boosters */}
           {trade && (
             <BusinessHealthDashboard
               tradeId={trade.id}
@@ -485,13 +494,7 @@ const TradeDashboard = () => {
             />
           )}
 
-          {/* 4. FIND WORK PREVIEW */}
-          {trade && <DashboardPlanningAlerts trade={trade} />}
-
-          {/* 5. PIPELINE PREVIEW */}
-          {trade && <PipelineSection tradeId={trade.id} />}
-
-          {/* 6. TODAY'S ACTIONS */}
+          {/* 5. TODAY'S ACTIONS */}
           {trade && (
             <AddSpecialismsBanner
               tradeId={trade.id}
@@ -499,10 +502,9 @@ const TradeDashboard = () => {
               onAdd={() => setActiveNav("profile")}
             />
           )}
-          <JobMatchesList matches={matches} />
           <CalendarConnect variant="compact" />
 
-          {/* 7. RECENT ACTIVITY */}
+          {/* 6. RECENT ACTIVITY */}
           <section className="space-y-4">
             <h2 className="font-heading text-primary text-2xl">Recent Activity</h2>
             <ActiveProjectsList projects={activeProjects} />
@@ -511,6 +513,7 @@ const TradeDashboard = () => {
           {trade && isFeatureEnabled("quickBuild") && (
             <QuickBuildDraftsList tradeId={trade.id} />
           )}
+
 
           {trade && trade.is_green_trade && <CertificationsSection trade={trade} />}
           </>
