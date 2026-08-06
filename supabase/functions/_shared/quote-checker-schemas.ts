@@ -757,6 +757,7 @@ export const SCHEMAS: Record<string, CategoryDef[]> = {
   boiler_heating: BOILER_SCHEMA,
   bathroom: BATHROOM_SCHEMA,
   electrical_rewire: ELECTRICAL_SCHEMA,
+  extension_building: EXTENSION_SCHEMA,
 };
 
 
