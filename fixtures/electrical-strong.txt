@@ -1,0 +1,108 @@
+LEDBURY & CO ELECTRICAL CONTRACTORS LTD
+Unit 4, Trent Business Park, Nottingham NG7 2QT
+Tel 0115 442 9910 | office@ledburyelectrical.co.uk
+VAT no. 442 7781 06 | NICEIC Approved Contractor, enrolment no. 214887
+
+QUOTATION - Quote ref: Q-2026-0184
+Quote date: 4 February 2026. This quotation is valid for 60 days from the
+date of issue.
+
+Customer: Dr H Iyer, 41 Beechdale Avenue, Nottingham NG8 3PL
+Property to be rewired: 41 Beechdale Avenue, Nottingham NG8 3PL
+
+1. SCOPE OF WORKS
+Full rewire of the whole property - three bedrooms, bathroom, landing,
+lounge, dining room, kitchen, hall, loft and integral garage.
+
+Accessories schedule:
+- 32 no. double switched socket outlets and 4 no. single socket outlets,
+  Hamilton Sheer brushed steel throughout.
+- 41 no. lighting points: 26 LED downlights to kitchen, bathroom and
+  landing, 12 pendant points to bedrooms and reception rooms, 3 external
+  bulkhead lights.
+- 24 no. switches: 16 no. 1-gang 2-way and 8 no. 2-gang 2-way, brushed
+  steel, with 3 no. dimmer modules to the lounge.
+- External circuits: a dedicated 32A SWA supply to the integral garage
+  consumer unit, two IP66 outdoor sockets to the rear garden and the three
+  external bulkhead lights noted above.
+
+2. CONSUMER UNIT
+Hager Design 10 VML metal consumer unit, 18-way, all-RCBO high-integrity
+configuration, installed in the existing position in the hallway cupboard.
+A Type 2 surge protection device (SPD) is included and fitted within the
+board.
+
+3. CABLING AND CIRCUITS
+Cabling: 2.5mm2 6242Y twin and earth to all ring finals, 1.5mm2 6242Y to
+lighting, 6mm2 to the cooker, 10mm2 to the shower, and 6mm2 3-core SWA to
+the garage.
+Circuits: 18 circuits in total - 4 ring finals (kitchen, ground floor,
+first floor, garage), 4 lighting circuits, cooker, 10.5kW electric shower,
+immersion heater, garage supply, 2 external circuits, smoke alarm circuit,
+boiler supply, and 2 spare ways.
+Containment: cables chased into walls to a minimum 25mm depth in oval
+conduit, clipped and secured in floor voids and the loft, with surface
+trunking used only in the garage.
+Labelling: every circuit individually labelled and a full circuit schedule
+and installation chart fixed inside the consumer unit door.
+Special circuits: a 7.4kW EV charge point supply to the garage wall is
+included, wired in 6mm2 SWA with its own RCBO and load-curtailment device.
+
+4. SAFETY DEVICES
+Protection: every circuit protected by its own individual 30mA Type A RCBO
+in a high-integrity board arrangement.
+Earthing: supply earthing arrangement is TN-C-S (PME); main protective
+bonding to gas and water services renewed in 10mm2 green/yellow.
+Alarms: 5 no. mains-powered interlinked Grade D alarms - 3 optical smoke
+alarms to hall and landing, 1 heat alarm in the kitchen, 1 CO alarm beside
+the boiler.
+AFDDs: arc fault detection devices are fitted to the socket circuits serving
+the bedrooms.
+
+5. CERTIFICATION AND PART P
+The installation will be self-certified under our NICEIC competent person
+scheme registration (enrolment no. 214887) and notified to Nottingham City
+Council Building Control, with the Building Regulations compliance
+certificate posted to you on completion.
+A full Electrical Installation Certificate (EIC) with schedules of
+inspection and test results will be issued to you on completion.
+A Minor Electrical Installation Works Certificate will additionally be
+issued for the separate garage consumer unit alteration.
+
+6. MAKING GOOD AND ACCESS
+Chases will be filled in bonding, made good and finished flush ready for
+decoration.
+Carpets, laminate and floorboards will be lifted by us where access is
+required and fully reinstated on completion.
+Redecoration is not included; the price covers making good only.
+Access: we work room by room, rooms to be cleared by the customer in advance;
+dust sheets and floor protection throughout, dust extraction used when
+chasing, and all debris removed from site daily.
+
+7. EXCLUSIONS AND VARIATIONS
+Excluded: supply of decorative light fittings, replacement of rotten floor
+joists, and any structural alterations.
+Plastering: chases are made good by us; full re-skim of walls and all
+decorating are excluded.
+Asbestos: no allowance is made for asbestos or other hazardous materials; if
+any are found, work will stop and a specialist survey will be arranged and
+priced separately.
+Variations: any additional work will be quoted and agreed in writing before
+it is carried out; ad-hoc extras are charged at £48 per hour.
+
+8. PRICE, VAT AND PAYMENT
+Total price: £11,480 including VAT at 20%, broken down as £6,300 labour,
+£3,620 materials and £1,560 consumer unit, EV supply and certification.
+Payment: 20% deposit of £2,296 on acceptance, 40% on completion of first
+fix, balance of 40% on issue of the EIC.
+
+9. PROGRAMME
+Anticipated start Monday 16 March 2026, with an estimated 12 working days on
+site. Working hours are 8.00am to 4.30pm Monday to Friday. The supply will
+be off between 9.00am and 4.00pm on the consumer unit changeover day only; a
+temporary supply will be maintained to the fridge-freezer and one socket per
+floor during the works.
+
+Yours sincerely,
+J. Ledbury
+Director

@@ -31,6 +31,7 @@ const MODULE_V2_FN: Record<string, string> = {
   landscaping_driveway: "extract-quote",
   boiler_heating: "extract-quote",
   bathroom: "extract-quote",
+  electrical_rewire: "extract-quote",
 };
 
 Deno.serve(async (req) => {

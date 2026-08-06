@@ -465,10 +465,298 @@ export const BATHROOM_SCHEMA: CategoryDef[] = [
   },
 ];
 
+// ---- Electrical / Rewire (42 fields across the module's 10 categories) -----
+//
+// Structure mirrors the 10 scoring categories already defined for the
+// electrical_rewire module in src/lib/quoteCheckerModules.ts. Every bug class
+// surfaced by Landscaping, Boiler and Bathroom is designed in from the start:
+//   1. NEAR-MISS = ABSENT (corrected Boiler wording, never the original
+//      Landscaping "pleasantries are ambiguous" wording).
+//   2. COLLECTIVE-NOUN / QUALITY-CLAIM KILL on every field that invites a
+//      "fully rewired throughout to a high standard" dodge.
+//   3. COMPOUND FACT fields spell out "one half only = ambiguous".
+//   4. HEDGING: precision hedge (figure survives) = present; commitment hedge
+//      (figure replaced) = ambiguous.
+//   5. NO-REUSE stays narrow — shared evidence between two fields legitimately
+//      evidenced by the same sentence is explicitly allowed.
+export const ELECTRICAL_SCHEMA: CategoryDef[] = [
+  {
+    key: "quote_basics",
+    name: "Quote Basics",
+    fields: [
+      {
+        key: "customer_name_and_address",
+        label: "Customer name and address",
+        criteria: "COMPOUND FACT — needs BOTH a customer name AND a customer address (full address, street + town, or postcode). Both = present. Only one (a greeting such as 'Hi Mark,' with no address, or an address with no named customer) = ambiguous. Neither = absent. NOTE: the same header block may also evidence property_address_worked and trade_business_details — shared evidence is allowed.",
+      },
+      {
+        key: "property_address_worked",
+        label: "Address of the property being rewired",
+        criteria: "present if the document names the property where the work will be carried out (a site/installation address line, or a customer address the document clearly treats as the work address). Only one address in the document, given as the customer's address, counts as present for this field too — shared evidence is allowed. NEAR-MISS = ABSENT: 'at your property', 'at yours', 'the house' name no address — absent, never ambiguous. Silence is absent.",
+      },
+      {
+        key: "quote_date_and_validity",
+        label: "Quote date and how long the price is held",
+        criteria: "COMPOUND FACT — needs BOTH a quote/issue date AND a validity or expiry period for the price. SEARCH THE WHOLE DOCUMENT FOR BOTH HALVES BEFORE GRADING: the date is usually in the header and the validity clause is very often a closing line at the very bottom. If both halves appear anywhere in the document, however far apart, the answer is PRESENT. Only one half found anywhere = ambiguous. Neither = absent. 'Prices subject to change' with no period is NOT a validity period — treat it as the missing half. HEDGING: 'valid for approximately 30 days' is present (figure survives); 'valid for a short while' is ambiguous (figure replaced).",
+      },
+      {
+        key: "trade_business_details",
+        label: "Electrician / business name and contact details",
+        criteria: "COMPOUND FACT — needs BOTH a business or trading name AND at least one contact route (phone, email, or business address). Both = present. Only one (a letterhead name with no contact route, or a mobile number signed with a first name only) = ambiguous. Neither = absent. A trading name without Ltd/Limited still counts as a business name.",
+      },
+      {
+        key: "quote_reference_number",
+        label: "Quote or job reference number",
+        criteria: "COMPOUND FACT / IDENTITY RULE — present only if an actual reference identifier is given (e.g. 'Quote ref: Q-2291', 'Job no. 4471', 'Estimate 2026-118'). A DATE IS NOT A REFERENCE: a quote date, however precise, does not make this field present or ambiguous — if a date is the only candidate, this field is ABSENT. A label with no value ('Quote ref:' followed by nothing) is ambiguous. Silence is absent.",
+      },
+    ],
+  },
+  {
+    key: "electrical_scope_quantities",
+    name: "Electrical Scope & Quantities",
+    fields: [
+      {
+        key: "rewire_scope_type",
+        label: "Whether this is a full rewire, partial rewire or specific works",
+        criteria: "present only if the document states the extent of the works in a way a homeowner could check: 'full rewire of the whole property', 'partial rewire — ground floor only', 'kitchen and bathroom circuits only', or a named room/floor list. COLLECTIVE-NOUN / QUALITY-CLAIM RULE (overrides everything else in this field): wording that describes the job collectively or makes a quality claim without stating extent — 'fully rewired throughout', 'complete electrical works', 'sort the wiring out', 'all done to a high standard', 'first-class rewire' — is ABSENT, NEVER ambiguous, however confident or repeated, because it carries no extent information. 'Rewire, possibly partial' names the subject vaguely = ambiguous. Silence is absent.",
+      },
+      {
+        key: "socket_outlet_count_and_type",
+        label: "Number and type of socket outlets",
+        criteria: "COMPOUND FACT — needs BOTH a count AND a type/spec (single/double, USB, switched, metal-clad, brand or range). Both = present ('22 no. double sockets, brushed steel'). Count with no type, or type with no count, = ambiguous. HEDGING: 'approximately 22 double sockets' keeps the figure — present; 'plenty of sockets', 'as many sockets as you need' replace the figure and name no type — ABSENT (collective/quality claim, not ambiguous). Silence is absent.",
+      },
+      {
+        key: "lighting_points_count_and_type",
+        label: "Number and type of lighting points",
+        criteria: "COMPOUND FACT — needs BOTH a count of lighting points/fittings AND a type (pendant, LED downlight, batten, external, or a named product). Both = present. One half only = ambiguous. NEAR-MISS = ABSENT: 'we'll sort the lights out', 'lighting included', 'lovely new lighting throughout' name neither count nor type — absent, never ambiguous. Silence is absent.",
+      },
+      {
+        key: "switch_count_and_type",
+        label: "Number and type of light switches",
+        criteria: "COMPOUND FACT — needs BOTH a switch count AND a type (1-gang/2-gang, 2-way, dimmer, finish or brand). Both = present. One half only = ambiguous. NEAR-MISS = ABSENT: 'new switches throughout', 'matching switches and sockets' with no count and no type — absent. Silence is absent. NOTE: an accessories schedule line may evidence this field and socket_outlet_count_and_type — shared evidence is allowed.",
+      },
+      {
+        key: "outdoor_external_circuits",
+        label: "Outdoor / external circuits (garden, garage, outbuilding, external lighting)",
+        criteria: "EITHER/OR FIELD — present if the document states ANY ONE of: an external circuit included (garage supply, garden sockets, external lighting, outbuilding SWA feed) or an explicit exclusion of external works ('no external or garage circuits included'). A stated exclusion IS present — it is a scope decision. 'We can look at the garage if you want' is ambiguous. NEAR-MISS = ABSENT: mentioning the garden or a garage without stating any electrical work or exclusion for it — absent. Silence is absent.",
+      },
+    ],
+  },
+  {
+    key: "consumer_unit",
+    name: "Consumer Unit",
+    fields: [
+      {
+        key: "consumer_unit_make_model",
+        label: "Consumer unit make and model",
+        criteria: "COMPOUND FACT — needs BOTH manufacturer AND a model/range (e.g. 'Hager Design 10 VML', 'Wylex NM dual RCD board'). Both = present. Make only ('a Hager board') or model only = ambiguous. COLLECTIVE-NOUN / QUALITY-CLAIM RULE (overrides everything else in this field): wording that praises or generalises the board without naming a manufacturer or model — 'quality consumer unit fitted', 'new fuse board of a good brand', 'top-spec board', 'modern consumer unit' — is ABSENT, NEVER ambiguous. Silence is absent.",
+      },
+      {
+        key: "consumer_unit_ways_and_type",
+        label: "Consumer unit way count and protection type",
+        criteria: "COMPOUND FACT — needs BOTH a way/module count (e.g. '10-way', '18 module') AND the protection arrangement of the board (dual RCD, high-integrity, all-RCBO, main switch). Both = present. Only one half (e.g. '10-way board' with no protection type, or 'all-RCBO board' with no way count) = ambiguous. NEAR-MISS = ABSENT: 'metal consumer unit to the current regs' states neither ways nor protection type — absent. Silence is absent.",
+      },
+      {
+        key: "consumer_unit_location",
+        label: "Where the consumer unit will be located",
+        criteria: "present only if a physical position is named (under the stairs, hallway, garage wall, existing position retained, relocated to the utility). 'Relocation to be agreed on site' is ambiguous. NEAR-MISS = ABSENT: naming the board or its spec without stating where it goes — absent, never ambiguous. Silence is absent.",
+      },
+      {
+        key: "surge_protection_spd",
+        label: "Surge protection device (SPD)",
+        criteria: "present if the document states an SPD/surge protection device is included, or explicitly excluded/declined by risk assessment ('SPD omitted following risk assessment as permitted by BS 7671'). Either direction counts. 'SPD can be added if you want it' with no decision is ambiguous. NEAR-MISS = ABSENT: 'board fully protected', 'all the latest protection' name no surge device — absent. Silence is absent.",
+      },
+    ],
+  },
+  {
+    key: "cabling_circuits",
+    name: "Cabling / Circuits",
+    fields: [
+      {
+        key: "cable_type_and_rating",
+        label: "Cable type and size/rating",
+        criteria: "COMPOUND FACT — needs BOTH a cable type (twin & earth / 6242Y, SWA, FP200, flex) AND a size or rating (2.5mm2, 6mm2, 1.5mm2). Both = present. Type with no size, or size with no type, = ambiguous. NEAR-MISS = ABSENT: 'new cable throughout', 'proper cable', 'all new wiring' name neither type nor size — absent. Silence is absent.",
+      },
+      {
+        key: "circuit_count_and_schedule",
+        label: "Number of circuits and what each one serves",
+        criteria: "present only if the document gives a circuit count together with what the circuits serve, or an itemised circuit schedule (ring finals, lighting circuits, cooker, shower, immersion). A count with no indication of what they serve, or a list of two or more named circuits with no total, = ambiguous. COLLECTIVE-NOUN / QUALITY-CLAIM RULE (overrides everything else in this field): wording that refers to the circuits collectively or claims quality without any count or named circuit — 'all circuits renewed', 'every circuit done properly', 'full set of new circuits', 'wired throughout to a high standard' — is ABSENT, NEVER ambiguous. HEDGING: 'approximately 12 circuits — ring finals, lighting, cooker and shower' keeps the figure — present; 'we'll work out roughly how many circuits are needed' replaces the figure — ambiguous. Silence is absent.",
+      },
+      {
+        key: "cable_containment_method",
+        label: "How cables are run and contained (chased, capping, conduit, trunking, clipped, floor voids)",
+        criteria: "present only if a routing or containment method is named (chased into walls with capping, oval conduit, surface trunking, clipped in the loft, run in floor voids). NEAR-MISS = ABSENT: 'cables run neatly', 'tidy installation', 'hidden away' name no method — absent, never ambiguous. 'Containment method to be confirmed on site' is ambiguous. Silence is absent.",
+      },
+      {
+        key: "circuit_labelling",
+        label: "Circuit identification / labelling of the board",
+        criteria: "present only if labelling, circuit identification, or a circuit chart/schedule fixed at the board is stated. NEAR-MISS = ABSENT: issuing a certificate, or providing 'all paperwork', is a different subject and does not evidence labelling — absent. Silence is absent.",
+      },
+      {
+        key: "ev_charger_or_special_circuits",
+        label: "EV charger or other special circuits (shower, cooker, immersion, solar, hot tub)",
+        criteria: "EITHER/OR FIELD — present if the document states ANY ONE of: a named special circuit included (EV charge point, electric shower, cooker circuit, immersion, PV/battery, hot tub supply), or an explicit exclusion of one ('no EV charger included in this price'). One qualifying statement makes this present. 'We could add an EV point later' is ambiguous. Silence is absent.",
+      },
+    ],
+  },
+  {
+    key: "safety_devices",
+    name: "Safety Devices",
+    fields: [
+      {
+        key: "rcd_rcbo_protection_type",
+        label: "RCD / RCBO protection arrangement",
+        criteria: "present only if the protection arrangement is specified: 'all circuits on individual RCBOs', 'dual RCD board, 2 x 63A 30mA', 'high-integrity board with RCBOs on the sockets'. COLLECTIVE-NOUN / QUALITY-CLAIM RULE (overrides everything else in this field): wording that claims safety without naming RCD or RCBO protection — 'fully protected board', 'all the safety devices fitted', 'safe and to the latest standard', 'trip switches all included' — is ABSENT, NEVER ambiguous. Naming RCD/RCBO with no indication of arrangement ('RCD protection included') is ambiguous. Silence is absent. NOTE: a board spec line may evidence this field and consumer_unit_ways_and_type — shared evidence is allowed.",
+      },
+      {
+        key: "earthing_and_bonding_arrangement",
+        label: "Earthing arrangement and main protective bonding",
+        criteria: "EITHER/OR FIELD — present if the document states EITHER the earthing arrangement (TN-S, TN-C-S/PME, TT with earth rod) OR main protective bonding of services (10mm2 bonding to gas and water). One qualifying statement makes this present. 'Earthing checked and upgraded if needed' is ambiguous. NEAR-MISS = ABSENT: 'everything properly earthed', 'safe earthing throughout' name no arrangement or bonding work — absent. Silence is absent.",
+      },
+      {
+        key: "smoke_heat_co_alarm_provision",
+        label: "Smoke, heat and CO alarm provision",
+        criteria: "present if the document states alarms are included with either a count, a location, or a grade/type (mains-interlinked Grade D, heat alarm in the kitchen, CO alarm by the boiler), or explicitly excludes them. Naming alarms with no count, location, grade or exclusion ('smoke alarms included') is ambiguous. NEAR-MISS = ABSENT: 'fire safety taken care of', 'all to current safety standards' name no alarms — absent. Silence is absent.",
+      },
+      {
+        key: "afdd_arc_fault_protection",
+        label: "AFDD (arc fault detection) provision",
+        criteria: "present if the document states AFDDs are included, or explicitly states they are not required/not included for this installation. Either direction counts. 'AFDDs can be added at extra cost' with no decision is ambiguous. NEAR-MISS = ABSENT: RCD/RCBO protection is a different device and does not evidence AFDD — absent. Silence is absent.",
+      },
+    ],
+  },
+  {
+    key: "certification_part_p",
+    name: "Certification / Part P",
+    fields: [
+      {
+        key: "part_p_building_regs_notification",
+        label: "Part P / Building Regulations notification",
+        criteria: "COMPOUND FACT — needs BOTH the notification route named (self-certification via a competent person scheme, or notification to Building Control / local authority) AND a commitment that it will be done for this job (issued, notified, registered, certificate provided). Both = present. Only one half — a bare 'Part P compliant', 'meets Part P', or 'Building Regs where applicable' with no commitment — is ambiguous. NEAR-MISS = ABSENT: 'all work to current regulations' / 'to BS 7671' names testing standards, not notification — absent, never ambiguous. Silence is absent.",
+      },
+      {
+        key: "eic_electrical_installation_certificate",
+        label: "Electrical Installation Certificate (EIC) on completion",
+        criteria: "COMPOUND FACT — needs BOTH the certificate named (EIC / Electrical Installation Certificate) AND a commitment to issue it on completion. Both = present. Naming the certificate with no commitment, or promising 'all certificates' with none named, = ambiguous. NEAR-MISS = ABSENT: 'fully certified work', 'certified electrician', 'you'll get the paperwork' name no certificate type — absent, never ambiguous. Silence is absent.",
+      },
+      {
+        key: "eicr_or_minor_works_cert_where_applicable",
+        label: "EICR or Minor Works certificate where applicable",
+        criteria: "COMPOUND FACT — needs BOTH the document named (EICR / condition report / Minor Electrical Installation Works Certificate) AND a commitment to carry it out or issue it, or a clear statement that it does not apply to this job. Both = present. Named with no commitment ('an EICR may be needed') = ambiguous. NEAR-MISS = ABSENT: an EIC promise alone is a different document and does not evidence this field — absent. Silence is absent.",
+      },
+      {
+        key: "competent_person_scheme_membership",
+        label: "Competent person scheme membership (NICEIC, NAPIT, ELECSA, STROMA)",
+        criteria: "COMPOUND FACT — needs BOTH a named scheme (NICEIC, NAPIT, ELECSA, STROMA, SELECT) AND a registration/enrolment number or an explicit statement of current registration. Both = present. Scheme named with no number and no registration statement ('NICEIC approved') = ambiguous. COLLECTIVE-NOUN / QUALITY-CLAIM RULE: 'fully qualified electrician', '18th edition qualified', 'registered and insured', '25 years in the trade' name no scheme — ABSENT, never ambiguous. Silence is absent.",
+      },
+    ],
+  },
+  {
+    key: "making_good_access",
+    name: "Making Good / Access",
+    fields: [
+      {
+        key: "chasing_and_making_good_walls",
+        label: "Chasing walls and making good the plasterwork",
+        criteria: "present only if the document states what happens to chased walls: 'chases filled and bonded ready for decoration', 'walls made good in bonding and skimmed', or an explicit exclusion ('plaster repairs by others'). COLLECTIVE-NOUN / QUALITY-CLAIM RULE (overrides everything else in this field): wording that claims a standard without stating the making-good work — 'all left to a high standard', 'we make good as we go', 'tidy finish throughout', 'you'd never know we'd been' — is ABSENT, NEVER ambiguous. 'Making good where required' names the subject but sets no scope = ambiguous. Silence is absent.",
+      },
+      {
+        key: "flooring_lifting_and_reinstatement",
+        label: "Lifting and reinstating floors, carpets and floorboards",
+        criteria: "EITHER/OR FIELD — present if the document states EITHER that floors/boards/carpets will be lifted and relaid/reinstated, OR an explicit exclusion ('customer to lift and refit carpets', 'no allowance for lifting laminate'). One qualifying statement makes this present. 'Some floorboards may need lifting' is ambiguous. NEAR-MISS = ABSENT: running cables in floor voids without stating who lifts or reinstates the covering — absent. Silence is absent.",
+      },
+      {
+        key: "decorating_or_redecoration_scope",
+        label: "Decorating / redecoration after the works",
+        criteria: "present if the document states the decorating position either way: decoration included (with what is painted), or explicitly excluded ('redecoration is not included'). Either direction counts. 'We'll touch things up where we can' is ambiguous. NEAR-MISS = ABSENT: making good plaster is a different subject and does not state a decorating position — absent. Silence is absent.",
+      },
+      {
+        key: "access_and_dust_debris_containment",
+        label: "Access arrangements and dust / debris containment",
+        criteria: "EITHER/OR FIELD — present if the document states EITHER an access arrangement (rooms cleared by the customer, working room by room, keys/occupancy, power off windows) OR a dust/debris measure (dust sheets, floor protection, dust extraction, daily clearance of debris, waste removed from site). One qualifying statement makes this present. NEAR-MISS = ABSENT: 'we're clean and tidy workers', 'we respect your home' name no measure or arrangement — absent, never ambiguous. Silence is absent.",
+      },
+    ],
+  },
+  {
+    key: "exclusions",
+    name: "Exclusions",
+    fields: [
+      {
+        key: "explicit_exclusions_listed",
+        label: "Explicit list of what is excluded",
+        criteria: "present only if at least one specific item is named as excluded or not included ('light fittings not supplied', 'no allowance for structural alterations'). A single named exclusion is enough. 'Anything else will be chargeable' with nothing named is ambiguous. NEAR-MISS = ABSENT: 'price includes everything listed above' restates scope and names no exclusion — absent. Silence is absent.",
+      },
+      {
+        key: "plastering_decorating_exclusion_clarity",
+        label: "Whether plastering and decorating are included or excluded",
+        criteria: "present only if the document states the position on plastering AND/OR decorating clearly in one direction — included with scope, or excluded. 'Plastering by others' is present. Mentioning making good without saying whether plastering/decorating is in or out is ambiguous. NEAR-MISS = ABSENT: silence, or a generic exclusions list that names neither plastering nor decorating — absent. NOTE: the same sentence may also evidence explicit_exclusions_listed or decorating_or_redecoration_scope — shared evidence is allowed.",
+      },
+      {
+        key: "asbestos_hazardous_material_clause",
+        label: "Asbestos / hazardous material clause",
+        criteria: "present only if asbestos or another named hazardous material (lead paint, artex containing asbestos) is addressed — excluded, surveyed, or priced separately. 'Anything unforeseen is extra' does not name a hazardous material — ambiguous only if it explicitly references hazards; otherwise absent. Silence is absent.",
+      },
+      {
+        key: "unforeseen_works_variation_clause",
+        label: "How unforeseen works and variations are handled",
+        criteria: "present only if the document states a process or rate for extras: 'any additional work quoted and agreed in writing before it is carried out', 'extras charged at £45/hour'. 'Anything unforeseen will be chargeable' flags cost but sets no process or rate — ambiguous. NEAR-MISS = ABSENT: a named exclusion alone is a different subject (that is explicit_exclusions_listed) and does not state a variation process — absent. Silence is absent.",
+      },
+    ],
+  },
+  {
+    key: "price_vat_payment",
+    name: "Price / VAT / Payment",
+    fields: [
+      {
+        key: "total_price_and_breakdown",
+        label: "Total price and whether it is broken down",
+        criteria: "present if a total price figure is stated AND either a breakdown by item/stage is given or the document explicitly states the price is a single all-in figure for the listed scope. A bare total with no breakdown and no such statement = ambiguous. HEDGING: 'approximately £7,400' keeps a figure — the total half is satisfied; 'a few thousand', 'we'll be competitive' replace the figure — absent. Silence is absent. NOTE: the same price line may also evidence vat_treatment and payment_schedule_and_stage_payments — shared evidence is allowed.",
+      },
+      {
+        key: "vat_treatment",
+        label: "VAT treatment (inclusive, exclusive, rate, VAT number, or not VAT registered)",
+        criteria: "present if the VAT position is stated in any clear form: 'including VAT at 20%', 'plus VAT', a VAT line in the total, a VAT registration number, or 'we are not VAT registered'. Any one of these = present. 'VAT may apply' is ambiguous. NEAR-MISS = ABSENT: a bare total with no VAT wording anywhere — absent, never ambiguous. Silence is absent.",
+      },
+      {
+        key: "payment_schedule_and_stage_payments",
+        label: "Payment schedule / stage payments",
+        criteria: "present if the document states when money is due: two or more payment points, or a deposit with a stated balance point, or 'payment in full on completion' as a single stated term. A deposit alone with no balance point is ambiguous (the balance half belongs here too). 'Terms as usual' / 'we'll sort payment out' is ambiguous. Silence is absent.",
+      },
+      {
+        key: "deposit_amount",
+        label: "Deposit amount",
+        criteria: "present if a deposit is stated as a specific figure, or as a percentage alongside a stated total price so the figure is calculable ('50% up front' with a total of £8,500 = present). A deposit mentioned with no figure and no percentage ('a deposit is required before we start') = ambiguous. NEAR-MISS = ABSENT: 'payment on completion' states no deposit — absent. Silence is absent.",
+      },
+    ],
+  },
+  {
+    key: "timescale",
+    name: "Timescale",
+    fields: [
+      {
+        key: "start_date",
+        label: "Start date or start window",
+        criteria: "present if a date or a dated window is stated. HEDGING (precision vs commitment): 'anticipated start Monday 13 April, subject to material lead times' keeps a real date — present; 'we can start in about 3 weeks' keeps a real window — present; 'as soon as we can', 'we'll fit you in', 'start shortly' replace the figure — ambiguous. Silence is absent.",
+      },
+      {
+        key: "duration_or_completion_date",
+        label: "Duration on site or completion date",
+        criteria: "present if an on-site duration or a completion date is stated. HEDGING: 'approximately 8 working days', 'estimated 2 weeks' keep a figure — present; 'about a week or so', 'not long', 'we'll be as quick as we can' replace the figure — ambiguous. NEAR-MISS = ABSENT: a start date alone states no duration or completion — absent, never ambiguous (that is start_date's subject). Silence is absent.",
+      },
+      {
+        key: "working_hours_and_power_off_arrangement",
+        label: "Working hours and how long the power will be off",
+        criteria: "EITHER/OR FIELD — present if the document states EITHER working hours/days on site ('8am to 4.30pm, Monday to Friday') OR the power-off arrangement ('power off between 9am and 4pm on the changeover day', 'temporary supply maintained to the fridge and one socket per floor'). One qualifying statement makes this present. 'We'll try not to leave you without power' is ambiguous. NEAR-MISS = ABSENT: a duration in days states no working hours and no power-off arrangement — absent. Silence is absent.",
+      },
+    ],
+  },
+];
+
 export const SCHEMAS: Record<string, CategoryDef[]> = {
   landscaping_driveway: LANDSCAPING_SCHEMA,
   boiler_heating: BOILER_SCHEMA,
   bathroom: BATHROOM_SCHEMA,
+  electrical_rewire: ELECTRICAL_SCHEMA,
 };
 
 
@@ -539,6 +827,21 @@ export const CATEGORY_META: Record<string, CategoryMeta> = {
       "This quote covers the main bathroom works, but points such as tiling extent, material allowances, waterproofing, electrical certification and payment terms should be confirmed in writing before accepting.",
     verdictLow:
       "This quote is too vague to accept safely yet. It gives a price, but leaves out key details about the room scope, sanitaryware specification, tiling, waterproofing, electrical certification and guarantees.",
+  },
+  electrical_rewire: {
+    title: "ELECTRICAL / REWIRE",
+    tradeNoun: "electrician",
+    schemaVersion: "electrical-extraction-v1",
+    reportVersion: "electrical-v2",
+    contextKey: "electrical_context",
+    projectType: "Electrical / Rewire",
+    reportRoute: "electrical-quote-report",
+    verdictStrong:
+      "This is a strong electrical quote — the rewire extent, accessory quantities, consumer unit, circuits, protection, certification and commercial terms are all clearly set out. A few final confirmation points are worth agreeing before accepting.",
+    verdictModerate:
+      "This quote covers the main electrical works, but points such as circuit schedule, consumer unit specification, Part P notification, making good and payment terms should be confirmed in writing before accepting.",
+    verdictLow:
+      "This quote is too vague to accept safely yet. It gives a price, but leaves out key details about the extent of the rewire, quantities, consumer unit and circuit specification, certification and making good.",
   },
 };
 
