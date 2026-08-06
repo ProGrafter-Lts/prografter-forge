@@ -283,8 +283,17 @@ Deno.serve(async (req) => {
       project_type: checkRow.project_type ?? null,
       is_landscaping_quote: extractionRow.category === "landscaping_driveway" ? isRightCategory : undefined,
       is_boiler_quote: extractionRow.category === "boiler_heating" ? isRightCategory : undefined,
+      is_bathroom_quote: extractionRow.category === "bathroom" ? isRightCategory : undefined,
+      is_electrical_quote: extractionRow.category === "electrical_rewire" ? isRightCategory : undefined,
       wrong_document: !isRightCategory,
-      ...(isRightCategory ? {} : { not_boiler_note: notCategoryNote, wrong_document_note: notCategoryNote }),
+      ...(isRightCategory
+        ? {}
+        : {
+            not_boiler_note: notCategoryNote,
+            not_bathroom_note: notCategoryNote,
+            not_electrical_note: notCategoryNote,
+            wrong_document_note: notCategoryNote,
+          }),
 
       verdict: { level: verdictLevel, line: verdictLine },
       clarity_score: clarityScore,
