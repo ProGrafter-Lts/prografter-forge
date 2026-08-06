@@ -45,14 +45,16 @@ if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
   process.exit(1);
 }
 
+const ONLY_LABELS = (process.env.ONLY_LABELS || "").split(",").map((s) => s.trim()).filter(Boolean);
+
 const REFERENCE_QUOTES = [
   { label: "weak", filePath: process.env.WEAK_QUOTE },
   { label: "medium", filePath: process.env.MEDIUM_QUOTE },
   { label: "strong", filePath: process.env.STRONG_QUOTE },
-].filter((q) => q.filePath);
+].filter((q) => q.filePath && (ONLY_LABELS.length === 0 || ONLY_LABELS.includes(q.label)));
 
-if (REFERENCE_QUOTES.length !== 3) {
-  console.error("Provide all three reference quotes via WEAK_QUOTE, MEDIUM_QUOTE, STRONG_QUOTE env vars.");
+if (REFERENCE_QUOTES.length === 0) {
+  console.error("Provide reference quotes via WEAK_QUOTE, MEDIUM_QUOTE, STRONG_QUOTE env vars.");
   process.exit(1);
 }
 
