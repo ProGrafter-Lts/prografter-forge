@@ -183,54 +183,55 @@ const AvailableJobsView = ({ tradeId }: { tradeId: string }) => {
               key={match.id}
               className="bg-card rounded-2xl p-5 border border-primary/10 shadow-sm hover:shadow-md transition-shadow"
             >
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="font-heading text-primary text-lg">
-                      {match.job?.title || match.job?.job_type || "Job"}
-                    </h3>
-                    {match.job?.funds_verified && (
-                      <span className="inline-flex items-center gap-1 bg-secondary/10 text-secondary font-mono text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full">
-                        <ShieldCheck className="w-3 h-3" />
-                        Funds Verified
-                      </span>
-                    )}
-                    {(match.job?.is_green_job || (match.job?.job_type && isGreenTrade(match.job.job_type))) && (
-                      <span className="inline-flex items-center gap-1 bg-emerald-500/10 text-emerald-700 font-mono text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full">
-                        <Leaf className="w-3 h-3" />
-                        Green
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-3 mt-1 flex-wrap">
-                    <span className="flex items-center gap-1 font-mono text-xs text-muted-foreground">
-                      <MapPin className="w-3 h-3" />
-                      {match.job?.postcode}
-                    </span>
-                    {match.estimated_value && (
-                      <span className="font-mono text-xs text-secondary font-semibold">
-                        Est. {match.estimated_value}
-                      </span>
-                    )}
-                    <span className="flex items-center gap-1 font-mono text-xs text-muted-foreground">
-                      <Clock className="w-3 h-3" />
-                      Matched {timeAgo(match.notified_at)}
-                    </span>
-                  </div>
-                  <p className="font-mono text-xs text-muted-foreground mt-2 line-clamp-2">
-                    {match.job?.description}
-                  </p>
-                </div>
-                <button
-                  onClick={() => match.job_id && openDrawer(`/project/${match.job_id}`)}
-                  className="flex items-center gap-1 bg-secondary text-secondary-foreground font-mono text-xs px-4 py-2 rounded-xl hover:opacity-90 transition-opacity whitespace-nowrap shadow-sm cursor-pointer"
-                >
-                  View &amp; Quote
-                  <ChevronRight className="w-3 h-3" />
-                </button>
+              <h3 className="font-heading text-primary text-lg leading-tight">
+                {match.job?.title || match.job?.job_type || "Job"}
+              </h3>
+
+              <div className="flex items-center gap-2 flex-wrap mt-2">
+                {match.job?.funds_verified && (
+                  <span className="inline-flex items-center gap-1 bg-secondary/10 text-secondary font-mono text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full">
+                    <ShieldCheck className="w-3 h-3" />
+                    Funds Verified
+                  </span>
+                )}
+                {(match.job?.is_green_job || (match.job?.job_type && isGreenTrade(match.job.job_type))) && (
+                  <span className="inline-flex items-center gap-1 bg-emerald-500/10 text-emerald-700 font-mono text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full">
+                    <Leaf className="w-3 h-3" />
+                    Green
+                  </span>
+                )}
               </div>
+
+              <div className="flex flex-wrap items-center gap-2 mt-3">
+                <span className="inline-flex items-center gap-1.5 bg-primary/5 text-primary font-mono text-[11px] px-2.5 py-1.5 rounded-full">
+                  <MapPin className="w-3 h-3" />
+                  {match.job?.postcode}
+                </span>
+                {match.estimated_value && (
+                  <span className="inline-flex items-center gap-1.5 bg-secondary/15 text-secondary font-mono text-[11px] font-semibold px-2.5 py-1.5 rounded-full">
+                    Est. {match.estimated_value}
+                  </span>
+                )}
+                <span className="inline-flex items-center gap-1.5 bg-primary/5 text-primary/70 font-mono text-[11px] px-2.5 py-1.5 rounded-full">
+                  <Clock className="w-3 h-3" />
+                  Matched {timeAgo(match.notified_at)}
+                </span>
+              </div>
+
+              <p className="font-mono text-xs text-muted-foreground mt-3 leading-relaxed line-clamp-3">
+                {match.job?.description}
+              </p>
+
+              <button
+                onClick={() => match.job_id && openDrawer(`/project/${match.job_id}`)}
+                className="mt-4 w-full sm:w-auto flex items-center justify-center gap-1 bg-secondary text-secondary-foreground font-mono text-sm font-semibold px-5 min-h-[44px] rounded-xl hover:opacity-90 transition-opacity shadow-sm cursor-pointer"
+              >
+                View &amp; Quote
+                <ChevronRight className="w-3 h-3" />
+              </button>
             </div>
           ))}
+
         </div>
       )}
     </section>
