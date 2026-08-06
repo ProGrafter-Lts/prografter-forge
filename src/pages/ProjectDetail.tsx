@@ -630,23 +630,28 @@ const ProjectDetail = () => {
 
           {/* Right column */}
           <div className="space-y-8">
-            {/* Trade quote submission — only when this trade hasn't quoted yet */}
+            {/* Trade quote submission — full-page builder */}
             {userRole === "trade" && userId && !contract && !quotes.some((q) => q.trade_id === userId) && (
-              <QuoteSubmitForm
-                jobId={id!}
-                tradeId={userId}
-                quickBuildPrefill={qbPrefill}
-                onQuoteSubmitted={() => {
-                  if (qbDraftId) {
-                    const sp = new URLSearchParams(searchParams);
-                    sp.delete("qbDraft");
-                    setSearchParams(sp, { replace: true });
-                    setQbPrefill(null);
+              <div className="bg-card rounded-2xl p-5 border border-border shadow-sm space-y-3">
+                <h3 className="font-heading text-primary text-lg">Submit your quote</h3>
+                <p className="font-mono text-[11px] text-muted-foreground">
+                  A guided 4-stage quote builder with a live homeowner preview.
+                </p>
+                <button
+                  onClick={() =>
+                    navigate(
+                      `/jobs/${id}/quote?from=${encodeURIComponent(`/project/${id}`)}${
+                        qbDraftId ? `&qbDraft=${qbDraftId}` : ""
+                      }`,
+                    )
                   }
-                  refreshProject();
-                }}
-              />
+                  className="w-full bg-secondary text-secondary-foreground font-mono text-sm py-3 rounded-xl hover:opacity-90 transition-opacity"
+                >
+                  Open quote builder
+                </button>
+              </div>
             )}
+
 
             {/* Trade: download branded PDF of their submitted quote */}
             {isFeatureEnabled("quotePdf") && userRole === "trade" && userId && (() => {

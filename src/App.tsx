@@ -64,6 +64,7 @@ const IsCheckatradeWorthIt = lazy(() => import("./pages/IsCheckatradeWorthIt.tsx
 const ContractPage = lazy(() => import("./pages/ContractPage.tsx"));
 const LegalReview = lazy(() => import("./pages/LegalReview.tsx"));
 const QuickBuildPage = lazy(() => import("./pages/QuickBuildPage.tsx"));
+const QuoteBuilder = lazy(() => import("./pages/QuoteBuilder.tsx"));
 const Apply = lazy(() => import("./pages/Apply.tsx"));
 const Vetting = lazy(() => import("./pages/Vetting.tsx"));
 const PostJobBrief = lazy(() => import("./pages/PostJobBrief.tsx"));
@@ -245,6 +246,7 @@ const AppRoutes = () => {
               <Route path="/project/:id/contract" element={<ContractPage />} />
               <Route path="/manual/:id" element={<HomeownerManual />} />
               <Route path="/quote-builder/quickbuild" element={<QuickBuildPage />} />
+              <Route path="/jobs/:jobId/quote" element={<QuoteBuilder />} />
               <Route path="/jobs/:ref" element={<JobOS />} />
               <Route path="/reviews/:ref" element={<ReviewSubmit />} />
               <Route path="/disputes/new" element={<DisputeRaise />} />
