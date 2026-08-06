@@ -392,7 +392,7 @@ export const EXTENSION_SCHEMA: CategoryDef[] = [
       {
         key: "smoke_heat_alarm_provision",
         label: "Smoke / heat alarm provision",
-        criteria: "present if mains-linked smoke/heat alarms are stated with a location or count, or explicitly stated as interlinked with the existing system. NEAR-MISS = ABSENT: 'alarms as required' — absent... treat 'as required' with no count or location as ambiguous only where the alarm type is named; otherwise absent. Silence is absent.",
+        criteria: "present if mains-linked smoke/heat alarms are stated with a location or count, or explicitly stated as interlinked with the existing system. 'Smoke alarms as required' names the subject but no location or count = ambiguous. NEAR-MISS = ABSENT: 'all safety kit included', 'alarms sorted' name no alarm type, location or count — absent, never ambiguous. Silence is absent.",
       },
       {
         key: "part_p_notification",
