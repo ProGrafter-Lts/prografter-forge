@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import Logo from "@/components/Logo";
 import { supabase } from "@/integrations/supabase/client";
 import { useVerificationStatus } from "@/hooks/useVerificationStatus";
+import { useNewJobMatchCount } from "@/hooks/useNewJobMatches";
 import {
   LayoutDashboard,
   Search,
