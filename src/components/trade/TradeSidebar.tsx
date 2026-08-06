@@ -100,6 +100,7 @@ const TradeSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen }: 
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           {NAV_ITEMS.map((item) => {
             const isActive = routeActiveNav === item.id;
+            const showBadge = item.id === "find-work" && newMatchCount > 0;
             return (
               <button
                 key={item.id}
@@ -112,9 +113,19 @@ const TradeSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen }: 
               >
                 <item.icon className="w-4 h-4 flex-shrink-0" />
                 {item.label}
+                {showBadge && (
+                  <span
+                    className="ml-auto min-w-[20px] h-5 px-1.5 inline-flex items-center justify-center rounded-full font-mono text-[11px] font-semibold"
+                    style={{ backgroundColor: "#DC2626", color: "#FFFFFF" }}
+                    aria-label={`${newMatchCount} new job matches`}
+                  >
+                    {newMatchCount > 99 ? "99+" : newMatchCount}
+                  </span>
+                )}
               </button>
             );
           })}
+
 
           {/* Atlas — coming soon, visible but disabled */}
           <div
