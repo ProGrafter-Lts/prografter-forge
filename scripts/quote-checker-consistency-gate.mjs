@@ -21,7 +21,7 @@
  *   CATEGORY        (default "landscaping_driveway")
  *   RUNS_PER_QUOTE  (default 5)
  *   AGREEMENT_THRESHOLD (default 0.95)
- *   POLL_TIMEOUT_MS (default 90000)
+ *   POLL_TIMEOUT_MS (default 300000; large 116+ field categories need it)
  *   TESTED_BY       (default "automated-script")
  */
 
@@ -34,7 +34,11 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const CATEGORY = process.env.CATEGORY || "landscaping_driveway";
 const RUNS_PER_QUOTE = Number(process.env.RUNS_PER_QUOTE || 5);
 const AGREEMENT_THRESHOLD = Number(process.env.AGREEMENT_THRESHOLD || 0.95);
-const POLL_TIMEOUT_MS = Number(process.env.POLL_TIMEOUT_MS || 90_000);
+// Large categories (116+ fields, e.g. extension_building) routinely need far
+// more than 90s for Pass 1 to land. 300s is the safe default for every
+// category — a genuine extraction failure still surfaces, it just no longer
+// gets masked as a false "timeout" on big schemas.
+const POLL_TIMEOUT_MS = Number(process.env.POLL_TIMEOUT_MS || 300_000);
 const POLL_INTERVAL_MS = 3_000;
 const TESTED_BY = process.env.TESTED_BY || "automated-script";
 const PROJECT_TYPE = process.env.PROJECT_TYPE || "Landscaping / Driveway";

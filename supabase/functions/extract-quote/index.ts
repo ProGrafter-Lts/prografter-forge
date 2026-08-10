@@ -90,6 +90,15 @@ async function callAnthropic(content: unknown, maxTokens: number): Promise<strin
     throw new Error(`Anthropic error ${resp.status}: ${errText}`);
   }
   const data = await resp.json();
+  // A silent max_tokens stop is the dangerous failure mode here: the JSON
+  // repair layer still yields a parseable object, the missing tail categories
+  // default to "absent", and every run fails identically — so the consistency
+  // gate reports 100% agreement on a truncated extraction. Fail loudly instead.
+  if (data?.stop_reason === "max_tokens") {
+    throw new Error(
+      `Extraction truncated: model hit max_tokens (${maxTokens}). Raise the Pass 1 token budget for this schema size.`,
+    );
+  }
   return (data?.content?.[0]?.text as string) || "";
 }
 
@@ -300,7 +309,13 @@ async function runExtraction(supabase: any, args: RunArgs): Promise<void> {
 
     content.push({ type: "text", text: buildPass1Prompt(category, schema, pass0, intake ?? {}, supportingNames) });
 
-    const raw = await callAnthropic(content, 8000);
+    // Token budget must scale with the schema: every field emits a status, a
+    // verbatim quote and an evidence_source, so a 116-field category (Extension)
+    // needs roughly 3x the output of a 21-field one. A flat 8000 silently
+    // truncated Extension's last two categories.
+    const fieldCount = schema.reduce((n, c) => n + c.fields.length, 0);
+    const maxTokens = Math.min(32_000, Math.max(8_000, fieldCount * 250));
+    const raw = await callAnthropic(content, maxTokens);
     const parsed = extractJson(raw);
     if (!parsed) {
       console.error("[extract-quote] parse failed. rawLen=", raw?.length, "head=", (raw || "").slice(0, 400));
