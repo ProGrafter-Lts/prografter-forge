@@ -309,7 +309,13 @@ async function runExtraction(supabase: any, args: RunArgs): Promise<void> {
 
     content.push({ type: "text", text: buildPass1Prompt(category, schema, pass0, intake ?? {}, supportingNames) });
 
-    const raw = await callAnthropic(content, 8000);
+    // Token budget must scale with the schema: every field emits a status, a
+    // verbatim quote and an evidence_source, so a 116-field category (Extension)
+    // needs roughly 3x the output of a 21-field one. A flat 8000 silently
+    // truncated Extension's last two categories.
+    const fieldCount = schema.reduce((n, c) => n + c.fields.length, 0);
+    const maxTokens = Math.min(32_000, Math.max(8_000, fieldCount * 250));
+    const raw = await callAnthropic(content, maxTokens);
     const parsed = extractJson(raw);
     if (!parsed) {
       console.error("[extract-quote] parse failed. rawLen=", raw?.length, "head=", (raw || "").slice(0, 400));
