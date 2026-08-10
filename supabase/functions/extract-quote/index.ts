@@ -90,6 +90,15 @@ async function callAnthropic(content: unknown, maxTokens: number): Promise<strin
     throw new Error(`Anthropic error ${resp.status}: ${errText}`);
   }
   const data = await resp.json();
+  // A silent max_tokens stop is the dangerous failure mode here: the JSON
+  // repair layer still yields a parseable object, the missing tail categories
+  // default to "absent", and every run fails identically — so the consistency
+  // gate reports 100% agreement on a truncated extraction. Fail loudly instead.
+  if (data?.stop_reason === "max_tokens") {
+    throw new Error(
+      `Extraction truncated: model hit max_tokens (${maxTokens}). Raise the Pass 1 token budget for this schema size.`,
+    );
+  }
   return (data?.content?.[0]?.text as string) || "";
 }
 
