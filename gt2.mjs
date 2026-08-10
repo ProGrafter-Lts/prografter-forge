@@ -1,0 +1,13 @@
+import { createClient } from "@supabase/supabase-js";
+const s = createClient("https://xryinqaxjclcmhebdcex.supabase.co", process.env.SUPABASE_SERVICE_ROLE_KEY);
+const label = process.argv[2];
+const { data } = await s.from("quote_check_consistency_tests").select("extraction_json,tested_at,tested_by").eq("category","extension_building").eq("test_quote_label",label).order("tested_at",{ascending:false}).limit(5);
+const flats = data.map(d=>{const f={};for(const[c,fs]of Object.entries(d.extraction_json||{}))for(const[k,v]of Object.entries(fs||{}))f[`${c}.${k}`]=v?.status;return f;});
+const flat=flats[0];
+console.log(label, data[0].tested_at, data[0].tested_by, "runs:",flats.length);
+const counts={};for(const v of Object.values(flat))counts[v]=(counts[v]||0)+1;
+console.log(counts);
+const want=process.argv[3];
+const off=Object.entries(flat).filter(([k,v])=>v!==want).sort();
+console.log(`NOT ${want} (${off.length}):`);
+for(const [k,v] of off) console.log(" ", k, "=>", v);
