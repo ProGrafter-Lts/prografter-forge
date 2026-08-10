@@ -191,7 +191,7 @@ export const EXTENSION_SCHEMA: CategoryDef[] = [
       {
         key: "existing_wall_opening_and_lintels",
         label: "Opening up the existing wall and lintels to remaining openings",
-        criteria: "COMPOUND FACT — needs BOTH the opening in the existing wall described (position and approximate width, or 'full width of the existing rear wall') AND the lintel/beam supporting it identified. Both = present. Opening with no support named, or a lintel with no opening described, = ambiguous. NEAR-MISS = ABSENT: 'knock through' with no width and no support — absent. Silence is absent.",
+        criteria: "COMPOUND FACT — needs BOTH the opening in the existing wall described (position and approximate width, or 'full width of the existing rear wall') AND the lintel/beam supporting it identified WITH its size or specification stated. Both = present. PRECISION HEDGE: a beam or lintel whose size is deferred to a third party or a later date ('steel to engineer's size', 'beam size TBC', 'lintel to be confirmed') does NOT count as identified — with the opening described this is ambiguous, never present. Opening with no support named, or a lintel with no opening described, = ambiguous. NEAR-MISS = ABSENT: 'knock through' with no width and no support — absent. Silence is absent.",
       },
       {
         key: "structural_warranty_or_sign_off",
