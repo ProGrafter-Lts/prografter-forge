@@ -210,7 +210,7 @@ export const QUOTE_CHECKER_MODULES: QuoteCheckerModule[] = [
     module_id: "kitchen",
     display_name: "Kitchen Quote Checker Module",
     short_label: "Kitchen",
-    status: "active",
+    status: "coming_soon",
     description:
       "Kitchen refits, supply-and-fit, fit-only and labour-only installs. Checks scope, units, worktops, appliances, plumbing/gas/electrical, tiling, flooring, rip-out, making good, exclusions and guarantees.",
     route_or_component: null,
