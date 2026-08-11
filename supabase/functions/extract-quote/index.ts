@@ -70,7 +70,7 @@ async function downloadBytes(supabase: any, path: string): Promise<Uint8Array | 
 // file reads the same as the other analyse-* functions. --------------------
 const extractJson = robustParseJson;
 
-async function callAnthropic(content: unknown, maxTokens: number): Promise<string> {
+async function callAnthropic(system: unknown[], content: unknown, maxTokens: number): Promise<string> {
   const resp = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
@@ -82,6 +82,14 @@ async function callAnthropic(content: unknown, maxTokens: number): Promise<strin
       model: MODEL,
       max_tokens: maxTokens,
       temperature: 0,
+      // The schema + rulebook live in `system` with a cache_control breakpoint
+      // so Anthropic prompt caching can reuse them across every call for a
+      // category (all 15 runs of a consistency gate, and every live check).
+      // Cache writes cost 1.25x, cache reads 0.1x — with a 38-116 field
+      // schema that's the bulk of the prompt. The documents and the per-run
+      // dynamic block stay in the user message and are never cached, so each
+      // run is still a genuinely fresh extraction.
+      system,
       messages: [{ role: "user", content }],
     }),
   });
@@ -90,6 +98,10 @@ async function callAnthropic(content: unknown, maxTokens: number): Promise<strin
     throw new Error(`Anthropic error ${resp.status}: ${errText}`);
   }
   const data = await resp.json();
+  const u = data?.usage ?? {};
+  console.log(
+    `[extract-quote] usage input=${u.input_tokens} cache_write=${u.cache_creation_input_tokens ?? 0} cache_read=${u.cache_read_input_tokens ?? 0} output=${u.output_tokens}`,
+  );
   // A silent max_tokens stop is the dangerous failure mode here: the JSON
   // repair layer still yields a parseable object, the missing tail categories
   // default to "absent", and every run fails identically — so the consistency
@@ -102,14 +114,20 @@ async function callAnthropic(content: unknown, maxTokens: number): Promise<strin
   return (data?.content?.[0]?.text as string) || "";
 }
 
+
 // ---- Pass 1 prompt ----------------------------------------------------------
-function buildPass1Prompt(
-  category: string,
-  schema: CategoryDef[],
-  pass0: Pass0Candidates,
-  intake: Record<string, unknown>,
-  supportingNames: string[],
-): string {
+//
+// Split into two halves so Anthropic prompt caching can do real work:
+//   * buildPass1System() — schema + rulebook + output contract. Byte-identical
+//     for every call in a category, so it is sent as the `system` block with a
+//     cache_control breakpoint and read from cache on subsequent calls.
+//   * buildPass1Runtime() — homeowner context, Pass 0 hints, supporting-doc
+//     names. Varies per run/document and is never cached.
+// The documents themselves are always re-sent and re-read, so nothing about
+// the extraction result is reused between runs.
+
+/** Static half — identical across every call for a given category. */
+function buildPass1System(category: string, schema: CategoryDef[]): string {
   const meta = metaFor(category);
   const schemaLines = schema
     .map(
@@ -125,23 +143,15 @@ function buildPass1Prompt(
     )
     .join("\n\n");
 
-
-  const ctx = (intake as any)?.[meta.contextKey] ?? intake ?? {};
-
   return `You are ProGrafter's ${meta.title} QUOTE EXTRACTION engine (Pass 1 of a two-pass pipeline).
 
 Your ONLY job is EXTRACTION, not judgment or scoring. A separate pass will score and write the homeowner report from your output. Do not editorialise, do not score, do not write prose commentary.
 
-You are given the main quote first, then any supporting documents (${supportingNames.length ? supportingNames.join(", ") : "none"}).
-
-HOMEOWNER CONTEXT (background only — never used to mark a field "absent" just because the homeowner didn't mention it):
-${JSON.stringify(ctx, null, 2)}
-
-A DETERMINISTIC PRE-SCAN of the document text (Pass 0, regex — not from you) found these candidate values. Use them as hints to cross-check your own reading; do not blindly copy one into a field that doesn't match its context (e.g. a detected percentage could be a VAT rate, not a deposit rate — read the surrounding text to decide):
-${describePass0Candidates(pass0)}
+You are given the main quote first, then any supporting documents, then a short run-specific briefing (homeowner context and deterministic pre-scan hints).
 
 ===== FIXED EXTRACTION SCHEMA — every field below MUST appear exactly once in your output =====
 ${schemaLines}
+
 
 ===== RULES =====
 - Where a field has a RULE line above, that RULE is binding and overrides your own judgement. Apply it literally. A RULE narrows how you judge a field; it never removes evidence from view.
@@ -173,6 +183,28 @@ Return ONLY one JSON object, no prose, no markdown code fences, no preamble. Sha
   ...one key per category above, each containing one key per field above...
 }`;
 }
+
+/** Dynamic half — varies per run and per document; never cached. */
+function buildPass1Runtime(
+  category: string,
+  pass0: Pass0Candidates,
+  intake: Record<string, unknown>,
+  supportingNames: string[],
+): string {
+  const meta = metaFor(category);
+  const ctx = (intake as any)?.[meta.contextKey] ?? intake ?? {};
+  return `===== RUN BRIEFING =====
+Supporting documents supplied with this quote: ${supportingNames.length ? supportingNames.join(", ") : "none"}.
+
+HOMEOWNER CONTEXT (background only — never used to mark a field "absent" just because the homeowner didn't mention it):
+${JSON.stringify(ctx, null, 2)}
+
+A DETERMINISTIC PRE-SCAN of the document text (Pass 0, regex — not from you) found these candidate values. Use them as hints to cross-check your own reading; do not blindly copy one into a field that doesn't match its context (e.g. a detected percentage could be a VAT rate, not a deposit rate — read the surrounding text to decide):
+${describePass0Candidates(pass0)}
+
+Now produce the JSON object exactly as specified in the OUTPUT section, covering every field in the fixed extraction schema.`;
+}
+
 
 // ---- Substring anti-hallucination check ------------------------------------
 function normalize(s: string): string {
@@ -307,7 +339,7 @@ async function runExtraction(supabase: any, args: RunArgs): Promise<void> {
       supportingNames.push(sf.name);
     }
 
-    content.push({ type: "text", text: buildPass1Prompt(category, schema, pass0, intake ?? {}, supportingNames) });
+    content.push({ type: "text", text: buildPass1Runtime(category, pass0, intake ?? {}, supportingNames) });
 
     // Token budget must scale with the schema: every field emits a status, a
     // verbatim quote and an evidence_source, so a 116-field category (Extension)
@@ -315,7 +347,15 @@ async function runExtraction(supabase: any, args: RunArgs): Promise<void> {
     // truncated Extension's last two categories.
     const fieldCount = schema.reduce((n, c) => n + c.fields.length, 0);
     const maxTokens = Math.min(32_000, Math.max(8_000, fieldCount * 250));
-    const raw = await callAnthropic(content, maxTokens);
+    const system = [
+      {
+        type: "text",
+        text: buildPass1System(category, schema),
+        cache_control: { type: "ephemeral" },
+      },
+    ];
+    const raw = await callAnthropic(system, content, maxTokens);
+
     const parsed = extractJson(raw);
     if (!parsed) {
       console.error("[extract-quote] parse failed. rawLen=", raw?.length, "head=", (raw || "").slice(0, 400));
