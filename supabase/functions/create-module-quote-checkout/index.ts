@@ -33,6 +33,17 @@ const MODULE_PRICE_BAND: Record<string, PriceBand> = {
   extension_building: "extension",
 };
 
+// RETIRED 2026-08-11: legacy V1 single-pass analysers, not on the Pass 0/1/2
+// fixed-standard pipeline. Off sale until rebuilt on the V2 standard. This is
+// the server-side block — the UI also hides them, but this stops any direct
+// API call from creating a paid session.
+const RETIRED_MODULES = new Set([
+  "kitchen",
+  "roofing",
+  "windows_doors",
+  "plastering_rendering",
+]);
+
 const PRICE_BAND_AMOUNT: Record<PriceBand, number> = {
   single_trade: 1900,
   standard_trade: 3900,
@@ -67,6 +78,14 @@ Deno.serve(async (req) => {
     if (typeof moduleId !== "string" || !MODULE_PRICE_BAND[moduleId]) {
       return new Response(JSON.stringify({ error: "Unknown module" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (RETIRED_MODULES.has(moduleId)) {
+      return new Response(JSON.stringify({
+        error: "This quote checker is temporarily unavailable while we rebuild it. Please request a manual ProGrafter review.",
+        retired: true,
+      }), {
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
     if (typeof email !== "string" || !EMAIL_RE.test(email.trim())) {
