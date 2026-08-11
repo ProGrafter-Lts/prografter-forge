@@ -11,7 +11,9 @@
 // directories.
 
 import { EXTENSION_SCHEMA } from "./quote-checker-extension-schema.ts";
-export { EXTENSION_SCHEMA };
+import { KITCHEN_SCHEMA } from "./quote-checker-kitchen-schema.ts";
+export { EXTENSION_SCHEMA, KITCHEN_SCHEMA };
+
 
 export type FieldStatus = "present" | "absent" | "ambiguous";
 export type EvidenceSource = "in_quote" | "supplied_in_supporting" | "not_found";
@@ -761,7 +763,9 @@ export const SCHEMAS: Record<string, CategoryDef[]> = {
   bathroom: BATHROOM_SCHEMA,
   electrical_rewire: ELECTRICAL_SCHEMA,
   extension_building: EXTENSION_SCHEMA,
+  kitchen: KITCHEN_SCHEMA,
 };
+
 
 
 /** Per-category wording + versioning so Pass 1 and Pass 2 are not hardcoded
@@ -862,7 +866,23 @@ export const CATEGORY_META: Record<string, CategoryMeta> = {
     verdictLow:
       "This quote is too vague to accept safely yet. It gives a price, but leaves out key details about the scope and drawings, foundations, structure, insulation, drainage, Building Regulations, party wall position and payment terms.",
   },
+  kitchen: {
+    title: "KITCHEN",
+    tradeNoun: "kitchen fitter",
+    schemaVersion: "kitchen-extraction-v1",
+    reportVersion: "kitchen-v2",
+    contextKey: "kitchen_context",
+    projectType: "Kitchen",
+    reportRoute: "kitchen-quote-report",
+    verdictStrong:
+      "This is a strong kitchen quote — the scope, units and worktop specification, appliances, plumbing and electrical works, certification and commercial terms are all clearly set out. A few final confirmation points are worth agreeing before accepting.",
+    verdictModerate:
+      "This quote covers the main kitchen works, but points such as the unit range and worktop specification, appliance models and connections, consumer unit capacity, making good and payment terms should be confirmed in writing before accepting.",
+    verdictLow:
+      "This quote is too vague to accept safely yet. It gives a price, but leaves out key details about the units and worktop, appliances, plumbing and electrical works, certification, making good and payment terms.",
+  },
 };
+
 
 
 export function metaFor(category: string): CategoryMeta {
