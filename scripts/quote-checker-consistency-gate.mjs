@@ -90,6 +90,13 @@ async function runExtraction(storagePath) {
   return data.id; // simple_quote_checks id
 }
 
+/**
+ * Poll for a run's extraction.
+ *
+ * Also watches simple_quote_checks.status so a genuinely failed extraction
+ * (bad key, no credits, truncation) aborts immediately instead of burning the
+ * full poll timeout and then looking like a "timeout".
+ */
 async function pollForExtraction(quoteCheckId) {
   const deadline = Date.now() + POLL_TIMEOUT_MS;
   while (Date.now() < deadline) {
@@ -100,10 +107,48 @@ async function pollForExtraction(quoteCheckId) {
       .maybeSingle();
     if (error) throw new Error(`Poll failed: ${error.message}`);
     if (data?.pass1_json) return data.pass1_json;
+
+    const { data: check } = await supabase
+      .from("simple_quote_checks")
+      .select("status, error")
+      .eq("id", quoteCheckId)
+      .maybeSingle();
+    if (check?.status === "error") {
+      throw new Error(`Extraction failed server-side (${quoteCheckId}): ${check.error}`);
+    }
     await new Promise((r) => setTimeout(r, POLL_INTERVAL_MS));
   }
-  throw new Error(`Timed out waiting for extraction (quote_check_id=${quoteCheckId})`);
+  throw new Error(
+    `Timed out waiting for extraction (quote_check_id=${quoteCheckId}). ` +
+      `The Anthropic call may still be in flight — re-run the gate to resume: it re-polls this id from ` +
+      `${STATE_FILE} instead of paying for the same extraction twice.`,
+  );
 }
+
+// ---- Resume state ---------------------------------------------------------
+// A timeout previously meant the whole run was thrown away and the next
+// attempt re-sent the entire prompt (schema + rulebook + document) — a real,
+// avoidable Anthropic charge for work already paid for. Every invoked
+// quote_check_id is recorded here as soon as extract-quote returns it, so a
+// resumed gate re-polls the existing request rather than issuing a new one.
+// Only completed, still-fresh model calls are reused; nothing is cached across
+// gate runs — a finished run is cleared from state once its result is consumed.
+async function loadState() {
+  try {
+    return JSON.parse(await readFile(STATE_FILE, "utf8"));
+  } catch {
+    return {};
+  }
+}
+
+async function saveState(state) {
+  await writeFile(STATE_FILE, JSON.stringify(state, null, 2));
+}
+
+function stateKey(label, run) {
+  return `${CATEGORY}::${label}::${run}`;
+}
+
 
 /** Flatten a category -> field -> {status,...} extraction into "category.field": status. */
 export function flattenStatuses(extraction) {
