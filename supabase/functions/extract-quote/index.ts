@@ -116,13 +116,18 @@ async function callAnthropic(system: unknown[], content: unknown, maxTokens: num
 
 
 // ---- Pass 1 prompt ----------------------------------------------------------
-function buildPass1Prompt(
-  category: string,
-  schema: CategoryDef[],
-  pass0: Pass0Candidates,
-  intake: Record<string, unknown>,
-  supportingNames: string[],
-): string {
+//
+// Split into two halves so Anthropic prompt caching can do real work:
+//   * buildPass1System() — schema + rulebook + output contract. Byte-identical
+//     for every call in a category, so it is sent as the `system` block with a
+//     cache_control breakpoint and read from cache on subsequent calls.
+//   * buildPass1Runtime() — homeowner context, Pass 0 hints, supporting-doc
+//     names. Varies per run/document and is never cached.
+// The documents themselves are always re-sent and re-read, so nothing about
+// the extraction result is reused between runs.
+
+/** Static half — identical across every call for a given category. */
+function buildPass1System(category: string, schema: CategoryDef[]): string {
   const meta = metaFor(category);
   const schemaLines = schema
     .map(
@@ -138,23 +143,15 @@ function buildPass1Prompt(
     )
     .join("\n\n");
 
-
-  const ctx = (intake as any)?.[meta.contextKey] ?? intake ?? {};
-
   return `You are ProGrafter's ${meta.title} QUOTE EXTRACTION engine (Pass 1 of a two-pass pipeline).
 
 Your ONLY job is EXTRACTION, not judgment or scoring. A separate pass will score and write the homeowner report from your output. Do not editorialise, do not score, do not write prose commentary.
 
-You are given the main quote first, then any supporting documents (${supportingNames.length ? supportingNames.join(", ") : "none"}).
-
-HOMEOWNER CONTEXT (background only — never used to mark a field "absent" just because the homeowner didn't mention it):
-${JSON.stringify(ctx, null, 2)}
-
-A DETERMINISTIC PRE-SCAN of the document text (Pass 0, regex — not from you) found these candidate values. Use them as hints to cross-check your own reading; do not blindly copy one into a field that doesn't match its context (e.g. a detected percentage could be a VAT rate, not a deposit rate — read the surrounding text to decide):
-${describePass0Candidates(pass0)}
+You are given the main quote first, then any supporting documents, then a short run-specific briefing (homeowner context and deterministic pre-scan hints).
 
 ===== FIXED EXTRACTION SCHEMA — every field below MUST appear exactly once in your output =====
 ${schemaLines}
+
 
 ===== RULES =====
 - Where a field has a RULE line above, that RULE is binding and overrides your own judgement. Apply it literally. A RULE narrows how you judge a field; it never removes evidence from view.
