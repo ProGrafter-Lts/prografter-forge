@@ -184,6 +184,28 @@ Return ONLY one JSON object, no prose, no markdown code fences, no preamble. Sha
 }`;
 }
 
+/** Dynamic half — varies per run and per document; never cached. */
+function buildPass1Runtime(
+  category: string,
+  pass0: Pass0Candidates,
+  intake: Record<string, unknown>,
+  supportingNames: string[],
+): string {
+  const meta = metaFor(category);
+  const ctx = (intake as any)?.[meta.contextKey] ?? intake ?? {};
+  return `===== RUN BRIEFING =====
+Supporting documents supplied with this quote: ${supportingNames.length ? supportingNames.join(", ") : "none"}.
+
+HOMEOWNER CONTEXT (background only — never used to mark a field "absent" just because the homeowner didn't mention it):
+${JSON.stringify(ctx, null, 2)}
+
+A DETERMINISTIC PRE-SCAN of the document text (Pass 0, regex — not from you) found these candidate values. Use them as hints to cross-check your own reading; do not blindly copy one into a field that doesn't match its context (e.g. a detected percentage could be a VAT rate, not a deposit rate — read the surrounding text to decide):
+${describePass0Candidates(pass0)}
+
+Now produce the JSON object exactly as specified in the OUTPUT section, covering every field in the fixed extraction schema.`;
+}
+
+
 // ---- Substring anti-hallucination check ------------------------------------
 function normalize(s: string): string {
   return s
