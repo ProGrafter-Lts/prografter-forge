@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,7 @@ import LandscapingQuoteChecker from "@/pages/LandscapingQuoteChecker";
 import PlasteringQuoteChecker from "@/pages/PlasteringQuoteChecker";
 import {
   QUOTE_CHECKER_MODULES,
+  getModule,
   type QuoteCheckerModule,
 } from "@/lib/quoteCheckerModules";
 import { moduleDisplayPrice } from "@/lib/quoteCheckerPayment";
