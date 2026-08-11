@@ -38,7 +38,7 @@ const MODULE_PRICE_BAND: Record<string, PriceBand> = {
 // the server-side block — the UI also hides them, but this stops any direct
 // API call from creating a paid session.
 const RETIRED_MODULES = new Set([
-  "kitchen",
+  
   "roofing",
   "windows_doors",
   "plastering_rendering",

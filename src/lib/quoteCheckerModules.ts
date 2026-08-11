@@ -210,13 +210,13 @@ export const QUOTE_CHECKER_MODULES: QuoteCheckerModule[] = [
     module_id: "kitchen",
     display_name: "Kitchen Quote Checker Module",
     short_label: "Kitchen",
-    status: "coming_soon",
+    status: "active",
     description:
       "Kitchen refits, supply-and-fit, fit-only and labour-only installs. Checks scope, units, worktops, appliances, plumbing/gas/electrical, tiling, flooring, rip-out, making good, exclusions and guarantees.",
-    route_or_component: null,
-    // RETIRED 2026-08-11: legacy V1 single-pass analyser. Not on the Pass 0/1/2
-    // fixed-standard pipeline, so scoring is non-deterministic. Off sale until
-    // rebuilt on the V2 standard.,
+    route_or_component: "/quote-checker?module=kitchen",
+    // Rebuilt 2026-08-11 on the Pass 0/1/2 fixed-standard pipeline (38-field
+    // KITCHEN_SCHEMA). Cleared the 5x3 consistency gate (weak 100%,
+    // medium 100%, strong 97.4% — threshold 95%).,
     supported_project_types: [
       "kitchen refit",
       "kitchen renovation",

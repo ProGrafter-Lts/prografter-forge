@@ -20,6 +20,9 @@ export const QUOTE_CHECKER_V2_ENABLED: Record<string, boolean> = {
   // Extension V2 (116 fields): 5x3 gate 100% agreement, 348/348 ground truth
   // under the corrected scaled token budget. Signed off — live.
   extension_building: true,
+  // Kitchen V2 (38 fields): 5x3 gate — weak 100%, medium 100%, strong 97.4%
+  // field agreement (threshold 95%). Signed off — live.
+  kitchen: true,
 };
 
 export function isV2Enabled(moduleId: string): boolean {
