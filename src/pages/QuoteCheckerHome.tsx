@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,7 @@ import LandscapingQuoteChecker from "@/pages/LandscapingQuoteChecker";
 import PlasteringQuoteChecker from "@/pages/PlasteringQuoteChecker";
 import {
   QUOTE_CHECKER_MODULES,
+  getModule,
   type QuoteCheckerModule,
 } from "@/lib/quoteCheckerModules";
 import { moduleDisplayPrice } from "@/lib/quoteCheckerPayment";
@@ -50,33 +51,33 @@ const QuoteCheckerHome = () => {
   // When a module is selected via the query param, load the working checker
   // for that module inline inside the AI Quote Checker flow. This reuses the
   // existing checker logic without rebuilding or altering it.
-  if (activeModuleId === "extension_building") {
-    return <SimpleQuoteChecker />;
+  //
+  // IMPORTANT: only modules with status "active" may render their checker.
+  // Retired/coming-soon modules fall through to the coming-soon state below,
+  // so a direct link or bookmark (e.g. /kitchen-quote-checker) cannot bypass
+  // the retirement and reach a live intake + payment flow.
+  const activeModule = activeModuleId ? getModule(activeModuleId) : undefined;
+  const activeIsLive = activeModule?.status === "active";
+
+  useEffect(() => {
+    if (activeModule && !activeIsLive) {
+      setSelected(activeModule);
+      setView("coming_soon");
+    }
+  }, [activeModuleId, activeIsLive]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (activeIsLive) {
+    if (activeModuleId === "extension_building") return <SimpleQuoteChecker />;
+    if (activeModuleId === "boiler_heating") return <BoilerQuoteChecker />;
+    if (activeModuleId === "electrical_rewire") return <ElectricalQuoteChecker />;
+    if (activeModuleId === "bathroom") return <BathroomQuoteChecker />;
+    if (activeModuleId === "roofing") return <RoofingQuoteChecker />;
+    if (activeModuleId === "kitchen") return <KitchenQuoteChecker />;
+    if (activeModuleId === "windows_doors") return <WindowsDoorsQuoteChecker />;
+    if (activeModuleId === "landscaping_driveway") return <LandscapingQuoteChecker />;
+    if (activeModuleId === "plastering_rendering") return <PlasteringQuoteChecker />;
   }
-  if (activeModuleId === "boiler_heating") {
-    return <BoilerQuoteChecker />;
-  }
-  if (activeModuleId === "electrical_rewire") {
-    return <ElectricalQuoteChecker />;
-  }
-  if (activeModuleId === "bathroom") {
-    return <BathroomQuoteChecker />;
-  }
-  if (activeModuleId === "roofing") {
-    return <RoofingQuoteChecker />;
-  }
-  if (activeModuleId === "kitchen") {
-    return <KitchenQuoteChecker />;
-  }
-  if (activeModuleId === "windows_doors") {
-    return <WindowsDoorsQuoteChecker />;
-  }
-  if (activeModuleId === "landscaping_driveway") {
-    return <LandscapingQuoteChecker />;
-  }
-  if (activeModuleId === "plastering_rendering") {
-    return <PlasteringQuoteChecker />;
-  }
+
 
 
   const handleSelect = (m: QuoteCheckerModule) => {

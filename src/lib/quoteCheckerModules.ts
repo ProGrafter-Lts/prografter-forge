@@ -210,10 +210,13 @@ export const QUOTE_CHECKER_MODULES: QuoteCheckerModule[] = [
     module_id: "kitchen",
     display_name: "Kitchen Quote Checker Module",
     short_label: "Kitchen",
-    status: "active",
+    status: "coming_soon",
     description:
       "Kitchen refits, supply-and-fit, fit-only and labour-only installs. Checks scope, units, worktops, appliances, plumbing/gas/electrical, tiling, flooring, rip-out, making good, exclusions and guarantees.",
-    route_or_component: "/quote-checker?module=kitchen",
+    route_or_component: null,
+    // RETIRED 2026-08-11: legacy V1 single-pass analyser. Not on the Pass 0/1/2
+    // fixed-standard pipeline, so scoring is non-deterministic. Off sale until
+    // rebuilt on the V2 standard.,
     supported_project_types: [
       "kitchen refit",
       "kitchen renovation",
@@ -252,10 +255,13 @@ export const QUOTE_CHECKER_MODULES: QuoteCheckerModule[] = [
     module_id: "roofing",
     display_name: "Roofing Quote Checker Module",
     short_label: "Roofing",
-    status: "active",
+    status: "coming_soon",
     description:
       "Repairs, re-roofs, flat roofs, chimney work and fascia/soffit/gutter/roofline works. Checks scope, materials, access/scaffold, leadwork, insulation, waste, guarantees and exclusions.",
-    route_or_component: "/quote-checker?module=roofing",
+    route_or_component: null,
+    // RETIRED 2026-08-11: legacy V1 single-pass analyser. Not on the Pass 0/1/2
+    // fixed-standard pipeline, so scoring is non-deterministic. Off sale until
+    // rebuilt on the V2 standard.,
     supported_project_types: [
       "re-roof",
       "roof repair",
@@ -295,10 +301,13 @@ export const QUOTE_CHECKER_MODULES: QuoteCheckerModule[] = [
     module_id: "windows_doors",
     display_name: "Windows & Doors Quote Checker Module",
     short_label: "Windows & doors",
-    status: "active",
+    status: "coming_soon",
     description:
       "uPVC, aluminium, timber or composite windows and doors — front doors, back doors, patio doors, bifolds and mixed packages. Checks product spec, sizes, glazing, security, trickle vents, making good, disposal, FENSA/CERTASS certification and guarantees.",
-    route_or_component: "/quote-checker?module=windows_doors",
+    route_or_component: null,
+    // RETIRED 2026-08-11: legacy V1 single-pass analyser. Not on the Pass 0/1/2
+    // fixed-standard pipeline, so scoring is non-deterministic. Off sale until
+    // rebuilt on the V2 standard.,
     supported_project_types: [
       "windows",
       "doors",
@@ -336,10 +345,13 @@ export const QUOTE_CHECKER_MODULES: QuoteCheckerModule[] = [
     module_id: "plastering_rendering",
     display_name: "Plastering / Rendering Quote Checker Module",
     short_label: "Plastering / rendering",
-    status: "active",
+    status: "coming_soon",
     description:
       "Plastering, skimming, boarding, rendering and patch repairs. Checks areas, preparation, materials, finish, waste, access, exclusions and guarantees.",
-    route_or_component: "/quote-checker?module=plastering_rendering",
+    route_or_component: null,
+    // RETIRED 2026-08-11: legacy V1 single-pass analyser. Not on the Pass 0/1/2
+    // fixed-standard pipeline, so scoring is non-deterministic. Off sale until
+    // rebuilt on the V2 standard.,
     supported_project_types: [
       "plastering",
       "skimming",
