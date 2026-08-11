@@ -70,7 +70,7 @@ async function downloadBytes(supabase: any, path: string): Promise<Uint8Array | 
 // file reads the same as the other analyse-* functions. --------------------
 const extractJson = robustParseJson;
 
-async function callAnthropic(content: unknown, maxTokens: number): Promise<string> {
+async function callAnthropic(system: unknown[], content: unknown, maxTokens: number): Promise<string> {
   const resp = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
@@ -82,6 +82,14 @@ async function callAnthropic(content: unknown, maxTokens: number): Promise<strin
       model: MODEL,
       max_tokens: maxTokens,
       temperature: 0,
+      // The schema + rulebook live in `system` with a cache_control breakpoint
+      // so Anthropic prompt caching can reuse them across every call for a
+      // category (all 15 runs of a consistency gate, and every live check).
+      // Cache writes cost 1.25x, cache reads 0.1x — with a 38-116 field
+      // schema that's the bulk of the prompt. The documents and the per-run
+      // dynamic block stay in the user message and are never cached, so each
+      // run is still a genuinely fresh extraction.
+      system,
       messages: [{ role: "user", content }],
     }),
   });
@@ -90,6 +98,10 @@ async function callAnthropic(content: unknown, maxTokens: number): Promise<strin
     throw new Error(`Anthropic error ${resp.status}: ${errText}`);
   }
   const data = await resp.json();
+  const u = data?.usage ?? {};
+  console.log(
+    `[extract-quote] usage input=${u.input_tokens} cache_write=${u.cache_creation_input_tokens ?? 0} cache_read=${u.cache_read_input_tokens ?? 0} output=${u.output_tokens}`,
+  );
   // A silent max_tokens stop is the dangerous failure mode here: the JSON
   // repair layer still yields a parseable object, the missing tail categories
   // default to "absent", and every run fails identically — so the consistency
@@ -101,6 +113,7 @@ async function callAnthropic(content: unknown, maxTokens: number): Promise<strin
   }
   return (data?.content?.[0]?.text as string) || "";
 }
+
 
 // ---- Pass 1 prompt ----------------------------------------------------------
 function buildPass1Prompt(
