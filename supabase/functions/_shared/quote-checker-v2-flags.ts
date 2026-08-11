@@ -17,8 +17,9 @@ export const QUOTE_CHECKER_V2_ENABLED: Record<string, boolean> = {
   bathroom: true,
   // Electrical/Rewire V2 (42 fields): gate passed 100% agreement, 126/126 ground truth. Signed off.
   electrical_rewire: true,
-  // Extension V2 (116 fields) built and gate-tested; stays OFF until sign-off.
-  extension_building: false,
+  // Extension V2 (116 fields): 5x3 gate 100% agreement, 348/348 ground truth
+  // under the corrected scaled token budget. Signed off — live.
+  extension_building: true,
 };
 
 export function isV2Enabled(moduleId: string): boolean {
