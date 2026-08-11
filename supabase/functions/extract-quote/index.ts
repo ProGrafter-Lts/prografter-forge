@@ -339,7 +339,7 @@ async function runExtraction(supabase: any, args: RunArgs): Promise<void> {
       supportingNames.push(sf.name);
     }
 
-    content.push({ type: "text", text: buildPass1Prompt(category, schema, pass0, intake ?? {}, supportingNames) });
+    content.push({ type: "text", text: buildPass1Runtime(category, pass0, intake ?? {}, supportingNames) });
 
     // Token budget must scale with the schema: every field emits a status, a
     // verbatim quote and an evidence_source, so a 116-field category (Extension)
