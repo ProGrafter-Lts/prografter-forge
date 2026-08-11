@@ -347,7 +347,15 @@ async function runExtraction(supabase: any, args: RunArgs): Promise<void> {
     // truncated Extension's last two categories.
     const fieldCount = schema.reduce((n, c) => n + c.fields.length, 0);
     const maxTokens = Math.min(32_000, Math.max(8_000, fieldCount * 250));
-    const raw = await callAnthropic(content, maxTokens);
+    const system = [
+      {
+        type: "text",
+        text: buildPass1System(category, schema),
+        cache_control: { type: "ephemeral" },
+      },
+    ];
+    const raw = await callAnthropic(system, content, maxTokens);
+
     const parsed = extractJson(raw);
     if (!parsed) {
       console.error("[extract-quote] parse failed. rawLen=", raw?.length, "head=", (raw || "").slice(0, 400));
