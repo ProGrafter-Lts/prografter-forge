@@ -210,15 +210,14 @@ export const QUOTE_CHECKER_MODULES: QuoteCheckerModule[] = [
     module_id: "kitchen",
     display_name: "Kitchen Quote Checker Module",
     short_label: "Kitchen",
-    status: "coming_soon",
+    status: "active",
     description:
       "Kitchen refits, supply-and-fit, fit-only and labour-only installs. Checks scope, units, worktops, appliances, plumbing/gas/electrical, tiling, flooring, rip-out, making good, exclusions and guarantees.",
-    route_or_component: null,
-    // OFF SALE 2026-08-11: rebuilt on the Pass 0/1/2 fixed-standard pipeline
-    // (38-field KITCHEN_SCHEMA) and the 5x3 gate cleared (weak 100%,
-    // medium 100%, strong 97.4%), but NOT signed off — the strong-fixture
-    // flip on appliances.integrated_vs_freestanding is being fixed and
-    // re-gated. Awaiting explicit go-ahead before relisting.,
+    route_or_component: "/quote-checker?module=kitchen",
+    // RELISTED 2026-08-12 on Lee's explicit go-ahead. Rebuilt on the Pass 0/1/2
+    // fixed-standard pipeline (38-field KITCHEN_SCHEMA); gate run 4 cleared at
+    // 100% field agreement on all three fixtures (weak / medium / strong).
+    // Standard trade band, £39.
     supported_project_types: [
       "kitchen refit",
       "kitchen renovation",
