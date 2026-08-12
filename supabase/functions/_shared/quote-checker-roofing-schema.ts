@@ -230,7 +230,7 @@ export const ROOFING_SCHEMA: CategoryDef[] = [
         key: "lead_flashing_specification",
         label: "Lead (or alternative) flashing specification — code/thickness and where it is used",
         criteria:
-          "COMPOUND FACT — needs BOTH (1) the flashing material with its code or thickness ('Code 4 lead', 'Code 5 milled lead', 'a Code 4-equivalent lead substitute') AND (2) where it is applied ('to the front abutment', 'all abutments and the chimney'). Both = present. Material with no code and no location, or a location with no material spec, = ambiguous. COLLECTIVE-NOUN / QUALITY-CLAIM RULE (overrides everything else in this field): 'properly leaded', 'quality lead work', 'all lead renewed', 'new leadwork throughout' name no code, thickness or location — ABSENT, NEVER ambiguous. Silence is absent.",
+          "COMPOUND FACT — needs BOTH (1) the flashing material with its code or thickness ('Code 4 lead', 'Code 5 milled lead', 'a Code 4-equivalent lead substitute') AND (2) where it is applied ('to the front abutment', 'all abutments and the chimney'). Both = present — an installation METHOD (chasing, wedging, pointing, laps) is explicitly NOT required by this field, so 'Code 4 lead to the front abutment and to the chimney' is PRESENT, not ambiguous. Material with no code and no location, or a location with no material spec, = ambiguous. COLLECTIVE-NOUN / QUALITY-CLAIM RULE (overrides everything else in this field): 'properly leaded', 'quality lead work', 'all lead renewed', 'new leadwork throughout' name no code, thickness or location — ABSENT, NEVER ambiguous. Silence is absent.",
       },
       {
         key: "chimney_flashing_where_applicable",
@@ -242,7 +242,7 @@ export const ROOFING_SCHEMA: CategoryDef[] = [
         key: "valley_flashing_where_applicable",
         label: "Valley flashing — material and method",
         criteria:
-          "COMPOUND FACT — needs BOTH the valley material AND the method ('new GRP valley troughs bedded on treated valley boards', 'Code 5 lead valley laid in 1.5m lengths with 150mm laps'). Both = present. 'Valleys renewed' or 'new valleys' names the subject with no material AND no method — ambiguous, not present. An explicit statement that the roof has no valleys, or that valley work is excluded, is ALSO present. NEAR-MISS = ABSENT: 'the roof junctions will be sorted' — absent, not ambiguous. Silence is absent.",
+          "COMPOUND FACT — needs BOTH the valley material AND the method ('new GRP valley troughs bedded on treated valley boards', 'Code 5 lead valley laid in 1.5m lengths with 150mm laps'). Both = present. 'Valleys renewed' or 'new valleys' names the subject with no material AND no method — ambiguous, not present. An explicit statement that the roof has no valleys, or that valley work is excluded, is ALSO present. AMBIGUOUS therefore requires the valleys to be named as WORK ITEMS with a stated action ('valleys renewed', 'new valleys', 'valleys re-leaded'). NEAR-MISS = ABSENT: a vague catch-all that names no action on the valleys — 'the roof junctions will be sorted', 'valleys attended to', 'valleys seen to', 'valleys looked at' — is ABSENT, never ambiguous. Silence is absent.",
       },
     ],
   },
@@ -367,3 +367,12 @@ export const ROOFING_SCHEMA: CategoryDef[] = [
     ],
   },
 ];
+
+// ---- Branch guard metadata --------------------------------------------------
+// Consumed by extract-quote's deterministic post-processing guard. The prompt
+// already tells the model to default to PITCHED when roof_type_and_pitch is
+// absent or ambiguous; these constants let us ENFORCE that server-side so a
+// quote that never states its roof type can never end up with both branches
+// marked not_applicable (which would silently exclude 11 fields from scoring).
+export const ROOFING_PITCHED_ONLY_CATEGORIES = ["structure_pitched", "covering_pitched"] as const;
+export const ROOFING_FLAT_ONLY_CATEGORIES = ["covering_flat"] as const;
