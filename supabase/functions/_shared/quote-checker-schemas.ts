@@ -13,7 +13,8 @@
 import { EXTENSION_SCHEMA } from "./quote-checker-extension-schema.ts";
 import { KITCHEN_SCHEMA } from "./quote-checker-kitchen-schema.ts";
 import { ROOFING_SCHEMA } from "./quote-checker-roofing-schema.ts";
-export { EXTENSION_SCHEMA, KITCHEN_SCHEMA, ROOFING_SCHEMA };
+import { WINDOWS_DOORS_SCHEMA } from "./quote-checker-windows-doors-schema.ts";
+export { EXTENSION_SCHEMA, KITCHEN_SCHEMA, ROOFING_SCHEMA, WINDOWS_DOORS_SCHEMA };
 
 
 // "not_applicable" is the fourth extraction state, used where a schema field
@@ -771,6 +772,7 @@ export const SCHEMAS: Record<string, CategoryDef[]> = {
   extension_building: EXTENSION_SCHEMA,
   kitchen: KITCHEN_SCHEMA,
   roofing: ROOFING_SCHEMA,
+  windows_doors: WINDOWS_DOORS_SCHEMA,
 };
 
 
@@ -902,6 +904,21 @@ export const CATEGORY_META: Record<string, CategoryMeta> = {
       "This quote covers the main roofing works, but points such as the tile or membrane specification, underlay and battens, flashing details, ventilation, guarantees and stage payments should be confirmed in writing before accepting.",
     verdictLow:
       "This quote is too vague to accept safely yet. It gives a price, but leaves out key details about the roof covering, underlay and battens, flashings, ventilation, scaffolding, guarantees and payment terms.",
+  },
+  windows_doors: {
+    title: "WINDOWS & DOORS",
+    tradeNoun: "window and door installer",
+    schemaVersion: "windows-doors-extraction-v1",
+    reportVersion: "windows-doors-v2",
+    contextKey: "windows_doors_context",
+    projectType: "Windows & Doors",
+    reportRoute: "windows-doors-quote-report",
+    verdictStrong:
+      "This is a strong windows and doors quote — the unit schedule, product specification, glazing, security, ventilation, certification and commercial terms are all clearly set out. A few final confirmation points are worth agreeing before accepting.",
+    verdictModerate:
+      "This quote covers the main window and door works, but points such as the itemised unit schedule, glazing and U-value specification, safety glazing at critical locations, FENSA/CERTASS registration, making good and payment terms should be confirmed in writing before accepting.",
+    verdictLow:
+      "This quote is too vague to accept safely yet. It gives a price, but leaves out key details about what units are being fitted and where, frame and glazing specification, safety glazing, ventilation, certification, making good and payment terms.",
   },
 };
 
