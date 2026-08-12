@@ -73,7 +73,12 @@ interface CategoryScore {
 
 function scoreCategories(schema: CategoryDef[], extraction: ExtractionRecord): CategoryScore[] {
   return schema.map((c) => {
-    const fields = c.fields.map((f) => extraction[c.key]?.[f.key]).filter(Boolean) as ExtractedField[];
+    // not_applicable fields are excluded from the completeness score entirely:
+    // a flat-roof quote must not be marked down for having no batten spec, and
+    // a pitched-roof quote must not be marked down for having no membrane spec.
+    const fields = (c.fields.map((f) => extraction[c.key]?.[f.key]).filter(Boolean) as ExtractedField[]).filter(
+      (f) => f.status !== "not_applicable",
+    );
     const avgMain = fields.length ? fields.reduce((s, f) => s + creditForMain(f), 0) / fields.length : 0;
     const avgPack = fields.length ? fields.reduce((s, f) => s + fieldCredit(f), 0) / fields.length : 0;
     const scoreMain = Math.round(avgMain * 10);
@@ -89,6 +94,7 @@ function averageScore(scores: number[]): number {
 }
 
 function statusLabel(f: ExtractedField): string {
+  if (f.status === "not_applicable") return "not_applicable";
   if (f.status === "present" && f.evidence_source === "supplied_in_supporting") return "supplied_separately";
   if (f.status === "present") return "clear";
   if (f.status === "ambiguous") return "needs_clarifying";
@@ -127,7 +133,7 @@ You do NOT have the original quote document. You have ONLY the structured eviden
 HOMEOWNER CONTEXT (background only):
 ${JSON.stringify(ctx, null, 2)}
 
-EXTRACTED EVIDENCE (status: present | absent | ambiguous; evidence_source: in_quote | supplied_in_supporting | not_found):
+EXTRACTED EVIDENCE (status: present | absent | ambiguous | not_applicable — not_applicable means the item does not apply to this type of roof/job and must NEVER be reported as missing or raised as a risk or question; evidence_source: in_quote | supplied_in_supporting | not_found):
 ${evidenceLines}
 
 WORDING STYLE: practical, calm and homeowner-friendly. Never accuse the ${meta.tradeNoun}. Never sound like legal advice. Use phrases like "Not visible in the quote — confirm if required.", "Worth confirming before accepting.", "Good detail, but ask for written confirmation on…", "Ground conditions can surprise — worth flagging as a risk item."
@@ -218,10 +224,13 @@ Deno.serve(async (req) => {
 
     const categories = schema.map((c) => {
       const scoreRow = categoryScores.find((s) => s.key === c.key)!;
-      const fields = c.fields.map((f) => extraction[c.key][f.key]);
+      const fields = c.fields
+        .map((f) => extraction[c.key][f.key])
+        .filter((f) => f.status !== "not_applicable");
       const statuses = fields.map(statusLabel);
       let status: string;
-      if (statuses.includes("supplied_separately")) status = "supplied_separately";
+      if (!statuses.length) status = "not_applicable";
+      else if (statuses.includes("supplied_separately")) status = "supplied_separately";
       else if (statuses.every((s) => s === "missing")) status = "missing";
       else if (statuses.some((s) => s === "needs_clarifying" || s === "missing")) status = "needs_clarifying";
       else status = "clear";
@@ -233,7 +242,7 @@ Deno.serve(async (req) => {
       return {
         key: c.key,
         name: c.name,
-        relevant: true,
+        relevant: fields.length > 0,
         score: scoreRow.score_pack,
         score_main: scoreRow.score_main,
         score_pack: scoreRow.score_pack,
@@ -247,7 +256,11 @@ Deno.serve(async (req) => {
     for (const c of schema) {
       for (const f of c.fields) {
         const field = extraction[c.key][f.key];
-        if (field.evidence_source === "supplied_in_supporting" && field.status !== "absent") {
+        if (
+          field.evidence_source === "supplied_in_supporting" &&
+          field.status !== "absent" &&
+          field.status !== "not_applicable"
+        ) {
           suppliedSeparately.push({
             item: f.label,
             main_quote: "Not visible in the main quote",
@@ -271,7 +284,12 @@ Deno.serve(async (req) => {
     ]);
     const tradeSpecific = schema.filter((c) => !GENERIC_CATEGORY_KEYS.has(c.key));
     const tradeEvidenceCount = tradeSpecific.reduce(
-      (n, c) => n + c.fields.filter((f) => extraction[c.key][f.key].status !== "absent").length,
+      (n, c) =>
+        n +
+        c.fields.filter((f) => {
+          const st = extraction[c.key][f.key].status;
+          return st !== "absent" && st !== "not_applicable";
+        }).length,
       0,
     );
     const isRightCategory = tradeSpecific.length === 0 || tradeEvidenceCount > 0;
