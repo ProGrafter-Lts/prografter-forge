@@ -102,7 +102,7 @@ export const KITCHEN_SCHEMA: CategoryDef[] = [
         key: "worktop_material_and_thickness",
         label: "Worktop material and thickness",
         criteria:
-          "COMPOUND FACT — needs BOTH a named worktop material (laminate, solid oak, quartz, granite, Dekton, compact laminate, and where relevant the brand/colour) AND a thickness figure (e.g. '38mm', '20mm quartz'). Both = present. Material with no thickness, or a thickness with no material, = ambiguous. HEDGING: 'approximately 30mm quartz' keeps the figure — present; 'a chunky worktop in a nice stone-effect' replaces both — see kill rule. COLLECTIVE-NOUN / QUALITY-CLAIM RULE (overrides everything else in this field): 'quality worktops throughout', 'premium stone worktop', 'a lovely solid worktop', 'high-end surfaces' name neither material spec nor thickness — ABSENT, NEVER ambiguous. Silence is absent.",
+          "COMPOUND FACT — needs EXACTLY TWO THINGS AND NO MORE: (1) a named worktop material (laminate, solid oak, quartz, granite, Dekton, compact laminate) AND (2) a thickness figure (e.g. '38mm', '20mm quartz'). Both = present. BRAND, RANGE, COLOUR AND FINISH ARE NOT REQUIRED (this is the field's most common misread): '38mm laminate' is fully present — do NOT downgrade to ambiguous because no brand, range, colour, edge profile or supplier is named. Material with no thickness, or a thickness with no material, = ambiguous. HEDGING: 'approximately 30mm quartz' keeps the figure — present; 'a chunky worktop in a nice stone-effect' replaces both — see kill rule. COLLECTIVE-NOUN / QUALITY-CLAIM RULE (overrides everything else in this field): 'quality worktops throughout', 'premium stone worktop', 'a lovely solid worktop', 'high-end surfaces' name neither material spec nor thickness — ABSENT, NEVER ambiguous. Silence is absent.",
       },
       {
         key: "handles_and_ironmongery",
@@ -276,7 +276,7 @@ export const KITCHEN_SCHEMA: CategoryDef[] = [
         key: "total_price_and_breakdown",
         label: "Total price and how it breaks down",
         criteria:
-          "COMPOUND FACT — needs BOTH a total price figure AND a breakdown (line items, labour vs materials, per-element costs, or a units/worktop/appliances split). Both = present. A total with no breakdown, or line items with no total, = ambiguous. HEDGING: 'around £14,500 in total' keeps the figure — present; 'in the region of fifteen grand-ish, we'll firm it up' with no line items = ambiguous. Neither = absent.",
+          "COMPOUND FACT — needs BOTH a total price figure AND a breakdown (line items, labour vs materials, per-element costs, or a units/worktop/appliances split). Both = present. A total with no breakdown, or line items with no total, = ambiguous. WHAT COUNTS AS A FIGURE (this is the field's most common misread): a money amount written in words or slang counts exactly the same as digits — 'fifteen grand', 'fifteen grand-ish', 'fifteen thousand pounds', 'circa 15k', '£15,000' are ALL figures. Do NOT treat a colloquial or spelled-out amount as 'no price given'. HEDGING: 'around £14,500 in total' keeps the figure — present; 'in the region of fifteen grand-ish, we'll firm it up' IS a stated figure with no line items = AMBIGUOUS, never absent. ABSENT is only for a document that states no monetary amount at all ('price on application', 'we'll cost it up later', silence). Neither = absent.",
       },
       {
         key: "vat_treatment",
