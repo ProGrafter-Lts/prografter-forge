@@ -14,6 +14,10 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.100.1";
 import { robustParseJson } from "../_shared/json-repair.ts";
 import { SCHEMAS, metaFor, emptyExtraction, type CategoryDef, type ExtractionRecord } from "../_shared/quote-checker-schemas.ts";
 import { extractPdfText, runPass0Regex, describePass0Candidates, type Pass0Candidates } from "./pass0.ts";
+import {
+  ROOFING_PITCHED_ONLY_CATEGORIES,
+  ROOFING_FLAT_ONLY_CATEGORIES,
+} from "../_shared/quote-checker-roofing-schema.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -298,6 +302,68 @@ function applyVatLock(extraction: ExtractionRecord, pass0: Pass0Candidates): voi
   }
 }
 
+// ---- Roofing branch guard (deterministic, server-side) ---------------------
+// The pitched-only and flat-only fields may only be not_applicable when the
+// quote genuinely identifies the OTHER roof type. If scope.roof_type_and_pitch
+// is absent or ambiguous, the job is treated as PITCHED (majority case): the
+// pitched branch is scored normally and any not_applicable the model applied
+// there is downgraded to "absent", so omitting the roof type can never protect
+// a quote from the detailed pitched questions. The flat branch is the one
+// excluded in that case. This also catches the pathological "both branches
+// not_applicable" output regardless of what the roof-type field says.
+function applyRoofingBranchGuard(category: string, extraction: ExtractionRecord): void {
+  if (category !== "roofing") return;
+  const roofType = extraction.scope?.roof_type_and_pitch;
+  const typeKnown = roofType?.status === "present";
+
+  const forceScored = (cats: readonly string[]) => {
+    for (const c of cats) {
+      const cat = extraction[c];
+      if (!cat) continue;
+      for (const f of Object.values(cat)) {
+        if (f.status === "not_applicable") {
+          f.status = "absent";
+          f.quote = null;
+          f.evidence_source = "not_found";
+          f.verified = false;
+        }
+      }
+    }
+  };
+  const forceNA = (cats: readonly string[]) => {
+    for (const c of cats) {
+      const cat = extraction[c];
+      if (!cat) continue;
+      for (const f of Object.values(cat)) {
+        f.status = "not_applicable";
+        f.quote = null;
+        f.evidence_source = "not_found";
+        f.verified = false;
+      }
+    }
+  };
+
+  const allNA = (cats: readonly string[]) =>
+    cats.every((c) => Object.values(extraction[c] ?? {}).every((f) => f.status === "not_applicable"));
+
+  if (!typeKnown) {
+    // Roof type never stated (or too vague to identify) — default to pitched.
+    forceScored(ROOFING_PITCHED_ONLY_CATEGORIES);
+    forceNA(ROOFING_FLAT_ONLY_CATEGORIES);
+    return;
+  }
+
+  // Roof type stated: never allow BOTH branches to be excluded.
+  if (allNA(ROOFING_PITCHED_ONLY_CATEGORIES) && allNA(ROOFING_FLAT_ONLY_CATEGORIES)) {
+    const text = (roofType?.quote || "").toLowerCase();
+    const looksFlat = /\bflat\b|epdm|grp|fibreglass|single[- ]ply|felt|torch[- ]on|warm deck|cold deck/.test(text);
+    if (looksFlat) forceScored(ROOFING_FLAT_ONLY_CATEGORIES);
+    else forceScored(ROOFING_PITCHED_ONLY_CATEGORIES);
+  }
+}
+
+
+
 interface RunArgs {
   checkId: string;
   lookupToken: string;
@@ -377,6 +443,8 @@ async function runExtraction(supabase: any, args: RunArgs): Promise<void> {
     const extraction = coerceExtraction(parsed, schema);
     verifyExtractionAgainstSource(extraction, sourceText);
     applyVatLock(extraction, pass0);
+    applyRoofingBranchGuard(category, extraction);
+
 
     const { data: extractionRow, error: exErr } = await supabase
       .from("quote_check_extractions")
