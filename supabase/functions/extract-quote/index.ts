@@ -158,6 +158,7 @@ ${schemaLines}
 - Default adjudication (used when no RULE is given, and never in conflict with one):
   * "present" = the document EXPLICITLY and SPECIFICALLY states the thing named by the field. Explicit means stated in words, not implied, not inferable from adjacent facts, not a reasonable industry assumption.
   * "ambiguous" = the thing IS mentioned, but the statement is vague, hedged, approximate, non-committal, conditional, self-contradictory, or only a provisional sum/allowance.
+  * "not_applicable" = ONLY permitted for a field whose RULE explicitly defines a not_applicable condition (branch fields), and ONLY when that condition is met. It means the field's subject does not exist on this job at all — not that the document is silent about it. Never use "not_applicable" for any field whose RULE does not define it; silence on such a field is "absent".
   * "absent" = the thing is not mentioned at all. Silence, implication, and "a competent contractor would obviously do this" are ALL absent.
 - GLOBAL VAGUENESS RULE (applies to EVERY field, including fields with a RULE line): if the field expects a specific fact — a date, a figure, a measurement, a duration, a named material, or a confirmed action — and the document only gestures at it with vague, hedged, approximate or non-committal wording, the answer is "ambiguous", NEVER "present". Hedging markers include: "about", "around", "approximately", "roughly", "or so", "circa", "typically", "usually", "normally", "should", "aim to", "hope to", "expect to", "in the region of", "TBC", "to be confirmed", "as required", "where necessary", "subject to", "if needed", "similar", "or equivalent" (when no base spec is named), and any passing social or conversational reference rather than a stated commitment. Only mark "present" when the document COMMITS to the specific fact.
 - PRECISION HEDGING EXCEPTION to the rule above: a hedge word placed NEXT TO a specific, usable figure, date or spec does NOT make the field ambiguous — the figure is still actionable. "Approximate area: 62m²", "anticipated start date: 16 March 2026", "circa 150mm sub-base" are all "present". A hedge word that REPLACES the specific figure or date leaves nothing actionable and IS ambiguous — "should take about a week or so", "start in the spring", "roughly the same as last time". Test: strip the hedge word — if a concrete number, date or named spec remains, mark "present"; if nothing concrete remains, mark "ambiguous".
@@ -169,7 +170,8 @@ ${schemaLines}
 
 
 - If status is "present", "quote" MUST be a VERBATIM substring copied exactly from the document text — never paraphrase, never recompute, never invent. If you cannot find an exact verbatim span, use "ambiguous" instead of "present".
-- If status is "absent" or you found nothing, "quote" MUST be null.
+- If status is "absent", "not_applicable", or you found nothing, "quote" MUST be null.
+- BRANCH FIELDS: where RULEs define a branch (e.g. pitched-roof-only vs flat-roof-only fields), decide the branch ONCE from the field named in those RULEs, then apply it consistently to every branch field. Evidence about one branch must never be used to score the other branch's fields.
 - "evidence_source": "in_quote" if the fact comes from the MAIN quote document; "supplied_in_supporting" if it is ONLY in a supporting document (not the main quote); "not_found" if status is "absent".
 - Never mark something "absent" if it appears in a supporting document — use "supplied_in_supporting" with status "present" or "ambiguous" instead.
 - Do NOT skip, merge, reorder or add fields. Every single field key listed above must appear in your JSON output exactly once, even if you are just marking it absent.
@@ -257,12 +259,18 @@ function coerceExtraction(raw: any, schema: CategoryDef[]): ExtractionRecord {
     for (const f of c.fields) {
       const rf = rawCat[f.key];
       if (!rf || typeof rf !== "object") continue;
-      const status = rf.status === "present" || rf.status === "ambiguous" ? rf.status : "absent";
-      const quote = status !== "absent" && typeof rf.quote === "string" && rf.quote.trim() ? rf.quote.trim() : null;
+      const status =
+        rf.status === "present" || rf.status === "ambiguous" || rf.status === "not_applicable"
+          ? rf.status
+          : "absent";
+      const quote =
+        status === "present" || status === "ambiguous"
+          ? (typeof rf.quote === "string" && rf.quote.trim() ? rf.quote.trim() : null)
+          : null;
       const evidence_source =
         rf.evidence_source === "in_quote" || rf.evidence_source === "supplied_in_supporting"
           ? rf.evidence_source
-          : status === "absent" ? "not_found" : "in_quote";
+          : status === "absent" || status === "not_applicable" ? "not_found" : "in_quote";
       record[c.key][f.key] = {
         status: status === "present" && !quote ? "ambiguous" : status,
         quote,

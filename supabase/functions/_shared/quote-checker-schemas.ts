@@ -12,10 +12,16 @@
 
 import { EXTENSION_SCHEMA } from "./quote-checker-extension-schema.ts";
 import { KITCHEN_SCHEMA } from "./quote-checker-kitchen-schema.ts";
-export { EXTENSION_SCHEMA, KITCHEN_SCHEMA };
+import { ROOFING_SCHEMA } from "./quote-checker-roofing-schema.ts";
+export { EXTENSION_SCHEMA, KITCHEN_SCHEMA, ROOFING_SCHEMA };
 
 
-export type FieldStatus = "present" | "absent" | "ambiguous";
+// "not_applicable" is the fourth extraction state, used where a schema field
+// belongs to a branch of the category that this particular quote is not in
+// (e.g. Roofing's pitched-only fields on a flat-roof quote). It is NOT absent:
+// score-quote excludes not_applicable fields from the completeness score
+// entirely, so neither branch is penalised for the other's subject matter.
+export type FieldStatus = "present" | "absent" | "ambiguous" | "not_applicable";
 export type EvidenceSource = "in_quote" | "supplied_in_supporting" | "not_found";
 
 export interface FieldDef {
@@ -764,6 +770,7 @@ export const SCHEMAS: Record<string, CategoryDef[]> = {
   electrical_rewire: ELECTRICAL_SCHEMA,
   extension_building: EXTENSION_SCHEMA,
   kitchen: KITCHEN_SCHEMA,
+  roofing: ROOFING_SCHEMA,
 };
 
 
@@ -880,6 +887,21 @@ export const CATEGORY_META: Record<string, CategoryMeta> = {
       "This quote covers the main kitchen works, but points such as the unit range and worktop specification, appliance models and connections, consumer unit capacity, making good and payment terms should be confirmed in writing before accepting.",
     verdictLow:
       "This quote is too vague to accept safely yet. It gives a price, but leaves out key details about the units and worktop, appliances, plumbing and electrical works, certification, making good and payment terms.",
+  },
+  roofing: {
+    title: "ROOFING",
+    tradeNoun: "roofer",
+    schemaVersion: "roofing-extraction-v1",
+    reportVersion: "roofing-v2",
+    contextKey: "roofing_context",
+    projectType: "Roofing",
+    reportRoute: "roofing-quote-report",
+    verdictStrong:
+      "This is a strong roofing quote — the scope, roof type, covering specification, flashings, rainwater goods, scaffolding, certification and commercial terms are all clearly set out. A few final confirmation points are worth agreeing before accepting.",
+    verdictModerate:
+      "This quote covers the main roofing works, but points such as the tile or membrane specification, underlay and battens, flashing details, ventilation, guarantees and stage payments should be confirmed in writing before accepting.",
+    verdictLow:
+      "This quote is too vague to accept safely yet. It gives a price, but leaves out key details about the roof covering, underlay and battens, flashings, ventilation, scaffolding, guarantees and payment terms.",
   },
 };
 
