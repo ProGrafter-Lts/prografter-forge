@@ -40,7 +40,9 @@ const MODULE_PRICE_BAND: Record<string, PriceBand> = {
 const RETIRED_MODULES = new Set([
   // Kitchen relisted 2026-08-12 (gate run 4: 100% on all three fixtures,
   // signed off by Lee) — back on sale at the standard_trade band.
-  "roofing",
+  // Roofing relisted 2026-08-12 (full 5x3 gate: 100% agreement on weak /
+  // medium / strong, plus flat + no-type branch spot-checks) — back on sale
+  // at the standard_trade band.
   "windows_doors",
   "plastering_rendering",
 ]);

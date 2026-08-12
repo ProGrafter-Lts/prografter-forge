@@ -256,13 +256,14 @@ export const QUOTE_CHECKER_MODULES: QuoteCheckerModule[] = [
     module_id: "roofing",
     display_name: "Roofing Quote Checker Module",
     short_label: "Roofing",
-    status: "coming_soon",
+    status: "active",
     description:
       "Repairs, re-roofs, flat roofs, chimney work and fascia/soffit/gutter/roofline works. Checks scope, materials, access/scaffold, leadwork, insulation, waste, guarantees and exclusions.",
-    route_or_component: null,
-    // RETIRED 2026-08-11: legacy V1 single-pass analyser. Not on the Pass 0/1/2
-    // fixed-standard pipeline, so scoring is non-deterministic. Off sale until
-    // rebuilt on the V2 standard.,
+    route_or_component: "/quote-checker?module=roofing",
+    // RELISTED 2026-08-12 on Lee's explicit go-ahead. Rebuilt on the Pass 0/1/2
+    // fixed-standard pipeline (42-field ROOFING_SCHEMA with pitched/flat
+    // branching); full 5x3 gate cleared at 100% field agreement on all three
+    // fixtures. Standard trade band, £39.
     supported_project_types: [
       "re-roof",
       "roof repair",

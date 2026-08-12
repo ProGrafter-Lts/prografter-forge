@@ -24,6 +24,10 @@ export const QUOTE_CHECKER_V2_ENABLED: Record<string, boolean> = {
   // three fixtures (weak / medium / strong). Signed off by Lee 2026-08-12 —
   // live at the standard_trade band (£39).
   kitchen: true,
+  // Roofing V2 (42 fields, pitched/flat branching with server-side branch
+  // guard): full 5x3 gate 100% agreement on all three pitched fixtures, plus
+  // flat and no-type branch spot-checks at 100%. Signed off by Lee 2026-08-12.
+  roofing: true,
 };
 
 export function isV2Enabled(moduleId: string): boolean {
