@@ -38,10 +38,8 @@ const MODULE_PRICE_BAND: Record<string, PriceBand> = {
 // the server-side block — the UI also hides them, but this stops any direct
 // API call from creating a paid session.
 const RETIRED_MODULES = new Set([
-  // Kitchen: V2 gate cleared but NOT signed off — strong fixture flips
-  // appliances.integrated_vs_freestanding (3/5 present, 2/5 ambiguous).
-  // Off sale until the clause is tightened and the gate re-run.
-  "kitchen",
+  // Kitchen relisted 2026-08-12 (gate run 4: 100% on all three fixtures,
+  // signed off by Lee) — back on sale at the standard_trade band.
   "roofing",
   "windows_doors",
   "plastering_rendering",
