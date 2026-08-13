@@ -14,7 +14,8 @@ import { EXTENSION_SCHEMA } from "./quote-checker-extension-schema.ts";
 import { KITCHEN_SCHEMA } from "./quote-checker-kitchen-schema.ts";
 import { ROOFING_SCHEMA } from "./quote-checker-roofing-schema.ts";
 import { WINDOWS_DOORS_SCHEMA } from "./quote-checker-windows-doors-schema.ts";
-export { EXTENSION_SCHEMA, KITCHEN_SCHEMA, ROOFING_SCHEMA, WINDOWS_DOORS_SCHEMA };
+import { PLASTERING_SCHEMA } from "./quote-checker-plastering-schema.ts";
+export { EXTENSION_SCHEMA, KITCHEN_SCHEMA, ROOFING_SCHEMA, WINDOWS_DOORS_SCHEMA, PLASTERING_SCHEMA };
 
 
 // "not_applicable" is the fourth extraction state, used where a schema field
@@ -773,6 +774,7 @@ export const SCHEMAS: Record<string, CategoryDef[]> = {
   kitchen: KITCHEN_SCHEMA,
   roofing: ROOFING_SCHEMA,
   windows_doors: WINDOWS_DOORS_SCHEMA,
+  plastering_rendering: PLASTERING_SCHEMA,
 };
 
 
@@ -919,6 +921,21 @@ export const CATEGORY_META: Record<string, CategoryMeta> = {
       "This quote covers the main window and door works, but points such as the itemised unit schedule, glazing and U-value specification, safety glazing at critical locations, FENSA/CERTASS registration, making good and payment terms should be confirmed in writing before accepting.",
     verdictLow:
       "This quote is too vague to accept safely yet. It gives a price, but leaves out key details about what units are being fitted and where, frame and glazing specification, safety glazing, ventilation, certification, making good and payment terms.",
+  },
+  plastering_rendering: {
+    title: "PLASTERING & RENDERING",
+    tradeNoun: "plasterer",
+    schemaVersion: "plastering-extraction-v1",
+    reportVersion: "plastering-v2",
+    contextKey: "plastering_context",
+    projectType: "Plastering / Rendering",
+    reportRoute: "plastering-quote-report",
+    verdictStrong:
+      "This is a strong plastering and rendering quote \u2014 the scope, plaster or render system, coats and thickness, preparation, beading, making good, standards and commercial terms are all clearly set out. A few final confirmation points are worth agreeing before accepting.",
+    verdictModerate:
+      "This quote covers the main plastering and rendering works, but points such as the plaster system and coat count, the named render manufacturer and product line, surface preparation, beading and movement joints, drying times, warranties and payment terms should be confirmed in writing before accepting.",
+    verdictLow:
+      "This quote is too vague to accept safely yet. It gives a price, but leaves out key details about the plaster or render system being used, coats and thickness, preparation, beading, protection and making good, standards and payment terms.",
   },
 };
 
