@@ -303,13 +303,12 @@ export const QUOTE_CHECKER_MODULES: QuoteCheckerModule[] = [
     module_id: "windows_doors",
     display_name: "Windows & Doors Quote Checker Module",
     short_label: "Windows & doors",
-    status: "coming_soon",
+    status: "active",
     description:
       "uPVC, aluminium, timber or composite windows and doors — front doors, back doors, patio doors, bifolds and mixed packages. Checks product spec, sizes, glazing, security, trickle vents, making good, disposal, FENSA/CERTASS certification and guarantees.",
-    route_or_component: null,
-    // RETIRED 2026-08-11: legacy V1 single-pass analyser. Not on the Pass 0/1/2
-    // fixed-standard pipeline, so scoring is non-deterministic. Off sale until
-    // rebuilt on the V2 standard.,
+    route_or_component: "/quote-checker?module=windows_doors",
+    // REBUILT ON V2 2026-08-13: 35-field fixed-standard schema, full 5x3 gate
+    // at 100% agreement on weak / medium / strong. Signed off by Lee — live.
     supported_project_types: [
       "windows",
       "doors",
