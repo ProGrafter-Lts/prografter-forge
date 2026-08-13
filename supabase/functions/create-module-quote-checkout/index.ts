@@ -23,8 +23,8 @@ type PriceBand = keyof typeof FALLBACK_PRICES;
 
 const MODULE_PRICE_BAND: Record<string, PriceBand> = {
   boiler_heating: "single_trade",
-  windows_doors: "single_trade",
   plastering_rendering: "single_trade",
+  windows_doors: "standard_trade",
   electrical_rewire: "standard_trade",
   bathroom: "standard_trade",
   kitchen: "standard_trade",
@@ -43,7 +43,8 @@ const RETIRED_MODULES = new Set([
   // Roofing relisted 2026-08-12 (full 5x3 gate: 100% agreement on weak /
   // medium / strong, plus flat + no-type branch spot-checks) — back on sale
   // at the standard_trade band.
-  "windows_doors",
+  // Windows & Doors relisted 2026-08-13 (full 5x3 gate: 100% agreement on
+  // weak / medium / strong) — back on sale at the standard_trade band.
   "plastering_rendering",
 ]);
 
