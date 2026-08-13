@@ -359,6 +359,9 @@ Deno.serve(async (req) => {
     const isRightCategory = tradeSpecific.length === 0 || tradeEvidenceCount > 0;
     const notCategoryNote = `This document doesn't appear to be a ${meta.tradeNoun} quote — we couldn't find any ${meta.tradeNoun}-specific detail in it. Please check you uploaded the right file, or choose a different quote type.`;
 
+    const suggestedQuestions = buildSuggestedQuestions(schema, extraction);
+    const suggestedMessageText = buildSuggestedMessageText(suggestedQuestions, meta.tradeNoun);
+
     const report_json = {
       version: meta.reportVersion,
       generated_at: new Date().toISOString(),
