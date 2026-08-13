@@ -31,6 +31,9 @@ export const QUOTE_CHECKER_V2_ENABLED: Record<string, boolean> = {
   // Windows & Doors V2 (35 fields): full 5x3 gate 100% agreement on all three
   // fixtures. Signed off by Lee 2026-08-13.
   windows_doors: true,
+  // Plastering/Rendering V2 (30 fields): full 5x3 gate 100% agreement on all
+  // three fixtures. Signed off by Lee 2026-08-13 — live at standard_trade band (£39).
+  plastering_rendering: true,
 };
 
 export function isV2Enabled(moduleId: string): boolean {
