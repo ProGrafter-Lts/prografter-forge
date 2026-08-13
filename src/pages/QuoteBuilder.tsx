@@ -101,6 +101,7 @@ const QuoteBuilder = () => {
   // Stage 3
   const [exclusions, setExclusions] = useState("");
   const [assumptions, setAssumptions] = useState("");
+  const [provisionalSums, setProvisionalSums] = useState("");
   const [certs, setCerts] = useState<Record<string, string>>({});
   const [workingHours, setWorkingHours] = useState("");
   const [variationProcess, setVariationProcess] = useState("");
@@ -154,6 +155,7 @@ const QuoteBuilder = () => {
         if (Array.isArray(d.materials) && d.materials.length) setMaterials(d.materials);
         setShareMaterials(!!d.shareMaterials);
         setExclusions(d.exclusions ?? ""); setAssumptions(d.assumptions ?? "");
+        setProvisionalSums(d.provisionalSums ?? "");
         setCerts(d.certs ?? {}); setWorkingHours(d.workingHours ?? "");
         setVariationProcess(d.variationProcess ?? "");
         setHomeownerResponsibilities(d.homeownerResponsibilities ?? "");
@@ -171,11 +173,12 @@ const QuoteBuilder = () => {
     if (!jobId) return;
     let alive = true;
     getAtlasQuoteHandoff(jobId)
-      .then((text) => {
-        if (!alive || !text) return;
-        setAssumptions((prev) =>
-          prev.includes(ATLAS_HANDOFF_HEADING) ? prev : (prev.trim() ? `${prev.trim()}\n\n` : "") + text,
-        );
+      .then((handoff) => {
+        if (!alive || !handoff) return;
+        const merge = (prev: string, text: string) =>
+          prev.includes(ATLAS_HANDOFF_HEADING) ? prev : (prev.trim() ? `${prev.trim()}\n\n` : "") + text;
+        setAssumptions((prev) => merge(prev, handoff.assumptions));
+        setProvisionalSums((prev) => merge(prev, handoff.provisionalSums));
       })
       .catch(() => {});
     return () => {
@@ -186,7 +189,7 @@ const QuoteBuilder = () => {
   const draft = {
     amount, vatStatus, vatAmount, validUntil, startDate, duration, depositRequired, depositAmount,
     message, tierEnabled, budgetPrice, budgetDesc, standardPrice, standardDesc, premiumPrice,
-    premiumDesc, materials, shareMaterials, exclusions, assumptions, certs, workingHours,
+    premiumDesc, materials, shareMaterials, exclusions, assumptions, provisionalSums, certs, workingHours,
     variationProcess, homeownerResponsibilities, cancellationTerms, stages,
   };
   const draftJson = JSON.stringify(draft);
@@ -273,6 +276,7 @@ const QuoteBuilder = () => {
       scope_of_works: message.trim() || null,
       exclusions: exclusions.trim() || null,
       assumptions: assumptions.trim() || null,
+      provisional_sums: provisionalSums.trim() || null,
       vat_status: vatStatus || null,
       vat_amount: vatAmount ? Number(vatAmount) : null,
       valid_until: validUntil || null,
@@ -447,6 +451,7 @@ const QuoteBuilder = () => {
         )}
         <PreviewBlock title="Exclusions" filled={exclusions.trim().length > 0}>{exclusions}</PreviewBlock>
         <PreviewBlock title="Assumptions" filled={assumptions.trim().length > 0}>{assumptions}</PreviewBlock>
+        <PreviewBlock title="Provisional sums" filled={provisionalSums.trim().length > 0}>{provisionalSums}</PreviewBlock>
         <PreviewBlock title="Certificates & warranties" filled={certsAnswered}>
           <div className="space-y-0.5">
             {CERT_QUESTIONS.filter((q) => certs[q.key]).map((q) => (
@@ -716,6 +721,13 @@ const QuoteBuilder = () => {
                     placeholder="Clear access, drawings accurate, no hidden structural defects, no asbestos, normal working hours…"
                     value={assumptions} onChange={(e) => setAssumptions(e.target.value)}
                     className="font-sans text-sm min-h-[120px] bg-white border-navy/15" />
+                </div>
+                <div>
+                  <label className={labelCls}>Provisional sums — items priced provisionally</label>
+                  <Textarea
+                    placeholder="Groundworks / foundation depth pending trial holes, drainage connection, unknown substrate…"
+                    value={provisionalSums} onChange={(e) => setProvisionalSums(e.target.value)}
+                    className="font-sans text-sm min-h-[100px] bg-white border-navy/15" />
                 </div>
               </div>
 

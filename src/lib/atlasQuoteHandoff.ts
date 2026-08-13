@@ -6,12 +6,20 @@ import {
 
 export const ATLAS_HANDOFF_HEADING = "From Atlas site survey:";
 
+export interface AtlasQuoteHandoff {
+  /** Text for the quote's free-text assumptions field. */
+  assumptions: string;
+  /** Text for the quote's dedicated provisional-sums field. */
+  provisionalSums: string;
+}
+
 /**
- * Pull the latest Atlas capture for a job and turn its risk flags into text
- * for the quote wizard's assumptions / provisional-sums wording, so the
- * ground-conditions risk reaches the homeowner before pricing is finalised.
+ * Pull the latest Atlas capture for a job and split its risk flags into the
+ * quote wizard's assumptions text and its dedicated provisional-sums field,
+ * so the ground-conditions risk is carried as a priced provisional sum rather
+ * than buried in free-text assumptions.
  */
-export async function getAtlasQuoteHandoff(jobId: string): Promise<string | null> {
+export async function getAtlasQuoteHandoff(jobId: string): Promise<AtlasQuoteHandoff | null> {
   const { data: surveys } = await (supabase as any)
     .from("atlas_surveys")
     .select("id")
@@ -32,11 +40,8 @@ export async function getAtlasQuoteHandoff(jobId: string): Promise<string | null
   const values: Record<string, any> = {};
   for (const f of fields as any[]) values[f.field_key] = f.value;
 
-  return [
-    ATLAS_HANDOFF_HEADING,
-    quoteAssumptionsFromSurvey(values),
-    "",
-    "Provisional sums:",
-    `• ${quoteProvisionalSumsFromSurvey(values)}`,
-  ].join("\n");
+  return {
+    assumptions: [ATLAS_HANDOFF_HEADING, quoteAssumptionsFromSurvey(values)].join("\n"),
+    provisionalSums: [ATLAS_HANDOFF_HEADING, `• ${quoteProvisionalSumsFromSurvey(values)}`].join("\n"),
+  };
 }
