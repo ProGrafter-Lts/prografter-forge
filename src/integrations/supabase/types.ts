@@ -142,6 +142,47 @@ export type Database = {
           },
         ]
       }
+      atlas_field_photos: {
+        Row: {
+          caption: string | null
+          captured_at: string
+          created_at: string
+          field_key: string
+          id: string
+          local_id: string | null
+          storage_path: string
+          survey_id: string
+        }
+        Insert: {
+          caption?: string | null
+          captured_at?: string
+          created_at?: string
+          field_key: string
+          id?: string
+          local_id?: string | null
+          storage_path: string
+          survey_id: string
+        }
+        Update: {
+          caption?: string | null
+          captured_at?: string
+          created_at?: string
+          field_key?: string
+          id?: string
+          local_id?: string | null
+          storage_path?: string
+          survey_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "atlas_field_photos_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "atlas_surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       atlas_observations: {
         Row: {
           acknowledged_at_completion: boolean | null
@@ -303,6 +344,41 @@ export type Database = {
           },
         ]
       }
+      atlas_survey_fields: {
+        Row: {
+          captured_at: string
+          field_key: string
+          id: string
+          survey_id: string
+          updated_at: string
+          value: Json | null
+        }
+        Insert: {
+          captured_at?: string
+          field_key: string
+          id?: string
+          survey_id: string
+          updated_at?: string
+          value?: Json | null
+        }
+        Update: {
+          captured_at?: string
+          field_key?: string
+          id?: string
+          survey_id?: string
+          updated_at?: string
+          value?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "atlas_survey_fields_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "atlas_surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       atlas_surveys: {
         Row: {
           access_limitations: string | null
@@ -328,6 +404,7 @@ export type Database = {
           relevant_trades: string[]
           revision_number: number
           revision_reason: string | null
+          schema_version: string | null
           start_route: string
           started_at: string | null
           status: string
@@ -363,6 +440,7 @@ export type Database = {
           relevant_trades?: string[]
           revision_number?: number
           revision_reason?: string | null
+          schema_version?: string | null
           start_route?: string
           started_at?: string | null
           status?: string
@@ -398,6 +476,7 @@ export type Database = {
           relevant_trades?: string[]
           revision_number?: number
           revision_reason?: string | null
+          schema_version?: string | null
           start_route?: string
           started_at?: string | null
           status?: string
