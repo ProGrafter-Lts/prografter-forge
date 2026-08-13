@@ -45,7 +45,8 @@ const RETIRED_MODULES = new Set([
   // at the standard_trade band.
   // Windows & Doors relisted 2026-08-13 (full 5x3 gate: 100% agreement on
   // weak / medium / strong) — back on sale at the standard_trade band.
-  "plastering_rendering",
+  // Plastering/Rendering relisted 2026-08-13 (full 5x3 gate: 100% agreement on
+  // weak / medium / strong) — back on sale at the standard_trade band.
 ]);
 
 const PRICE_BAND_AMOUNT: Record<PriceBand, number> = {
