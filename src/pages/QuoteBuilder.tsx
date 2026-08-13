@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { getAtlasQuoteHandoff, ATLAS_HANDOFF_HEADING } from "@/lib/atlasQuoteHandoff";
 import MaterialsBreakdown, { emptyMaterialLine, type MaterialLine } from "@/components/trade/MaterialsBreakdown";
 import { checkQuoteQuality, hasCriticalIssues, type QuoteIssue } from "@/lib/quoteQuality";
 
