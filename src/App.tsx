@@ -241,6 +241,8 @@ const AppRoutes = () => {
               <Route path="/atlas/:id" element={<AtlasWorkspace />} />
               <Route path="/atlas/:id/review" element={<AtlasReview />} />
               <Route path="/atlas/:id/summary" element={<AtlasSummary />} />
+              <Route path="/atlas/:id/capture" element={<AtlasCapture />} />
+              <Route path="/atlas/:id/capture-report" element={<AtlasCaptureReport />} />
               <Route path="/dashboard/homeowner" element={<HomeownerDashboard />} />
               <Route path="/dashboard/quote-checks" element={<MyQuoteChecks />} />
               <Route path="/dashboard/quote-checks/:id" element={<QuoteCheckDetail />} />
