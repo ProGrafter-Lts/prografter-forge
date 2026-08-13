@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { getAtlasQuoteHandoff, ATLAS_HANDOFF_HEADING } from "@/lib/atlasQuoteHandoff";
 import MaterialsBreakdown, { emptyMaterialLine, type MaterialLine } from "@/components/trade/MaterialsBreakdown";
 import { checkQuoteQuality, hasCriticalIssues, type QuoteIssue } from "@/lib/quoteQuality";
 
@@ -164,6 +165,23 @@ const QuoteBuilder = () => {
     hydrated.current = true;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [draftKey]);
+
+  /* --------- Atlas site-survey risk hand-off into assumptions --------- */
+  useEffect(() => {
+    if (!jobId) return;
+    let alive = true;
+    getAtlasQuoteHandoff(jobId)
+      .then((text) => {
+        if (!alive || !text) return;
+        setAssumptions((prev) =>
+          prev.includes(ATLAS_HANDOFF_HEADING) ? prev : (prev.trim() ? `${prev.trim()}\n\n` : "") + text,
+        );
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [jobId]);
 
   const draft = {
     amount, vatStatus, vatAmount, validUntil, startDate, duration, depositRequired, depositAmount,

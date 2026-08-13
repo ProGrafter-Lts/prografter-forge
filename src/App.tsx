@@ -29,6 +29,8 @@ const AtlasNewSurvey = lazyRetry(() => import("./atlas/pages/AtlasNewSurvey.tsx"
 const AtlasWorkspace = lazyRetry(() => import("./atlas/pages/AtlasWorkspace.tsx"));
 const AtlasReview = lazyRetry(() => import("./atlas/pages/AtlasReview.tsx"));
 const AtlasSummary = lazyRetry(() => import("./atlas/pages/AtlasSummary.tsx"));
+const AtlasCapture = lazyRetry(() => import("./atlas/pages/AtlasCapture.tsx"));
+const AtlasCaptureReport = lazyRetry(() => import("./atlas/pages/AtlasCaptureReport.tsx"));
 const TradeSettings = lazyRetry(() => import("./pages/TradeSettings.tsx"));
 const HomeownerDashboard = lazyRetry(() => import("./pages/HomeownerDashboard.tsx"));
 const ProjectDetail = lazyRetry(() => import("./pages/ProjectDetail.tsx"));
@@ -239,6 +241,8 @@ const AppRoutes = () => {
               <Route path="/atlas/:id" element={<AtlasWorkspace />} />
               <Route path="/atlas/:id/review" element={<AtlasReview />} />
               <Route path="/atlas/:id/summary" element={<AtlasSummary />} />
+              <Route path="/atlas/:id/capture" element={<AtlasCapture />} />
+              <Route path="/atlas/:id/capture-report" element={<AtlasCaptureReport />} />
               <Route path="/dashboard/homeowner" element={<HomeownerDashboard />} />
               <Route path="/dashboard/quote-checks" element={<MyQuoteChecks />} />
               <Route path="/dashboard/quote-checks/:id" element={<QuoteCheckDetail />} />
