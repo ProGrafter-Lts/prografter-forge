@@ -3893,6 +3893,7 @@ export type Database = {
           pdf_version: number
           premium_description: string | null
           premium_price: number | null
+          provisional_sums: string | null
           reference: string | null
           scope_of_works: string | null
           selected_tier: string | null
@@ -3941,6 +3942,7 @@ export type Database = {
           pdf_version?: number
           premium_description?: string | null
           premium_price?: number | null
+          provisional_sums?: string | null
           reference?: string | null
           scope_of_works?: string | null
           selected_tier?: string | null
@@ -3989,6 +3991,7 @@ export type Database = {
           pdf_version?: number
           premium_description?: string | null
           premium_price?: number | null
+          provisional_sums?: string | null
           reference?: string | null
           scope_of_works?: string | null
           selected_tier?: string | null
