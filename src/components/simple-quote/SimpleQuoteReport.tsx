@@ -1,4 +1,5 @@
 import { useState } from "react";
+import SuggestedMessageBlock, { type SuggestedQuestion } from "@/components/quote-report/SuggestedMessageBlock";
 import {
   CheckCircle2,
   AlertTriangle,
@@ -57,6 +58,8 @@ export interface SimpleReportJson {
   building_control?: { status?: string; detail?: string };
   questions?: string[];
   suggested_message?: string;
+  suggested_questions?: SuggestedQuestion[];
+  suggested_message_text?: string;
   supporting_docs?: { name: string; type: string; note: string; builder_confirmed?: string }[];
 }
 
@@ -94,7 +97,6 @@ const Section = ({ title, icon, children }: { title: string; icon: React.ReactNo
 
 export default function SimpleQuoteReport({ report }: { report: SimpleReportJson }) {
   const [showDetail, setShowDetail] = useState(false);
-  const [copied, setCopied] = useState(false);
 
   const verdict = report.verdict ?? { level: "useful", line: "" };
   const theme = VERDICT_THEME[verdict.level] ?? VERDICT_THEME.useful;
@@ -106,33 +108,10 @@ export default function SimpleQuoteReport({ report }: { report: SimpleReportJson
   const suppliedSeparately = report.supplied_separately ?? [];
   const bc = report.building_control ?? {};
 
-  const copyMessage = async () => {
-    if (!report.suggested_message) return;
-    await navigator.clipboard.writeText(report.suggested_message);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   // Split the suggested message into a short intro plus numbered points so it is
   // easy for homeowners to read, copy and send. Presentation only — the copied
   // text still uses the original message verbatim.
-  const parseSuggestedMessage = (msg: string) => {
-    const cleaned = msg.trim();
-    // Prefer explicit line breaks; fall back to sentence splitting.
-    let parts = cleaned
-      .split(/\n+/)
-      .map((p) => p.replace(/^\s*(?:\d+[.)]|[-•*])\s*/, "").trim())
-      .filter(Boolean);
-    if (parts.length <= 1) {
-      parts = cleaned
-        .split(/(?<=[.?!])\s+/)
-        .map((p) => p.trim())
-        .filter(Boolean);
-    }
-    if (parts.length <= 1) return { intro: cleaned, points: [] as string[] };
-    return { intro: parts[0], points: parts.slice(1) };
-  };
-  const suggested = report.suggested_message ? parseSuggestedMessage(report.suggested_message) : null;
 
   return (
     <div className="space-y-5">
@@ -291,35 +270,8 @@ export default function SimpleQuoteReport({ report }: { report: SimpleReportJson
         </Section>
       ) : null}
 
-      {/* 8. Suggested message to builder */}
-      {report.suggested_message ? (
-        <div className="bg-navy rounded-2xl p-5 md:p-6 shadow-sm">
-          <div className="flex items-center justify-between gap-2 mb-3">
-            <h2 className="font-heading text-base md:text-lg text-white">Suggested Message To Your Builder</h2>
-            <button
-              onClick={copyMessage}
-              className="flex items-center gap-1.5 font-mono text-xs text-white/90 bg-white/10 hover:bg-white/20 rounded-lg px-3 py-1.5 transition-colors"
-            >
-              {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-              {copied ? "Copied" : "Copy"}
-            </button>
-          </div>
-          {suggested && (
-            <div className="space-y-3">
-              {suggested.intro && (
-                <p className="font-mono text-sm text-white/90 leading-relaxed whitespace-pre-wrap">{suggested.intro}</p>
-              )}
-              {suggested.points.length ? (
-                <ol className="space-y-2 list-decimal list-inside">
-                  {suggested.points.map((p, i) => (
-                    <li key={i} className="font-mono text-sm text-white/90 leading-relaxed">{p}</li>
-                  ))}
-                </ol>
-              ) : null}
-            </div>
-          )}
-        </div>
-      ) : null}
+      {/* Suggested message — deterministic, built from the V2 field results */}
+      <SuggestedMessageBlock report={report} title="Suggested Message To Your Builder" />
 
       {/* Supporting docs note */}
       {report.supporting_docs?.length ? (

@@ -255,7 +255,7 @@ export default function BoilerQuoteReport({ report }: { report: BoilerReportJson
       ) : null}
 
       {/* Suggested message to your installer — deterministic, built from the V2 field results */}
-      <SuggestedMessageBlock report={report} tradeNoun="installer" />
+      <SuggestedMessageBlock report={report} title="Suggested Message To Your Installer" />
 
       {/* 8. ProGrafter Summary */}
       {report.summary ? (
