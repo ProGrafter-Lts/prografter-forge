@@ -1,4 +1,5 @@
 import { useState } from "react";
+import SuggestedMessageBlock, { type SuggestedQuestion } from "@/components/quote-report/SuggestedMessageBlock";
 import {
   CheckCircle2,
   AlertTriangle,
@@ -53,6 +54,8 @@ export interface WindowsDoorsReportJson {
   key_risks?: string[];
   questions?: string[];
   suggested_message?: string;
+  suggested_questions?: SuggestedQuestion[];
+  suggested_message_text?: string;
   summary?: string;
 }
 
@@ -91,7 +94,6 @@ const Section = ({ title, icon, children }: { title: string; icon: React.ReactNo
 
 export default function WindowsDoorsQuoteReport({ report }: { report: WindowsDoorsReportJson }) {
   const [showDetail, setShowDetail] = useState(false);
-  const [copied, setCopied] = useState(false);
 
   const verdict = report.verdict ?? { level: "moderate", line: "" };
   const theme = VERDICT_THEME[verdict.level] ?? VERDICT_THEME.moderate;
@@ -102,26 +104,7 @@ export default function WindowsDoorsQuoteReport({ report }: { report: WindowsDoo
   const relevant = categories.filter((c) => c.relevant);
   const suppliedSeparately = report.supplied_separately ?? [];
 
-  const copyMessage = async () => {
-    if (!report.suggested_message) return;
-    await navigator.clipboard.writeText(report.suggested_message);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
-  const parseSuggestedMessage = (msg: string) => {
-    const cleaned = msg.trim();
-    let parts = cleaned
-      .split(/\n+/)
-      .map((p) => p.replace(/^\s*(?:\d+[.)]|[-•*])\s*/, "").trim())
-      .filter(Boolean);
-    if (parts.length <= 1) {
-      parts = cleaned.split(/(?<=[.?!])\s+/).map((p) => p.trim()).filter(Boolean);
-    }
-    if (parts.length <= 1) return { intro: cleaned, points: [] as string[] };
-    return { intro: parts[0], points: parts.slice(1) };
-  };
-  const suggested = report.suggested_message ? parseSuggestedMessage(report.suggested_message) : null;
 
   return (
     <div className="space-y-5">
@@ -275,35 +258,8 @@ export default function WindowsDoorsQuoteReport({ report }: { report: WindowsDoo
         </Section>
       ) : null}
 
-      {/* Suggested Message */}
-      {report.suggested_message ? (
-        <div className="bg-navy rounded-2xl p-5 md:p-6 shadow-sm">
-          <div className="flex items-center justify-between gap-2 mb-3">
-            <h2 className="font-heading text-base md:text-lg text-white">Suggested Message To The Window & Door Installer</h2>
-            <button
-              onClick={copyMessage}
-              className="flex items-center gap-1.5 font-mono text-xs text-white/90 bg-white/10 hover:bg-white/20 rounded-lg px-3 py-1.5 transition-colors"
-            >
-              {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-              {copied ? "Copied" : "Copy"}
-            </button>
-          </div>
-          {suggested && (
-            <div className="space-y-3">
-              {suggested.intro && (
-                <p className="font-mono text-sm text-white/90 leading-relaxed whitespace-pre-wrap">{suggested.intro}</p>
-              )}
-              {suggested.points.length ? (
-                <ol className="space-y-2 list-decimal list-inside">
-                  {suggested.points.map((p, i) => (
-                    <li key={i} className="font-mono text-sm text-white/90 leading-relaxed">{p}</li>
-                  ))}
-                </ol>
-              ) : null}
-            </div>
-          )}
-        </div>
-      ) : null}
+      {/* Suggested message — deterministic, built from the V2 field results */}
+      <SuggestedMessageBlock report={report} title="Suggested Message To The Window & Door Installer" />
 
       {/* ProGrafter Summary */}
       {report.summary ? (

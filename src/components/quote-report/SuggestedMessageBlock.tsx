@@ -41,10 +41,10 @@ const parseLegacy = (msg: string) => {
 
 export default function SuggestedMessageBlock({
   report,
-  tradeNoun = "builder",
+  title = "Suggested Message To Your Builder",
 }: {
   report: SuggestedMessageSource;
-  tradeNoun?: string;
+  title?: string;
 }) {
   const [copied, setCopied] = useState(false);
   const [showAll, setShowAll] = useState(false);
@@ -82,7 +82,7 @@ export default function SuggestedMessageBlock({
         <div className="flex items-center gap-2 min-w-0">
           <MessageSquare className="h-5 w-5 text-teal shrink-0" />
           <h2 className="font-heading text-base md:text-lg text-white">
-            Suggested Message To Your {tradeNoun.charAt(0).toUpperCase() + tradeNoun.slice(1)}
+            {title}
           </h2>
         </div>
         <button
