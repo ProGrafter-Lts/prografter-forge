@@ -28,6 +28,9 @@ export const QUOTE_CHECKER_V2_ENABLED: Record<string, boolean> = {
   // guard): full 5x3 gate 100% agreement on all three pitched fixtures, plus
   // flat and no-type branch spot-checks at 100%. Signed off by Lee 2026-08-12.
   roofing: true,
+  // Windows & Doors V2 (35 fields): full 5x3 gate 100% agreement on all three
+  // fixtures. Signed off by Lee 2026-08-13.
+  windows_doors: true,
 };
 
 export function isV2Enabled(moduleId: string): boolean {
