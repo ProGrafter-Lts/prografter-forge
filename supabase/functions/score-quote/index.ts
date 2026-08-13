@@ -101,6 +101,70 @@ function statusLabel(f: ExtractedField): string {
   return "missing";
 }
 
+// ---- Deterministic "suggested message" block (no LLM) ----------------------
+// REPORT TEMPLATE ONLY. Rebuilds the old V1 "Suggested message to your builder"
+// block from the already-scored Pass 1 field statuses: every field that came
+// back absent or ambiguous becomes one numbered question, in schema order,
+// absent first. No new model call, no new document read — so the block is as
+// deterministic as the schema itself. Nothing here feeds scoring.
+interface SuggestedQuestion {
+  n: number;
+  category: string;
+  label: string;
+  status: "absent" | "ambiguous";
+  question: string;
+}
+
+const MESSAGE_QUESTION_CAP = 12;
+
+function buildSuggestedQuestions(
+  schema: CategoryDef[],
+  extraction: ExtractionRecord,
+): SuggestedQuestion[] {
+  const absent: Omit<SuggestedQuestion, "n">[] = [];
+  const ambiguous: Omit<SuggestedQuestion, "n">[] = [];
+
+  for (const c of schema) {
+    for (const f of c.fields) {
+      const field = extraction[c.key]?.[f.key];
+      if (!field) continue;
+      if (field.status === "absent") {
+        absent.push({
+          category: c.name,
+          label: f.label,
+          status: "absent",
+          question: `${f.label} — this isn't stated in the quote. Please confirm it in writing.`,
+        });
+      } else if (field.status === "ambiguous") {
+        ambiguous.push({
+          category: c.name,
+          label: f.label,
+          status: "ambiguous",
+          question: `${f.label} — this is mentioned but not specific. Please confirm the exact detail in writing.`,
+        });
+      }
+    }
+  }
+
+  return [...absent, ...ambiguous].map((q, i) => ({ ...q, n: i + 1 }));
+}
+
+function buildSuggestedMessageText(questions: SuggestedQuestion[], tradeNoun: string): string {
+  if (!questions.length) {
+    return `Hi, thanks for the quote — it covers everything I'd expect to see, so I've no outstanding questions at this stage. I'll be in touch to confirm next steps.`;
+  }
+  const top = questions.slice(0, MESSAGE_QUESTION_CAP);
+  const lines = [
+    `Hi, thanks for the quote. Before I go ahead, could you confirm a few points in writing please?`,
+    "",
+    ...top.map((q, i) => `${i + 1}. ${q.question}`),
+    "",
+    `Once I have these confirmed in writing I'll be happy to move forward. Thanks.`,
+  ];
+  return lines.join("\n") + (questions.length > top.length ? "" : "");
+}
+
+
 // ---- Pass 2 prompt: narrative only, sourced only from Pass 1's JSON --------
 function buildPass2Prompt(
   category: string,
