@@ -88,7 +88,8 @@ Deno.serve(async (req) => {
 
   // If the success page hasn't already run analysis, run it here.
   if (!pending.analysed_check_id) {
-    const fnName = MODULE_ANALYSE_FN[pending.module_id];
+    const useV2 = isV2Enabled(pending.module_id) && !!MODULE_V2_FN[pending.module_id];
+    const fnName = useV2 ? MODULE_V2_FN[pending.module_id] : MODULE_ANALYSE_FN[pending.module_id];
     if (fnName) {
       try {
         const { data: analysed } = await supabase.functions.invoke(fnName, {
@@ -99,6 +100,7 @@ Deno.serve(async (req) => {
             pdfPath: pending.pdf_path,
             supportingFiles: pending.supporting_files || [],
             userId: pending.user_id,
+            ...(useV2 ? { category: pending.module_id } : {}),
           },
         });
         if (analysed?.id) {
