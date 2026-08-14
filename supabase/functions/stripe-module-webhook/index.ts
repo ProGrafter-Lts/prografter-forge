@@ -6,6 +6,21 @@
 
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.100.1";
+import { isV2Enabled } from "../_shared/quote-checker-v2-flags.ts";
+
+// Categories on the Pass 0/1/2 rebuild — routed through extract-quote when
+// their flag is on. Must stay in sync with run-paid-module-check.
+const MODULE_V2_FN: Record<string, string> = {
+  landscaping_driveway: "extract-quote",
+  boiler_heating: "extract-quote",
+  bathroom: "extract-quote",
+  electrical_rewire: "extract-quote",
+  extension_building: "extract-quote",
+  kitchen: "extract-quote",
+  roofing: "extract-quote",
+  windows_doors: "extract-quote",
+  plastering_rendering: "extract-quote",
+};
 
 const MODULE_ANALYSE_FN: Record<string, string> = {
   extension_building: "analyse-simple-quote",
