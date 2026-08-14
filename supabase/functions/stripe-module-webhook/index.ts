@@ -6,6 +6,21 @@
 
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.100.1";
+import { isV2Enabled } from "../_shared/quote-checker-v2-flags.ts";
+
+// Categories on the Pass 0/1/2 rebuild — routed through extract-quote when
+// their flag is on. Must stay in sync with run-paid-module-check.
+const MODULE_V2_FN: Record<string, string> = {
+  landscaping_driveway: "extract-quote",
+  boiler_heating: "extract-quote",
+  bathroom: "extract-quote",
+  electrical_rewire: "extract-quote",
+  extension_building: "extract-quote",
+  kitchen: "extract-quote",
+  roofing: "extract-quote",
+  windows_doors: "extract-quote",
+  plastering_rendering: "extract-quote",
+};
 
 const MODULE_ANALYSE_FN: Record<string, string> = {
   extension_building: "analyse-simple-quote",
@@ -73,7 +88,8 @@ Deno.serve(async (req) => {
 
   // If the success page hasn't already run analysis, run it here.
   if (!pending.analysed_check_id) {
-    const fnName = MODULE_ANALYSE_FN[pending.module_id];
+    const useV2 = isV2Enabled(pending.module_id) && !!MODULE_V2_FN[pending.module_id];
+    const fnName = useV2 ? MODULE_V2_FN[pending.module_id] : MODULE_ANALYSE_FN[pending.module_id];
     if (fnName) {
       try {
         const { data: analysed } = await supabase.functions.invoke(fnName, {
@@ -84,6 +100,7 @@ Deno.serve(async (req) => {
             pdfPath: pending.pdf_path,
             supportingFiles: pending.supporting_files || [],
             userId: pending.user_id,
+            ...(useV2 ? { category: pending.module_id } : {}),
           },
         });
         if (analysed?.id) {
