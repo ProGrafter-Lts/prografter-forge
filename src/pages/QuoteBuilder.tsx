@@ -122,11 +122,13 @@ const QuoteBuilder = () => {
     const load = async () => {
       const { data: auth } = await supabase.auth.getUser();
       const uid = auth.user?.id ?? null;
-      setTradeId(uid);
       const [jobRes, tradeRes] = await Promise.all([
         supabase.from("jobs").select("title, job_type, address, postcode, homeowner_id").eq("id", jobId!).maybeSingle(),
-        uid ? supabase.from("trades").select("name, company_name").eq("id", uid).maybeSingle() : Promise.resolve({ data: null } as any),
+        uid
+          ? supabase.from("trades").select("id, name, company_name").eq("user_id", uid).maybeSingle()
+          : Promise.resolve({ data: null } as any),
       ]);
+      setTradeId((tradeRes.data as any)?.id ?? null);
       setJob(jobRes.data as any);
       setTradeName((tradeRes.data as any)?.company_name || (tradeRes.data as any)?.name || "Your business");
       const hid = (jobRes.data as any)?.homeowner_id;
