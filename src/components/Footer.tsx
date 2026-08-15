@@ -21,8 +21,9 @@ const Footer = () => {
             <Link to="/trust" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">Trust Centre</Link>
             <a href="/about" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">About</a>
             <a href="/privacy" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">Privacy</a>
-            <a href="/terms" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">Terms</a>
-            <a href="/cookies" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">Cookies</a>
+            <Link to="/terms" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">Terms of Use</Link>
+            <Link to="/cookies" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">Cookie Policy</Link>
+            <Link to="/complaints" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">Complaints Policy</Link>
             <a href="/contact" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">Contact</a>
             <a href="/suppliers" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">For suppliers →</a>
             <a href="#" className="termly-display-preferences font-mono text-xs text-secondary-text hover:text-teal transition-colors">Consent Preferences</a>
