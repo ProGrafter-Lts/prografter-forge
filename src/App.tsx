@@ -18,6 +18,7 @@ const Login = lazyRetry(() => import("./pages/Login.tsx"));
 const Terms = lazyRetry(() => import("./pages/Terms.tsx"));
 const Privacy = lazyRetry(() => import("./pages/Privacy.tsx"));
 const Cookies = lazyRetry(() => import("./pages/Cookies.tsx"));
+const Complaints = lazyRetry(() => import("./pages/Complaints.tsx"));
 const TradeRegister = lazyRetry(() => import("./pages/TradeRegister.tsx"));
 const SignupTrade = lazyRetry(() => import("./pages/SignupTrade.tsx"));
 const SignupTradeUnderReview = lazyRetry(() => import("./pages/SignupTradeUnderReview.tsx"));
