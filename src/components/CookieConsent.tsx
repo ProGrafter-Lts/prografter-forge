@@ -62,7 +62,16 @@ const CookieConsent = () => {
   const [prefs, setPrefs] = useState<CookiePrefs>(DEFAULT_PREFS);
 
   useEffect(() => {
-    if (!getStoredCookiePrefs()) setVisible(true);
+    const stored = getStoredCookiePrefs();
+    if (!stored) setVisible(true);
+    else setPrefs(stored);
+    const onOpen = () => {
+      setPrefs(getStoredCookiePrefs() ?? DEFAULT_PREFS);
+      setVisible(true);
+      setManaging(true);
+    };
+    window.addEventListener(OPEN_PREFS_EVENT, onOpen);
+    return () => window.removeEventListener(OPEN_PREFS_EVENT, onOpen);
   }, []);
 
   const persist = useCallback(async (chosen: CookiePrefs) => {
