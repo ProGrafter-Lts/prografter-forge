@@ -347,6 +347,8 @@ const App = () => (
         <PWAInstallBanner />
         <Chatbot />
         <AppRoutes />
+        <GlobalLegalFooter />
+        <CookieConsent />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
