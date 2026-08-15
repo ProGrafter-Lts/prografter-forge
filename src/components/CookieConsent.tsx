@@ -67,7 +67,6 @@ const CookieConsent = () => {
     else setPrefs(stored);
     const onOpen = () => {
       setPrefs(getStoredCookiePrefs() ?? DEFAULT_PREFS);
-      setVisible(true);
       setManaging(true);
     };
     window.addEventListener(OPEN_PREFS_EVENT, onOpen);
@@ -102,10 +101,11 @@ const CookieConsent = () => {
     }
   }, []);
 
-  if (!visible) return null;
+  if (!visible && !managing) return null;
 
   return (
     <>
+      {visible && !managing && (
       <div className="fixed inset-x-0 bottom-0 z-[60] px-4 pb-4">
         <div className="mx-auto max-w-4xl rounded-2xl border border-cream/10 bg-deep p-5 shadow-2xl">
           <div className="flex flex-col gap-4 craft:flex-row craft:items-center craft:justify-between">
@@ -133,6 +133,7 @@ const CookieConsent = () => {
           </div>
         </div>
       </div>
+      )}
 
       <Dialog open={managing} onOpenChange={setManaging}>
         <DialogContent className="max-w-lg">
