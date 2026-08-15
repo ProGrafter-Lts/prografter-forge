@@ -540,7 +540,7 @@ export type Database = {
           id: string
           ip_address: unknown
           user_agent: string | null
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           consent_type: string
@@ -549,7 +549,7 @@ export type Database = {
           id?: string
           ip_address?: unknown
           user_agent?: string | null
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           consent_type?: string
@@ -558,7 +558,7 @@ export type Database = {
           id?: string
           ip_address?: unknown
           user_agent?: string | null
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: []
       }

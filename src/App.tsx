@@ -7,6 +7,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
 import PWAInstallBanner from "./components/PWAInstallBanner.tsx";
 import Chatbot from "./components/Chatbot.tsx";
+import GlobalLegalFooter from "./components/LegalFooterLinks.tsx";
+import CookieConsent from "./components/CookieConsent.tsx";
 import { usePageTracking } from "./hooks/usePageTracking.ts";
 
 // Lazy-load every non-landing route so the initial bundle stays small
@@ -16,6 +18,7 @@ const Login = lazyRetry(() => import("./pages/Login.tsx"));
 const Terms = lazyRetry(() => import("./pages/Terms.tsx"));
 const Privacy = lazyRetry(() => import("./pages/Privacy.tsx"));
 const Cookies = lazyRetry(() => import("./pages/Cookies.tsx"));
+const Complaints = lazyRetry(() => import("./pages/Complaints.tsx"));
 const TradeRegister = lazyRetry(() => import("./pages/TradeRegister.tsx"));
 const SignupTrade = lazyRetry(() => import("./pages/SignupTrade.tsx"));
 const SignupTradeUnderReview = lazyRetry(() => import("./pages/SignupTradeUnderReview.tsx"));
@@ -167,6 +170,7 @@ const AppRoutes = () => {
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/cookies" element={<Cookies />} />
+            <Route path="/complaints" element={<Complaints />} />
             <Route path="/register" element={<TradeRegister />} />
             <Route path="/register/trade" element={<SignupTradeRedirect />} />
             <Route path="/post-a-job" element={<Navigate to="/post-job-brief" replace />} />
@@ -347,6 +351,8 @@ const App = () => (
         <PWAInstallBanner />
         <Chatbot />
         <AppRoutes />
+        <GlobalLegalFooter />
+        <CookieConsent />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

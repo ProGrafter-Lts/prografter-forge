@@ -1,9 +1,10 @@
 import { Link } from "react-router-dom";
 import Logo from "@/components/Logo";
+import { openCookiePreferences } from "@/components/CookieConsent";
 
 const Footer = () => {
   return (
-    <footer className="bg-deep border-t border-cream/5 py-8 px-6">
+    <footer data-site-footer className="bg-deep border-t border-cream/5 py-8 px-6">
       <div className="max-w-[1800px] mx-auto flex flex-col gap-6">
         <div className="border-b border-cream/5 pb-6 flex flex-col items-center gap-3">
           <p className="font-mono text-xs uppercase tracking-widest text-teal">ProGrafter Intelligence</p>
@@ -20,12 +21,13 @@ const Footer = () => {
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
             <Link to="/trust" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">Trust Centre</Link>
             <a href="/about" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">About</a>
-            <a href="/privacy" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">Privacy</a>
-            <a href="/terms" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">Terms</a>
-            <a href="/cookies" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">Cookies</a>
+            <Link to="/privacy" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">Privacy Policy</Link>
+            <Link to="/terms" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">Terms of Use</Link>
+            <Link to="/cookies" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">Cookie Policy</Link>
+            <Link to="/complaints" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">Complaints Policy</Link>
             <a href="/contact" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">Contact</a>
             <a href="/suppliers" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">For suppliers →</a>
-            <a href="#" className="termly-display-preferences font-mono text-xs text-secondary-text hover:text-teal transition-colors">Consent Preferences</a>
+            <button type="button" onClick={openCookiePreferences} className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">Consent Preferences</button>
           </div>
 
           <p className="font-mono text-xs text-secondary-text">© 2026 ProGrafter. All rights reserved.</p>
