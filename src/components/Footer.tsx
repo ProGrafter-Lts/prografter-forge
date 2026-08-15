@@ -3,7 +3,7 @@ import Logo from "@/components/Logo";
 
 const Footer = () => {
   return (
-    <footer className="bg-deep border-t border-cream/5 py-8 px-6">
+    <footer data-site-footer className="bg-deep border-t border-cream/5 py-8 px-6">
       <div className="max-w-[1800px] mx-auto flex flex-col gap-6">
         <div className="border-b border-cream/5 pb-6 flex flex-col items-center gap-3">
           <p className="font-mono text-xs uppercase tracking-widest text-teal">ProGrafter Intelligence</p>
