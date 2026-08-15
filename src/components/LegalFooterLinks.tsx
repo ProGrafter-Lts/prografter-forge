@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { openCookiePreferences } from "@/components/CookieConsent";
 
 export const LEGAL_LINKS: { label: string; to: string }[] = [
   { label: "Terms of Use", to: "/terms" },
@@ -53,6 +54,13 @@ const GlobalLegalFooter = () => {
     <footer className="border-t border-cream/10 bg-deep px-6 py-5">
       <div className="mx-auto flex max-w-[1800px] flex-col items-center gap-3">
         <LegalFooterLinks />
+        <button
+          type="button"
+          onClick={openCookiePreferences}
+          className="font-mono text-xs text-secondary-text hover:text-teal transition-colors"
+        >
+          Consent Preferences
+        </button>
         <p className="font-mono text-[11px] text-secondary-text/80 text-center">
           © 2026 ProGrafter Ltd · Company number 17124130
         </p>

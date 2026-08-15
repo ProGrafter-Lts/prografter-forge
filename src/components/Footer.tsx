@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import Logo from "@/components/Logo";
+import { openCookiePreferences } from "@/components/CookieConsent";
 
 const Footer = () => {
   return (
@@ -26,7 +27,7 @@ const Footer = () => {
             <Link to="/complaints" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">Complaints Policy</Link>
             <a href="/contact" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">Contact</a>
             <a href="/suppliers" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">For suppliers →</a>
-            <a href="#" className="termly-display-preferences font-mono text-xs text-secondary-text hover:text-teal transition-colors">Consent Preferences</a>
+            <button type="button" onClick={openCookiePreferences} className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">Consent Preferences</button>
           </div>
 
           <p className="font-mono text-xs text-secondary-text">© 2026 ProGrafter. All rights reserved.</p>
