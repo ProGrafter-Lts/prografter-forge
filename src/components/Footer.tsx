@@ -20,7 +20,7 @@ const Footer = () => {
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
             <Link to="/trust" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">Trust Centre</Link>
             <a href="/about" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">About</a>
-            <a href="/privacy" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">Privacy</a>
+            <Link to="/privacy" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">Privacy Policy</Link>
             <Link to="/terms" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">Terms of Use</Link>
             <Link to="/cookies" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">Cookie Policy</Link>
             <Link to="/complaints" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">Complaints Policy</Link>
