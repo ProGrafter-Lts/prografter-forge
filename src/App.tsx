@@ -170,6 +170,7 @@ const AppRoutes = () => {
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/cookies" element={<Cookies />} />
+            <Route path="/complaints" element={<Complaints />} />
             <Route path="/register" element={<TradeRegister />} />
             <Route path="/register/trade" element={<SignupTradeRedirect />} />
             <Route path="/post-a-job" element={<Navigate to="/post-job-brief" replace />} />
