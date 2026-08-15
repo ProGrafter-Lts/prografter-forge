@@ -7,6 +7,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
 import PWAInstallBanner from "./components/PWAInstallBanner.tsx";
 import Chatbot from "./components/Chatbot.tsx";
+import GlobalLegalFooter from "./components/LegalFooterLinks.tsx";
+import CookieConsent from "./components/CookieConsent.tsx";
 import { usePageTracking } from "./hooks/usePageTracking.ts";
 
 // Lazy-load every non-landing route so the initial bundle stays small
