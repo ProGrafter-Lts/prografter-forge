@@ -12,6 +12,12 @@ import {
 } from "@/components/ui/dialog";
 
 const STORAGE_KEY = "pg_cookie_consent_v1";
+export const OPEN_PREFS_EVENT = "prografter:open-cookie-preferences";
+
+/** Re-open the cookie preferences modal from anywhere (e.g. the footer link). */
+export function openCookiePreferences() {
+  window.dispatchEvent(new CustomEvent(OPEN_PREFS_EVENT));
+}
 
 export type CookiePrefs = {
   functional: boolean;
