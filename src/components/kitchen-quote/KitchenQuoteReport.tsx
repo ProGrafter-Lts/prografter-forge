@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { getScoreBand } from "@/lib/quoteScoreBand";
 import SuggestedMessageBlock, { type SuggestedQuestion } from "@/components/quote-report/SuggestedMessageBlock";
 import {
   CheckCircle2,
@@ -96,8 +97,9 @@ export default function KitchenQuoteReport({ report }: { report: KitchenReportJs
   const [showDetail, setShowDetail] = useState(false);
 
   const verdict = report.verdict ?? { level: "moderate", line: "" };
-  const theme = VERDICT_THEME[verdict.level] ?? VERDICT_THEME.moderate;
   const score = typeof report.clarity_score === "number" ? report.clarity_score : 0;
+  const band = getScoreBand(score, "kitchen fitter");
+  const theme = band;
   const packScore = typeof report.pack_confidence_score === "number" ? report.pack_confidence_score : null;
   const hasDocs = !!report.has_supporting_docs && packScore !== null;
   const categories = report.categories ?? [];
@@ -112,8 +114,8 @@ export default function KitchenQuoteReport({ report }: { report: KitchenReportJs
       <div className={`bg-card rounded-2xl border border-border p-6 md:p-8 shadow-sm ring-1 ${theme.ring}`}>
         <div className="flex flex-col md:flex-row md:items-center gap-6">
           <div className="flex-1 space-y-2">
-            <span className={`font-mono text-[11px] uppercase tracking-wider ${theme.text}`}>{theme.label}</span>
-            <p className="font-heading text-xl md:text-2xl text-navy leading-snug">{verdict.line}</p>
+            <span className={`font-mono text-[11px] uppercase tracking-wider ${theme.text}`}>{band.label}</span>
+            <p className="font-heading text-xl md:text-2xl text-navy leading-snug">{band.line}</p>
           </div>
           <div className="shrink-0 text-center">
             <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground mb-1">

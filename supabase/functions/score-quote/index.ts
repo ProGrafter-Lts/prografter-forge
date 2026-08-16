@@ -278,18 +278,25 @@ Deno.serve(async (req) => {
     const strong = categoryScores.filter((c) => c.score_pack >= 7).map((c) => c.name);
     const weak = categoryScores.filter((c) => c.score_pack <= 4).map((c) => c.name);
 
-    let verdictLevel: "low" | "moderate" | "good" | "strong";
+    // Four presentation bands (scoring model unchanged):
+    // 90-100 excellent | 75-89 good | 55-74 workable | 0-54 caution.
+    const t = meta.tradeNoun;
+    let verdictLevel: "caution" | "workable" | "good" | "excellent";
     let verdictLine: string;
-    if (clarityScore >= 78) {
-      verdictLevel = "strong";
-      verdictLine = meta.verdictStrong;
-    } else if (clarityScore >= 45) {
-      verdictLevel = clarityScore >= 68 ? "good" : "moderate";
-      verdictLine = meta.verdictModerate;
+    if (clarityScore >= 90) {
+      verdictLevel = "excellent";
+      verdictLine = `This is an excellent quote. The scope, materials, responsibilities and commercial terms are all clearly set out, and there is nothing significant left open. You can proceed with confidence — just keep the ${t}'s written quote on file as the agreed basis of the work.`;
+    } else if (clarityScore >= 75) {
+      verdictLevel = "good";
+      verdictLine = `This is a good quote. The main scope, materials and pricing are clear and it stands up well overall. A small number of points are still worth putting in writing with the ${t} before you accept, but none of them are red flags.`;
+    } else if (clarityScore >= 55) {
+      verdictLevel = "workable";
+      verdictLine = `This quote is workable but incomplete. The basics are there, yet several meaningful details are missing or unclear. Go back to the ${t} and get those gaps confirmed in writing before you accept, so the price you agree is the price you pay.`;
     } else {
-      verdictLevel = "low";
-      verdictLine = meta.verdictLow;
+      verdictLevel = "caution";
+      verdictLine = `Treat this quote with caution. It gives a price, but too much of the work is left undefined for you to accept it safely as it stands. Ask the ${t} for a revised, itemised quote covering the gaps below before committing any money.`;
     }
+
 
     const raw = await callAnthropic(
       [{ type: "text", text: buildPass2Prompt(extractionRow.category, schema, extraction, categoryScores, checkRow.intake ?? {}) }],
