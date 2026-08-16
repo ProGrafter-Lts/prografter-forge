@@ -113,6 +113,7 @@ const CookieConsent = () => {
     } catch {
       /* storage unavailable — decision still applies for this session */
     }
+    applyConsentToAnalytics(chosen);
     setVisible(false);
     setManaging(false);
 
