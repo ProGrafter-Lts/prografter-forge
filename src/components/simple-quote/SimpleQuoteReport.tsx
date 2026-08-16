@@ -260,11 +260,36 @@ export default function SimpleQuoteReport({ report }: { report: SimpleReportJson
         </Section>
       ) : null}
 
+      {/* 6. Key risks to clarify — severity-ranked subset, separate from the full list */}
+      {report.key_risks?.length ? (
+        <Section
+          title={score >= 80 ? "Final Confirmation Points" : "Key Risks To Clarify"}
+          icon={<AlertTriangle className={`h-5 w-5 ${score >= 80 ? "text-teal" : "text-rose-500"}`} />}
+        >
+          <p className="font-mono text-xs text-muted-foreground mb-2">
+            {score >= 80
+              ? "This quote is strong — these are the final points worth confirming in writing before you accept."
+              : "The most important gaps in this quote. Resolve these before accepting — the rest are minor confirmations."}
+          </p>
+          <ul className="space-y-2">
+            {report.key_risks.map((t, i) => (
+              <li key={i} className="flex gap-2 font-mono text-sm text-navy/90">
+                <AlertTriangle className={`h-4 w-4 shrink-0 mt-0.5 ${score >= 80 ? "text-teal" : "text-rose-500"}`} />
+                <span>{t}</span>
+              </li>
+            ))}
+          </ul>
+        </Section>
+      ) : null}
+
       {/* 7. Main questions to ask the builder */}
       {report.questions?.length ? (
         <Section title="Main Questions To Ask The Builder" icon={<MessageSquare className="h-5 w-5 text-navy" />}>
+          <p className="font-mono text-xs text-muted-foreground mb-2">
+            A prioritised shortlist — ask these first.
+          </p>
           <ol className="space-y-2 list-decimal list-inside">
-            {report.questions.slice(0, 8).map((q, i) => (
+            {report.questions.slice(0, score >= 80 ? 8 : 10).map((q, i) => (
               <li key={i} className="font-mono text-sm text-navy/90">{q}</li>
             ))}
           </ol>
