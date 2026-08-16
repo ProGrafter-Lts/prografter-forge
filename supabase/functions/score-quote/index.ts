@@ -293,7 +293,7 @@ Deno.serve(async (req) => {
 
     const raw = await callAnthropic(
       [{ type: "text", text: buildPass2Prompt(extractionRow.category, schema, extraction, categoryScores, checkRow.intake ?? {}) }],
-      4000,
+      8000,
     );
     const parsed = robustParseJson(raw) ?? {};
 
