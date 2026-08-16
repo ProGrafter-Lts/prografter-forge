@@ -38,6 +38,35 @@ export function getStoredCookiePrefs(): CookiePrefs | null {
   }
 }
 
+/** Push the user's choice into Google Consent Mode v2 and clear GA cookies when denied. */
+export function applyConsentToAnalytics(prefs: CookiePrefs) {
+  if (typeof window === "undefined") return;
+  const gtag = (window as unknown as { gtag?: (...a: unknown[]) => void }).gtag;
+  const analytics = prefs.analytics ? "granted" : "denied";
+  const marketing = prefs.marketing ? "granted" : "denied";
+  gtag?.("consent", "update", {
+    ad_storage: marketing,
+    ad_user_data: marketing,
+    ad_personalization: marketing,
+    analytics_storage: analytics,
+    functionality_storage: prefs.functional ? "granted" : "denied",
+    security_storage: "granted",
+  });
+
+  if (!prefs.analytics) {
+    const host = window.location.hostname;
+    const domains = [host, `.${host}`, `.${host.split(".").slice(-2).join(".")}`];
+    document.cookie.split(";").forEach((c) => {
+      const name = c.split("=")[0]?.trim();
+      if (!name || !/^(_ga|_gid|_gat)/.test(name)) return;
+      domains.forEach((d) => {
+        document.cookie = `${name}=; Max-Age=0; path=/; domain=${d}`;
+      });
+      document.cookie = `${name}=; Max-Age=0; path=/`;
+    });
+  }
+}
+
 const CATEGORIES: { key: keyof CookiePrefs; label: string; desc: string }[] = [
   {
     key: "functional",
@@ -65,6 +94,8 @@ const CookieConsent = () => {
     const stored = getStoredCookiePrefs();
     if (!stored) setVisible(true);
     else setPrefs(stored);
+    // Re-assert the stored decision once gtag has loaded (inline default runs earlier).
+    applyConsentToAnalytics(stored ?? { functional: false, analytics: false, marketing: false });
     const onOpen = () => {
       setPrefs(getStoredCookiePrefs() ?? DEFAULT_PREFS);
       setManaging(true);
@@ -82,6 +113,7 @@ const CookieConsent = () => {
     } catch {
       /* storage unavailable — decision still applies for this session */
     }
+    applyConsentToAnalytics(chosen);
     setVisible(false);
     setManaging(false);
 
