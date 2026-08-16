@@ -408,8 +408,14 @@ Deno.serve(async (req) => {
       what_looks_clear: Array.isArray(parsed.what_looks_clear) ? parsed.what_looks_clear : [],
       supplied_separately: suppliedSeparately,
       not_found: Array.isArray(parsed.not_found) ? parsed.not_found : [],
-      key_risks: Array.isArray(parsed.key_risks) ? parsed.key_risks : [],
-      questions: (Array.isArray(parsed.questions) ? parsed.questions : []).slice(0, 10),
+      key_risks:
+        Array.isArray(parsed.key_risks) && parsed.key_risks.length
+          ? parsed.key_risks
+          : fallbackKeyRisks(suggestedQuestions),
+      questions:
+        Array.isArray(parsed.questions) && parsed.questions.length
+          ? parsed.questions.slice(0, 10)
+          : fallbackQuestions(suggestedQuestions),
       suggested_message: typeof parsed.suggested_message === "string" ? parsed.suggested_message : "",
       // Deterministic, schema-derived question block (report template only).
       suggested_questions: suggestedQuestions,
