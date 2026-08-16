@@ -149,6 +149,20 @@ function buildSuggestedQuestions(
   return [...absent, ...ambiguous].map((q, i) => ({ ...q, n: i + 1 }));
 }
 
+// Deterministic fallbacks used when the narrative model call returns nothing
+// for these keys (e.g. very large schemas where the JSON response is
+// truncated). Presentation only — never feeds scoring.
+function fallbackKeyRisks(questions: SuggestedQuestion[]): string[] {
+  return questions
+    .filter((q) => q.status === "absent")
+    .slice(0, 6)
+    .map((q) => `${q.category}: ${q.label} — not visible in the quote. Worth confirming before accepting.`);
+}
+
+function fallbackQuestions(questions: SuggestedQuestion[]): string[] {
+  return questions.slice(0, 10).map((q) => q.question);
+}
+
 function buildSuggestedMessageText(questions: SuggestedQuestion[], tradeNoun: string): string {
   if (!questions.length) {
     return `Hi, thanks for the quote — it covers everything I'd expect to see, so I've no outstanding questions at this stage. I'll be in touch to confirm next steps.`;
@@ -279,7 +293,7 @@ Deno.serve(async (req) => {
 
     const raw = await callAnthropic(
       [{ type: "text", text: buildPass2Prompt(extractionRow.category, schema, extraction, categoryScores, checkRow.intake ?? {}) }],
-      4000,
+      8000,
     );
     const parsed = robustParseJson(raw) ?? {};
 
@@ -394,8 +408,14 @@ Deno.serve(async (req) => {
       what_looks_clear: Array.isArray(parsed.what_looks_clear) ? parsed.what_looks_clear : [],
       supplied_separately: suppliedSeparately,
       not_found: Array.isArray(parsed.not_found) ? parsed.not_found : [],
-      key_risks: Array.isArray(parsed.key_risks) ? parsed.key_risks : [],
-      questions: (Array.isArray(parsed.questions) ? parsed.questions : []).slice(0, 10),
+      key_risks:
+        Array.isArray(parsed.key_risks) && parsed.key_risks.length
+          ? parsed.key_risks
+          : fallbackKeyRisks(suggestedQuestions),
+      questions:
+        Array.isArray(parsed.questions) && parsed.questions.length
+          ? parsed.questions.slice(0, 10)
+          : fallbackQuestions(suggestedQuestions),
       suggested_message: typeof parsed.suggested_message === "string" ? parsed.suggested_message : "",
       // Deterministic, schema-derived question block (report template only).
       suggested_questions: suggestedQuestions,
