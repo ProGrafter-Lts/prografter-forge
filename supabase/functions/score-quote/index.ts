@@ -149,6 +149,20 @@ function buildSuggestedQuestions(
   return [...absent, ...ambiguous].map((q, i) => ({ ...q, n: i + 1 }));
 }
 
+// Deterministic fallbacks used when the narrative model call returns nothing
+// for these keys (e.g. very large schemas where the JSON response is
+// truncated). Presentation only — never feeds scoring.
+function fallbackKeyRisks(questions: SuggestedQuestion[]): string[] {
+  return questions
+    .filter((q) => q.status === "absent")
+    .slice(0, 6)
+    .map((q) => `${q.category}: ${q.label} — not visible in the quote. Worth confirming before accepting.`);
+}
+
+function fallbackQuestions(questions: SuggestedQuestion[]): string[] {
+  return questions.slice(0, 10).map((q) => q.question);
+}
+
 function buildSuggestedMessageText(questions: SuggestedQuestion[], tradeNoun: string): string {
   if (!questions.length) {
     return `Hi, thanks for the quote — it covers everything I'd expect to see, so I've no outstanding questions at this stage. I'll be in touch to confirm next steps.`;
