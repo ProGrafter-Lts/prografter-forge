@@ -94,6 +94,8 @@ const CookieConsent = () => {
     const stored = getStoredCookiePrefs();
     if (!stored) setVisible(true);
     else setPrefs(stored);
+    // Re-assert the stored decision once gtag has loaded (inline default runs earlier).
+    applyConsentToAnalytics(stored ?? { functional: false, analytics: false, marketing: false });
     const onOpen = () => {
       setPrefs(getStoredCookiePrefs() ?? DEFAULT_PREFS);
       setManaging(true);
