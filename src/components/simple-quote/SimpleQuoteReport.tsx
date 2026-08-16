@@ -56,6 +56,7 @@ export interface SimpleReportJson {
   what_appears_missing?: string[];
   supplied_separately?: SuppliedSeparatelyItem[];
   building_control?: { status?: string; detail?: string };
+  key_risks?: string[];
   questions?: string[];
   suggested_message?: string;
   suggested_questions?: SuggestedQuestion[];
