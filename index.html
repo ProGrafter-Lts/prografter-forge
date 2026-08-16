@@ -8,6 +8,26 @@
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
+      // Consent Mode v2 — deny until the user's stored choice says otherwise.
+      (function () {
+        var analytics = 'denied', marketing = 'denied';
+        try {
+          var raw = localStorage.getItem('pg_cookie_consent_v1');
+          if (raw) {
+            var p = (JSON.parse(raw) || {}).prefs || {};
+            analytics = p.analytics ? 'granted' : 'denied';
+            marketing = p.marketing ? 'granted' : 'denied';
+          }
+        } catch (e) { /* storage unavailable — stay denied */ }
+        gtag('consent', 'default', {
+          ad_storage: marketing,
+          ad_user_data: marketing,
+          ad_personalization: marketing,
+          analytics_storage: analytics,
+          functionality_storage: 'granted',
+          security_storage: 'granted'
+        });
+      })();
       gtag('js', new Date());
       gtag('config', 'G-G8KF4CMYVT');
     </script>
