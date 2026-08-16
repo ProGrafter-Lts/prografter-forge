@@ -1,7 +1,8 @@
 // Lightweight GA4 (gtag.js) helper.
 // gtag is loaded in index.html with measurement ID G-G8KF4CMYVT.
-// All calls here no-op safely if gtag is unavailable (e.g. blocked by the
-// Termly cookie-consent banner before the user grants analytics consent).
+// Calls no-op safely if gtag is unavailable. Analytics storage is gated by
+// Google Consent Mode v2: denied by default, granted only when the user opts
+// in via the cookie banner (src/components/CookieConsent.tsx).
 
 export const GA_MEASUREMENT_ID = "G-G8KF4CMYVT";
 
