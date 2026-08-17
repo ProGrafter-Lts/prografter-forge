@@ -367,6 +367,14 @@ export default function AtlasWorkspace() {
             </Button>
           )}
           <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate(`/atlas/${survey.id}/capture`)}
+            className="gap-1.5 text-white/80 hover:text-white hover:bg-white/[0.06] rounded-full h-9"
+          >
+            <ClipboardCheck className="w-3.5 h-3.5" /> Guided capture
+          </Button>
+          <Button
             size="sm"
             onClick={() => navigate(`/atlas/${survey.id}/review`)}
             className="gap-1.5 rounded-full h-9 px-4 shadow-lg shadow-teal-500/20"
@@ -374,6 +382,7 @@ export default function AtlasWorkspace() {
           >
             <ClipboardCheck className="w-3.5 h-3.5" /> Review & complete
           </Button>
+
         </div>
       </section>
 

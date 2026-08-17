@@ -84,7 +84,7 @@ export default function AtlasNewSurvey() {
       console.error(e);
     }
     toast.success("Survey created");
-    navigate(`/atlas/${data.id}`);
+    navigate(`/atlas/${data.id}/capture`);
   }
 
   return (
