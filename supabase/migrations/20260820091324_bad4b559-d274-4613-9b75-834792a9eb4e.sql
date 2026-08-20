@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.pc_path_belongs_to_user(text, uuid) FROM anon;
