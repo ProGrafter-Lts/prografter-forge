@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDrawerNavigate } from "@/hooks/useDrawerNavigate";
 import { supabase } from "@/integrations/supabase/client";
-import { Briefcase, MapPin, Clock, ChevronRight, ShieldCheck, Leaf } from "lucide-react";
+import { Briefcase, MapPin, Clock, ChevronRight, ShieldCheck, Leaf, Hand, Check } from "lucide-react";
 import { isGreenTrade } from "@/lib/greenTrades";
+import { registerJobInterest, registerJobViewed } from "@/lib/jobInterest";
+import { toast } from "sonner";
 
 interface JobMatchRow {
   id: string;
@@ -11,7 +13,9 @@ interface JobMatchRow {
   estimated_value: string | null;
   notified_at: string;
   status: string;
+  interested_at: string | null;
 }
+
 
 interface JobRow {
   id: string;
