@@ -163,17 +163,39 @@ const JobMatchesList = ({ matches, tradeId }: { matches: JobMatch[]; tradeId?: s
                 {match.jobs?.description}
               </p>
 
-              <button
-                onClick={() => {
-                  const jobId = match.jobs?.id || match.job_id;
-                  markJobMatchSeen(match.id);
-                  if (jobId) openDrawer(`/project/${jobId}`);
-                }}
-                className="mt-4 w-full sm:w-auto flex items-center justify-center gap-1.5 bg-secondary text-secondary-foreground font-mono text-sm font-semibold px-5 min-h-[44px] rounded-xl hover:opacity-90 transition-opacity shadow-sm cursor-pointer"
-              >
-                View &amp; Quote
-                <ChevronRight className="w-3 h-3" />
-              </button>
+              <div className="mt-4 flex flex-col sm:flex-row gap-2">
+                <button
+                  onClick={() => {
+                    const jobId = match.jobs?.id || match.job_id;
+                    markJobMatchSeen(match.id);
+                    if (jobId) {
+                      if (tradeId) void registerJobViewed(jobId, tradeId);
+                      openDrawer(`/project/${jobId}`);
+                    }
+                  }}
+                  className="w-full sm:w-auto flex items-center justify-center gap-1.5 bg-secondary text-secondary-foreground font-mono text-sm font-semibold px-5 min-h-[44px] rounded-xl hover:opacity-90 transition-opacity shadow-sm cursor-pointer"
+                >
+                  View &amp; Quote
+                  <ChevronRight className="w-3 h-3" />
+                </button>
+
+                {match.interested_at || interested[match.id] ? (
+                  <span className="w-full sm:w-auto flex items-center justify-center gap-1.5 border border-emerald-500/40 bg-emerald-500/10 text-emerald-700 font-mono text-sm px-5 min-h-[44px] rounded-xl">
+                    <Check className="w-3.5 h-3.5" />
+                    Interest registered
+                  </span>
+                ) : (
+                  <button
+                    disabled={savingId === match.id || !tradeId}
+                    onClick={() => void markInterested(match)}
+                    className="w-full sm:w-auto flex items-center justify-center gap-1.5 border border-secondary/40 text-secondary font-mono text-sm font-semibold px-5 min-h-[44px] rounded-xl hover:bg-secondary/10 transition-colors cursor-pointer disabled:opacity-60"
+                  >
+                    <Hand className="w-3.5 h-3.5" />
+                    {savingId === match.id ? "Saving…" : "I'm interested"}
+                  </button>
+                )}
+              </div>
+
             </div>
           ))}
 
