@@ -17,7 +17,7 @@ const WaitlistOutOfAreaEmail = ({ name }: WaitlistOutOfAreaProps) => (
       like you on board.
     </Para>
     <Para>
-      We're launching in <strong>Nottinghamshire and the East Midlands first</strong>, and your
+      We're currently live across <strong>the East Midlands, Lincolnshire and South Yorkshire</strong> (NG, DE, LE, LN, S and DN postcodes), and your
       postcode is just outside that initial area. The good news: if things go well here (and we
       think they will), we'll be rolling out to more areas soon.
     </Para>
@@ -28,7 +28,7 @@ const WaitlistOutOfAreaEmail = ({ name }: WaitlistOutOfAreaProps) => (
     </InfoCard>
     <Para>
       If you'd rather we didn't keep your details, just reply to this email and we'll remove them.
-      And if you believe you're already within the Nottinghamshire / East Midlands area, reply and
+      And if you believe you're already within an NG, DE, LE, LN, S or DN postcode, reply and
       we'll get you set up straight away.
     </Para>
   </ProGrafterShell>
