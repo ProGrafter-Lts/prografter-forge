@@ -319,6 +319,9 @@ function Coverage({ rows }: { rows: CoverageRow[] }) {
                   <td className="px-4 py-3">
                     <Bar value={r.trade_count} max={maxTrades} color="bg-teal" />
                   </td>
+                  <td className="px-4 py-3 font-body text-secondary-text text-right tabular-nums">
+                    {r.coming_soon_count || "—"}
+                  </td>
                   <td className="px-4 py-3">
                     <Bar value={r.job_count} max={maxJobs} color="bg-navy" />
                   </td>
