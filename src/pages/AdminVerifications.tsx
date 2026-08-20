@@ -489,9 +489,9 @@ const AdminVerifications = () => {
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
         <div className="bg-teal/5 border border-teal/20 rounded-xl p-3 mb-6 text-sm text-navy/80 flex flex-wrap items-center gap-x-2 gap-y-1">
-          <strong className="text-teal">Pre-submission queue.</strong>
-          <span>Trades who started signup but haven't completed document upload appear here. For submitted 6-step applications in active vetting, use the</span>
-          <Link to="/vetting" className="text-teal underline font-semibold">Vetting Dashboard →</Link>
+          <strong className="text-teal">Legacy archive.</strong>
+          <span>Old pre-submission signups only. All new trade applications are reviewed in</span>
+          <Link to="/admin/applications" className="text-teal underline font-semibold">Trade Applications →</Link>
         </div>
 
         {matStats && (
