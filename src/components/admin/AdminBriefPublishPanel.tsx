@@ -171,6 +171,7 @@ export default function AdminBriefPublishPanel({
       const n = (data as any)?.released ?? 0;
       setMsg(n > 0 ? `Released next batch: ${n} trade(s) invited.` : "No further trades to release.");
       await loadTrades();
+      await loadEscalations();
     } catch (e: any) {
       setMsg("Release failed: " + (e.message || e));
     } finally {
