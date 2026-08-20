@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState, type CSSProperties, type ReactNode, type ChangeEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { trackEvent } from "@/lib/analytics";
+import { isInLiveArea } from "@/lib/serviceArea";
 import { processImageFile, ACCEPTED_FORMATS_LABEL } from "@/lib/portfolioImage";
 import Logo from "@/components/Logo";
 
