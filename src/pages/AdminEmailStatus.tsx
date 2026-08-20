@@ -61,19 +61,23 @@ const AdminEmailStatus = () => {
     return out;
   }, [logs]);
 
+  // Catalog derived from the generated template registry + any template_name
+  // actually observed in the log, so it can never silently drift.
+  const sortedCatalog = useMemo(
+    () => buildEmailCatalog(logs.map((r) => r.template_name)),
+    [logs]
+  );
+
   const statsByEmail = useMemo<Record<string, Stats>>(() => {
     const out: Record<string, Stats> = {};
-    for (const e of EMAIL_CATALOG) {
+    for (const e of sortedCatalog) {
       const rows = dedupedByMessage.filter((r) => r.template_name === e.matchKey);
       const sent = rows.filter((r) => r.status === "sent");
       const failed = rows.filter(
         (r) => r.status === "failed" || r.status === "dlq" || r.status === "bounced"
       );
       out[e.name] = {
-        configured:
-          e.category === "auth"
-            ? true
-            : REGISTERED_TEMPLATES.has(e.name),
+        configured: e.registered,
         lastSent: sent[0]?.created_at || null,
         lastFailed: failed[0]?.created_at || null,
         lastFailedReason: failed[0]?.error_message || null,
@@ -83,16 +87,8 @@ const AdminEmailStatus = () => {
       };
     }
     return out;
-  }, [dedupedByMessage]);
+  }, [dedupedByMessage, sortedCatalog]);
 
-  const sortedCatalog = useMemo(
-    () =>
-      [...EMAIL_CATALOG].sort(
-        (a, b) =>
-          a.category.localeCompare(b.category) || a.name.localeCompare(b.name)
-      ),
-    []
-  );
 
   return (
     <div className="min-h-screen bg-cream">
