@@ -419,8 +419,9 @@ export default function AdminCallNote() {
         <div className="rounded-2xl bg-white border border-navy/10 p-5 mb-5">
           <h2 className="font-heading text-lg text-navy mb-2">Recording & consent</h2>
           <p className="font-body text-sm text-secondary-text mb-3">
-            Before recording, confirm the homeowner is aware that this call may be recorded and transcribed for
-            project scoping, platform support and service improvement.
+            Before recording, confirm the homeowner is aware that this call may be recorded for
+            project scoping, platform support and service improvement. Recordings are stored securely and are
+            admin-only. Transcription is currently manual — no automatic transcription takes place.
           </p>
           <label className="flex items-start gap-2 text-sm text-navy">
             <input type="checkbox" className="mt-1" checked={note.consent_given}
