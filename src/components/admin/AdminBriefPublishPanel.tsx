@@ -83,6 +83,22 @@ export default function AdminBriefPublishPanel({
   const [overrideReason, setOverrideReason] = useState("");
   const [releasing, setReleasing] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  const [escalations, setEscalations] = useState<
+    { id: string; source: string; note: string | null; created_at: string }[]
+  >([]);
+
+  const loadEscalations = async () => {
+    if (!brief.job_id) return;
+    const { data } = await supabase
+      .from("job_escalation_events")
+      .select("id, source, note, created_at")
+      .eq("job_id", brief.job_id)
+      .order("created_at", { ascending: false })
+      .limit(10);
+    setEscalations((data as any) || []);
+  };
+
+  useEffect(() => { loadEscalations(); /* eslint-disable-next-line */ }, [brief.job_id]);
 
   const checklist = buildChecklist(brief);
   const blockingFlags = checklist.filter((c) => c.blocking && !c.ok).map((c) => c.label);
