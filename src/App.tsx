@@ -72,7 +72,6 @@ const LegalReview = lazyRetry(() => import("./pages/LegalReview.tsx"));
 const QuickBuildPage = lazyRetry(() => import("./pages/QuickBuildPage.tsx"));
 const QuoteBuilder = lazyRetry(() => import("./pages/QuoteBuilder.tsx"));
 const Apply = lazyRetry(() => import("./pages/Apply.tsx"));
-const Vetting = lazyRetry(() => import("./pages/Vetting.tsx"));
 const PostJobBrief = lazyRetry(() => import("./pages/PostJobBrief.tsx"));
 const ProjectClarity = lazyRetry(() => import("./pages/ProjectClarity.tsx"));
 const ProjectBuilder = lazyRetry(() => import("./pages/ProjectBuilder.tsx"));
@@ -279,7 +278,6 @@ const AppRoutes = () => {
             <Route path="/share-your-experience" element={<SubmitTestimonial />} />
             <Route path="/legal-review" element={<LegalReview />} />
             <Route path="/apply" element={<Apply />} />
-            <Route path="/vetting" element={<Vetting />} />
             <Route path="/post-job-brief" element={<PostJobBrief />} />
             <Route path="/prografter-intelligence" element={<ProGrafterIntelligence />} />
             <Route path="/traders/:id/reviews" element={<TraderReviews />} />
