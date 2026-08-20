@@ -1,0 +1,2 @@
+CREATE POLICY "Admins can insert quote checks" ON public.quote_checks FOR INSERT TO authenticated WITH CHECK (has_role(auth.uid(), 'admin'::app_role));
+CREATE POLICY "Admins can update quote checks" ON public.quote_checks FOR UPDATE TO authenticated USING (has_role(auth.uid(), 'admin'::app_role)) WITH CHECK (has_role(auth.uid(), 'admin'::app_role));

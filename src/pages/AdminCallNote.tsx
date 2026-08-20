@@ -244,8 +244,16 @@ export default function AdminCallNote() {
   };
 
   // ---- save summary to job brief / quote check ----
+  // Cold start: if nothing is linked yet, CREATE the link instead of refusing.
   const saveToJobBrief = async () => {
-    if (!note?.job_brief_id) { toast.error("No linked job brief."); return; }
+    if (!note) return;
+    let briefId = note.job_brief_id;
+    if (!briefId) {
+      const linked = await createBriefFromCall(note);
+      if (!linked?.job_brief_id) return; // createBriefFromCall already reported why
+      briefId = linked.job_brief_id;
+      setNote({ ...note, ...linked });
+    }
     const scopeAddition = [note.outputs.job_brief_improvements, note.answers.scope_summary, note.answers.affordability_concern && `Budget: ${note.answers.affordability_concern}`].filter(Boolean).join("\n");
     const { error } = await (supabase as any)
       .from("job_briefs")
@@ -253,19 +261,53 @@ export default function AdminCallNote() {
         scoping_notes: scopeAddition,
         planning_notes: note.answers.planning_call_notes || null,
       })
-      .eq("id", note.job_brief_id);
+      .eq("id", briefId);
     if (error) { toast.error("Could not save to job brief: " + error.message); return; }
     toast.success("Saved to job brief");
   };
+
   const saveToQuoteCheck = async () => {
-    if (!note?.quote_check_id) { toast.error("No linked quote check."); return; }
+    if (!note) return;
+    let checkId = note.quote_check_id;
+    if (!checkId) {
+      if (!note.homeowner_email?.trim()) {
+        toast.error("Add the homeowner's email before creating a quote check.");
+        return;
+      }
+      const a = note.answers || {};
+      const { data: created, error: createErr } = await (supabase as any)
+        .from("quote_checks")
+        .insert({
+          email: note.homeowner_email,
+          project_type: a.project_type || "other",
+          postcode: (a.postcode || "").toString().toUpperCase(),
+          description: [a.scope_summary, note.key_concerns].filter(Boolean).join("\n\n") || "Created from scoping call",
+          pdf_url: "",
+          status: "awaiting_quote",
+          checker_type: "admin_call",
+        })
+        .select("id")
+        .single();
+      if (createErr || !created?.id) {
+        toast.error("Could not create quote check: " + (createErr?.message ?? "unknown error"));
+        return;
+      }
+      checkId = created.id as string;
+      await (supabase as any)
+        .from("customer_call_notes")
+        .update({ quote_check_id: checkId, updated_at: new Date().toISOString() })
+        .eq("id", note.id);
+      setNote({ ...note, quote_check_id: checkId });
+      toast.success("Quote check created and linked");
+    }
     const { error } = await (supabase as any)
       .from("quote_checks")
       .update({ admin_call_notes: note.ai_summary || note.outputs.homeowner_summary })
-      .eq("id", note.quote_check_id);
+      .eq("id", checkId);
     if (error) { toast.error("Could not save to quote check: " + error.message); return; }
     toast.success("Saved to quote check");
   };
+
 
   const addToDataset = async () => {
     if (!note) return;
