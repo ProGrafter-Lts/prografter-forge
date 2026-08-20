@@ -96,6 +96,59 @@ export default function AdminCallNote() {
   const setOutput = (k: string, v: string) =>
     setNote((prev) => (prev ? { ...prev, outputs: { ...prev.outputs, [k]: v } } : prev));
 
+  // Create a job brief from a cold call (no existing reference to attach to).
+  // Uses the SAME edge function as the public online form, so a call-based brief
+  // lands in exactly the same place with a real PG- reference, ready for trades.
+  const createBriefFromCall = async (n: Note): Promise<Partial<Note> | null> => {
+    const a = n.answers || {};
+    const missing: string[] = [];
+    if (!n.homeowner_name?.trim()) missing.push("name");
+    if (!n.homeowner_email?.trim()) missing.push("email");
+    if (!n.homeowner_phone?.trim()) missing.push("phone");
+    if (!String(a.address_line1 ?? "").trim()) missing.push("address line 1");
+    if (!String(a.city ?? "").trim()) missing.push("town/city");
+    if (!String(a.postcode ?? "").trim()) missing.push("postcode");
+    if (missing.length) {
+      toast.message("Call saved — job brief not created yet", {
+        description: `Add ${missing.join(", ")} to create the job brief automatically.`,
+      });
+      return null;
+    }
+    const { data, error } = await supabase.functions.invoke("submit-job-brief", {
+      body: {
+        full_name: n.homeowner_name,
+        email: n.homeowner_email,
+        phone: n.homeowner_phone,
+        address_line1: a.address_line1,
+        city: a.city,
+        postcode: a.postcode,
+        job_title: a.job_title || a.project_type || "Scoping call enquiry",
+        job_description: [a.scope_summary, a.included_works, n.key_concerns].filter(Boolean).join("\n\n") || null,
+        scope_items: a.included_works || null,
+        known_issues: [a.missing_works, a.known_constraints].filter(Boolean).join("\n") || null,
+        planning_permission: a.planning_status || null,
+        building_regs: a.building_control_status || null,
+        budget_band: a.budget_expectation || null,
+        timeline: a.desired_start || a.urgency || null,
+        quotes_received: a.num_quotes || null,
+        additional_notes: `Created from scoping call ${n.id}.`,
+        needs_scoping: false,
+      },
+    });
+    if (error || !(data as any)?.ref) {
+      toast.error("Could not create job brief: " + (error?.message ?? "unknown error"));
+      return null;
+    }
+    const ref = (data as any).ref as string;
+    const briefId = ((data as any).briefId as string | null) ?? null;
+    await (supabase as any)
+      .from("customer_call_notes")
+      .update({ job_brief_id: briefId, project_reference: ref, updated_at: new Date().toISOString() })
+      .eq("id", n.id);
+    toast.success(`Job brief created — ${ref}`);
+    return { job_brief_id: briefId, project_reference: ref };
+  };
+
   const save = async (extra?: Partial<Note>, silent = false) => {
     if (!note) return;
     setSaving(true);
@@ -103,11 +156,17 @@ export default function AdminCallNote() {
     const { id: _id, ...payload } = merged;
     const { error } = await (supabase as any)
       .from("customer_call_notes").update({ ...payload, updated_at: new Date().toISOString() }).eq("id", id);
+    if (error) { setSaving(false); toast.error(error.message); return; }
+    let linked: Partial<Note> | null = null;
+    // Cold start: nothing to attach to → create the job brief automatically.
+    if (!silent && !merged.job_brief_id && !merged.quote_check_id) {
+      linked = await createBriefFromCall(merged);
+    }
     setSaving(false);
-    if (error) { toast.error(error.message); return; }
-    if (extra) setNote(merged);
+    if (extra || linked) setNote({ ...merged, ...(linked ?? {}) });
     if (!silent) toast.success("Saved");
   };
+
 
   // ---- recording ----
   const startRecording = async () => {
@@ -124,7 +183,7 @@ export default function AdminCallNote() {
         const { error } = await (supabase as any).storage
           .from("call-recordings").upload(path, blob, { contentType: "audio/webm" });
         if (error) { toast.error("Upload failed: " + error.message); return; }
-        await save({ recording_path: path });
+        await save({ recording_path: path }, true);
         const { data: signed } = await (supabase as any).storage
           .from("call-recordings").createSignedUrl(path, 3600);
         if (signed?.signedUrl) setRecordingUrl(signed.signedUrl);
@@ -326,12 +385,27 @@ export default function AdminCallNote() {
             <input className="mt-1 w-full rounded-lg border border-navy/15 px-3 py-2 text-sm text-navy" value={note.project_reference ?? ""} onChange={(e) => patch({ project_reference: e.target.value })} /></div>
           <div><label className="font-mono text-[11px] uppercase text-secondary-text">Follow-up date</label>
             <input type="date" className="mt-1 w-full rounded-lg border border-navy/15 px-3 py-2 text-sm text-navy" value={note.follow_up_date ?? ""} onChange={(e) => patch({ follow_up_date: e.target.value })} /></div>
+          <div><label className="font-mono text-[11px] uppercase text-secondary-text">Address line 1</label>
+            <input className="mt-1 w-full rounded-lg border border-navy/15 px-3 py-2 text-sm text-navy" value={note.answers.address_line1 ?? ""} onChange={(e) => setAnswer("address_line1", e.target.value)} /></div>
+          <div><label className="font-mono text-[11px] uppercase text-secondary-text">Town / city</label>
+            <input className="mt-1 w-full rounded-lg border border-navy/15 px-3 py-2 text-sm text-navy" value={note.answers.city ?? ""} onChange={(e) => setAnswer("city", e.target.value)} /></div>
+          <div><label className="font-mono text-[11px] uppercase text-secondary-text">Postcode</label>
+            <input className="mt-1 w-full rounded-lg border border-navy/15 px-3 py-2 text-sm text-navy" value={note.answers.postcode ?? ""} onChange={(e) => setAnswer("postcode", e.target.value)} /></div>
+          <div><label className="font-mono text-[11px] uppercase text-secondary-text">Job title</label>
+            <input className="mt-1 w-full rounded-lg border border-navy/15 px-3 py-2 text-sm text-navy" value={note.answers.job_title ?? ""} onChange={(e) => setAnswer("job_title", e.target.value)} /></div>
           <div className="sm:col-span-2 text-xs text-secondary-text">
             {note.job_brief_id && <span className="mr-3">Linked job brief ✓</span>}
             {note.quote_check_id && <span className="mr-3">Linked quote check ✓</span>}
             {note.project_id && <span className="mr-3">Linked project ✓</span>}
             {note.homeowner_id && <span>Linked homeowner ✓</span>}
           </div>
+          {!note.job_brief_id && !note.quote_check_id && (
+            <p className="sm:col-span-2 font-mono text-[11px] text-teal">
+              Cold call — saving with name, email, phone, address, town and postcode filled in will create a new job
+              brief automatically (same place as the online form) and issue a PG- reference.
+            </p>
+          )}
+
         </div>
 
         {/* Opening script */}
@@ -345,8 +419,9 @@ export default function AdminCallNote() {
         <div className="rounded-2xl bg-white border border-navy/10 p-5 mb-5">
           <h2 className="font-heading text-lg text-navy mb-2">Recording & consent</h2>
           <p className="font-body text-sm text-secondary-text mb-3">
-            Before recording, confirm the homeowner is aware that this call may be recorded and transcribed for
-            project scoping, platform support and service improvement.
+            Before recording, confirm the homeowner is aware that this call may be recorded for
+            project scoping, platform support and service improvement. Recordings are stored securely and are
+            admin-only. Transcription is currently manual — no automatic transcription takes place.
           </p>
           <label className="flex items-start gap-2 text-sm text-navy">
             <input type="checkbox" className="mt-1" checked={note.consent_given}
