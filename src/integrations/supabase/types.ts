@@ -1922,6 +1922,60 @@ export type Database = {
           },
         ]
       }
+      job_escalation_events: {
+        Row: {
+          actor_user_id: string | null
+          brief_id: string | null
+          created_at: string
+          expired_count: number
+          expired_invitation_ids: string[]
+          id: string
+          job_id: string
+          note: string | null
+          released_count: number
+          source: string
+        }
+        Insert: {
+          actor_user_id?: string | null
+          brief_id?: string | null
+          created_at?: string
+          expired_count?: number
+          expired_invitation_ids?: string[]
+          id?: string
+          job_id: string
+          note?: string | null
+          released_count?: number
+          source?: string
+        }
+        Update: {
+          actor_user_id?: string | null
+          brief_id?: string | null
+          created_at?: string
+          expired_count?: number
+          expired_invitation_ids?: string[]
+          id?: string
+          job_id?: string
+          note?: string | null
+          released_count?: number
+          source?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_escalation_events_brief_id_fkey"
+            columns: ["brief_id"]
+            isOneToOne: false
+            referencedRelation: "job_briefs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_escalation_events_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       job_matches: {
         Row: {
           created_at: string
@@ -4203,6 +4257,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      scheduler_locks: {
+        Row: {
+          locked_until: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          locked_until: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          locked_until?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       scraped_trades: {
         Row: {
