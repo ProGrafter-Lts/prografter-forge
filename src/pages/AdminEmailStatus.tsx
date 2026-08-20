@@ -5,68 +5,8 @@ import SEO from "@/components/SEO";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import { format } from "date-fns";
 
-// Emails the platform sends, grouped by category.
-// `matchKey` is the value stored in email_send_log.template_name.
-const EMAIL_CATALOG: {
-  name: string;
-  category: "auth" | "onboarding" | "contract" | "payments" | "quotes" | "project";
-  matchKey: string;
-}[] = [
-  // Auth (handled by auth-email-hook — each action_type logs under its own name)
-  { name: "auth_signup_verification", category: "auth", matchKey: "signup" },
-  { name: "auth_password_reset",      category: "auth", matchKey: "recovery" },
-  { name: "auth_email_change",        category: "auth", matchKey: "email_change" },
-  { name: "auth_magic_link",          category: "auth", matchKey: "magiclink" },
-  // Onboarding
-  { name: "homeowner-welcome",            category: "onboarding", matchKey: "homeowner-welcome" },
-  { name: "trade-welcome",                category: "onboarding", matchKey: "trade-welcome" },
-  { name: "trade-verification-submitted", category: "onboarding", matchKey: "trade-verification-submitted" },
-  { name: "trade-verified",               category: "onboarding", matchKey: "trade-verified" },
-  { name: "trade-rejected",               category: "onboarding", matchKey: "trade-rejected" },
-  { name: "trade-verification-query",     category: "onboarding", matchKey: "trade-verification-query" },
-  // Quotes
-  { name: "quote-received",               category: "quotes", matchKey: "quote-received" },
-  // Payments
-  { name: "payment-released-trade",       category: "payments", matchKey: "payment-released-trade" },
-  { name: "payment-released-homeowner",   category: "payments", matchKey: "payment-released-homeowner" },
-  // Project lifecycle
-  { name: "project-overdue-trade",        category: "project", matchKey: "project-overdue-trade" },
-  { name: "project-overdue-homeowner",    category: "project", matchKey: "project-overdue-homeowner" },
-  // Contract lifecycle — templates registered, triggers ship with contract signing (target June 2026)
-  { name: "contract-generated",           category: "contract", matchKey: "contract-generated" },
-  { name: "contract-awaiting-signature",  category: "contract", matchKey: "contract-awaiting-signature" },
-  { name: "contract-activated",           category: "contract", matchKey: "contract-activated" },
-  { name: "variation-proposed",           category: "contract", matchKey: "variation-proposed" },
-  { name: "variation-approved",           category: "contract", matchKey: "variation-approved" },
-  { name: "completion-marked",            category: "contract", matchKey: "completion-marked" },
-  { name: "completion-accepted",          category: "contract", matchKey: "completion-accepted" },
-];
+import { buildEmailCatalog } from "@/lib/emailCatalog";
 
-const REGISTERED_TEMPLATES = new Set([
-  "homeowner-welcome",
-  "trade-welcome",
-  "trade-verification-submitted",
-  "trade-verified",
-  "trade-rejected",
-  "trade-verification-query",
-  "trade-coming-soon",
-  "waitlist-welcome",
-  "waitlist-admin-notification",
-  "waitlist-out-of-area",
-  "contact-message",
-  "quote-received",
-  "payment-released-trade",
-  "payment-released-homeowner",
-  "project-overdue-trade",
-  "project-overdue-homeowner",
-  "contract-generated",
-  "contract-awaiting-signature",
-  "contract-activated",
-  "variation-proposed",
-  "variation-approved",
-  "completion-marked",
-  "completion-accepted",
-]);
 
 interface LogRow {
   template_name: string;
