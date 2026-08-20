@@ -5601,6 +5601,7 @@ export type Database = {
         Args: never
         Returns: {
           area: string
+          coming_soon_count: number
           job_count: number
           match_count: number
           trade_count: number

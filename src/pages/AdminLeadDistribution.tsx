@@ -26,6 +26,7 @@ interface LeadRow {
 interface CoverageRow {
   area: string;
   trade_count: number;
+  coming_soon_count: number;
   job_count: number;
   match_count: number;
 }
@@ -294,14 +295,16 @@ function Coverage({ rows }: { rows: CoverageRow[] }) {
   return (
     <>
       <p className="font-body text-sm text-secondary-text mb-3">
-        Per postcode area: registered trades vs job posts. Use this to balance recruitment and homeowner advertising.
+        Per postcode area: trades that can actually receive leads (verified and in-area) vs job posts.
+        Out-of-area "coming soon" trades are counted separately — they can never be sent a lead.
       </p>
       <div className="rounded-2xl bg-white border border-navy/10 overflow-hidden">
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-cream/40 text-left font-body text-secondary-text">
               <th className="px-4 py-3 font-medium">Area</th>
-              <th className="px-4 py-3 font-medium">Registered trades</th>
+              <th className="px-4 py-3 font-medium">Lead-eligible trades</th>
+              <th className="px-4 py-3 font-medium text-right">Coming soon (out of area)</th>
               <th className="px-4 py-3 font-medium">Job posts</th>
               <th className="px-4 py-3 font-medium text-right">Leads sent</th>
               <th className="px-4 py-3 font-medium text-right">Signal</th>
@@ -315,6 +318,9 @@ function Coverage({ rows }: { rows: CoverageRow[] }) {
                   <td className="px-4 py-3 font-heading text-navy">{r.area}</td>
                   <td className="px-4 py-3">
                     <Bar value={r.trade_count} max={maxTrades} color="bg-teal" />
+                  </td>
+                  <td className="px-4 py-3 font-body text-secondary-text text-right tabular-nums">
+                    {r.coming_soon_count || "—"}
                   </td>
                   <td className="px-4 py-3">
                     <Bar value={r.job_count} max={maxJobs} color="bg-navy" />
