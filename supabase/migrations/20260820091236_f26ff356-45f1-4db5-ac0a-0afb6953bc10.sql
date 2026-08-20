@@ -1,0 +1,1 @@
+GRANT EXECUTE ON FUNCTION public.pc_path_belongs_to_user(text, uuid) TO authenticated, anon;
