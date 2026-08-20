@@ -1927,6 +1927,7 @@ export type Database = {
           created_at: string
           estimated_value: string | null
           id: string
+          interested_at: string | null
           is_test: boolean
           job_id: string
           notified_at: string
@@ -1937,6 +1938,7 @@ export type Database = {
           created_at?: string
           estimated_value?: string | null
           id?: string
+          interested_at?: string | null
           is_test?: boolean
           job_id: string
           notified_at?: string
@@ -1947,6 +1949,7 @@ export type Database = {
           created_at?: string
           estimated_value?: string | null
           id?: string
+          interested_at?: string | null
           is_test?: boolean
           job_id?: string
           notified_at?: string
@@ -5311,12 +5314,14 @@ export type Database = {
           id: string
           is_current: boolean
           issue_date: string | null
+          legacy_source: string | null
           original_filename: string | null
           policy_or_membership_number: string | null
           provider_name: string | null
           rejection_reason: string | null
           reviewed_at: string | null
           reviewed_by: string | null
+          source_bucket: string
           status: string
           trade_id: string
           trade_notes: string | null
@@ -5332,12 +5337,14 @@ export type Database = {
           id?: string
           is_current?: boolean
           issue_date?: string | null
+          legacy_source?: string | null
           original_filename?: string | null
           policy_or_membership_number?: string | null
           provider_name?: string | null
           rejection_reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          source_bucket?: string
           status?: string
           trade_id: string
           trade_notes?: string | null
@@ -5353,12 +5360,14 @@ export type Database = {
           id?: string
           is_current?: boolean
           issue_date?: string | null
+          legacy_source?: string | null
           original_filename?: string | null
           policy_or_membership_number?: string | null
           provider_name?: string | null
           rejection_reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          source_bucket?: string
           status?: string
           trade_id?: string
           trade_notes?: string | null
