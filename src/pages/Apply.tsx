@@ -450,6 +450,23 @@ export default function Apply() {
         console.warn("trade application welcome email failed (non-blocking)", welcomeErr);
       }
 
+      // 5. Out-of-area applicants get the "coming soon" note automatically —
+      // no manual admin step. Same template the Verifications queue used.
+      if (outOfArea) {
+        try {
+          await supabase.functions.invoke("send-transactional-email", {
+            body: {
+              templateName: "trade-coming-soon",
+              recipientEmail: applicantEmail,
+              idempotencyKey: `trade-coming-soon-app-${applicationId}`,
+              templateData: { name: firstName },
+            },
+          });
+        } catch (csErr) {
+          console.warn("trade coming-soon email failed (non-blocking)", csErr);
+        }
+      }
+
       setDone(true);
       trackEvent("sign_up", { method: "trade_application" });
     } catch (err: any) {
