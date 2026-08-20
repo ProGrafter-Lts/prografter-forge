@@ -10,12 +10,14 @@ export type VaultBaseStatus =
 // Derived statuses shown to the user (base + expiry-aware)
 export type VaultDisplayStatus =
   | "missing"
+  | "legacy_verified"
   | "uploaded"
   | "pending_review"
   | "approved"
   | "rejected"
   | "expiring_soon"
   | "expired";
+
 
 export interface VaultDocTypeConfig {
   key: string;
@@ -74,7 +76,14 @@ export interface VaultDocument {
   is_current: boolean;
   created_at: string;
   updated_at: string;
+  /** Storage bucket the file lives in. Legacy migrations point at the application bucket. */
+  source_bucket?: string | null;
+  /** Set when the row was carried over from a pre-TradeVault verification record. */
+  legacy_source?: string | null;
 }
+
+export const VAULT_DEFAULT_BUCKET = "trade-verification-documents";
+
 
 export const EXPIRING_SOON_DAYS = 30;
 
