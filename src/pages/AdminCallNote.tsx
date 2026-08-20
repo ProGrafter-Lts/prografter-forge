@@ -326,12 +326,27 @@ export default function AdminCallNote() {
             <input className="mt-1 w-full rounded-lg border border-navy/15 px-3 py-2 text-sm text-navy" value={note.project_reference ?? ""} onChange={(e) => patch({ project_reference: e.target.value })} /></div>
           <div><label className="font-mono text-[11px] uppercase text-secondary-text">Follow-up date</label>
             <input type="date" className="mt-1 w-full rounded-lg border border-navy/15 px-3 py-2 text-sm text-navy" value={note.follow_up_date ?? ""} onChange={(e) => patch({ follow_up_date: e.target.value })} /></div>
+          <div><label className="font-mono text-[11px] uppercase text-secondary-text">Address line 1</label>
+            <input className="mt-1 w-full rounded-lg border border-navy/15 px-3 py-2 text-sm text-navy" value={note.answers.address_line1 ?? ""} onChange={(e) => setAnswer("address_line1", e.target.value)} /></div>
+          <div><label className="font-mono text-[11px] uppercase text-secondary-text">Town / city</label>
+            <input className="mt-1 w-full rounded-lg border border-navy/15 px-3 py-2 text-sm text-navy" value={note.answers.city ?? ""} onChange={(e) => setAnswer("city", e.target.value)} /></div>
+          <div><label className="font-mono text-[11px] uppercase text-secondary-text">Postcode</label>
+            <input className="mt-1 w-full rounded-lg border border-navy/15 px-3 py-2 text-sm text-navy" value={note.answers.postcode ?? ""} onChange={(e) => setAnswer("postcode", e.target.value)} /></div>
+          <div><label className="font-mono text-[11px] uppercase text-secondary-text">Job title</label>
+            <input className="mt-1 w-full rounded-lg border border-navy/15 px-3 py-2 text-sm text-navy" value={note.answers.job_title ?? ""} onChange={(e) => setAnswer("job_title", e.target.value)} /></div>
           <div className="sm:col-span-2 text-xs text-secondary-text">
             {note.job_brief_id && <span className="mr-3">Linked job brief ✓</span>}
             {note.quote_check_id && <span className="mr-3">Linked quote check ✓</span>}
             {note.project_id && <span className="mr-3">Linked project ✓</span>}
             {note.homeowner_id && <span>Linked homeowner ✓</span>}
           </div>
+          {!note.job_brief_id && !note.quote_check_id && (
+            <p className="sm:col-span-2 font-mono text-[11px] text-teal">
+              Cold call — saving with name, email, phone, address, town and postcode filled in will create a new job
+              brief automatically (same place as the online form) and issue a PG- reference.
+            </p>
+          )}
+
         </div>
 
         {/* Opening script */}
