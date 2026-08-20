@@ -39,6 +39,7 @@ export const STATUS_OPTIONS = [
   { value: "approved", label: "Approved" },
   { value: "rejected", label: "Rejected" },
   { value: "held", label: "Held" },
+  { value: "coming_soon", label: "Coming soon (out of area)" },
 ] as const;
 
 export const STATUS_LABEL: Record<string, string> = Object.fromEntries(
