@@ -53,6 +53,7 @@ export const STATUS_COLOR: Record<string, string> = {
   approved: "#16A34A",
   rejected: "#DC2626",
   held: "#6B7280",
+  coming_soon: "#0F766E",
 };
 
 export const QUAL_LABEL: Record<string, string> = {
