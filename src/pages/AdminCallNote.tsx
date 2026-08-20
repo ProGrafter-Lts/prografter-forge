@@ -96,6 +96,59 @@ export default function AdminCallNote() {
   const setOutput = (k: string, v: string) =>
     setNote((prev) => (prev ? { ...prev, outputs: { ...prev.outputs, [k]: v } } : prev));
 
+  // Create a job brief from a cold call (no existing reference to attach to).
+  // Uses the SAME edge function as the public online form, so a call-based brief
+  // lands in exactly the same place with a real PG- reference, ready for trades.
+  const createBriefFromCall = async (n: Note): Promise<Partial<Note> | null> => {
+    const a = n.answers || {};
+    const missing: string[] = [];
+    if (!n.homeowner_name?.trim()) missing.push("name");
+    if (!n.homeowner_email?.trim()) missing.push("email");
+    if (!n.homeowner_phone?.trim()) missing.push("phone");
+    if (!String(a.address_line1 ?? "").trim()) missing.push("address line 1");
+    if (!String(a.city ?? "").trim()) missing.push("town/city");
+    if (!String(a.postcode ?? "").trim()) missing.push("postcode");
+    if (missing.length) {
+      toast.message("Call saved — job brief not created yet", {
+        description: `Add ${missing.join(", ")} to create the job brief automatically.`,
+      });
+      return null;
+    }
+    const { data, error } = await supabase.functions.invoke("submit-job-brief", {
+      body: {
+        full_name: n.homeowner_name,
+        email: n.homeowner_email,
+        phone: n.homeowner_phone,
+        address_line1: a.address_line1,
+        city: a.city,
+        postcode: a.postcode,
+        job_title: a.job_title || a.project_type || "Scoping call enquiry",
+        job_description: [a.scope_summary, a.included_works, n.key_concerns].filter(Boolean).join("\n\n") || null,
+        scope_items: a.included_works || null,
+        known_issues: [a.missing_works, a.known_constraints].filter(Boolean).join("\n") || null,
+        planning_permission: a.planning_status || null,
+        building_regs: a.building_control_status || null,
+        budget_band: a.budget_expectation || null,
+        timeline: a.desired_start || a.urgency || null,
+        quotes_received: a.num_quotes || null,
+        additional_notes: `Created from scoping call ${n.id}.`,
+        needs_scoping: false,
+      },
+    });
+    if (error || !(data as any)?.ref) {
+      toast.error("Could not create job brief: " + (error?.message ?? "unknown error"));
+      return null;
+    }
+    const ref = (data as any).ref as string;
+    const briefId = ((data as any).briefId as string | null) ?? null;
+    await (supabase as any)
+      .from("customer_call_notes")
+      .update({ job_brief_id: briefId, project_reference: ref, updated_at: new Date().toISOString() })
+      .eq("id", n.id);
+    toast.success(`Job brief created — ${ref}`);
+    return { job_brief_id: briefId, project_reference: ref };
+  };
+
   const save = async (extra?: Partial<Note>, silent = false) => {
     if (!note) return;
     setSaving(true);
@@ -103,11 +156,17 @@ export default function AdminCallNote() {
     const { id: _id, ...payload } = merged;
     const { error } = await (supabase as any)
       .from("customer_call_notes").update({ ...payload, updated_at: new Date().toISOString() }).eq("id", id);
+    if (error) { setSaving(false); toast.error(error.message); return; }
+    let linked: Partial<Note> | null = null;
+    // Cold start: nothing to attach to → create the job brief automatically.
+    if (!silent && !merged.job_brief_id && !merged.quote_check_id) {
+      linked = await createBriefFromCall(merged);
+    }
     setSaving(false);
-    if (error) { toast.error(error.message); return; }
-    if (extra) setNote(merged);
+    if (extra || linked) setNote({ ...merged, ...(linked ?? {}) });
     if (!silent) toast.success("Saved");
   };
+
 
   // ---- recording ----
   const startRecording = async () => {
