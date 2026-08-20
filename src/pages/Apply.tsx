@@ -401,12 +401,10 @@ export default function Apply() {
         business_name: (form.business_name as string)?.trim() || null,
         trade_category_id: (form.trade_category_id as string) || null,
         qualification_path: (form.qualification_path as string) || null,
+        // The database trigger flags out-of-area postcodes as "coming_soon";
+        // the public insert policy requires status 'new' here.
         form_data: { ...form, out_of_area: outOfArea },
         document_paths: documentPaths,
-        verification_status: outOfArea ? "coming_soon" : "new",
-        admin_notes: outOfArea
-          ? `Auto-archived: postcode ${(form.postcode as string)?.trim().toUpperCase()} is outside the live service area (NG/DE/LE/LN/S/DN). "Coming soon" email sent automatically on submission.`
-          : null,
       });
       if (appError) throw appError;
 
