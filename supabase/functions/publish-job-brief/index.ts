@@ -105,6 +105,8 @@ Deno.serve(async (req) => {
       .from('jobs')
       .insert({
         homeowner_id: brief.homeowner_id,
+        // Canonical reference: the job inherits the brief's ref (one ref per project).
+        ref: brief.ref,
         title: brief.job_title || 'Home project',
         job_type: acceptedTypes[0] || brief.trade_category_id || 'General',
         description: brief.job_description || brief.job_title || 'See brief for details.',
