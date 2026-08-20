@@ -17,10 +17,12 @@ const TradeComingSoonEmail = ({ name }: TradeComingSoonProps) => (
       tradespeople like you on board.
     </Para>
     <Para>
-      We're launching in <Strong>Nottinghamshire and the East Midlands first</Strong> (NG, DE
-      and LE postcodes), and your area is just outside that initial launch. The good news: if
-      things go well here — and we think they will — we'll be rolling out to more areas soon.
+      We're currently live across <Strong>the East Midlands, Lincolnshire and South Yorkshire</Strong>{' '}
+      (NG, DE, LE, LN, S and DN postcodes), and your area is just outside that initial launch. The
+      good news: if things go well here — and we think they will — we'll be rolling out to more
+      areas soon.
     </Para>
+
 
     <InfoCard title="May we keep your details?">
       • We'd like to hold your application on file so you're first in the queue.<br />
