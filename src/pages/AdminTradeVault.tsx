@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import AdminNav from "@/components/AdminNav";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -135,7 +134,6 @@ const AdminTradeVault = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <AdminNav />
       <main className="max-w-[1100px] mx-auto px-4 md:px-6 py-8 space-y-6">
         <div>
           <h1 className="font-heading text-3xl text-foreground">TradeVault review</h1>
