@@ -26,6 +26,7 @@ interface LeadRow {
 interface CoverageRow {
   area: string;
   trade_count: number;
+  coming_soon_count: number;
   job_count: number;
   match_count: number;
 }
@@ -294,7 +295,8 @@ function Coverage({ rows }: { rows: CoverageRow[] }) {
   return (
     <>
       <p className="font-body text-sm text-secondary-text mb-3">
-        Per postcode area: registered trades vs job posts. Use this to balance recruitment and homeowner advertising.
+        Per postcode area: trades that can actually receive leads (verified and in-area) vs job posts.
+        Out-of-area "coming soon" trades are counted separately — they can never be sent a lead.
       </p>
       <div className="rounded-2xl bg-white border border-navy/10 overflow-hidden">
         <table className="w-full text-sm">
