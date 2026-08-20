@@ -267,6 +267,25 @@ export default function AdminBriefPublishPanel({
 
       {msg && <p style={{ marginTop: 10, fontSize: 12, color: C.deep }}>{msg}</p>}
 
+      {escalations.length > 0 && (
+        <div style={{ marginTop: 14, borderTop: `1px solid ${C.border}`, paddingTop: 10 }}>
+          <div style={{ fontWeight: 800, color: C.deep, fontSize: 13, marginBottom: 6 }}>Escalation history</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            {escalations.map((e) => (
+              <div key={e.id} style={{ display: "flex", gap: 8, alignItems: "flex-start", fontSize: 12, color: C.deep }}>
+                <span style={chip(e.source === "auto_48h" ? "#FEF3C7" : "#E0E7FF", e.source === "auto_48h" ? C.amberFg : "#3730A3")}>
+                  {e.source === "auto_48h" ? "AUTO 48h" : "MANUAL"}
+                </span>
+                <span style={{ flex: 1 }}>
+                  {e.note}
+                  <span style={{ color: C.secondary }}> · {new Date(e.created_at).toLocaleString("en-GB")}</span>
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Override modal */}
       {overrideOpen && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100, padding: 16 }}>
