@@ -39,6 +39,7 @@ export const STATUS_OPTIONS = [
   { value: "approved", label: "Approved" },
   { value: "rejected", label: "Rejected" },
   { value: "held", label: "Held" },
+  { value: "coming_soon", label: "Coming soon (out of area)" },
 ] as const;
 
 export const STATUS_LABEL: Record<string, string> = Object.fromEntries(
@@ -52,6 +53,7 @@ export const STATUS_COLOR: Record<string, string> = {
   approved: "#16A34A",
   rejected: "#DC2626",
   held: "#6B7280",
+  coming_soon: "#0F766E",
 };
 
 export const QUAL_LABEL: Record<string, string> = {

@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState, type CSSProperties, type ReactNode, type ChangeEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { trackEvent } from "@/lib/analytics";
+import { isInLiveArea } from "@/lib/serviceArea";
 import { processImageFile, ACCEPTED_FORMATS_LABEL } from "@/lib/portfolioImage";
 import Logo from "@/components/Logo";
 
@@ -386,6 +387,8 @@ export default function Apply() {
     try {
       const applicationId = crypto.randomUUID();
       const applicantEmail = (form.email as string).trim().toLowerCase();
+      // Automatic service-area check at the point of submission (NG/DE/LE/LN/S/DN).
+      const outOfArea = !isInLiveArea((form.postcode as string) || "");
 
       // 1. Upload all documents/photos to Cloud storage.
       const documentPaths = await uploadDocuments(applicationId);
@@ -398,8 +401,12 @@ export default function Apply() {
         business_name: (form.business_name as string)?.trim() || null,
         trade_category_id: (form.trade_category_id as string) || null,
         qualification_path: (form.qualification_path as string) || null,
-        form_data: { ...form },
+        form_data: { ...form, out_of_area: outOfArea },
         document_paths: documentPaths,
+        verification_status: outOfArea ? "coming_soon" : "new",
+        admin_notes: outOfArea
+          ? `Auto-archived: postcode ${(form.postcode as string)?.trim().toUpperCase()} is outside the live service area (NG/DE/LE/LN/S/DN). "Coming soon" email sent automatically on submission.`
+          : null,
       });
       if (appError) throw appError;
 
@@ -441,6 +448,23 @@ export default function Apply() {
         });
       } catch (welcomeErr) {
         console.warn("trade application welcome email failed (non-blocking)", welcomeErr);
+      }
+
+      // 5. Out-of-area applicants get the "coming soon" note automatically —
+      // no manual admin step. Same template the Verifications queue used.
+      if (outOfArea) {
+        try {
+          await supabase.functions.invoke("send-transactional-email", {
+            body: {
+              templateName: "trade-coming-soon",
+              recipientEmail: applicantEmail,
+              idempotencyKey: `trade-coming-soon-app-${applicationId}`,
+              templateData: { name: firstName },
+            },
+          });
+        } catch (csErr) {
+          console.warn("trade coming-soon email failed (non-blocking)", csErr);
+        }
       }
 
       setDone(true);

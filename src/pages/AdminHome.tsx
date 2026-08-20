@@ -3,8 +3,8 @@ import SEO from "@/components/SEO";
 
 const SECTIONS: { to: string; label: string; desc: string }[] = [
   { to: "/admin/waitlist", label: "Waitlist signups", desc: "Early-access signups; dismiss out-of-area" },
-  { to: "/admin/applications", label: "Applications", desc: "Review trade applications and references" },
-  { to: "/admin/verifications", label: "Verifications", desc: "Approve, query or reject pending trades" },
+  { to: "/admin/applications", label: "Trade Applications", desc: "Single review queue: all trade applications, documents and references" },
+  { to: "/admin/verifications", label: "Legacy signups (archive)", desc: "Read-only: 13 pre-submission signups from the old flow. Being retired — do not use for new applications" },
   { to: "/admin/tradevault", label: "TradeVault", desc: "Review trade documents: insurance, quals, accreditations" },
   { to: "/admin/job-briefs", label: "Job briefs", desc: "Homeowner job briefs submitted" },
   { to: "/admin/scoping-calls", label: "Customer Discovery", desc: "Guided scoping & discovery calls with homeowners" },
