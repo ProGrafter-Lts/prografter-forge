@@ -10,12 +10,14 @@ export type VaultBaseStatus =
 // Derived statuses shown to the user (base + expiry-aware)
 export type VaultDisplayStatus =
   | "missing"
+  | "legacy_verified"
   | "uploaded"
   | "pending_review"
   | "approved"
   | "rejected"
   | "expiring_soon"
   | "expired";
+
 
 export interface VaultDocTypeConfig {
   key: string;
@@ -74,7 +76,14 @@ export interface VaultDocument {
   is_current: boolean;
   created_at: string;
   updated_at: string;
+  /** Storage bucket the file lives in. Legacy migrations point at the application bucket. */
+  source_bucket?: string | null;
+  /** Set when the row was carried over from a pre-TradeVault verification record. */
+  legacy_source?: string | null;
 }
+
+export const VAULT_DEFAULT_BUCKET = "trade-verification-documents";
+
 
 export const EXPIRING_SOON_DAYS = 30;
 
@@ -94,9 +103,16 @@ export const daysUntil = (dateStr: string | null): number | null => {
 export const computeDisplayStatus = (
   doc: VaultDocument | undefined,
   required: boolean,
+  /**
+   * True when the trade holds a manual verification approved before TradeVault
+   * existed. A required document with no file is then a known-good approval
+   * awaiting a copy, not an unverified gap.
+   */
+  legacyVerified = false,
 ): VaultDisplayStatus => {
   if (!doc || !doc.file_url) {
-    return required ? "missing" : "missing";
+    if (required && legacyVerified) return "legacy_verified";
+    return "missing";
   }
 
   const days = daysUntil(doc.expiry_date);
@@ -119,6 +135,7 @@ export const STATUS_META: Record<
   { label: string; tone: "green" | "amber" | "red" | "grey" }
 > = {
   missing: { label: "Missing", tone: "red" },
+  legacy_verified: { label: "Verified pre-TradeVault — re-upload requested", tone: "amber" },
   uploaded: { label: "Uploaded", tone: "amber" },
   pending_review: { label: "Pending Review", tone: "amber" },
   approved: { label: "Approved", tone: "green" },
@@ -126,6 +143,7 @@ export const STATUS_META: Record<
   expiring_soon: { label: "Expiring Soon", tone: "amber" },
   expired: { label: "Expired", tone: "red" },
 };
+
 
 export const TONE_CLASSES: Record<string, string> = {
   green: "bg-emerald-500/15 text-emerald-600 border-emerald-500/30",

@@ -12,16 +12,27 @@ interface Props {
 /** Warning banners shown on the trade dashboard home when documents need attention. */
 const TradeVaultBanners = ({ tradeId, onOpenVault }: Props) => {
   const [docs, setDocs] = useState<VaultDocument[] | null>(null);
+  const [legacyVerified, setLegacyVerified] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data } = await supabase
-        .from("tradevault_documents")
-        .select("*")
-        .eq("trade_id", tradeId)
-        .eq("is_current", true);
-      if (!cancelled) setDocs((data as VaultDocument[]) ?? []);
+      const [docRes, tradeRes] = await Promise.all([
+        supabase
+          .from("tradevault_documents")
+          .select("*")
+          .eq("trade_id", tradeId)
+          .eq("is_current", true),
+        supabase
+          .from("trades")
+          .select("verified, verification_status")
+          .eq("id", tradeId)
+          .maybeSingle(),
+      ]);
+      if (cancelled) return;
+      setDocs((docRes.data as VaultDocument[]) ?? []);
+      const t = tradeRes.data as any;
+      setLegacyVerified(!!(t && (t.verified || t.verification_status === "approved")));
     })();
     return () => { cancelled = true; };
   }, [tradeId]);
@@ -54,10 +65,13 @@ const TradeVaultBanners = ({ tradeId, onOpenVault }: Props) => {
       key: "missing",
       tone: "amber",
       icon: AlertTriangle,
-      text: "Action required: Upload your required documents so ProGrafter can verify your profile.",
+      text: legacyVerified
+        ? "You're verified — but some documents were approved before TradeVault existed. Please upload copies so your record stays complete and renewal reminders can work."
+        : "Action required: Upload your required documents so ProGrafter can verify your profile.",
       button: "Open TradeVault",
     });
   }
+
 
   if (banners.length === 0) return null;
 

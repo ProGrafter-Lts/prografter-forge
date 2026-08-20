@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDrawerNavigate } from "@/hooks/useDrawerNavigate";
 import { supabase } from "@/integrations/supabase/client";
-import { Briefcase, MapPin, Clock, ChevronRight, ShieldCheck, Leaf } from "lucide-react";
+import { Briefcase, MapPin, Clock, ChevronRight, ShieldCheck, Leaf, Hand, Check } from "lucide-react";
 import { isGreenTrade } from "@/lib/greenTrades";
+import { registerJobInterest, registerJobViewed } from "@/lib/jobInterest";
+import { toast } from "sonner";
 
 interface JobMatchRow {
   id: string;
@@ -11,7 +13,9 @@ interface JobMatchRow {
   estimated_value: string | null;
   notified_at: string;
   status: string;
+  interested_at: string | null;
 }
+
 
 interface JobRow {
   id: string;
@@ -43,6 +47,27 @@ const AvailableJobsView = ({ tradeId }: { tradeId: string }) => {
   const [loading, setLoading] = useState(true);
   const [fundsOnly, setFundsOnly] = useState(false);
   const [greenOnly, setGreenOnly] = useState(false);
+  const [savingId, setSavingId] = useState<string | null>(null);
+
+  const markInterested = async (match: Match) => {
+    setSavingId(match.id);
+    const res = await registerJobInterest({
+      matchId: match.id,
+      jobId: match.job_id,
+      tradeId,
+    });
+    setSavingId(null);
+    if (!res.ok) {
+      toast.error("Couldn't register your interest. Please try again.");
+      return;
+    }
+    setMatches((prev) =>
+      prev.map((m) => (m.id === match.id ? { ...m, interested_at: new Date().toISOString() } : m)),
+    );
+    toast.success("Interest registered — you're logged as interested in this job.");
+  };
+
+
 
   useEffect(() => {
     let cancelled = false;
@@ -50,7 +75,7 @@ const AvailableJobsView = ({ tradeId }: { tradeId: string }) => {
       setLoading(true);
       const { data: matchRows, error } = await supabase
         .from("job_matches")
-        .select("id, job_id, estimated_value, notified_at, status")
+        .select("id, job_id, estimated_value, notified_at, status, interested_at")
         .eq("trade_id", tradeId)
         .eq("status", "notified")
         .order("notified_at", { ascending: false });
@@ -222,13 +247,36 @@ const AvailableJobsView = ({ tradeId }: { tradeId: string }) => {
                 {match.job?.description}
               </p>
 
-              <button
-                onClick={() => match.job_id && openDrawer(`/project/${match.job_id}`)}
-                className="mt-4 w-full sm:w-auto flex items-center justify-center gap-1 bg-secondary text-secondary-foreground font-mono text-sm font-semibold px-5 min-h-[44px] rounded-xl hover:opacity-90 transition-opacity shadow-sm cursor-pointer"
-              >
-                View &amp; Quote
-                <ChevronRight className="w-3 h-3" />
-              </button>
+              <div className="mt-4 flex flex-col sm:flex-row gap-2">
+                <button
+                  onClick={() => {
+                    if (!match.job_id) return;
+                    void registerJobViewed(match.job_id, tradeId);
+                    openDrawer(`/project/${match.job_id}`);
+                  }}
+                  className="w-full sm:w-auto flex items-center justify-center gap-1 bg-secondary text-secondary-foreground font-mono text-sm font-semibold px-5 min-h-[44px] rounded-xl hover:opacity-90 transition-opacity shadow-sm cursor-pointer"
+                >
+                  View &amp; Quote
+                  <ChevronRight className="w-3 h-3" />
+                </button>
+
+                {match.interested_at ? (
+                  <span className="w-full sm:w-auto flex items-center justify-center gap-1.5 border border-emerald-500/40 bg-emerald-500/10 text-emerald-700 font-mono text-sm px-5 min-h-[44px] rounded-xl">
+                    <Check className="w-3.5 h-3.5" />
+                    Interest registered
+                  </span>
+                ) : (
+                  <button
+                    disabled={savingId === match.id}
+                    onClick={() => void markInterested(match)}
+                    className="w-full sm:w-auto flex items-center justify-center gap-1.5 border border-secondary/40 text-secondary font-mono text-sm font-semibold px-5 min-h-[44px] rounded-xl hover:bg-secondary/10 transition-colors cursor-pointer disabled:opacity-60"
+                  >
+                    <Hand className="w-3.5 h-3.5" />
+                    {savingId === match.id ? "Saving…" : "I'm interested"}
+                  </button>
+                )}
+              </div>
+
             </div>
           ))}
 
