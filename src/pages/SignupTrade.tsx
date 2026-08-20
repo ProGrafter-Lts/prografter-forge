@@ -74,7 +74,7 @@ const GENERAL_TRADE_TYPES = [
 const UK_POSTCODE = /^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}$/i;
 
 // ── Service-area gate ────────────────────────────────────────────────
-// We are only live in Nottinghamshire & the wider East Midlands. Trade
+// We are only live across NG, DE, LE, LN, S and DN postcodes. Trade
 // sign-ups from postcode areas outside this list are routed to a waitlist.
 // EDIT THIS SINGLE LIST to expand our launch area.
 const LAUNCH_AREA_PREFIXES = ["NG", "DE", "LE", "LN", "S", "DN", "NN"] as const;
@@ -962,7 +962,7 @@ const SignupTrade = () => {
                   We're not in your <span className="text-teal">area yet.</span>
                 </h2>
                 <p className="font-body text-cream/70 text-base mb-8">
-                  ProGrafter is live in Nottinghamshire and the East Midlands right now. Leave your details and we'll tell you the day we reach you.
+                  ProGrafter is live across the East Midlands, Lincolnshire and South Yorkshire (NG, DE, LE, LN, S and DN postcodes) right now. Leave your details and we'll tell you the day we reach you.
                 </p>
 
                 {error && (
