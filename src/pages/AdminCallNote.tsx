@@ -68,6 +68,17 @@ export default function AdminCallNote() {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [recordingUrl, setRecordingUrl] = useState<string | null>(null);
 
+  // AI transcription / extraction
+  const [aiBusy, setAiBusy] = useState<"full" | "extract_only" | null>(null);
+  const [aiError, setAiError] = useState<string | null>(null);
+  const [suggestions, setSuggestions] = useState<{
+    answers: Record<string, string>;
+    summary: string | null;
+    key_concerns: string | null;
+    next_steps: string | null;
+  } | null>(null);
+
+
   const load = useCallback(async () => {
     setLoading(true);
     const { data, error } = await (supabase as any)
@@ -212,6 +223,70 @@ export default function AdminCallNote() {
     if (timerRef.current) clearInterval(timerRef.current);
   };
   const fmt = (s: number) => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+
+  // ---- AI transcription + field extraction (review aid, never auto-saves) ----
+  const activeFieldSpecs = useCallback((): GuideField[] => {
+    const keys = CALL_TYPES.find((c) => c.value === (note?.call_type ?? ""))?.sections ?? Object.keys(SECTIONS);
+    const out: GuideField[] = [];
+    for (const k of keys) SECTIONS[k]?.fields.forEach((f) => out.push(f));
+    return out;
+  }, [note?.call_type]);
+
+  const fieldLabel = (key: string) =>
+    activeFieldSpecs().find((f) => f.key === key)?.label ?? key;
+
+  const runAi = async (mode: "full" | "extract_only") => {
+    if (!note) return;
+    setAiBusy(mode);
+    setAiError(null);
+    try {
+      // Persist any manually pasted transcript first so the server sees it.
+      if (mode === "extract_only" && note.transcript_text) {
+        await (supabase as any).from("customer_call_notes")
+          .update({ transcript_text: note.transcript_text, updated_at: new Date().toISOString() })
+          .eq("id", note.id);
+      }
+      const { data, error } = await supabase.functions.invoke("transcribe-call", {
+        body: {
+          callNoteId: note.id,
+          mode,
+          transcript: mode === "extract_only" ? note.transcript_text : undefined,
+          fields: activeFieldSpecs().map((f) => ({ key: f.key, label: f.label, kind: f.kind, options: f.options })),
+        },
+      });
+      const payload = data as any;
+      if (error || payload?.error) {
+        setAiError(payload?.error ?? error?.message ?? "AI processing failed");
+        return;
+      }
+      if (payload?.transcript) patch({ transcript_text: payload.transcript });
+      setSuggestions({
+        answers: (payload?.answers ?? {}) as Record<string, string>,
+        summary: payload?.summary ?? null,
+        key_concerns: payload?.key_concerns ?? null,
+        next_steps: payload?.next_steps ?? null,
+      });
+      if (payload?.warning) toast.message("Partial result", { description: payload.warning });
+      else toast.success("Suggestions ready — review before applying.");
+    } catch (e) {
+      setAiError((e as Error).message);
+    } finally {
+      setAiBusy(null);
+    }
+  };
+
+  const applyAllSuggestions = () => {
+    if (!note || !suggestions) return;
+    setNote({
+      ...note,
+      answers: { ...note.answers, ...suggestions.answers },
+      ai_summary: suggestions.summary ?? note.ai_summary,
+      key_concerns: suggestions.key_concerns ?? note.key_concerns,
+      next_steps: suggestions.next_steps ?? note.next_steps,
+    });
+    toast.success("Applied to the form — review, then press “Save call”.");
+  };
+
 
   // ---- summary generation (compiles structured answers into editable outputs) ----
   const generateSummary = () => {
@@ -463,7 +538,7 @@ export default function AdminCallNote() {
           <p className="font-body text-sm text-secondary-text mb-3">
             Before recording, confirm the homeowner is aware that this call may be recorded for
             project scoping, platform support and service improvement. Recordings are stored securely and are
-            admin-only. Transcription is currently manual — no automatic transcription takes place.
+            admin-only. Recordings are transcribed automatically by ProGrafter's AI to help write up the call.
           </p>
           <label className="flex items-start gap-2 text-sm text-navy">
             <input type="checkbox" className="mt-1" checked={note.consent_given}
@@ -492,13 +567,87 @@ export default function AdminCallNote() {
           )}
         </div>
 
-        {/* Transcript */}
+        {/* Transcript + AI extraction */}
         <div className="rounded-2xl bg-white border border-navy/10 p-5 mb-5">
-          <h2 className="font-heading text-lg text-navy mb-1">Transcript</h2>
-          <p className="font-body text-xs text-secondary-text mb-2">Automatic transcription coming soon — paste or type the transcript here.</p>
-          <textarea className="w-full min-h-[100px] rounded-lg border border-navy/15 px-3 py-2 text-sm text-navy"
+          <h2 className="font-heading text-lg text-navy mb-1">Transcript & AI field extraction</h2>
+          <p className="font-body text-xs text-secondary-text mb-3">
+            Audio is transcribed with a speech-to-text model, then the transcript is read by Claude to
+            suggest form answers. Suggestions are never saved automatically — review and apply them yourself.
+          </p>
+
+          <div className="flex flex-wrap gap-2 mb-3">
+            <button
+              onClick={() => runAi("full")}
+              disabled={!!aiBusy || !note.recording_path}
+              className="rounded-lg bg-teal text-white font-mono text-sm px-4 py-2 disabled:opacity-40">
+              {aiBusy === "full" ? "Transcribing…" : "Transcribe recording & extract fields"}
+            </button>
+            <button
+              onClick={() => runAi("extract_only")}
+              disabled={!!aiBusy || !(note.transcript_text ?? "").trim()}
+              className="rounded-lg border border-navy/20 font-mono text-sm px-4 py-2 disabled:opacity-40">
+              {aiBusy === "extract_only" ? "Extracting…" : "Extract fields from transcript"}
+            </button>
+          </div>
+          {!note.recording_path && (
+            <p className="font-mono text-[11px] text-secondary-text mb-2">
+              No recording on this call — paste a transcript below and use “Extract fields from transcript”.
+            </p>
+          )}
+          {aiError && <p className="font-mono text-[11px] text-red-600 mb-2">{aiError} — you can still paste the transcript manually below.</p>}
+
+          <label className="font-mono text-[11px] uppercase text-secondary-text">Transcript (editable)</label>
+          <textarea className="mt-1 w-full min-h-[120px] rounded-lg border border-navy/15 px-3 py-2 text-sm text-navy"
             value={note.transcript_text ?? ""} onChange={(e) => patch({ transcript_text: e.target.value })} />
+
+          {suggestions && (
+            <div className="mt-4 rounded-xl border border-teal/40 bg-teal/5 p-4">
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                <h3 className="font-heading text-base text-navy">
+                  Suggested answers ({Object.keys(suggestions.answers).length})
+                </h3>
+                <div className="flex gap-2">
+                  <button onClick={applyAllSuggestions} className="rounded-lg bg-navy text-cream font-mono text-xs px-3 py-1.5">Apply all</button>
+                  <button onClick={() => setSuggestions(null)} className="rounded-lg border border-navy/20 font-mono text-xs px-3 py-1.5">Dismiss</button>
+                </div>
+              </div>
+              <p className="font-mono text-[11px] text-secondary-text mb-3">
+                Nothing is saved until you apply a suggestion and press “Save call”.
+              </p>
+              {Object.keys(suggestions.answers).length === 0 ? (
+                <p className="font-body text-sm text-secondary-text">No fields could be confidently extracted.</p>
+              ) : (
+                <div className="space-y-2">
+                  {Object.entries(suggestions.answers).map(([k, v]) => (
+                    <div key={k} className="flex flex-wrap items-start gap-2 border-b border-navy/10 pb-2">
+                      <div className="flex-1 min-w-[200px]">
+                        <div className="font-mono text-[11px] uppercase text-secondary-text">{fieldLabel(k)}</div>
+                        <div className="font-body text-sm text-navy whitespace-pre-wrap">{v}</div>
+                      </div>
+                      <button
+                        onClick={() => { setAnswer(k, v); toast.success("Applied — review before saving."); }}
+                        className="rounded-lg border border-teal text-teal font-mono text-xs px-3 py-1.5">
+                        Apply
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {suggestions.summary && (
+                <div className="mt-3">
+                  <div className="font-mono text-[11px] uppercase text-secondary-text">Suggested summary</div>
+                  <p className="font-body text-sm text-navy whitespace-pre-wrap">{suggestions.summary}</p>
+                  <button
+                    onClick={() => { patch({ ai_summary: suggestions.summary!, key_concerns: suggestions.key_concerns ?? note.key_concerns, next_steps: suggestions.next_steps ?? note.next_steps }); toast.success("Summary applied — review before saving."); }}
+                    className="mt-2 rounded-lg border border-teal text-teal font-mono text-xs px-3 py-1.5">
+                    Use this summary
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
+
 
         {/* Guided sections */}
         <div className="space-y-3 mb-5">
@@ -536,12 +685,29 @@ export default function AdminCallNote() {
         {/* Summary + outputs */}
         <div className="rounded-2xl bg-white border border-navy/10 p-5 mb-5">
           <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-            <h2 className="font-heading text-lg text-navy">Summary & outputs</h2>
+            <h2 className="font-heading text-lg text-navy">AI call summary & outputs</h2>
             <button onClick={generateSummary} className="rounded-lg bg-teal text-white font-mono text-sm px-4 py-2">Generate call summary</button>
           </div>
+
+          {note.transcript_text ? (
+            <details className="mb-4 rounded-lg border border-navy/10 bg-cream/50 p-3" open>
+              <summary className="font-mono text-[11px] uppercase text-secondary-text cursor-pointer">
+                Transcript ({note.transcript_text.length.toLocaleString()} characters)
+              </summary>
+              <p className="mt-2 whitespace-pre-wrap font-body text-sm text-navy max-h-64 overflow-y-auto">
+                {note.transcript_text}
+              </p>
+            </details>
+          ) : (
+            <p className="mb-4 font-body text-xs text-secondary-text">
+              No transcript yet — transcribe the recording above or paste one in.
+            </p>
+          )}
+
           <label className="font-mono text-[11px] uppercase text-secondary-text">AI / call summary</label>
           <textarea className="mt-1 w-full min-h-[120px] rounded-lg border border-navy/15 px-3 py-2 text-sm text-navy"
             value={note.ai_summary ?? ""} onChange={(e) => patch({ ai_summary: e.target.value })} />
+
           <div className="mt-4 space-y-3">
             {OUTPUT_KEYS.map((o) => (
               <div key={o.key}>
