@@ -303,7 +303,8 @@ function Coverage({ rows }: { rows: CoverageRow[] }) {
           <thead>
             <tr className="bg-cream/40 text-left font-body text-secondary-text">
               <th className="px-4 py-3 font-medium">Area</th>
-              <th className="px-4 py-3 font-medium">Registered trades</th>
+              <th className="px-4 py-3 font-medium">Lead-eligible trades</th>
+              <th className="px-4 py-3 font-medium text-right">Coming soon (out of area)</th>
               <th className="px-4 py-3 font-medium">Job posts</th>
               <th className="px-4 py-3 font-medium text-right">Leads sent</th>
               <th className="px-4 py-3 font-medium text-right">Signal</th>
