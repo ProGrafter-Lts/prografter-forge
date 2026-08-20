@@ -47,6 +47,27 @@ const AvailableJobsView = ({ tradeId }: { tradeId: string }) => {
   const [loading, setLoading] = useState(true);
   const [fundsOnly, setFundsOnly] = useState(false);
   const [greenOnly, setGreenOnly] = useState(false);
+  const [savingId, setSavingId] = useState<string | null>(null);
+
+  const markInterested = async (match: Match) => {
+    setSavingId(match.id);
+    const res = await registerJobInterest({
+      matchId: match.id,
+      jobId: match.job_id,
+      tradeId,
+    });
+    setSavingId(null);
+    if (!res.ok) {
+      toast.error("Couldn't register your interest. Please try again.");
+      return;
+    }
+    setMatches((prev) =>
+      prev.map((m) => (m.id === match.id ? { ...m, interested_at: new Date().toISOString() } : m)),
+    );
+    toast.success("Interest registered — the homeowner can see you're keen.");
+  };
+
+
 
   useEffect(() => {
     let cancelled = false;
