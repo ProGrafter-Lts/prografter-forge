@@ -128,7 +128,7 @@ const TradeDashboard = () => {
       const [matchRes, quoteRes, contractRes] = await Promise.all([
         supabase
           .from("job_matches")
-          .select("id, job_id, estimated_value, notified_at, status")
+          .select("id, job_id, estimated_value, notified_at, status, interested_at")
           .eq("trade_id", tradeData.id)
           .eq("status", "notified")
           .order("notified_at", { ascending: false })
@@ -471,7 +471,7 @@ const TradeDashboard = () => {
           )}
 
           {/* 1. LIVE WORK — job matches lead the page, above everything else */}
-          <JobMatchesList matches={matches} />
+          <JobMatchesList matches={matches} tradeId={trade?.id ?? ""} />
 
           {/* 2. FIND WORK PREVIEW */}
           {trade && <DashboardPlanningAlerts trade={trade} />}
