@@ -1,0 +1,1 @@
+REVOKE ALL ON FUNCTION public.trade_application_out_of_area() FROM PUBLIC, anon, authenticated;
