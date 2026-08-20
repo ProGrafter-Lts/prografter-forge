@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDrawerNavigate } from "@/hooks/useDrawerNavigate";
-import { Briefcase, MapPin, Clock, ChevronRight, ShieldCheck } from "lucide-react";
+import { Briefcase, MapPin, Clock, ChevronRight, ShieldCheck, Hand, Check } from "lucide-react";
 import { markJobMatchSeen } from "@/hooks/useNewJobMatches";
+import { registerJobInterest, registerJobViewed } from "@/lib/jobInterest";
+import { toast } from "sonner";
 
 interface JobMatch {
   id: string;
@@ -10,6 +12,7 @@ interface JobMatch {
   estimated_value: string | null;
   notified_at: string;
   status: string;
+  interested_at?: string | null;
   jobs: {
     id?: string;
     title: string | null;
@@ -28,12 +31,29 @@ const timeAgo = (dateStr: string) => {
   return `${Math.floor(hours / 24)}d ago`;
 };
 
-const JobMatchesList = ({ matches }: { matches: JobMatch[] }) => {
+const JobMatchesList = ({ matches, tradeId }: { matches: JobMatch[]; tradeId?: string }) => {
   const navigate = useNavigate();
   const openDrawer = useDrawerNavigate();
   const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [savingId, setSavingId] = useState<string | null>(null);
+  const [interested, setInterested] = useState<Record<string, boolean>>({});
   const visible = verifiedOnly ? matches.filter((m) => m.jobs?.funds_verified) : matches;
   const hasLive = visible.length > 0;
+
+  const markInterested = async (match: JobMatch) => {
+    const jobId = match.jobs?.id || match.job_id;
+    if (!jobId || !tradeId) return;
+    setSavingId(match.id);
+    const res = await registerJobInterest({ matchId: match.id, jobId, tradeId });
+    setSavingId(null);
+    if (!res.ok) {
+      toast.error("Couldn't register your interest. Please try again.");
+      return;
+    }
+    setInterested((p) => ({ ...p, [match.id]: true }));
+    toast.success("Interest registered — the homeowner can see you're keen.");
+  };
+
 
   return (
     <section
