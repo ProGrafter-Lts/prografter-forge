@@ -183,7 +183,7 @@ export default function AdminCallNote() {
         const { error } = await (supabase as any).storage
           .from("call-recordings").upload(path, blob, { contentType: "audio/webm" });
         if (error) { toast.error("Upload failed: " + error.message); return; }
-        await save({ recording_path: path });
+        await save({ recording_path: path }, true);
         const { data: signed } = await (supabase as any).storage
           .from("call-recordings").createSignedUrl(path, 3600);
         if (signed?.signedUrl) setRecordingUrl(signed.signedUrl);
