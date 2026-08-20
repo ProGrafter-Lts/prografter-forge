@@ -64,7 +64,7 @@ const AvailableJobsView = ({ tradeId }: { tradeId: string }) => {
     setMatches((prev) =>
       prev.map((m) => (m.id === match.id ? { ...m, interested_at: new Date().toISOString() } : m)),
     );
-    toast.success("Interest registered — the homeowner can see you're keen.");
+    toast.success("Interest registered — you're logged as interested in this job.");
   };
 
 

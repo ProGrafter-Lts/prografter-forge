@@ -51,7 +51,7 @@ const JobMatchesList = ({ matches, tradeId }: { matches: JobMatch[]; tradeId?: s
       return;
     }
     setInterested((p) => ({ ...p, [match.id]: true }));
-    toast.success("Interest registered — the homeowner can see you're keen.");
+    toast.success("Interest registered — you're logged as interested in this job.");
   };
 
 
