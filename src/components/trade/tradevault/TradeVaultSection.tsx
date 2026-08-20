@@ -6,10 +6,11 @@ import {
   ShieldCheck, FileText, Clock, AlertTriangle, Upload, Eye, Loader2, Lock,
 } from "lucide-react";
 import {
-  VAULT_DOC_TYPES, VaultDocument, VaultDocTypeConfig,
+  VAULT_DOC_TYPES, VaultDocument, VaultDocTypeConfig, VAULT_DEFAULT_BUCKET,
   computeDisplayStatus, computeVaultSummary, STATUS_META, TONE_CLASSES,
   daysUntil, getDocLabel, computeDashboardVerification,
 } from "@/lib/tradeVault";
+
 import VaultDocumentDialog from "./VaultDocumentDialog";
 import { cn } from "@/lib/utils";
 
@@ -85,11 +86,11 @@ const TradeVaultSection = ({ tradeId }: Props) => {
   const summary = computeVaultSummary(docs);
   const dashVerification = computeDashboardVerification(docs, manualCtx);
 
-  const viewFile = async (path: string | null) => {
-    if (!path) return;
+  const viewFile = async (doc: VaultDocument) => {
+    if (!doc.file_url) return;
     const { data, error } = await supabase.storage
-      .from("trade-verification-documents")
-      .createSignedUrl(path, 60 * 60);
+      .from(doc.source_bucket || VAULT_DEFAULT_BUCKET)
+      .createSignedUrl(doc.file_url, 60 * 60);
     if (error) { console.error(error); return; }
     window.open(data.signedUrl, "_blank");
   };
@@ -104,7 +105,7 @@ const TradeVaultSection = ({ tradeId }: Props) => {
 
   const renderDocRow = (cfg: VaultDocTypeConfig) => {
     const doc = currentByType.get(cfg.key);
-    const status = computeDisplayStatus(doc, cfg.required);
+    const status = computeDisplayStatus(doc, cfg.required, manualCtx.manuallyVerified);
     const days = daysUntil(doc?.expiry_date ?? null);
     return (
       <div key={cfg.key} className="rounded-xl border border-border bg-card p-4 flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
@@ -115,6 +116,12 @@ const TradeVaultSection = ({ tradeId }: Props) => {
             <StatusBadge status={status} required={cfg.required} />
           </div>
           <div className="text-xs text-muted-foreground mt-1 space-x-3">
+            {doc?.legacy_source && (
+              <span className="text-amber-600">Carried over from your original verification</span>
+            )}
+            {status === "legacy_verified" && (
+              <span>Approved during your manual verification — please upload a copy so renewal reminders can work.</span>
+            )}
             {doc?.provider_name && <span>{doc.provider_name}</span>}
             {doc?.expiry_date && (
               <span>
@@ -127,7 +134,7 @@ const TradeVaultSection = ({ tradeId }: Props) => {
         </div>
         <div className="flex items-center gap-2 shrink-0">
           {doc?.file_url && (
-            <Button variant="outline" size="sm" onClick={() => viewFile(doc.file_url)}>
+            <Button variant="outline" size="sm" onClick={() => viewFile(doc)}>
               <Eye className="w-4 h-4 mr-1" /> View
             </Button>
           )}
@@ -138,6 +145,7 @@ const TradeVaultSection = ({ tradeId }: Props) => {
       </div>
     );
   };
+
 
   if (loading) {
     return (
