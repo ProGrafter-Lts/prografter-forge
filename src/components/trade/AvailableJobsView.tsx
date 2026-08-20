@@ -54,7 +54,7 @@ const AvailableJobsView = ({ tradeId }: { tradeId: string }) => {
       setLoading(true);
       const { data: matchRows, error } = await supabase
         .from("job_matches")
-        .select("id, job_id, estimated_value, notified_at, status")
+        .select("id, job_id, estimated_value, notified_at, status, interested_at")
         .eq("trade_id", tradeId)
         .eq("status", "notified")
         .order("notified_at", { ascending: false });
