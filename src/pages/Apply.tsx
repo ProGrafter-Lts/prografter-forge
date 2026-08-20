@@ -386,6 +386,8 @@ export default function Apply() {
     try {
       const applicationId = crypto.randomUUID();
       const applicantEmail = (form.email as string).trim().toLowerCase();
+      // Automatic service-area check at the point of submission (NG/DE/LE/LN/S/DN).
+      const outOfArea = !isInLiveArea((form.postcode as string) || "");
 
       // 1. Upload all documents/photos to Cloud storage.
       const documentPaths = await uploadDocuments(applicationId);
