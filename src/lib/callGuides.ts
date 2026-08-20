@@ -38,7 +38,7 @@ export const OPENING_SCRIPT =
   "Thanks for taking the time to speak with me. The purpose of this call is to understand your project, what stage you are at, and what concerns you have before you make any decisions. I'll ask a few questions about the quote, scope, timing and anything you are unsure about. This helps us guide you properly and make sure any trades receive a clearer brief.";
 
 export const OPENING_SCRIPT_RECORDING =
-  "Are you happy for me to record this call so I can capture the details accurately for your project record? The recording is stored securely and only used for your project — notes are written up by me, not by an automated system.";
+  "Are you happy for me to record this call so I can capture the details accurately for your project record? The recording is stored securely, used only for your project, and transcribed by our system to help me write up the notes — which I then review myself.";
 
 export const SECTIONS: Record<string, GuideSection> = {
   opening: {
