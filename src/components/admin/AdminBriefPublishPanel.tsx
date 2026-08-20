@@ -83,6 +83,22 @@ export default function AdminBriefPublishPanel({
   const [overrideReason, setOverrideReason] = useState("");
   const [releasing, setReleasing] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  const [escalations, setEscalations] = useState<
+    { id: string; source: string; note: string | null; created_at: string }[]
+  >([]);
+
+  const loadEscalations = async () => {
+    if (!brief.job_id) return;
+    const { data } = await supabase
+      .from("job_escalation_events")
+      .select("id, source, note, created_at")
+      .eq("job_id", brief.job_id)
+      .order("created_at", { ascending: false })
+      .limit(10);
+    setEscalations((data as any) || []);
+  };
+
+  useEffect(() => { loadEscalations(); /* eslint-disable-next-line */ }, [brief.job_id]);
 
   const checklist = buildChecklist(brief);
   const blockingFlags = checklist.filter((c) => c.blocking && !c.ok).map((c) => c.label);
@@ -155,6 +171,7 @@ export default function AdminBriefPublishPanel({
       const n = (data as any)?.released ?? 0;
       setMsg(n > 0 ? `Released next batch: ${n} trade(s) invited.` : "No further trades to release.");
       await loadTrades();
+      await loadEscalations();
     } catch (e: any) {
       setMsg("Release failed: " + (e.message || e));
     } finally {
@@ -266,6 +283,25 @@ export default function AdminBriefPublishPanel({
       </div>
 
       {msg && <p style={{ marginTop: 10, fontSize: 12, color: C.deep }}>{msg}</p>}
+
+      {escalations.length > 0 && (
+        <div style={{ marginTop: 14, borderTop: `1px solid ${C.border}`, paddingTop: 10 }}>
+          <div style={{ fontWeight: 800, color: C.deep, fontSize: 13, marginBottom: 6 }}>Escalation history</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            {escalations.map((e) => (
+              <div key={e.id} style={{ display: "flex", gap: 8, alignItems: "flex-start", fontSize: 12, color: C.deep }}>
+                <span style={chip(e.source === "auto_48h" ? "#FEF3C7" : "#E0E7FF", e.source === "auto_48h" ? C.amberFg : "#3730A3")}>
+                  {e.source === "auto_48h" ? "AUTO 48h" : "MANUAL"}
+                </span>
+                <span style={{ flex: 1 }}>
+                  {e.note}
+                  <span style={{ color: C.secondary }}> · {new Date(e.created_at).toLocaleString("en-GB")}</span>
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Override modal */}
       {overrideOpen && (

@@ -1,13 +1,15 @@
+// Manual admin escalation: releases the next batch of trades for a job.
+// Shares its implementation with the automatic 48h escalation job so both
+// paths behave identically; every release is logged to job_escalation_events
+// with source 'manual' vs 'auto_48h'.
+
 import { createClient } from 'npm:@supabase/supabase-js@2'
+import { releaseNextBatch, logEscalation } from '../_shared/release-batch.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
-
-const SITE_URL = 'https://prografter.co.uk'
-const MAX_BATCH = 3
-const RESPONSE_WINDOW_HOURS = 48
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders })
@@ -47,92 +49,23 @@ Deno.serve(async (req) => {
     })
   }
 
-  // Next unreleased invitations by rank, capped at MAX_BATCH.
-  const { data: pending } = await supabase
-    .from('job_trade_invitations')
-    .select('id, trade_id, brief_id, batch_number')
-    .eq('job_id', jobId)
-    .eq('released', false)
-    .order('rank', { ascending: true, nullsFirst: false })
-    .limit(MAX_BATCH)
+  const result = await releaseNextBatch(supabase, jobId)
 
-  if (!pending || pending.length === 0) {
-    return new Response(JSON.stringify({ ok: true, released: 0, message: 'No further trades to release.' }), {
-      status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  if (result.released > 0) {
+    const { data: anyInv } = await supabase
+      .from('job_trade_invitations')
+      .select('brief_id').eq('job_id', jobId).limit(1).maybeSingle()
+    await logEscalation(supabase, {
+      job_id: jobId,
+      brief_id: anyInv?.brief_id ?? null,
+      source: 'manual',
+      released_count: result.released,
+      note: `Manually escalated by admin — ${result.released} trade(s) released (batch ${result.batch_number}).`,
+      actor_user_id: userId,
     })
   }
 
-  const now = new Date()
-  const expiresAt = new Date(now.getTime() + RESPONSE_WINDOW_HOURS * 3600 * 1000)
-  const batchNumber = Math.max(...pending.map((p) => p.batch_number || 2))
-
-  // Release: mark invitations, create job_matches.
-  const ids = pending.map((p) => p.id)
-  await supabase.from('job_trade_invitations').update({
-    released: true,
-    status: 'invited',
-    invited_at: now.toISOString(),
-    expires_at: expiresAt.toISOString(),
-  }).in('id', ids)
-
-  const { data: brief } = await supabase
-    .from('job_briefs')
-    .select('id, ref, city, job_title, job_description, budget_band, trade_category_id')
-    .eq('id', pending[0].brief_id)
-    .maybeSingle()
-
-  const { data: existingMatches } = await supabase
-    .from('job_matches').select('trade_id').eq('job_id', jobId)
-  const matchedIds = new Set((existingMatches || []).map((r: any) => r.trade_id))
-  const matchRows = pending.filter((p) => !matchedIds.has(p.trade_id)).map((p) => ({
-    job_id: jobId,
-    trade_id: p.trade_id,
-    status: 'notified',
-    notified_at: now.toISOString(),
-    estimated_value: brief?.budget_band || null,
-    is_test: false,
-  }))
-  if (matchRows.length) {
-    const { error } = await supabase.from('job_matches').insert(matchRows)
-    if (error) console.error('[release-next-batch] job_matches insert failed', error)
-  }
-
-  // Emails to the newly released trades.
-  const briefUrl = `${SITE_URL}/project/${jobId}`
-  const sends: Promise<unknown>[] = []
-  for (const p of pending) {
-    const { data: trade } = await supabase.from('trades').select('name, user_id').eq('id', p.trade_id).maybeSingle()
-    if (!trade?.user_id) continue
-    const { data: tp } = await supabase.from('profiles').select('email').eq('user_id', trade.user_id).maybeSingle()
-    if (!tp?.email) continue
-    sends.push(supabase.functions.invoke('send-transactional-email', {
-      body: {
-        templateName: 'new-job-in-area',
-        recipientEmail: tp.email,
-        idempotencyKey: `new-job-${jobId}-${p.trade_id}-b${batchNumber}`,
-        templateData: {
-          tradeFirstName: trade.name?.split(' ')[0],
-          reference: brief?.ref,
-          jobTitle: brief?.job_title || 'A new job',
-          summary: brief?.job_description?.slice(0, 277),
-          trade: brief?.trade_category_id || undefined,
-          valueBand: brief?.budget_band || undefined,
-          location: brief?.city || 'your area',
-          briefUrl,
-        },
-      },
-    }))
-  }
-  await Promise.allSettled(sends)
-
-  // Bump homeowner-facing matched count.
-  const { count } = await supabase
-    .from('job_matches').select('id', { count: 'exact', head: true }).eq('job_id', jobId)
-  if (brief?.id != null) {
-    await supabase.from('job_briefs').update({ matched_trade_count: count ?? null }).eq('id', brief.id)
-  }
-
-  return new Response(JSON.stringify({ ok: true, released: pending.length, batch_number: batchNumber, emailed: sends.length }), {
+  return new Response(JSON.stringify({ ok: true, ...result }), {
     status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   })
 })
