@@ -13,7 +13,6 @@ import PaymentSchedule from "@/components/project/PaymentSchedule";
 import VariationsPanel from "@/components/project/VariationsPanel";
 import ContractPanel from "@/components/project/ContractPanel";
 import SubTradeModal from "@/components/project/SubTradeModal";
-import QuoteSubmitForm, { type QuickBuildPrefill } from "@/components/trade/QuoteSubmitForm";
 import GenerateQuotePdfButton from "@/components/trade/GenerateQuotePdfButton";
 import { isFeatureEnabled } from "@/lib/featureFlags";
 
