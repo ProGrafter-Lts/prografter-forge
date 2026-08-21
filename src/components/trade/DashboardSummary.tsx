@@ -66,9 +66,10 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
           .eq("trade_id", tradeId),
         supabase
           .from("quotes")
-          .select("id, amount, status, created_at")
+          .select("id, amount, status, created_at, is_test, jobs(is_test)")
           .eq("trade_id", tradeId)
           .eq("status", "pending"),
+
         supabase
           .from("job_matches")
           .select("id, status, interested_at, estimated_value")
