@@ -276,6 +276,41 @@ const QuickBuildPage = () => {
           onBack={() => setStage("input")}
         />
       )}
+
+      {stage === "pickjob" && (
+        <Card className="space-y-4 p-6">
+          <div>
+            <h2 className="font-semibold">Which job is this quote for?</h2>
+            <p className="text-xs text-muted-foreground">
+              Pick the job and we'll open the full quote builder with your draft filled in.
+            </p>
+          </div>
+          {jobsLoading ? (
+            <Loader2 className="h-5 w-5 animate-spin text-amber-600" />
+          ) : jobOptions.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              No matched jobs yet. Your draft is saved — open a job and choose “Open quote builder”.
+            </p>
+          ) : (
+            <ul className="divide-y rounded-md border">
+              {jobOptions.map((j) => (
+                <li key={j.id}>
+                  <button
+                    onClick={() => goToBuilder(j.id)}
+                    className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left text-sm hover:bg-muted"
+                  >
+                    <span>{j.title || j.job_type || "Job"}</span>
+                    <span className="text-xs text-muted-foreground">{j.postcode}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+          <Button variant="outline" onClick={() => setStage("review")}>
+            Back to draft
+          </Button>
+        </Card>
+      )}
     </div>
   );
 };
