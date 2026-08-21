@@ -2,15 +2,9 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { BadgeCheck } from "lucide-react";
-import { GreenSpecialistBanner, CertificationsSection } from "@/components/GreenCertBadges";
+import { GreenSpecialistBanner } from "@/components/GreenCertBadges";
 import { GreenLeafBadge } from "@/lib/greenTrades";
-import DashboardPlanningAlerts from "@/components/trade/DashboardPlanningAlerts";
 import TradeSidebar from "@/components/trade/TradeSidebar";
-import StatsRow from "@/components/trade/StatsRow";
-import JobMatchesList from "@/components/trade/JobMatchesList";
-import ActiveProjectsList from "@/components/trade/ActiveProjectsList";
-import MorningBriefing from "@/components/trade/MorningBriefing";
-import LiveMarginWidget from "@/components/trade/LiveMarginWidget";
 import CalendarConnect from "@/components/trade/CalendarConnect";
 import TradeProfileSection from "@/components/trade/TradeProfileSection";
 import AddSpecialismsBanner from "@/components/trade/AddSpecialismsBanner";
@@ -24,14 +18,9 @@ import EarningsView from "@/components/trade/EarningsView";
 import { useTradeAccess } from "@/hooks/useTradeAccess";
 import { isContractedActiveJob } from "@/lib/activeProjects";
 import LegalReviewBanner from "@/components/LegalReviewBanner";
-import QuickBuildDraftsList from "@/components/trade/quickbuild/QuickBuildDraftsList";
-import CommandCentre from "@/components/trade/CommandCentre";
-import BusinessHealthDashboard from "@/components/trade/BusinessHealthDashboard";
 import DashboardSummary from "@/components/trade/DashboardSummary";
-
-import type { PriorityNav } from "@/lib/businessHealth";
 import type { PriorityTarget } from "@/lib/tradeProfileStrength";
-import { isFeatureEnabled } from "@/lib/featureFlags";
+
 
 interface TradeProfile {
   name: string;
