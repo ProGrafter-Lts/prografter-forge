@@ -206,32 +206,62 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
       onClick: () => onOpenView("tradevault"),
     });
 
-  const cards = [
+  type Card = {
+    key: string;
+    label: string;
+    icon: typeof FolderKanban;
+    accent: string;
+    value: string;
+    unit: string;
+    sub: string;
+    cta: string;
+    onClick: () => void;
+    urgency: number;
+    alert?: string;
+    secondary?: { label: string; onClick: () => void };
+  };
+
+  const cards: Card[] = [
     {
       key: "pipeline",
       label: "Pipeline",
       icon: FolderKanban,
+      accent: "#8B5CF6",
       value: String(data.pipelineActive),
       unit: data.pipelineActive === 1 ? "active lead" : "active leads",
       sub: `${data.pipelineTodo} to contact · ${data.pipelineWaiting} waiting`,
       cta: "Open Pipeline",
       onClick: () => onOpenView("pipeline"),
+      urgency: data.overdueFollowUps > 0 ? 3 : data.pipelineTodo > 0 ? 2 : 0,
+      alert:
+        data.overdueFollowUps > 0
+          ? `${data.overdueFollowUps} follow-up${data.overdueFollowUps === 1 ? "" : "s"} due`
+          : data.pipelineTodo > 0
+            ? `${data.pipelineTodo} not contacted yet`
+            : undefined,
     },
     {
       key: "quotes",
       label: "Quotes",
       icon: FileText,
+      accent: "#F59E0B",
       value: String(data.quotesOutstanding),
       unit: data.quotesOutstanding === 1 ? "outstanding quote" : "outstanding quotes",
       sub: data.quotesOutstanding > 0 ? `${gbp(data.quotesValue)} awaiting decision` : "No quotes awaiting a decision",
       cta: "Open Quote Builder",
       onClick: () => navigate("/quote-builder/quickbuild"),
       secondary: { label: "View quotes", onClick: () => onOpenView("quotes") },
+      urgency: data.staleQuotes.length > 0 ? 3 : 0,
+      alert:
+        data.staleQuotes.length > 0
+          ? `${data.staleQuotes.length} chase-up${data.staleQuotes.length === 1 ? "" : "s"} overdue`
+          : undefined,
     },
     {
       key: "find-work",
       label: "Find Work",
       icon: Search,
+      accent: "#1AC2BA",
       value: String(data.newMatches),
       unit: data.newMatches === 1 ? "new match" : "new matches",
       sub:
@@ -242,28 +272,36 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
             : "No unactioned matches",
       cta: "Open Find Work",
       onClick: () => navigate("/planning-alerts"),
+      urgency: data.newMatches > 0 ? 2 : 0,
+      alert: data.newMatches > 0 ? "Awaiting your response" : undefined,
     },
     {
       key: "tradevault",
       label: "TradeVault",
       icon: ShieldCheck,
+      accent: "#3B82F6",
       value: String(data.docsNeeded),
       unit: data.docsNeeded === 1 ? "document needed" : "documents needed",
       sub: data.docsLabel,
       cta: "Open TradeVault",
       onClick: () => onOpenView("tradevault"),
+      urgency: data.docsNeeded > 0 ? 3 : 0,
+      alert: data.docsNeeded > 0 ? "Missing or expired documents" : undefined,
     },
     {
       key: "calendar",
       label: "Calendar",
       icon: CalendarDays,
+      accent: "#94A3B8",
       value: data.nextDate ? formatDate(data.nextDate.date) : "—",
       unit: data.nextDate ? "next date" : "nothing scheduled",
       sub: data.nextDate ? data.nextDate.label : "No upcoming dates or deadlines",
       cta: "Open Calendar",
       onClick: () => onOpenView("calendar"),
+      urgency: 0,
     },
-  ];
+  ].sort((a, b) => b.urgency - a.urgency);
+
 
   return (
     <div className="space-y-6">
@@ -300,20 +338,54 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
       </section>
 
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {cards.map((card) => (
+        {cards.map((card) => {
+          const urgent = card.urgency >= 3;
+          const attention = card.urgency === 2;
+          const tone = urgent ? "#FCD34D" : attention ? card.accent : card.accent;
+          return (
           <div
             key={card.key}
             className="rounded-2xl p-5 flex flex-col justify-between"
-            style={{ backgroundColor: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
+            style={{
+              backgroundColor: urgent
+                ? "rgba(252,211,77,0.07)"
+                : attention
+                  ? "rgba(255,255,255,0.055)"
+                  : "rgba(255,255,255,0.03)",
+              border: `1px solid ${urgent ? "rgba(252,211,77,0.35)" : attention ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.07)"}`,
+              borderLeft: `4px solid ${urgent ? "#FCD34D" : attention ? card.accent : "rgba(255,255,255,0.10)"}`,
+              opacity: card.urgency === 0 ? 0.82 : 1,
+              boxShadow: urgent ? "0 8px 24px -12px rgba(252,211,77,0.45)" : "none",
+            }}
           >
             <div>
               <div className="flex items-center gap-2">
-                <card.icon className="w-4 h-4" style={{ color: "#1AC2BA" }} />
+                <span
+                  className="inline-flex items-center justify-center rounded-lg w-7 h-7"
+                  style={{ backgroundColor: `${tone}1F` }}
+                >
+                  <card.icon className="w-4 h-4" style={{ color: tone }} />
+                </span>
                 <span className="font-mono text-[11px] uppercase tracking-widest text-primary-foreground/60">
                   {card.label}
                 </span>
+                {card.alert && (
+                  <span
+                    className="ml-auto inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-mono text-[10px]"
+                    style={{
+                      backgroundColor: urgent ? "rgba(252,211,77,0.18)" : `${card.accent}1F`,
+                      color: urgent ? "#FCD34D" : card.accent,
+                    }}
+                  >
+                    {urgent && <AlertCircle className="w-3 h-3" />}
+                    {card.alert}
+                  </span>
+                )}
               </div>
-              <div className="mt-3 font-heading text-4xl leading-none text-primary-foreground">
+              <div
+                className="mt-3 font-heading text-4xl leading-none"
+                style={{ color: urgent ? "#FCD34D" : "hsl(var(--primary-foreground))" }}
+              >
                 {card.value}
               </div>
               <div className="mt-1 font-mono text-xs text-primary-foreground/70">{card.unit}</div>
@@ -325,23 +397,35 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
               <button
                 onClick={card.onClick}
                 className="inline-flex items-center gap-1 font-mono text-xs px-3 py-2 rounded-xl transition-opacity hover:opacity-90"
-                style={{ backgroundColor: "rgba(13,148,136,0.9)", color: "#FFFFFF" }}
+                style={
+                  urgent
+                    ? { backgroundColor: "#FCD34D", color: "#1A1A1A" }
+                    : card.urgency === 0
+                      ? {
+                          backgroundColor: "rgba(255,255,255,0.06)",
+                          color: "rgba(255,255,255,0.75)",
+                          border: "1px solid rgba(255,255,255,0.12)",
+                        }
+                      : { backgroundColor: `${card.accent}E6`, color: "#FFFFFF" }
+                }
               >
                 {card.cta}
                 <ArrowRight className="w-3 h-3" />
               </button>
-              {"secondary" in card && card.secondary && (
+              {card.secondary && (
                 <button
                   onClick={card.secondary.onClick}
                   className="font-mono text-xs hover:underline"
-                  style={{ color: "#1AC2BA" }}
+                  style={{ color: card.accent }}
                 >
                   {card.secondary.label}
                 </button>
               )}
             </div>
           </div>
-        ))}
+          );
+        })}
+
       </section>
     </div>
   );
