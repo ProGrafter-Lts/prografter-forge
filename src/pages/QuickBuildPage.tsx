@@ -133,14 +133,38 @@ const QuickBuildPage = () => {
     );
     const jobId = searchParams.get("job");
     if (jobId) {
-      navigate(
-        `/jobs/${jobId}/quote?from=${encodeURIComponent(`/project/${jobId}`)}` +
-          (generationId ? `&qbDraft=${generationId}` : ""),
-      );
+      goToBuilder(jobId);
       return;
     }
-    toast.success("Draft saved — pick the job it belongs to to finish the quote.");
-    navigate("/dashboard/trade?view=quotes");
+    setStage("pickjob");
+    void loadJobOptions();
+  };
+
+  const goToBuilder = (jobId: string) => {
+    navigate(
+      `/jobs/${jobId}/quote?from=${encodeURIComponent(`/project/${jobId}`)}` +
+        (generationId ? `&qbDraft=${generationId}` : ""),
+    );
+  };
+
+  const loadJobOptions = async () => {
+    setJobsLoading(true);
+    const { data: userRes } = await supabase.auth.getUser();
+    const uid = userRes.user?.id;
+    if (!uid) { setJobsLoading(false); return; }
+    const { data: trade } = await supabase.from("trades").select("id").eq("user_id", uid).maybeSingle();
+    if (!trade) { setJobsLoading(false); return; }
+    const { data } = await supabase
+      .from("job_matches")
+      .select("job_id, jobs(id, title, job_type, postcode)")
+      .eq("trade_id", (trade as any).id)
+      .order("notified_at", { ascending: false })
+      .limit(25);
+    const opts = ((data ?? []) as any[])
+      .map((r) => r.jobs)
+      .filter(Boolean) as JobOption[];
+    setJobOptions(opts);
+    setJobsLoading(false);
   };
 
   const loadScenario = async (scenarioId: string) => {
