@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import {
   ArrowRight,
@@ -97,6 +98,7 @@ const BusinessHealthDashboard = ({
   marginData,
   onNavigate,
 }: Props) => {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [health, setHealth] = useState<BusinessHealth | null>(null);
   const [input, setInput] = useState<BusinessHealthInput | null>(null);
@@ -352,9 +354,14 @@ const BusinessHealthDashboard = ({
     },
   ];
 
-  const quickActions: { label: string; icon: typeof Search; target: PriorityNav }[] = [
+  const quickActions: {
+    label: string;
+    icon: typeof Search;
+    target?: PriorityNav;
+    href?: string;
+  }[] = [
     { label: "Find Work", icon: Search, target: "find-work" },
-    { label: "Create Quote", icon: Plus, target: "quotes" },
+    { label: "Create Quote", icon: Plus, href: "/quote-builder/quickbuild" },
     { label: "Open Pipeline", icon: FolderKanban, target: "pipeline" },
     { label: "Calendar", icon: CalendarDays, target: "calendar" },
     { label: "TradeVault", icon: ShieldCheck, target: "tradevault" },
@@ -447,7 +454,7 @@ const BusinessHealthDashboard = ({
             return (
               <button
                 key={a.label}
-                onClick={() => onNavigate(a.target)}
+                onClick={() => (a.href ? navigate(a.href) : onNavigate(a.target!))}
                 className="flex flex-col items-center justify-center gap-2 rounded-xl py-5 px-3 transition-colors hover:bg-white/5"
                 style={cardStyle}
               >
