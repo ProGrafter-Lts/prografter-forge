@@ -234,21 +234,6 @@ const TradeDashboard = () => {
     }
   };
 
-  const handleHealthNav = (target: PriorityNav) => {
-    if (target === "find-work") {
-      navigate("/planning-alerts");
-      return;
-    }
-    const map: Record<Exclude<PriorityNav, "find-work">, string> = {
-      pipeline: "pipeline",
-      quotes: "quotes",
-      tradevault: "tradevault",
-      profile: "profile",
-      calendar: "calendar",
-      messages: "messages",
-    };
-    goToView(map[target] ?? "dashboard");
-  };
 
 
 
