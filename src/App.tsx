@@ -72,6 +72,7 @@ const ContractPage = lazyRetry(() => import("./pages/ContractPage.tsx"));
 const LegalReview = lazyRetry(() => import("./pages/LegalReview.tsx"));
 const QuickBuildPage = lazyRetry(() => import("./pages/QuickBuildPage.tsx"));
 const QuoteBuilder = lazyRetry(() => import("./pages/QuoteBuilder.tsx"));
+const QuoteDetail = lazyRetry(() => import("./pages/QuoteDetail.tsx"));
 const Apply = lazyRetry(() => import("./pages/Apply.tsx"));
 const PostJobBrief = lazyRetry(() => import("./pages/PostJobBrief.tsx"));
 const ProjectClarity = lazyRetry(() => import("./pages/ProjectClarity.tsx"));
