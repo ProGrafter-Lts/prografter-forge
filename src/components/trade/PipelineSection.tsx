@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { AlertCircle, ArrowRight, RefreshCw, GitBranch } from "lucide-react";
+import { AlertCircle, ArrowRight, RefreshCw, GitBranch, X, MapPin, CalendarClock } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { ShortlistStatus } from "./ShortlistStatusControl";
 import Workspace from "@/components/trade/Workspace";
@@ -65,6 +65,28 @@ const CARD_DEFS: {
 ];
 
 
+interface StageRow {
+  id: string;
+  note: string | null;
+  next_action_date: string | null;
+  last_status_change_at: string | null;
+  planning_alerts: {
+    address: string | null;
+    postcode: string | null;
+    application_type: string | null;
+    description: string | null;
+    local_authority: string | null;
+  } | null;
+}
+
+/** Stage key -> shortlist contact_status it maps to (null = no data source yet). */
+const STAGE_STATUS: Partial<Record<keyof Counts, string>> = {
+  todo: "todo",
+  contacted: "contacted",
+  quoted: "quoted",
+  won: "won",
+};
+
 const PipelineSection = ({ tradeId }: Props) => {
   const navigate = useNavigate();
   const [counts, setCounts] = useState<Counts>({
@@ -79,6 +101,10 @@ const PipelineSection = ({ tradeId }: Props) => {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [openStage, setOpenStage] = useState<keyof Counts | null>(null);
+  const [stageRows, setStageRows] = useState<StageRow[] | null>(null);
+  const [stageLoading, setStageLoading] = useState(false);
+  const [stageError, setStageError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -135,6 +161,36 @@ const PipelineSection = ({ tradeId }: Props) => {
     setCounts(next);
     setLoading(false);
   }, [tradeId]);
+
+  const openStageDetail = useCallback(
+    async (key: keyof Counts) => {
+      if (openStage === key) {
+        setOpenStage(null);
+        return;
+      }
+      setOpenStage(key);
+      setStageRows(null);
+      setStageError(null);
+      const status = STAGE_STATUS[key];
+      if (!status) return;
+      setStageLoading(true);
+      const { data, error: rowsError } = await supabase
+        .from("planning_alert_shortlist")
+        .select(
+          "id, note, next_action_date, last_status_change_at, planning_alerts(address, postcode, application_type, description, local_authority)",
+        )
+        .eq("trade_id", tradeId)
+        .eq("contact_status", status as any)
+        .order("last_status_change_at", { ascending: false });
+      setStageLoading(false);
+      if (rowsError) {
+        setStageError(rowsError.message);
+        return;
+      }
+      setStageRows((data ?? []) as unknown as StageRow[]);
+    },
+    [openStage, tradeId],
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -225,23 +281,17 @@ const PipelineSection = ({ tradeId }: Props) => {
           {CARD_DEFS.map((card, i) => {
             const value = counts[card.key];
             const isZero = value === 0;
-            const clickable = !!card.filter;
             return (
               <button
                 key={card.key}
                 type="button"
-                disabled={!clickable}
-                onClick={() =>
-                  clickable &&
-                  navigate(
-                    `/dashboard/trade?pipeline=${encodeURIComponent(card.filter!)}#planning-alerts-list`,
-                  )
-                }
+                onClick={() => void openStageDetail(card.key)}
                 className={`premium-card relative text-left p-4 focus:outline-none focus:ring-2 focus:ring-ring ${
-                  clickable ? "" : "cursor-default"
+                  openStage === card.key ? "ring-2 ring-ring" : ""
                 } ${isZero ? "opacity-70" : ""}`}
                 style={{ ["--ws-accent" as any]: "251 146 60" }}
-                aria-label={`${value} ${card.label} leads. ${card.subtitle}.${clickable ? " Click to filter." : ""}`}
+                aria-expanded={openStage === card.key}
+                aria-label={`${value} ${card.label} leads. ${card.subtitle}. Tap to see the leads in this stage.`}
               >
                 {/* Animated connector to the next stage */}
                 {i < CARD_DEFS.length - 1 && (
@@ -269,9 +319,87 @@ const PipelineSection = ({ tradeId }: Props) => {
                 <div className="mt-1 font-sans text-[11px] text-white/50 leading-snug">
                   {card.subtitle}
                 </div>
+                <div className="mt-2 font-mono text-[10px] uppercase tracking-wider ws-accent-fg">
+                  {openStage === card.key ? "Hide leads" : "View leads"}
+                </div>
               </button>
             );
           })}
+        </div>
+      )}
+
+      {openStage && (
+        <div className="premium-card mt-4 p-5">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="font-sans font-semibold text-white">
+                {CARD_DEFS.find((c) => c.key === openStage)?.label} —{" "}
+                {counts[openStage]} {counts[openStage] === 1 ? "lead" : "leads"}
+              </p>
+              <p className="font-sans text-xs text-white/55 mt-1">
+                {CARD_DEFS.find((c) => c.key === openStage)?.subtitle}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setOpenStage(null)}
+              aria-label="Close stage detail"
+              className="text-white/60 hover:text-white p-1"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="mt-4 space-y-2">
+            {!STAGE_STATUS[openStage] ? (
+              <p className="font-sans text-sm text-white/60">
+                This stage isn't tracked yet — leads move here once site visits and planning
+                outcomes are recorded against a lead. Nothing to show for now.
+              </p>
+            ) : stageLoading ? (
+              <>
+                <Skeleton className="h-16 w-full" />
+                <Skeleton className="h-16 w-full" />
+              </>
+            ) : stageError ? (
+              <p role="alert" className="font-mono text-xs text-destructive">{stageError}</p>
+            ) : !stageRows?.length ? (
+              <p className="font-sans text-sm text-white/60">No leads sitting in this stage.</p>
+            ) : (
+              stageRows.map((row) => (
+                <button
+                  key={row.id}
+                  type="button"
+                  onClick={() => navigate("/planning-alerts")}
+                  className="w-full text-left rounded-xl bg-white/5 hover:bg-white/10 transition-colors p-4"
+                >
+                  <p className="font-sans font-semibold text-sm text-white">
+                    {row.planning_alerts?.address || row.planning_alerts?.application_type || "Lead"}
+                  </p>
+                  <div className="flex flex-wrap items-center gap-3 mt-1.5 font-mono text-[11px] text-white/55">
+                    {row.planning_alerts?.postcode && (
+                      <span className="inline-flex items-center gap-1">
+                        <MapPin className="w-3 h-3" />
+                        {row.planning_alerts.postcode}
+                      </span>
+                    )}
+                    {row.next_action_date && (
+                      <span className="inline-flex items-center gap-1">
+                        <CalendarClock className="w-3 h-3" />
+                        Next action {row.next_action_date}
+                      </span>
+                    )}
+                    {row.planning_alerts?.local_authority && (
+                      <span>{row.planning_alerts.local_authority}</span>
+                    )}
+                  </div>
+                  {row.note && (
+                    <p className="font-sans text-xs text-white/60 mt-2 line-clamp-2">{row.note}</p>
+                  )}
+                </button>
+              ))
+            )}
+          </div>
         </div>
       )}
     </Workspace>
