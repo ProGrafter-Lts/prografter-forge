@@ -206,32 +206,62 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
       onClick: () => onOpenView("tradevault"),
     });
 
-  const cards = [
+  type Card = {
+    key: string;
+    label: string;
+    icon: typeof FolderKanban;
+    accent: string;
+    value: string;
+    unit: string;
+    sub: string;
+    cta: string;
+    onClick: () => void;
+    urgency: number;
+    alert?: string;
+    secondary?: { label: string; onClick: () => void };
+  };
+
+  const cards: Card[] = [
     {
       key: "pipeline",
       label: "Pipeline",
       icon: FolderKanban,
+      accent: "#8B5CF6",
       value: String(data.pipelineActive),
       unit: data.pipelineActive === 1 ? "active lead" : "active leads",
       sub: `${data.pipelineTodo} to contact · ${data.pipelineWaiting} waiting`,
       cta: "Open Pipeline",
       onClick: () => onOpenView("pipeline"),
+      urgency: data.overdueFollowUps > 0 ? 3 : data.pipelineTodo > 0 ? 2 : 0,
+      alert:
+        data.overdueFollowUps > 0
+          ? `${data.overdueFollowUps} follow-up${data.overdueFollowUps === 1 ? "" : "s"} due`
+          : data.pipelineTodo > 0
+            ? `${data.pipelineTodo} not contacted yet`
+            : undefined,
     },
     {
       key: "quotes",
       label: "Quotes",
       icon: FileText,
+      accent: "#F59E0B",
       value: String(data.quotesOutstanding),
       unit: data.quotesOutstanding === 1 ? "outstanding quote" : "outstanding quotes",
       sub: data.quotesOutstanding > 0 ? `${gbp(data.quotesValue)} awaiting decision` : "No quotes awaiting a decision",
       cta: "Open Quote Builder",
       onClick: () => navigate("/quote-builder/quickbuild"),
       secondary: { label: "View quotes", onClick: () => onOpenView("quotes") },
+      urgency: data.staleQuotes.length > 0 ? 3 : 0,
+      alert:
+        data.staleQuotes.length > 0
+          ? `${data.staleQuotes.length} chase-up${data.staleQuotes.length === 1 ? "" : "s"} overdue`
+          : undefined,
     },
     {
       key: "find-work",
       label: "Find Work",
       icon: Search,
+      accent: "#1AC2BA",
       value: String(data.newMatches),
       unit: data.newMatches === 1 ? "new match" : "new matches",
       sub:
@@ -242,28 +272,36 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
             : "No unactioned matches",
       cta: "Open Find Work",
       onClick: () => navigate("/planning-alerts"),
+      urgency: data.newMatches > 0 ? 2 : 0,
+      alert: data.newMatches > 0 ? "Awaiting your response" : undefined,
     },
     {
       key: "tradevault",
       label: "TradeVault",
       icon: ShieldCheck,
+      accent: "#3B82F6",
       value: String(data.docsNeeded),
       unit: data.docsNeeded === 1 ? "document needed" : "documents needed",
       sub: data.docsLabel,
       cta: "Open TradeVault",
       onClick: () => onOpenView("tradevault"),
+      urgency: data.docsNeeded > 0 ? 3 : 0,
+      alert: data.docsNeeded > 0 ? "Missing or expired documents" : undefined,
     },
     {
       key: "calendar",
       label: "Calendar",
       icon: CalendarDays,
+      accent: "#94A3B8",
       value: data.nextDate ? formatDate(data.nextDate.date) : "—",
       unit: data.nextDate ? "next date" : "nothing scheduled",
       sub: data.nextDate ? data.nextDate.label : "No upcoming dates or deadlines",
       cta: "Open Calendar",
       onClick: () => onOpenView("calendar"),
+      urgency: 0,
     },
-  ];
+  ].sort((a, b) => b.urgency - a.urgency);
+
 
   return (
     <div className="space-y-6">
