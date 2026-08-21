@@ -9,7 +9,7 @@ import CalendarConnect from "@/components/trade/CalendarConnect";
 import TradeProfileSection from "@/components/trade/TradeProfileSection";
 import AddSpecialismsBanner from "@/components/trade/AddSpecialismsBanner";
 import PipelineSection from "@/components/trade/PipelineSection";
-import QuotesList from "@/components/trade/QuotesList";
+import QuotesDashboard from "@/components/trade/QuotesDashboard";
 import AvailableJobsView from "@/components/trade/AvailableJobsView";
 import TradeVaultSection from "@/components/trade/tradevault/TradeVaultSection";
 import TradeVaultBanners from "@/components/trade/tradevault/TradeVaultBanners";
@@ -414,9 +414,9 @@ const TradeDashboard = () => {
             <div className="space-y-6">
               <div>
                 <h1 className="font-heading text-primary text-3xl">Quotes</h1>
-                <p className="font-mono text-sm text-muted-foreground mt-1">Track and manage your submitted quotes.</p>
+                <p className="font-mono text-sm text-muted-foreground mt-1">Every quote you\u2019ve started and submitted, with its current status.</p>
               </div>
-              <QuotesList quotes={quotes} />
+              <QuotesDashboard quotes={quotes} />
             </div>
           )}
 
