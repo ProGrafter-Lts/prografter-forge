@@ -99,7 +99,7 @@ const QuoteCheckDetail = () => {
 
   return (
     <div className="min-h-screen dashboard-dark">
-      <SEO title="AI Quote Checker — ProGrafter" description="Your saved AI Quote Checker report." path={`/dashboard/quote-checks/${id}`} noindex />
+      <SEO title={advancedMode ? "Advanced Review Engine — ProGrafter Admin" : "AI Quote Checker — ProGrafter"} description={advancedMode ? "Admin-only Advanced Review Engine report." : "Your saved AI Quote Checker report."} path={`/dashboard/quote-checks/${id}`} noindex />
       <main className="max-w-3xl mx-auto p-4 md:p-8 space-y-6">
         <div className="no-print flex items-center justify-between gap-3 flex-wrap">
           <Link
