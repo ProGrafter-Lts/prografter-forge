@@ -352,9 +352,14 @@ const BusinessHealthDashboard = ({
     },
   ];
 
-  const quickActions: { label: string; icon: typeof Search; target: PriorityNav }[] = [
+  const quickActions: {
+    label: string;
+    icon: typeof Search;
+    target?: PriorityNav;
+    href?: string;
+  }[] = [
     { label: "Find Work", icon: Search, target: "find-work" },
-    { label: "Create Quote", icon: Plus, target: "quotes" },
+    { label: "Create Quote", icon: Plus, href: "/quote-builder/quickbuild" },
     { label: "Open Pipeline", icon: FolderKanban, target: "pipeline" },
     { label: "Calendar", icon: CalendarDays, target: "calendar" },
     { label: "TradeVault", icon: ShieldCheck, target: "tradevault" },
