@@ -203,6 +203,7 @@ const AppRoutes = () => {
             
             
             <Route path="/report/:id" element={<QuoteReport />} />
+            <Route path="/quote/:quoteId" element={<PublicQuoteView />} />
             <Route path="/green" element={<GreenGrants />} />
             <Route path="/login" element={<Login />} />
             <Route path="/reset-password" element={<ResetPassword />} />
