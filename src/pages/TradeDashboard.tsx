@@ -477,7 +477,7 @@ const TradeDashboard = () => {
           <>
           {/* Slim eligibility / document banners only — shown near the top when action is required */}
           {trade && (
-            <TradeVaultBanners tradeId={trade.id} onOpenVault={() => setActiveNav("tradevault")} />
+            <TradeVaultBanners tradeId={trade.id} onOpenVault={() => goToView("tradevault")} />
           )}
 
           {/* 1. LIVE WORK — job matches lead the page, above everything else */}
@@ -509,7 +509,7 @@ const TradeDashboard = () => {
             <AddSpecialismsBanner
               tradeId={trade.id}
               promptSeen={trade.specialisms_prompt_seen}
-              onAdd={() => setActiveNav("profile")}
+              onAdd={() => goToView("profile")}
             />
           )}
           <CalendarConnect variant="compact" />
