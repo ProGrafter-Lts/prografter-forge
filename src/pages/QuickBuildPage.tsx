@@ -33,9 +33,16 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { FlaskConical } from "lucide-react";
 
-type Stage = "input" | "generating" | "review";
+type Stage = "input" | "generating" | "review" | "pickjob";
 
 const QUICKBUILD_HANDOFF_KEY = "prografter:quickbuild:handoff";
+
+interface JobOption {
+  id: string;
+  title: string | null;
+  job_type: string | null;
+  postcode: string | null;
+}
 
 const QuickBuildPage = () => {
   const navigate = useNavigate();
@@ -49,6 +56,8 @@ const QuickBuildPage = () => {
   const [generationId, setGenerationId] = useState<string | null>(null);
   const [remaining, setRemaining] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [jobOptions, setJobOptions] = useState<JobOption[]>([]);
+  const [jobsLoading, setJobsLoading] = useState(false);
 
   useEffect(() => {
     if (!isFeatureEnabled("quickBuild")) {
