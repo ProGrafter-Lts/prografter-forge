@@ -41,6 +41,7 @@ const CompareQuotes = lazyRetry(() => import("./pages/CompareQuotes.tsx"));
 const NotFound = lazyRetry(() => import("./pages/NotFound.tsx"));
 const QuoteChecker = lazyRetry(() => import("./pages/QuoteChecker.tsx"));
 const QuoteReport = lazyRetry(() => import("./pages/QuoteReport.tsx"));
+const PublicQuoteView = lazyRetry(() => import("./pages/PublicQuoteView.tsx"));
 const MyQuoteChecks = lazyRetry(() => import("./pages/MyQuoteChecks.tsx"));
 const QuoteCheckDetail = lazyRetry(() => import("./pages/QuoteCheckDetail.tsx"));
 const GreenGrants = lazyRetry(() => import("./pages/GreenGrants.tsx"));
@@ -203,6 +204,7 @@ const AppRoutes = () => {
             
             
             <Route path="/report/:id" element={<QuoteReport />} />
+            <Route path="/quote/:quoteId" element={<PublicQuoteView />} />
             <Route path="/green" element={<GreenGrants />} />
             <Route path="/login" element={<Login />} />
             <Route path="/reset-password" element={<ResetPassword />} />
