@@ -347,35 +347,89 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
   return (
     <div className="space-y-6">
       <section className="space-y-3">
-        <h2 className="font-heading text-primary text-2xl">What needs doing today</h2>
+        <div className="flex items-baseline justify-between gap-3 flex-wrap">
+          <h2 className="font-heading text-primary text-2xl">What needs doing today</h2>
+          {prompts.length > 0 && (
+            <span className="font-mono text-[11px] uppercase tracking-widest text-primary-foreground/50">
+              {prompts.length} {prompts.length === 1 ? "action" : "actions"} · top priority first
+            </span>
+          )}
+        </div>
         {prompts.length === 0 ? (
-          <p className="font-mono text-sm text-muted-foreground">
-            Nothing overdue — no unactioned matches, quotes or documents right now.
-          </p>
+          <div
+            className="rounded-2xl px-5 py-6 text-center"
+            style={{ backgroundColor: "rgba(26,194,186,0.06)", border: "1px solid rgba(26,194,186,0.25)" }}
+          >
+            <p className="font-heading text-lg" style={{ color: "#1AC2BA" }}>
+              You're all clear
+            </p>
+            <p className="mt-1 font-mono text-xs text-primary-foreground/60">
+              No unactioned matches, quotes or documents right now.
+            </p>
+          </div>
         ) : (
-          <ul className="space-y-2">
-            {prompts.slice(0, 5).map((p) => (
-              <li
-                key={p.key}
-                className="flex items-center justify-between gap-3 flex-wrap rounded-xl px-4 py-3"
-                style={{ backgroundColor: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
-              >
-                <span className="flex items-start gap-2 font-mono text-sm text-primary-foreground/85">
-                  <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" style={{ color: "#FCD34D" }} />
-                  {p.text}
-                </span>
+          <ol className="space-y-2">
+            {prompts.slice(0, 5).map((p, i) => (
+              <li key={p.key}>
                 <button
                   onClick={p.onClick}
-                  className="inline-flex items-center gap-1 font-mono text-xs hover:underline"
-                  style={{ color: "#1AC2BA" }}
+                  className="group w-full text-left rounded-2xl px-4 py-4 flex items-center gap-4 transition-all hover:translate-x-[2px]"
+                  style={{
+                    backgroundColor: i === 0 ? `${p.tone}12` : "rgba(255,255,255,0.035)",
+                    border: `1px solid ${i === 0 ? `${p.tone}59` : "rgba(255,255,255,0.08)"}`,
+                    borderLeft: `4px solid ${p.tone}`,
+                  }}
                 >
-                  {p.cta}
-                  <ArrowRight className="w-3 h-3" />
+                  <span
+                    className="relative flex items-center justify-center rounded-xl w-11 h-11 shrink-0"
+                    style={{ backgroundColor: `${p.tone}1F` }}
+                  >
+                    <p.icon className="w-5 h-5" style={{ color: p.tone }} strokeWidth={1.75} />
+                    <span
+                      className="absolute -top-1.5 -left-1.5 flex items-center justify-center rounded-full w-5 h-5 font-mono text-[10px]"
+                      style={{ backgroundColor: p.tone, color: "#0B1B2B" }}
+                    >
+                      {i + 1}
+                    </span>
+                  </span>
+
+                  <span className="min-w-0 flex-1">
+                    <span
+                      className="inline-block font-mono text-[10px] uppercase tracking-widest"
+                      style={{ color: p.tone }}
+                    >
+                      {p.tag}
+                    </span>
+                    <span className="block font-heading text-base leading-snug text-primary-foreground">
+                      {p.headline}
+                    </span>
+                    <span className="block font-mono text-xs text-primary-foreground/55 leading-snug mt-0.5">
+                      {p.detail}
+                    </span>
+                  </span>
+
+                  {p.metric && (
+                    <span
+                      className="hidden sm:block font-heading text-2xl leading-none shrink-0"
+                      style={{ color: p.tone }}
+                    >
+                      {p.metric}
+                    </span>
+                  )}
+
+                  <span
+                    className="inline-flex items-center gap-1 font-mono text-xs shrink-0"
+                    style={{ color: p.tone }}
+                  >
+                    <span className="hidden md:inline">{p.cta}</span>
+                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                  </span>
                 </button>
               </li>
             ))}
-          </ul>
+          </ol>
         )}
+
       </section>
 
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
