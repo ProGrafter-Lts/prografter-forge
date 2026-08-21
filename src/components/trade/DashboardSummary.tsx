@@ -338,20 +338,54 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
       </section>
 
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {cards.map((card) => (
+        {cards.map((card) => {
+          const urgent = card.urgency >= 3;
+          const attention = card.urgency === 2;
+          const tone = urgent ? "#FCD34D" : attention ? card.accent : card.accent;
+          return (
           <div
             key={card.key}
             className="rounded-2xl p-5 flex flex-col justify-between"
-            style={{ backgroundColor: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
+            style={{
+              backgroundColor: urgent
+                ? "rgba(252,211,77,0.07)"
+                : attention
+                  ? "rgba(255,255,255,0.055)"
+                  : "rgba(255,255,255,0.03)",
+              border: `1px solid ${urgent ? "rgba(252,211,77,0.35)" : attention ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.07)"}`,
+              borderLeft: `4px solid ${urgent ? "#FCD34D" : attention ? card.accent : "rgba(255,255,255,0.10)"}`,
+              opacity: card.urgency === 0 ? 0.82 : 1,
+              boxShadow: urgent ? "0 8px 24px -12px rgba(252,211,77,0.45)" : "none",
+            }}
           >
             <div>
               <div className="flex items-center gap-2">
-                <card.icon className="w-4 h-4" style={{ color: "#1AC2BA" }} />
+                <span
+                  className="inline-flex items-center justify-center rounded-lg w-7 h-7"
+                  style={{ backgroundColor: `${tone}1F` }}
+                >
+                  <card.icon className="w-4 h-4" style={{ color: tone }} />
+                </span>
                 <span className="font-mono text-[11px] uppercase tracking-widest text-primary-foreground/60">
                   {card.label}
                 </span>
+                {card.alert && (
+                  <span
+                    className="ml-auto inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-mono text-[10px]"
+                    style={{
+                      backgroundColor: urgent ? "rgba(252,211,77,0.18)" : `${card.accent}1F`,
+                      color: urgent ? "#FCD34D" : card.accent,
+                    }}
+                  >
+                    {urgent && <AlertCircle className="w-3 h-3" />}
+                    {card.alert}
+                  </span>
+                )}
               </div>
-              <div className="mt-3 font-heading text-4xl leading-none text-primary-foreground">
+              <div
+                className="mt-3 font-heading text-4xl leading-none"
+                style={{ color: urgent ? "#FCD34D" : "hsl(var(--primary-foreground))" }}
+              >
                 {card.value}
               </div>
               <div className="mt-1 font-mono text-xs text-primary-foreground/70">{card.unit}</div>
@@ -363,23 +397,35 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
               <button
                 onClick={card.onClick}
                 className="inline-flex items-center gap-1 font-mono text-xs px-3 py-2 rounded-xl transition-opacity hover:opacity-90"
-                style={{ backgroundColor: "rgba(13,148,136,0.9)", color: "#FFFFFF" }}
+                style={
+                  urgent
+                    ? { backgroundColor: "#FCD34D", color: "#1A1A1A" }
+                    : card.urgency === 0
+                      ? {
+                          backgroundColor: "rgba(255,255,255,0.06)",
+                          color: "rgba(255,255,255,0.75)",
+                          border: "1px solid rgba(255,255,255,0.12)",
+                        }
+                      : { backgroundColor: `${card.accent}E6`, color: "#FFFFFF" }
+                }
               >
                 {card.cta}
                 <ArrowRight className="w-3 h-3" />
               </button>
-              {"secondary" in card && card.secondary && (
+              {card.secondary && (
                 <button
                   onClick={card.secondary.onClick}
                   className="font-mono text-xs hover:underline"
-                  style={{ color: "#1AC2BA" }}
+                  style={{ color: card.accent }}
                 >
                   {card.secondary.label}
                 </button>
               )}
             </div>
           </div>
-        ))}
+          );
+        })}
+
       </section>
     </div>
   );
