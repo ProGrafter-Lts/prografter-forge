@@ -100,8 +100,10 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
         (r: any) => r.next_action_date && r.next_action_date <= todayIso,
       ).length;
 
-      const quotes = quotesRes.data || [];
+      // Test/demo quotes are excluded from every aggregate on this dashboard.
+      const quotes = (quotesRes.data || []).filter((q: any) => !isTestRecord(q));
       const quotesValue = quotes.reduce((s: number, q: any) => s + Number(q.amount || 0), 0);
+
       const staleQuotes = quotes
         .map((q: any) => ({ id: q.id, amount: Number(q.amount || 0), days: daysAgo(q.created_at) }))
         .filter((q) => q.days >= 5)
