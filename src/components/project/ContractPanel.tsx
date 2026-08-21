@@ -16,6 +16,10 @@ interface Quote {
   standard_price?: number | null;
   premium_price?: number | null;
   selected_tier?: string | null;
+  is_offline_agreement?: boolean | null;
+  pdf_path?: string | null;
+  contract_pdf_path?: string | null;
+  agreed_at?: string | null;
 }
 
 interface Contract {
