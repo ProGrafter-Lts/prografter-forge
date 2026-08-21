@@ -66,7 +66,7 @@ const ProjectDetail = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const qbDraftId = searchParams.get("qbDraft");
-  const [qbPrefill, setQbPrefill] = useState<QuickBuildPrefill | null>(null);
+  
 
   const [job, setJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
