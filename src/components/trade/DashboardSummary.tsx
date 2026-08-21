@@ -13,6 +13,8 @@ import {
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { computeVaultSummary, type VaultDocument } from "@/lib/tradeVault";
+import { isTestRecord } from "@/lib/testData";
+
 
 interface Props {
   tradeId: string;
@@ -66,9 +68,10 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
           .eq("trade_id", tradeId),
         supabase
           .from("quotes")
-          .select("id, amount, status, created_at")
+          .select("id, amount, status, created_at, is_test, jobs(is_test)")
           .eq("trade_id", tradeId)
           .eq("status", "pending"),
+
         supabase
           .from("job_matches")
           .select("id, status, interested_at, estimated_value")
@@ -99,8 +102,10 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
         (r: any) => r.next_action_date && r.next_action_date <= todayIso,
       ).length;
 
-      const quotes = quotesRes.data || [];
+      // Test/demo quotes are excluded from every aggregate on this dashboard.
+      const quotes = (quotesRes.data || []).filter((q: any) => !isTestRecord(q));
       const quotesValue = quotes.reduce((s: number, q: any) => s + Number(q.amount || 0), 0);
+
       const staleQuotes = quotes
         .map((q: any) => ({ id: q.id, amount: Number(q.amount || 0), days: daysAgo(q.created_at) }))
         .filter((q) => q.days >= 5)

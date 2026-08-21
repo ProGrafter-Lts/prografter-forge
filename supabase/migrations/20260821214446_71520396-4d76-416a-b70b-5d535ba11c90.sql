@@ -1,0 +1,1 @@
+update public.quotes set is_test = true where id = 'd21d6e32-06d8-4b1a-91ed-d71e2a25651c';

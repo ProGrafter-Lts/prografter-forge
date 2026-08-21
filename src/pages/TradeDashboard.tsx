@@ -18,6 +18,7 @@ import EarningsView from "@/components/trade/EarningsView";
 import { useTradeAccess } from "@/hooks/useTradeAccess";
 import { isContractedActiveJob } from "@/lib/activeProjects";
 import LegalReviewBanner from "@/components/LegalReviewBanner";
+import { isTestRecord } from "@/lib/testData";
 import DashboardSummary from "@/components/trade/DashboardSummary";
 import type { PriorityTarget } from "@/lib/tradeProfileStrength";
 
@@ -126,7 +127,7 @@ const TradeDashboard = () => {
           .limit(5),
         supabase
           .from("quotes")
-          .select("id, amount, status, created_at, job_id, jobs(id, title, job_type, postcode, stage)")
+          .select("id, amount, status, created_at, job_id, is_test, jobs(id, title, job_type, postcode, stage, is_test)")
           .eq("trade_id", tradeData.id)
           .order("created_at", { ascending: false }),
         supabase
@@ -182,7 +183,9 @@ const TradeDashboard = () => {
       setQuotes(allQuotes.filter((quote: any) => quote.status === "pending"));
       setActiveProjects(contractJobs);
 
-      const totalQuoted = allQuotes.reduce((sum: number, quote: any) => sum + Number(quote.amount || 0), 0);
+      // Margin/earnings figures must exclude seeded demo records.
+      const realQuotes = allQuotes.filter((quote: any) => !isTestRecord(quote));
+      const totalQuoted = realQuotes.reduce((sum: number, quote: any) => sum + Number(quote.amount || 0), 0);
       const totalReceived = (stagePaymentRes.data || [])
         .filter((stage: any) => stage.payment_status === "paid")
         .reduce((sum: number, stage: any) => sum + Number(stage.payment_amount || 0), 0);
@@ -272,7 +275,8 @@ const TradeDashboard = () => {
         setSidebarOpen={setSidebarOpen}
       />
 
-      <main className="flex-1 p-4 md:p-8 overflow-auto">
+      {/* pt-16 on mobile keeps content clear of the fixed sidebar toggle (top-14 left-4) */}
+      <main className="flex-1 p-4 pt-16 md:p-8 overflow-auto">
         <div className="max-w-5xl mx-auto space-y-10">
           {!isReady || tradeAccessLoading ? (
             <div className="min-h-[40vh] flex items-center justify-center font-mono text-sm text-muted-foreground">
@@ -296,7 +300,7 @@ const TradeDashboard = () => {
           {/* Incomplete application banner */}
           {trade?.verification_status === "pending" && !trade?.submitted_for_review_at && (
             <div
-              className="mt-10 md:mt-0 p-4 rounded-xl font-body text-sm"
+              className="p-4 rounded-xl font-body text-sm"
               style={{ backgroundColor: "rgba(251,191,36,0.10)", border: "1px solid rgba(251,191,36,0.35)", color: "#FDE68A" }}
             >
               <div className="flex items-center justify-between gap-4 flex-wrap">
@@ -330,7 +334,7 @@ const TradeDashboard = () => {
             const isAssessment = status === "pending_assessment";
             return (
               <div
-                className="mt-10 md:mt-0 p-4 rounded-xl font-body text-sm"
+                className="p-4 rounded-xl font-body text-sm"
                 style={{ backgroundColor: palette.bg, border: `1px solid ${palette.border}`, color: palette.text }}
               >
                 <div className="flex items-center justify-between gap-4 flex-wrap">
@@ -359,7 +363,7 @@ const TradeDashboard = () => {
 
           {/* Welcome header — hidden on the dashboard view, where the Business Health hero takes over */}
           {activeNav !== "dashboard" && (
-          <div className="flex items-center gap-3 pt-10 md:pt-0">
+          <div className="flex items-center gap-3">
             <div>
               <h1 className="font-heading text-primary text-3xl md:text-4xl">
                 Welcome back, {trade?.name || "Trade"}

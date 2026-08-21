@@ -20,6 +20,7 @@ import {
 import { computeProfileStrength } from "@/lib/tradeProfileStrength";
 import type { VaultDocument } from "@/lib/tradeVault";
 import { computeVaultSummary } from "@/lib/tradeVault";
+import { isTestRecord } from "@/lib/testData";
 import {
   buildSummarySentence,
   computeBoosters,
@@ -130,7 +131,7 @@ const BusinessHealthDashboard = ({
           .from("trade_portfolio_items" as any)
           .select("id", { count: "exact", head: true })
           .eq("trade_id", tradeId),
-        supabase.from("quotes").select("id, amount, status, created_at").eq("trade_id", tradeId),
+        supabase.from("quotes").select("id, amount, status, created_at, is_test, jobs(is_test)").eq("trade_id", tradeId),
         supabase
           .from("planning_alerts")
           .select("id, application_type, address, postcode, distance_miles, viewed, actioned, created_at")
@@ -154,7 +155,8 @@ const BusinessHealthDashboard = ({
       const vaultDocs = (vaultRes.data as VaultDocument[]) ?? [];
       const specialismCount = specRes.count ?? 0;
       const portfolioCount = portfolioRes.count ?? 0;
-      const quoteRows = (quotesRes.data as any[]) ?? [];
+      // Test/demo quotes are excluded from all business-health figures.
+      const quoteRows = ((quotesRes.data as any[]) ?? []).filter((q) => !isTestRecord(q));
       setAllQuotes(quoteRows);
 
       // ── Find Work summary ──────────────────────────────────────────────

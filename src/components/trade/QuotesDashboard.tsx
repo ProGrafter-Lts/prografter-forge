@@ -4,6 +4,7 @@ import { FileText, PoundSterling, MapPin, Clock, CheckCircle2, XCircle, PencilLi
 import { supabase } from "@/integrations/supabase/client";
 import GenerateQuotePdfButton from "./GenerateQuotePdfButton";
 import { isFeatureEnabled } from "@/lib/featureFlags";
+import { isTestRecord } from "@/lib/testData";
 
 interface QuoteRow {
   id: string;
@@ -11,8 +12,10 @@ interface QuoteRow {
   status: string | null;
   created_at: string;
   job_id?: string | null;
+  is_test?: boolean | null;
   jobs: {
     id?: string;
+    is_test?: boolean | null;
     title: string | null;
     job_type: string;
     postcode: string;
@@ -66,8 +69,15 @@ const Pill = ({ children }: { children: React.ReactNode }) => (
   </span>
 );
 
-const QuotesDashboard = ({ quotes }: { quotes: QuoteRow[] }) => {
+const QuotesDashboard = ({ quotes: allQuotes }: { quotes: QuoteRow[] }) => {
   const navigate = useNavigate();
+  /* Real vs test/demo records are never blended into one figure. */
+  const quotes = useMemo(() => allQuotes.filter((q) => !isTestRecord(q)), [allQuotes]);
+  const testQuotes = useMemo(() => allQuotes.filter((q) => isTestRecord(q)), [allQuotes]);
+  const testValue = useMemo(
+    () => testQuotes.reduce((s, q) => s + Number(q.amount || 0), 0),
+    [testQuotes],
+  );
   const [drafts, setDrafts] = useState<DraftRow[]>([]);
   const [filter, setFilter] = useState<"all" | "drafts" | StatusKey>("all");
 
@@ -130,10 +140,10 @@ const QuotesDashboard = ({ quotes }: { quotes: QuoteRow[] }) => {
     : null;
 
   const visibleQuotes = useMemo(() => {
-    if (filter === "all") return quotes;
+    if (filter === "all") return [...quotes, ...testQuotes];
     if (filter === "drafts") return [];
-    return quotes.filter((q) => normaliseStatus(q.status) === filter);
-  }, [quotes, filter]);
+    return [...quotes, ...testQuotes].filter((q) => normaliseStatus(q.status) === filter);
+  }, [quotes, testQuotes, filter]);
 
   const showDrafts = filter === "all" || filter === "drafts";
 
@@ -163,6 +173,14 @@ const QuotesDashboard = ({ quotes }: { quotes: QuoteRow[] }) => {
           </div>
         ))}
       </div>
+
+      {testQuotes.length > 0 && (
+        <p className="font-mono text-[11px] text-muted-foreground">
+          Excluded from the figures above: {testQuotes.length} test/demo{" "}
+          {testQuotes.length === 1 ? "quote" : "quotes"} worth £{testValue.toLocaleString()}. They are
+          tagged TEST in the list below.
+        </p>
+      )}
 
       {/* Filters */}
       <div className="flex flex-wrap gap-2">
@@ -240,8 +258,15 @@ const QuotesDashboard = ({ quotes }: { quotes: QuoteRow[] }) => {
                   <h3 className="font-heading text-primary text-lg leading-tight">
                     {quote.jobs?.title || quote.jobs?.job_type || "Job"}
                   </h3>
-                  <span className={`${meta.cls} font-mono text-[10px] px-2 py-0.5 rounded-full shrink-0 inline-flex items-center gap-1`}>
-                    <Icon className="w-3 h-3" /> {meta.label}
+                  <span className="flex items-center gap-1.5 shrink-0">
+                    {isTestRecord(quote) && (
+                      <span className="bg-slate-200 text-slate-700 font-mono text-[10px] font-semibold px-2 py-0.5 rounded-full">
+                        TEST
+                      </span>
+                    )}
+                    <span className={`${meta.cls} font-mono text-[10px] px-2 py-0.5 rounded-full inline-flex items-center gap-1`}>
+                      <Icon className="w-3 h-3" /> {meta.label}
+                    </span>
                   </span>
                 </div>
 
