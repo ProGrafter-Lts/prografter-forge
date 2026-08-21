@@ -13,6 +13,8 @@ import {
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { computeVaultSummary, type VaultDocument } from "@/lib/tradeVault";
+import { isTestRecord } from "@/lib/testData";
+
 
 interface Props {
   tradeId: string;
