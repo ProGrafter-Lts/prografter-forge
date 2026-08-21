@@ -211,17 +211,28 @@ const TradeDashboard = () => {
   const pipelineFilter = searchParams.get("pipeline");
   const viewFilter = searchParams.get("view");
 
+  /**
+   * Dashboard views are driven by the ?view= URL param (same as the sidebar).
+   * Calling setActiveNav alone gets reverted by the URL-sync effect below,
+   * which is why in-page buttons appeared to only scroll to the top.
+   */
+  const goToView = (view: string) => {
+    setActiveNav(view);
+    navigate(view === "dashboard" ? "/dashboard/trade" : `/dashboard/trade?view=${view}`);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const goTo = (target: PriorityTarget) => {
     switch (target) {
       case "tradevault":
-        setActiveNav("tradevault");
+        goToView("tradevault");
         break;
       case "jobs":
-        setActiveNav("jobs");
+        goToView("jobs");
         break;
       case "profile":
       case "specialisms":
-        setActiveNav("profile");
+        goToView("profile");
         break;
       case "settings":
         navigate("/dashboard/trade/settings");
@@ -230,14 +241,14 @@ const TradeDashboard = () => {
         navigate("/planning-alerts");
         break;
     }
-    if (target !== "settings" && target !== "planning") {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
   };
 
   const handleHealthNav = (target: PriorityNav) => {
-    const map: Record<PriorityNav, string> = {
-      "find-work": "jobs",
+    if (target === "find-work") {
+      navigate("/planning-alerts");
+      return;
+    }
+    const map: Record<Exclude<PriorityNav, "find-work">, string> = {
       pipeline: "pipeline",
       quotes: "quotes",
       tradevault: "tradevault",
@@ -245,8 +256,7 @@ const TradeDashboard = () => {
       calendar: "calendar",
       messages: "messages",
     };
-    setActiveNav(map[target] ?? "dashboard");
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    goToView(map[target] ?? "dashboard");
   };
 
 
