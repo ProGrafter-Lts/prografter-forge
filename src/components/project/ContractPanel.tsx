@@ -180,6 +180,7 @@ const ContractPanel = ({ jobId, quotes, contract, userRole, userId, onRefresh }:
           ))}
         </div>
       </section>
+      </>
     );
   }
 
