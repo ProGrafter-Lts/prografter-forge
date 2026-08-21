@@ -256,6 +256,7 @@ const AppRoutes = () => {
               <Route path="/manual/:id" element={<HomeownerManual />} />
               <Route path="/quote-builder/quickbuild" element={<QuickBuildPage />} />
               <Route path="/jobs/:jobId/quote" element={<QuoteBuilder />} />
+              <Route path="/quotes/:quoteId" element={<QuoteDetail />} />
               <Route path="/jobs/:ref" element={<JobOS />} />
               <Route path="/reviews/:ref" element={<ReviewSubmit />} />
               <Route path="/disputes/new" element={<DisputeRaise />} />
