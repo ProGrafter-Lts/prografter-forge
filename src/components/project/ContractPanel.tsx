@@ -66,6 +66,58 @@ const ContractPanel = ({ jobId, quotes, contract, userRole, userId, onRefresh }:
     (q) => q.status === "pending" || (q.status === "accepted" && !contract),
   );
 
+  const offlineAgreements = quotes.filter((q) => q.is_offline_agreement);
+
+  const openDoc = async (path: string) => {
+    const { data, error } = await supabase.storage.from("quote-pdfs").createSignedUrl(path, 600);
+    if (error || !data?.signedUrl) {
+      toast.error("Couldn't open that document.");
+      return;
+    }
+    window.open(data.signedUrl, "_blank", "noopener");
+  };
+
+  const AgreedBlock = () => (
+    <section className="mb-6">
+      <h2 className="font-heading text-navy text-2xl mb-4 flex items-center gap-2">
+        <FileText className="w-5 h-5" /> Agreed quote &amp; contract
+      </h2>
+      <div className="space-y-3">
+        {offlineAgreements.map((q) => (
+          <div key={q.id} className="bg-card rounded-2xl p-5 border border-navy/10 shadow-sm">
+            <div className="flex items-center justify-between">
+              <p className="font-heading text-teal text-xl">£{Number(q.amount).toLocaleString()}</p>
+              <Badge className="bg-emerald-100 text-emerald-800">Agreed</Badge>
+            </div>
+            <p className="font-mono text-xs text-secondary-text mt-2">
+              Agreed directly between homeowner and trade
+              {q.agreed_at ? ` on ${new Date(q.agreed_at).toLocaleDateString("en-GB")}` : ""}, and
+              filed here for the record.
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {q.pdf_path && (
+                <button
+                  onClick={() => openDoc(q.pdf_path!)}
+                  className="font-mono text-xs border border-navy/20 rounded-lg px-3 py-2 hover:bg-navy/5 inline-flex items-center gap-2"
+                >
+                  <Eye className="w-3.5 h-3.5" /> Agreed quote document
+                </button>
+              )}
+              {q.contract_pdf_path && (
+                <button
+                  onClick={() => openDoc(q.contract_pdf_path!)}
+                  className="font-mono text-xs border border-navy/20 rounded-lg px-3 py-2 hover:bg-navy/5 inline-flex items-center gap-2"
+                >
+                  <Eye className="w-3.5 h-3.5" /> Signed contract
+                </button>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+
   const acceptAndGenerate = async (quote: Quote) => {
     if (!userId) return;
     setAccepting(quote.id);
