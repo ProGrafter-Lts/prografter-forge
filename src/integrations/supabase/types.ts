@@ -5745,6 +5745,10 @@ export type Database = {
         }[]
       }
       current_user_owns_trade: { Args: { _trade_id: string }; Returns: boolean }
+      decide_quote_by_token: {
+        Args: { _decision: string; _quote_id: string; _token: string }
+        Returns: Json
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -5794,6 +5798,10 @@ export type Database = {
           website: string
           years_experience: number
         }[]
+      }
+      get_quote_by_token: {
+        Args: { _quote_id: string; _token: string }
+        Returns: Json
       }
       get_review_context: {
         Args: { _ref: string }
