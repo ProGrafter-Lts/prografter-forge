@@ -232,6 +232,10 @@ const QuotesDashboard = ({ quotes }: { quotes: QuoteRow[] }) => {
             const jobId = quote.job_id || quote.jobs?.id;
             return (
               <Card key={quote.id}>
+                <div
+                  className="cursor-pointer"
+                  onClick={() => navigate(`/quotes/${quote.id}`)}
+                >
                 <div className="flex items-start justify-between gap-3 flex-wrap">
                   <h3 className="font-heading text-primary text-lg leading-tight">
                     {quote.jobs?.title || quote.jobs?.job_type || "Job"}
@@ -249,8 +253,15 @@ const QuotesDashboard = ({ quotes }: { quotes: QuoteRow[] }) => {
                   <Pill><Clock className="w-3 h-3" />Sent {timeAgo(quote.created_at)}</Pill>
                   {quote.jobs?.stage && <Pill>Job stage: {quote.jobs.stage.replace(/_/g, " ")}</Pill>}
                 </div>
+                </div>
 
                 <div className="mt-4 flex flex-wrap items-center gap-2">
+                  <button
+                    onClick={() => navigate(`/quotes/${quote.id}`)}
+                    className="inline-flex items-center gap-1.5 bg-primary text-primary-foreground font-mono text-[11px] px-3 py-2 rounded-full"
+                  >
+                    View quote <ArrowRight className="w-3 h-3" />
+                  </button>
                   {isFeatureEnabled("quotePdf") && <GenerateQuotePdfButton quoteId={quote.id} />}
                   {jobId && key === "submitted" && (
                     <button

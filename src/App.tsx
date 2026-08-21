@@ -72,6 +72,7 @@ const ContractPage = lazyRetry(() => import("./pages/ContractPage.tsx"));
 const LegalReview = lazyRetry(() => import("./pages/LegalReview.tsx"));
 const QuickBuildPage = lazyRetry(() => import("./pages/QuickBuildPage.tsx"));
 const QuoteBuilder = lazyRetry(() => import("./pages/QuoteBuilder.tsx"));
+const QuoteDetail = lazyRetry(() => import("./pages/QuoteDetail.tsx"));
 const Apply = lazyRetry(() => import("./pages/Apply.tsx"));
 const PostJobBrief = lazyRetry(() => import("./pages/PostJobBrief.tsx"));
 const ProjectClarity = lazyRetry(() => import("./pages/ProjectClarity.tsx"));
@@ -256,6 +257,7 @@ const AppRoutes = () => {
               <Route path="/manual/:id" element={<HomeownerManual />} />
               <Route path="/quote-builder/quickbuild" element={<QuickBuildPage />} />
               <Route path="/jobs/:jobId/quote" element={<QuoteBuilder />} />
+              <Route path="/quotes/:quoteId" element={<QuoteDetail />} />
               <Route path="/jobs/:ref" element={<JobOS />} />
               <Route path="/reviews/:ref" element={<ReviewSubmit />} />
               <Route path="/disputes/new" element={<DisputeRaise />} />
