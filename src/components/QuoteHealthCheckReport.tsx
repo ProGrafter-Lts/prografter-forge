@@ -1314,7 +1314,7 @@ const FixedStandardReport = ({ report, admin = false }: { report: ReportJson; ad
 
   return (
     <div className="qr-paper qr-paper-v2 space-y-6">
-      <StandardHero report={report} score={score} generated={generated} />
+      <StandardHero report={report} score={score} generated={generated} admin={admin} />
 
       <div className="qr-card qr-report-stack">
         {report.standard_mismatch && (
