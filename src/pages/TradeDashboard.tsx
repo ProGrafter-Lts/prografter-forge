@@ -27,6 +27,8 @@ import LegalReviewBanner from "@/components/LegalReviewBanner";
 import QuickBuildDraftsList from "@/components/trade/quickbuild/QuickBuildDraftsList";
 import CommandCentre from "@/components/trade/CommandCentre";
 import BusinessHealthDashboard from "@/components/trade/BusinessHealthDashboard";
+import DashboardSummary from "@/components/trade/DashboardSummary";
+
 import type { PriorityNav } from "@/lib/businessHealth";
 import type { PriorityTarget } from "@/lib/tradeProfileStrength";
 import { isFeatureEnabled } from "@/lib/featureFlags";
