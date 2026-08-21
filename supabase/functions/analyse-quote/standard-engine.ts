@@ -119,17 +119,23 @@ export function buildBuilderMessage(
   questions: { check_id: string; question: string }[],
 ): string {
   if (questions.length === 0) {
-    return "Thank you for the quote. It reads as clear and complete against our checklist — we have no outstanding points to raise before deciding.";
+    return "Thanks for the quote — it covers everything we needed, so no questions from us.";
   }
-  const lines = questions.slice(0, 12).map((q) => `• ${q.question}`);
+  // Strip the internal "Regarding X: ... (why it matters)" scaffolding so each
+  // line reads as a direct question a homeowner would actually send.
+  const clean = (q: string) =>
+    q
+      .replace(/^Regarding\s+/i, "")
+      .replace(/\s*\([^()]*\)\s*$/, "")
+      .trim();
+  const lines = questions.slice(0, 12).map((q, i) => `${i + 1}. ${clean(q.question)}`);
   return [
-    "Thank you for the quote. Before we make a decision, could you please confirm the following points so we fully understand what is included and how the job would be managed?",
+    "Thanks for the quote. Before we decide, please confirm the following in writing:",
     "",
     ...lines,
-    "",
-    "Once these are confirmed in writing we'll be in a position to move forward. Thank you.",
   ].join("\n");
 }
+
 
 export function verdictSummary(counts: ReturnType<typeof scoreChecklist>): string {
   const { addressed_count, clarification_count, missing_count, not_applicable_count, total_checks, score } = counts;

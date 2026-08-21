@@ -590,6 +590,44 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
 .qr-paper {
   color: #1f2a44;
 }
+/* The report is always a light "paper" document, even when it is rendered
+   inside a dark dashboard shell. Without this, .dashboard-dark's global
+   heading/paragraph colours turn report text white-on-white (invisible). */
+.dashboard-dark .qr-paper,
+.dashboard-dark .qr-paper p,
+.dashboard-dark .qr-paper li,
+.dashboard-dark .qr-paper span,
+.dashboard-dark .qr-paper div,
+.dashboard-dark .qr-paper .font-mono {
+  color: #1f2a44;
+}
+.dashboard-dark .qr-paper h1,
+.dashboard-dark .qr-paper h2,
+.dashboard-dark .qr-paper h3,
+.dashboard-dark .qr-paper h4,
+.dashboard-dark .qr-paper h5,
+.dashboard-dark .qr-paper h6 {
+  color: #0f2544;
+}
+.dashboard-dark .qr-paper .qr-hero h1,
+.dashboard-dark .qr-paper .qr-hero p,
+.dashboard-dark .qr-paper .qr-hero span,
+.dashboard-dark .qr-paper .qr-hero div {
+  color: inherit;
+}
+.dashboard-dark .qr-paper .qr-final-why,
+.dashboard-dark .qr-paper .qr-section2-intro,
+.dashboard-dark .qr-paper .qr-metric2-explain {
+  color: #374151;
+}
+.dashboard-dark .qr-paper .qr-metric-label,
+.dashboard-dark .qr-paper .qr-strip-label {
+  color: #6b7280;
+}
+.dashboard-dark .qr-paper .qr-final-good .qr-final-tag { color: #16a34a; }
+.dashboard-dark .qr-paper .qr-final-warn .qr-final-tag { color: #d97706; }
+.dashboard-dark .qr-paper .qr-final-bad .qr-final-tag { color: #dc2626; }
+
 .qr-card {
   background: #ffffff;
   color: #1f2a44;

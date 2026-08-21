@@ -875,29 +875,60 @@ const QuestionsSection = ({ groups }: { groups: QuestionGroup[] }) => {
   );
 };
 
+/** Tighten legacy/boilerplate builder messages so every line earns its place. */
+const tidyBuilderMessage = (raw: string): string => {
+  const filler = [
+    /^thank you for the quote\.?\s*before we make a decision.*$/i,
+    /^once these are confirmed in writing.*$/i,
+    /^once confirmed, could you please issue a revised quote.*$/i,
+    /^hi,?\s*thanks for sending the quote\.?$/i,
+    /^before i make a decision.*$/i,
+    /^thanks\.?$/i,
+    /^thank you\.?$/i,
+  ];
+  const body = raw
+    .split("\n")
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0 && !filler.some((f) => f.test(l)))
+    .map((l) =>
+      l
+        .replace(/^[•\-*]\s*/, "")
+        .replace(/^\d+[.)]\s*/, "")
+        .replace(/^Regarding\s+/i, "")
+        .replace(/\s*\([^()]*\)\s*$/, "")
+        .trim(),
+    )
+    .filter(Boolean);
+  if (body.length === 0) return raw.trim();
+  const numbered = body.map((l, i) => `${i + 1}. ${l}`);
+  return ["Thanks for the quote. Before we decide, please confirm the following in writing:", "", ...numbered].join("\n");
+};
+
 /** Suggested message to send the builder, with copy. */
 const BuilderMessage = ({ message }: { message: string }) => {
   const { copied, copy } = useCopy();
   if (!message.trim()) return null;
+  const text = tidyBuilderMessage(message);
   return (
     <section className="qr-msgcard">
       <div className="qr-actionplan-head">
         <MessageSquareText className="h-5 w-5 shrink-0" style={{ color: "#0d9488" }} />
         <div>
           <h2 className="qr-section2-title">Suggested Message To Send The Builder</h2>
-          <p className="qr-section2-intro">You can copy this message and send it to the builder to clarify the quote.</p>
+          <p className="qr-section2-intro">Copy this and send it to the builder to clarify the quote.</p>
         </div>
       </div>
-      <pre className="qr-msgbox">{message}</pre>
+      <pre className="qr-msgbox">{text}</pre>
       <button
         type="button"
         className="qr-copyall-btn no-print"
         style={{ marginTop: "0.85rem" }}
-        onClick={() => copy("builder-msg", message, "Copied")}
+        onClick={() => copy("builder-msg", text, "Copied")}
       >
         {copied === "builder-msg" ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
         {copied === "builder-msg" ? "Copied" : "Copy Message"}
       </button>
+
     </section>
   );
 };
@@ -1186,19 +1217,26 @@ const StandardHero = ({
   report,
   score,
   generated,
+  admin = false,
 }: {
   report: ReportJson;
   score: number;
   generated: string;
+  admin?: boolean;
 }) => (
   <header className="qr-hero">
     <div className="qr-hero-top">
       <img src={logoLight.url} alt="ProGrafter" className="qr-hero-logo" />
-      <span className="qr-hero-kicker">AI Quote Checker</span>
+      <span className="qr-hero-kicker">{admin ? "Advanced Review Engine" : "AI Quote Checker"}</span>
     </div>
     <div className="qr-hero-rule" />
-    <h1 className="qr-hero-title">AI Quote Checker</h1>
-    <p className="qr-hero-prepared">Prepared by ProGrafter · Fixed-standard compliance audit</p>
+    <h1 className="qr-hero-title">{admin ? "Advanced Review Engine" : "AI Quote Checker"}</h1>
+    <p className="qr-hero-prepared">
+      {admin
+        ? "ProGrafter internal review tool · Full fixed-standard audit · Not the homeowner-facing report"
+        : "Prepared by ProGrafter · Fixed-standard compliance audit"}
+    </p>
+
 
     <div className="qr-hero-meta">
       {report.standard_name && (
@@ -1307,7 +1345,7 @@ const FixedStandardReport = ({ report, admin = false }: { report: ReportJson; ad
 
   return (
     <div className="qr-paper qr-paper-v2 space-y-6">
-      <StandardHero report={report} score={score} generated={generated} />
+      <StandardHero report={report} score={score} generated={generated} admin={admin} />
 
       <div className="qr-card qr-report-stack">
         {report.standard_mismatch && (
@@ -1387,25 +1425,58 @@ const FixedStandardReport = ({ report, admin = false }: { report: ReportJson; ad
           </div>
 
           {sectionStats.length > 0 && (
-            <div style={{ marginTop: "1.25rem" }}>
-              <div className="qr-metric-label">Completeness by section</div>
-              <div style={{ marginTop: "0.6rem", display: "grid", gap: "0.7rem" }}>
+            <div
+              style={{
+                marginTop: "1.5rem",
+                borderTop: "1px solid #e3e6ec",
+                paddingTop: "1.1rem",
+              }}
+            >
+              <div className="qr-metric-label" style={{ marginBottom: "0.85rem" }}>
+                Completeness by section
+              </div>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+                  columnGap: "1.75rem",
+                  rowGap: "1rem",
+                }}
+              >
                 {sectionStats.map((s) => (
                   <div key={s.section}>
-                    <div style={{ display: "flex", justifyContent: "space-between", gap: "0.5rem", fontSize: "0.82rem", color: "#374151" }}>
-                      <span style={{ fontWeight: 600 }}>{s.section}</span>
-                      <span style={{ fontVariantNumeric: "tabular-nums", opacity: 0.75 }}>
-                        {s.addressed}/{s.total} addressed · {s.pct}%
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "baseline",
+                        justifyContent: "space-between",
+                        gap: "0.75rem",
+                      }}
+                    >
+                      <span style={{ fontSize: "0.85rem", fontWeight: 600, color: "#0f2544" }}>{s.section}</span>
+                      <span
+                        style={{
+                          fontSize: "0.85rem",
+                          fontWeight: 700,
+                          fontVariantNumeric: "tabular-nums",
+                          color: "#0f2544",
+                        }}
+                      >
+                        {s.pct}%
                       </span>
                     </div>
-                    <div className={`qr-bar qr-bar-${barTone(s.pct)}`}>
+                    <div className={`qr-bar qr-bar-${barTone(s.pct)}`} style={{ margin: "0.4rem 0 0.3rem" }}>
                       <span style={{ width: `${Math.max(4, Math.min(100, s.pct))}%` }} />
+                    </div>
+                    <div style={{ fontSize: "0.75rem", color: "#6b7280", fontVariantNumeric: "tabular-nums" }}>
+                      {s.addressed} of {s.total} checks addressed
                     </div>
                   </div>
                 ))}
               </div>
             </div>
           )}
+
         </section>
 
         {/* Two-score summary + payment note (only when supporting docs supplied) */}
