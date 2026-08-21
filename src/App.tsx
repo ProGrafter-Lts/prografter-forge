@@ -59,6 +59,7 @@ const OAuthConsent = lazyRetry(() => import("./pages/OAuthConsent.tsx"));
 const SignupTradeRedirect = lazyRetry(() => import("./pages/SignupTradeRedirect.tsx"));
 const AdminVerifications = lazyRetry(() => import("./pages/AdminVerifications.tsx"));
 const AdminTradeVault = lazyRetry(() => import("./pages/AdminTradeVault.tsx"));
+const AdminRecordAgreedQuote = lazyRetry(() => import("./pages/AdminRecordAgreedQuote.tsx"));
 const AdminWaitlist = lazyRetry(() => import("./pages/AdminWaitlist.tsx"));
 const AdminSuppliers = lazyRetry(() => import("./pages/AdminSuppliers.tsx"));
 const Suppliers = lazyRetry(() => import("./pages/Suppliers.tsx"));
@@ -270,6 +271,7 @@ const AppRoutes = () => {
             <Route path="/signup/trade" element={<SignupTradeRedirect />} />
             <Route path="/admin/verifications" element={<AdminRoute><AdminVerifications /></AdminRoute>} />
             <Route path="/admin/tradevault" element={<AdminRoute><AdminTradeVault /></AdminRoute>} />
+            <Route path="/admin/record-agreed-quote" element={<AdminRoute><AdminRecordAgreedQuote /></AdminRoute>} />
             <Route path="/admin/waitlist" element={<AdminRoute><AdminWaitlist /></AdminRoute>} />
             <Route path="/admin/suppliers" element={<AdminRoute><AdminSuppliers /></AdminRoute>} />
             <Route path="/suppliers" element={<Suppliers />} />
