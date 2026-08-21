@@ -234,7 +234,12 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
       icon: Search,
       value: String(data.newMatches),
       unit: data.newMatches === 1 ? "new match" : "new matches",
-      sub: data.matchesValue > 0 ? `${gbp(data.matchesValue)} estimated value` : "No unactioned matches",
+      sub:
+        data.matchesValue > 0
+          ? `${gbp(data.matchesValue)} estimated value`
+          : data.newMatches > 0
+            ? "Awaiting your response"
+            : "No unactioned matches",
       cta: "Open Find Work",
       onClick: () => navigate("/planning-alerts"),
     },
