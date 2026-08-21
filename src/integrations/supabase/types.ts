@@ -3922,6 +3922,7 @@ export type Database = {
       quotes: {
         Row: {
           accept_token: string
+          agreed_at: string | null
           ai_verdict: string | null
           ai_verdict_at: string | null
           ai_verdict_summary: string | null
@@ -3930,6 +3931,7 @@ export type Database = {
           budget_description: string | null
           budget_price: number | null
           certifications: Json | null
+          contract_pdf_path: string | null
           created_at: string
           deposit_amount: number | null
           deposit_required: boolean | null
@@ -3937,6 +3939,7 @@ export type Database = {
           estimated_start_date: string | null
           exclusions: string | null
           id: string
+          is_offline_agreement: boolean
           is_test: boolean
           job_id: string
           last_viewed_at: string | null
@@ -3944,6 +3947,8 @@ export type Database = {
           materials_spec: Json
           message: string | null
           methodology: string | null
+          offline_notes: string | null
+          offline_recorded_by: string | null
           payment_schedule: Json | null
           pdf_generated_at: string | null
           pdf_path: string | null
@@ -3971,6 +3976,7 @@ export type Database = {
         }
         Insert: {
           accept_token?: string
+          agreed_at?: string | null
           ai_verdict?: string | null
           ai_verdict_at?: string | null
           ai_verdict_summary?: string | null
@@ -3979,6 +3985,7 @@ export type Database = {
           budget_description?: string | null
           budget_price?: number | null
           certifications?: Json | null
+          contract_pdf_path?: string | null
           created_at?: string
           deposit_amount?: number | null
           deposit_required?: boolean | null
@@ -3986,6 +3993,7 @@ export type Database = {
           estimated_start_date?: string | null
           exclusions?: string | null
           id?: string
+          is_offline_agreement?: boolean
           is_test?: boolean
           job_id: string
           last_viewed_at?: string | null
@@ -3993,6 +4001,8 @@ export type Database = {
           materials_spec?: Json
           message?: string | null
           methodology?: string | null
+          offline_notes?: string | null
+          offline_recorded_by?: string | null
           payment_schedule?: Json | null
           pdf_generated_at?: string | null
           pdf_path?: string | null
@@ -4020,6 +4030,7 @@ export type Database = {
         }
         Update: {
           accept_token?: string
+          agreed_at?: string | null
           ai_verdict?: string | null
           ai_verdict_at?: string | null
           ai_verdict_summary?: string | null
@@ -4028,6 +4039,7 @@ export type Database = {
           budget_description?: string | null
           budget_price?: number | null
           certifications?: Json | null
+          contract_pdf_path?: string | null
           created_at?: string
           deposit_amount?: number | null
           deposit_required?: boolean | null
@@ -4035,6 +4047,7 @@ export type Database = {
           estimated_start_date?: string | null
           exclusions?: string | null
           id?: string
+          is_offline_agreement?: boolean
           is_test?: boolean
           job_id?: string
           last_viewed_at?: string | null
@@ -4042,6 +4055,8 @@ export type Database = {
           materials_spec?: Json
           message?: string | null
           methodology?: string | null
+          offline_notes?: string | null
+          offline_recorded_by?: string | null
           payment_schedule?: Json | null
           pdf_generated_at?: string | null
           pdf_path?: string | null

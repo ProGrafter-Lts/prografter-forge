@@ -43,6 +43,7 @@ export const TRANSACTIONAL_TEMPLATE_NAMES = [
   "dispute-raised-admin",
   "quote-health-check-ready",
   "tradevault-doc-expiring",
+  "agreed-quote-on-file",
 ] as const;
 
 export const AUTH_TEMPLATE_KEYS = [
