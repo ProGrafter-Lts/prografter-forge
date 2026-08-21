@@ -228,8 +228,11 @@ const ContractPanel = ({ jobId, quotes, contract, userRole, userId, onRefresh }:
           </button>
         </div>
       </section>
+      </>
     );
   }
+
+  if (offlineAgreements.length > 0) return <AgreedBlock />;
 
   return null;
 };
