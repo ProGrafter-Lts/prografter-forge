@@ -116,13 +116,21 @@ const QuickBuildPage = () => {
         .update({ final_output: JSON.parse(JSON.stringify(final)) })
         .eq("id", generationId);
     }
-    // Stash for the existing quote builder to pick up later when wired
+    // Handoff for QuoteBuilder to pre-fill the real 4-step wizard
     sessionStorage.setItem(
       QUICKBUILD_HANDOFF_KEY,
       JSON.stringify({ generationId, final, structured }),
     );
-    toast.success("Draft saved. Continue in the standard quote builder.");
-    navigate("/dashboard/trade");
+    const jobId = searchParams.get("job");
+    if (jobId) {
+      navigate(
+        `/jobs/${jobId}/quote?from=${encodeURIComponent(`/project/${jobId}`)}` +
+          (generationId ? `&qbDraft=${generationId}` : ""),
+      );
+      return;
+    }
+    toast.success("Draft saved — pick the job it belongs to to finish the quote.");
+    navigate("/dashboard/trade?view=quotes");
   };
 
   const loadScenario = async (scenarioId: string) => {
