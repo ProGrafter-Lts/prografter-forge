@@ -49,6 +49,7 @@ import { template as disputeRaisedClaimant } from './dispute-raised-claimant.tsx
 import { template as disputeRaisedAdmin } from './dispute-raised-admin.tsx'
 import { template as quoteHealthCheckReady } from './quote-health-check-ready.tsx'
 import { template as tradevaultDocExpiring } from './tradevault-doc-expiring.tsx'
+import { template as agreedQuoteOnFile } from './agreed-quote-on-file.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'waitlist-admin-notification': waitlistAdminNotification,
@@ -95,4 +96,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'dispute-raised-admin': disputeRaisedAdmin,
   'quote-health-check-ready': quoteHealthCheckReady,
   'tradevault-doc-expiring': tradevaultDocExpiring,
+  'agreed-quote-on-file': agreedQuoteOnFile,
 }
