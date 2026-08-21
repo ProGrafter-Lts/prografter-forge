@@ -1186,19 +1186,26 @@ const StandardHero = ({
   report,
   score,
   generated,
+  admin = false,
 }: {
   report: ReportJson;
   score: number;
   generated: string;
+  admin?: boolean;
 }) => (
   <header className="qr-hero">
     <div className="qr-hero-top">
       <img src={logoLight.url} alt="ProGrafter" className="qr-hero-logo" />
-      <span className="qr-hero-kicker">AI Quote Checker</span>
+      <span className="qr-hero-kicker">{admin ? "Advanced Review Engine" : "AI Quote Checker"}</span>
     </div>
     <div className="qr-hero-rule" />
-    <h1 className="qr-hero-title">AI Quote Checker</h1>
-    <p className="qr-hero-prepared">Prepared by ProGrafter · Fixed-standard compliance audit</p>
+    <h1 className="qr-hero-title">{admin ? "Advanced Review Engine" : "AI Quote Checker"}</h1>
+    <p className="qr-hero-prepared">
+      {admin
+        ? "ProGrafter internal review tool · Full fixed-standard audit · Not the homeowner-facing report"
+        : "Prepared by ProGrafter · Fixed-standard compliance audit"}
+    </p>
+
 
     <div className="qr-hero-meta">
       {report.standard_name && (
