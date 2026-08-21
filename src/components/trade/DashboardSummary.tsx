@@ -5,6 +5,7 @@ import {
   AlertCircle,
   ArrowRight,
   CalendarDays,
+  Clock,
   FileText,
   FolderKanban,
   Search,
