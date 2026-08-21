@@ -193,6 +193,8 @@ const ContractPanel = ({ jobId, quotes, contract, userRole, userId, onRefresh }:
       (userRole === "homeowner" && !hSigned) || (userRole === "trade" && !tSigned);
 
     return (
+      <>
+      {offlineAgreements.length > 0 && <AgreedBlock />}
       <section>
         <h2 className="font-heading text-navy text-2xl mb-4 flex items-center gap-2">
           <FileText className="w-5 h-5" /> Digital Contract
