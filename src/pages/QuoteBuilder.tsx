@@ -10,6 +10,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { getAtlasQuoteHandoff, ATLAS_HANDOFF_HEADING } from "@/lib/atlasQuoteHandoff";
+import {
+  loadQuickBuildPrefill, readQuickBuildHandoff, buildPrefillFromOutput,
+  type QuickBuildPrefill,
+} from "@/lib/quickBuildPrefill";
 import MaterialsBreakdown, { emptyMaterialLine, type MaterialLine } from "@/components/trade/MaterialsBreakdown";
 import { checkQuoteQuality, hasCriticalIssues, type QuoteIssue } from "@/lib/quoteQuality";
 
@@ -169,6 +173,44 @@ const QuoteBuilder = () => {
     hydrated.current = true;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [draftKey]);
+
+  /* --------- QuickBuild AI draft hand-off into the wizard --------- */
+  useEffect(() => {
+    if (!jobId) return;
+    let alive = true;
+    const apply = (p: QuickBuildPrefill) => {
+      if (!alive) return;
+      setAmount((prev) => prev || p.amount);
+      setMessage((prev) => (prev.trim() ? prev : p.message));
+      setDuration((prev) => prev || p.duration);
+      setAssumptions((prev) =>
+        prev.includes("QuickBuild") || !p.assumptions
+          ? prev
+          : (prev.trim() ? `${prev.trim()}\n\n` : "") + p.assumptions,
+      );
+      if (p.materials.length) {
+        setMaterials((prev) => {
+          const filled = prev.filter((m) => m.description.trim());
+          return filled.length ? prev : p.materials;
+        });
+      }
+      toast.success("QuickBuild draft loaded — review and adjust before submitting.");
+    };
+
+    const run = async () => {
+      const qbDraft = searchParams.get("qbDraft");
+      if (qbDraft) {
+        const p = await loadQuickBuildPrefill(qbDraft);
+        if (p) { apply(p); return; }
+      }
+      const handoff = readQuickBuildHandoff();
+      if (handoff) apply(buildPrefillFromOutput(handoff.final, handoff.generationId));
+    };
+    // run after local-draft hydration so it can layer on top
+    const t = setTimeout(() => { void run(); }, 0);
+    return () => { alive = false; clearTimeout(t); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [jobId]);
 
   /* --------- Atlas site-survey risk hand-off into assumptions --------- */
   useEffect(() => {

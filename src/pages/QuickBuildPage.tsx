@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Loader2, Sparkles } from "lucide-react";
@@ -33,12 +33,20 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { FlaskConical } from "lucide-react";
 
-type Stage = "input" | "generating" | "review";
+type Stage = "input" | "generating" | "review" | "pickjob";
 
 const QUICKBUILD_HANDOFF_KEY = "prografter:quickbuild:handoff";
 
+interface JobOption {
+  id: string;
+  title: string | null;
+  job_type: string | null;
+  postcode: string | null;
+}
+
 const QuickBuildPage = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [stage, setStage] = useState<Stage>("input");
   const [userId, setUserId] = useState<string | null>(null);
   const [transcript, setTranscript] = useState("");
@@ -48,6 +56,8 @@ const QuickBuildPage = () => {
   const [generationId, setGenerationId] = useState<string | null>(null);
   const [remaining, setRemaining] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [jobOptions, setJobOptions] = useState<JobOption[]>([]);
+  const [jobsLoading, setJobsLoading] = useState(false);
 
   useEffect(() => {
     if (!isFeatureEnabled("quickBuild")) {
@@ -116,13 +126,45 @@ const QuickBuildPage = () => {
         .update({ final_output: JSON.parse(JSON.stringify(final)) })
         .eq("id", generationId);
     }
-    // Stash for the existing quote builder to pick up later when wired
+    // Handoff for QuoteBuilder to pre-fill the real 4-step wizard
     sessionStorage.setItem(
       QUICKBUILD_HANDOFF_KEY,
       JSON.stringify({ generationId, final, structured }),
     );
-    toast.success("Draft saved. Continue in the standard quote builder.");
-    navigate("/dashboard/trade");
+    const jobId = searchParams.get("job");
+    if (jobId) {
+      goToBuilder(jobId);
+      return;
+    }
+    setStage("pickjob");
+    void loadJobOptions();
+  };
+
+  const goToBuilder = (jobId: string) => {
+    navigate(
+      `/jobs/${jobId}/quote?from=${encodeURIComponent(`/project/${jobId}`)}` +
+        (generationId ? `&qbDraft=${generationId}` : ""),
+    );
+  };
+
+  const loadJobOptions = async () => {
+    setJobsLoading(true);
+    const { data: userRes } = await supabase.auth.getUser();
+    const uid = userRes.user?.id;
+    if (!uid) { setJobsLoading(false); return; }
+    const { data: trade } = await supabase.from("trades").select("id").eq("user_id", uid).maybeSingle();
+    if (!trade) { setJobsLoading(false); return; }
+    const { data } = await supabase
+      .from("job_matches")
+      .select("job_id, jobs(id, title, job_type, postcode)")
+      .eq("trade_id", (trade as any).id)
+      .order("notified_at", { ascending: false })
+      .limit(25);
+    const opts = ((data ?? []) as any[])
+      .map((r) => r.jobs)
+      .filter(Boolean) as JobOption[];
+    setJobOptions(opts);
+    setJobsLoading(false);
   };
 
   const loadScenario = async (scenarioId: string) => {
@@ -233,6 +275,41 @@ const QuickBuildPage = () => {
           onAccept={handleAccept}
           onBack={() => setStage("input")}
         />
+      )}
+
+      {stage === "pickjob" && (
+        <Card className="space-y-4 p-6">
+          <div>
+            <h2 className="font-semibold">Which job is this quote for?</h2>
+            <p className="text-xs text-muted-foreground">
+              Pick the job and we'll open the full quote builder with your draft filled in.
+            </p>
+          </div>
+          {jobsLoading ? (
+            <Loader2 className="h-5 w-5 animate-spin text-amber-600" />
+          ) : jobOptions.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              No matched jobs yet. Your draft is saved — open a job and choose “Open quote builder”.
+            </p>
+          ) : (
+            <ul className="divide-y rounded-md border">
+              {jobOptions.map((j) => (
+                <li key={j.id}>
+                  <button
+                    onClick={() => goToBuilder(j.id)}
+                    className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left text-sm hover:bg-muted"
+                  >
+                    <span>{j.title || j.job_type || "Job"}</span>
+                    <span className="text-xs text-muted-foreground">{j.postcode}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+          <Button variant="outline" onClick={() => setStage("review")}>
+            Back to draft
+          </Button>
+        </Card>
       )}
     </div>
   );

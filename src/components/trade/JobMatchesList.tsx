@@ -170,7 +170,7 @@ const JobMatchesList = ({ matches, tradeId }: { matches: JobMatch[]; tradeId?: s
                     markJobMatchSeen(match.id);
                     if (jobId) {
                       if (tradeId) void registerJobViewed(jobId, tradeId);
-                      openDrawer(`/project/${jobId}`);
+                      navigate(`/jobs/${jobId}/quote?from=${encodeURIComponent(`/project/${jobId}`)}`);
                     }
                   }}
                   className="w-full sm:w-auto flex items-center justify-center gap-1.5 bg-secondary text-secondary-foreground font-mono text-sm font-semibold px-5 min-h-[44px] rounded-xl hover:opacity-90 transition-opacity shadow-sm cursor-pointer"
@@ -178,6 +178,18 @@ const JobMatchesList = ({ matches, tradeId }: { matches: JobMatch[]; tradeId?: s
                   View &amp; Quote
                   <ChevronRight className="w-3 h-3" />
                 </button>
+
+                <button
+                  onClick={() => {
+                    const jobId = match.jobs?.id || match.job_id;
+                    markJobMatchSeen(match.id);
+                    if (jobId) openDrawer(`/project/${jobId}`);
+                  }}
+                  className="w-full sm:w-auto flex items-center justify-center gap-1.5 border border-primary/20 text-primary font-mono text-sm px-5 min-h-[44px] rounded-xl hover:bg-primary/5 transition-colors cursor-pointer"
+                >
+                  Job details
+                </button>
+
 
                 {match.interested_at || interested[match.id] ? (
                   <span className="w-full sm:w-auto flex items-center justify-center gap-1.5 border border-emerald-500/40 bg-emerald-500/10 text-emerald-700 font-mono text-sm px-5 min-h-[44px] rounded-xl">
