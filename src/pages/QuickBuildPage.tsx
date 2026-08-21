@@ -39,6 +39,7 @@ const QUICKBUILD_HANDOFF_KEY = "prografter:quickbuild:handoff";
 
 const QuickBuildPage = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [stage, setStage] = useState<Stage>("input");
   const [userId, setUserId] = useState<string | null>(null);
   const [transcript, setTranscript] = useState("");
