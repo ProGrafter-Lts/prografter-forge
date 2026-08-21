@@ -1394,25 +1394,58 @@ const FixedStandardReport = ({ report, admin = false }: { report: ReportJson; ad
           </div>
 
           {sectionStats.length > 0 && (
-            <div style={{ marginTop: "1.25rem" }}>
-              <div className="qr-metric-label">Completeness by section</div>
-              <div style={{ marginTop: "0.6rem", display: "grid", gap: "0.7rem" }}>
+            <div
+              style={{
+                marginTop: "1.5rem",
+                borderTop: "1px solid #e3e6ec",
+                paddingTop: "1.1rem",
+              }}
+            >
+              <div className="qr-metric-label" style={{ marginBottom: "0.85rem" }}>
+                Completeness by section
+              </div>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+                  columnGap: "1.75rem",
+                  rowGap: "1rem",
+                }}
+              >
                 {sectionStats.map((s) => (
                   <div key={s.section}>
-                    <div style={{ display: "flex", justifyContent: "space-between", gap: "0.5rem", fontSize: "0.82rem", color: "#374151" }}>
-                      <span style={{ fontWeight: 600 }}>{s.section}</span>
-                      <span style={{ fontVariantNumeric: "tabular-nums", opacity: 0.75 }}>
-                        {s.addressed}/{s.total} addressed · {s.pct}%
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "baseline",
+                        justifyContent: "space-between",
+                        gap: "0.75rem",
+                      }}
+                    >
+                      <span style={{ fontSize: "0.85rem", fontWeight: 600, color: "#0f2544" }}>{s.section}</span>
+                      <span
+                        style={{
+                          fontSize: "0.85rem",
+                          fontWeight: 700,
+                          fontVariantNumeric: "tabular-nums",
+                          color: "#0f2544",
+                        }}
+                      >
+                        {s.pct}%
                       </span>
                     </div>
-                    <div className={`qr-bar qr-bar-${barTone(s.pct)}`}>
+                    <div className={`qr-bar qr-bar-${barTone(s.pct)}`} style={{ margin: "0.4rem 0 0.3rem" }}>
                       <span style={{ width: `${Math.max(4, Math.min(100, s.pct))}%` }} />
+                    </div>
+                    <div style={{ fontSize: "0.75rem", color: "#6b7280", fontVariantNumeric: "tabular-nums" }}>
+                      {s.addressed} of {s.total} checks addressed
                     </div>
                   </div>
                 ))}
               </div>
             </div>
           )}
+
         </section>
 
         {/* Two-score summary + payment note (only when supporting docs supplied) */}
