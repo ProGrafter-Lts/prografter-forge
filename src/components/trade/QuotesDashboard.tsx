@@ -252,12 +252,12 @@ const QuotesDashboard = ({ quotes }: { quotes: QuoteRow[] }) => {
 
                 <div className="mt-4 flex flex-wrap items-center gap-2">
                   {isFeatureEnabled("quotePdf") && <GenerateQuotePdfButton quoteId={quote.id} />}
-                  {jobId && (
+                  {jobId && key === "submitted" && (
                     <button
-                      onClick={() => navigate(`/jobs/${jobId}`)}
+                      onClick={() => navigate(`/jobs/${jobId}/quote`)}
                       className="inline-flex items-center gap-1.5 border border-primary/20 text-primary font-mono text-[11px] px-3 py-2 rounded-full hover:bg-primary/5"
                     >
-                      View job <ArrowRight className="w-3 h-3" />
+                      Review quote <ArrowRight className="w-3 h-3" />
                     </button>
                   )}
                 </div>
