@@ -167,44 +167,85 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
     );
   }
 
-  const prompts: { key: string; text: string; cta: string; onClick: () => void }[] = [];
+  type Prompt = {
+    key: string;
+    icon: typeof FileText;
+    tone: string;
+    tag: string;
+    headline: string;
+    detail: string;
+    metric?: string;
+    cta: string;
+    onClick: () => void;
+  };
+
+  const prompts: Prompt[] = [];
 
   data.staleQuotes.slice(0, 2).forEach((q) =>
     prompts.push({
       key: `quote-${q.id}`,
-      text: `Follow up: ${gbp(q.amount)} quote sent ${q.days} days ago, no response`,
+      icon: FileText,
+      tone: "#FCD34D",
+      tag: "Chase up",
+      headline: `${gbp(q.amount)} quote has gone quiet`,
+      detail: `Sent ${q.days} days ago · no response yet`,
+      metric: `${q.days}d`,
       cta: "Open quotes",
       onClick: () => onOpenView("quotes"),
     }),
   );
-  if (data.newMatches > 0)
-    prompts.push({
-      key: "matches",
-      text: `${data.newMatches} new job ${data.newMatches === 1 ? "match" : "matches"} awaiting action`,
-      cta: "View matches",
-      onClick: () => onOpenView("jobs"),
-    });
   if (data.overdueFollowUps > 0)
     prompts.push({
       key: "followups",
-      text: `${data.overdueFollowUps} pipeline ${data.overdueFollowUps === 1 ? "lead is" : "leads are"} due a follow-up today`,
+      icon: Clock,
+      tone: "#FB923C",
+      tag: "Due today",
+      headline: `${data.overdueFollowUps} ${data.overdueFollowUps === 1 ? "lead is" : "leads are"} due a follow-up`,
+      detail: "Scheduled follow-up date has arrived",
+      metric: String(data.overdueFollowUps),
       cta: "Open pipeline",
       onClick: () => onOpenView("pipeline"),
+    });
+  if (data.newMatches > 0)
+    prompts.push({
+      key: "matches",
+      icon: Search,
+      tone: "#1AC2BA",
+      tag: "New work",
+      headline: `${data.newMatches} new job ${data.newMatches === 1 ? "match" : "matches"} awaiting action`,
+      detail:
+        data.matchesValue > 0
+          ? `${gbp(data.matchesValue)} estimated value on the table`
+          : "Respond before they go to another trade",
+      metric: String(data.newMatches),
+      cta: "View matches",
+      onClick: () => onOpenView("jobs"),
     });
   if (data.pipelineTodo > 0)
     prompts.push({
       key: "tocontact",
-      text: `${data.pipelineTodo} saved ${data.pipelineTodo === 1 ? "lead has" : "leads have"} not been contacted yet`,
+      icon: FolderKanban,
+      tone: "#8B5CF6",
+      tag: "Not contacted",
+      headline: `${data.pipelineTodo} saved ${data.pipelineTodo === 1 ? "lead has" : "leads have"} had no contact`,
+      detail: "Sitting in your pipeline with no first call made",
+      metric: String(data.pipelineTodo),
       cta: "Open pipeline",
       onClick: () => onOpenView("pipeline"),
     });
   if (data.docsNeeded > 0)
     prompts.push({
       key: "docs",
-      text: `${data.docsNeeded} ${data.docsNeeded === 1 ? "document" : "documents"} missing or expired in TradeVault`,
+      icon: ShieldCheck,
+      tone: "#3B82F6",
+      tag: "Compliance",
+      headline: `${data.docsNeeded} ${data.docsNeeded === 1 ? "document" : "documents"} missing or expired`,
+      detail: data.docsLabel,
+      metric: String(data.docsNeeded),
       cta: "Open TradeVault",
       onClick: () => onOpenView("tradevault"),
     });
+
 
   type Card = {
     key: string;
