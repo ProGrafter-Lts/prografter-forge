@@ -875,29 +875,60 @@ const QuestionsSection = ({ groups }: { groups: QuestionGroup[] }) => {
   );
 };
 
+/** Tighten legacy/boilerplate builder messages so every line earns its place. */
+const tidyBuilderMessage = (raw: string): string => {
+  const filler = [
+    /^thank you for the quote\.?\s*before we make a decision.*$/i,
+    /^once these are confirmed in writing.*$/i,
+    /^once confirmed, could you please issue a revised quote.*$/i,
+    /^hi,?\s*thanks for sending the quote\.?$/i,
+    /^before i make a decision.*$/i,
+    /^thanks\.?$/i,
+    /^thank you\.?$/i,
+  ];
+  const body = raw
+    .split("\n")
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0 && !filler.some((f) => f.test(l)))
+    .map((l) =>
+      l
+        .replace(/^[•\-*]\s*/, "")
+        .replace(/^\d+[.)]\s*/, "")
+        .replace(/^Regarding\s+/i, "")
+        .replace(/\s*\([^()]*\)\s*$/, "")
+        .trim(),
+    )
+    .filter(Boolean);
+  if (body.length === 0) return raw.trim();
+  const numbered = body.map((l, i) => `${i + 1}. ${l}`);
+  return ["Thanks for the quote. Before we decide, please confirm the following in writing:", "", ...numbered].join("\n");
+};
+
 /** Suggested message to send the builder, with copy. */
 const BuilderMessage = ({ message }: { message: string }) => {
   const { copied, copy } = useCopy();
   if (!message.trim()) return null;
+  const text = tidyBuilderMessage(message);
   return (
     <section className="qr-msgcard">
       <div className="qr-actionplan-head">
         <MessageSquareText className="h-5 w-5 shrink-0" style={{ color: "#0d9488" }} />
         <div>
           <h2 className="qr-section2-title">Suggested Message To Send The Builder</h2>
-          <p className="qr-section2-intro">You can copy this message and send it to the builder to clarify the quote.</p>
+          <p className="qr-section2-intro">Copy this and send it to the builder to clarify the quote.</p>
         </div>
       </div>
-      <pre className="qr-msgbox">{message}</pre>
+      <pre className="qr-msgbox">{text}</pre>
       <button
         type="button"
         className="qr-copyall-btn no-print"
         style={{ marginTop: "0.85rem" }}
-        onClick={() => copy("builder-msg", message, "Copied")}
+        onClick={() => copy("builder-msg", text, "Copied")}
       >
         {copied === "builder-msg" ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
         {copied === "builder-msg" ? "Copied" : "Copy Message"}
       </button>
+
     </section>
   );
 };
