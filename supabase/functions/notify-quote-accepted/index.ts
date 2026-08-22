@@ -143,7 +143,9 @@ Deno.serve(async (req) => {
           homeownerFirstName: homeowner.name?.split(' ')[0],
           reference, projectTitle, amount: amountStr,
           tradeName, tradePhone: trade?.phone || undefined,
-          tradeEmail: tradeEmail || undefined,
+          // Homeowner-facing contact is always the ProGrafter address —
+          // never a trade's personal inbox.
+          tradeEmail: 'hello@prografter.co.uk',
           workspaceUrl: contractUrl,
         },
       },
