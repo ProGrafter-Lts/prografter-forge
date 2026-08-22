@@ -450,15 +450,15 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
             style={{
               backgroundColor: urgent
                 ? "rgba(252,211,77,0.07)"
-                : attention
-                  ? "rgba(255,255,255,0.055)"
-                  : "rgba(255,255,255,0.03)",
-              border: `1px solid ${urgent ? "rgba(252,211,77,0.35)" : attention ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.07)"}`,
-              borderLeft: `4px solid ${urgent ? "#FCD34D" : attention ? card.accent : "rgba(255,255,255,0.10)"}`,
-              opacity: card.urgency === 0 ? 0.82 : 1,
-              boxShadow: urgent ? "0 8px 24px -12px rgba(252,211,77,0.45)" : "none",
+                : `${card.accent}0F`,
+              border: `1px solid ${urgent ? "rgba(252,211,77,0.35)" : `${card.accent}3D`}`,
+              borderLeft: `4px solid ${urgent ? "#FCD34D" : card.accent}`,
+              boxShadow: urgent
+                ? "0 8px 24px -12px rgba(252,211,77,0.45)"
+                : `0 8px 22px -16px ${card.accent}`,
             }}
           >
+
             <div>
               <div className="flex items-center gap-2">
                 <span
