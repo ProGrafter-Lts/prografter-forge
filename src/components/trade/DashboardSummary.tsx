@@ -463,13 +463,14 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
               <div className="flex items-center gap-2">
                 <span
                   className="inline-flex items-center justify-center rounded-lg w-7 h-7"
-                  style={{ backgroundColor: `${tone}1F` }}
+                  style={{ backgroundColor: `${tone}2E`, border: `1px solid ${tone}59` }}
                 >
                   <card.icon className="w-4 h-4" style={{ color: tone }} />
                 </span>
-                <span className="font-mono text-[11px] uppercase tracking-widest text-primary-foreground/60">
+                <span className="font-mono text-[11px] uppercase tracking-widest" style={{ color: tone }}>
                   {card.label}
                 </span>
+
                 {card.alert && (
                   <span
                     className="ml-auto inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-mono text-[10px]"
