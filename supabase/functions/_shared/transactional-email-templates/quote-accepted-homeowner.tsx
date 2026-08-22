@@ -43,7 +43,7 @@ const QuoteAcceptedHomeownerEmail = ({
     <InfoCard title="Your trade's contact">
       {tradeName}
       {tradePhone ? <><br />Phone: {tradePhone}</> : null}
-      {tradeEmail ? <><br />Email: {tradeEmail}</> : null}
+      <br />Email: {tradeEmail || 'hello@prografter.co.uk'}
     </InfoCard>
     <CTA href={workspaceUrl} label="Review &amp; sign your contract" />
   </ProGrafterShell>
