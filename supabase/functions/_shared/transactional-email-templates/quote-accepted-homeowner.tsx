@@ -60,6 +60,6 @@ export const template = {
     amount: '£4,800.00',
     tradeName: 'BrightSpark Electrical',
     tradePhone: '07700 900456',
-    tradeEmail: 'sam@brightspark.example',
+    tradeEmail: 'hello@prografter.co.uk',
   },
 } satisfies TemplateEntry
