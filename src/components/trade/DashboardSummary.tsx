@@ -450,26 +450,27 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
             style={{
               backgroundColor: urgent
                 ? "rgba(252,211,77,0.07)"
-                : attention
-                  ? "rgba(255,255,255,0.055)"
-                  : "rgba(255,255,255,0.03)",
-              border: `1px solid ${urgent ? "rgba(252,211,77,0.35)" : attention ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.07)"}`,
-              borderLeft: `4px solid ${urgent ? "#FCD34D" : attention ? card.accent : "rgba(255,255,255,0.10)"}`,
-              opacity: card.urgency === 0 ? 0.82 : 1,
-              boxShadow: urgent ? "0 8px 24px -12px rgba(252,211,77,0.45)" : "none",
+                : `${card.accent}0F`,
+              border: `1px solid ${urgent ? "rgba(252,211,77,0.35)" : `${card.accent}3D`}`,
+              borderLeft: `4px solid ${urgent ? "#FCD34D" : card.accent}`,
+              boxShadow: urgent
+                ? "0 8px 24px -12px rgba(252,211,77,0.45)"
+                : `0 8px 22px -16px ${card.accent}`,
             }}
           >
+
             <div>
               <div className="flex items-center gap-2">
                 <span
                   className="inline-flex items-center justify-center rounded-lg w-7 h-7"
-                  style={{ backgroundColor: `${tone}1F` }}
+                  style={{ backgroundColor: `${tone}2E`, border: `1px solid ${tone}59` }}
                 >
                   <card.icon className="w-4 h-4" style={{ color: tone }} />
                 </span>
-                <span className="font-mono text-[11px] uppercase tracking-widest text-primary-foreground/60">
+                <span className="font-mono text-[11px] uppercase tracking-widest" style={{ color: tone }}>
                   {card.label}
                 </span>
+
                 {card.alert && (
                   <span
                     className="ml-auto inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-mono text-[10px]"
@@ -485,7 +486,7 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
               </div>
               <div
                 className="mt-3 font-heading text-4xl leading-none"
-                style={{ color: urgent ? "#FCD34D" : "hsl(var(--primary-foreground))" }}
+                style={{ color: urgent ? "#FCD34D" : card.urgency === 0 ? "hsl(var(--primary-foreground))" : card.accent }}
               >
                 {card.value}
               </div>
@@ -503,13 +504,14 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
                     ? { backgroundColor: "#FCD34D", color: "#1A1A1A" }
                     : card.urgency === 0
                       ? {
-                          backgroundColor: "rgba(255,255,255,0.06)",
-                          color: "rgba(255,255,255,0.75)",
-                          border: "1px solid rgba(255,255,255,0.12)",
+                          backgroundColor: `${card.accent}1F`,
+                          color: card.accent,
+                          border: `1px solid ${card.accent}59`,
                         }
                       : { backgroundColor: `${card.accent}E6`, color: "#FFFFFF" }
                 }
               >
+
                 {card.cta}
                 <ArrowRight className="w-3 h-3" />
               </button>
