@@ -21,7 +21,7 @@ const NAV_ITEMS = [
   { label: "Dashboard", icon: LayoutDashboard, id: "dashboard" },
   { label: "Find Work", icon: Search, id: "find-work" },
   { label: "Pipeline", icon: FolderKanban, id: "pipeline" },
-  { label: "Atlas", icon: Map, id: "atlas" },
+  { label: "SiteScout", icon: Map, id: "atlas" },
   { label: "Quotes", icon: FileText, id: "quotes" },
   { label: "Calendar", icon: CalendarDays, id: "calendar" },
   { label: "Messages", icon: MessageSquare, id: "messages" },
@@ -134,7 +134,7 @@ const TradeSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen }: 
             aria-disabled="true"
           >
             <Map className="w-4 h-4 flex-shrink-0" />
-            Atlas
+            SiteScout
             <span
               className="ml-auto text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full"
               style={{ backgroundColor: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.5)" }}

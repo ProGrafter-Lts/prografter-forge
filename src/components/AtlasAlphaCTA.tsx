@@ -31,10 +31,10 @@ export default function AtlasAlphaCTA() {
                 </span>
               </div>
               <h2 className="font-heading text-cream text-3xl md:text-4xl leading-tight mb-3">
-                Atlas — Guided Site Surveys
+                SiteScout — Guided Site Surveys
               </h2>
               <p className="font-body text-cream/70 text-base md:text-lg max-w-2xl leading-relaxed">
-                Field-test the new Atlas workflow: capture property intelligence, log risks and unknowns, and generate a structured survey summary in real time.
+                Field-test the new SiteScout workflow: capture property intelligence, log risks and unknowns, and generate a structured survey summary in real time.
               </p>
             </div>
 
@@ -43,7 +43,7 @@ export default function AtlasAlphaCTA() {
               className="group inline-flex items-center justify-center gap-2.5 font-heading text-sm tracking-wide bg-teal text-navy px-7 py-4 rounded-full hover:bg-teal-hover transition-colors shrink-0"
             >
               <Map className="w-4 h-4" />
-              Start Atlas Alpha test
+              Start SiteScout Alpha test
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>

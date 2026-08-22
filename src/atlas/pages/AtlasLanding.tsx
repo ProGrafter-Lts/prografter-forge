@@ -66,7 +66,7 @@ export default function AtlasLanding() {
       {/* Hero */}
       <header className="mb-10">
         <div className="flex items-center gap-2 mb-4">
-          <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-teal-300">Atlas</span>
+          <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-teal-300">SiteScout</span>
           <span className="h-px flex-1 bg-white/10" />
           <span className="font-mono text-[10px] uppercase tracking-widest text-white/40">
             Guided site surveys
@@ -207,7 +207,7 @@ function EmptyState({ onStart }: { onStart: () => void }) {
       </div>
       <h3 className="font-heading text-white text-2xl mb-2">Your first walk-through</h3>
       <p className="font-body text-sm text-white/60 max-w-sm mx-auto mb-6">
-        Atlas guides you through a property in the order you'd naturally survey it — outside first,
+        SiteScout guides you through a property in the order you'd naturally survey it — outside first,
         then inside. Nothing is missed and everything is defensible.
       </p>
       <Button

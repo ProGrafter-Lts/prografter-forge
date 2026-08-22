@@ -32,7 +32,7 @@ export const HUB_NAV: HubNavItem[] = [
 
 /** Modules not yet available — shown greyed but visible. */
 export const HUB_NAV_SOON: HubNavItem[] = [
-  { label: "Atlas", to: "/hub/atlas", icon: Map, soon: true },
+  { label: "SiteScout", to: "/hub/atlas", icon: Map, soon: true },
   { label: "Quote Checker", to: "/hub/quote-checker", icon: FileCheck2, soon: true },
   { label: "Marketplace", to: "/hub/marketplace", icon: Store, soon: true },
 ];

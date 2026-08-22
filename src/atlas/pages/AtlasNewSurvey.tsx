@@ -100,7 +100,7 @@ export default function AtlasNewSurvey() {
         <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-teal-300">New survey</span>
         <h1 className="font-heading text-white text-4xl md:text-5xl mt-2">Set the scene.</h1>
         <p className="font-body text-[15px] text-white/60 mt-2 max-w-lg">
-          Three short steps. Once complete, Atlas will guide the walk-through in the order that matches
+          Three short steps. Once complete, SiteScout will guide the walk-through in the order that matches
           how the property flows.
         </p>
       </div>
@@ -244,7 +244,7 @@ export default function AtlasNewSurvey() {
       )}
 
       {step === 3 && (
-        <Panel eyebrow="Step 3" title="Ready to begin" hint="Atlas will seed sections based on this project">
+        <Panel eyebrow="Step 3" title="Ready to begin" hint="SiteScout will seed sections based on this project">
           <div className="grid gap-3">
             <Summary label="Project" value={`${form.project_title || "—"} · ${form.project_type}`} />
             <Summary label="Property" value={`${form.property_address || "—"} ${form.postcode}`} />

@@ -127,7 +127,7 @@ export const markFieldClean = async (id: string) => {
 export async function putPhoto(surveyId: string, fieldKey: string, blob: Blob): Promise<LocalPhoto> {
   if (!fieldKey || !fieldKey.trim()) {
     // Hard invariant: photos are always evidence for a specific field.
-    throw new Error("Atlas: refusing to store a photo with no field_key");
+    throw new Error("SiteScout: refusing to store a photo with no field_key");
   }
   const row: LocalPhoto = {
     localId: localId(),
