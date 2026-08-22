@@ -486,7 +486,7 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
               </div>
               <div
                 className="mt-3 font-heading text-4xl leading-none"
-                style={{ color: urgent ? "#FCD34D" : "hsl(var(--primary-foreground))" }}
+                style={{ color: urgent ? "#FCD34D" : card.urgency === 0 ? "hsl(var(--primary-foreground))" : card.accent }}
               >
                 {card.value}
               </div>
@@ -504,13 +504,14 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
                     ? { backgroundColor: "#FCD34D", color: "#1A1A1A" }
                     : card.urgency === 0
                       ? {
-                          backgroundColor: "rgba(255,255,255,0.06)",
-                          color: "rgba(255,255,255,0.75)",
-                          border: "1px solid rgba(255,255,255,0.12)",
+                          backgroundColor: `${card.accent}1F`,
+                          color: card.accent,
+                          border: `1px solid ${card.accent}59`,
                         }
                       : { backgroundColor: `${card.accent}E6`, color: "#FFFFFF" }
                 }
               >
+
                 {card.cta}
                 <ArrowRight className="w-3 h-3" />
               </button>
