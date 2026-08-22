@@ -4,7 +4,7 @@ import {
   quoteProvisionalSumsFromSurvey,
 } from "@/atlas/capture/atlas-survey-schema";
 
-export const ATLAS_HANDOFF_HEADING = "From Atlas site survey:";
+export const ATLAS_HANDOFF_HEADING = "From SiteScout site survey:";
 
 export interface AtlasQuoteHandoff {
   /** Text for the quote's free-text assumptions field. */

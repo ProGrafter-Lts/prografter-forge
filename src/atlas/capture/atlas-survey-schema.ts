@@ -280,7 +280,7 @@ const SHELL_GROUPS: GroupDef[] = [
     key: "shell_ground",
     title: "Ground conditions",
     section: "shell",
-    blurb: "Atlas never confirms ground conditions. This flag cannot be cleared during capture.",
+    blurb: "SiteScout never confirms ground conditions. This flag cannot be cleared during capture.",
     fields: [
       {
         key: "ground_conditions_flag",
@@ -330,7 +330,7 @@ export const ATLAS_SECTION_LABELS: Record<string, string> = {
 };
 
 export const ATLAS_DISCLAIMER =
-  "Atlas captures site observations to guide quotations. It does not replace structural, geotechnical, or other professional assessment. Ground conditions, in particular, are never confirmed safe by this tool — only flagged for further investigation where relevant.";
+  "SiteScout captures site observations to guide quotations. It does not replace structural, geotechnical, or other professional assessment. Ground conditions, in particular, are never confirmed safe by this tool — only flagged for further investigation where relevant.";
 
 export const GROUND_CONDITIONS_STATEMENT =
   "Ground conditions unverified — recommend trial hole / site investigation before final pricing.";

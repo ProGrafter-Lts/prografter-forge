@@ -4,10 +4,10 @@ import HubPlaceholder from "@/hub/pages/HubPlaceholder";
 export const HubAtlas = () => (
   <HubPlaceholder
     soon
-    title="Atlas"
+    title="SiteScout"
     subtitle="Deep property & location intelligence."
     icon={<Map size={22} />}
-    emptyTitle="Atlas is coming soon"
+    emptyTitle="SiteScout is coming soon"
     emptyDescription="A powerful map-based view of properties, planning history and local demand."
   />
 );
