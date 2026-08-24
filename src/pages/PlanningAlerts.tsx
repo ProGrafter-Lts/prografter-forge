@@ -640,7 +640,7 @@ export default function PlanningAlerts() {
                     const active = pipelineTab === t.id;
                     const count = t.id === "all"
                       ? undefined
-                      : MOCK_APPLICATIONS.filter((a) => (pi.interactions[a.id]?.status ?? "new") === t.id).length;
+                      : apps.filter((a) => (pi.interactions[a.id]?.status ?? "new") === t.id).length;
                     return (
                       <button
                         key={t.id}
