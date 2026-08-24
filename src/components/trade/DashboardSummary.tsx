@@ -106,9 +106,9 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
       const quotes = (quotesRes.data || []).filter((q: any) => !isTestRecord(q));
       const quotesValue = quotes.reduce((s: number, q: any) => s + Number(q.amount || 0), 0);
 
+      // Every live quote is surfaced from day 0; day 5+ escalates to a chase-up.
       const staleQuotes = quotes
         .map((q: any) => ({ id: q.id, amount: Number(q.amount || 0), days: daysAgo(q.created_at) }))
-        .filter((q) => q.days >= 5)
         .sort((a, b) => b.days - a.days);
 
       const matches = matchesRes.data || [];
