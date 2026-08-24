@@ -209,7 +209,10 @@ const PROP_TYPES = [
 const StatusBadge = ({ status }: { status: string }) => {
   const s = STATUS_CFG[status] || STATUS_CFG.submitted;
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wider ${s.chip}`}>
+    <span
+      style={badgeToneStyle(s.tone)}
+      className="inline-flex items-center gap-1.5 rounded-full border-transparent px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wider"
+    >
       <span className={`w-1.5 h-1.5 rounded-full ${s.dot}`} />
       {s.label}
     </span>
