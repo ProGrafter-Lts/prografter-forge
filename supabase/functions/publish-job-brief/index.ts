@@ -1,4 +1,5 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
+import { notifyTrade } from '../_shared/trade-notify.ts'
 import { CATEGORY_TRADE_TYPES, rankTrades, type TradeCandidate } from '../_shared/trade-matching.ts'
 
 const corsHeaders = {
@@ -215,6 +216,16 @@ Deno.serve(async (req) => {
   const sends: Promise<unknown>[] = []
   for (const t of batch1) {
     if (!t.user_id || existingByTrade.get(t.id)?.released) continue
+    await notifyTrade(supabase, {
+      tradeId: t.id,
+      userId: t.user_id,
+      type: 'new_lead',
+      title: 'New lead available',
+      body: `${jobTitle}${brief.city ? ` — ${brief.city}` : ''}. You have 48 hours to accept or decline.`,
+      link: briefUrl,
+      jobId: jobId,
+      invitationId: existingByTrade.get(t.id)?.id ?? null,
+    })
     const { data: tp } = await supabase.from('profiles').select('email').eq('user_id', t.user_id).maybeSingle()
     if (!tp?.email) continue
     sends.push(supabase.functions.invoke('send-transactional-email', {
