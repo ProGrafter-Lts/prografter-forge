@@ -74,6 +74,7 @@ const QuoteBuilder = () => {
   const [step, setStep] = useState(0);
   const [tradeId, setTradeId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [notAllowed, setNotAllowed] = useState(false);
   const [job, setJob] = useState<{ title: string | null; job_type: string | null; address: string | null; postcode: string | null; homeowner_id: string | null } | null>(null);
   const [homeownerName, setHomeownerName] = useState<string>("");
   const [tradeName, setTradeName] = useState<string>("");
