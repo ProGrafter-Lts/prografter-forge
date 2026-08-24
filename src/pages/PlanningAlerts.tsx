@@ -929,6 +929,7 @@ export default function PlanningAlerts() {
                       onFollowUp={(date) => pi.upsertInteraction(selectedApp.id, { status: date ? "follow_up" : (pi.interactions[selectedApp.id]?.status ?? "saved"), follow_up_date: date })}
                       onCreateInvite={() => pi.createInviteLink(selectedApp.id, getProjectType(selectedApp))}
                       onLetterGenerated={() => pi.upsertInteraction(selectedApp.id, { intro_letter_generated: true })}
+                      engaged={engagements[engagementKey(selectedApp.address, selectedApp.postcode) ?? ""]}
                     />
                   )}
                 </div>
