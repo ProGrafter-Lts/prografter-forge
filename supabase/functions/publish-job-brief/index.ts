@@ -213,6 +213,11 @@ Deno.serve(async (req) => {
   const valueBand = brief.budget_band || undefined
   const briefUrl = `${SITE_URL}/project/${jobId}`
 
+  // Invitation ids (post-upsert) so in-app notifications dedupe per invitation.
+  const { data: invRows } = await supabase
+    .from('job_trade_invitations').select('id, trade_id').eq('job_id', jobId)
+  const invIdByTrade = new Map((invRows || []).map((r: any) => [r.trade_id, r.id]))
+
   const sends: Promise<unknown>[] = []
   for (const t of batch1) {
     if (!t.user_id || existingByTrade.get(t.id)?.released) continue
@@ -224,7 +229,7 @@ Deno.serve(async (req) => {
       body: `${jobTitle}${brief.city ? ` — ${brief.city}` : ''}. You have 48 hours to accept or decline.`,
       link: briefUrl,
       jobId: jobId,
-      invitationId: existingByTrade.get(t.id)?.id ?? null,
+      invitationId: invIdByTrade.get(t.id) ?? null,
     })
     const { data: tp } = await supabase.from('profiles').select('email').eq('user_id', t.user_id).maybeSingle()
     if (!tp?.email) continue
