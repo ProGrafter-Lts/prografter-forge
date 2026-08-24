@@ -162,13 +162,25 @@ export default function OpportunityCommandCentre({
               {score.band}
             </span>
           </div>
+          {engaged && (
+            <div className="flex items-start gap-2 border-t border-white/10 pt-3">
+              <AlertTriangle className="w-4 h-4 text-amber-400 mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="font-mono text-xs font-semibold text-amber-400">Already engaged — no cold intro</p>
+                <p className="font-sans text-[11px] text-cream/70 mt-1 leading-relaxed">{engaged}</p>
+              </div>
+            </div>
+          )}
           <div className="flex items-start gap-2 border-t border-white/10 pt-3">
             <Target className="w-4 h-4 text-secondary mt-0.5 flex-shrink-0" />
             <div>
-              <p className="font-mono text-xs font-semibold text-secondary">Best action: {action.label}</p>
-              <p className="font-sans text-[11px] text-cream/70 mt-1 leading-relaxed">{action.explanation}</p>
+              <p className="font-mono text-xs font-semibold text-secondary">
+                Best action: {engaged ? "Follow up through the existing job" : action.label}
+              </p>
+              <p className="font-sans text-[11px] text-cream/70 mt-1 leading-relaxed">{engaged ? engaged : action.explanation}</p>
             </div>
           </div>
+
           <div className="grid grid-cols-2 gap-2 pt-1">
             <StatBox k="Est. value" v={app.estimated_value} />
             <StatBox k="Planning stage" v={typeInfo.label} />
