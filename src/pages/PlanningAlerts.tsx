@@ -8,6 +8,7 @@ import { Bell, Search, X, Radio, Building2, MapPin, Calendar, FileText, CheckCir
 import { usePlanningIntelligence } from "@/hooks/usePlanningIntelligence";
 import OpportunityCommandCentre from "@/components/trade/planning/OpportunityCommandCentre";
 import { scoreOpportunity, getBestAction, ACCESS_LABEL, PIPELINE_TABS, PipelineStatus } from "@/lib/planningIntelligence";
+import { badgeToneStyle, type BadgeTone } from "@/lib/statusBadge";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 type ProjectKind = "DOMESTIC" | "CONVERSION" | "NEW BUILD";
