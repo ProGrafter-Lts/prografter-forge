@@ -8,6 +8,7 @@ import { Bell, Search, X, Radio, Building2, MapPin, Calendar, FileText, CheckCir
 import { usePlanningIntelligence } from "@/hooks/usePlanningIntelligence";
 import OpportunityCommandCentre from "@/components/trade/planning/OpportunityCommandCentre";
 import { scoreOpportunity, getBestAction, ACCESS_LABEL, PIPELINE_TABS, PipelineStatus } from "@/lib/planningIntelligence";
+import { badgeToneStyle, type BadgeTone } from "@/lib/statusBadge";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 type ProjectKind = "DOMESTIC" | "CONVERSION" | "NEW BUILD";
@@ -189,11 +190,11 @@ const PD_RULES: Record<string, Record<string, { pd: boolean | "maybe"; notes: st
 };
 
 // ── Status config (uses semantic tokens via Tailwind classes) ────────────────
-const STATUS_CFG: Record<string, { label: string; chip: string; dot: string; priority: string; accent: string }> = {
-  submitted:        { label:"Submitted",        chip:"bg-secondary/10 text-secondary border-secondary/30",        dot:"bg-secondary",        priority:"Act now",       accent:"text-secondary" },
-  pending_decision: { label:"Pending decision", chip:"bg-amber-500/10 text-amber-700 border-amber-500/30",        dot:"bg-amber-500",        priority:"Still time",    accent:"text-amber-700" },
-  approved:         { label:"Approved",         chip:"bg-emerald-500/10 text-emerald-700 border-emerald-500/30",  dot:"bg-emerald-500",      priority:"Ready",         accent:"text-emerald-700" },
-  refused:          { label:"Refused",          chip:"bg-destructive/10 text-destructive border-destructive/30",  dot:"bg-destructive",      priority:"No further action", accent:"text-destructive" },
+const STATUS_CFG: Record<string, { label: string; chip: string; dot: string; priority: string; accent: string; tone: BadgeTone }> = {
+  submitted:        { label:"Submitted",        chip:"bg-secondary/10 text-secondary border-secondary/30",        dot:"bg-secondary",        priority:"Act now",       accent:"text-secondary", tone:"blue" },
+  pending_decision: { label:"Pending decision", chip:"bg-amber-500/10 text-amber-700 border-amber-500/30",        dot:"bg-amber-500",        priority:"Still time",    accent:"text-amber-700", tone:"amber" },
+  approved:         { label:"Approved",         chip:"bg-emerald-500/10 text-emerald-700 border-emerald-500/30",  dot:"bg-emerald-500",      priority:"Ready",         accent:"text-emerald-700", tone:"green" },
+  refused:          { label:"Refused",          chip:"bg-destructive/10 text-destructive border-destructive/30",  dot:"bg-destructive",      priority:"No further action", accent:"text-destructive", tone:"grey" },
 };
 
 const PROP_TYPES = [
@@ -209,7 +210,10 @@ const PROP_TYPES = [
 const StatusBadge = ({ status }: { status: string }) => {
   const s = STATUS_CFG[status] || STATUS_CFG.submitted;
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wider ${s.chip}`}>
+    <span
+      style={badgeToneStyle(s.tone)}
+      className="inline-flex items-center gap-1.5 rounded-full border-transparent px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wider"
+    >
       <span className={`w-1.5 h-1.5 rounded-full ${s.dot}`} />
       {s.label}
     </span>
@@ -635,7 +639,7 @@ export default function PlanningAlerts() {
             {activeTab === "pipeline" && (
               <>
                 {/* Founding access banner */}
-                {pi.trade && (
+                {pi.trade && pi.hasAccessRecord && (
                   <div className="mb-5 flex items-start gap-2.5 rounded-2xl border border-secondary/30 bg-secondary/10 px-4 py-3">
                     <Sparkles className="w-4 h-4 text-secondary mt-0.5 flex-shrink-0" />
                     <p className="font-sans text-xs text-primary leading-relaxed">

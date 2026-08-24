@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useTradeAccess } from "@/hooks/useTradeAccess";
+import { isTestRecord } from "@/lib/testData";
 
 const SEEN_KEY = "pg_seen_job_matches";
 
@@ -36,49 +38,43 @@ export const markJobMatchSeen = (matchId: string) => {
  */
 export const useNewJobMatchCount = () => {
   const [count, setCount] = useState(0);
+  // Use the same trade resolution as the dashboard so the badge can never
+  // count matches belonging to a different (e.g. duplicate personal) account.
+  const { isReady, trade } = useTradeAccess({ redirectToSetup: false });
+  const tradeId = trade?.id ?? null;
 
   const refresh = useCallback(async () => {
-    const { data: auth } = await supabase.auth.getUser();
-    if (!auth.user) {
+    if (!tradeId) {
       setCount(0);
-      return;
-    }
-
-    const { data: tradeRow } = await supabase
-      .from("trades")
-      .select("id")
-      .eq("user_id", auth.user.id)
-      .maybeSingle();
-
-    if (!tradeRow?.id) {
-      setCount(0);
-      return;
+      return null;
     }
 
     const { data } = await supabase
       .from("job_matches")
-      .select("id")
-      .eq("trade_id", tradeRow.id)
+      .select("id, jobs(is_test)")
+      .eq("trade_id", tradeId)
       .eq("status", "notified");
 
     const seen = readSeen();
-    setCount((data || []).filter((m: { id: string }) => !seen.includes(m.id)).length);
-    return tradeRow.id;
-  }, []);
+    const rows = (data || []) as { id: string; jobs?: { is_test?: boolean | null } | null }[];
+    setCount(rows.filter((m) => !isTestRecord(m) && !seen.includes(m.id)).length);
+    return tradeId;
+  }, [tradeId]);
 
   useEffect(() => {
     let channel: ReturnType<typeof supabase.channel> | null = null;
     let cancelled = false;
+    if (!isReady) return;
 
     void (async () => {
-      const tradeId = await refresh();
-      if (cancelled || !tradeId) return;
+      const resolvedId = await refresh();
+      if (cancelled || !resolvedId) return;
 
       channel = supabase
-        .channel(`job-matches-badge-${tradeId}`)
+        .channel(`job-matches-badge-${resolvedId}`)
         .on(
           "postgres_changes",
-          { event: "*", schema: "public", table: "job_matches", filter: `trade_id=eq.${tradeId}` },
+          { event: "*", schema: "public", table: "job_matches", filter: `trade_id=eq.${resolvedId}` },
           () => void refresh(),
         )
         .subscribe();
@@ -92,7 +88,7 @@ export const useNewJobMatchCount = () => {
       window.removeEventListener("pg:job-matches-seen", onSeen);
       if (channel) void supabase.removeChannel(channel);
     };
-  }, [refresh]);
+  }, [refresh, isReady]);
 
   return count;
 };
