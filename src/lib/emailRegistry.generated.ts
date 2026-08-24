@@ -44,6 +44,7 @@ export const TRANSACTIONAL_TEMPLATE_NAMES = [
   "quote-health-check-ready",
   "tradevault-doc-expiring",
   "agreed-quote-on-file",
+  "delivery-confirmation",
 ] as const;
 
 export const AUTH_TEMPLATE_KEYS = [
