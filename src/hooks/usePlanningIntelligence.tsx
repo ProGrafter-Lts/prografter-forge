@@ -30,6 +30,8 @@ interface State {
   ready: boolean;
   trade: TradeIdentity | null;
   accessLevel: AccessLevel;
+  /** True once a real planning_access row exists for this trade. */
+  hasAccessRecord: boolean;
   features: PlanningFeatures;
   interactions: Record<string, Interaction>;
 }
@@ -40,6 +42,7 @@ export function usePlanningIntelligence() {
     ready: false,
     trade: null,
     accessLevel: "founding",
+    hasAccessRecord: false,
     features: resolveFeatures("founding"),
     interactions: {},
   });
@@ -67,11 +70,17 @@ export function usePlanningIntelligence() {
       // Ensure a founding access record exists
       let accessLevel: AccessLevel = "founding";
       let overrides: Partial<PlanningFeatures> | null = null;
+      let hasAccessRecord = false;
       if (accessRes.data) {
+        hasAccessRecord = true;
         accessLevel = (accessRes.data.access_level as AccessLevel) || "founding";
         overrides = (accessRes.data.features_enabled as Partial<PlanningFeatures>) || null;
       } else {
-        void supabase.from("planning_access").insert({ trade_id: tradeAccess.id });
+        const { error: insertErr } = await supabase
+          .from("planning_access")
+          .insert({ trade_id: tradeAccess.id });
+        hasAccessRecord = !insertErr;
+        if (cancelled) return;
       }
 
       const interactions: Record<string, Interaction> = {};
@@ -90,6 +99,7 @@ export function usePlanningIntelligence() {
             }
           : { id: tradeAccess.id, name: "", company_name: "", trade_type: tradeAccess.trade_type },
         accessLevel,
+        hasAccessRecord,
         features: resolveFeatures(accessLevel, overrides),
         interactions,
       });
