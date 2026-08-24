@@ -774,7 +774,20 @@ export default function PlanningAlerts() {
                 <div className={`grid gap-4 items-start ${selectedApp && !isMobile ? "grid-cols-[1fr_380px]" : "grid-cols-1"}`}>
                   {/* Application list */}
                   <div className="flex flex-col gap-3">
-                    {sorted.length === 0 && (
+                    {loadingApps && (
+                      <div className="bg-card rounded-2xl border border-border p-8 text-center">
+                        <p className="font-sans text-sm text-muted-foreground">Loading your planning feed…</p>
+                      </div>
+                    )}
+                    {!loadingApps && apps.length === 0 && (
+                      <div className="bg-card rounded-2xl border border-border p-8 text-center">
+                        <p className="font-sans text-sm text-primary font-semibold mb-1">No planning applications in your feed yet</p>
+                        <p className="font-sans text-xs text-muted-foreground">
+                          Use “Refresh feed” to pull the latest validated applications for your service area.
+                        </p>
+                      </div>
+                    )}
+                    {!loadingApps && apps.length > 0 && sorted.length === 0 && (
                       <div className="bg-card rounded-2xl border border-border p-8 text-center">
                         <p className="font-sans text-sm text-muted-foreground">No applications match your filters</p>
                       </div>
