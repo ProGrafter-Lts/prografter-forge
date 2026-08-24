@@ -5,6 +5,7 @@ import { BadgeCheck } from "lucide-react";
 import { GreenSpecialistBanner } from "@/components/GreenCertBadges";
 import { GreenLeafBadge } from "@/lib/greenTrades";
 import TradeSidebar from "@/components/trade/TradeSidebar";
+import NotificationBell from "@/components/trade/NotificationBell";
 import CalendarConnect from "@/components/trade/CalendarConnect";
 import TradeProfileSection from "@/components/trade/TradeProfileSection";
 import AddSpecialismsBanner from "@/components/trade/AddSpecialismsBanner";
