@@ -482,6 +482,15 @@ const SignupTrade = () => {
               templateData: { firstName },
             },
           });
+          // Delivery-check email — proves our emails reach this inbox.
+          await supabase.functions.invoke("send-transactional-email", {
+            body: {
+              templateName: "delivery-confirmation",
+              recipientEmail: email.trim(),
+              idempotencyKey: `delivery-confirmation-${userId}`,
+              templateData: { firstName, audience: "trade" },
+            },
+          });
         } catch (e) {
           console.warn("trade-welcome email failed (non-blocking)", e);
         }
