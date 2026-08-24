@@ -555,6 +555,28 @@ const QuoteBuilder = () => {
     );
   }
 
+  if (notAllowed) {
+    return (
+      <div className="min-h-screen bg-cream flex items-center justify-center px-6">
+        <div className="max-w-md text-center space-y-4">
+          <h1 className="font-serif text-2xl text-navy">You're not on this job yet</h1>
+          <p className="font-sans text-sm text-navy/70">
+            Quotes can only be built for jobs you've been invited to or matched with. If you think
+            this is wrong, check you're signed in to the right business account, or contact ProGrafter.
+          </p>
+          <button
+            onClick={() => navigate("/dashboard/trade?view=find-work")}
+            className="font-mono text-xs uppercase tracking-wider bg-navy text-cream px-5 py-3 rounded-lg"
+          >
+            Back to Find Work
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+
+
   return (
     <div className="min-h-screen bg-cream">
       {/* Header */}
