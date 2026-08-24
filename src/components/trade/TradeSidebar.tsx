@@ -3,6 +3,7 @@ import Logo from "@/components/Logo";
 import { supabase } from "@/integrations/supabase/client";
 import { useVerificationStatus } from "@/hooks/useVerificationStatus";
 import { useNewJobMatchCount } from "@/hooks/useNewJobMatches";
+import { useSiteScoutAccess } from "@/lib/siteScoutAccess";
 import {
   LayoutDashboard,
   Search,
@@ -21,7 +22,6 @@ const NAV_ITEMS = [
   { label: "Dashboard", icon: LayoutDashboard, id: "dashboard" },
   { label: "Find Work", icon: Search, id: "find-work" },
   { label: "Pipeline", icon: FolderKanban, id: "pipeline" },
-  { label: "SiteScout", icon: Map, id: "atlas" },
   { label: "Quotes", icon: FileText, id: "quotes" },
   { label: "Calendar", icon: CalendarDays, id: "calendar" },
   { label: "Messages", icon: MessageSquare, id: "messages" },
@@ -41,6 +41,7 @@ const TradeSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen }: 
   const location = useLocation();
   const verification = useVerificationStatus();
   const newMatchCount = useNewJobMatchCount();
+  const siteScout = useSiteScoutAccess();
 
 
   const currentView = new URLSearchParams(location.search).get("view");
@@ -127,21 +128,35 @@ const TradeSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen }: 
           })}
 
 
-          {/* Atlas — coming soon, visible but disabled */}
-          <div
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-mono text-sm whitespace-nowrap cursor-not-allowed"
-            style={{ color: "rgba(255,255,255,0.35)" }}
-            aria-disabled="true"
-          >
-            <Map className="w-4 h-4 flex-shrink-0" />
-            SiteScout
-            <span
-              className="ml-auto text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full"
-              style={{ backgroundColor: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.5)" }}
+          {/* SiteScout — live for the closed-testing account only, otherwise "Soon" */}
+          {siteScout.allowed ? (
+            <button
+              onClick={() => handleNavClick("atlas")}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-mono text-sm transition-colors whitespace-nowrap"
+              style={{
+                backgroundColor: routeActiveNav === "atlas" ? "rgba(13,148,136,0.18)" : "transparent",
+                color: routeActiveNav === "atlas" ? "#1AC2BA" : "rgba(255,255,255,0.75)",
+              }}
             >
-              Soon
-            </span>
-          </div>
+              <Map className="w-4 h-4 flex-shrink-0" />
+              SiteScout
+            </button>
+          ) : (
+            <div
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-mono text-sm whitespace-nowrap cursor-not-allowed"
+              style={{ color: "rgba(255,255,255,0.35)" }}
+              aria-disabled="true"
+            >
+              <Map className="w-4 h-4 flex-shrink-0" />
+              SiteScout
+              <span
+                className="ml-auto text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full"
+                style={{ backgroundColor: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.5)" }}
+              >
+                Soon
+              </span>
+            </div>
+          )}
 
           {/* Settings */}
           <button

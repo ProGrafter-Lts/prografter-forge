@@ -27,6 +27,7 @@ const Verification = lazyRetry(() => import("./pages/Verification.tsx"));
 const PostAJob = lazyRetry(() => import("./pages/PostAJob.tsx"));
 const ResetPassword = lazyRetry(() => import("./pages/ResetPassword.tsx"));
 const TradeDashboard = lazyRetry(() => import("./pages/TradeDashboard.tsx"));
+import SiteScoutGate from "./atlas/SiteScoutGate";
 const AtlasLanding = lazyRetry(() => import("./atlas/pages/AtlasLanding.tsx"));
 const AtlasNewSurvey = lazyRetry(() => import("./atlas/pages/AtlasNewSurvey.tsx"));
 const AtlasWorkspace = lazyRetry(() => import("./atlas/pages/AtlasWorkspace.tsx"));
@@ -243,13 +244,13 @@ const AppRoutes = () => {
             >
               <Route path="/dashboard/trade" element={<TradeDashboard />} />
               <Route path="/dashboard/trade/settings" element={<TradeSettings />} />
-              <Route path="/atlas" element={<AtlasLanding />} />
-              <Route path="/atlas/new" element={<AtlasNewSurvey />} />
-              <Route path="/atlas/:id" element={<AtlasWorkspace />} />
-              <Route path="/atlas/:id/review" element={<AtlasReview />} />
-              <Route path="/atlas/:id/summary" element={<AtlasSummary />} />
-              <Route path="/atlas/:id/capture" element={<AtlasCapture />} />
-              <Route path="/atlas/:id/capture-report" element={<AtlasCaptureReport />} />
+              <Route path="/atlas" element={<SiteScoutGate><AtlasLanding /></SiteScoutGate>} />
+              <Route path="/atlas/new" element={<SiteScoutGate><AtlasNewSurvey /></SiteScoutGate>} />
+              <Route path="/atlas/:id" element={<SiteScoutGate><AtlasWorkspace /></SiteScoutGate>} />
+              <Route path="/atlas/:id/review" element={<SiteScoutGate><AtlasReview /></SiteScoutGate>} />
+              <Route path="/atlas/:id/summary" element={<SiteScoutGate><AtlasSummary /></SiteScoutGate>} />
+              <Route path="/atlas/:id/capture" element={<SiteScoutGate><AtlasCapture /></SiteScoutGate>} />
+              <Route path="/atlas/:id/capture-report" element={<SiteScoutGate><AtlasCaptureReport /></SiteScoutGate>} />
               <Route path="/dashboard/homeowner" element={<HomeownerDashboard />} />
               <Route path="/dashboard/quote-checks" element={<MyQuoteChecks />} />
               <Route path="/dashboard/quote-checks/:id" element={<QuoteCheckDetail />} />
