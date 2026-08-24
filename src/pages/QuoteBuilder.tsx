@@ -74,6 +74,7 @@ const QuoteBuilder = () => {
   const [step, setStep] = useState(0);
   const [tradeId, setTradeId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [notAllowed, setNotAllowed] = useState(false);
   const [job, setJob] = useState<{ title: string | null; job_type: string | null; address: string | null; postcode: string | null; homeowner_id: string | null } | null>(null);
   const [homeownerName, setHomeownerName] = useState<string>("");
   const [tradeName, setTradeName] = useState<string>("");
@@ -132,13 +133,22 @@ const QuoteBuilder = () => {
           ? supabase.from("trades").select("id, name, company_name").eq("user_id", uid).maybeSingle()
           : Promise.resolve({ data: null } as any),
       ]);
-      setTradeId((tradeRes.data as any)?.id ?? null);
+      const tid = (tradeRes.data as any)?.id ?? null;
+      setTradeId(tid);
       setJob(jobRes.data as any);
       setTradeName((tradeRes.data as any)?.company_name || (tradeRes.data as any)?.name || "Your business");
       const hid = (jobRes.data as any)?.homeowner_id;
       if (hid) {
         const { data: ho } = await supabase.from("homeowners").select("name").eq("id", hid).maybeSingle();
         setHomeownerName((ho as any)?.name || "Homeowner");
+      }
+      // Guard rail: only an invited or matched trade may quote this job.
+      if (tid && jobId) {
+        const [inv, mat] = await Promise.all([
+          supabase.from("job_trade_invitations").select("id").eq("job_id", jobId).eq("trade_id", tid).limit(1),
+          supabase.from("job_matches").select("id").eq("job_id", jobId).eq("trade_id", tid).limit(1),
+        ]);
+        setNotAllowed(!((inv.data?.length ?? 0) > 0 || (mat.data?.length ?? 0) > 0));
       }
       setLoading(false);
     };
@@ -545,6 +555,28 @@ const QuoteBuilder = () => {
       </div>
     );
   }
+
+  if (notAllowed) {
+    return (
+      <div className="min-h-screen bg-cream flex items-center justify-center px-6">
+        <div className="max-w-md text-center space-y-4">
+          <h1 className="font-serif text-2xl text-navy">You're not on this job yet</h1>
+          <p className="font-sans text-sm text-navy/70">
+            Quotes can only be built for jobs you've been invited to or matched with. If you think
+            this is wrong, check you're signed in to the right business account, or contact ProGrafter.
+          </p>
+          <button
+            onClick={() => navigate("/dashboard/trade?view=find-work")}
+            className="font-mono text-xs uppercase tracking-wider bg-navy text-cream px-5 py-3 rounded-lg"
+          >
+            Back to Find Work
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+
 
   return (
     <div className="min-h-screen bg-cream">

@@ -106,9 +106,9 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
       const quotes = (quotesRes.data || []).filter((q: any) => !isTestRecord(q));
       const quotesValue = quotes.reduce((s: number, q: any) => s + Number(q.amount || 0), 0);
 
+      // Every live quote is surfaced from day 0; day 5+ escalates to a chase-up.
       const staleQuotes = quotes
         .map((q: any) => ({ id: q.id, amount: Number(q.amount || 0), days: daysAgo(q.created_at) }))
-        .filter((q) => q.days >= 5)
         .sort((a, b) => b.days - a.days);
 
       const matches = matchesRes.data || [];
@@ -186,20 +186,28 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
   };
 
   const prompts: Prompt[] = [];
+  const overdueQuotes = data.staleQuotes.filter((q) => q.days >= 5);
 
-  data.staleQuotes.slice(0, 2).forEach((q) =>
+  data.staleQuotes.slice(0, 2).forEach((q) => {
+    const overdue = q.days >= 5;
     prompts.push({
       key: `quote-${q.id}`,
       icon: FileText,
-      tone: "#FCD34D",
-      tag: "Chase up",
-      headline: `${gbp(q.amount)} quote has gone quiet`,
-      detail: `Sent ${q.days} days ago · no response yet`,
+      tone: overdue ? "#FCD34D" : "#38BDF8",
+      tag: overdue ? "Chase up" : "Awaiting decision",
+      headline: overdue
+        ? `${gbp(q.amount)} quote has gone quiet`
+        : `${gbp(q.amount)} quote is with the homeowner`,
+      detail: overdue
+        ? `Sent ${q.days} days ago · no response yet`
+        : q.days === 0
+          ? "Sent today · awaiting their decision"
+          : `Sent ${q.days} day${q.days === 1 ? "" : "s"} ago · awaiting their decision`,
       metric: `${q.days}d`,
       cta: "Open quotes",
       onClick: () => onOpenView("quotes"),
-    }),
-  );
+    });
+  });
   if (data.overdueFollowUps > 0)
     prompts.push({
       key: "followups",
@@ -298,10 +306,10 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
       cta: "Open Quote Builder",
       onClick: () => navigate("/quote-builder/quickbuild"),
       secondary: { label: "View quotes", onClick: () => onOpenView("quotes") },
-      urgency: data.staleQuotes.length > 0 ? 3 : 0,
+      urgency: overdueQuotes.length > 0 ? 3 : data.staleQuotes.length > 0 ? 1 : 0,
       alert:
-        data.staleQuotes.length > 0
-          ? `${data.staleQuotes.length} chase-up${data.staleQuotes.length === 1 ? "" : "s"} overdue`
+        overdueQuotes.length > 0
+          ? `${overdueQuotes.length} chase-up${overdueQuotes.length === 1 ? "" : "s"} overdue`
           : undefined,
     },
     {
