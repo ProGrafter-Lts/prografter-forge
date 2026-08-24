@@ -408,7 +408,7 @@ export const resolveFeatures = (
 });
 
 export const ACCESS_LABEL: Record<AccessLevel, string> = {
-  founding: "Founding Access — Planning Intelligence included during launch period.",
+  founding: "Planning Intelligence — internal access enabled.",
   free: "Free Verified Trade",
   pro: "Planning Intelligence Pro",
   plus: "Planning Intelligence Plus",
