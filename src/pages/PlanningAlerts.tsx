@@ -492,10 +492,66 @@ export default function PlanningAlerts() {
   const pi = usePlanningIntelligence();
   const tradeTypes = pi.trade?.trade_type ? [pi.trade.trade_type.toLowerCase()] : [];
 
-  const allTrades = [...new Set(MOCK_APPLICATIONS.flatMap(a => a.trades_needed))].sort();
-  const allCouncils = [...new Set(MOCK_APPLICATIONS.map(a => a.council))].sort();
+  const [apps, setApps] = useState<PlanningApp[]>([]);
+  const [loadingApps, setLoadingApps] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const filtered = MOCK_APPLICATIONS.filter(app => {
+  const tradeId = pi.trade?.id ?? null;
+
+  const loadApps = useCallback(async () => {
+    if (!tradeId) {
+      setApps([]);
+      setLoadingApps(false);
+      return;
+    }
+    setLoadingApps(true);
+    const { data } = await supabase
+      .from("planning_alerts")
+      .select("id, application_ref, address, postcode, application_type, description, approved_date, created_at, local_authority, planning_portal_url")
+      .eq("trade_id", tradeId)
+      .order("created_at", { ascending: false })
+      .limit(200);
+    setApps(((data ?? []) as PlanningAlertRow[]).map(mapAlertToApp));
+    setLoadingApps(false);
+  }, [tradeId]);
+
+  useEffect(() => {
+    if (!pi.ready) return;
+    void loadApps();
+  }, [pi.ready, loadApps]);
+
+  // Same proven refresh path used by the trade dashboard planning feed.
+  const handleRefresh = async (days: number = 90) => {
+    if (!tradeId) return;
+    setRefreshing(true);
+    try {
+      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+      const anon = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      const { data: { session } } = await supabase.auth.getSession();
+      const accessToken = session?.access_token;
+      if (!accessToken) throw new Error("Please sign in again to refresh your planning feed.");
+      const res = await fetch(
+        `https://${projectId}.supabase.co/functions/v1/process-planning-alerts?trade_id=${tradeId}&days=${days}`,
+        { method: "POST", headers: { Authorization: `Bearer ${accessToken}`, apikey: anon } },
+      );
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error ?? "Refresh failed");
+      toast({
+        title: "Planning feed refreshed",
+        description: `${json.inserted ?? 0} new application(s) found in your area (last 3 months).`,
+      });
+      await loadApps();
+    } catch (e: any) {
+      toast({ title: "Refresh failed", description: e?.message ?? "Please try again shortly.", variant: "destructive" });
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  const allTrades = [...new Set(apps.flatMap(a => a.trades_needed))].sort();
+  const allCouncils = [...new Set(apps.map(a => a.council))].sort();
+
+  const filtered = apps.filter(app => {
     // Hide refused by default unless user explicitly toggles or status filter is "refused"
     if (!showRefused && app.status === "refused" && filterStatus !== "refused") return false;
     if (filterStatus !== "all" && app.status !== filterStatus) return false;
@@ -523,11 +579,12 @@ export default function PlanningAlerts() {
   const sorted = [...filtered].sort((a,b) => sortOrder[a.status] - sortOrder[b.status]);
 
   const counts = {
-    submitted: MOCK_APPLICATIONS.filter(a=>a.status==="submitted").length,
-    pending_decision: MOCK_APPLICATIONS.filter(a=>a.status==="pending_decision").length,
-    approved: MOCK_APPLICATIONS.filter(a=>a.status==="approved").length,
-    refused: MOCK_APPLICATIONS.filter(a=>a.status==="refused").length,
+    submitted: apps.filter(a=>a.status==="submitted").length,
+    pending_decision: apps.filter(a=>a.status==="pending_decision").length,
+    approved: apps.filter(a=>a.status==="approved").length,
+    refused: apps.filter(a=>a.status==="refused").length,
   };
+
 
   const tabClass = (active: boolean) =>
     `px-4 py-2.5 rounded-xl font-mono text-xs uppercase tracking-wider transition-colors whitespace-nowrap ${
