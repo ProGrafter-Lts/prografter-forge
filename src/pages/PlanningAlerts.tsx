@@ -85,6 +85,18 @@ const mapAlertToApp = (row: PlanningAlertRow) => ({
   reference: row.application_ref || "",
 });
 
+// ── Existing-engagement guard ────────────────────────────────────────────────
+// A trade must never be nudged to "send intro" to a homeowner they are already
+// mid-conversation with. We key existing jobs (matches, invitations, quotes) by
+// postcode + leading house number and suppress outreach on those cards.
+export const engagementKey = (address: string | null, postcode: string | null): string | null => {
+  const pc = (postcode || "").replace(/\s+/g, "").toUpperCase();
+  if (!pc) return null;
+  const num = (address || "").match(/\d+[A-Za-z]?/);
+  return `${pc}|${num ? num[0].toUpperCase() : ""}`;
+};
+
+
 
 // ── Permitted development checker data ───────────────────────────────────────
 const PD_PROJECTS = [
@@ -235,7 +247,7 @@ interface PlanningApp {
   estimated_value: string; floorspace_m2: number; documents_available: boolean; validated: boolean;
 }
 
-const AppCard = ({ app, onSelect, selected, tradeTypes, pipelineStatus, showScore }: { app: PlanningApp; onSelect: (app: PlanningApp) => void; selected: boolean; tradeTypes: string[]; pipelineStatus?: PipelineStatus; showScore: boolean }) => {
+const AppCard = ({ app, onSelect, selected, tradeTypes, pipelineStatus, showScore, engagement }: { app: PlanningApp; onSelect: (app: PlanningApp) => void; selected: boolean; tradeTypes: string[]; pipelineStatus?: PipelineStatus; showScore: boolean; engagement?: string }) => {
   const s = STATUS_CFG[app.status];
   const [tradesExpanded, setTradesExpanded] = useState(false);
   const projectKind = getProjectType(app);
@@ -243,10 +255,13 @@ const AppCard = ({ app, onSelect, selected, tradeTypes, pipelineStatus, showScor
   const visibleTrades = tradesExpanded ? app.trades_needed : app.trades_needed.slice(0, 3);
   const overflow = app.trades_needed.length - 3;
   const score = scoreOpportunity(app, tradeTypes);
-  const action = getBestAction(app);
+  const action = engagement
+    ? { label: "Already engaged — no cold intro", explanation: engagement }
+    : getBestAction(app);
   const pipelineLabel = pipelineStatus && pipelineStatus !== "new"
     ? PIPELINE_TABS.find((t) => t.id === pipelineStatus)?.label
     : null;
+
 
   return (
     <div
@@ -268,9 +283,15 @@ const AppCard = ({ app, onSelect, selected, tradeTypes, pipelineStatus, showScor
                 <Sparkles className="w-2.5 h-2.5" /> Large project
               </span>
             )}
+            {engagement && (
+              <span className="inline-flex items-center gap-1 font-mono text-[10px] px-2 py-0.5 rounded-full border bg-amber-500/10 text-amber-700 border-amber-500/30 uppercase tracking-wider">
+                <AlertTriangle className="w-2.5 h-2.5" /> Already engaged
+              </span>
+            )}
           </div>
           <h4 className="font-heading text-primary text-sm leading-snug">{app.address}</h4>
           <p className="font-mono text-[11px] text-muted-foreground mt-0.5">{app.council} · {app.postcode}</p>
+
         </div>
         <div className="flex flex-col items-end gap-1 flex-shrink-0">
           <StatusBadge status={app.status} />
@@ -291,11 +312,19 @@ const AppCard = ({ app, onSelect, selected, tradeTypes, pipelineStatus, showScor
           >
             <TrendingUp className="w-2.5 h-2.5" /> {score.score}/100 · {score.band}
           </span>
-          <span className="inline-flex items-center gap-1 font-mono text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider bg-secondary/10 text-secondary border border-secondary/20">
+          <span className={`inline-flex items-center gap-1 font-mono text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider border ${
+            engagement
+              ? "bg-amber-500/10 text-amber-700 border-amber-500/30"
+              : "bg-secondary/10 text-secondary border-secondary/20"
+          }`}>
             <Target className="w-2.5 h-2.5" /> {action.label}
           </span>
         </div>
       )}
+      {engagement && (
+        <p className="font-mono text-[11px] text-amber-700 mb-2.5 leading-relaxed">{engagement}</p>
+      )}
+
 
       <p className="font-sans text-xs text-foreground leading-relaxed mb-2 line-clamp-2">
         {app.description}
@@ -495,6 +524,8 @@ export default function PlanningAlerts() {
   const [searchQuery, setSearchQuery] = useState("");
   const [pipelineTab, setPipelineTab] = useState<PipelineStatus | "all">("all");
   const [mineOnly, setMineOnly] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(15);
+
 
   const pi = usePlanningIntelligence();
   const tradeTypes = pi.trade?.trade_type ? [pi.trade.trade_type.toLowerCase()] : [];
@@ -522,10 +553,37 @@ export default function PlanningAlerts() {
     setLoadingApps(false);
   }, [tradeId]);
 
+  // Existing engagements (quotes out, matches, invitations) so the feed never
+  // suggests a cold intro to a homeowner already in conversation with us.
+  const [engagements, setEngagements] = useState<Record<string, string>>({});
+
+  const loadEngagements = useCallback(async () => {
+    if (!tradeId) {
+      setEngagements({});
+      return;
+    }
+    const [quoteRes, matchRes] = await Promise.all([
+      supabase.from("quotes").select("reference, status, jobs(address, postcode)").eq("trade_id", tradeId),
+      supabase.from("job_matches").select("jobs(address, postcode)").eq("trade_id", tradeId),
+    ]);
+    const map: Record<string, string> = {};
+    (matchRes.data ?? []).forEach((row: any) => {
+      const key = engagementKey(row.jobs?.address, row.jobs?.postcode);
+      if (key) map[key] = "You are already matched to a live ProGrafter job at this address.";
+    });
+    (quoteRes.data ?? []).forEach((row: any) => {
+      const key = engagementKey(row.jobs?.address, row.jobs?.postcode);
+      if (key) map[key] = `You already have a quote (${row.reference ?? "in progress"}) with this homeowner — follow up through the job, don't cold-outreach.`;
+    });
+    setEngagements(map);
+  }, [tradeId]);
+
   useEffect(() => {
     if (!pi.ready) return;
     void loadApps();
-  }, [pi.ready, loadApps]);
+    void loadEngagements();
+  }, [pi.ready, loadApps, loadEngagements]);
+
 
   // Same proven refresh path used by the trade dashboard planning feed.
   const handleRefresh = async (days: number = 90) => {
@@ -582,8 +640,23 @@ export default function PlanningAlerts() {
     return true;
   });
 
-  const sortOrder: Record<string, number> = { submitted:0, pending_decision:1, approved:2, refused:3 };
-  const sorted = [...filtered].sort((a,b) => sortOrder[a.status] - sortOrder[b.status]);
+  // Highest relevance score first; recency breaks ties.
+  const sorted = [...filtered].sort((a, b) => {
+    const diff = scoreOpportunity(b, tradeTypes).score - scoreOpportunity(a, tradeTypes).score;
+    if (diff !== 0) return diff;
+    return new Date(b.submitted_date).getTime() - new Date(a.submitted_date).getTime();
+  });
+
+  const PAGE_SIZE = 15;
+  const visible = sorted.slice(0, visibleCount);
+
+  // Any filter change resets pagination back to the first page.
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [filterStatus, filterTrade, filterCouncil, filterDate, filterProjectType, showRefused, searchQuery, pipelineTab, mineOnly]);
+
+
+
 
   const counts = {
     submitted: apps.filter(a=>a.status==="submitted").length,
@@ -618,7 +691,7 @@ export default function PlanningAlerts() {
           <div className="bg-primary px-6 py-4 flex items-center justify-between flex-wrap gap-3">
             <div className="flex items-center gap-2">
               <Bell className="w-5 h-5 text-secondary" />
-              <h1 className="font-heading text-primary-foreground text-lg">Planning Intelligence</h1>
+              <h1 className="font-heading text-primary-foreground text-2xl">Planning Intelligence</h1>
             </div>
             <div className="flex items-center gap-2">
               <button
@@ -775,6 +848,15 @@ export default function PlanningAlerts() {
                   Budget estimates are indicative only, based on typical UK build costs. Actual project costs will vary.
                 </p>
 
+                <div className="flex items-baseline justify-between gap-3 flex-wrap mb-3">
+                  <h2 className="font-heading text-primary text-2xl">Your opportunity feed</h2>
+                  {sorted.length > 0 && (
+                    <span className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
+                      Showing {visible.length} of {sorted.length} · highest score first
+                    </span>
+                  )}
+                </div>
+
                 <div className={`grid gap-4 items-start ${selectedApp && !isMobile ? "grid-cols-[1fr_380px]" : "grid-cols-1"}`}>
                   {/* Application list */}
                   <div className="flex flex-col gap-3">
@@ -796,7 +878,7 @@ export default function PlanningAlerts() {
                         <p className="font-sans text-sm text-muted-foreground">No applications match your filters</p>
                       </div>
                     )}
-                    {sorted.map(app => (
+                    {visible.map(app => (
                       <AppCard
                         key={app.id}
                         app={app}
@@ -805,8 +887,19 @@ export default function PlanningAlerts() {
                         tradeTypes={tradeTypes}
                         pipelineStatus={pi.interactions[app.id]?.status ?? "new"}
                         showScore={pi.features.can_use_opportunity_scores}
+                        engagement={engagements[engagementKey(app.address, app.postcode) ?? ""]}
                       />
                     ))}
+
+                    {visible.length < sorted.length && (
+                      <button
+                        onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+                        className="bg-card border border-border rounded-2xl px-4 py-3 font-mono text-xs uppercase tracking-wider text-primary hover:border-secondary/40 transition-colors"
+                      >
+                        Load {Math.min(PAGE_SIZE, sorted.length - visible.length)} more · {sorted.length - visible.length} remaining
+                      </button>
+                    )}
+
 
                     {/* Data source notice */}
                     <div className="bg-card border border-border rounded-2xl px-4 py-3 flex items-start gap-3">
@@ -836,6 +929,7 @@ export default function PlanningAlerts() {
                       onFollowUp={(date) => pi.upsertInteraction(selectedApp.id, { status: date ? "follow_up" : (pi.interactions[selectedApp.id]?.status ?? "saved"), follow_up_date: date })}
                       onCreateInvite={() => pi.createInviteLink(selectedApp.id, getProjectType(selectedApp))}
                       onLetterGenerated={() => pi.upsertInteraction(selectedApp.id, { intro_letter_generated: true })}
+                      engaged={engagements[engagementKey(selectedApp.address, selectedApp.postcode) ?? ""]}
                     />
                   )}
                 </div>
