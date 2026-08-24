@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.enforce_quote_job_relationship() FROM PUBLIC, anon, authenticated;
