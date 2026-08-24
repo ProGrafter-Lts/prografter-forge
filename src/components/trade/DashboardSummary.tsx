@@ -186,6 +186,7 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
   };
 
   const prompts: Prompt[] = [];
+  const overdueQuotes = data.staleQuotes.filter((q) => q.days >= 5);
 
   data.staleQuotes.slice(0, 2).forEach((q) => {
     const overdue = q.days >= 5;
