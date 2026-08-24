@@ -305,10 +305,10 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
       cta: "Open Quote Builder",
       onClick: () => navigate("/quote-builder/quickbuild"),
       secondary: { label: "View quotes", onClick: () => onOpenView("quotes") },
-      urgency: data.staleQuotes.length > 0 ? 3 : 0,
+      urgency: overdueQuotes.length > 0 ? 3 : data.staleQuotes.length > 0 ? 1 : 0,
       alert:
-        data.staleQuotes.length > 0
-          ? `${data.staleQuotes.length} chase-up${data.staleQuotes.length === 1 ? "" : "s"} overdue`
+        overdueQuotes.length > 0
+          ? `${overdueQuotes.length} chase-up${overdueQuotes.length === 1 ? "" : "s"} overdue`
           : undefined,
     },
     {
