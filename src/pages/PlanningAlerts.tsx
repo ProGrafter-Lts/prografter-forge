@@ -44,41 +44,43 @@ function useIsMobile() {
   return isMobile;
 }
 
-// ── Mock planning applications (mirrors real Idox/Planning Portal API structure)
-const MOCK_APPLICATIONS = [
-  { id:"SDDC/2026/0412", council:"South Derbyshire", address:"14 Orchard Lane, Swadlincote", postcode:"DE11 8PQ", type:"Householder",
-    description:"Proposed two-storey rear extension and single-storey side extension to provide additional living accommodation and enlarged kitchen/diner.",
-    status:"submitted", submitted_date:"2026-05-03", decision_date:null, applicant_name:"Mr & Mrs Holloway", agent:null,
-    trades_needed:["General Builder","Plasterer","Electrician","Plumber"], estimated_value:"£35,000–£55,000", floorspace_m2:38, documents_available:true, validated:true },
-  { id:"SDDC/2026/0388", council:"South Derbyshire", address:"7 Bramble Close, Repton", postcode:"DE65 6GH", type:"Householder",
-    description:"Loft conversion to habitable room with rear dormer window, Juliet balcony and two front roof lights.",
-    status:"pending_decision", submitted_date:"2026-04-18", decision_date:null, applicant_name:"Ms Sarah Bates", agent:"Trent Architecture Ltd",
-    trades_needed:["Carpenter / Joiner","Plasterer","Electrician","Decorator / Painter"], estimated_value:"£28,000–£42,000", floorspace_m2:24, documents_available:true, validated:true },
-  { id:"NCC/2026/1104", council:"Nottingham City", address:"23 Sherwood Vale, Mapperley", postcode:"NG3 5AA", type:"Householder",
-    description:"Single-storey rear extension (4.5m x 6m) with bi-fold doors, flat roof with roof lantern, knock-through to existing dining room.",
-    status:"submitted", submitted_date:"2026-05-07", decision_date:null, applicant_name:"Mr D Patel", agent:null,
-    trades_needed:["General Builder","Plasterer","Glazier","Electrician","Decorator / Painter"], estimated_value:"£22,000–£35,000", floorspace_m2:27, documents_available:false, validated:false },
-  { id:"SDDC/2026/0341", council:"South Derbyshire", address:"Ashwood Farm, Ticknall Road, Hartshorne", postcode:"DE11 7AS", type:"Full",
-    description:"Change of use of agricultural barn to residential dwelling (Class Q permitted development), with associated structural works and new services installation.",
-    status:"pending_decision", submitted_date:"2026-04-02", decision_date:null, applicant_name:"Holloway Agricultural Ltd", agent:"PJD Planning Consultants",
-    trades_needed:["General Builder","Electrician","Plumber","Plasterer","Roofer","Carpenter / Joiner"], estimated_value:"£180,000–£280,000", floorspace_m2:210, documents_available:true, validated:true },
-  { id:"BKTV/2026/0892", council:"Broxtowe", address:"4 Elm Park Drive, Beeston", postcode:"NG9 2QT", type:"Householder",
-    description:"Garage conversion to habitable room, new front bay window, reclad existing render with brick slips.",
-    status:"approved", submitted_date:"2026-03-14", decision_date:"2026-05-01", applicant_name:"Mr R Kaur", agent:null,
-    trades_needed:["General Builder","Plasterer","Electrician","Decorator / Painter"], estimated_value:"£12,000–£18,000", floorspace_m2:18, documents_available:true, validated:true },
-  { id:"NCC/2026/0987", council:"Nottingham City", address:"118 Radcliffe Road, West Bridgford", postcode:"NG2 5HH", type:"Full",
-    description:"Demolition of existing detached garage and erection of two-storey side extension with integrated garage at ground floor, bedroom and bathroom above.",
-    status:"approved", submitted_date:"2026-02-28", decision_date:"2026-04-22", applicant_name:"Mrs J Thornton", agent:"Studio 44 Architects",
-    trades_needed:["General Builder","Roofer","Plasterer","Electrician","Plumber"], estimated_value:"£55,000–£80,000", floorspace_m2:45, documents_available:true, validated:true },
-  { id:"SDDC/2026/0298", council:"South Derbyshire", address:"2 Canal Street, Melbourne", postcode:"DE73 8AN", type:"Householder",
-    description:"Erection of detached garden room / home office (under 15m²) and associated hard landscaping.",
-    status:"refused", submitted_date:"2026-03-05", decision_date:"2026-04-30", applicant_name:"Mr P Walsh", agent:null,
-    trades_needed:["General Builder","Landscaper","Electrician"], estimated_value:"£8,000–£15,000", floorspace_m2:14, documents_available:true, validated:true },
-  { id:"RSHL/2026/0633", council:"Rushcliffe", address:"39 Melton Road, East Leake", postcode:"LE12 6PG", type:"Householder",
-    description:"First floor extension over existing ground floor side extension to provide master bedroom with en-suite. New roofline to match existing.",
-    status:"submitted", submitted_date:"2026-05-09", decision_date:null, applicant_name:"Dr & Mrs Okonkwo", agent:null,
-    trades_needed:["General Builder","Plasterer","Plumber","Electrician","Roofer"], estimated_value:"£30,000–£48,000", floorspace_m2:22, documents_available:false, validated:false },
-];
+// ── Real planning applications ────────────────────────────────────────────────
+// Rows come from `planning_alerts` (populated by the process-planning-alerts
+// edge function from local-authority portals). No mock/demo records are used.
+interface PlanningAlertRow {
+  id: string;
+  application_ref: string | null;
+  address: string | null;
+  postcode: string | null;
+  application_type: string | null;
+  description: string | null;
+  approved_date: string | null;
+  created_at: string;
+  local_authority: string | null;
+  planning_portal_url: string | null;
+}
+
+const mapAlertToApp = (row: PlanningAlertRow) => ({
+  id: row.id,
+  council: row.local_authority || "Unknown authority",
+  address: row.address || "Address not stated",
+  postcode: row.postcode || "",
+  type: row.application_type || "Planning application",
+  description: row.description || "",
+  status: row.approved_date ? "approved" : "submitted",
+  submitted_date: (row.approved_date || row.created_at || "").slice(0, 10),
+  decision_date: row.approved_date,
+  applicant_name: "Not published",
+  agent: null,
+  trades_needed: [] as string[],
+  estimated_value: "Not stated",
+  floorspace_m2: 0,
+  documents_available: !!row.planning_portal_url,
+  validated: true,
+  source_url: row.planning_portal_url,
+  reference: row.application_ref || "",
+});
+
 
 // ── Permitted development checker data ───────────────────────────────────────
 const PD_PROJECTS = [
