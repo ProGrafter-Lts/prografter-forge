@@ -187,19 +187,26 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
 
   const prompts: Prompt[] = [];
 
-  data.staleQuotes.slice(0, 2).forEach((q) =>
+  data.staleQuotes.slice(0, 2).forEach((q) => {
+    const overdue = q.days >= 5;
     prompts.push({
       key: `quote-${q.id}`,
       icon: FileText,
-      tone: "#FCD34D",
-      tag: "Chase up",
-      headline: `${gbp(q.amount)} quote has gone quiet`,
-      detail: `Sent ${q.days} days ago · no response yet`,
+      tone: overdue ? "#FCD34D" : "#38BDF8",
+      tag: overdue ? "Chase up" : "Awaiting decision",
+      headline: overdue
+        ? `${gbp(q.amount)} quote has gone quiet`
+        : `${gbp(q.amount)} quote is with the homeowner`,
+      detail: overdue
+        ? `Sent ${q.days} days ago · no response yet`
+        : q.days === 0
+          ? "Sent today · awaiting their decision"
+          : `Sent ${q.days} day${q.days === 1 ? "" : "s"} ago · awaiting their decision`,
       metric: `${q.days}d`,
       cta: "Open quotes",
       onClick: () => onOpenView("quotes"),
-    }),
-  );
+    });
+  });
   if (data.overdueFollowUps > 0)
     prompts.push({
       key: "followups",
