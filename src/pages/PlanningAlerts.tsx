@@ -616,9 +616,19 @@ export default function PlanningAlerts() {
               <Bell className="w-5 h-5 text-secondary" />
               <h1 className="font-heading text-primary-foreground text-lg">Planning Intelligence</h1>
             </div>
-            <span className="font-mono text-[10px] text-secondary bg-secondary/15 px-2.5 py-1 rounded-full uppercase tracking-wider font-semibold">
-              Live Feed
-            </span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => void handleRefresh(90)}
+                disabled={refreshing || !pi.trade}
+                className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider bg-secondary text-primary-foreground px-3 py-1.5 rounded-full disabled:opacity-50"
+              >
+                {refreshing ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
+                {refreshing ? "Refreshing" : "Refresh feed"}
+              </button>
+              <span className="font-mono text-[10px] text-secondary bg-secondary/15 px-2.5 py-1 rounded-full uppercase tracking-wider font-semibold">
+                {apps.length} in feed
+              </span>
+            </div>
           </div>
 
           <div className="mx-auto px-4 py-6 max-w-[1100px]">
