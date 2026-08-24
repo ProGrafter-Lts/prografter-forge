@@ -639,7 +639,7 @@ export default function PlanningAlerts() {
             {activeTab === "pipeline" && (
               <>
                 {/* Founding access banner */}
-                {pi.trade && (
+                {pi.trade && pi.hasAccessRecord && (
                   <div className="mb-5 flex items-start gap-2.5 rounded-2xl border border-secondary/30 bg-secondary/10 px-4 py-3">
                     <Sparkles className="w-4 h-4 text-secondary mt-0.5 flex-shrink-0" />
                     <p className="font-sans text-xs text-primary leading-relaxed">
