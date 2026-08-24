@@ -2,6 +2,8 @@
 // (release-next-batch) and the automatic 48h escalation job
 // (auto-escalate-invitations). Single implementation = identical behaviour.
 
+import { notifyTrade } from './trade-notify.ts'
+
 const SITE_URL = 'https://prografter.co.uk'
 export const MAX_BATCH = 3
 export const RESPONSE_WINDOW_HOURS = 48
@@ -69,6 +71,16 @@ export async function releaseNextBatch(
   for (const p of pending) {
     const { data: trade } = await supabase.from('trades').select('name, user_id').eq('id', p.trade_id).maybeSingle()
     if (!trade?.user_id) continue
+    await notifyTrade(supabase, {
+      tradeId: p.trade_id,
+      userId: trade.user_id,
+      type: 'new_lead',
+      title: 'New lead available',
+      body: `${brief?.job_title || 'A new job'}${brief?.city ? ` — ${brief.city}` : ''}. You have 48 hours to accept or decline.`,
+      link: briefUrl,
+      jobId: jobId,
+      invitationId: p.id,
+    })
     const { data: tp } = await supabase.from('profiles').select('email').eq('user_id', trade.user_id).maybeSingle()
     if (!tp?.email) continue
     sends.push(supabase.functions.invoke('send-transactional-email', {

@@ -5,6 +5,7 @@ import { BadgeCheck } from "lucide-react";
 import { GreenSpecialistBanner } from "@/components/GreenCertBadges";
 import { GreenLeafBadge } from "@/lib/greenTrades";
 import TradeSidebar from "@/components/trade/TradeSidebar";
+import NotificationBell from "@/components/trade/NotificationBell";
 import CalendarConnect from "@/components/trade/CalendarConnect";
 import TradeProfileSection from "@/components/trade/TradeProfileSection";
 import AddSpecialismsBanner from "@/components/trade/AddSpecialismsBanner";
@@ -278,6 +279,9 @@ const TradeDashboard = () => {
       {/* pt-16 on mobile keeps content clear of the fixed sidebar toggle (top-14 left-4) */}
       <main className="flex-1 p-4 pt-16 md:p-8 overflow-auto">
         <div className="max-w-5xl mx-auto space-y-10">
+          <div className="flex justify-end">
+            <NotificationBell />
+          </div>
           {!isReady || tradeAccessLoading ? (
             <div className="min-h-[40vh] flex items-center justify-center font-mono text-sm text-muted-foreground">
               Loading dashboard…

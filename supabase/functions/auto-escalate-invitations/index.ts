@@ -15,6 +15,7 @@
 
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { releaseNextBatch, logEscalation } from '../_shared/release-batch.ts'
+import { notifyTrade } from '../_shared/trade-notify.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -88,6 +89,19 @@ Deno.serve(async (req) => {
       await supabase.from('job_trade_invitations')
         .update({ status: 'no_response' })
         .in('id', ids)
+
+      // Tell each timed-out trade privately. Homeowners never see this.
+      for (const inv of invites) {
+        await notifyTrade(supabase, {
+          tradeId: inv.trade_id,
+          type: 'lead_expired',
+          title: 'Lead expired',
+          body: 'This opportunity passed to another trade after 48 hours with no response.',
+          link: '/dashboard/trade?view=find-work',
+          jobId: jobId,
+          invitationId: inv.id,
+        })
+      }
 
       let result = { released: 0, batch_number: null as number | null, emailed: 0, message: '' as string | undefined }
       try {

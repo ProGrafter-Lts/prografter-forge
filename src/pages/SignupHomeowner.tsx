@@ -125,6 +125,15 @@ const SignupHomeowner = () => {
               templateData: { firstName },
             },
           });
+          // Delivery-check email — proves our emails reach this inbox.
+          await supabase.functions.invoke("send-transactional-email", {
+            body: {
+              templateName: "delivery-confirmation",
+              recipientEmail: form.email,
+              idempotencyKey: `delivery-confirmation-${userId}`,
+              templateData: { firstName, audience: "homeowner" },
+            },
+          });
         } catch (e) {
           console.warn("homeowner-welcome email failed (non-blocking)", e);
         }

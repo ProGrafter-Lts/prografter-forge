@@ -2131,10 +2131,12 @@ export type Database = {
           id: string
           invited_at: string | null
           job_id: string
+          notified_at: string | null
           quote_submitted_at: string | null
           rank: number | null
           released: boolean
           responded_at: string | null
+          sms_reminder_sent_at: string | null
           status: string
           trade_id: string
           updated_at: string
@@ -2150,10 +2152,12 @@ export type Database = {
           id?: string
           invited_at?: string | null
           job_id: string
+          notified_at?: string | null
           quote_submitted_at?: string | null
           rank?: number | null
           released?: boolean
           responded_at?: string | null
+          sms_reminder_sent_at?: string | null
           status?: string
           trade_id: string
           updated_at?: string
@@ -2169,10 +2173,12 @@ export type Database = {
           id?: string
           invited_at?: string | null
           job_id?: string
+          notified_at?: string | null
           quote_submitted_at?: string | null
           rank?: number | null
           released?: boolean
           responded_at?: string | null
+          sms_reminder_sent_at?: string | null
           status?: string
           trade_id?: string
           updated_at?: string
@@ -4953,6 +4959,66 @@ export type Database = {
           verification_status?: string
         }
         Relationships: []
+      }
+      trade_notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          invitation_id: string | null
+          job_id: string | null
+          link: string | null
+          read_at: string | null
+          title: string
+          trade_id: string
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          invitation_id?: string | null
+          job_id?: string | null
+          link?: string | null
+          read_at?: string | null
+          title: string
+          trade_id: string
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          invitation_id?: string | null
+          job_id?: string | null
+          link?: string | null
+          read_at?: string | null
+          title?: string
+          trade_id?: string
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trade_notifications_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "trades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trade_notifications_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "trades_public"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       trade_portfolio_items: {
         Row: {
