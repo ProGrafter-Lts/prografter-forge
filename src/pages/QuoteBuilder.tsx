@@ -132,13 +132,22 @@ const QuoteBuilder = () => {
           ? supabase.from("trades").select("id, name, company_name").eq("user_id", uid).maybeSingle()
           : Promise.resolve({ data: null } as any),
       ]);
-      setTradeId((tradeRes.data as any)?.id ?? null);
+      const tid = (tradeRes.data as any)?.id ?? null;
+      setTradeId(tid);
       setJob(jobRes.data as any);
       setTradeName((tradeRes.data as any)?.company_name || (tradeRes.data as any)?.name || "Your business");
       const hid = (jobRes.data as any)?.homeowner_id;
       if (hid) {
         const { data: ho } = await supabase.from("homeowners").select("name").eq("id", hid).maybeSingle();
         setHomeownerName((ho as any)?.name || "Homeowner");
+      }
+      // Guard rail: only an invited or matched trade may quote this job.
+      if (tid && jobId) {
+        const [inv, mat] = await Promise.all([
+          supabase.from("job_trade_invitations").select("id").eq("job_id", jobId).eq("trade_id", tid).limit(1),
+          supabase.from("job_matches").select("id").eq("job_id", jobId).eq("trade_id", tid).limit(1),
+        ]);
+        setNotAllowed(!((inv.data?.length ?? 0) > 0 || (mat.data?.length ?? 0) > 0));
       }
       setLoading(false);
     };
