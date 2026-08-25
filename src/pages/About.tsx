@@ -193,11 +193,11 @@ const About = () => {
             <p className="font-body text-cream/70 mt-8 max-w-3xl leading-relaxed">
               Ten leads shown here, £379.92 of the total spent (inc. VAT) — the full picture across
               all 18 leads came to £625.32. Zero jobs won. In several cases, zero conversations even
-              started. On Dave Windsor's job alone, eight builders collectively handed MyBuilder
-              around £344+VAT — for a homeowner who never responded to any of us. When I chased
-              Kirpal three months after paying, there was no reply. There is no refund for that.
-              MyBuilder's refund policy only covers wrong contact details or duplicate charges —
-              'homeowner did not respond' is explicitly not a valid reason. You just lose the money.
+              started. On one job alone, eight builders collectively handed MyBuilder around £344+VAT
+              — for a homeowner who never responded to any of us. On another, I chased up three
+              months after paying and there was no reply. There is no refund for that. MyBuilder's
+              refund policy only covers wrong contact details or duplicate charges — 'homeowner did
+              not respond' is explicitly not a valid reason. You just lose the money.
             </p>
           </div>
         </section>
