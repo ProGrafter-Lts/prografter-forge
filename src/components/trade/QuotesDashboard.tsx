@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import GenerateQuotePdfButton from "./GenerateQuotePdfButton";
 import { isFeatureEnabled } from "@/lib/featureFlags";
 import { isTestRecord } from "@/lib/testData";
+import { badgeToneStyle, type BadgeTone } from "@/lib/statusBadge";
 
 interface QuoteRow {
   id: string;
@@ -44,11 +45,11 @@ const timeAgo = (dateStr: string | null) => {
 
 type StatusKey = "submitted" | "accepted" | "declined" | "withdrawn";
 
-const statusMeta: Record<StatusKey, { label: string; cls: string; icon: typeof Clock }> = {
-  submitted: { label: "Awaiting decision", cls: "bg-amber-100 text-amber-800", icon: Clock },
-  accepted: { label: "Accepted", cls: "bg-secondary/15 text-secondary", icon: CheckCircle2 },
-  declined: { label: "Not selected", cls: "bg-red-100 text-red-700", icon: XCircle },
-  withdrawn: { label: "Withdrawn", cls: "bg-muted text-muted-foreground", icon: XCircle },
+const statusMeta: Record<StatusKey, { label: string; tone: BadgeTone; icon: typeof Clock }> = {
+  submitted: { label: "Awaiting decision", tone: "amber", icon: Clock },
+  accepted: { label: "Accepted", tone: "green", icon: CheckCircle2 },
+  declined: { label: "Not selected", tone: "red", icon: XCircle },
+  withdrawn: { label: "Withdrawn", tone: "grey", icon: XCircle },
 };
 
 const normaliseStatus = (raw: string | null): StatusKey => {
@@ -258,13 +259,19 @@ const QuotesDashboard = ({ quotes: allQuotes }: { quotes: QuoteRow[] }) => {
                   <h3 className="font-heading text-primary text-lg leading-tight">
                     {quote.jobs?.title || quote.jobs?.job_type || "Job"}
                   </h3>
-                  <span className="flex items-center gap-1.5 shrink-0">
+                  <span className="flex flex-wrap items-center justify-end gap-1.5 shrink min-w-0">
                     {isTestRecord(quote) && (
-                      <span className="bg-slate-200 text-slate-700 font-mono text-[10px] font-semibold px-2 py-0.5 rounded-full">
+                      <span
+                        className="shrink-0 whitespace-nowrap font-mono text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                        style={badgeToneStyle("grey")}
+                      >
                         TEST
                       </span>
                     )}
-                    <span className={`${meta.cls} font-mono text-[10px] px-2 py-0.5 rounded-full inline-flex items-center gap-1`}>
+                    <span
+                      className="shrink-0 whitespace-nowrap font-mono text-[10px] px-2 py-0.5 rounded-full inline-flex items-center gap-1"
+                      style={badgeToneStyle(meta.tone)}
+                    >
                       <Icon className="w-3 h-3" /> {meta.label}
                     </span>
                   </span>
