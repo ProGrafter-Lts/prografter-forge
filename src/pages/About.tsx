@@ -285,8 +285,8 @@ const About = () => {
           <div className="max-w-4xl mx-auto text-center">
             <Button
               asChild
+              variant="cta"
               size="lg"
-              className="bg-teal hover:bg-teal/90 text-deep font-mono uppercase tracking-wider"
             >
               <Link to="/register/trade">
                 Register Free — Pay Nothing Until You Earn <ArrowRight className="ml-1" />

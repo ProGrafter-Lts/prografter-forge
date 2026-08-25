@@ -86,7 +86,7 @@ const CheckatradeAlternative = () => {
             Checkatrade can cost up to <strong className="text-cream">£1,959 a month</strong> before a single homeowner picks up the phone. ProGrafter is £0 to join, and 7.5% only when a job completes — capped at £900.
           </p>
           <div className="mt-10 flex flex-wrap gap-4">
-            <Button asChild size="lg" className="bg-teal hover:bg-teal/90 text-deep font-mono uppercase tracking-wider">
+            <Button asChild variant="cta" size="lg">
               <Link to="/register/trade">
                 Register as a Trade Free <ArrowRight className="ml-1" />
               </Link>
@@ -255,7 +255,7 @@ const CheckatradeAlternative = () => {
           <p className="font-body text-cream/70 max-w-xl mx-auto mb-10 text-lg">
             Free to register. Free to quote. 7.5% on completion only — capped at £900.
           </p>
-          <Button asChild size="lg" className="bg-teal hover:bg-teal/90 text-deep font-mono uppercase tracking-wider">
+          <Button asChild variant="cta" size="lg">
             <Link to="/register/trade">
               Register as a Trade Free <ArrowRight className="ml-1" />
             </Link>
