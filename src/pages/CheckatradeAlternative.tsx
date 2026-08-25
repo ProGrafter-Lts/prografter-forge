@@ -63,7 +63,7 @@ const CheckatradeAlternative = () => {
   return (
     <div className="min-h-screen bg-deep">
       <SEO
-        title="Checkatrade Alternative: Pay Only When You Win Work"
+        title="Checkatrade Alternative for UK Trades | Pay Only When You Win Work — ProGrafter"
         description="Tired of paying £299–£1,959/month to Checkatrade before earning a penny? ProGrafter is the UK alternative — no monthly fees, 7.5% on completed jobs."
         path="/checkatrade-alternative"
         ogType="article"
