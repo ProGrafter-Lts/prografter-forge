@@ -7,70 +7,70 @@ import { localBusinessJsonLd } from "@/lib/seoSchemas";
 
 const leads = [
   {
-    name: "Lindsay Eastwood",
+    name: "Homeowner",
     job: "Kitchen/office showroom — 1 mile",
     paid: "£18+VAT",
     others: "6 builders paid",
     outcome: "Asked 'could you give me an idea of the cost?' — conversation stopped dead",
   },
   {
-    name: "Dave Windsor",
+    name: "Homeowner",
     job: "2-storey extension — 14 miles",
     paid: "£43+VAT",
     others: "8 builders paid (~£344 total to MyBuilder)",
     outcome: "Never replied after contact details shared",
   },
   {
-    name: "Miss Liza Place",
+    name: "Homeowner",
     job: "Single storey extension — 7 miles",
     paid: "£45+VAT",
     others: "8 builders paid",
     outcome: "Not a single word exchanged",
   },
   {
-    name: "Donna Beatty",
+    name: "Homeowner",
     job: "Double storey extension — 7 miles",
     paid: "£27+VAT",
     others: "8 builders paid",
     outcome: "Silence",
   },
   {
-    name: "Daniel Rey",
+    name: "Homeowner",
     job: "Garage conversion — 14 miles",
     paid: "£8.60+VAT",
     others: "2 responses",
     outcome: "Message appeared AI-generated. Asked for drawings — nothing back",
   },
   {
-    name: "Paul Lawrence",
+    name: "Homeowner",
     job: "Single storey extension — 2 miles",
     paid: "£29+VAT",
     others: "6 builders paid",
     outcome: "No conversation",
   },
   {
-    name: "Jackie Pugh",
+    name: "Homeowner",
     job: "L-shaped extension — 4 miles",
     paid: "£44+VAT",
     others: "8 builders paid",
     outcome: "Nothing",
   },
   {
-    name: "Kirpal",
+    name: "Homeowner",
     job: "Retaining wall repair — 2 miles",
     paid: "£27+VAT",
     others: "1 response",
     outcome: "Paid, waited, chased 2.5 months later — no reply",
   },
   {
-    name: "Bethany Hirons",
+    name: "Homeowner",
     job: "2-storey side extension — 2 miles",
     paid: "£37+VAT",
     others: "2 responses",
     outcome: "Message was READ. Never replied.",
   },
   {
-    name: "Amrik Nijran",
+    name: "Homeowner",
     job: "Ground & first floor extension — 12 miles",
     paid: "£38+VAT",
     others: "5 responses",
@@ -93,8 +93,8 @@ const articleJsonLd = {
   "@type": "Article",
   headline: "I Spent £625 on 18 Leads and Won Nothing. So I Built Something Better.",
   description:
-    "ProGrafter was built by Lee Palfreeman, a working builder who spent £625 on 18 MyBuilder leads and won nothing. Find out why he built a better way.",
-  author: { "@type": "Person", name: "Lee Palfreeman" },
+    "ProGrafter was built by a working builder who spent £625 on 18 MyBuilder leads and won nothing. Find out why he built a better way.",
+  author: { "@type": "Organization", name: "ProGrafter Ltd" },
   publisher: {
     "@type": "Organization",
     name: "ProGrafter Ltd",
@@ -108,7 +108,7 @@ const About = () => {
     <AppShell>
       <SEO
         title="I Spent £625 on 18 Leads and Won Nothing. So I Built Something Better. — ProGrafter"
-        description="ProGrafter was built by Lee Palfreeman, a working builder who spent £625 on 18 MyBuilder leads and won nothing. Find out why he built a better way."
+        description="ProGrafter was built by a working builder who spent £625 on 18 MyBuilder leads and won nothing. Find out why he built a better way."
         path="/about"
         ogType="article"
         jsonLd={[localBusinessJsonLd, articleJsonLd]}
@@ -134,10 +134,10 @@ const About = () => {
         <section className="px-6 pb-16">
           <div className="max-w-[700px] mx-auto space-y-6 font-body text-cream/80 text-lg leading-relaxed font-light">
             <p>
-              My name's Lee Palfreeman. I run Palfreeman Construction Ltd out of Sutton in
-              Ashfield, Nottinghamshire. I've been in the trade for years. I know how to build.
-              What I couldn't figure out was why getting decent work felt like buying scratch cards
-              — and why the platform took my money regardless of what happened next.
+              I run my own construction business in Nottinghamshire. I've been in the trade for
+              years. I know how to build. What I couldn't figure out was why getting decent work
+              felt like buying scratch cards — and why the platform took my money regardless of
+              what happened next.
             </p>
             <p>
               A couple of years back I was using MyBuilder like most builders do — shortlisting
@@ -166,7 +166,7 @@ const About = () => {
                   <tr className="bg-cream/[0.04] text-cream uppercase tracking-wider text-xs">
                     <th className="text-left p-4">Job</th>
                     <th className="text-left p-4">Distance</th>
-                    <th className="text-left p-4 text-teal">Lee paid+VAT</th>
+                    <th className="text-left p-4 text-teal">Paid + VAT</th>
                     <th className="text-left p-4">Other builders</th>
                     <th className="text-left p-4">Outcome</th>
                   </tr>
@@ -175,7 +175,7 @@ const About = () => {
                   {leads.map((l, i) => {
                     const [job, distance] = l.job.split(" — ");
                     return (
-                      <tr key={l.name} className={i % 2 === 0 ? "bg-cream/[0.01]" : ""}>
+                      <tr key={i} className={i % 2 === 0 ? "bg-cream/[0.01]" : ""}>
                         <td className="p-4 text-cream font-medium align-top">
                           {l.name}
                           <span className="block text-cream/50 font-normal mt-1">{job}</span>
@@ -193,11 +193,11 @@ const About = () => {
             <p className="font-body text-cream/70 mt-8 max-w-3xl leading-relaxed">
               Ten leads shown here, £379.92 of the total spent (inc. VAT) — the full picture across
               all 18 leads came to £625.32. Zero jobs won. In several cases, zero conversations even
-              started. On Dave Windsor's job alone, eight builders collectively handed MyBuilder
-              around £344+VAT — for a homeowner who never responded to any of us. When I chased
-              Kirpal three months after paying, there was no reply. There is no refund for that.
-              MyBuilder's refund policy only covers wrong contact details or duplicate charges —
-              'homeowner did not respond' is explicitly not a valid reason. You just lose the money.
+              started. On one job alone, eight builders collectively handed MyBuilder around £344+VAT
+              — for a homeowner who never responded to any of us. On another, I chased up three
+              months after paying and there was no reply. There is no refund for that. MyBuilder's
+              refund policy only covers wrong contact details or duplicate charges — 'homeowner did
+              not respond' is explicitly not a valid reason. You just lose the money.
             </p>
           </div>
         </section>
@@ -231,7 +231,7 @@ const About = () => {
               my problem. ProGrafter exists because that is not how it should work."
             </p>
             <p className="font-mono text-xs text-secondary-text uppercase tracking-widest mt-6">
-              — Lee Palfreeman, Founder — ProGrafter / Palfreeman Construction Ltd
+              — Founder, ProGrafter
             </p>
           </div>
         </section>
