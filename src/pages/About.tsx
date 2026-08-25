@@ -134,10 +134,10 @@ const About = () => {
         <section className="px-6 pb-16">
           <div className="max-w-[700px] mx-auto space-y-6 font-body text-cream/80 text-lg leading-relaxed font-light">
             <p>
-              My name's Lee Palfreeman. I run Palfreeman Construction Ltd out of Sutton in
-              Ashfield, Nottinghamshire. I've been in the trade for years. I know how to build.
-              What I couldn't figure out was why getting decent work felt like buying scratch cards
-              — and why the platform took my money regardless of what happened next.
+              I run my own construction business in Nottinghamshire. I've been in the trade for
+              years. I know how to build. What I couldn't figure out was why getting decent work
+              felt like buying scratch cards — and why the platform took my money regardless of
+              what happened next.
             </p>
             <p>
               A couple of years back I was using MyBuilder like most builders do — shortlisting
