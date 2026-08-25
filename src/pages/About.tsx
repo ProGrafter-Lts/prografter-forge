@@ -108,7 +108,7 @@ const About = () => {
     <AppShell>
       <SEO
         title="I Spent £625 on 18 Leads and Won Nothing. So I Built Something Better. — ProGrafter"
-        description="ProGrafter was built by Lee Palfreeman, a working builder who spent £625 on 18 MyBuilder leads and won nothing. Find out why he built a better way."
+        description="ProGrafter was built by a working builder who spent £625 on 18 MyBuilder leads and won nothing. Find out why he built a better way."
         path="/about"
         ogType="article"
         jsonLd={[localBusinessJsonLd, articleJsonLd]}
