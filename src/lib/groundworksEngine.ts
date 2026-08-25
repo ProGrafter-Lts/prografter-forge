@@ -127,9 +127,6 @@ export function runSubstructureTakeoff(
       "Rock recorded: breaker/attachment hire and reduced dig output not included in this Phase 1 net cost.",
     );
   }
-  if (input.drainageInvert(input) === undefined) {
-    // placeholder never runs — kept out of production logic
-  }
   if (input.drainageInvertBaseline > digDepth) {
     auditNotes.push(
       `⚠️ Drainage invert baseline (${input.drainageInvertBaseline}m) is deeper than the foundation dig (${digDepth}m) — Part H interface: local deepening or lintelling over the run required.`,
