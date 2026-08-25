@@ -93,8 +93,8 @@ const articleJsonLd = {
   "@type": "Article",
   headline: "I Spent £625 on 18 Leads and Won Nothing. So I Built Something Better.",
   description:
-    "ProGrafter was built by Lee Palfreeman, a working builder who spent £625 on 18 MyBuilder leads and won nothing. Find out why he built a better way.",
-  author: { "@type": "Person", name: "Lee Palfreeman" },
+    "ProGrafter was built by a working builder who spent £625 on 18 MyBuilder leads and won nothing. Find out why he built a better way.",
+  author: { "@type": "Organization", name: "ProGrafter Ltd" },
   publisher: {
     "@type": "Organization",
     name: "ProGrafter Ltd",
