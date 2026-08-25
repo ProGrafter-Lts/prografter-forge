@@ -16,7 +16,7 @@ import type { CSSProperties } from "react";
  *  Closed          → grey
  */
 
-export type BadgeTone = "blue" | "teal" | "amber" | "green" | "grey" | "purple";
+export type BadgeTone = "blue" | "teal" | "amber" | "green" | "grey" | "purple" | "red";
 
 const TONE_STYLE: Record<BadgeTone, CSSProperties> = {
   blue: { backgroundColor: "#dbeafe", color: "#1e3a8a" },
@@ -25,6 +25,7 @@ const TONE_STYLE: Record<BadgeTone, CSSProperties> = {
   green: { backgroundColor: "#bbf7d0", color: "#14532d" },
   grey: { backgroundColor: "#e5e7eb", color: "#374151" },
   purple: { backgroundColor: "#e9d5ff", color: "#581c87" },
+  red: { backgroundColor: "#fecaca", color: "#7f1d1d" },
 };
 
 export function badgeToneStyle(tone: BadgeTone): CSSProperties {
