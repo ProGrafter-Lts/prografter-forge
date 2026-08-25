@@ -15,11 +15,13 @@ const buttonVariants = cva(
         secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
+        /* Site-wide marketing CTA — matches the .btn-p primary button used across the marketing pages */
+        cta: "bg-teal text-white hover:bg-teal/90 font-mono font-bold uppercase tracking-[1px] text-[11px] rounded-[5px]",
       },
       size: {
         default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-md px-3",
-        lg: "h-11 rounded-md px-8",
+        sm: "h-9 px-3",
+        lg: "h-11 px-8",
         icon: "h-10 w-10",
       },
     },

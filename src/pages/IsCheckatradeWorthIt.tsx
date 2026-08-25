@@ -225,7 +225,7 @@ const IsCheckatradeWorthIt = () => {
           <p className="font-body text-cream/70 max-w-xl mx-auto mb-10 text-lg">
             7.5% on completion only. Capped at £900. No subscription, no credits, no lock-in.
           </p>
-          <Button asChild size="lg" className="bg-teal hover:bg-teal/90 text-deep font-mono uppercase tracking-wider">
+          <Button asChild variant="cta" size="lg">
             <Link to="/register/trade">
               Register Free → No Monthly Fees <ArrowRight className="ml-1" />
             </Link>
