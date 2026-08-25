@@ -166,7 +166,7 @@ const About = () => {
                   <tr className="bg-cream/[0.04] text-cream uppercase tracking-wider text-xs">
                     <th className="text-left p-4">Job</th>
                     <th className="text-left p-4">Distance</th>
-                    <th className="text-left p-4 text-teal">Lee paid+VAT</th>
+                    <th className="text-left p-4 text-teal">Paid + VAT</th>
                     <th className="text-left p-4">Other builders</th>
                     <th className="text-left p-4">Outcome</th>
                   </tr>
@@ -175,7 +175,7 @@ const About = () => {
                   {leads.map((l, i) => {
                     const [job, distance] = l.job.split(" — ");
                     return (
-                      <tr key={l.name} className={i % 2 === 0 ? "bg-cream/[0.01]" : ""}>
+                      <tr key={i} className={i % 2 === 0 ? "bg-cream/[0.01]" : ""}>
                         <td className="p-4 text-cream font-medium align-top">
                           {l.name}
                           <span className="block text-cream/50 font-normal mt-1">{job}</span>
