@@ -16,6 +16,8 @@ import {
   LogOut,
   ShieldCheck,
   Map,
+  FlaskConical,
+
 } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -45,13 +47,16 @@ const TradeSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen }: 
 
 
   const currentView = new URLSearchParams(location.search).get("view");
-  const routeActiveNav = location.pathname.startsWith("/dashboard/trade/settings")
-    ? "settings"
-    : location.pathname.startsWith("/atlas")
-      ? "atlas"
-      : location.pathname.startsWith("/planning-alerts")
-        ? "find-work"
-        : currentView || activeNav;
+  const routeActiveNav = location.pathname.startsWith("/sitescout-sandbox")
+    ? "sitescout-sandbox"
+    : location.pathname.startsWith("/dashboard/trade/settings")
+      ? "settings"
+      : location.pathname.startsWith("/atlas")
+        ? "atlas"
+        : location.pathname.startsWith("/planning-alerts")
+          ? "find-work"
+          : currentView || activeNav;
+
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -170,6 +175,31 @@ const TradeSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen }: 
             <Settings className="w-4 h-4 flex-shrink-0" />
             Settings
           </button>
+
+          {/* Internal Beta / Admin — temporary */}
+          <div
+            className="px-4 pt-5 pb-1 font-mono text-[10px] uppercase tracking-[0.15em]"
+            style={{ color: "rgba(255,255,255,0.35)" }}
+          >
+            Internal Beta / Admin
+          </div>
+          <button
+            onClick={() => {
+              setActiveNav("sitescout-sandbox");
+              navigate("/sitescout-sandbox");
+              setSidebarOpen(false);
+            }}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-mono text-sm transition-colors whitespace-nowrap"
+            style={{
+              backgroundColor:
+                routeActiveNav === "sitescout-sandbox" ? "rgba(13,148,136,0.18)" : "transparent",
+              color: routeActiveNav === "sitescout-sandbox" ? "#1AC2BA" : "rgba(255,255,255,0.75)",
+            }}
+          >
+            <FlaskConical className="w-4 h-4 flex-shrink-0" />
+            Agent Sandbox
+          </button>
+
         </nav>
 
         {/* Verification status */}
