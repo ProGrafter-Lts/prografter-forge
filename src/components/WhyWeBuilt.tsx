@@ -25,7 +25,7 @@ const WhyWeBuilt = () => {
             construction fairer, clearer and more transparent for everyone.
           </p>
         </div>
-        <p className="mt-10 font-mono text-sm text-teal">— Lee Palfreeman, Founder</p>
+        <p className="mt-10 font-mono text-sm text-teal">— Founder, ProGrafter</p>
       </div>
     </section>
   );
