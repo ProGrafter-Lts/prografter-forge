@@ -231,7 +231,7 @@ const About = () => {
               my problem. ProGrafter exists because that is not how it should work."
             </p>
             <p className="font-mono text-xs text-secondary-text uppercase tracking-widest mt-6">
-              — Lee Palfreeman, Founder — ProGrafter / Palfreeman Construction Ltd
+              — Founder, ProGrafter
             </p>
           </div>
         </section>
