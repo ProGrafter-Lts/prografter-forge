@@ -16,6 +16,8 @@ import {
   LogOut,
   ShieldCheck,
   Map,
+  FlaskConical,
+
 } from "lucide-react";
 
 const NAV_ITEMS = [
