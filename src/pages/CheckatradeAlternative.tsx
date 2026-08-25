@@ -63,7 +63,7 @@ const CheckatradeAlternative = () => {
   return (
     <div className="min-h-screen bg-deep">
       <SEO
-        title="Checkatrade Alternative: Pay Only When You Win Work"
+        title="Checkatrade Alternative for UK Trades | Pay Only When You Win Work — ProGrafter"
         description="Tired of paying £299–£1,959/month to Checkatrade before earning a penny? ProGrafter is the UK alternative — no monthly fees, 7.5% on completed jobs."
         path="/checkatrade-alternative"
         ogType="article"
@@ -193,6 +193,35 @@ const CheckatradeAlternative = () => {
               </tbody>
             </table>
           </div>
+        </div>
+      </section>
+
+      {/* Annual cost comparison */}
+      <section className="px-6 py-20 border-t border-cream/10">
+        <div className="max-w-6xl mx-auto">
+          <span className="font-mono text-xs text-teal uppercase tracking-widest">04 / A Year Of Work</span>
+          <h2 className="font-heading text-cream text-[36px] craft:text-[64px] leading-[1] mt-3 mb-8 max-w-3xl">
+            24 jobs a year,<br />£5,000 average.
+          </h2>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="border border-teal/40 p-8 bg-teal/[0.04]">
+              <p className="font-mono text-[10px] text-teal uppercase tracking-wider mb-2">ProGrafter</p>
+              <p className="font-heading text-cream text-5xl mb-4">~£9,000</p>
+              <p className="font-mono text-cream/60 text-sm leading-relaxed">
+                7.5% commission on 24 completed jobs at £5,000 each. No job hits the £900 cap at this size — the cap only bites above £12,000. Paid only on work you actually won.
+              </p>
+            </div>
+            <div className="border border-cream/10 p-8 bg-cream/[0.02]">
+              <p className="font-mono text-[10px] text-cream/50 uppercase tracking-wider mb-2">Checkatrade (Medium 50-mile)</p>
+              <p className="font-heading text-cream text-5xl mb-4">£17,148</p>
+              <p className="font-mono text-cream/60 text-sm leading-relaxed">
+                £1,429 a month in fixed subscription fees — charged regardless of how many jobs you win, plus lead credits on top.
+              </p>
+            </div>
+          </div>
+          <p className="font-mono text-cream/40 text-xs mt-6 max-w-3xl leading-relaxed">
+            Illustrative comparison. ProGrafter commission scales with the work you win; Checkatrade subscription is fixed whether you win work or not.
+          </p>
         </div>
       </section>
 
