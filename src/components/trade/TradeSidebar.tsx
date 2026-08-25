@@ -47,13 +47,16 @@ const TradeSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen }: 
 
 
   const currentView = new URLSearchParams(location.search).get("view");
-  const routeActiveNav = location.pathname.startsWith("/dashboard/trade/settings")
-    ? "settings"
-    : location.pathname.startsWith("/atlas")
-      ? "atlas"
-      : location.pathname.startsWith("/planning-alerts")
-        ? "find-work"
-        : currentView || activeNav;
+  const routeActiveNav = location.pathname.startsWith("/sitescout-sandbox")
+    ? "sitescout-sandbox"
+    : location.pathname.startsWith("/dashboard/trade/settings")
+      ? "settings"
+      : location.pathname.startsWith("/atlas")
+        ? "atlas"
+        : location.pathname.startsWith("/planning-alerts")
+          ? "find-work"
+          : currentView || activeNav;
+
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
