@@ -26,6 +26,10 @@ interface Props {
   onLetterGenerated: () => void;
   /** Set when the trade already has a live job/quote at this address. */
   engaged?: string;
+  /** When true, the panel immediately runs the intro flow (opened via a "Send intro now" chip). */
+  autoIntro?: boolean;
+  /** Called once the auto-intro has been consumed so the parent can reset its intent. */
+  onAutoIntroHandled?: () => void;
 }
 
 const label = "font-mono text-[10px] font-semibold uppercase tracking-wider";
@@ -40,8 +44,9 @@ const Section = ({ title, children }: { title: string; children: React.ReactNode
 export default function OpportunityCommandCentre({
   app, onClose, isMobile, interaction, trade, features,
   onStatus, onNotes, onFollowUp, onCreateInvite, onLetterGenerated, engaged,
-
+  autoIntro, onAutoIntroHandled,
 }: Props) {
+
   const score = scoreOpportunity(app, trade?.trade_type ? [trade.trade_type.toLowerCase()] : []);
   const action = getBestAction(app);
   const packages = getWorkPackages(app);
