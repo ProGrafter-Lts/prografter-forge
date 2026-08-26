@@ -47,6 +47,7 @@ export interface Agent {
 const REAL_AVATARS: Partial<Record<AgentId, { clean: string; site: string }>> = {
   ian: { clean: ianClean.url, site: ianSite.url },
   amy: { clean: amyClean.url, site: amySite.url },
+  ruby: { clean: rubyClean.url, site: rubySite.url },
 };
 
 const avatars = (id: AgentId) =>
