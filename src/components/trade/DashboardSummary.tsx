@@ -74,7 +74,7 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
 
         supabase
           .from("job_matches")
-          .select("id, status, interested_at, estimated_value")
+          .select("id, status, interested_at, estimated_value, jobs(is_test)")
           .eq("trade_id", tradeId)
           .eq("status", "notified"),
         supabase.from("tradevault_documents").select("*").eq("trade_id", tradeId),
@@ -111,7 +111,9 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
         .map((q: any) => ({ id: q.id, amount: Number(q.amount || 0), days: daysAgo(q.created_at) }))
         .sort((a, b) => b.days - a.days);
 
-      const matches = matchesRes.data || [];
+      // Must match src/hooks/useNewJobMatches.tsx exactly: notified, non-test,
+      // no interested_at. Otherwise the sidebar badge and this tile disagree.
+      const matches = (matchesRes.data || []).filter((m: any) => !isTestRecord(m));
       const unactioned = matches.filter((m: any) => !m.interested_at);
       const matchesValue = unactioned.reduce(
         (s: number, m: any) => s + Number(m.estimated_value || 0),

@@ -19,26 +19,14 @@ Deno.serve(async (req) => {
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
   )
 
-  // Require an authenticated caller.
-  const authHeader = req.headers.get('Authorization')
-  if (!authHeader?.startsWith('Bearer ')) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-      status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    })
-  }
-  const { data: authData, error: authErr } = await supabase.auth.getUser(
-    authHeader.replace('Bearer ', ''),
-  )
-  if (authErr || !authData?.user) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-      status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    })
-  }
-
+  // Parse the body first: public quote links authenticate with the quote's
+  // accept token rather than a user session.
   let quoteId: string
+  let token = ''
   try {
     const body = await req.json()
     quoteId = String(body.quote_id || body.quoteId || '')
+    token = String(body.token || '')
   } catch {
     return new Response(JSON.stringify({ error: 'Invalid JSON' }), {
       status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -50,9 +38,23 @@ Deno.serve(async (req) => {
     })
   }
 
+  // An authenticated caller is optional when a valid accept token is supplied.
+  const authHeader = req.headers.get('Authorization')
+  let callerId: string | null = null
+  if (authHeader?.startsWith('Bearer ')) {
+    const { data: authData } = await supabase.auth.getUser(authHeader.replace('Bearer ', ''))
+    callerId = authData?.user?.id ?? null
+  }
+  if (!callerId && !token) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
+  }
+
+
   const { data: quote } = await supabase
     .from('quotes')
-    .select('id, reference, amount, job_id, trade_id, tier_enabled, selected_tier, budget_price, standard_price, premium_price')
+    .select('id, reference, amount, job_id, trade_id, accept_token, tier_enabled, selected_tier, budget_price, standard_price, premium_price')
     .eq('id', quoteId)
     .maybeSingle()
   if (!quote) {
@@ -85,13 +87,16 @@ Deno.serve(async (req) => {
     .eq('id', quote.trade_id)
     .maybeSingle()
 
-  // Only a party to this quote (or an admin) may trigger these notifications.
-  const callerId = authData.user.id
-  const { data: isAdmin } = await supabase.rpc('has_role', { _user_id: callerId, _role: 'admin' })
-  if (!isAdmin && callerId !== homeowner?.user_id && callerId !== trade?.user_id) {
-    return new Response(JSON.stringify({ error: 'Forbidden' }), {
-      status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    })
+  // A party to this quote, an admin, or the holder of the quote's accept token
+  // (the homeowner following the emailed public link) may trigger these emails.
+  const tokenValid = !!token && !!quote.accept_token && token === quote.accept_token
+  if (!tokenValid) {
+    const { data: isAdmin } = await supabase.rpc('has_role', { _user_id: callerId, _role: 'admin' })
+    if (!isAdmin && callerId !== homeowner?.user_id && callerId !== trade?.user_id) {
+      return new Response(JSON.stringify({ error: 'Forbidden' }), {
+        status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
   }
 
   let tradeEmail: string | null = null

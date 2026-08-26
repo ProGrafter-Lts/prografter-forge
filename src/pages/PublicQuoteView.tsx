@@ -66,8 +66,16 @@ export default function PublicQuoteView() {
     if (!out?.ok) {
       toast.error(out?.error === "already_decided" ? `This quote is already marked ${out.status}.` : "Link not valid.");
     } else {
+      if (decision === "accepted") {
+        // Token-authenticated: the homeowner following the emailed link has no session.
+        const { error: notifyErr } = await supabase.functions.invoke("notify-quote-accepted", {
+          body: { quote_id: quoteId, token },
+        });
+        if (notifyErr) console.error("notify-quote-accepted failed", notifyErr);
+      }
       toast.success(decision === "accepted" ? "Quote accepted — the tradesperson has been notified." : "Quote declined.");
     }
+
     setData((d) => (d ? { ...d, quote: { ...d.quote, status: decision } } : d));
   };
 
