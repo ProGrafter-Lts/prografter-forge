@@ -67,6 +67,7 @@ const CARD_DEFS: {
 
 interface StageRow {
   id: string;
+  planning_alert_id: string | null;
   note: string | null;
   next_action_date: string | null;
   last_status_change_at: string | null;
@@ -177,7 +178,7 @@ const PipelineSection = ({ tradeId }: Props) => {
       const { data, error: rowsError } = await supabase
         .from("planning_alert_shortlist")
         .select(
-          "id, note, next_action_date, last_status_change_at, planning_alerts(address, postcode, application_type, description, local_authority)",
+          "id, planning_alert_id, note, next_action_date, last_status_change_at, planning_alerts(address, postcode, application_type, description, local_authority)",
         )
         .eq("trade_id", tradeId)
         .eq("contact_status", status as any)
@@ -370,7 +371,13 @@ const PipelineSection = ({ tradeId }: Props) => {
                 <button
                   key={row.id}
                   type="button"
-                  onClick={() => navigate("/planning-alerts")}
+                  onClick={() =>
+                    navigate(
+                      row.planning_alert_id
+                        ? `/planning-alerts?alert=${row.planning_alert_id}`
+                        : "/planning-alerts",
+                    )
+                  }
                   className="w-full text-left rounded-xl bg-white/5 hover:bg-white/10 transition-colors p-4"
                 >
                   <p className="font-sans font-semibold text-sm text-white">
