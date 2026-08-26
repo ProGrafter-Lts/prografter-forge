@@ -51,13 +51,20 @@ export const useNewJobMatchCount = () => {
 
     const { data } = await supabase
       .from("job_matches")
-      .select("id, jobs(is_test)")
+      .select("id, interested_at, jobs(is_test)")
       .eq("trade_id", tradeId)
       .eq("status", "notified");
 
-    const seen = readSeen();
-    const rows = (data || []) as { id: string; jobs?: { is_test?: boolean | null } | null }[];
-    setCount(rows.filter((m) => !isTestRecord(m) && !seen.includes(m.id)).length);
+    // Same rule as the dashboard tile: notified, not test data, not yet actioned
+    // in the database (interested_at). Never a per-browser "seen" rule, or the
+    // sidebar badge and the dashboard would disagree across devices.
+    const rows = (data || []) as {
+      id: string;
+      interested_at: string | null;
+      jobs?: { is_test?: boolean | null } | null;
+    }[];
+    setCount(rows.filter((m) => !isTestRecord(m) && !m.interested_at).length);
+
     return tradeId;
   }, [tradeId]);
 
