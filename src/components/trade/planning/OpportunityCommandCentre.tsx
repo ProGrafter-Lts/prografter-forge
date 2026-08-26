@@ -114,6 +114,18 @@ export default function OpportunityCommandCentre({
     if (features.can_generate_intro_letters && !letter) await handleLetter();
   };
 
+  // Opened from the feed's "Send intro now" chip → run the same flow on mount.
+  const autoIntroDone = useRef(false);
+  useEffect(() => {
+    if (!autoIntro || engaged || autoIntroDone.current) return;
+    autoIntroDone.current = true;
+    void runBestAction();
+    onAutoIntroHandled?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoIntro, app.id, engaged]);
+
+
+
 
   const currentStatus = interaction?.status ?? "new";
 
