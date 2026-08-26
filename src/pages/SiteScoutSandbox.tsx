@@ -279,12 +279,6 @@ const SiteScoutSandbox = () => {
 
   const avatarState: "clean" | "site" = status === "analyzing" ? "site" : "clean";
 
-  const filteredBoq = (phase: string) =>
-    liveBoq.filter(
-      (l) =>
-        l.phase === phase &&
-        (!filterAgent || PHASE_BY_AGENT[filterAgent] === phase || filterAgent === "lee"),
-    );
 
   const updateOverride = (key: string, field: "quantity" | "rate", value: number) =>
     setOverrides((p) => ({ ...p, [key]: { ...p[key], [field]: value } }));
