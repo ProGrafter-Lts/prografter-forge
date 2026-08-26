@@ -204,7 +204,13 @@ const PipelineSection = ({ tradeId }: Props) => {
   }, [load]);
 
   const totalLeads =
-    counts.todo + counts.contacted + counts.quoted + counts.won + counts.lost;
+    counts.todo +
+    counts.contacted +
+    counts.planning_approved +
+    counts.site_visit +
+    counts.quoted +
+    counts.won +
+    counts.lost;
 
   return (
     <Workspace
