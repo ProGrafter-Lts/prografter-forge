@@ -1,409 +1,341 @@
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Link } from "react-router-dom";
 import Logo from "@/components/Logo";
+import {
+  C,
+  CONTACT_METHODS,
+  LETTER_TEMPLATES,
+  QUICK_VIEWS,
+  RESPONSE_STATES,
+  buildFunnel,
+  buildToday,
+  campaignFor,
+  daysSince,
+  fmt,
+  fmtCompact,
+  fmtDate,
+  isContacted,
+  isSkipped,
+  lastContactAt,
+  matchesView,
+  nextActionFor,
+  outreachChip,
+  responseLabel,
+  type Agent,
+  type Lead,
+  type LeadEvent,
+  type QuickView,
+} from "./planningPipelineModel";
 
-const C = {
-  cream: "#F5F0E8", deep: "#0F2238", navy: "#27396A",
-  teal: "#14A8A1", tealHover: "#14B8A8", tealLight: "#CCFBF1",
-  body: "#1F2937", secondary: "#4B5563", border: "#D1CBB8", white: "#FFFFFF",
-  amber: "#D97706", amberBg: "#FFFBEB", amberBorder: "#FDE68A",
-  green: "#16A34A", greenBg: "#F0FDF4", greenBorder: "#BBF7D0",
-  red: "#DC2626", redBg: "#FEF2F2", redBorder: "#FECACA",
-  purple: "#7C3AED", purpleBg: "#F5F3FF", purpleBorder: "#DDD6FE",
-  darkSurface: "#152C45", darkCard: "#27396A",
-  darkBorder: "rgba(245,240,232,0.1)", dimText: "rgba(245,240,232,0.5)",
-  brightText: "#F5F0E8",
-};
-
-type Agent = {
-  id: string;
-  contact_name: string;
-  company_name: string | null;
-  email: string | null;
-  phone: string | null;
-  address: string | null;
-  relationship_status: string;
-  intro_sent: boolean;
-  meeting_held: boolean;
-  councils_active: string[] | null;
-  avg_job_value_estimate: number | null;
-  notes: string | null;
-};
-
-type Lead = {
-  id: string;
-  application_ref: string;
-  council_name: string;
-  site_address: string;
-  postcode: string | null;
-  application_type: string | null;
-  status: string;
-  description: string | null;
-  submitted_date: string | null;
-  applicant_name: string | null;
-  applicant_address: string | null;
-  applicant_contact: string | null;
-  agent_id: string | null;
-  agent_name: string | null;
-  agent_address: string | null;
-  agent_contact: string | null;
-  proposal_type: string | null;
-  trades_likely: string[] | null;
-  estimated_value_min: number | null;
-  estimated_value_max: number | null;
-  priority_score: number;
-  pipeline_status: string;
-  documents_available: boolean;
-  form1app_extracted: boolean;
-  council_application_url: string | null;
-  pdf_source_url: string | null;
-  pdf_enriched_at: string | null;
-  notes: string | null;
-  next_action: string | null;
-  agent_contacted: boolean;
-  agent_contacted_at: string | null;
-  agent_contact_methods: string[] | null;
-  homeowner_contacted: boolean;
-  homeowner_contacted_at: string | null;
-  homeowner_contact_methods: string[] | null;
-  homeowner_interested: "yes" | "no" | "unknown" | null;
-  outreach_status: string | null;
-  letter_sent_at: string | null;
-};
-
-const CONTACT_METHODS = [
-  { id: "call", label: "📞 Call" },
-  { id: "email", label: "✉️ Email" },
-  { id: "letter", label: "📬 Letter" },
-  { id: "visit", label: "🚶 In person" },
-];
-
-const PIPELINE_STAGES = [
-  { id: "new", label: "New lead", color: C.purple },
-  { id: "letter_sent", label: "Letter sent", color: C.amber },
-  { id: "contacted_agent", label: "Agent contacted", color: C.teal },
-  { id: "call_made", label: "Call made", color: C.teal },
-  { id: "meeting_booked", label: "Meeting booked", color: C.navy },
-  { id: "quote_posted", label: "Quote posted", color: C.navy },
-  { id: "job_won", label: "Job won", color: C.green },
-  { id: "not_interested", label: "Not interested / Cold", color: C.secondary },
-  // Legacy aliases — render so older rows still display correctly
-  { id: "contacted_homeowner", label: "Homeowner contacted", color: C.amber },
-  { id: "brief_posted", label: "Brief posted", color: C.navy },
-  { id: "converted", label: "Converted", color: C.green },
-  { id: "not_suitable", label: "Not suitable", color: C.secondary },
-];
-
-const SCORE_TOOLTIP =
-  "Score factors: project value (40%) · recency, days since submission (30%) · " +
-  "trades required, breadth of work (20%) · agent relationship status (10%). " +
-  "Scores 75+ are flagged red as hot leads.";
-
-const isOverdue = (status: string, days: number) =>
-  (status === "new" && days > 14) || (status === "contacted_agent" && days > 30);
-
-const isNonDomestic = (l: { application_type: string | null; description: string | null }) => {
-  const t = `${l.application_type ?? ""} ${l.description ?? ""}`.toLowerCase();
-  return /class\s*q|barn conversion|agricultural|change of use/.test(t)
-    || (l.application_type ?? "").toLowerCase() === "full";
-};
-
-const AGENT_STATUS: Record<string, { label: string; bg: string; border: string; text: string }> = {
-  identified: { label: "Identified", bg: C.purpleBg, border: C.purpleBorder, text: C.purple },
-  contacted: { label: "Contacted", bg: C.amberBg, border: C.amberBorder, text: C.amber },
-  interested: { label: "Interested", bg: C.tealLight, border: "#99F6E4", text: C.teal },
-  partner: { label: "Partner", bg: C.greenBg, border: C.greenBorder, text: C.green },
-  not_interested: { label: "Not interested", bg: "#F3F4F6", border: C.border, text: C.secondary },
-};
-
-const fmt = (n: number | null | undefined) => (n ? `£${Number(n).toLocaleString("en-GB")}` : "—");
-const daysSince = (dateStr: string | null) => {
-  if (!dateStr) return 0;
-  const ms = Date.now() - new Date(dateStr).getTime();
-  return Math.max(0, Math.floor(ms / 86400000));
-};
-
-// ---- Auto next-action (PART 1) ----
-// Computes a suggested next action from existing data. Never overrides a human-set next_action.
-const suggestedNextAction = (lead: Lead, agent?: Agent): string | null => {
-  const os = lead.outreach_status || "not_contacted";
-  const firm = agent?.company_name || agent?.contact_name || lead.agent_name || "agent";
-  if (lead.agent_id && (os === "not_contacted" || os === "no_next_action")) {
-    return `Email agent — ${firm}`;
-  }
-  if (!lead.agent_id && lead.applicant_address && os === "not_contacted") {
-    return `Send letter to homeowner — ${lead.applicant_address}`;
-  }
-  if (!lead.agent_id && !lead.applicant_address) {
-    return "Skip — insufficient contact data";
-  }
-  if (os === "letter_sent" && lead.letter_sent_at && daysSince(lead.letter_sent_at) > 14) {
-    return `Follow up letter — sent ${daysSince(lead.letter_sent_at)}d ago`;
-  }
-  return null;
-};
-
-// ---- Value bands + sort (PART 2) ----
-const VALUE_BANDS = [
-  { id: "all", label: "All", min: 0 },
-  { id: "40k", label: "£40k+", min: 40000 },
-  { id: "80k", label: "£80k+", min: 80000 },
-  { id: "150k", label: "£150k+", min: 150000 },
-];
-const SORT_OPTIONS = [
-  { id: "newest", label: "Newest" },
-  { id: "value_desc", label: "Value (high to low)" },
-  { id: "value_asc", label: "Value (low to high)" },
-  { id: "deadline", label: "Closest deadline" },
-];
-const LS_BAND = "pp_value_band";
-const LS_SORT = "pp_sort";
-
-// ---- Homeowner search launchers (PART 3) ----
-// Best-effort town extraction from a free-text site address (last comma segment, postcode stripped).
-const guessTown = (lead: Lead): string => {
-  const parts = (lead.site_address || "")
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-  const pc = (lead.postcode || "").trim();
-  let last = parts[parts.length - 1] || "";
-  if (pc && last.toUpperCase().includes(pc.toUpperCase()) && parts.length >= 2) {
-    last = parts[parts.length - 2];
-  }
-  // strip any embedded postcode-looking token from the town string
-  return last.replace(/[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}/gi, "").trim();
-};
+/* ------------------------------------------------------------------ */
+/* Small shared primitives                                             */
+/* ------------------------------------------------------------------ */
 
 const inp = (): CSSProperties => ({
-  width: "100%", padding: "8px 10px", borderRadius: 7,
-  border: `1px solid ${C.darkBorder}`, background: "rgba(255,255,255,0.05)",
-  color: C.brightText, fontSize: 12, fontFamily: "inherit", outline: "none",
+  width: "100%",
+  padding: "8px 10px",
+  borderRadius: 8,
+  border: `1px solid ${C.line}`,
+  background: "rgba(255,255,255,0.04)",
+  color: C.cream,
+  fontSize: 12,
+  fontFamily: "inherit",
+  outline: "none",
   boxSizing: "border-box",
 });
 
-const SBadge = ({ status }: { status: string }) => {
-  const stage = PIPELINE_STAGES.find((s) => s.id === status);
-  if (!stage) return null;
-  return (
-    <span style={{
-      display: "inline-block", fontSize: 10, fontWeight: 700,
-      color: stage.color, background: `${stage.color}22`,
-      border: `1px solid ${stage.color}55`,
-      borderRadius: 20, padding: "2px 8px", letterSpacing: "0.04em",
-    }}>{stage.label}</span>
-  );
-};
+const Chip = ({ label, color, title }: { label: string; color: string; title?: string }) => (
+  <span
+    title={title}
+    style={{
+      display: "inline-block",
+      fontSize: 9.5,
+      fontWeight: 700,
+      letterSpacing: "0.06em",
+      color,
+      background: `${color}1F`,
+      borderRadius: 5,
+      padding: "2px 7px",
+      whiteSpace: "nowrap",
+    }}
+  >
+    {label}
+  </span>
+);
 
-const PriorityBar = ({ score }: { score: number }) => {
-  const c = score >= 75 ? C.red : score >= 50 ? C.amber : C.teal;
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 6 }} title={SCORE_TOOLTIP}>
-      <div style={{ flex: 1, height: 4, background: "rgba(255,255,255,0.08)", borderRadius: 4, overflow: "hidden" }}>
-        <div style={{ width: `${score}%`, height: "100%", background: c }} />
-      </div>
-      <span style={{ fontSize: 10, fontWeight: 700, color: c, minWidth: 26, textAlign: "right", cursor: "help" }}>
-        {score} ⓘ
-      </span>
-    </div>
-  );
-};
+const SectionLabel = ({ children }: { children: ReactNode }) => (
+  <p
+    style={{
+      fontSize: 9.5,
+      fontWeight: 700,
+      color: C.dim,
+      textTransform: "uppercase",
+      letterSpacing: "0.14em",
+      margin: "0 0 10px",
+    }}
+  >
+    {children}
+  </p>
+);
 
-const LeadCard = ({ lead, onSelect, selected, agent, onSkip }: {
-  lead: Lead; onSelect: (l: Lead) => void; selected: boolean; agent?: Agent;
-  onSkip: (l: Lead, skip: boolean) => void;
+const Panel = ({ children, style }: { children: ReactNode; style?: CSSProperties }) => (
+  <div style={{ background: "rgba(255,255,255,0.035)", borderRadius: 12, padding: "14px 16px", ...style }}>
+    {children}
+  </div>
+);
+
+const btn = (variant: "primary" | "ghost" | "quiet", extra?: CSSProperties): CSSProperties => ({
+  border: variant === "primary" ? "none" : `1px solid ${variant === "ghost" ? "rgba(13,148,136,0.5)" : C.line}`,
+  background: variant === "primary" ? C.teal : "transparent",
+  color: variant === "primary" ? C.white : variant === "ghost" ? C.tealBright : C.dim,
+  borderRadius: 8,
+  padding: "7px 12px",
+  fontSize: 11,
+  fontWeight: 700,
+  cursor: "pointer",
+  whiteSpace: "nowrap",
+  ...extra,
+});
+
+/* ------------------------------------------------------------------ */
+/* Lead card                                                           */
+/* ------------------------------------------------------------------ */
+
+const LeadCard = ({
+  lead,
+  selected,
+  onSelect,
+}: {
+  lead: Lead;
+  selected: boolean;
+  onSelect: (l: Lead) => void;
 }) => {
+  const chip = outreachChip(lead);
   const days = daysSince(lead.submitted_date);
-  const overdue = isOverdue(lead.pipeline_status, days);
-  const manual = (lead.next_action || "").trim();
-  const suggested = manual ? null : suggestedNextAction(lead, agent);
-  const nonDomestic = isNonDomestic(lead);
-  const skipped = lead.outreach_status === "skipped";
   return (
-    <div onClick={() => onSelect(lead)}
+    <div
+      onClick={() => onSelect(lead)}
       style={{
-        background: selected ? C.darkCard : "rgba(255,255,255,0.04)",
-        border: `1px solid ${selected ? C.teal : C.darkBorder}`,
-        borderRadius: 10, padding: "10px 14px", cursor: "pointer",
-        marginBottom: 6, transition: "all 0.15s", opacity: skipped ? 0.6 : 1,
-      }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6, gap: 8 }}>
-        <div style={{ minWidth: 0 }}>
-          <p style={{ fontSize: 12, fontWeight: 700, color: C.brightText, margin: "0 0 2px", lineHeight: 1.3 }}>
+        display: "flex",
+        gap: 10,
+        background: selected ? "rgba(13,148,136,0.14)" : "rgba(255,255,255,0.03)",
+        boxShadow: selected ? `inset 0 0 0 1px ${C.teal}` : "none",
+        borderRadius: 10,
+        padding: "10px 12px 10px 10px",
+        cursor: "pointer",
+        marginBottom: 6,
+        opacity: isSkipped(lead) ? 0.5 : 1,
+        transition: "background 0.12s",
+      }}
+    >
+      <span style={{ width: 3, borderRadius: 3, background: chip.color, flexShrink: 0 }} />
+      <div style={{ minWidth: 0, flex: 1 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+          <p
+            style={{
+              fontSize: 12.5,
+              fontWeight: 700,
+              color: selected ? C.cream : "rgba(245,240,232,0.92)",
+              margin: 0,
+              lineHeight: 1.3,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
             {lead.site_address}
           </p>
-          <p style={{ fontSize: 10, color: C.dimText, margin: 0 }}>
-            {lead.council_name} · {lead.application_ref}
-          </p>
-        </div>
-        <div style={{ textAlign: "right", flexShrink: 0 }}>
-          <p style={{ fontSize: 12, fontWeight: 700, color: C.teal, margin: 0 }}>
+          <span style={{ fontSize: 12, fontWeight: 700, color: C.tealBright, flexShrink: 0 }}>
             {fmt(lead.estimated_value_max)}
+          </span>
+        </div>
+        <p style={{ fontSize: 10, color: C.faint, margin: "2px 0 0" }}>
+          {lead.council_name} · {lead.application_ref}
+        </p>
+        {lead.description && (
+          <p
+            style={{
+              fontSize: 10.5,
+              color: C.dim,
+              margin: "4px 0 0",
+              lineHeight: 1.4,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {lead.description}
           </p>
-          <p style={{ fontSize: 9, color: C.dimText, margin: 0 }}>{days}d ago</p>
-        </div>
-      </div>
-      <div style={{ marginBottom: 6 }}>
-        <PriorityBar score={lead.priority_score} />
-      </div>
-      {(overdue || nonDomestic) && (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 6 }}>
-          {overdue && (
-            <span style={{ fontSize: 9, fontWeight: 700, color: C.amber,
-              background: "rgba(217,119,6,0.18)", border: `1px solid ${C.amberBorder}`,
-              borderRadius: 4, padding: "1px 6px", letterSpacing: "0.04em" }}>
-              ⚠ FOLLOW-UP OVERDUE
-            </span>
-          )}
-          {nonDomestic && (
-            <span style={{ fontSize: 9, fontWeight: 700, color: C.purple,
-              background: "rgba(124,58,237,0.18)", border: `1px solid ${C.purpleBorder}`,
-              borderRadius: 4, padding: "1px 6px", letterSpacing: "0.04em" }}>
-              ⚠ NON-DOMESTIC
-            </span>
-          )}
-        </div>
-      )}
-      {/* Next action — always shown: manual in white, or suggested in teal with an 'auto' tag */}
-      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
-        <span style={{ fontSize: 9, color: C.dimText, flexShrink: 0 }}>▸</span>
-        <span style={{
-          fontSize: 10, fontWeight: 600, lineHeight: 1.3,
-          color: manual ? C.brightText : C.teal,
-          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-        }}>
-          {manual || suggested || "No suggestion"}
-        </span>
-        {!manual && suggested && (
-          <span style={{ fontSize: 8, fontWeight: 700, color: C.teal, background: "rgba(13,148,136,0.18)",
-            border: `1px solid rgba(13,148,136,0.4)`, borderRadius: 4, padding: "0 5px", letterSpacing: "0.06em", flexShrink: 0 }}>
-            AUTO
-          </span>
         )}
-      </div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 6 }}>
-        <SBadge status={lead.pipeline_status} />
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <span style={{ fontSize: 9, color: C.dimText, textAlign: "right" }}>
-            {agent ? `🏛️ ${agent.company_name || agent.contact_name}` : "No agent"}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginTop: 7 }}>
+          <Chip label={chip.label} color={chip.color} />
+          <span style={{ fontSize: 9.5, color: C.faint, whiteSpace: "nowrap" }}>
+            {chip.date ? fmtDate(chip.date) : `${days} days`}
           </span>
-          <button
-            onClick={(e) => { e.stopPropagation(); onSkip(lead, !skipped); }}
-            title={skipped ? "Restore this lead" : "Skip this lead (reversible)"}
-            style={{ background: "transparent", border: `1px solid ${C.darkBorder}`, color: skipped ? C.teal : C.dimText,
-              borderRadius: 5, padding: "1px 7px", fontSize: 9, fontWeight: 700, cursor: "pointer", flexShrink: 0 }}>
-            {skipped ? "↺ Restore" : "Skip"}
-          </button>
         </div>
       </div>
     </div>
   );
 };
 
-const LeadDetail = ({ lead, agent, onSaved, onSkip }: { lead: Lead; agent?: Agent; onSaved: () => void; onSkip: (l: Lead, skip: boolean) => void }) => {
+/* ------------------------------------------------------------------ */
+/* Lead detail                                                         */
+/* ------------------------------------------------------------------ */
+
+const LeadDetail = ({
+  lead,
+  agent,
+  events,
+  onSaved,
+  onSkip,
+  onLog,
+}: {
+  lead: Lead;
+  agent?: Agent;
+  events: LeadEvent[];
+  onSaved: () => void;
+  onSkip: (l: Lead, skip: boolean) => void;
+  onLog: (leadId: string, type: string, detail?: string, template?: string) => Promise<void>;
+}) => {
   const [notes, setNotes] = useState(lead.notes || "");
   const [nextAction, setNextAction] = useState(lead.next_action || "");
-  const [pipelineStatus, setPipelineStatus] = useState(lead.pipeline_status);
-  const [agentContacted, setAgentContacted] = useState(lead.agent_contacted ?? false);
-  const [agentMethods, setAgentMethods] = useState<string[]>(lead.agent_contact_methods ?? []);
-  const [homeownerContacted, setHomeownerContacted] = useState(lead.homeowner_contacted ?? false);
-  const [homeownerMethods, setHomeownerMethods] = useState<string[]>(lead.homeowner_contact_methods ?? []);
-  const [homeownerInterested, setHomeownerInterested] = useState<string>(lead.homeowner_interested ?? "unknown");
-  const [saving, setSaving] = useState(false);
-  const [enriching, setEnriching] = useState(false);
+  const [template, setTemplate] = useState(lead.homeowner_letter_template || "A");
+  const [editUrl, setEditUrl] = useState(false);
   const [councilUrl, setCouncilUrl] = useState(lead.council_application_url || "");
-  const [savingUrl, setSavingUrl] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [enriching, setEnriching] = useState(false);
 
   useEffect(() => {
     setNotes(lead.notes || "");
     setNextAction(lead.next_action || "");
-    setPipelineStatus(lead.pipeline_status);
-    setAgentContacted(lead.agent_contacted ?? false);
-    setAgentMethods(lead.agent_contact_methods ?? []);
-    setHomeownerContacted(lead.homeowner_contacted ?? false);
-    setHomeownerMethods(lead.homeowner_contact_methods ?? []);
-    setHomeownerInterested(lead.homeowner_interested ?? "unknown");
+    setTemplate(lead.homeowner_letter_template || "A");
     setCouncilUrl(lead.council_application_url || "");
+    setEditUrl(false);
   }, [lead.id]);
 
-  const saveCouncilUrl = async () => {
-    const trimmed = councilUrl.trim();
-    if (trimmed && !/^https?:\/\//i.test(trimmed)) {
+  const patch = useCallback(
+    async (values: Record<string, unknown>, successTitle?: string) => {
+      setBusy(true);
+      const { error } = await supabase.from("planning_leads").update(values as never).eq("id", lead.id);
+      setBusy(false);
+      if (error) {
+        toast({ title: "Save failed", description: error.message, variant: "destructive" });
+        return false;
+      }
+      if (successTitle) toast({ title: successTitle });
+      onSaved();
+      return true;
+    },
+    [lead.id, onSaved],
+  );
+
+  const na = nextActionFor(lead);
+  const ds = daysSince(lead.submitted_date);
+
+  const markReviewed = async () => {
+    if (await patch({ reviewed_at: new Date().toISOString() }, "Lead reviewed")) {
+      await onLog(lead.id, "reviewed", "Lead reviewed");
+    }
+  };
+
+  const addToBatch = async () => {
+    if (lead.letter_batch_status === "queued") {
+      if (await patch({ letter_batch_status: null, letter_batch_added_at: null }, "Removed from letter batch")) {
+        await onLog(lead.id, "batch_removed", "Removed from letter batch");
+      }
+      return;
+    }
+    const ok = await patch(
+      {
+        letter_batch_status: "queued",
+        letter_batch_added_at: new Date().toISOString(),
+        homeowner_letter_template: template,
+        outreach_campaign: campaignFor(template),
+        reviewed_at: lead.reviewed_at || new Date().toISOString(),
+      },
+      `Added to letter batch — Template ${template}`,
+    );
+    if (ok) await onLog(lead.id, "batch_added", `Added to letter batch`, template);
+  };
+
+  const recordContact = async (party: "homeowner" | "agent", method: string) => {
+    const now = new Date().toISOString();
+    const values: Record<string, unknown> =
+      party === "homeowner"
+        ? {
+            homeowner_contacted: true,
+            homeowner_contacted_at: lead.homeowner_contacted_at || now,
+            homeowner_last_contact_at: now,
+            homeowner_last_contact_method: method,
+            homeowner_contact_methods: Array.from(new Set([...(lead.homeowner_contact_methods || []), method])),
+            ...(method === "letter"
+              ? {
+                  letter_sent_at: now,
+                  outreach_status: "letter_sent",
+                  homeowner_letter_template: template,
+                  outreach_campaign: campaignFor(template),
+                }
+              : {}),
+          }
+        : {
+            agent_contacted: true,
+            agent_contacted_at: lead.agent_contacted_at || now,
+            agent_last_contact_at: now,
+            agent_last_contact_method: method,
+            agent_outreach_status: "contacted",
+            agent_contact_methods: Array.from(new Set([...(lead.agent_contact_methods || []), method])),
+          };
+    const label = CONTACT_METHODS.find((m) => m.id === method)?.label ?? method;
+    if (await patch(values, `${party === "homeowner" ? "Homeowner" : "Agent"} contact recorded — ${label}`)) {
+      await onLog(
+        lead.id,
+        party === "homeowner" ? "homeowner_contact" : "agent_contact",
+        `${label} — ${party === "homeowner" ? "homeowner" : "architect/agent"}`,
+        method === "letter" ? template : undefined,
+      );
+    }
+  };
+
+  const setResponse = async (state: string) => {
+    const next = lead.response_state === state ? null : state;
+    if (
+      await patch(
+        { response_state: next, response_at: next ? new Date().toISOString() : null },
+        next ? `Outcome: ${responseLabel(next)}` : "Outcome cleared",
+      )
+    ) {
+      if (next) await onLog(lead.id, "response", responseLabel(next) || next);
+    }
+  };
+
+  const saveUrl = async () => {
+    const t = councilUrl.trim();
+    if (t && !/^https?:\/\//i.test(t)) {
       toast({ title: "Invalid URL", description: "Must start with http:// or https://", variant: "destructive" });
       return;
     }
-    setSavingUrl(true);
-    const { error } = await supabase
-      .from("planning_leads")
-      .update({ council_application_url: trimmed || null } as never)
-      .eq("id", lead.id);
-    setSavingUrl(false);
-    if (error) {
-      toast({ title: "Save failed", description: error.message, variant: "destructive" });
-    } else {
-      toast({ title: "Council URL saved", description: "You can now read the PDF form." });
-      onSaved();
-    }
+    if (await patch({ council_application_url: t || null }, "Council URL saved")) setEditUrl(false);
   };
 
-
-
-  const toggleMethod = (current: string[], setter: (v: string[]) => void, m: string) => {
-    setter(current.includes(m) ? current.filter((x) => x !== m) : [...current, m]);
-  };
-
-  const save = async () => {
-    setSaving(true);
-    const patch: Record<string, unknown> = {
-      notes,
-      next_action: nextAction,
-      pipeline_status: pipelineStatus,
-      agent_contacted: agentContacted,
-      agent_contact_methods: agentMethods,
-      homeowner_contacted: homeownerContacted,
-      homeowner_contact_methods: homeownerMethods,
-      homeowner_interested: homeownerInterested === "unknown" ? null : homeownerInterested,
-    };
-    if (agentContacted && !lead.agent_contacted_at) patch.agent_contacted_at = new Date().toISOString();
-    if (homeownerContacted && !lead.homeowner_contacted_at) patch.homeowner_contacted_at = new Date().toISOString();
-
-    const { error } = await supabase.from("planning_leads").update(patch as never).eq("id", lead.id);
-    setSaving(false);
-    if (error) {
-      toast({ title: "Save failed", description: error.message, variant: "destructive" });
-    } else {
-      toast({ title: "Lead updated" });
-      onSaved();
-    }
-  };
-
-  const acceptSuggested = async (text: string) => {
-    setNextAction(text);
-    const { error } = await supabase
-      .from("planning_leads")
-      .update({ next_action: text } as never)
-      .eq("id", lead.id);
-    if (error) {
-      toast({ title: "Save failed", description: error.message, variant: "destructive" });
-    } else {
-      toast({ title: "Next action set", description: text });
-      onSaved();
-    }
+  const copy = (text: string, what: string) => {
+    navigator.clipboard?.writeText(text);
+    toast({ title: `${what} copied` });
   };
 
   const enrichFromPdf = async () => {
     setEnriching(true);
-    const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
     const { data, error } = await supabase.functions.invoke("enrich-planning-lead-pdf", {
       body: { lead_id: lead.id },
       headers: session ? { Authorization: `Bearer ${session.access_token}` } : {},
     });
     setEnriching(false);
     if (error) {
-      // supabase.functions.invoke puts non-2xx response bodies in error.context, not data.
       let detail = error.message;
       try {
         const ctx = (error as { context?: Response }).context;
@@ -411,350 +343,440 @@ const LeadDetail = ({ lead, agent, onSaved, onSkip }: { lead: Lead; agent?: Agen
           const body = await ctx.json();
           if (body?.error) detail = body.error;
         }
-      } catch { /* keep generic message */ }
+      } catch {
+        /* keep generic message */
+      }
       toast({ title: "PDF enrich failed", description: detail, variant: "destructive" });
       return;
     }
-    const r = data as { ok?: boolean; error?: string };
-    if (r?.error) {
-      toast({ title: "PDF enrich failed", description: r.error, variant: "destructive" });
-    } else {
+    const r = data as { error?: string };
+    if (r?.error) toast({ title: "PDF enrich failed", description: r.error, variant: "destructive" });
+    else {
       toast({ title: "PDF read", description: "Applicant & agent details extracted." });
       onSaved();
     }
   };
 
-  const copyEmail = (email: string) => {
-    navigator.clipboard?.writeText(email);
-    toast({ title: "Copied" });
-  };
+  const info: [string, string][] = [
+    ["Reference", lead.application_ref],
+    ["Council", lead.council_name],
+    ["Type", lead.application_type || "—"],
+    ["Submitted", `${fmtDate(lead.submitted_date)} (${ds} days)`],
+    ["Applicant", lead.applicant_name || "Not listed"],
+    ["Postcode", lead.postcode || "—"],
+    ["Estimated value", fmt(lead.estimated_value_max)],
+    ["Status", lead.status.replace(/_/g, " ")],
+  ];
 
-  const ds = daysSince(lead.submitted_date);
+  const naTone = na.tone === "amber" ? C.amberBright : na.tone === "grey" ? C.dim : C.tealBright;
 
   return (
-    <div style={{ height: "100%", overflowY: "auto", padding: "16px 20px", color: C.brightText }}>
-      <div style={{ marginBottom: 16 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
-          <div>
-            <h2 style={{ fontSize: 20, fontWeight: 700, color: C.brightText, margin: "0 0 4px" }}>
-              {lead.site_address}
-            </h2>
-            <p style={{ fontSize: 12, color: C.dimText, margin: "0 0 8px" }}>
-              {lead.council_name} · {lead.application_ref} · {lead.application_type}
-            </p>
-            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-              <SBadge status={lead.pipeline_status} />
-              <span style={{ fontSize: 11, color: C.dimText }}>
-                {lead.status === "submitted" ? "🔥 Submitted" :
-                  lead.status === "pending_decision" ? "⏳ Pending" : "✅ Approved"}
-              </span>
-              <span style={{ fontSize: 11, color: C.dimText }}>{ds} days ago</span>
+    <div style={{ height: "100%", overflowY: "auto", padding: "20px 24px 40px", color: C.cream }}>
+      {/* Header */}
+      <div style={{ marginBottom: 18 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
+          <div style={{ minWidth: 0 }}>
+            <h2 style={{ fontSize: 22, fontWeight: 700, margin: 0, lineHeight: 1.25 }}>{lead.site_address}</h2>
+            <p style={{ fontSize: 12, color: C.dim, margin: "6px 0 0", lineHeight: 1.5 }}>{lead.description}</p>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 10, alignItems: "center" }}>
+              <span style={{ fontSize: 18, fontWeight: 700, color: C.tealBright }}>{fmt(lead.estimated_value_max)}</span>
+              <span style={{ fontSize: 11, color: C.faint }}>{ds} days</span>
+              <span style={{ fontSize: 11, color: C.faint }}>{lead.council_name}</span>
+              <span style={{ fontSize: 11, color: C.faint }}>{lead.application_ref}</span>
+              <Chip {...outreachChip(lead)} />
             </div>
           </div>
-          <div style={{ textAlign: "right", display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>
-            <p style={{ fontSize: 22, fontWeight: 700, color: C.teal, margin: 0 }}>{fmt(lead.estimated_value_max)}</p>
-            <p style={{ fontSize: 10, color: C.dimText, margin: 0 }}>est. value</p>
-            <button onClick={enrichFromPdf} disabled={enriching || !lead.council_application_url}
-              title={lead.council_application_url ? "Read the official application form PDF and extract applicant + agent details" : "No council URL on file"}
-              style={{ marginTop: 6, background: lead.pdf_enriched_at ? "rgba(13,148,136,0.18)" : C.teal, color: lead.pdf_enriched_at ? C.teal : C.white, border: lead.pdf_enriched_at ? `1px solid rgba(13,148,136,0.4)` : "none", borderRadius: 7, padding: "6px 10px", fontSize: 10, fontWeight: 700, cursor: enriching ? "not-allowed" : "pointer", opacity: enriching || !lead.council_application_url ? 0.6 : 1, whiteSpace: "nowrap" }}>
-              {enriching ? "Reading PDF…" : lead.pdf_enriched_at ? "🔁 Re-read PDF" : "📄 Read PDF form"}
-            </button>
-            {lead.proposal_type && (
-              <span style={{ fontSize: 10, color: C.dimText, marginTop: 2 }}>{lead.proposal_type}</span>
-            )}
-          </div>
         </div>
-      </div>
 
-      <div style={{ display: "grid", gap: 12 }}>
-        <div style={{ background: lead.council_application_url ? "rgba(255,255,255,0.04)" : "rgba(217,119,6,0.10)", border: lead.council_application_url ? "none" : `1px solid ${C.amberBorder}`, borderRadius: 10, padding: "12px 14px" }}>
-          <p style={{ fontSize: 10, fontWeight: 700, color: lead.council_application_url ? C.teal : C.amber, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 6px" }}>
-            🔗 Council application URL {lead.council_application_url ? "" : "(missing — paste to enable PDF read)"}
-          </p>
-          <div style={{ display: "flex", gap: 6 }}>
+        {/* Actions */}
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 14 }}>
+          <a
+            href={lead.council_application_url || undefined}
+            target="_blank"
+            rel="noreferrer"
+            onClick={(e) => {
+              if (!lead.council_application_url) {
+                e.preventDefault();
+                setEditUrl(true);
+              }
+            }}
+            style={{
+              ...btn("ghost"),
+              textDecoration: "none",
+              opacity: lead.council_application_url ? 1 : 0.55,
+              display: "inline-block",
+            }}
+          >
+            Open council record
+          </a>
+          {lead.pdf_source_url && (
+            <a href={lead.pdf_source_url} target="_blank" rel="noreferrer" style={{ ...btn("quiet"), textDecoration: "none" }}>
+              Open PDF
+            </a>
+          )}
+          <button
+            onClick={() => lead.council_application_url && copy(lead.council_application_url, "Link")}
+            disabled={!lead.council_application_url}
+            style={btn("quiet", { opacity: lead.council_application_url ? 1 : 0.5 })}
+          >
+            Copy link
+          </button>
+          <button onClick={addToBatch} disabled={busy} style={btn(lead.letter_batch_status === "queued" ? "quiet" : "primary")}>
+            {lead.letter_batch_status === "queued" ? "Remove from letter batch" : "Add to letter batch"}
+          </button>
+          <button onClick={() => setEditUrl((v) => !v)} style={btn("quiet")}>
+            {editUrl ? "Close" : "Edit URL"}
+          </button>
+          <button onClick={enrichFromPdf} disabled={enriching || !lead.council_application_url} style={btn("quiet")}>
+            {enriching ? "Reading PDF…" : lead.pdf_enriched_at ? "Re-read PDF form" : "Read PDF form"}
+          </button>
+          <button onClick={() => onSkip(lead, !isSkipped(lead))} style={btn("quiet")}>
+            {isSkipped(lead) ? "Restore lead" : "Skip lead"}
+          </button>
+        </div>
+
+        {editUrl && (
+          <div style={{ display: "flex", gap: 6, marginTop: 10 }}>
             <input
               type="url"
               value={councilUrl}
               onChange={(e) => setCouncilUrl(e.target.value)}
               placeholder="https://publicaccess.council.gov.uk/online-applications/..."
-              style={{ flex: 1, background: "rgba(0,0,0,0.3)", border: `1px solid rgba(255,255,255,0.15)`, borderRadius: 6, padding: "6px 10px", fontSize: 11, color: C.brightText }}
+              style={inp()}
             />
-            <button
-              onClick={saveCouncilUrl}
-              disabled={savingUrl || councilUrl.trim() === (lead.council_application_url || "")}
-              style={{ background: C.teal, color: C.white, border: "none", borderRadius: 6, padding: "6px 12px", fontSize: 11, fontWeight: 700, cursor: savingUrl ? "not-allowed" : "pointer", opacity: savingUrl || councilUrl.trim() === (lead.council_application_url || "") ? 0.5 : 1, whiteSpace: "nowrap" }}
-            >
-              {savingUrl ? "Saving…" : "Save"}
+            <button onClick={saveUrl} disabled={busy} style={btn("primary")}>
+              Save
             </button>
           </div>
-          {!lead.council_application_url && (
-            <p style={{ fontSize: 10, color: C.dimText, margin: "6px 0 0" }}>
-              Open the council's public access portal, find this application, copy the page URL and paste here. Then click "📄 Read PDF form" above.
-            </p>
+        )}
+      </div>
+
+      {/* Next action */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 12,
+          background: `${naTone}14`,
+          boxShadow: `inset 0 0 0 1px ${naTone}44`,
+          borderRadius: 12,
+          padding: "12px 16px",
+          marginBottom: 14,
+          flexWrap: "wrap",
+        }}
+      >
+        <div style={{ flex: 1, minWidth: 200 }}>
+          <p style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: "0.14em", color: C.dim, margin: 0 }}>NEXT ACTION</p>
+          <p style={{ fontSize: 14, fontWeight: 700, color: naTone, margin: "3px 0 0" }}>
+            {nextAction.trim() || na.label}
+          </p>
+          {na.hint && !nextAction.trim() && (
+            <p style={{ fontSize: 10.5, color: C.faint, margin: "2px 0 0" }}>{na.hint}</p>
           )}
         </div>
+        {na.key === "review" && (
+          <button onClick={markReviewed} style={btn("primary")}>
+            Mark reviewed
+          </button>
+        )}
+        {na.key === "add_batch" && (
+          <button onClick={addToBatch} style={btn("primary")}>
+            Add to letter batch
+          </button>
+        )}
+        {na.key === "follow_up" && (
+          <button onClick={() => recordContact("homeowner", "letter")} style={btn("primary")}>
+            Log follow-up letter
+          </button>
+        )}
+      </div>
 
-
-        <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: 10, padding: "12px 14px" }}>
-          <p style={{ fontSize: 10, fontWeight: 700, color: C.teal, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 6px" }}>Description</p>
-          <p style={{ fontSize: 12, color: C.brightText, lineHeight: 1.6, margin: 0 }}>{lead.description}</p>
-        </div>
-
-        <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: 10, padding: "12px 14px" }}>
-          <p style={{ fontSize: 10, fontWeight: 700, color: C.teal, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 8px" }}>Trades required</p>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-            {(lead.trades_likely || []).map((t) => (
-              <span key={t} style={{ fontSize: 11, fontWeight: 600, background: "rgba(13,148,136,0.15)", color: C.teal, border: `1px solid rgba(13,148,136,0.3)`, borderRadius: 6, padding: "3px 8px" }}>{t}</span>
+      <div style={{ display: "grid", gap: 12 }}>
+        {/* Outreach — homeowner */}
+        <Panel>
+          <SectionLabel>Outreach — homeowner</SectionLabel>
+          <div style={{ display: "flex", gap: 18, flexWrap: "wrap", marginBottom: 12 }}>
+            {[
+              ["Status", outreachChip(lead).label],
+              ["Last contact", lastContactAt(lead) ? fmtDate(lastContactAt(lead)) : "—"],
+              ["Method", lead.homeowner_last_contact_method || (lead.letter_sent_at ? "letter" : "—")],
+              ["Template", lead.homeowner_letter_template ? `Template ${lead.homeowner_letter_template}` : "—"],
+              ["Campaign", lead.outreach_campaign || "—"],
+            ].map(([k, v]) => (
+              <div key={k}>
+                <p style={{ fontSize: 9.5, color: C.faint, margin: 0, letterSpacing: "0.08em" }}>{k.toUpperCase()}</p>
+                <p style={{ fontSize: 12, color: C.cream, margin: "2px 0 0", fontWeight: 600 }}>{v}</p>
+              </div>
             ))}
           </div>
-        </div>
-
-        <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: 10, padding: "12px 14px" }}>
-          <p style={{ fontSize: 10, fontWeight: 700, color: C.teal, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 6px" }}>🏠 Applicant (homeowner)</p>
-          <p style={{ fontSize: 13, fontWeight: 600, color: C.brightText, margin: "0 0 2px" }}>{lead.applicant_name || "Name not listed"}</p>
-          {lead.applicant_address && <p style={{ fontSize: 11, color: C.dimText, margin: "0 0 4px" }}>{lead.applicant_address}</p>}
-          {lead.applicant_contact && (
-            <p style={{ fontSize: 11, color: C.teal, margin: "4px 0 0", fontWeight: 600 }}>📞 {lead.applicant_contact}
-              <button onClick={() => copyEmail(lead.applicant_contact!)} style={{ marginLeft: 8, background: "rgba(13,148,136,0.2)", color: C.teal, border: `1px solid rgba(13,148,136,0.3)`, borderRadius: 5, padding: "2px 7px", fontSize: 10, cursor: "pointer" }}>Copy</button>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+            <span style={{ fontSize: 10.5, color: C.faint }}>Template</span>
+            {LETTER_TEMPLATES.map((t) => (
+              <button
+                key={t}
+                onClick={() => setTemplate(t)}
+                style={btn(template === t ? "primary" : "quiet", { padding: "5px 12px" })}
+              >
+                {t}
+              </button>
+            ))}
+            <span style={{ width: 12 }} />
+            {CONTACT_METHODS.map((m) => (
+              <button key={m.id} onClick={() => recordContact("homeowner", m.id)} disabled={busy} style={btn("ghost")}>
+                Log {m.label.toLowerCase()}
+              </button>
+            ))}
+          </div>
+          {lead.applicant_address && (
+            <p style={{ fontSize: 11, color: C.dim, margin: "10px 0 0" }}>
+              {lead.applicant_name ? `${lead.applicant_name} · ` : ""}
+              {lead.applicant_address}
             </p>
           )}
-          {!agent && !lead.agent_name && (
-            <div style={{ marginTop: 8, padding: "8px 10px", background: "rgba(217,119,6,0.12)", border: `1px solid rgba(217,119,6,0.3)`, borderRadius: 7 }}>
-              <p style={{ fontSize: 11, color: C.amber, margin: "0 0 8px" }}>⚠️ No agent listed — read the PDF form or contact homeowner directly</p>
-              {/* PART 3 — homeowner search launchers (open-in-new-tab only; nothing is scraped or stored) */}
-              <p style={{ fontSize: 10, fontWeight: 700, color: C.amber, textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 6px" }}>Find homeowner contact:</p>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                {(() => {
-                  const town = guessTown(lead);
-                  const pc = (lead.postcode || "").trim();
-                  const links = [
-                    {
-                      label: "🔎 192.com search",
-                      url: `https://www.192.com/people/search/?initial=&surname=&town=${encodeURIComponent(town)}&postcode=${encodeURIComponent(pc)}`,
-                    },
-                    {
-                      label: "🏷️ Land Registry",
-                      url: "https://search-property-information.service.gov.uk/",
-                    },
-                    {
-                      label: "🌐 Google: occupier",
-                      url: `https://www.google.com/search?q=${encodeURIComponent(`occupier of ${lead.site_address}`)}`,
-                    },
-                  ];
-                  return links.map((l) => (
-                    <a key={l.label} href={l.url} target="_blank" rel="noreferrer"
-                      onClick={(e) => e.stopPropagation()}
-                      style={{ display: "inline-flex", alignItems: "center", background: "rgba(255,255,255,0.06)", color: C.amber, border: `1px solid ${C.amberBorder}`, borderRadius: 6, padding: "5px 10px", fontSize: 10, fontWeight: 700, textDecoration: "none" }}>
-                      {l.label} ↗
-                    </a>
-                  ));
-                })()}
-              </div>
-              <p style={{ fontSize: 9, color: C.dimText, margin: "6px 0 0", lineHeight: 1.5 }}>
-                Convenience launchers only — ProGrafter does not fetch or store anything from these services.
-              </p>
-            </div>
-          )}
-        </div>
+        </Panel>
 
-        <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: 10, padding: "12px 14px" }}>
-          <p style={{ fontSize: 10, fontWeight: 700, color: C.teal, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 6px" }}>🏛️ Agent / representative (contact first)</p>
-          {agent ? (
+        {/* Architect / agent */}
+        <Panel>
+          <SectionLabel>Architect / agent</SectionLabel>
+          {agent || lead.agent_name ? (
             <>
-              <p style={{ fontSize: 13, fontWeight: 600, color: C.brightText, margin: "0 0 2px" }}>{agent.contact_name}</p>
-              {agent.company_name && <p style={{ fontSize: 11, color: C.teal, margin: "0 0 2px" }}>{agent.company_name}</p>}
-              {agent.address && <p style={{ fontSize: 11, color: C.dimText, margin: "0 0 8px" }}>{agent.address}</p>}
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
-                {agent.email && (
-                  <a href={`mailto:${agent.email}`} style={{ display: "inline-flex", alignItems: "center", gap: 4, background: C.teal, color: C.white, borderRadius: 6, padding: "5px 10px", fontSize: 11, fontWeight: 600, textDecoration: "none" }}>✉️ {agent.email}</a>
-                )}
-                {agent.email && (
-                  <button onClick={() => copyEmail(agent.email!)} style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "rgba(13,148,136,0.2)", color: C.teal, border: `1px solid rgba(13,148,136,0.3)`, borderRadius: 6, padding: "5px 10px", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>Copy</button>
+              <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "baseline" }}>
+                <p style={{ fontSize: 14, fontWeight: 700, margin: 0 }}>
+                  {agent?.company_name || agent?.contact_name || lead.agent_name}
+                </p>
+                <Chip
+                  label={(lead.agent_outreach_status || "not contacted").toUpperCase()}
+                  color={lead.agent_outreach_status === "contacted" ? C.amberBright : C.faint}
+                />
+                {agent?.email && (
+                  <button onClick={() => copy(agent.email!, "Email")} style={btn("quiet", { padding: "3px 9px" })}>
+                    {agent.email}
+                  </button>
                 )}
               </div>
-              {agent.phone && (
-                <div style={{ marginTop: 8, padding: "6px 10px", background: "rgba(217,119,6,0.10)", border: `1px solid ${C.amberBorder}`, borderRadius: 7, fontSize: 11, color: C.amber }}>
-                  ⚠ Phone on file ({agent.phone}) is unverified — planning portals rarely publish real phone numbers. Confirm via Companies House or the agent's own website before calling.
-                </div>
-              )}
-            </>
-          ) : lead.agent_name ? (
-            <>
-              <p style={{ fontSize: 13, fontWeight: 600, color: C.brightText, margin: "0 0 2px" }}>{lead.agent_name}</p>
-              {lead.agent_address && <p style={{ fontSize: 11, color: C.dimText, margin: "0 0 6px" }}>{lead.agent_address}</p>}
-              {lead.agent_contact && (
-                <p style={{ fontSize: 11, color: C.teal, margin: 0, fontWeight: 600 }}>📞 {lead.agent_contact}
-                  <button onClick={() => copyEmail(lead.agent_contact!)} style={{ marginLeft: 8, background: "rgba(13,148,136,0.2)", color: C.teal, border: `1px solid rgba(13,148,136,0.3)`, borderRadius: 5, padding: "2px 7px", fontSize: 10, cursor: "pointer" }}>Copy</button>
+              {lead.agent_last_contact_at && (
+                <p style={{ fontSize: 11, color: C.dim, margin: "6px 0 0" }}>
+                  Last contact {fmtDate(lead.agent_last_contact_at)} · {lead.agent_last_contact_method}
                 </p>
               )}
-              <p style={{ fontSize: 10, color: C.dimText, marginTop: 6 }}>Extracted from official application form PDF.</p>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 10 }}>
+                {CONTACT_METHODS.map((m) => (
+                  <button key={m.id} onClick={() => recordContact("agent", m.id)} disabled={busy} style={btn("ghost")}>
+                    {m.label}
+                  </button>
+                ))}
+              </div>
             </>
           ) : (
-            <p style={{ fontSize: 11, color: C.dimText, margin: 0 }}>No agent listed. Click "Read PDF form" above to extract from the official application.</p>
+            <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+              <p style={{ fontSize: 12, color: C.faint, margin: 0 }}>Not identified</p>
+              <button onClick={enrichFromPdf} disabled={enriching || !lead.council_application_url} style={btn("quiet")}>
+                + Identify from PDF form
+              </button>
+            </div>
           )}
-          {lead.council_application_url && (
-            <p style={{ fontSize: 10, marginTop: 8, marginBottom: 0 }}>
-              <a href={lead.council_application_url} target="_blank" rel="noreferrer" style={{ color: C.teal, textDecoration: "underline" }}>↗ Open council planning page</a>
-              {lead.pdf_source_url && (
-                <> · <a href={lead.pdf_source_url} target="_blank" rel="noreferrer" style={{ color: C.teal, textDecoration: "underline" }}>↗ Open form PDF</a></>
-              )}
+        </Panel>
+
+        {/* Response / outcome */}
+        <Panel>
+          <SectionLabel>Response / outcome</SectionLabel>
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+            {RESPONSE_STATES.map((r) => {
+              const on = lead.response_state === r.id;
+              const color =
+                r.tone === "teal" ? C.tealBright : r.tone === "purple" ? C.purple : r.tone === "red" ? C.red : C.dim;
+              return (
+                <button
+                  key={r.id}
+                  onClick={() => setResponse(r.id)}
+                  style={{
+                    background: on ? color : "transparent",
+                    color: on ? C.white : color,
+                    border: `1px solid ${on ? color : C.line}`,
+                    borderRadius: 20,
+                    padding: "5px 12px",
+                    fontSize: 10.5,
+                    fontWeight: 700,
+                    cursor: "pointer",
+                  }}
+                >
+                  {r.label}
+                </button>
+              );
+            })}
+          </div>
+          {lead.response_state === "draftline_enquiry" && (
+            <p style={{ fontSize: 10.5, color: C.purple, margin: "10px 0 0" }}>
+              Source attribution retained: ProGrafter Planning Outreach
+              {lead.outreach_campaign ? ` · ${lead.outreach_campaign}` : ""}.
             </p>
           )}
-        </div>
+          {lead.response_at && (
+            <p style={{ fontSize: 10.5, color: C.faint, margin: "8px 0 0" }}>Recorded {fmtDate(lead.response_at)}</p>
+          )}
+        </Panel>
 
-        {/* OUTREACH TRACKING */}
-        <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: 10, padding: "12px 14px" }}>
-          <p style={{ fontSize: 10, fontWeight: 700, color: C.teal, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 10px" }}>
-            📞 Outreach tracking
-          </p>
-
-          {/* Agent contact */}
-          <div style={{ marginBottom: 12, paddingBottom: 12, borderBottom: `1px solid ${C.darkBorder}` }}>
-            <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: C.brightText, cursor: "pointer", marginBottom: 6 }}>
-              <input type="checkbox" checked={agentContacted} onChange={(e) => setAgentContacted(e.target.checked)} />
-              <span style={{ fontWeight: 600 }}>Agent contacted</span>
-              {lead.agent_contacted_at && (
-                <span style={{ fontSize: 10, color: C.dimText }}>· first {new Date(lead.agent_contacted_at).toLocaleDateString()}</span>
-              )}
-            </label>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, paddingLeft: 22 }}>
-              {CONTACT_METHODS.map((m) => {
-                const on = agentMethods.includes(m.id);
-                return (
-                  <button key={m.id} type="button" onClick={() => toggleMethod(agentMethods, setAgentMethods, m.id)} style={{
-                    background: on ? C.teal : "transparent", color: on ? C.white : C.dimText,
-                    border: `1px solid ${on ? C.teal : C.darkBorder}`, borderRadius: 20, padding: "3px 10px",
-                    fontSize: 10, fontWeight: 600, cursor: "pointer",
-                  }}>{m.label}</button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Homeowner contact */}
-          <div>
-            <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: C.brightText, cursor: "pointer", marginBottom: 6 }}>
-              <input type="checkbox" checked={homeownerContacted} onChange={(e) => setHomeownerContacted(e.target.checked)} />
-              <span style={{ fontWeight: 600 }}>🏠 Homeowner contacted directly</span>
-              {lead.homeowner_contacted_at && (
-                <span style={{ fontSize: 10, color: C.dimText }}>· first {new Date(lead.homeowner_contacted_at).toLocaleDateString()}</span>
-              )}
-            </label>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, paddingLeft: 22, marginBottom: 8 }}>
-              {CONTACT_METHODS.map((m) => {
-                const on = homeownerMethods.includes(m.id);
-                return (
-                  <button key={m.id} type="button" onClick={() => toggleMethod(homeownerMethods, setHomeownerMethods, m.id)} style={{
-                    background: on ? C.teal : "transparent", color: on ? C.white : C.dimText,
-                    border: `1px solid ${on ? C.teal : C.darkBorder}`, borderRadius: 20, padding: "3px 10px",
-                    fontSize: 10, fontWeight: 600, cursor: "pointer",
-                  }}>{m.label}</button>
-                );
-              })}
-            </div>
-            <div style={{ paddingLeft: 22, display: "flex", alignItems: "center", gap: 8, fontSize: 11 }}>
-              <span style={{ color: C.dimText }}>Interested?</span>
-              {(["yes", "no", "unknown"] as const).map((v) => {
-                const on = homeownerInterested === v;
-                const color = v === "yes" ? C.green : v === "no" ? C.red : C.dimText;
-                return (
-                  <button key={v} type="button" onClick={() => setHomeownerInterested(v)} style={{
-                    background: on ? color : "transparent", color: on ? C.white : color,
-                    border: `1px solid ${color}`, borderRadius: 20, padding: "3px 12px",
-                    fontSize: 10, fontWeight: 700, cursor: "pointer", textTransform: "capitalize",
-                  }}>{v}</button>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
-
-        <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: 10, padding: "12px 14px" }}>
-          <p style={{ fontSize: 10, fontWeight: 700, color: C.teal, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 8px" }}>Pipeline status</p>
-          <select value={pipelineStatus} onChange={(e) => setPipelineStatus(e.target.value)} style={{ ...inp(), marginBottom: 10 }}>
-            {PIPELINE_STAGES.map((s) => <option key={s.id} value={s.id} style={{ color: C.body }}>{s.label}</option>)}
-          </select>
-          <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={4} placeholder="Notes on this lead — conversations, outcomes…" style={{ ...inp(), resize: "vertical", marginBottom: 8 }} />
-          {/* PART 1 — one-click accept of the system-suggested next action */}
-          {(() => {
-            const sug = suggestedNextAction(lead, agent);
-            if (!sug) return null;
-            return (
-              <div style={{ display: "flex", alignItems: "center", gap: 8, background: "rgba(13,148,136,0.10)", border: `1px solid rgba(13,148,136,0.3)`, borderRadius: 8, padding: "8px 10px", marginBottom: 8 }}>
-                <span style={{ fontSize: 8, fontWeight: 700, color: C.teal, background: "rgba(13,148,136,0.18)", border: `1px solid rgba(13,148,136,0.4)`, borderRadius: 4, padding: "1px 5px", letterSpacing: "0.06em", flexShrink: 0 }}>AUTO</span>
-                <span style={{ fontSize: 11, color: C.teal, fontWeight: 600, flex: 1, lineHeight: 1.3 }}>{sug}</span>
-                <button onClick={() => acceptSuggested(sug)} style={{ background: C.teal, color: C.white, border: "none", borderRadius: 6, padding: "4px 12px", fontSize: 11, fontWeight: 700, cursor: "pointer", flexShrink: 0 }}>Accept</button>
+        {/* Planning application info */}
+        <Panel>
+          <SectionLabel>Planning application</SectionLabel>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))", gap: "10px 18px" }}>
+            {info.map(([k, v]) => (
+              <div key={k}>
+                <p style={{ fontSize: 9.5, color: C.faint, margin: 0, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                  {k}
+                </p>
+                <p style={{ fontSize: 12, color: C.cream, margin: "2px 0 0", fontWeight: 500, wordBreak: "break-word" }}>
+                  {v}
+                </p>
               </div>
-            );
-          })()}
-          <input value={nextAction} onChange={(e) => setNextAction(e.target.value)} placeholder="Next action — e.g. 'Call agent back after 20 May'" style={{ ...inp(), marginBottom: 8 }} />
-          <button onClick={save} disabled={saving} style={{ width: "100%", background: C.teal, color: C.white, border: "none", borderRadius: 8, padding: "9px", fontSize: 12, fontWeight: 700, cursor: saving ? "not-allowed" : "pointer", opacity: saving ? 0.6 : 1, marginBottom: 8 }}>
-            {saving ? "Saving…" : "Save changes"}
+            ))}
+          </div>
+        </Panel>
+
+        {/* Activity */}
+        <Panel>
+          <SectionLabel>Activity</SectionLabel>
+          {events.length === 0 ? (
+            <p style={{ fontSize: 11.5, color: C.faint, margin: 0 }}>No recorded activity yet.</p>
+          ) : (
+            <div style={{ display: "grid", gap: 7 }}>
+              {events.map((e) => (
+                <div key={e.id} style={{ display: "flex", gap: 10, fontSize: 11.5 }}>
+                  <span style={{ color: C.faint, minWidth: 92 }}>{fmtDate(e.created_at)}</span>
+                  <span style={{ color: C.cream }}>
+                    {e.detail || e.event_type}
+                    {e.template ? ` — Template ${e.template}` : ""}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </Panel>
+
+        {/* Notes + manual next action */}
+        <Panel>
+          <SectionLabel>Notes</SectionLabel>
+          <textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            rows={4}
+            placeholder="Notes on this lead — conversations, outcomes…"
+            style={{ ...inp(), resize: "vertical", marginBottom: 8 }}
+          />
+          <input
+            value={nextAction}
+            onChange={(e) => setNextAction(e.target.value)}
+            placeholder="Override next action (optional)"
+            style={{ ...inp(), marginBottom: 8 }}
+          />
+          <button
+            onClick={() => patch({ notes, next_action: nextAction }, "Lead updated")}
+            disabled={busy}
+            style={btn("primary", { width: "100%", padding: "10px" })}
+          >
+            {busy ? "Saving…" : "Save changes"}
           </button>
-          {/* PART 2 — reversible skip from the detail page */}
-          <button onClick={() => onSkip(lead, lead.outreach_status !== "skipped")} style={{ width: "100%", background: "transparent", color: lead.outreach_status === "skipped" ? C.teal : C.dimText, border: `1px solid ${C.darkBorder}`, borderRadius: 8, padding: "8px", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>
-            {lead.outreach_status === "skipped" ? "↺ Restore this lead" : "Skip this lead"}
-          </button>
-        </div>
+        </Panel>
       </div>
     </div>
   );
 };
 
-const AgentCard = ({ agent, onSelect, selected, leadCount }: { agent: Agent; onSelect: (a: Agent) => void; selected: boolean; leadCount: number }) => {
+/* ------------------------------------------------------------------ */
+/* Agent card (unchanged behaviour)                                    */
+/* ------------------------------------------------------------------ */
+
+const AGENT_STATUS: Record<string, { label: string; color: string }> = {
+  identified: { label: "Identified", color: C.purple },
+  contacted: { label: "Contacted", color: C.amberBright },
+  interested: { label: "Interested", color: C.tealBright },
+  partner: { label: "Partner", color: C.green },
+  not_interested: { label: "Not interested", color: C.dim },
+};
+
+const AgentCard = ({
+  agent,
+  onSelect,
+  selected,
+  leadCount,
+}: {
+  agent: Agent;
+  onSelect: (a: Agent) => void;
+  selected: boolean;
+  leadCount: number;
+}) => {
   const status = AGENT_STATUS[agent.relationship_status] || AGENT_STATUS.identified;
   return (
-    <div onClick={() => onSelect(agent)}
+    <div
+      onClick={() => onSelect(agent)}
       style={{
-        background: selected ? C.darkCard : "rgba(255,255,255,0.04)",
-        border: `1px solid ${selected ? C.teal : C.darkBorder}`,
-        borderRadius: 10, padding: "10px 14px", cursor: "pointer",
-        marginBottom: 6, transition: "all 0.15s",
-      }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6, gap: 8 }}>
+        background: selected ? "rgba(13,148,136,0.14)" : "rgba(255,255,255,0.03)",
+        boxShadow: selected ? `inset 0 0 0 1px ${C.teal}` : "none",
+        borderRadius: 10,
+        padding: "10px 14px",
+        cursor: "pointer",
+        marginBottom: 6,
+      }}
+    >
+      <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
         <div style={{ minWidth: 0 }}>
-          <p style={{ fontSize: 12, fontWeight: 700, color: C.brightText, margin: "0 0 1px" }}>{agent.contact_name}</p>
-          <p style={{ fontSize: 10, color: C.teal, margin: 0 }}>{agent.company_name || "Independent"}</p>
+          <p style={{ fontSize: 12.5, fontWeight: 700, color: C.cream, margin: 0 }}>{agent.contact_name}</p>
+          <p style={{ fontSize: 10.5, color: C.tealBright, margin: "2px 0 0" }}>{agent.company_name || "Independent"}</p>
         </div>
         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4 }}>
-          <span style={{ fontSize: 10, fontWeight: 600, background: status.bg, color: status.text, border: `1px solid ${status.border}`, borderRadius: 20, padding: "2px 8px", whiteSpace: "nowrap" }}>{status.label}</span>
-          <span title={`${leadCount} planning application${leadCount === 1 ? "" : "s"}`} style={{ fontSize: 10, fontWeight: 700, color: leadCount > 1 ? C.amber : C.dimText, background: "rgba(255,255,255,0.06)", border: `1px solid ${C.darkBorder}`, borderRadius: 20, padding: "2px 8px", whiteSpace: "nowrap" }}>
+          <Chip label={status.label} color={status.color} />
+          <span style={{ fontSize: 10, color: leadCount > 1 ? C.amberBright : C.faint }}>
             {leadCount} app{leadCount === 1 ? "" : "s"}
           </span>
         </div>
       </div>
-      <div style={{ display: "flex", justifyContent: "space-between", gap: 6 }}>
-        <span style={{ fontSize: 10, color: C.dimText, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{(agent.councils_active || []).join(", ")}</span>
-        <div style={{ display: "flex", gap: 6 }}>
-          {agent.intro_sent && <span style={{ fontSize: 10, color: C.teal }}>✉️</span>}
-          {agent.meeting_held && <span style={{ fontSize: 10, color: C.green }}>🤝</span>}
-        </div>
-      </div>
     </div>
   );
 };
 
+/* ------------------------------------------------------------------ */
+/* Page                                                                */
+/* ------------------------------------------------------------------ */
+
+const PAGE_SIZE = 20;
+const LS_BAND = "pp_value_band";
+const LS_SORT = "pp_sort";
+
+const VALUE_BANDS = [
+  { id: "all", label: "All", min: 0 },
+  { id: "40k", label: "£40k+", min: 40000 },
+  { id: "80k", label: "£80k+", min: 80000 },
+  { id: "150k", label: "£150k+", min: 150000 },
+];
+const SORT_OPTIONS = [
+  { id: "value_desc", label: "Value (high to low)" },
+  { id: "value_asc", label: "Value (low to high)" },
+  { id: "newest", label: "Newest" },
+  { id: "deadline", label: "Oldest first" },
+];
+
 export default function PlanningPipeline() {
-  const [tab, setTab] = useState<"leads" | "agents" | "kanban">("leads");
+  const [tab, setTab] = useState<"leads" | "batch" | "agents" | "insights">("leads");
   const [leads, setLeads] = useState<Lead[]>([]);
   const [agents, setAgents] = useState<Agent[]>([]);
+  const [events, setEvents] = useState<LeadEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
-  const [filterStatus, setFilterStatus] = useState("all");
-  const [filterPipeline, setFilterPipeline] = useState("all");
+  const [view, setView] = useState<QuickView>("all");
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(0);
   const [ingesting, setIngesting] = useState(false);
   const [valueBand, setValueBand] = useState<string>(() => localStorage.getItem(LS_BAND) || "40k");
   const [sortBy, setSortBy] = useState<string>(() => localStorage.getItem(LS_SORT) || "value_desc");
   const [showSkipped, setShowSkipped] = useState(false);
   const isMobile = useIsMobile();
 
-  useEffect(() => { localStorage.setItem(LS_BAND, valueBand); }, [valueBand]);
-  useEffect(() => { localStorage.setItem(LS_SORT, sortBy); }, [sortBy]);
+  useEffect(() => localStorage.setItem(LS_BAND, valueBand), [valueBand]);
+  useEffect(() => localStorage.setItem(LS_SORT, sortBy), [sortBy]);
+  useEffect(() => setPage(0), [view, search, valueBand, sortBy, showSkipped]);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     const [{ data: lData, error: lErr }, { data: aData, error: aErr }] = await Promise.all([
       supabase.from("planning_leads").select("*").order("priority_score", { ascending: false }),
@@ -762,14 +784,52 @@ export default function PlanningPipeline() {
     ]);
     if (lErr) toast({ title: "Failed to load leads", description: lErr.message, variant: "destructive" });
     if (aErr) toast({ title: "Failed to load agents", description: aErr.message, variant: "destructive" });
-    setLeads((lData as Lead[]) || []);
-    setAgents((aData as Agent[]) || []);
+    setLeads(((lData as unknown) as Lead[]) || []);
+    setAgents(((aData as unknown) as Agent[]) || []);
     setLoading(false);
-  };
+  }, []);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  // Activity for the selected lead only — keeps the page light.
+  useEffect(() => {
+    if (!selectedLeadId) {
+      setEvents([]);
+      return;
+    }
+    let cancelled = false;
+    void (async () => {
+      const { data } = await supabase
+        .from("planning_lead_events")
+        .select("*")
+        .eq("lead_id", selectedLeadId)
+        .order("created_at", { ascending: false })
+        .limit(30);
+      if (!cancelled) setEvents(((data as unknown) as LeadEvent[]) || []);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedLeadId, leads]);
+
+  const logEvent = useCallback(async (leadId: string, type: string, detail?: string, template?: string) => {
+    const { data: auth } = await supabase.auth.getUser();
+    await supabase.from("planning_lead_events").insert({
+      lead_id: leadId,
+      event_type: type,
+      detail: detail ?? null,
+      template: template ?? null,
+      created_by: auth.user?.id ?? null,
+    } as never);
+  }, []);
 
   const runIngest = async () => {
     setIngesting(true);
-    const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
     const { data, error } = await supabase.functions.invoke("ingest-planning-leads", {
       headers: session ? { Authorization: `Bearer ${session.access_token}` } : {},
     });
@@ -782,9 +842,8 @@ export default function PlanningPipeline() {
     if (r.started) {
       toast({
         title: "Planning ingest started",
-        description: `Scanning ${r.councils ?? 8} Notts councils in the background. Leads will appear over the next 30–60s.`,
+        description: `Scanning ${r.councils ?? 8} Notts councils in the background.`,
       });
-      // Poll refresh a few times so new leads show without a manual reload
       setTimeout(load, 15000);
       setTimeout(load, 45000);
       setTimeout(load, 90000);
@@ -793,12 +852,21 @@ export default function PlanningPipeline() {
         title: "Planning ingest complete",
         description: `${r.inserted ?? 0} new Notts leads from ${r.councils ?? 0} councils (${r.fetched ?? 0} scanned)`,
       });
-      load();
+      void load();
     }
   };
 
-
-  useEffect(() => { load(); }, []);
+  const skipLead = async (l: Lead, skip: boolean) => {
+    const { error } = await supabase
+      .from("planning_leads")
+      .update({ outreach_status: skip ? "skipped" : "not_contacted" } as never)
+      .eq("id", l.id);
+    if (error) toast({ title: "Update failed", description: error.message, variant: "destructive" });
+    else {
+      toast({ title: skip ? "Lead skipped" : "Lead restored" });
+      void load();
+    }
+  };
 
   const agentsById = useMemo(() => Object.fromEntries(agents.map((a) => [a.id, a])), [agents]);
   const leadsByAgent = useMemo(() => {
@@ -806,24 +874,25 @@ export default function PlanningPipeline() {
     for (const l of leads) if (l.agent_id) m[l.agent_id] = (m[l.agent_id] ?? 0) + 1;
     return m;
   }, [leads]);
-  const selectedLead = leads.find((l) => l.id === selectedLeadId) || leads[0] || null;
 
   const bandMin = useMemo(() => VALUE_BANDS.find((b) => b.id === valueBand)?.min ?? 0, [valueBand]);
 
   const filteredLeads = useMemo(() => {
     const out = leads.filter((l) => {
-      // Skipped leads are hidden from default views unless toggled on
-      if (!showSkipped && l.outreach_status === "skipped") return false;
+      if (!showSkipped && isSkipped(l)) return false;
+      if (!matchesView(l, view)) return false;
       if (bandMin > 0 && (Number(l.estimated_value_max) || 0) < bandMin) return false;
-      if (filterStatus !== "all" && l.status !== filterStatus) return false;
-      if (filterPipeline !== "all" && l.pipeline_status !== filterPipeline) return false;
       if (search) {
         const s = search.toLowerCase();
-        const agent = l.agent_id ? agentsById[l.agent_id] : null;
-        if (!l.site_address.toLowerCase().includes(s)
-          && !(l.description || "").toLowerCase().includes(s)
-          && !(agent?.contact_name || "").toLowerCase().includes(s)
-          && !(l.applicant_name || "").toLowerCase().includes(s)) return false;
+        const a = l.agent_id ? agentsById[l.agent_id] : null;
+        if (
+          !l.site_address.toLowerCase().includes(s) &&
+          !(l.description || "").toLowerCase().includes(s) &&
+          !(l.application_ref || "").toLowerCase().includes(s) &&
+          !(a?.contact_name || "").toLowerCase().includes(s) &&
+          !(l.applicant_name || "").toLowerCase().includes(s)
+        )
+          return false;
       }
       return true;
     });
@@ -831,265 +900,579 @@ export default function PlanningPipeline() {
     const sub = (l: Lead) => (l.submitted_date ? new Date(l.submitted_date).getTime() : 0);
     out.sort((a, b) => {
       switch (sortBy) {
-        case "value_asc": return val(a) - val(b);
-        case "value_desc": return val(b) - val(a);
-        case "newest": return sub(b) - sub(a);
-        case "deadline": return sub(a) - sub(b); // oldest submission = closest decision deadline
-        default: return 0;
+        case "value_asc":
+          return val(a) - val(b);
+        case "value_desc":
+          return val(b) - val(a);
+        case "newest":
+          return sub(b) - sub(a);
+        case "deadline":
+          return sub(a) - sub(b);
+        default:
+          return 0;
       }
     });
     return out;
-  }, [leads, filterStatus, filterPipeline, search, agentsById, bandMin, showSkipped, sortBy]);
+  }, [leads, view, search, agentsById, bandMin, showSkipped, sortBy]);
 
-  const skippedCount = useMemo(() => leads.filter((l) => l.outreach_status === "skipped").length, [leads]);
+  const pageCount = Math.max(1, Math.ceil(filteredLeads.length / PAGE_SIZE));
+  const pageLeads = filteredLeads.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE);
+  const selectedLead = leads.find((l) => l.id === selectedLeadId) || null;
 
-  const skipLead = async (l: Lead, skip: boolean) => {
+  /* ---- metrics ---- */
+  const weekAgo = Date.now() - 7 * 86400000;
+  const newThisWeek = leads.filter((l) => l.created_at && new Date(l.created_at).getTime() >= weekAgo).length;
+  const totalValue = leads.reduce((s, l) => s + (Number(l.estimated_value_max) || 0), 0);
+  const valueThisWeek = leads
+    .filter((l) => l.created_at && new Date(l.created_at).getTime() >= weekAgo)
+    .reduce((s, l) => s + (Number(l.estimated_value_max) || 0), 0);
+  const hotLeads = leads.filter((l) => l.pipeline_status === "new" && daysSince(l.submitted_date) <= 14).length;
+  const funnel = useMemo(() => buildFunnel(leads), [leads]);
+  const today = useMemo(() => buildToday(leads), [leads]);
+  const batchLeads = useMemo(() => leads.filter((l) => l.letter_batch_status === "queued"), [leads]);
+
+  const markBatchSent = async () => {
+    if (!batchLeads.length) return;
+    const now = new Date().toISOString();
+    const ids = batchLeads.map((l) => l.id);
     const { error } = await supabase
       .from("planning_leads")
-      .update({ outreach_status: skip ? "skipped" : "not_contacted" } as never)
-      .eq("id", l.id);
+      .update({
+        letter_batch_status: "sent",
+        letter_batch_sent_at: now,
+        letter_sent_at: now,
+        homeowner_contacted: true,
+        homeowner_last_contact_at: now,
+        homeowner_last_contact_method: "letter",
+        outreach_status: "letter_sent",
+        pipeline_status: "letter_sent",
+      } as never)
+      .in("id", ids);
     if (error) {
-      toast({ title: "Update failed", description: error.message, variant: "destructive" });
-    } else {
-      toast({ title: skip ? "Lead skipped" : "Lead restored" });
-      load();
+      toast({ title: "Batch update failed", description: error.message, variant: "destructive" });
+      return;
     }
+    await Promise.all(
+      batchLeads.map((l) => logEvent(l.id, "letter_sent", "Letter sent", l.homeowner_letter_template || "A")),
+    );
+    toast({ title: `Batch marked sent`, description: `${ids.length} letters recorded as sent.` });
+    void load();
   };
 
-  const hotLeads = leads.filter((l) => l.pipeline_status === "new" && daysSince(l.submitted_date) <= 14).length;
-  const totalValue = leads.reduce((s, l) => s + (Number(l.estimated_value_max) || 0), 0);
-
-  const updateAgentStatus = async (agent: Agent, status: string) => {
-    const { error } = await supabase.from("planning_agents").update({ relationship_status: status }).eq("id", agent.id);
-    if (error) {
-      toast({ title: "Update failed", description: error.message, variant: "destructive" });
-    } else {
-      toast({ title: "Agent updated" });
-      setSelectedAgent({ ...agent, relationship_status: status });
-      load();
-    }
+  const exportBatchCsv = () => {
+    const rows = [
+      ["applicant_name", "address", "postcode", "planning_ref", "council", "description", "template", "campaign"],
+      ...batchLeads.map((l) => [
+        l.applicant_name || "The Homeowner",
+        l.applicant_address || l.site_address,
+        l.postcode || "",
+        l.application_ref,
+        l.council_name,
+        (l.description || "").replace(/[\r\n]+/g, " "),
+        l.homeowner_letter_template || "A",
+        l.outreach_campaign || campaignFor(l.homeowner_letter_template || "A") || "",
+      ]),
+    ];
+    const csv = rows.map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\n");
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `prografter-letter-batch-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
+
+  const kpi = (label: string, value: string, delta: string | null, color = C.cream) => (
+    <div>
+      <p style={{ fontSize: 9.5, color: C.faint, margin: 0, letterSpacing: "0.14em" }}>{label}</p>
+      <p style={{ fontSize: 24, fontWeight: 700, color, margin: "2px 0 0", lineHeight: 1.1 }}>{value}</p>
+      {delta && <p style={{ fontSize: 10.5, color: C.tealBright, margin: "2px 0 0" }}>{delta}</p>}
+    </div>
+  );
 
   const navTab = (id: typeof tab, label: string) => (
-    <button onClick={() => setTab(id)} style={{
-      padding: "10px 18px", borderRadius: 10, border: "none",
-      fontSize: 13, fontWeight: 600, cursor: "pointer", transition: "all 0.15s",
-      background: tab === id ? C.teal : "transparent",
-      color: tab === id ? C.white : C.dimText,
-    }}>{label}</button>
+    <button
+      key={id}
+      onClick={() => setTab(id)}
+      style={{
+        padding: "12px 16px",
+        border: "none",
+        background: "transparent",
+        borderBottom: `2px solid ${tab === id ? C.teal : "transparent"}`,
+        color: tab === id ? C.cream : C.dim,
+        fontSize: 12.5,
+        fontWeight: 700,
+        cursor: "pointer",
+      }}
+    >
+      {label}
+    </button>
   );
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", height: isMobile ? "auto" : "100vh", fontFamily: "system-ui, sans-serif", background: C.deep, width: "100%", overflowX: "hidden" }}>
-      <div style={{ background: C.deep, borderBottom: `1px solid ${C.darkBorder}`, padding: isMobile ? "10px 14px" : "0 20px", minHeight: 56, display: "flex", flexDirection: isMobile ? "column" : "row", alignItems: isMobile ? "stretch" : "center", justifyContent: "space-between", gap: isMobile ? 10 : 0, flexShrink: 0 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-          <div className="font-heading tracking-wider" style={{ fontSize: isMobile ? 18 : 22, fontWeight: 700 }}>
-            <Logo variant="light" className="h-9 w-auto inline-block" />
-          </div>
-          <span style={{ color: C.darkBorder }}>|</span>
-          <span style={{ fontSize: isMobile ? 10 : 12, color: C.dimText, fontWeight: 500, letterSpacing: "0.05em" }}>PLANNING PIPELINE</span>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100vh",
+        height: isMobile ? "auto" : "100vh",
+        fontFamily: "system-ui, sans-serif",
+        background: C.deep,
+        width: "100%",
+        overflowX: "hidden",
+      }}
+    >
+      {/* Masthead */}
+      <div
+        style={{
+          padding: isMobile ? "12px 14px" : "14px 24px",
+          display: "flex",
+          flexWrap: "wrap",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 16,
+          flexShrink: 0,
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <Logo variant="light" className="h-8 w-auto inline-block" />
+          <span style={{ fontSize: 11, color: C.dim, fontWeight: 600, letterSpacing: "0.18em" }}>PLANNING PIPELINE</span>
         </div>
-        <div style={{ display: "flex", gap: isMobile ? 8 : 16, alignItems: "center", flexWrap: "wrap", justifyContent: isMobile ? "space-between" : "flex-end" }}>
-          <div style={{ textAlign: "center", flex: isMobile ? "1 1 60px" : "none" }}>
-            <p style={{ fontSize: 16, fontWeight: 700, color: C.red, margin: 0 }}>{hotLeads}</p>
-            <p style={{ fontSize: 9, color: C.dimText, margin: 0 }}>HOT</p>
+        <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 18 : 32, flexWrap: "wrap" }}>
+          {kpi("TOTAL LEADS", String(leads.length), newThisWeek ? `+${newThisWeek} this week` : null)}
+          {kpi(
+            "ESTIMATED VALUE",
+            fmtCompact(totalValue),
+            valueThisWeek ? `+${fmtCompact(valueThisWeek)} this week` : null,
+            C.tealBright,
+          )}
+          <span style={{ fontSize: 10.5, color: C.faint }}>{hotLeads} hot</span>
+          <div style={{ display: "flex", gap: 8 }}>
+            <Link to="/admin/trade-scraper" style={{ ...btn("quiet"), textDecoration: "none" }}>
+              Trade scraper
+            </Link>
+            <button onClick={runIngest} disabled={ingesting} style={btn("primary", { opacity: ingesting ? 0.6 : 1 })}>
+              {ingesting ? "Ingesting…" : "Ingest Notts planning"}
+            </button>
           </div>
-          <div style={{ textAlign: "center", flex: isMobile ? "1 1 60px" : "none" }}>
-            <p style={{ fontSize: 16, fontWeight: 700, color: C.brightText, margin: 0 }}>{leads.length}</p>
-            <p style={{ fontSize: 9, color: C.dimText, margin: 0 }}>TOTAL</p>
-            <p style={{ fontSize: 9, color: C.teal, margin: 0, fontWeight: 700 }}>({filteredLeads.length} visible)</p>
-          </div>
-          <div style={{ textAlign: "center", flex: isMobile ? "1 1 60px" : "none" }}>
-            <p style={{ fontSize: 16, fontWeight: 700, color: C.teal, margin: 0 }}>{agents.length}</p>
-            <p style={{ fontSize: 9, color: C.dimText, margin: 0 }}>AGENTS</p>
-          </div>
-          <div style={{ textAlign: "center", flex: isMobile ? "1 1 80px" : "none" }}>
-            <p style={{ fontSize: 14, fontWeight: 700, color: C.green, margin: 0 }}>{fmt(totalValue)}</p>
-            <p style={{ fontSize: 9, color: C.dimText, margin: 0 }}>VALUE</p>
-          </div>
-          <Link to="/admin/trade-scraper"
-            style={{ background: "transparent", color: C.teal, border: `1px solid ${C.teal}`, borderRadius: 8, padding: "7px 12px", fontSize: 11, fontWeight: 700, textDecoration: "none", flex: isMobile ? "1 1 100%" : "none", textAlign: "center" }}>
-            🛠 Trade scraper
-          </Link>
-          <button onClick={runIngest} disabled={ingesting}
-            style={{ background: C.teal, color: C.white, border: "none", borderRadius: 8, padding: "7px 14px", fontSize: 11, fontWeight: 700, cursor: ingesting ? "not-allowed" : "pointer", opacity: ingesting ? 0.6 : 1, flex: isMobile ? "1 1 100%" : "none" }}>
-            {ingesting ? "Ingesting…" : "🔄 Ingest Notts planning"}
-          </button>
         </div>
       </div>
 
-      <div style={{ background: C.darkSurface, borderBottom: `1px solid ${C.darkBorder}`, padding: isMobile ? "0 8px" : "0 20px", display: "flex", gap: 4, overflowX: "auto" }}>
-        {navTab("leads", isMobile ? `📋 (${leads.length})` : `📋 Leads (${leads.length})`)}
-        {navTab("agents", isMobile ? `🏛️ (${agents.length})` : `🏛️ Agents (${agents.length})`)}
-        {navTab("kanban", isMobile ? "📊 Board" : "📊 Pipeline board")}
+      {/* Funnel strip */}
+      <div
+        style={{
+          display: "flex",
+          gap: isMobile ? 14 : 28,
+          padding: isMobile ? "10px 14px" : "10px 24px",
+          background: C.surface,
+          flexWrap: "wrap",
+          alignItems: "center",
+          flexShrink: 0,
+        }}
+      >
+        {(
+          [
+            ["IDENTIFIED", funnel.identified],
+            ["QUALIFIED", funnel.qualified],
+            ["CONTACTED", funnel.contacted],
+            ["RESPONDED", funnel.responded],
+            ["REGISTERED", funnel.registered],
+            ["PROJECTS", funnel.projects],
+          ] as [string, number][]
+        ).map(([label, n], i) => (
+          <div key={label} style={{ display: "flex", alignItems: "center", gap: isMobile ? 14 : 28 }}>
+            {i > 0 && <span style={{ color: C.faint, fontSize: 11 }}>→</span>}
+            <div>
+              <span style={{ fontSize: 15, fontWeight: 700, color: n ? C.cream : C.faint }}>{n}</span>{" "}
+              <span style={{ fontSize: 9.5, color: C.faint, letterSpacing: "0.1em" }}>{label}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Today strip */}
+      <div
+        style={{
+          padding: isMobile ? "10px 14px" : "10px 24px",
+          display: "flex",
+          gap: 16,
+          flexWrap: "wrap",
+          alignItems: "center",
+          flexShrink: 0,
+        }}
+      >
+        <span style={{ fontSize: 9.5, color: C.faint, letterSpacing: "0.14em", fontWeight: 700 }}>TODAY</span>
+        {today.total === 0 ? (
+          <span style={{ fontSize: 12, fontWeight: 700, color: C.tealBright }}>TODAY'S PIPELINE CLEARED ✓</span>
+        ) : (
+          <>
+            {today.toReview > 0 && (
+              <button onClick={() => { setTab("leads"); setView("review"); }} style={btn("quiet")}>
+                {today.toReview} to review
+              </button>
+            )}
+            {today.lettersReady > 0 && (
+              <button onClick={() => setTab("batch")} style={btn("quiet", { color: C.amberBright })}>
+                {today.lettersReady} letters ready
+              </button>
+            )}
+            {today.responsesToAction > 0 && (
+              <button onClick={() => { setTab("leads"); setView("responses"); }} style={btn("quiet", { color: C.tealBright })}>
+                {today.responsesToAction} responses to action
+              </button>
+            )}
+            {today.followUpsDue > 0 && (
+              <button onClick={() => { setTab("leads"); setView("contacted"); }} style={btn("quiet", { color: C.amberBright })}>
+                {today.followUpsDue} follow-ups due
+              </button>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* Tabs */}
+      <div style={{ display: "flex", gap: 4, padding: isMobile ? "0 8px" : "0 24px", borderBottom: `1px solid ${C.line}`, overflowX: "auto", flexShrink: 0 }}>
+        {navTab("leads", `Leads (${leads.length})`)}
+        {navTab("batch", `Letter batch (${batchLeads.length})`)}
+        {navTab("agents", `Architects & agents (${agents.length})`)}
+        {navTab("insights", "Insights")}
       </div>
 
       {loading ? (
-        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: C.dimText, padding: 40 }}>Loading…</div>
+        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: C.dim, padding: 40 }}>
+          Loading…
+        </div>
       ) : tab === "leads" ? (
         <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", flex: 1, overflow: isMobile ? "visible" : "hidden" }}>
           {(!isMobile || !selectedLeadId) && (
-            <div style={{ width: isMobile ? "100%" : 320, flexShrink: 0, borderRight: isMobile ? "none" : `1px solid ${C.darkBorder}`, borderBottom: isMobile ? `1px solid ${C.darkBorder}` : "none", display: "flex", flexDirection: "column", overflow: "hidden" }}>
-              <div style={{ padding: 12, borderBottom: `1px solid ${C.darkBorder}` }}>
-                {/* PART 2 — value band pills */}
-                <div style={{ display: "flex", gap: 6, marginBottom: 8, flexWrap: "wrap" }}>
-                  {VALUE_BANDS.map((b) => {
-                    const on = valueBand === b.id;
-                    return (
-                      <button key={b.id} type="button" onClick={() => setValueBand(b.id)} style={{
-                        background: on ? C.teal : "transparent", color: on ? C.white : C.dimText,
-                        border: `1px solid ${on ? C.teal : C.darkBorder}`, borderRadius: 20,
-                        padding: "4px 12px", fontSize: 11, fontWeight: 700, cursor: "pointer",
-                      }}>{b.label}</button>
-                    );
-                  })}
+            <div
+              style={{
+                width: isMobile ? "100%" : 360,
+                flexShrink: 0,
+                display: "flex",
+                flexDirection: "column",
+                overflow: "hidden",
+                background: "rgba(0,0,0,0.12)",
+              }}
+            >
+              <div style={{ padding: "12px 14px", display: "grid", gap: 8 }}>
+                <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+                  {QUICK_VIEWS.map((v) => (
+                    <button
+                      key={v.id}
+                      onClick={() => setView(v.id)}
+                      style={{
+                        background: view === v.id ? C.teal : "transparent",
+                        color: view === v.id ? C.white : C.dim,
+                        border: "none",
+                        borderRadius: 7,
+                        padding: "5px 11px",
+                        fontSize: 11,
+                        fontWeight: 700,
+                        cursor: "pointer",
+                      }}
+                    >
+                      {v.label}
+                    </button>
+                  ))}
                 </div>
-                <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search address, applicant, agent…" style={{ ...inp(), marginBottom: 8 }} />
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 8 }}>
-                  <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} style={inp()}>
-                    <option value="all" style={{ color: C.body }}>All statuses</option>
-                    <option value="submitted" style={{ color: C.body }}>🔥 Submitted</option>
-                    <option value="pending_decision" style={{ color: C.body }}>⏳ Pending</option>
-                    <option value="approved" style={{ color: C.body }}>✅ Approved</option>
+                <input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search address, reference, applicant…"
+                  style={inp()}
+                />
+                <div style={{ display: "flex", gap: 6 }}>
+                  <select value={valueBand} onChange={(e) => setValueBand(e.target.value)} style={{ ...inp(), flex: 1 }}>
+                    {VALUE_BANDS.map((b) => (
+                      <option key={b.id} value={b.id} style={{ color: "#1F2937" }}>
+                        {b.label}
+                      </option>
+                    ))}
                   </select>
-                  <select value={filterPipeline} onChange={(e) => setFilterPipeline(e.target.value)} style={inp()}>
-                    <option value="all" style={{ color: C.body }}>All stages</option>
-                    {PIPELINE_STAGES.map((s) => <option key={s.id} value={s.id} style={{ color: C.body }}>{s.label}</option>)}
+                  <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} style={{ ...inp(), flex: 1.4 }}>
+                    {SORT_OPTIONS.map((s) => (
+                      <option key={s.id} value={s.id} style={{ color: "#1F2937" }}>
+                        {s.label}
+                      </option>
+                    ))}
                   </select>
+                  <button onClick={() => setShowSkipped((v) => !v)} style={btn("quiet", { color: showSkipped ? C.tealBright : C.dim })}>
+                    Skipped
+                  </button>
                 </div>
-                {/* PART 2 — sort dropdown + show-skipped toggle */}
-                <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                  <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} style={{ ...inp(), flex: 1 }}>
-                    {SORT_OPTIONS.map((s) => <option key={s.id} value={s.id} style={{ color: C.body }}>{s.label}</option>)}
-                  </select>
-                  <button type="button" onClick={() => setShowSkipped((v) => !v)} title="Toggle skipped leads" style={{
-                    background: showSkipped ? C.teal : "transparent", color: showSkipped ? C.white : C.dimText,
-                    border: `1px solid ${showSkipped ? C.teal : C.darkBorder}`, borderRadius: 7,
-                    padding: "8px 10px", fontSize: 10, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap",
-                  }}>{showSkipped ? "Hide" : "Show"} skipped{skippedCount ? ` (${skippedCount})` : ""}</button>
-                </div>
+                <p style={{ fontSize: 10, color: C.faint, margin: 0 }}>
+                  {filteredLeads.length} matching · page {page + 1} of {pageCount}
+                </p>
               </div>
-              <div style={{ flex: 1, overflowY: "auto", padding: "10px 12px", maxHeight: isMobile ? "none" : undefined }}>
-                {filteredLeads.map((lead) => (
-                  <LeadCard key={lead.id} lead={lead} agent={lead.agent_id ? agentsById[lead.agent_id] : undefined}
-                    selected={selectedLead?.id === lead.id} onSelect={(l) => setSelectedLeadId(l.id)} onSkip={skipLead} />
+
+              <div style={{ flex: 1, overflowY: "auto", padding: "0 12px 12px" }}>
+                {pageLeads.map((lead) => (
+                  <LeadCard key={lead.id} lead={lead} selected={selectedLeadId === lead.id} onSelect={(l) => setSelectedLeadId(l.id)} />
                 ))}
                 {filteredLeads.length === 0 && (
-                  <p style={{ color: C.dimText, fontSize: 12, textAlign: "center", marginTop: 20 }}>No leads match your filters.</p>
+                  <p style={{ color: C.faint, fontSize: 12, textAlign: "center", marginTop: 20 }}>No leads match these filters.</p>
+                )}
+                {pageCount > 1 && (
+                  <div style={{ display: "flex", justifyContent: "space-between", gap: 8, marginTop: 10 }}>
+                    <button onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={page === 0} style={btn("quiet", { opacity: page === 0 ? 0.4 : 1 })}>
+                      ← Previous
+                    </button>
+                    <button
+                      onClick={() => setPage((p) => Math.min(pageCount - 1, p + 1))}
+                      disabled={page >= pageCount - 1}
+                      style={btn("quiet", { opacity: page >= pageCount - 1 ? 0.4 : 1 })}
+                    >
+                      Next →
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
           )}
+
           {(!isMobile || selectedLeadId) && (
-            <div style={{ flex: 1, overflow: isMobile ? "visible" : "hidden", background: C.darkSurface }}>
+            <div style={{ flex: 1, overflow: isMobile ? "visible" : "hidden", background: C.surface }}>
               {isMobile && selectedLeadId && (
-                <button onClick={() => setSelectedLeadId(null)} style={{ background: "transparent", border: "none", color: C.teal, padding: "12px 16px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
+                <button onClick={() => setSelectedLeadId(null)} style={{ ...btn("quiet"), margin: "12px 0 0 16px" }}>
                   ← Back to leads
                 </button>
               )}
               {selectedLead ? (
-                <LeadDetail lead={selectedLead} agent={selectedLead.agent_id ? agentsById[selectedLead.agent_id] : undefined} onSaved={load} onSkip={skipLead} />
+                <LeadDetail
+                  lead={selectedLead}
+                  agent={selectedLead.agent_id ? agentsById[selectedLead.agent_id] : undefined}
+                  events={events}
+                  onSaved={load}
+                  onSkip={skipLead}
+                  onLog={logEvent}
+                />
               ) : (
-                !isMobile && <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: C.dimText, fontSize: 13 }}>Select a lead to review</div>
+                !isMobile && (
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: C.faint, fontSize: 13 }}>
+                    Select a lead to review
+                  </div>
+                )
               )}
             </div>
+          )}
+        </div>
+      ) : tab === "batch" ? (
+        <div style={{ flex: 1, overflowY: "auto", padding: isMobile ? 14 : 24, color: C.cream }}>
+          <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap", marginBottom: 14 }}>
+            <div>
+              <h2 style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>Letter batch</h2>
+              <p style={{ fontSize: 12, color: C.dim, margin: "4px 0 0" }}>
+                {batchLeads.length} lead{batchLeads.length === 1 ? "" : "s"} queued · export to the Batch Letter Printer,
+                then mark the batch sent to update every record.
+              </p>
+            </div>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <button onClick={exportBatchCsv} disabled={!batchLeads.length} style={btn("quiet", { opacity: batchLeads.length ? 1 : 0.4 })}>
+                Export batch CSV
+              </button>
+              <button onClick={() => window.print()} disabled={!batchLeads.length} style={btn("quiet", { opacity: batchLeads.length ? 1 : 0.4 })}>
+                Print list
+              </button>
+              <button onClick={markBatchSent} disabled={!batchLeads.length} style={btn("primary", { opacity: batchLeads.length ? 1 : 0.4 })}>
+                Mark batch sent
+              </button>
+            </div>
+          </div>
+          {batchLeads.length === 0 ? (
+            <Panel>
+              <p style={{ fontSize: 12.5, color: C.dim, margin: 0 }}>
+                No letters queued. Open a lead and choose “Add to letter batch”.
+              </p>
+            </Panel>
+          ) : (
+            <Panel style={{ padding: 0, overflow: "hidden" }}>
+              {batchLeads.map((l, i) => (
+                <div
+                  key={l.id}
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: 12,
+                    padding: "12px 16px",
+                    borderTop: i ? `1px solid ${C.line}` : "none",
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <div style={{ minWidth: 0 }}>
+                    <p style={{ fontSize: 13, fontWeight: 700, margin: 0 }}>
+                      {l.applicant_name || "The Homeowner"} · {l.applicant_address || l.site_address}
+                    </p>
+                    <p style={{ fontSize: 11, color: C.dim, margin: "3px 0 0" }}>
+                      {l.council_name} · {l.application_ref} · {l.description}
+                    </p>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <Chip label={`TEMPLATE ${l.homeowner_letter_template || "A"}`} color={C.amberBright} />
+                    <button onClick={() => { setTab("leads"); setSelectedLeadId(l.id); }} style={btn("quiet")}>
+                      Open
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </Panel>
           )}
         </div>
       ) : tab === "agents" ? (
         <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", flex: 1, overflow: isMobile ? "visible" : "hidden" }}>
           {(!isMobile || !selectedAgent) && (
-            <div style={{ width: isMobile ? "100%" : 300, flexShrink: 0, borderRight: isMobile ? "none" : `1px solid ${C.darkBorder}`, borderBottom: isMobile ? `1px solid ${C.darkBorder}` : "none", padding: 12, overflowY: "auto" }}>
-              <p style={{ fontSize: 10, fontWeight: 700, color: C.teal, letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 10px" }}>Agent network ({agents.length})</p>
+            <div style={{ width: isMobile ? "100%" : 320, flexShrink: 0, padding: 12, overflowY: "auto", background: "rgba(0,0,0,0.12)" }}>
+              <SectionLabel>Agent network ({agents.length})</SectionLabel>
               {agents.map((agent) => (
-                <AgentCard key={agent.id} agent={agent} selected={selectedAgent?.id === agent.id} onSelect={setSelectedAgent} leadCount={leadsByAgent[agent.id] ?? 0} />
+                <AgentCard
+                  key={agent.id}
+                  agent={agent}
+                  selected={selectedAgent?.id === agent.id}
+                  onSelect={setSelectedAgent}
+                  leadCount={leadsByAgent[agent.id] ?? 0}
+                />
               ))}
             </div>
           )}
           {(!isMobile || selectedAgent) && (
-            <div style={{ flex: 1, padding: isMobile ? "12px 16px" : 20, overflowY: "auto", color: C.brightText }}>
+            <div style={{ flex: 1, padding: isMobile ? 14 : 24, overflowY: "auto", color: C.cream, background: C.surface }}>
               {isMobile && selectedAgent && (
-                <button onClick={() => setSelectedAgent(null)} style={{ background: "transparent", border: "none", color: C.teal, padding: "0 0 12px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
+                <button onClick={() => setSelectedAgent(null)} style={{ ...btn("quiet"), marginBottom: 12 }}>
                   ← Back to agents
                 </button>
               )}
               {selectedAgent ? (
-                <div>
-                  <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", justifyContent: "space-between", alignItems: isMobile ? "flex-start" : "flex-start", marginBottom: 20, gap: 12 }}>
-                    <div>
-                      <h2 style={{ fontSize: 20, fontWeight: 700, color: C.brightText, margin: "0 0 4px" }}>{selectedAgent.contact_name}</h2>
-                      <p style={{ fontSize: 13, color: C.teal, margin: "0 0 8px" }}>{selectedAgent.company_name}</p>
-                      {(() => {
-                        const s = AGENT_STATUS[selectedAgent.relationship_status] || AGENT_STATUS.identified;
-                        return <span style={{ fontSize: 11, fontWeight: 600, background: s.bg, color: s.text, border: `1px solid ${s.border}`, borderRadius: 20, padding: "3px 10px" }}>{s.label}</span>;
-                      })()}
+                <div style={{ display: "grid", gap: 12 }}>
+                  <div>
+                    <h2 style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>{selectedAgent.contact_name}</h2>
+                    <p style={{ fontSize: 13, color: C.tealBright, margin: "4px 0 8px" }}>{selectedAgent.company_name}</p>
+                    <Chip
+                      label={(AGENT_STATUS[selectedAgent.relationship_status] || AGENT_STATUS.identified).label}
+                      color={(AGENT_STATUS[selectedAgent.relationship_status] || AGENT_STATUS.identified).color}
+                    />
+                  </div>
+                  <Panel>
+                    <SectionLabel>Contact</SectionLabel>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))", gap: 12 }}>
+                      {[
+                        ["Email", selectedAgent.email],
+                        ["Phone", selectedAgent.phone],
+                        ["Address", selectedAgent.address],
+                        ["Active councils", (selectedAgent.councils_active || []).join(", ")],
+                        ["Avg job value", fmt(selectedAgent.avg_job_value_estimate)],
+                        ["Associated planning projects", String(leadsByAgent[selectedAgent.id] ?? 0)],
+                      ].map(([k, v]) =>
+                        v ? (
+                          <div key={k as string}>
+                            <p style={{ fontSize: 9.5, color: C.faint, margin: 0, letterSpacing: "0.08em", textTransform: "uppercase" }}>{k}</p>
+                            <p style={{ fontSize: 12, margin: "2px 0 0", wordBreak: "break-word" }}>{v}</p>
+                          </div>
+                        ) : null,
+                      )}
                     </div>
-                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                      {selectedAgent.phone && <a href={`tel:${selectedAgent.phone}`} style={{ background: C.teal, color: C.white, borderRadius: 8, padding: "8px 14px", fontSize: 12, fontWeight: 600, textDecoration: "none" }}>📞 Call</a>}
-                      {selectedAgent.email && <a href={`mailto:${selectedAgent.email}`} style={{ background: "none", border: `1px solid ${C.teal}`, color: C.teal, borderRadius: 8, padding: "8px 14px", fontSize: 12, fontWeight: 600, textDecoration: "none" }}>✉️ Email</a>}
-                    </div>
-                  </div>
-
-                  <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 12, marginBottom: 16 }}>
-                    {[
-                      { label: "Email", value: selectedAgent.email },
-                      { label: "Phone", value: selectedAgent.phone },
-                      { label: "Address", value: selectedAgent.address },
-                      { label: "Active councils", value: (selectedAgent.councils_active || []).join(", ") },
-                      { label: "Avg job value", value: fmt(selectedAgent.avg_job_value_estimate) },
-                    ].map((r) => r.value ? (
-                      <div key={r.label} style={{ background: "rgba(255,255,255,0.04)", borderRadius: 8, padding: "8px 12px" }}>
-                        <p style={{ fontSize: 10, color: C.dimText, margin: "0 0 2px" }}>{r.label}</p>
-                        <p style={{ fontSize: 12, color: C.brightText, fontWeight: 500, margin: 0, wordBreak: "break-word" }}>{r.value}</p>
-                      </div>
-                    ) : null)}
-                  </div>
-
-                  <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: 10, padding: "12px 14px", marginBottom: 12 }}>
-                    <p style={{ fontSize: 10, fontWeight: 700, color: C.teal, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 8px" }}>Notes & relationship log</p>
-                    <p style={{ fontSize: 12, color: selectedAgent.notes ? C.brightText : C.dimText, lineHeight: 1.65, margin: 0, whiteSpace: "pre-wrap" }}>{selectedAgent.notes || "No notes yet."}</p>
-                  </div>
-
+                  </Panel>
+                  <Panel>
+                    <SectionLabel>Notes & relationship log</SectionLabel>
+                    <p style={{ fontSize: 12, color: selectedAgent.notes ? C.cream : C.faint, lineHeight: 1.65, margin: 0, whiteSpace: "pre-wrap" }}>
+                      {selectedAgent.notes || "No notes yet."}
+                    </p>
+                  </Panel>
                   <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                     {(["contacted", "interested", "partner", "not_interested"] as const).map((s) => (
-                      <button key={s} onClick={() => updateAgentStatus(selectedAgent, s)}
-                        style={{ background: "rgba(255,255,255,0.06)", border: `1px solid ${AGENT_STATUS[s].border}`, color: AGENT_STATUS[s].text, borderRadius: 7, padding: "6px 12px", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>
+                      <button
+                        key={s}
+                        onClick={async () => {
+                          const { error } = await supabase.from("planning_agents").update({ relationship_status: s }).eq("id", selectedAgent.id);
+                          if (error) toast({ title: "Update failed", description: error.message, variant: "destructive" });
+                          else {
+                            toast({ title: "Agent updated" });
+                            setSelectedAgent({ ...selectedAgent, relationship_status: s });
+                            void load();
+                          }
+                        }}
+                        style={btn("quiet", { color: AGENT_STATUS[s].color })}
+                      >
                         Mark as {AGENT_STATUS[s].label}
                       </button>
                     ))}
                   </div>
                 </div>
               ) : (
-                !isMobile && <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: C.dimText, fontSize: 13 }}>Select an agent to view their profile</div>
+                !isMobile && (
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: C.faint, fontSize: 13 }}>
+                    Select an agent to view their profile
+                  </div>
+                )
               )}
             </div>
           )}
         </div>
       ) : (
-        <div style={{ flex: 1, overflowX: isMobile ? "visible" : "auto", padding: isMobile ? 12 : 16, display: "flex", flexDirection: isMobile ? "column" : "row", gap: isMobile ? 16 : 10 }}>
-          {PIPELINE_STAGES.filter((s) => s.id !== "not_suitable").map((stage) => {
-            const stageLeads = leads.filter((l) => l.pipeline_status === stage.id);
-            return (
-              <div key={stage.id} style={{ width: isMobile ? "100%" : 220, flexShrink: 0 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                  <p style={{ fontSize: 11, fontWeight: 700, color: stage.color, margin: 0, textTransform: "uppercase", letterSpacing: "0.06em" }}>{stage.label}</p>
-                  <span style={{ fontSize: 11, color: C.dimText, background: "rgba(255,255,255,0.06)", borderRadius: 20, padding: "1px 8px" }}>{stageLeads.length}</span>
+        <div style={{ flex: 1, overflowY: "auto", padding: isMobile ? 14 : 24, color: C.cream }}>
+          <h2 style={{ fontSize: 20, fontWeight: 700, margin: "0 0 4px" }}>Planning insights</h2>
+          <p style={{ fontSize: 12, color: C.dim, margin: "0 0 16px" }}>
+            Simple statistics from the live dataset. Deeper analysis will be added once more outreach history exists.
+          </p>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 12 }}>
+            <Panel>
+              <SectionLabel>Applications by council</SectionLabel>
+              {Object.entries(
+                leads.reduce<Record<string, number>>((m, l) => {
+                  m[l.council_name] = (m[l.council_name] || 0) + 1;
+                  return m;
+                }, {}),
+              )
+                .sort((a, b) => b[1] - a[1])
+                .map(([k, v]) => (
+                  <div key={k} style={{ display: "flex", justifyContent: "space-between", fontSize: 12, padding: "3px 0" }}>
+                    <span style={{ color: C.dim }}>{k}</span>
+                    <span style={{ fontWeight: 700 }}>{v}</span>
+                  </div>
+                ))}
+            </Panel>
+            <Panel>
+              <SectionLabel>Value</SectionLabel>
+              <p style={{ fontSize: 12, color: C.dim, margin: 0 }}>Total estimated</p>
+              <p style={{ fontSize: 22, fontWeight: 700, color: C.tealBright, margin: "2px 0 10px" }}>{fmtCompact(totalValue)}</p>
+              <p style={{ fontSize: 12, color: C.dim, margin: 0 }}>Average per application</p>
+              <p style={{ fontSize: 18, fontWeight: 700, margin: "2px 0 0" }}>
+                {leads.length ? fmtCompact(Math.round(totalValue / leads.length)) : "—"}
+              </p>
+            </Panel>
+            <Panel>
+              <SectionLabel>Most active agents</SectionLabel>
+              {Object.entries(leadsByAgent)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 8)
+                .map(([id, count]) => (
+                  <div key={id} style={{ display: "flex", justifyContent: "space-between", fontSize: 12, padding: "3px 0" }}>
+                    <span style={{ color: C.dim }}>{agentsById[id]?.company_name || agentsById[id]?.contact_name || "Unknown"}</span>
+                    <span style={{ fontWeight: 700 }}>{count}</span>
+                  </div>
+                ))}
+              {Object.keys(leadsByAgent).length === 0 && (
+                <p style={{ fontSize: 12, color: C.faint, margin: 0 }}>No agents linked to leads yet.</p>
+              )}
+            </Panel>
+            <Panel>
+              <SectionLabel>Conversion</SectionLabel>
+              {(
+                [
+                  ["Contacted", funnel.contacted],
+                  ["Responded", funnel.responded],
+                  ["Registered", funnel.registered],
+                  ["Projects", funnel.projects],
+                ] as [string, number][]
+              ).map(([k, v]) => (
+                <div key={k} style={{ display: "flex", justifyContent: "space-between", fontSize: 12, padding: "3px 0" }}>
+                  <span style={{ color: C.dim }}>{k}</span>
+                  <span style={{ fontWeight: 700 }}>
+                    {v} {funnel.identified ? `· ${((v / funnel.identified) * 100).toFixed(1)}%` : ""}
+                  </span>
                 </div>
-                <div>
-                  {stageLeads.map((lead) => (
-                    <div key={lead.id} onClick={() => { setSelectedLeadId(lead.id); setTab("leads"); }}
-                      style={{ background: "rgba(255,255,255,0.05)", border: `1px solid ${C.darkBorder}`, borderRadius: 8, padding: "8px 10px", marginBottom: 6, cursor: "pointer" }}>
-                      <p style={{ fontSize: 11, fontWeight: 600, color: C.brightText, margin: "0 0 2px", lineHeight: 1.3 }}>{lead.site_address.split(",")[0]}</p>
-                      <p style={{ fontSize: 10, color: C.teal, margin: "0 0 4px" }}>{fmt(lead.estimated_value_max)}</p>
-                      <PriorityBar score={lead.priority_score} />
-                    </div>
-                  ))}
-                  {stageLeads.length === 0 && (
-                    <p style={{ fontSize: 11, color: C.dimText, fontStyle: "italic", margin: "4px 0" }}>No leads in this stage</p>
-                  )}
-                </div>
-              </div>
-            );
-          })}
+              ))}
+            </Panel>
+          </div>
         </div>
       )}
     </div>
