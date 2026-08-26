@@ -43,12 +43,19 @@ async function firecrawlScrape(url: string, formats: string[]): Promise<ScrapeRe
   return json;
 }
 
+// Council portals often serve PDFs from viewer/download endpoints with no .pdf extension.
+function looksLikeDocLink(href: string): boolean {
+  const h = href.toLowerCase();
+  if (/\.pdf(\?|#|$)/.test(h)) return true;
+  return /(docid=|documentid=|showdoc|viewdoc|getfile|filedownload|downloaddocument|\/files\/|\/documents?\/|mediaid=|attachment)/.test(h);
+}
+
 // Score a link to find the most likely "application form" PDF.
 function scoreFormLink(href: string, label = ""): number {
+  if (!looksLikeDocLink(href)) return 0;
   const h = href.toLowerCase();
   const l = label.toLowerCase();
-  if (!h.endsWith(".pdf") && !h.includes(".pdf?")) return 0;
-  let s = 1;
+  let s = /\.pdf(\?|#|$)/.test(h) ? 2 : 1;
   const combined = `${h} ${l}`;
   if (/application[\s_-]*form/.test(combined)) s += 50;
   if (/\b1app\b/.test(combined)) s += 40;
@@ -60,21 +67,22 @@ function scoreFormLink(href: string, label = ""): number {
   return s;
 }
 
-// Extract candidate PDF links from markdown (handles `[label](url.pdf)` patterns).
+// Extract candidate document links from markdown (handles `[label](url)` patterns).
 function extractPdfLinks(markdown: string, fallbackLinks: string[]): Array<{ href: string; label: string }> {
   const out: Array<{ href: string; label: string }> = [];
-  const re = /\[([^\]]+)\]\(([^)]+\.pdf[^)]*)\)/gi;
+  const re = /\[([^\]]+)\]\(([^)\s]+)[^)]*\)/gi;
   let m: RegExpExecArray | null;
   while ((m = re.exec(markdown)) !== null) {
-    out.push({ label: m[1], href: m[2] });
+    if (looksLikeDocLink(m[2])) out.push({ label: m[1], href: m[2] });
   }
   for (const href of fallbackLinks ?? []) {
-    if (/\.pdf/i.test(href) && !out.some((x) => x.href === href)) {
+    if (looksLikeDocLink(href) && !out.some((x) => x.href === href)) {
       out.push({ href, label: "" });
     }
   }
   return out;
 }
+
 
 interface Extracted {
   applicant_name: string | null;
