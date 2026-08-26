@@ -2910,6 +2910,44 @@ export type Database = {
           },
         ]
       }
+      planning_lead_events: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          detail: string | null
+          event_type: string
+          id: string
+          lead_id: string
+          template: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          detail?: string | null
+          event_type: string
+          id?: string
+          lead_id: string
+          template?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          detail?: string | null
+          event_type?: string
+          id?: string
+          lead_id?: string
+          template?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "planning_lead_events_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "planning_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       planning_leads: {
         Row: {
           agent_address: string | null
@@ -2918,7 +2956,10 @@ export type Database = {
           agent_contacted: boolean
           agent_contacted_at: string | null
           agent_id: string | null
+          agent_last_contact_at: string | null
+          agent_last_contact_method: string | null
           agent_name: string | null
+          agent_outreach_status: string | null
           applicant_address: string | null
           applicant_contact: string | null
           applicant_name: string | null
@@ -2936,10 +2977,17 @@ export type Database = {
           homeowner_contacted: boolean
           homeowner_contacted_at: string | null
           homeowner_interested: string | null
+          homeowner_last_contact_at: string | null
+          homeowner_last_contact_method: string | null
+          homeowner_letter_template: string | null
           id: string
+          letter_batch_added_at: string | null
+          letter_batch_sent_at: string | null
+          letter_batch_status: string | null
           letter_sent_at: string | null
           next_action: string | null
           notes: string | null
+          outreach_campaign: string | null
           outreach_status: string
           pdf_enriched_at: string | null
           pdf_source_url: string | null
@@ -2947,6 +2995,9 @@ export type Database = {
           postcode: string | null
           priority_score: number
           proposal_type: string | null
+          response_at: string | null
+          response_state: string | null
+          reviewed_at: string | null
           site_address: string
           status: string
           submitted_date: string | null
@@ -2960,7 +3011,10 @@ export type Database = {
           agent_contacted?: boolean
           agent_contacted_at?: string | null
           agent_id?: string | null
+          agent_last_contact_at?: string | null
+          agent_last_contact_method?: string | null
           agent_name?: string | null
+          agent_outreach_status?: string | null
           applicant_address?: string | null
           applicant_contact?: string | null
           applicant_name?: string | null
@@ -2978,10 +3032,17 @@ export type Database = {
           homeowner_contacted?: boolean
           homeowner_contacted_at?: string | null
           homeowner_interested?: string | null
+          homeowner_last_contact_at?: string | null
+          homeowner_last_contact_method?: string | null
+          homeowner_letter_template?: string | null
           id?: string
+          letter_batch_added_at?: string | null
+          letter_batch_sent_at?: string | null
+          letter_batch_status?: string | null
           letter_sent_at?: string | null
           next_action?: string | null
           notes?: string | null
+          outreach_campaign?: string | null
           outreach_status?: string
           pdf_enriched_at?: string | null
           pdf_source_url?: string | null
@@ -2989,6 +3050,9 @@ export type Database = {
           postcode?: string | null
           priority_score?: number
           proposal_type?: string | null
+          response_at?: string | null
+          response_state?: string | null
+          reviewed_at?: string | null
           site_address: string
           status?: string
           submitted_date?: string | null
@@ -3002,7 +3066,10 @@ export type Database = {
           agent_contacted?: boolean
           agent_contacted_at?: string | null
           agent_id?: string | null
+          agent_last_contact_at?: string | null
+          agent_last_contact_method?: string | null
           agent_name?: string | null
+          agent_outreach_status?: string | null
           applicant_address?: string | null
           applicant_contact?: string | null
           applicant_name?: string | null
@@ -3020,10 +3087,17 @@ export type Database = {
           homeowner_contacted?: boolean
           homeowner_contacted_at?: string | null
           homeowner_interested?: string | null
+          homeowner_last_contact_at?: string | null
+          homeowner_last_contact_method?: string | null
+          homeowner_letter_template?: string | null
           id?: string
+          letter_batch_added_at?: string | null
+          letter_batch_sent_at?: string | null
+          letter_batch_status?: string | null
           letter_sent_at?: string | null
           next_action?: string | null
           notes?: string | null
+          outreach_campaign?: string | null
           outreach_status?: string
           pdf_enriched_at?: string | null
           pdf_source_url?: string | null
@@ -3031,6 +3105,9 @@ export type Database = {
           postcode?: string | null
           priority_score?: number
           proposal_type?: string | null
+          response_at?: string | null
+          response_state?: string | null
+          reviewed_at?: string | null
           site_address?: string
           status?: string
           submitted_date?: string | null
