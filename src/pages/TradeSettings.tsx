@@ -9,7 +9,7 @@ const TradeSettings = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="dashboard-dark min-h-screen bg-background flex">
+    <div className="dashboard-dark min-h-screen flex">
       <TradeSidebar
         activeNav={activeNav}
         setActiveNav={setActiveNav}
