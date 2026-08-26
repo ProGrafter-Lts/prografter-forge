@@ -311,6 +311,7 @@ export const QUICK_VIEWS = [
   { id: "ready", label: "Ready to send" },
   { id: "contacted", label: "Contacted" },
   { id: "responses", label: "Responses" },
+  { id: "historic", label: "Historic" },
 ] as const;
 
 export type QuickView = (typeof QUICK_VIEWS)[number]["id"];
@@ -318,14 +319,17 @@ export type QuickView = (typeof QUICK_VIEWS)[number]["id"];
 export const matchesView = (l: Lead, view: QuickView) => {
   switch (view) {
     case "review":
-      return !l.reviewed_at && !isContacted(l);
+      return !l.reviewed_at && !isContacted(l) && !isHistoric(l);
     case "ready":
       return l.letter_batch_status === "queued";
     case "contacted":
       return isContacted(l);
     case "responses":
       return hasResponded(l);
+    case "historic":
+      return isHistoric(l);
     default:
       return true;
   }
 };
+
