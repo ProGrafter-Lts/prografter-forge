@@ -13,6 +13,8 @@ import rubyClean from "@/assets/agents/ruby-clean.png.asset.json";
 import rubySite from "@/assets/agents/ruby-site.png.asset.json";
 import calebClean from "@/assets/agents/caleb-clean.png.asset.json";
 import calebSite from "@/assets/agents/caleb-site.png.asset.json";
+import meganClean from "@/assets/agents/megan-clean.png.asset.json";
+import meganSite from "@/assets/agents/megan-site.png.asset.json";
 
 export type AgentId =
   | "lee"
@@ -51,6 +53,7 @@ const REAL_AVATARS: Partial<Record<AgentId, { clean: string; site: string }>> = 
   amy: { clean: amyClean.url, site: amySite.url },
   ruby: { clean: rubyClean.url, site: rubySite.url },
   caleb: { clean: calebClean.url, site: calebSite.url },
+  megan: { clean: meganClean.url, site: meganSite.url },
 };
 
 const avatars = (id: AgentId) =>
