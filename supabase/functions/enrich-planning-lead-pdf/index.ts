@@ -47,7 +47,7 @@ async function firecrawlScrape(url: string, formats: string[]): Promise<ScrapeRe
 function looksLikeDocLink(href: string): boolean {
   const h = href.toLowerCase();
   if (/\.pdf(\?|#|$)/.test(h)) return true;
-  return /(docid=|documentid=|showdoc|viewdoc|getfile|filedownload|downloaddocument|\/files\/|\/documents?\/|mediaid=|attachment)/.test(h);
+  return /(docid=|docno=|documentid=|pagestream|showdoc|viewdoc|getfile|filedownload|downloaddocument|\/files\/|\/documents?\/|mediaid=|attachment)/.test(h);
 }
 
 // Score a link to find the most likely "application form" PDF.
