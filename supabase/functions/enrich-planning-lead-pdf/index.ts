@@ -238,25 +238,26 @@ serve(async (req) => {
 
     // Fallback: many council portals hide PDFs behind a Documents/Associated docs sub-page.
     if (!candidates.some((c) => scoreFormLink(c.href, c.label) > 0)) {
-      const docHints = /(document|associated|supporting|files|attachments|drawing)/i;
+      const docHints = /(document|associated|supporting|files|attachments|drawing|application[\s_-]*form|view[\s_-]*app|activeTab=documents)/i;
       const subPages = new Set<string>();
       // From markdown [label](href) pairs
-      const mdLinkRe = /\[([^\]]+)\]\(([^)]+)\)/gi;
+      const mdLinkRe = /\[([^\]]+)\]\(([^)\s]+)[^)]*\)/gi;
       let m: RegExpExecArray | null;
       while ((m = mdLinkRe.exec(pageMd)) !== null) {
         const label = m[1];
         const href = m[2];
-        if (/\.pdf/i.test(href)) continue;
+        if (looksLikeDocLink(href)) continue;
         if (docHints.test(label) || docHints.test(href)) subPages.add(href);
       }
       // From raw link list
       for (const href of pageLinks) {
-        if (/\.pdf/i.test(href)) continue;
+        if (looksLikeDocLink(href)) continue;
         if (docHints.test(href)) subPages.add(href);
       }
 
       const tried: string[] = [];
-      for (const sub of Array.from(subPages).slice(0, 3)) {
+      for (const sub of Array.from(subPages).slice(0, 5)) {
+
         const subUrl = new URL(sub, lead.council_application_url).toString();
         tried.push(subUrl);
         console.log(`[ENRICH] ${lead.application_ref}: fallback scraping ${subUrl}`);
