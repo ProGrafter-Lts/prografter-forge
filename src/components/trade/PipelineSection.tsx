@@ -71,21 +71,36 @@ interface StageRow {
   note: string | null;
   next_action_date: string | null;
   last_status_change_at: string | null;
+  contact_status?: string;
   planning_alerts: {
     address: string | null;
     postcode: string | null;
     application_type: string | null;
     description: string | null;
     local_authority: string | null;
+    approved_date?: string | null;
   } | null;
 }
 
-/** Stage key -> shortlist contact_status it maps to (null = no data source yet). */
-const STAGE_STATUS: Partial<Record<keyof Counts, string>> = {
-  todo: "todo",
-  contacted: "contacted",
-  quoted: "quoted",
-  won: "won",
+const SELECT_COLS =
+  "id, planning_alert_id, note, next_action_date, last_status_change_at, contact_status, planning_alerts(address, postcode, application_type, description, local_authority, approved_date)";
+
+/**
+ * Derive which pipeline stage a shortlist row sits in.
+ * Site Visit and Planning Approved are derived from real lead data:
+ *  - Site Visit: an open lead with a scheduled next action date.
+ *  - Planning Approved: an open lead whose planning application has an approved date.
+ */
+const stageForRow = (row: StageRow): keyof Counts | null => {
+  const status = row.contact_status;
+  if (status === "won") return "won";
+  if (status === "dead") return "lost";
+  if (status === "quoted") return "quoted";
+  const open = status === "todo" || status === "contacted";
+  if (!open) return null;
+  if (row.next_action_date) return "site_visit";
+  if (row.planning_alerts?.approved_date) return "planning_approved";
+  return status as keyof Counts;
 };
 
 const PipelineSection = ({ tradeId }: Props) => {
@@ -105,6 +120,7 @@ const PipelineSection = ({ tradeId }: Props) => {
   const [openStage, setOpenStage] = useState<keyof Counts | null>(null);
   const [stageRows, setStageRows] = useState<StageRow[] | null>(null);
   const [stageLoading, setStageLoading] = useState(false);
+  const [rowsByStage, setRowsByStage] = useState<Partial<Record<keyof Counts, StageRow[]>>>({});
   const [stageError, setStageError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -115,8 +131,9 @@ const PipelineSection = ({ tradeId }: Props) => {
     // Race the query against a 6s timeout so the section never hangs.
     const queryPromise = supabase
       .from("planning_alert_shortlist")
-      .select("contact_status, last_status_change_at")
-      .eq("trade_id", tradeId);
+      .select(SELECT_COLS)
+      .eq("trade_id", tradeId)
+      .order("last_status_change_at", { ascending: false });
 
     const timeoutPromise = new Promise<{ data: null; error: { message: string } }>((resolve) =>
       window.setTimeout(
@@ -128,7 +145,7 @@ const PipelineSection = ({ tradeId }: Props) => {
     const { data, error: queryError } = (await Promise.race([
       queryPromise,
       timeoutPromise,
-    ])) as { data: { contact_status: string; last_status_change_at: string | null }[] | null; error: { message: string } | null };
+    ])) as { data: StageRow[] | null; error: { message: string } | null };
 
     if (queryError) {
       console.error("Failed to load pipeline counts", queryError);
@@ -147,50 +164,32 @@ const PipelineSection = ({ tradeId }: Props) => {
       won: 0,
       lost: 0,
     };
-    for (const r of data ?? []) {
-      const status = r.contact_status as ShortlistStatus;
-      if (status === "todo" || status === "contacted" || status === "quoted") {
-        next[status] += 1;
-      } else if (status === "dead") {
-        next.lost += 1;
-      } else if (status === "won") {
-        if (r.last_status_change_at && r.last_status_change_at >= ninetyDaysAgo) {
-          next.won += 1;
-        }
+    const byStage: Partial<Record<keyof Counts, StageRow[]>> = {};
+    for (const r of (data ?? []) as StageRow[]) {
+      const stage = stageForRow(r);
+      if (!stage) continue;
+      if (stage === "won" && !(r.last_status_change_at && r.last_status_change_at >= ninetyDaysAgo)) {
+        continue;
       }
+      next[stage] += 1;
+      (byStage[stage] ||= []).push(r);
     }
     setCounts(next);
+    setRowsByStage(byStage);
     setLoading(false);
   }, [tradeId]);
 
   const openStageDetail = useCallback(
-    async (key: keyof Counts) => {
+    (key: keyof Counts) => {
       if (openStage === key) {
         setOpenStage(null);
         return;
       }
       setOpenStage(key);
-      setStageRows(null);
       setStageError(null);
-      const status = STAGE_STATUS[key];
-      if (!status) return;
-      setStageLoading(true);
-      const { data, error: rowsError } = await supabase
-        .from("planning_alert_shortlist")
-        .select(
-          "id, planning_alert_id, note, next_action_date, last_status_change_at, planning_alerts(address, postcode, application_type, description, local_authority)",
-        )
-        .eq("trade_id", tradeId)
-        .eq("contact_status", status as any)
-        .order("last_status_change_at", { ascending: false });
-      setStageLoading(false);
-      if (rowsError) {
-        setStageError(rowsError.message);
-        return;
-      }
-      setStageRows((data ?? []) as unknown as StageRow[]);
+      setStageRows(rowsByStage[key] ?? []);
     },
-    [openStage, tradeId],
+    [openStage, rowsByStage],
   );
 
   useEffect(() => {
@@ -205,7 +204,13 @@ const PipelineSection = ({ tradeId }: Props) => {
   }, [load]);
 
   const totalLeads =
-    counts.todo + counts.contacted + counts.quoted + counts.won + counts.lost;
+    counts.todo +
+    counts.contacted +
+    counts.planning_approved +
+    counts.site_visit +
+    counts.quoted +
+    counts.won +
+    counts.lost;
 
   return (
     <Workspace
@@ -352,12 +357,7 @@ const PipelineSection = ({ tradeId }: Props) => {
           </div>
 
           <div className="mt-4 space-y-2">
-            {!STAGE_STATUS[openStage] ? (
-              <p className="font-sans text-sm text-white/60">
-                This stage isn't tracked yet — leads move here once site visits and planning
-                outcomes are recorded against a lead. Nothing to show for now.
-              </p>
-            ) : stageLoading ? (
+            {stageLoading ? (
               <>
                 <Skeleton className="h-16 w-full" />
                 <Skeleton className="h-16 w-full" />
