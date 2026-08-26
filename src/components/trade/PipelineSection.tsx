@@ -130,8 +130,9 @@ const PipelineSection = ({ tradeId }: Props) => {
     // Race the query against a 6s timeout so the section never hangs.
     const queryPromise = supabase
       .from("planning_alert_shortlist")
-      .select("contact_status, last_status_change_at")
-      .eq("trade_id", tradeId);
+      .select(SELECT_COLS)
+      .eq("trade_id", tradeId)
+      .order("last_status_change_at", { ascending: false });
 
     const timeoutPromise = new Promise<{ data: null; error: { message: string } }>((resolve) =>
       window.setTimeout(
@@ -143,7 +144,7 @@ const PipelineSection = ({ tradeId }: Props) => {
     const { data, error: queryError } = (await Promise.race([
       queryPromise,
       timeoutPromise,
-    ])) as { data: { contact_status: string; last_status_change_at: string | null }[] | null; error: { message: string } | null };
+    ])) as { data: StageRow[] | null; error: { message: string } | null };
 
     if (queryError) {
       console.error("Failed to load pipeline counts", queryError);
@@ -162,50 +163,32 @@ const PipelineSection = ({ tradeId }: Props) => {
       won: 0,
       lost: 0,
     };
-    for (const r of data ?? []) {
-      const status = r.contact_status as ShortlistStatus;
-      if (status === "todo" || status === "contacted" || status === "quoted") {
-        next[status] += 1;
-      } else if (status === "dead") {
-        next.lost += 1;
-      } else if (status === "won") {
-        if (r.last_status_change_at && r.last_status_change_at >= ninetyDaysAgo) {
-          next.won += 1;
-        }
+    const byStage: Partial<Record<keyof Counts, StageRow[]>> = {};
+    for (const r of (data ?? []) as StageRow[]) {
+      const stage = stageForRow(r);
+      if (!stage) continue;
+      if (stage === "won" && !(r.last_status_change_at && r.last_status_change_at >= ninetyDaysAgo)) {
+        continue;
       }
+      next[stage] += 1;
+      (byStage[stage] ||= []).push(r);
     }
     setCounts(next);
+    setRowsByStage(byStage);
     setLoading(false);
   }, [tradeId]);
 
   const openStageDetail = useCallback(
-    async (key: keyof Counts) => {
+    (key: keyof Counts) => {
       if (openStage === key) {
         setOpenStage(null);
         return;
       }
       setOpenStage(key);
-      setStageRows(null);
       setStageError(null);
-      const status = STAGE_STATUS[key];
-      if (!status) return;
-      setStageLoading(true);
-      const { data, error: rowsError } = await supabase
-        .from("planning_alert_shortlist")
-        .select(
-          "id, planning_alert_id, note, next_action_date, last_status_change_at, planning_alerts(address, postcode, application_type, description, local_authority)",
-        )
-        .eq("trade_id", tradeId)
-        .eq("contact_status", status as any)
-        .order("last_status_change_at", { ascending: false });
-      setStageLoading(false);
-      if (rowsError) {
-        setStageError(rowsError.message);
-        return;
-      }
-      setStageRows((data ?? []) as unknown as StageRow[]);
+      setStageRows(rowsByStage[key] ?? []);
     },
-    [openStage, tradeId],
+    [openStage, rowsByStage],
   );
 
   useEffect(() => {
