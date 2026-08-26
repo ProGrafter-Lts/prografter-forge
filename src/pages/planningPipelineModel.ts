@@ -267,18 +267,27 @@ export type TodayQueue = {
 };
 
 /**
- * Historic backlog: leads imported before the outreach workflow existed.
- * A lead is historic when the application is older than 120 days AND nothing
- * has ever been done with it. These must not pollute "today's" workload.
+ * Historic backlog: leads imported (or bulk-flagged) before this outreach
+ * workflow existed. A lead is historic when the application is older than
+ * 120 days AND nothing has ever been done with it *through this workflow*.
+ * These must not pollute "today's" workload.
  */
 export const HISTORIC_AGE_DAYS = 120;
 
+/** True when a lead has been touched through the current outreach workflow. */
+export const isWorkflowTracked = (l: Lead) =>
+  Boolean(
+    l.reviewed_at ||
+      l.homeowner_last_contact_method ||
+      l.agent_last_contact_method ||
+      l.letter_batch_status ||
+      l.letter_batch_sent_at ||
+      l.letter_sent_at ||
+      l.response_state,
+  );
+
 export const isHistoric = (l: Lead) =>
-  !l.reviewed_at &&
-  !isContacted(l) &&
-  !l.response_state &&
-  !l.letter_batch_status &&
-  daysSince(l.submitted_date || l.created_at) > HISTORIC_AGE_DAYS;
+  !isWorkflowTracked(l) && daysSince(l.submitted_date || l.created_at) > HISTORIC_AGE_DAYS;
 
 export const buildToday = (leads: Lead[]): TodayQueue => {
   const live = leads.filter((l) => !isSkipped(l));
@@ -288,7 +297,11 @@ export const buildToday = (leads: Lead[]): TodayQueue => {
   const responsesToAction = live.filter(
     (l) => l.response_state === "interested" || l.response_state === "draftline_enquiry",
   ).length;
-  const followUpsDue = current.filter((l) => nextActionFor(l).key === "follow_up").length;
+  // Only chase follow-ups for contact that was actually logged through the workflow.
+  const followUpsDue = current.filter(
+    (l) => nextActionFor(l).key === "follow_up" && isWorkflowTracked(l),
+  ).length;
+
   return {
     toReview,
     lettersReady,
