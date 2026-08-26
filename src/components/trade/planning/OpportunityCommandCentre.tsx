@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   X, AlertTriangle, MapPin, Clock, TrendingUp, Target, FileText, ExternalLink,
   Bookmark, CheckCircle2, CalendarClock, Mail, ArrowRightCircle, XCircle,
@@ -26,6 +26,10 @@ interface Props {
   onLetterGenerated: () => void;
   /** Set when the trade already has a live job/quote at this address. */
   engaged?: string;
+  /** When true, the panel immediately runs the intro flow (opened via a "Send intro now" chip). */
+  autoIntro?: boolean;
+  /** Called once the auto-intro has been consumed so the parent can reset its intent. */
+  onAutoIntroHandled?: () => void;
 }
 
 const label = "font-mono text-[10px] font-semibold uppercase tracking-wider";
@@ -40,8 +44,9 @@ const Section = ({ title, children }: { title: string; children: React.ReactNode
 export default function OpportunityCommandCentre({
   app, onClose, isMobile, interaction, trade, features,
   onStatus, onNotes, onFollowUp, onCreateInvite, onLetterGenerated, engaged,
-
+  autoIntro, onAutoIntroHandled,
 }: Props) {
+
   const score = scoreOpportunity(app, trade?.trade_type ? [trade.trade_type.toLowerCase()] : []);
   const action = getBestAction(app);
   const packages = getWorkPackages(app);
@@ -56,6 +61,9 @@ export default function OpportunityCommandCentre({
   const [inviteUrl, setInviteUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [highlightActions, setHighlightActions] = useState(false);
+  const actionsRef = useRef<HTMLDivElement | null>(null);
+
 
   useEffect(() => {
     setNotesDraft(interaction?.notes ?? "");
@@ -75,11 +83,12 @@ export default function OpportunityCommandCentre({
   };
 
   const handleInvite = async () => {
-    if (inviteUrl) return;
+    if (inviteUrl) return inviteUrl;
     setBusy(true);
     const res = await onCreateInvite();
     setBusy(false);
     if (res) setInviteUrl(res.url);
+    return res?.url ?? null;
   };
 
   const handleLetter = async () => {
@@ -92,6 +101,31 @@ export default function OpportunityCommandCentre({
     setLetter(generateIntroLetter(app, trade ?? { name: "", company_name: "", trade_type: "" }, url));
     onLetterGenerated();
   };
+
+  // "Best action: Send intro now" — runs the existing intro flow rather than
+  // being decorative text: creates the homeowner invite link (and the intro
+  // letter when the trade has that feature), then scrolls to the actions block.
+  const runBestAction = async () => {
+    setShowMore(true);
+    actionsRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    setHighlightActions(true);
+    setTimeout(() => setHighlightActions(false), 2200);
+    if (features.can_create_homeowner_invite_links) await handleInvite();
+    if (features.can_generate_intro_letters && !letter) await handleLetter();
+  };
+
+  // Opened from the feed's "Send intro now" chip → run the same flow on mount.
+  const autoIntroDone = useRef(false);
+  useEffect(() => {
+    if (!autoIntro || engaged || autoIntroDone.current) return;
+    autoIntroDone.current = true;
+    void runBestAction();
+    onAutoIntroHandled?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoIntro, app.id, engaged]);
+
+
+
 
   const currentStatus = interaction?.status ?? "new";
 
@@ -176,13 +210,24 @@ export default function OpportunityCommandCentre({
           )}
           <div className="flex items-start gap-2 border-t border-white/10 pt-3">
             <Target className="w-4 h-4 text-secondary mt-0.5 flex-shrink-0" />
-            <div>
-              <p className="font-mono text-xs font-semibold text-secondary">
-                Best action: {engaged ? "Follow up through the existing job" : action.label}
-              </p>
+            <div className="min-w-0">
+              {engaged ? (
+                <p className="font-mono text-xs font-semibold text-secondary">
+                  Best action: Follow up through the existing job
+                </p>
+              ) : (
+                <button
+                  type="button"
+                  onClick={runBestAction}
+                  className="font-mono text-xs font-semibold text-secondary text-left underline decoration-secondary/40 underline-offset-4 hover:decoration-secondary transition-colors"
+                >
+                  Best action: {action.label} →
+                </button>
+              )}
               <p className="font-sans text-[11px] text-cream/70 mt-1 leading-relaxed">{engaged ? engaged : action.explanation}</p>
             </div>
           </div>
+
 
           <div className="grid grid-cols-2 gap-2 pt-1">
             <StatBox k="Est. value" v={app.estimated_value} />
@@ -271,7 +316,13 @@ export default function OpportunityCommandCentre({
         </Section>
 
         {/* Action buttons */}
-        <div className="grid grid-cols-1 gap-2 border-t border-white/10 pt-4">
+        <div
+          ref={actionsRef}
+          className={`grid grid-cols-1 gap-2 border-t border-white/10 pt-4 rounded-xl transition-all ${
+            highlightActions ? "ring-2 ring-secondary/60 ring-offset-2 ring-offset-transparent" : ""
+          }`}
+        >
+
           {features.can_create_homeowner_invite_links && (
             <ActionBtn icon={<Link2 className="w-3.5 h-3.5" />} primary onClick={handleInvite}>
               {busy ? "Creating…" : inviteUrl ? "Invite link ready" : "Create homeowner invite"}

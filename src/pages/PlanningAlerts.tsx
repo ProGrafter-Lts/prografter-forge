@@ -249,7 +249,7 @@ interface PlanningApp {
   estimated_value: string; floorspace_m2: number; documents_available: boolean; validated: boolean;
 }
 
-const AppCard = ({ app, onSelect, selected, tradeTypes, pipelineStatus, showScore, engagement }: { app: PlanningApp; onSelect: (app: PlanningApp) => void; selected: boolean; tradeTypes: string[]; pipelineStatus?: PipelineStatus; showScore: boolean; engagement?: string }) => {
+const AppCard = ({ app, onSelect, onIntroAction, selected, tradeTypes, pipelineStatus, showScore, engagement }: { app: PlanningApp; onSelect: (app: PlanningApp) => void; onIntroAction: (app: PlanningApp) => void; selected: boolean; tradeTypes: string[]; pipelineStatus?: PipelineStatus; showScore: boolean; engagement?: string }) => {
   const s = STATUS_CFG[app.status];
   const [tradesExpanded, setTradesExpanded] = useState(false);
   const projectKind = getProjectType(app);
@@ -314,13 +314,21 @@ const AppCard = ({ app, onSelect, selected, tradeTypes, pipelineStatus, showScor
           >
             <TrendingUp className="w-2.5 h-2.5" /> {score.score}/100 · {score.band}
           </span>
-          <span className={`inline-flex items-center gap-1 font-mono text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider border ${
-            engagement
-              ? "bg-amber-500/10 text-amber-700 border-amber-500/30"
-              : "bg-secondary/10 text-secondary border-secondary/20"
-          }`}>
-            <Target className="w-2.5 h-2.5" /> {action.label}
-          </span>
+          {engagement ? (
+            <span className="inline-flex items-center gap-1 font-mono text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider border bg-amber-500/10 text-amber-700 border-amber-500/30">
+              <Target className="w-2.5 h-2.5" /> {action.label}
+            </span>
+          ) : (
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); onIntroAction(app); }}
+              title="Opens this lead and creates the homeowner invite"
+              className="inline-flex items-center gap-1 font-mono text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider border bg-secondary/10 text-secondary border-secondary/20 hover:bg-secondary/20 transition-colors"
+            >
+              <Target className="w-2.5 h-2.5" /> {action.label} →
+            </button>
+          )}
+
         </div>
       )}
       {engagement && (
@@ -518,6 +526,8 @@ export default function PlanningAlerts() {
   const [activeTab, setActiveTab] = useState("pipeline");
   const [selectedApp, setSelectedApp] = useState<PlanningApp | null>(null);
   const [filterStatus, setFilterStatus] = useState("all");
+  const [introIntentId, setIntroIntentId] = useState<string | null>(null);
+
   const [filterTrade, setFilterTrade] = useState("all");
   const [filterCouncil, setFilterCouncil] = useState("all");
   const [filterDate, setFilterDate] = useState<"all" | "7" | "30" | "90">("90");
@@ -997,6 +1007,8 @@ export default function PlanningAlerts() {
                         app={app}
                         selected={selectedApp?.id === app.id}
                         onSelect={a => setSelectedApp(prev=>prev?.id===a.id?null:a)}
+                        onIntroAction={a => { setSelectedApp(a); setIntroIntentId(a.id); }}
+
                         tradeTypes={tradeTypes}
                         pipelineStatus={pi.interactions[app.id]?.status ?? "new"}
                         showScore={pi.features.can_use_opportunity_scores}
@@ -1032,7 +1044,7 @@ export default function PlanningAlerts() {
                   {selectedApp && (
                     <OpportunityCommandCentre
                       app={selectedApp}
-                      onClose={() => setSelectedApp(null)}
+                      onClose={() => { setSelectedApp(null); setIntroIntentId(null); }}
                       isMobile={isMobile}
                       interaction={pi.interactions[selectedApp.id]}
                       trade={pi.trade}
@@ -1043,6 +1055,9 @@ export default function PlanningAlerts() {
                       onCreateInvite={() => pi.createInviteLink(selectedApp.id, getProjectType(selectedApp))}
                       onLetterGenerated={() => pi.upsertInteraction(selectedApp.id, { intro_letter_generated: true })}
                       engaged={engagements[engagementKey(selectedApp.address, selectedApp.postcode) ?? ""]}
+                      autoIntro={introIntentId === selectedApp.id}
+                      onAutoIntroHandled={() => setIntroIntentId(null)}
+
                     />
                   )}
                 </div>
