@@ -526,6 +526,8 @@ export default function PlanningAlerts() {
   const [activeTab, setActiveTab] = useState("pipeline");
   const [selectedApp, setSelectedApp] = useState<PlanningApp | null>(null);
   const [filterStatus, setFilterStatus] = useState("all");
+  const [introIntentId, setIntroIntentId] = useState<string | null>(null);
+
   const [filterTrade, setFilterTrade] = useState("all");
   const [filterCouncil, setFilterCouncil] = useState("all");
   const [filterDate, setFilterDate] = useState<"all" | "7" | "30" | "90">("90");
@@ -1005,6 +1007,8 @@ export default function PlanningAlerts() {
                         app={app}
                         selected={selectedApp?.id === app.id}
                         onSelect={a => setSelectedApp(prev=>prev?.id===a.id?null:a)}
+                        onIntroAction={a => { setSelectedApp(a); setIntroIntentId(a.id); }}
+
                         tradeTypes={tradeTypes}
                         pipelineStatus={pi.interactions[app.id]?.status ?? "new"}
                         showScore={pi.features.can_use_opportunity_scores}
