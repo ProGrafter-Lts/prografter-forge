@@ -91,8 +91,8 @@ export default function OpportunityCommandCentre({
     return res?.url ?? null;
   };
 
-  const handleLetter = async () => {
-    let url = inviteUrl;
+  const handleLetter = async (existingUrl?: string | null) => {
+    let url = existingUrl ?? inviteUrl;
     if (!url) {
       const res = await onCreateInvite();
       url = res?.url ?? `${window.location.origin}/planning-invite/pending`;
@@ -105,14 +105,17 @@ export default function OpportunityCommandCentre({
   // "Best action: Send intro now" — runs the existing intro flow rather than
   // being decorative text: creates the homeowner invite link (and the intro
   // letter when the trade has that feature), then scrolls to the actions block.
+  // The invite URL is threaded into the letter so only ONE link is minted.
   const runBestAction = async () => {
     setShowMore(true);
     actionsRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
     setHighlightActions(true);
     setTimeout(() => setHighlightActions(false), 2200);
-    if (features.can_create_homeowner_invite_links) await handleInvite();
-    if (features.can_generate_intro_letters && !letter) await handleLetter();
+    let url: string | null = inviteUrl;
+    if (features.can_create_homeowner_invite_links) url = await handleInvite();
+    if (features.can_generate_intro_letters && !letter) await handleLetter(url);
   };
+
 
   // Opened from the feed's "Send intro now" chip → run the same flow on mount.
   const autoIntroDone = useRef(false);
