@@ -229,12 +229,54 @@ serve(async (req) => {
       });
     }
 
+    // Step 0: Civica portals (e.g. Ashfield) render documents via a JSON API, so the
+    // scraped HTML contains no links at all. Resolve the PDF straight from that API.
+    let civicaPdf: string | null = null;
+    try {
+      const u = new URL(lead.council_application_url);
+      const keyNo = u.searchParams.get("KeyNo") ?? u.searchParams.get("KeyNumb");
+      const refType = u.searchParams.get("RefType");
+      if (keyNo && refType) {
+        const listUrl = `${u.origin}/civica/Resource/Civica/Handler.ashx/doc/list`;
+        const r = await fetch(listUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "User-Agent": "Mozilla/5.0" },
+          body: JSON.stringify({ KeyNumb: keyNo, KeyText: "Subject", RefType: refType }),
+        });
+        if (r.ok) {
+          const j = await r.json();
+          const docs: Array<Record<string, string>> = j?.CompleteDocument ?? [];
+          const best = docs
+            .map((d) => ({
+              d,
+              score: scoreFormLink(
+                `x.${(d.FileExtension || "pdf").toLowerCase()}`,
+                `${d.DocDesc ?? ""} ${d.Title ?? ""} ${d.FileName ?? ""}`,
+              ),
+            }))
+            .sort((a, b) => b.score - a.score)[0];
+          if (best && best.score > 5) {
+            civicaPdf =
+              `${u.origin}/civica/Resource/Civica/Handler.ashx/Doc/pagestream?cd=inline&pdf=true&docno=${best.d.DocNo}`;
+            console.log(`[ENRICH] ${lead.application_ref}: Civica doc ${best.d.DocNo} (${best.d.DocDesc})`);
+          } else {
+            console.log(`[ENRICH] ${lead.application_ref}: Civica list had ${docs.length} docs, no form match`);
+          }
+        }
+      }
+    } catch (e) {
+      console.error("[ENRICH] Civica lookup failed:", (e as Error).message);
+    }
+
     // Step 1: scrape council page to find PDF (with documents sub-page fallback)
     console.log(`[ENRICH] ${lead.application_ref}: scraping ${lead.council_application_url}`);
-    const page = await firecrawlScrape(lead.council_application_url, ["markdown", "links"]);
-    const pageMd = page.data?.markdown ?? "";
-    const pageLinks = page.data?.links ?? [];
-    let candidates = extractPdfLinks(pageMd, pageLinks);
+    const page = civicaPdf ? null : await firecrawlScrape(lead.council_application_url, ["markdown", "links"]);
+    const pageMd = page?.data?.markdown ?? "";
+    const pageLinks = page?.data?.links ?? [];
+    let candidates = civicaPdf
+      ? [{ href: civicaPdf, label: "Application Form" }]
+      : extractPdfLinks(pageMd, pageLinks);
+
 
     // Fallback: many council portals hide PDFs behind a Documents/Associated docs sub-page.
     if (!candidates.some((c) => scoreFormLink(c.href, c.label) > 0)) {
