@@ -947,11 +947,50 @@ export default function PlanningAlerts() {
                         </p>
                       </div>
                     )}
-                    {!loadingApps && apps.length > 0 && sorted.length === 0 && (
-                      <div className="bg-card rounded-2xl border border-border p-8 text-center">
-                        <p className="font-sans text-sm text-muted-foreground">No applications match your filters</p>
-                      </div>
-                    )}
+                    {!loadingApps && apps.length > 0 && sorted.length === 0 && (() => {
+                      const tabLabel = PIPELINE_TABS.find(t => t.id === pipelineTab)?.label;
+                      const statusLabel = filterStatus !== "all" ? (STATUS_CFG[filterStatus]?.label ?? filterStatus) : null;
+                      const both = pipelineTab !== "all" && !!statusLabel;
+                      return (
+                        <div className="bg-card rounded-2xl border border-border p-8 text-center">
+                          <p className="font-sans text-sm text-primary font-semibold mb-1">
+                            {both
+                              ? `No applications are both “${tabLabel}” and “${statusLabel}”`
+                              : "No applications match your filters"}
+                          </p>
+                          {both && (
+                            <p className="font-sans text-xs text-muted-foreground mb-3">
+                              Two filters are active at once: the pipeline tab <strong>{tabLabel}</strong> (your interaction status)
+                              and the stat tile <strong>{statusLabel}</strong> (the council’s planning status). Clear one to see results.
+                            </p>
+                          )}
+                          {!both && (statusLabel || pipelineTab !== "all") && (
+                            <p className="font-sans text-xs text-muted-foreground mb-3">
+                              Active filter: {statusLabel ? `stat tile ${statusLabel}` : `pipeline tab ${tabLabel}`}.
+                            </p>
+                          )}
+                          <div className="flex flex-wrap gap-2 justify-center">
+                            {pipelineTab !== "all" && (
+                              <button
+                                onClick={() => setPipelineTab("all")}
+                                className="px-3 py-1.5 rounded-xl border border-border font-mono text-[11px] uppercase tracking-wider text-primary hover:bg-muted transition-colors"
+                              >
+                                Clear pipeline tab
+                              </button>
+                            )}
+                            {statusLabel && (
+                              <button
+                                onClick={() => setFilterStatus("all")}
+                                className="px-3 py-1.5 rounded-xl border border-border font-mono text-[11px] uppercase tracking-wider text-primary hover:bg-muted transition-colors"
+                              >
+                                Clear status tile
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })()}
+
                     {visible.map(app => (
                       <AppCard
                         key={app.id}
