@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { useSearchParams } from "react-router-dom";
 import SEO from "@/components/SEO";
 import TradeSidebar from "@/components/trade/TradeSidebar";
 import { supabase } from "@/integrations/supabase/client";
@@ -583,6 +584,65 @@ export default function PlanningAlerts() {
     void loadApps();
     void loadEngagements();
   }, [pi.ready, loadApps, loadEngagements]);
+
+  // Deep link: /planning-alerts?alert=<planning_alert_id> opens that lead's own
+  // Opportunity Command Centre instead of dumping the user on the generic list.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const deepLinkId = searchParams.get("alert");
+  const handledDeepLink = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!deepLinkId || loadingApps) return;
+    if (handledDeepLink.current === deepLinkId) return;
+    handledDeepLink.current = deepLinkId;
+
+    setActiveTab("pipeline");
+    // Clear anything that could filter the lead out of the feed behind it.
+    setFilterStatus("all");
+    setFilterTrade("all");
+    setFilterCouncil("all");
+    setFilterDate("all");
+    setFilterProjectType("all");
+    setPipelineTab("all");
+    setMineOnly(false);
+    setShowRefused(true);
+    setSearchQuery("");
+
+    const local = apps.find((a) => a.id === deepLinkId);
+    if (local) {
+      setSelectedApp(local);
+      return;
+    }
+    // Not in the loaded page (limit 200) — fetch that single record directly.
+    void (async () => {
+      const { data } = await supabase
+        .from("planning_alerts")
+        .select(
+          "id, application_ref, address, postcode, application_type, description, approved_date, created_at, local_authority, planning_portal_url",
+        )
+        .eq("id", deepLinkId)
+        .maybeSingle();
+      if (data) setSelectedApp(mapAlertToApp(data as PlanningAlertRow));
+      else
+        toast({
+          title: "Lead not found",
+          description: "That planning lead is no longer in your feed.",
+          variant: "destructive",
+        });
+    })();
+  }, [deepLinkId, loadingApps, apps]);
+
+  // Keep the URL honest as the user moves between leads.
+  useEffect(() => {
+    if (!deepLinkId) return;
+    if (!selectedApp) {
+      const next = new URLSearchParams(searchParams);
+      next.delete("alert");
+      setSearchParams(next, { replace: true });
+      handledDeepLink.current = null;
+    }
+  }, [selectedApp, deepLinkId, searchParams, setSearchParams]);
+
 
 
   // Same proven refresh path used by the trade dashboard planning feed.
