@@ -635,7 +635,9 @@ export default function PlanningAlerts() {
   // Keep the URL honest as the user moves between leads.
   useEffect(() => {
     if (!deepLinkId) return;
-    if (!selectedApp) {
+    // Only clear once the deep link has actually been handled and the user has
+    // since closed the panel — otherwise we'd strip it before it opens.
+    if (handledDeepLink.current === deepLinkId && !selectedApp) {
       const next = new URLSearchParams(searchParams);
       next.delete("alert");
       setSearchParams(next, { replace: true });
