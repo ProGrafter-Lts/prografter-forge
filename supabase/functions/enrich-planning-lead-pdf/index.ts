@@ -277,7 +277,13 @@ serve(async (req) => {
     const best = candidates.find((c) => scoreFormLink(c.href, c.label) > 0);
     if (!best) {
       return new Response(
-        JSON.stringify({ error: "No application-form PDF link found on council page", candidates_found: candidates.length }),
+        JSON.stringify({
+          error:
+            "Couldn't find an application-form document on this council page. Open the council link and check the Documents tab manually.",
+          candidates_found: candidates.length,
+          source_url: lead.council_application_url,
+        }),
+
         { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
