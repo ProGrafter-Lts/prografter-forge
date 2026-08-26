@@ -1044,7 +1044,7 @@ export default function PlanningAlerts() {
                   {selectedApp && (
                     <OpportunityCommandCentre
                       app={selectedApp}
-                      onClose={() => setSelectedApp(null)}
+                      onClose={() => { setSelectedApp(null); setIntroIntentId(null); }}
                       isMobile={isMobile}
                       interaction={pi.interactions[selectedApp.id]}
                       trade={pi.trade}
@@ -1055,6 +1055,9 @@ export default function PlanningAlerts() {
                       onCreateInvite={() => pi.createInviteLink(selectedApp.id, getProjectType(selectedApp))}
                       onLetterGenerated={() => pi.upsertInteraction(selectedApp.id, { intro_letter_generated: true })}
                       engaged={engagements[engagementKey(selectedApp.address, selectedApp.postcode) ?? ""]}
+                      autoIntro={introIntentId === selectedApp.id}
+                      onAutoIntroHandled={() => setIntroIntentId(null)}
+
                     />
                   )}
                 </div>
