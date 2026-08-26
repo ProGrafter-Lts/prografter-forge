@@ -120,6 +120,7 @@ const PipelineSection = ({ tradeId }: Props) => {
   const [openStage, setOpenStage] = useState<keyof Counts | null>(null);
   const [stageRows, setStageRows] = useState<StageRow[] | null>(null);
   const [stageLoading, setStageLoading] = useState(false);
+  const [rowsByStage, setRowsByStage] = useState<Partial<Record<keyof Counts, StageRow[]>>>({});
   const [stageError, setStageError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -350,12 +351,7 @@ const PipelineSection = ({ tradeId }: Props) => {
           </div>
 
           <div className="mt-4 space-y-2">
-            {!STAGE_STATUS[openStage] ? (
-              <p className="font-sans text-sm text-white/60">
-                This stage isn't tracked yet — leads move here once site visits and planning
-                outcomes are recorded against a lead. Nothing to show for now.
-              </p>
-            ) : stageLoading ? (
+            {stageLoading ? (
               <>
                 <Skeleton className="h-16 w-full" />
                 <Skeleton className="h-16 w-full" />
