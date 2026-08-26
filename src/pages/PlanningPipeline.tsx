@@ -80,7 +80,7 @@ const Chip = ({ label, color, title }: { label: string; color: string; title?: s
 
 const SectionHeading = ({ children, right }: { children: ReactNode; right?: ReactNode }) => (
   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, margin: "0 0 12px" }}>
-    <h3 style={{ fontSize: 15, fontWeight: 700, color: C.cream, margin: 0, letterSpacing: "0.01em" }}>{children}</h3>
+    <h3 style={{ fontSize: 15, fontWeight: 700, color: C.cream, margin: 0, letterSpacing: "0.01em", fontFamily: "inherit", textTransform: "none" }}>{children}</h3>
     {right}
   </div>
 );
@@ -409,7 +409,7 @@ const LeadDetail = ({
       <div style={{ maxWidth: 1080, margin: "0 auto", display: "grid", gap: 16 }}>
         {/* 1. PROJECT HEADER */}
         <div>
-          <h2 style={{ fontSize: 30, fontWeight: 800, margin: 0, lineHeight: 1.2, letterSpacing: "-0.01em" }}>
+          <h2 style={{ fontSize: 30, fontWeight: 800, margin: 0, lineHeight: 1.2, letterSpacing: "-0.01em", color: C.cream, fontFamily: "inherit", textTransform: "none" }}>
             {lead.site_address}
           </h2>
           {(lead.postcode || locationLine) && (
@@ -1537,7 +1537,7 @@ export default function PlanningPipeline() {
           <div style={{ maxWidth: 1080, margin: "0 auto" }}>
             <div style={{ display: "flex", justifyContent: "space-between", gap: 16, flexWrap: "wrap", marginBottom: 18 }}>
               <div>
-                <h2 style={{ fontSize: 26, fontWeight: 800, margin: 0 }}>Batch Letter Printer</h2>
+                <h2 style={{ fontSize: 26, fontWeight: 800, margin: 0, color: C.cream, fontFamily: "inherit", textTransform: "none" }}>Batch Letter Printer</h2>
                 <p style={{ fontSize: 14.5, color: C.dim, margin: "6px 0 0", maxWidth: 620, lineHeight: 1.55 }}>
                   {batchLeads.length} lead{batchLeads.length === 1 ? "" : "s"} queued. Check the recipient details, choose a
                   template per letter, print the batch, then mark it sent to record the outreach on every lead.
@@ -1639,7 +1639,7 @@ export default function PlanningPipeline() {
         <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", flex: 1, overflow: isMobile ? "visible" : "hidden" }}>
           {(!isMobile || !selectedAgent) && (
             <div style={{ width: isMobile ? "100%" : 340, flexShrink: 0, padding: 16, overflowY: "auto", background: "rgba(0,0,0,0.14)" }}>
-              <h3 style={{ fontSize: 15, fontWeight: 700, margin: "0 0 12px" }}>Agent network ({agents.length})</h3>
+              <h3 style={{ fontSize: 15, fontWeight: 700, margin: "0 0 12px", color: C.cream, fontFamily: "inherit", textTransform: "none" }}>Agent network ({agents.length})</h3>
               {agents.map((agent) => (
                 <AgentCard
                   key={agent.id}
@@ -1662,7 +1662,7 @@ export default function PlanningPipeline() {
                 )}
                 {selectedAgent ? (
                   <>
-                    <h2 style={{ fontSize: 26, fontWeight: 800, margin: 0 }}>
+                    <h2 style={{ fontSize: 26, fontWeight: 800, margin: 0, color: C.cream, fontFamily: "inherit", textTransform: "none" }}>
                       {selectedAgent.company_name || selectedAgent.contact_name}
                     </h2>
                     <p style={{ fontSize: 15, color: C.dim, margin: "6px 0 18px" }}>
