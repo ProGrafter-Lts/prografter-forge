@@ -203,12 +203,13 @@ const PD_RULES: Record<string, Record<string, { pd: boolean | "maybe"; notes: st
 };
 
 // ── Status config (uses semantic tokens via Tailwind classes) ────────────────
-const STATUS_CFG: Record<string, { label: string; chip: string; dot: string; priority: string; accent: string; tone: BadgeTone }> = {
-  submitted:        { label:"Submitted",        chip:"bg-secondary/10 text-secondary border-secondary/30",        dot:"bg-secondary",        priority:"Act now",       accent:"text-secondary", tone:"blue" },
-  pending_decision: { label:"Pending decision", chip:"bg-amber-500/10 text-amber-700 border-amber-500/30",        dot:"bg-amber-500",        priority:"Still time",    accent:"text-amber-700", tone:"amber" },
-  approved:         { label:"Approved",         chip:"bg-emerald-500/10 text-emerald-700 border-emerald-500/30",  dot:"bg-emerald-500",      priority:"Ready",         accent:"text-emerald-700", tone:"green" },
-  refused:          { label:"Refused",          chip:"bg-destructive/10 text-destructive border-destructive/30",  dot:"bg-destructive",      priority:"No further action", accent:"text-destructive", tone:"grey" },
+const STATUS_CFG: Record<string, { label: string; chip: string; dot: string; priority: string; accent: string; tone: BadgeTone; activeBorder: string }> = {
+  submitted:        { label:"Submitted",        chip:"bg-secondary/10 text-secondary border-secondary/30",        dot:"bg-secondary",        priority:"Act now",       accent:"text-secondary", tone:"blue", activeBorder:"border-secondary" },
+  pending_decision: { label:"Pending decision", chip:"bg-amber-500/10 text-amber-700 border-amber-500/30",        dot:"bg-amber-500",        priority:"Still time",    accent:"text-amber-700", tone:"amber", activeBorder:"border-amber-500" },
+  approved:         { label:"Approved",         chip:"bg-emerald-500/10 text-emerald-700 border-emerald-500/30",  dot:"bg-emerald-500",      priority:"Ready",         accent:"text-emerald-700", tone:"green", activeBorder:"border-emerald-500" },
+  refused:          { label:"Refused",          chip:"bg-destructive/10 text-destructive border-destructive/30",  dot:"bg-destructive",      priority:"No further action", accent:"text-destructive", tone:"grey", activeBorder:"border-destructive" },
 };
+
 
 const PROP_TYPES = [
   { id:"detached",  name:"Detached house" },
@@ -821,11 +822,18 @@ export default function PlanningAlerts() {
                     return (
                       <button
                         key={s.status}
-                        onClick={()=>setFilterStatus(f=>f===s.status?"all":s.status)}
+                        aria-pressed={active}
+                        onClick={()=>setFilterStatus(f=>{
+                          const next = f===s.status?"all":s.status;
+                          // Refused rows are hidden by default; selecting the tile reveals them
+                          if (next === "refused") setShowRefused(true);
+                          return next;
+                        })}
                         className={`rounded-2xl px-4 py-3 border-2 cursor-pointer transition-all text-left flex flex-col ${
-                          active ? `${sc.chip.replace("text-","border-").split(" ").find(c=>c.startsWith("border-")) ?? "border-secondary"} bg-card`
+                          active ? `${sc.activeBorder} bg-card ring-2 ring-offset-1 ring-offset-background ring-current/20`
                                  : "bg-card border-border hover:border-secondary/40"
                         }`}
+
                       >
                         <span className={`font-mono text-2xl font-bold leading-none ${active ? sc.accent : "text-primary"}`}>
                           {s.count}
