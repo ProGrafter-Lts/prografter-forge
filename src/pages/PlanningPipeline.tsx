@@ -18,8 +18,10 @@ import {
   fmtCompact,
   fmtDate,
   isContacted,
+  isHistoric,
   isSkipped,
   lastContactAt,
+  letterAlreadySent,
   matchesView,
   nextActionFor,
   outreachChip,
@@ -29,6 +31,16 @@ import {
   type LeadEvent,
   type QuickView,
 } from "./planningPipelineModel";
+import {
+  TEMPLATE_META,
+  composeLetterBody,
+  fullLetterText,
+  letterDateLabel,
+  letterGreeting,
+  SENDER,
+  type LetterRecipient,
+  type LetterTemplateId,
+} from "@/lib/planningLetterTemplates";
 
 /* ------------------------------------------------------------------ */
 /* Small shared primitives                                             */
@@ -36,12 +48,12 @@ import {
 
 const inp = (): CSSProperties => ({
   width: "100%",
-  padding: "8px 10px",
+  padding: "10px 12px",
   borderRadius: 8,
   border: `1px solid ${C.line}`,
-  background: "rgba(255,255,255,0.04)",
+  background: "rgba(255,255,255,0.05)",
   color: C.cream,
-  fontSize: 12,
+  fontSize: 14,
   fontFamily: "inherit",
   outline: "none",
   boxSizing: "border-box",
@@ -52,13 +64,13 @@ const Chip = ({ label, color, title }: { label: string; color: string; title?: s
     title={title}
     style={{
       display: "inline-block",
-      fontSize: 9.5,
+      fontSize: 12,
       fontWeight: 700,
-      letterSpacing: "0.06em",
+      letterSpacing: "0.02em",
       color,
-      background: `${color}1F`,
-      borderRadius: 5,
-      padding: "2px 7px",
+      background: `${color}22`,
+      borderRadius: 6,
+      padding: "4px 10px",
       whiteSpace: "nowrap",
     }}
   >
@@ -66,23 +78,23 @@ const Chip = ({ label, color, title }: { label: string; color: string; title?: s
   </span>
 );
 
-const SectionLabel = ({ children }: { children: ReactNode }) => (
-  <p
-    style={{
-      fontSize: 9.5,
-      fontWeight: 700,
-      color: C.dim,
-      textTransform: "uppercase",
-      letterSpacing: "0.14em",
-      margin: "0 0 10px",
-    }}
-  >
-    {children}
-  </p>
+const SectionHeading = ({ children, right }: { children: ReactNode; right?: ReactNode }) => (
+  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, margin: "0 0 12px" }}>
+    <h3 style={{ fontSize: 15, fontWeight: 700, color: C.cream, margin: 0, letterSpacing: "0.01em" }}>{children}</h3>
+    {right}
+  </div>
 );
 
 const Panel = ({ children, style }: { children: ReactNode; style?: CSSProperties }) => (
-  <div style={{ background: "rgba(255,255,255,0.035)", borderRadius: 12, padding: "14px 16px", ...style }}>
+  <div
+    style={{
+      background: "rgba(255,255,255,0.04)",
+      borderRadius: 14,
+      padding: "18px 20px",
+      border: `1px solid ${C.line}`,
+      ...style,
+    }}
+  >
     {children}
   </div>
 );
@@ -91,14 +103,25 @@ const btn = (variant: "primary" | "ghost" | "quiet", extra?: CSSProperties): CSS
   border: variant === "primary" ? "none" : `1px solid ${variant === "ghost" ? "rgba(13,148,136,0.5)" : C.line}`,
   background: variant === "primary" ? C.teal : "transparent",
   color: variant === "primary" ? C.white : variant === "ghost" ? C.tealBright : C.dim,
-  borderRadius: 8,
-  padding: "7px 12px",
-  fontSize: 11,
+  borderRadius: 9,
+  padding: variant === "primary" ? "11px 18px" : "10px 14px",
+  fontSize: 14,
   fontWeight: 700,
+  lineHeight: 1.2,
   cursor: "pointer",
   whiteSpace: "nowrap",
+  fontFamily: "inherit",
   ...extra,
 });
+
+const Field = ({ label, value }: { label: string; value: ReactNode }) => (
+  <div>
+    <p style={{ fontSize: 12.5, color: C.faint, margin: 0, fontWeight: 600 }}>{label}</p>
+    <p style={{ fontSize: 14, color: C.cream, margin: "3px 0 0", fontWeight: 600, lineHeight: 1.45, wordBreak: "break-word" }}>
+      {value}
+    </p>
+  </div>
+);
 
 /* ------------------------------------------------------------------ */
 /* Lead card                                                           */
@@ -120,27 +143,27 @@ const LeadCard = ({
       onClick={() => onSelect(lead)}
       style={{
         display: "flex",
-        gap: 10,
-        background: selected ? "rgba(13,148,136,0.14)" : "rgba(255,255,255,0.03)",
+        gap: 12,
+        background: selected ? "rgba(13,148,136,0.16)" : "rgba(255,255,255,0.035)",
         boxShadow: selected ? `inset 0 0 0 1px ${C.teal}` : "none",
-        borderRadius: 10,
-        padding: "10px 12px 10px 10px",
+        borderRadius: 12,
+        padding: "14px 14px 14px 12px",
         cursor: "pointer",
-        marginBottom: 6,
-        opacity: isSkipped(lead) ? 0.5 : 1,
+        marginBottom: 10,
+        opacity: isSkipped(lead) ? 0.55 : 1,
         transition: "background 0.12s",
       }}
     >
-      <span style={{ width: 3, borderRadius: 3, background: chip.color, flexShrink: 0 }} />
+      <span style={{ width: 4, borderRadius: 4, background: chip.color, flexShrink: 0 }} />
       <div style={{ minWidth: 0, flex: 1 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
           <p
             style={{
-              fontSize: 12.5,
+              fontSize: 16,
               fontWeight: 700,
-              color: selected ? C.cream : "rgba(245,240,232,0.92)",
+              color: C.cream,
               margin: 0,
-              lineHeight: 1.3,
+              lineHeight: 1.35,
               overflow: "hidden",
               textOverflow: "ellipsis",
               whiteSpace: "nowrap",
@@ -148,32 +171,33 @@ const LeadCard = ({
           >
             {lead.site_address}
           </p>
-          <span style={{ fontSize: 12, fontWeight: 700, color: C.tealBright, flexShrink: 0 }}>
+          <span style={{ fontSize: 15, fontWeight: 700, color: C.tealBright, flexShrink: 0 }}>
             {fmt(lead.estimated_value_max)}
           </span>
         </div>
-        <p style={{ fontSize: 10, color: C.faint, margin: "2px 0 0" }}>
-          {lead.council_name} · {lead.application_ref}
-        </p>
         {lead.description && (
           <p
             style={{
-              fontSize: 10.5,
+              fontSize: 13,
               color: C.dim,
-              margin: "4px 0 0",
-              lineHeight: 1.4,
+              margin: "6px 0 0",
+              lineHeight: 1.5,
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
               overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
             }}
           >
             {lead.description}
           </p>
         )}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginTop: 7 }}>
+        <p style={{ fontSize: 12.5, color: C.faint, margin: "6px 0 0" }}>
+          {lead.council_name} · {lead.application_ref}
+        </p>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginTop: 10 }}>
           <Chip label={chip.label} color={chip.color} />
-          <span style={{ fontSize: 9.5, color: C.faint, whiteSpace: "nowrap" }}>
-            {chip.date ? fmtDate(chip.date) : `${days} days`}
+          <span style={{ fontSize: 12.5, color: C.faint, whiteSpace: "nowrap" }}>
+            {chip.date ? fmtDate(chip.date) : `${days} days old`}
           </span>
         </div>
       </div>
@@ -192,6 +216,7 @@ const LeadDetail = ({
   onSaved,
   onSkip,
   onLog,
+  onOpenBatch,
 }: {
   lead: Lead;
   agent?: Agent;
@@ -199,11 +224,15 @@ const LeadDetail = ({
   onSaved: () => void;
   onSkip: (l: Lead, skip: boolean) => void;
   onLog: (leadId: string, type: string, detail?: string, template?: string) => Promise<void>;
+  onOpenBatch: () => void;
 }) => {
   const [notes, setNotes] = useState(lead.notes || "");
   const [nextAction, setNextAction] = useState(lead.next_action || "");
-  const [template, setTemplate] = useState(lead.homeowner_letter_template || "A");
+  const [template, setTemplate] = useState<LetterTemplateId>(
+    (lead.homeowner_letter_template as LetterTemplateId) || "A",
+  );
   const [editUrl, setEditUrl] = useState(false);
+  const [more, setMore] = useState(false);
   const [councilUrl, setCouncilUrl] = useState(lead.council_application_url || "");
   const [busy, setBusy] = useState(false);
   const [enriching, setEnriching] = useState(false);
@@ -211,9 +240,10 @@ const LeadDetail = ({
   useEffect(() => {
     setNotes(lead.notes || "");
     setNextAction(lead.next_action || "");
-    setTemplate(lead.homeowner_letter_template || "A");
+    setTemplate((lead.homeowner_letter_template as LetterTemplateId) || "A");
     setCouncilUrl(lead.council_application_url || "");
     setEditUrl(false);
+    setMore(false);
   }, [lead.id]);
 
   const patch = useCallback(
@@ -234,6 +264,8 @@ const LeadDetail = ({
 
   const na = nextActionFor(lead);
   const ds = daysSince(lead.submitted_date);
+  const chip = outreachChip(lead);
+  const inBatch = lead.letter_batch_status === "queued";
 
   const markReviewed = async () => {
     if (await patch({ reviewed_at: new Date().toISOString() }, "Lead reviewed")) {
@@ -242,13 +274,21 @@ const LeadDetail = ({
   };
 
   const addToBatch = async () => {
-    if (lead.letter_batch_status === "queued") {
+    if (inBatch) {
       if (await patch({ letter_batch_status: null, letter_batch_added_at: null }, "Removed from letter batch")) {
         await onLog(lead.id, "batch_removed", "Removed from letter batch");
       }
       return;
     }
-    const ok = await patch(
+    // Duplicate protection — a letter has already physically gone out.
+    if (letterAlreadySent(lead)) {
+      const when = lastContactAt(lead) ? fmtDate(lastContactAt(lead)) : "previously";
+      const ok = window.confirm(
+        `A letter was already sent to this lead (${when}). Add it to the batch again as a follow-up?`,
+      );
+      if (!ok) return;
+    }
+    const done = await patch(
       {
         letter_batch_status: "queued",
         letter_batch_added_at: new Date().toISOString(),
@@ -258,7 +298,7 @@ const LeadDetail = ({
       },
       `Added to letter batch — Template ${template}`,
     );
-    if (ok) await onLog(lead.id, "batch_added", `Added to letter batch`, template);
+    if (done) await onLog(lead.id, "batch_added", "Added to letter batch", template);
   };
 
   const recordContact = async (party: "homeowner" | "agent", method: string) => {
@@ -300,7 +340,7 @@ const LeadDetail = ({
   };
 
   const setResponse = async (state: string) => {
-    const next = lead.response_state === state ? null : state;
+    const next = state || null;
     if (
       await patch(
         { response_state: next, response_at: next ? new Date().toISOString() : null },
@@ -357,292 +397,351 @@ const LeadDetail = ({
     }
   };
 
-  const info: [string, string][] = [
-    ["Reference", lead.application_ref],
-    ["Council", lead.council_name],
-    ["Type", lead.application_type || "—"],
-    ["Submitted", `${fmtDate(lead.submitted_date)} (${ds} days)`],
-    ["Applicant", lead.applicant_name || "Not listed"],
-    ["Postcode", lead.postcode || "—"],
-    ["Estimated value", fmt(lead.estimated_value_max)],
-    ["Status", lead.status.replace(/_/g, " ")],
-  ];
+  const naTone =
+    na.tone === "amber" ? C.amberBright : na.tone === "grey" ? C.dim : na.key === "action_response" ? C.purple : C.tealBright;
 
-  const naTone = na.tone === "amber" ? C.amberBright : na.tone === "grey" ? C.dim : C.tealBright;
+  const locationLine = [lead.applicant_address?.includes(lead.site_address) ? null : null, lead.postcode]
+    .filter(Boolean)
+    .join(" ");
 
   return (
-    <div style={{ height: "100%", overflowY: "auto", padding: "20px 24px 40px", color: C.cream }}>
-      {/* Header */}
-      <div style={{ marginBottom: 18 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
-          <div style={{ minWidth: 0 }}>
-            <h2 style={{ fontSize: 22, fontWeight: 700, margin: 0, lineHeight: 1.25 }}>{lead.site_address}</h2>
-            <p style={{ fontSize: 12, color: C.dim, margin: "6px 0 0", lineHeight: 1.5 }}>{lead.description}</p>
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 10, alignItems: "center" }}>
-              <span style={{ fontSize: 18, fontWeight: 700, color: C.tealBright }}>{fmt(lead.estimated_value_max)}</span>
-              <span style={{ fontSize: 11, color: C.faint }}>{ds} days</span>
-              <span style={{ fontSize: 11, color: C.faint }}>{lead.council_name}</span>
-              <span style={{ fontSize: 11, color: C.faint }}>{lead.application_ref}</span>
-              <Chip {...outreachChip(lead)} />
-            </div>
-          </div>
-        </div>
-
-        {/* Actions */}
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 14 }}>
-          <a
-            href={lead.council_application_url || undefined}
-            target="_blank"
-            rel="noreferrer"
-            onClick={(e) => {
-              if (!lead.council_application_url) {
-                e.preventDefault();
-                setEditUrl(true);
-              }
-            }}
-            style={{
-              ...btn("ghost"),
-              textDecoration: "none",
-              opacity: lead.council_application_url ? 1 : 0.55,
-              display: "inline-block",
-            }}
-          >
-            Open council record
-          </a>
-          {lead.pdf_source_url && (
-            <a href={lead.pdf_source_url} target="_blank" rel="noreferrer" style={{ ...btn("quiet"), textDecoration: "none" }}>
-              Open PDF
-            </a>
+    <div style={{ height: "100%", overflowY: "auto", padding: "26px 32px 56px", color: C.cream }}>
+      <div style={{ maxWidth: 1080, margin: "0 auto", display: "grid", gap: 16 }}>
+        {/* 1. PROJECT HEADER */}
+        <div>
+          <h2 style={{ fontSize: 30, fontWeight: 800, margin: 0, lineHeight: 1.2, letterSpacing: "-0.01em" }}>
+            {lead.site_address}
+          </h2>
+          {(lead.postcode || locationLine) && (
+            <p style={{ fontSize: 15, color: C.dim, margin: "6px 0 0" }}>{lead.postcode}</p>
           )}
-          <button
-            onClick={() => lead.council_application_url && copy(lead.council_application_url, "Link")}
-            disabled={!lead.council_application_url}
-            style={btn("quiet", { opacity: lead.council_application_url ? 1 : 0.5 })}
-          >
-            Copy link
-          </button>
-          <button onClick={addToBatch} disabled={busy} style={btn(lead.letter_batch_status === "queued" ? "quiet" : "primary")}>
-            {lead.letter_batch_status === "queued" ? "Remove from letter batch" : "Add to letter batch"}
-          </button>
-          <button onClick={() => setEditUrl((v) => !v)} style={btn("quiet")}>
-            {editUrl ? "Close" : "Edit URL"}
-          </button>
-          <button onClick={enrichFromPdf} disabled={enriching || !lead.council_application_url} style={btn("quiet")}>
-            {enriching ? "Reading PDF…" : lead.pdf_enriched_at ? "Re-read PDF form" : "Read PDF form"}
-          </button>
-          <button onClick={() => onSkip(lead, !isSkipped(lead))} style={btn("quiet")}>
-            {isSkipped(lead) ? "Restore lead" : "Skip lead"}
-          </button>
-        </div>
-
-        {editUrl && (
-          <div style={{ display: "flex", gap: 6, marginTop: 10 }}>
-            <input
-              type="url"
-              value={councilUrl}
-              onChange={(e) => setCouncilUrl(e.target.value)}
-              placeholder="https://publicaccess.council.gov.uk/online-applications/..."
-              style={inp()}
-            />
-            <button onClick={saveUrl} disabled={busy} style={btn("primary")}>
-              Save
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* Next action */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 12,
-          background: `${naTone}14`,
-          boxShadow: `inset 0 0 0 1px ${naTone}44`,
-          borderRadius: 12,
-          padding: "12px 16px",
-          marginBottom: 14,
-          flexWrap: "wrap",
-        }}
-      >
-        <div style={{ flex: 1, minWidth: 200 }}>
-          <p style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: "0.14em", color: C.dim, margin: 0 }}>NEXT ACTION</p>
-          <p style={{ fontSize: 14, fontWeight: 700, color: naTone, margin: "3px 0 0" }}>
-            {nextAction.trim() || na.label}
-          </p>
-          {na.hint && !nextAction.trim() && (
-            <p style={{ fontSize: 10.5, color: C.faint, margin: "2px 0 0" }}>{na.hint}</p>
-          )}
-        </div>
-        {na.key === "review" && (
-          <button onClick={markReviewed} style={btn("primary")}>
-            Mark reviewed
-          </button>
-        )}
-        {na.key === "add_batch" && (
-          <button onClick={addToBatch} style={btn("primary")}>
-            Add to letter batch
-          </button>
-        )}
-        {na.key === "follow_up" && (
-          <button onClick={() => recordContact("homeowner", "letter")} style={btn("primary")}>
-            Log follow-up letter
-          </button>
-        )}
-      </div>
-
-      <div style={{ display: "grid", gap: 12 }}>
-        {/* Outreach — homeowner */}
-        <Panel>
-          <SectionLabel>Outreach — homeowner</SectionLabel>
-          <div style={{ display: "flex", gap: 18, flexWrap: "wrap", marginBottom: 12 }}>
-            {[
-              ["Status", outreachChip(lead).label],
-              ["Last contact", lastContactAt(lead) ? fmtDate(lastContactAt(lead)) : "—"],
-              ["Method", lead.homeowner_last_contact_method || (lead.letter_sent_at ? "letter" : "—")],
-              ["Template", lead.homeowner_letter_template ? `Template ${lead.homeowner_letter_template}` : "—"],
-              ["Campaign", lead.outreach_campaign || "—"],
-            ].map(([k, v]) => (
-              <div key={k}>
-                <p style={{ fontSize: 9.5, color: C.faint, margin: 0, letterSpacing: "0.08em" }}>{k.toUpperCase()}</p>
-                <p style={{ fontSize: 12, color: C.cream, margin: "2px 0 0", fontWeight: 600 }}>{v}</p>
-              </div>
-            ))}
-          </div>
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-            <span style={{ fontSize: 10.5, color: C.faint }}>Template</span>
-            {LETTER_TEMPLATES.map((t) => (
-              <button
-                key={t}
-                onClick={() => setTemplate(t)}
-                style={btn(template === t ? "primary" : "quiet", { padding: "5px 12px" })}
-              >
-                {t}
-              </button>
-            ))}
-            <span style={{ width: 12 }} />
-            {CONTACT_METHODS.map((m) => (
-              <button key={m.id} onClick={() => recordContact("homeowner", m.id)} disabled={busy} style={btn("ghost")}>
-                Log {m.label.toLowerCase()}
-              </button>
-            ))}
-          </div>
-          {lead.applicant_address && (
-            <p style={{ fontSize: 11, color: C.dim, margin: "10px 0 0" }}>
-              {lead.applicant_name ? `${lead.applicant_name} · ` : ""}
-              {lead.applicant_address}
+          {lead.description && (
+            <p style={{ fontSize: 16, color: C.cream, margin: "10px 0 0", lineHeight: 1.55, maxWidth: 780 }}>
+              {lead.description}
             </p>
           )}
-        </Panel>
+          <div
+            style={{
+              display: "flex",
+              gap: 14,
+              flexWrap: "wrap",
+              alignItems: "center",
+              marginTop: 12,
+              fontSize: 14,
+              color: C.dim,
+            }}
+          >
+            <span style={{ fontSize: 20, fontWeight: 800, color: C.tealBright }}>
+              {fmt(lead.estimated_value_max)} estimated
+            </span>
+            <span>·</span>
+            <span>{ds} days old</span>
+            <span>·</span>
+            <span>{lead.council_name}</span>
+            <span>·</span>
+            <span>{lead.application_ref}</span>
+          </div>
+          <div style={{ display: "flex", gap: 10, alignItems: "center", marginTop: 12, flexWrap: "wrap" }}>
+            <span style={{ fontSize: 13, color: C.faint, fontWeight: 600 }}>Status</span>
+            <Chip label={chip.label} color={chip.color} />
+            {chip.date && <span style={{ fontSize: 13, color: C.faint }}>{fmtDate(chip.date)}</span>}
+            {isHistoric(lead) && <Chip label="HISTORIC — UNPROCESSED" color={C.faint} />}
+          </div>
 
-        {/* Architect / agent */}
-        <Panel>
-          <SectionLabel>Architect / agent</SectionLabel>
-          {agent || lead.agent_name ? (
-            <>
-              <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "baseline" }}>
-                <p style={{ fontSize: 14, fontWeight: 700, margin: 0 }}>
-                  {agent?.company_name || agent?.contact_name || lead.agent_name}
-                </p>
-                <Chip
-                  label={(lead.agent_outreach_status || "not contacted").toUpperCase()}
-                  color={lead.agent_outreach_status === "contacted" ? C.amberBright : C.faint}
-                />
-                {agent?.email && (
-                  <button onClick={() => copy(agent.email!, "Email")} style={btn("quiet", { padding: "3px 9px" })}>
-                    {agent.email}
-                  </button>
-                )}
-              </div>
-              {lead.agent_last_contact_at && (
-                <p style={{ fontSize: 11, color: C.dim, margin: "6px 0 0" }}>
-                  Last contact {fmtDate(lead.agent_last_contact_at)} · {lead.agent_last_contact_method}
-                </p>
-              )}
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 10 }}>
-                {CONTACT_METHODS.map((m) => (
-                  <button key={m.id} onClick={() => recordContact("agent", m.id)} disabled={busy} style={btn("ghost")}>
-                    {m.label}
-                  </button>
-                ))}
-              </div>
-            </>
-          ) : (
-            <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
-              <p style={{ fontSize: 12, color: C.faint, margin: 0 }}>Not identified</p>
+          {/* Primary actions */}
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 18 }}>
+            <a
+              href={lead.council_application_url || undefined}
+              target="_blank"
+              rel="noreferrer"
+              onClick={(e) => {
+                if (!lead.council_application_url) {
+                  e.preventDefault();
+                  setEditUrl(true);
+                }
+              }}
+              style={{
+                ...btn("ghost"),
+                textDecoration: "none",
+                opacity: lead.council_application_url ? 1 : 0.55,
+                display: "inline-block",
+              }}
+            >
+              Open council record
+            </a>
+            {lead.pdf_source_url && (
+              <a
+                href={lead.pdf_source_url}
+                target="_blank"
+                rel="noreferrer"
+                style={{ ...btn("ghost"), textDecoration: "none", display: "inline-block" }}
+              >
+                Open PDF
+              </a>
+            )}
+            <button onClick={addToBatch} disabled={busy} style={btn(inBatch ? "quiet" : "primary")}>
+              {inBatch ? "Remove from letter batch" : "Add to letter batch"}
+            </button>
+            {inBatch && (
+              <button onClick={onOpenBatch} style={btn("quiet")}>
+                Open letter batch
+              </button>
+            )}
+            <button onClick={() => setMore((v) => !v)} style={btn("quiet")}>
+              {more ? "Less ▲" : "More ▾"}
+            </button>
+          </div>
+
+          {more && (
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 10 }}>
+              <button
+                onClick={() => lead.council_application_url && copy(lead.council_application_url, "Link")}
+                disabled={!lead.council_application_url}
+                style={btn("quiet", { opacity: lead.council_application_url ? 1 : 0.5 })}
+              >
+                Copy link
+              </button>
+              <button onClick={() => setEditUrl((v) => !v)} style={btn("quiet")}>
+                {editUrl ? "Close URL editor" : "Edit URL"}
+              </button>
               <button onClick={enrichFromPdf} disabled={enriching || !lead.council_application_url} style={btn("quiet")}>
-                + Identify from PDF form
+                {enriching ? "Reading PDF…" : lead.pdf_enriched_at ? "Re-read PDF form" : "Read PDF form"}
+              </button>
+              <button onClick={() => onSkip(lead, !isSkipped(lead))} style={btn("quiet")}>
+                {isSkipped(lead) ? "Restore lead" : "Skip lead"}
               </button>
             </div>
           )}
-        </Panel>
 
-        {/* Response / outcome */}
-        <Panel>
-          <SectionLabel>Response / outcome</SectionLabel>
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-            {RESPONSE_STATES.map((r) => {
-              const on = lead.response_state === r.id;
-              const color =
-                r.tone === "teal" ? C.tealBright : r.tone === "purple" ? C.purple : r.tone === "red" ? C.red : C.dim;
-              return (
+          {editUrl && (
+            <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
+              <input
+                type="url"
+                value={councilUrl}
+                onChange={(e) => setCouncilUrl(e.target.value)}
+                placeholder="https://publicaccess.council.gov.uk/online-applications/..."
+                style={inp()}
+              />
+              <button onClick={saveUrl} disabled={busy} style={btn("primary")}>
+                Save
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* 2. NEXT ACTION */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 16,
+            background: `${naTone}14`,
+            boxShadow: `inset 0 0 0 1px ${naTone}44`,
+            borderRadius: 14,
+            padding: "16px 20px",
+            flexWrap: "wrap",
+          }}
+        >
+          <div style={{ flex: 1, minWidth: 220 }}>
+            <p style={{ fontSize: 12.5, fontWeight: 700, letterSpacing: "0.08em", color: C.dim, margin: 0 }}>
+              NEXT ACTION
+            </p>
+            <p style={{ fontSize: 18, fontWeight: 700, color: naTone, margin: "5px 0 0" }}>
+              {nextAction.trim() || na.label}
+            </p>
+            {na.hint && !nextAction.trim() && (
+              <p style={{ fontSize: 13.5, color: C.faint, margin: "4px 0 0" }}>{na.hint}</p>
+            )}
+          </div>
+          {na.key === "review" && (
+            <button onClick={markReviewed} style={btn("primary")}>
+              Mark reviewed
+            </button>
+          )}
+          {na.key === "add_batch" && (
+            <button onClick={addToBatch} style={btn("primary")}>
+              Add to letter batch
+            </button>
+          )}
+          {na.key === "batch" && (
+            <button onClick={onOpenBatch} style={btn("primary")}>
+              Open letter batch
+            </button>
+          )}
+          {na.key === "follow_up" && (
+            <button onClick={() => recordContact("homeowner", "letter")} style={btn("primary")}>
+              Log follow-up letter
+            </button>
+          )}
+        </div>
+
+        {/* 3. OUTREACH — two cards */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(340px,1fr))", gap: 16 }}>
+          <Panel>
+            <SectionHeading right={<Chip label={chip.label} color={chip.color} />}>Homeowner</SectionHeading>
+            <div style={{ display: "grid", gap: 10 }}>
+              <Field label="Last contact" value={lastContactAt(lead) ? fmtDate(lastContactAt(lead)) : "Not contacted"} />
+              <Field
+                label="Method"
+                value={
+                  lead.homeowner_last_contact_method
+                    ? CONTACT_METHODS.find((m) => m.id === lead.homeowner_last_contact_method)?.label ||
+                      lead.homeowner_last_contact_method
+                    : lead.letter_sent_at
+                      ? "Letter"
+                      : "—"
+                }
+              />
+              {lead.homeowner_letter_template && (
+                <Field label="Template" value={`Template ${lead.homeowner_letter_template}`} />
+              )}
+              {(lead.applicant_name || lead.applicant_address) && (
+                <Field
+                  label="Recipient"
+                  value={[lead.applicant_name, lead.applicant_address].filter(Boolean).join(" · ")}
+                />
+              )}
+            </div>
+
+            <div style={{ marginTop: 16, display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+              <span style={{ fontSize: 13, color: C.faint, fontWeight: 600 }}>Letter template</span>
+              {LETTER_TEMPLATES.map((t) => (
                 <button
-                  key={r.id}
-                  onClick={() => setResponse(r.id)}
-                  style={{
-                    background: on ? color : "transparent",
-                    color: on ? C.white : color,
-                    border: `1px solid ${on ? color : C.line}`,
-                    borderRadius: 20,
-                    padding: "5px 12px",
-                    fontSize: 10.5,
-                    fontWeight: 700,
-                    cursor: "pointer",
-                  }}
+                  key={t}
+                  onClick={() => setTemplate(t as LetterTemplateId)}
+                  title={TEMPLATE_META[t as LetterTemplateId].purpose}
+                  style={btn(template === t ? "primary" : "quiet", { padding: "8px 16px" })}
                 >
-                  {r.label}
+                  {t}
                 </button>
+              ))}
+            </div>
+
+            <div style={{ marginTop: 12, display: "flex", gap: 10, flexWrap: "wrap" }}>
+              {CONTACT_METHODS.map((m) => (
+                <button key={m.id} onClick={() => recordContact("homeowner", m.id)} disabled={busy} style={btn("ghost")}>
+                  Log {m.label.toLowerCase()}
+                </button>
+              ))}
+            </div>
+          </Panel>
+
+          <Panel>
+            <SectionHeading>Architect / agent</SectionHeading>
+            {agent || lead.agent_name ? (
+              <>
+                <p style={{ fontSize: 17, fontWeight: 700, margin: 0 }}>
+                  {agent?.company_name || agent?.contact_name || lead.agent_name}
+                </p>
+                <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", marginTop: 10 }}>
+                  <Chip
+                    label={(lead.agent_outreach_status || "not contacted").toUpperCase()}
+                    color={lead.agent_outreach_status === "contacted" ? C.amberBright : C.faint}
+                  />
+                  {agent?.email && (
+                    <button onClick={() => copy(agent.email!, "Email")} style={btn("quiet", { padding: "6px 12px" })}>
+                      {agent.email}
+                    </button>
+                  )}
+                </div>
+                {lead.agent_last_contact_at && (
+                  <p style={{ fontSize: 14, color: C.dim, margin: "12px 0 0" }}>
+                    Last contact {fmtDate(lead.agent_last_contact_at)} · {lead.agent_last_contact_method}
+                  </p>
+                )}
+                <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 14 }}>
+                  {CONTACT_METHODS.map((m) => (
+                    <button key={m.id} onClick={() => recordContact("agent", m.id)} disabled={busy} style={btn("ghost")}>
+                      Log {m.label.toLowerCase()}
+                    </button>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div>
+                <p style={{ fontSize: 15, color: C.dim, margin: 0 }}>Not identified</p>
+                <button
+                  onClick={enrichFromPdf}
+                  disabled={enriching || !lead.council_application_url}
+                  style={btn("quiet", { marginTop: 14, opacity: lead.council_application_url ? 1 : 0.5 })}
+                >
+                  {enriching ? "Reading form…" : "Identify from planning form"}
+                </button>
+              </div>
+            )}
+          </Panel>
+        </div>
+
+        {/* 4. RESPONSE / OUTCOME */}
+        <Panel>
+          <SectionHeading
+            right={
+              lead.response_at ? (
+                <span style={{ fontSize: 13, color: C.faint }}>Recorded {fmtDate(lead.response_at)}</span>
+              ) : undefined
+            }
+          >
+            Response / outcome
+          </SectionHeading>
+          <div style={{ display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap" }}>
+            {(() => {
+              const cur = RESPONSE_STATES.find((r) => r.id === lead.response_state);
+              const color =
+                cur?.tone === "teal"
+                  ? C.tealBright
+                  : cur?.tone === "purple"
+                    ? C.purple
+                    : cur?.tone === "red"
+                      ? C.red
+                      : C.dim;
+              return (
+                <span style={{ fontSize: 18, fontWeight: 700, color }}>{cur?.label || "No response yet"}</span>
               );
-            })}
+            })()}
+            <select
+              value={lead.response_state || ""}
+              onChange={(e) => setResponse(e.target.value)}
+              style={{ ...inp(), width: "auto", minWidth: 260, cursor: "pointer" }}
+            >
+              <option value="" style={{ color: "#1F2937" }}>
+                No response yet
+              </option>
+              {RESPONSE_STATES.filter((r) => r.id !== "no_response").map((r) => (
+                <option key={r.id} value={r.id} style={{ color: "#1F2937" }}>
+                  {r.label}
+                </option>
+              ))}
+            </select>
           </div>
           {lead.response_state === "draftline_enquiry" && (
-            <p style={{ fontSize: 10.5, color: C.purple, margin: "10px 0 0" }}>
+            <p style={{ fontSize: 13.5, color: C.purple, margin: "12px 0 0" }}>
               Source attribution retained: ProGrafter Planning Outreach
               {lead.outreach_campaign ? ` · ${lead.outreach_campaign}` : ""}.
             </p>
           )}
-          {lead.response_at && (
-            <p style={{ fontSize: 10.5, color: C.faint, margin: "8px 0 0" }}>Recorded {fmtDate(lead.response_at)}</p>
-          )}
         </Panel>
 
-        {/* Planning application info */}
+        {/* 5. PLANNING DETAILS */}
         <Panel>
-          <SectionLabel>Planning application</SectionLabel>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))", gap: "10px 18px" }}>
-            {info.map(([k, v]) => (
-              <div key={k}>
-                <p style={{ fontSize: 9.5, color: C.faint, margin: 0, letterSpacing: "0.08em", textTransform: "uppercase" }}>
-                  {k}
-                </p>
-                <p style={{ fontSize: 12, color: C.cream, margin: "2px 0 0", fontWeight: 500, wordBreak: "break-word" }}>
-                  {v}
-                </p>
-              </div>
-            ))}
+          <SectionHeading>Planning details</SectionHeading>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(190px,1fr))", gap: "16px 24px" }}>
+            <Field label="Application type" value={lead.application_type || "—"} />
+            <Field label="Submitted" value={`${fmtDate(lead.submitted_date)} (${ds} days)`} />
+            <Field label="Applicant" value={lead.applicant_name || "Not listed"} />
+            <Field label="Planning status" value={lead.status.replace(/_/g, " ")} />
           </div>
         </Panel>
 
-        {/* Activity */}
+        {/* 6. ACTIVITY */}
         <Panel>
-          <SectionLabel>Activity</SectionLabel>
+          <SectionHeading>Activity</SectionHeading>
           {events.length === 0 ? (
-            <p style={{ fontSize: 11.5, color: C.faint, margin: 0 }}>No recorded activity yet.</p>
+            <p style={{ fontSize: 14, color: C.faint, margin: 0 }}>No recorded activity yet.</p>
           ) : (
-            <div style={{ display: "grid", gap: 7 }}>
+            <div style={{ display: "grid", gap: 10 }}>
               {events.map((e) => (
-                <div key={e.id} style={{ display: "flex", gap: 10, fontSize: 11.5 }}>
-                  <span style={{ color: C.faint, minWidth: 92 }}>{fmtDate(e.created_at)}</span>
+                <div key={e.id} style={{ display: "flex", gap: 14, fontSize: 14, lineHeight: 1.5 }}>
+                  <span style={{ color: C.faint, minWidth: 110 }}>{fmtDate(e.created_at)}</span>
                   <span style={{ color: C.cream }}>
                     {e.detail || e.event_type}
                     {e.template ? ` — Template ${e.template}` : ""}
@@ -653,26 +752,26 @@ const LeadDetail = ({
           )}
         </Panel>
 
-        {/* Notes + manual next action */}
+        {/* 7. NOTES */}
         <Panel>
-          <SectionLabel>Notes</SectionLabel>
+          <SectionHeading>Notes</SectionHeading>
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={4}
             placeholder="Notes on this lead — conversations, outcomes…"
-            style={{ ...inp(), resize: "vertical", marginBottom: 8 }}
+            style={{ ...inp(), resize: "vertical", marginBottom: 10, lineHeight: 1.6 }}
           />
           <input
             value={nextAction}
             onChange={(e) => setNextAction(e.target.value)}
             placeholder="Override next action (optional)"
-            style={{ ...inp(), marginBottom: 8 }}
+            style={{ ...inp(), marginBottom: 10 }}
           />
           <button
             onClick={() => patch({ notes, next_action: nextAction }, "Lead updated")}
             disabled={busy}
-            style={btn("primary", { width: "100%", padding: "10px" })}
+            style={btn("primary", { width: "100%" })}
           >
             {busy ? "Saving…" : "Save changes"}
           </button>
@@ -683,7 +782,7 @@ const LeadDetail = ({
 };
 
 /* ------------------------------------------------------------------ */
-/* Agent card (unchanged behaviour)                                    */
+/* Agent card                                                          */
 /* ------------------------------------------------------------------ */
 
 const AGENT_STATUS: Record<string, { label: string; color: string }> = {
@@ -710,22 +809,22 @@ const AgentCard = ({
     <div
       onClick={() => onSelect(agent)}
       style={{
-        background: selected ? "rgba(13,148,136,0.14)" : "rgba(255,255,255,0.03)",
+        background: selected ? "rgba(13,148,136,0.16)" : "rgba(255,255,255,0.035)",
         boxShadow: selected ? `inset 0 0 0 1px ${C.teal}` : "none",
-        borderRadius: 10,
-        padding: "10px 14px",
+        borderRadius: 12,
+        padding: "14px 16px",
         cursor: "pointer",
-        marginBottom: 6,
+        marginBottom: 10,
       }}
     >
-      <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
         <div style={{ minWidth: 0 }}>
-          <p style={{ fontSize: 12.5, fontWeight: 700, color: C.cream, margin: 0 }}>{agent.contact_name}</p>
-          <p style={{ fontSize: 10.5, color: C.tealBright, margin: "2px 0 0" }}>{agent.company_name || "Independent"}</p>
+          <p style={{ fontSize: 15, fontWeight: 700, color: C.cream, margin: 0 }}>{agent.contact_name}</p>
+          <p style={{ fontSize: 13, color: C.tealBright, margin: "4px 0 0" }}>{agent.company_name || "Independent"}</p>
         </div>
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4 }}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>
           <Chip label={status.label} color={status.color} />
-          <span style={{ fontSize: 10, color: leadCount > 1 ? C.amberBright : C.faint }}>
+          <span style={{ fontSize: 12.5, color: leadCount > 1 ? C.amberBright : C.faint }}>
             {leadCount} app{leadCount === 1 ? "" : "s"}
           </span>
         </div>
@@ -733,6 +832,64 @@ const AgentCard = ({
     </div>
   );
 };
+
+/* ------------------------------------------------------------------ */
+/* Batch letter printer                                                */
+/* ------------------------------------------------------------------ */
+
+const toRecipient = (l: Lead): LetterRecipient => ({
+  name: l.applicant_name,
+  address: l.applicant_address || l.site_address,
+  postcode: l.postcode,
+  siteAddress: l.site_address,
+  council: l.council_name,
+  reference: l.application_ref,
+  description: l.description,
+});
+
+const PrintSheet = ({ leads }: { leads: Lead[] }) => (
+  <div className="pp-print">
+    {leads.map((l) => {
+      const r = toRecipient(l);
+      const t = ((l.homeowner_letter_template as LetterTemplateId) || "A") as LetterTemplateId;
+      return (
+        <div className="pp-letter" key={l.id}>
+          <div className="pp-letterhead">
+            <strong>{SENDER.line1}</strong>
+            <br />
+            {SENDER.email} · {SENDER.web}
+          </div>
+          <p className="pp-date">{letterDateLabel()}</p>
+          <p className="pp-addr">
+            {r.name || "The Homeowner"}
+            <br />
+            {r.address}
+            {r.postcode ? (
+              <>
+                <br />
+                {r.postcode}
+              </>
+            ) : null}
+          </p>
+          <p className="pp-greet">{letterGreeting(r)}</p>
+          {composeLetterBody(r, t).map((para, i) => (
+            <p key={i}>{para}</p>
+          ))}
+          <p className="pp-sign">
+            Kind regards,
+            <br />
+            <strong>{SENDER.name}</strong>
+            <br />
+            {SENDER.web}
+          </p>
+          <p className="pp-foot">
+            Ref: {r.reference} · {r.council} · {TEMPLATE_META[t].label}
+          </p>
+        </div>
+      );
+    })}
+  </div>
+);
 
 /* ------------------------------------------------------------------ */
 /* Page                                                                */
@@ -743,7 +900,7 @@ const LS_BAND = "pp_value_band";
 const LS_SORT = "pp_sort";
 
 const VALUE_BANDS = [
-  { id: "all", label: "All", min: 0 },
+  { id: "all", label: "All values", min: 0 },
   { id: "40k", label: "£40k+", min: 40000 },
   { id: "80k", label: "£80k+", min: 80000 },
   { id: "150k", label: "£150k+", min: 150000 },
@@ -754,6 +911,32 @@ const SORT_OPTIONS = [
   { id: "newest", label: "Newest" },
   { id: "deadline", label: "Oldest first" },
 ];
+
+const PRINT_CSS = `
+.pp-print { display: none; }
+@media print {
+  body * { visibility: hidden !important; }
+  .pp-print, .pp-print * { visibility: visible !important; }
+  .pp-print {
+    display: block !important;
+    position: absolute; left: 0; top: 0; width: 100%;
+    background: #fff; color: #111;
+    font-family: Georgia, 'Times New Roman', serif;
+  }
+  .pp-letter {
+    page-break-after: always;
+    padding: 22mm 20mm;
+    font-size: 11.5pt;
+    line-height: 1.6;
+  }
+  .pp-letter:last-child { page-break-after: auto; }
+  .pp-letterhead { font-size: 10.5pt; margin-bottom: 16mm; }
+  .pp-date, .pp-addr, .pp-greet, .pp-sign { margin: 0 0 6mm; }
+  .pp-letter p { margin: 0 0 5mm; }
+  .pp-foot { font-size: 9pt; color: #555; margin-top: 12mm; }
+  @page { size: A4; margin: 0; }
+}
+`;
 
 export default function PlanningPipeline() {
   const [tab, setTab] = useState<"leads" | "batch" | "agents" | "insights">("leads");
@@ -770,6 +953,7 @@ export default function PlanningPipeline() {
   const [valueBand, setValueBand] = useState<string>(() => localStorage.getItem(LS_BAND) || "40k");
   const [sortBy, setSortBy] = useState<string>(() => localStorage.getItem(LS_SORT) || "value_desc");
   const [showSkipped, setShowSkipped] = useState(false);
+  const [batchBusy, setBatchBusy] = useState(false);
   const isMobile = useIsMobile();
 
   useEffect(() => localStorage.setItem(LS_BAND, valueBand), [valueBand]);
@@ -793,7 +977,6 @@ export default function PlanningPipeline() {
     void load();
   }, [load]);
 
-  // Activity for the selected lead only — keeps the page light.
   useEffect(() => {
     if (!selectedLeadId) {
       setEvents([]);
@@ -816,13 +999,14 @@ export default function PlanningPipeline() {
 
   const logEvent = useCallback(async (leadId: string, type: string, detail?: string, template?: string) => {
     const { data: auth } = await supabase.auth.getUser();
-    await supabase.from("planning_lead_events").insert({
+    const { error } = await supabase.from("planning_lead_events").insert({
       lead_id: leadId,
       event_type: type,
       detail: detail ?? null,
       template: template ?? null,
       created_by: auth.user?.id ?? null,
     } as never);
+    if (error) console.error("[planning] event log failed", error.message);
   }, []);
 
   const runIngest = async () => {
@@ -931,8 +1115,33 @@ export default function PlanningPipeline() {
   const today = useMemo(() => buildToday(leads), [leads]);
   const batchLeads = useMemo(() => leads.filter((l) => l.letter_batch_status === "queued"), [leads]);
 
+  const setBatchTemplate = async (l: Lead, t: LetterTemplateId) => {
+    const { error } = await supabase
+      .from("planning_leads")
+      .update({ homeowner_letter_template: t, outreach_campaign: campaignFor(t) } as never)
+      .eq("id", l.id);
+    if (error) toast({ title: "Template change failed", description: error.message, variant: "destructive" });
+    else void load();
+  };
+
+  const removeFromBatch = async (l: Lead) => {
+    const { error } = await supabase
+      .from("planning_leads")
+      .update({ letter_batch_status: null, letter_batch_added_at: null } as never)
+      .eq("id", l.id);
+    if (error) toast({ title: "Remove failed", description: error.message, variant: "destructive" });
+    else {
+      await logEvent(l.id, "batch_removed", "Removed from letter batch");
+      toast({ title: "Removed from batch" });
+      void load();
+    }
+  };
+
   const markBatchSent = async () => {
     if (!batchLeads.length) return;
+    if (!window.confirm(`Mark ${batchLeads.length} letter(s) as sent? This records the outreach against every lead.`))
+      return;
+    setBatchBusy(true);
     const now = new Date().toISOString();
     const ids = batchLeads.map((l) => l.id);
     const { error } = await supabase
@@ -942,6 +1151,7 @@ export default function PlanningPipeline() {
         letter_batch_sent_at: now,
         letter_sent_at: now,
         homeowner_contacted: true,
+        homeowner_contacted_at: now,
         homeowner_last_contact_at: now,
         homeowner_last_contact_method: "letter",
         outreach_status: "letter_sent",
@@ -949,29 +1159,35 @@ export default function PlanningPipeline() {
       } as never)
       .in("id", ids);
     if (error) {
+      setBatchBusy(false);
       toast({ title: "Batch update failed", description: error.message, variant: "destructive" });
       return;
     }
     await Promise.all(
       batchLeads.map((l) => logEvent(l.id, "letter_sent", "Letter sent", l.homeowner_letter_template || "A")),
     );
-    toast({ title: `Batch marked sent`, description: `${ids.length} letters recorded as sent.` });
+    setBatchBusy(false);
+    toast({ title: "Batch marked sent", description: `${ids.length} letter(s) recorded as sent.` });
     void load();
   };
 
   const exportBatchCsv = () => {
     const rows = [
-      ["applicant_name", "address", "postcode", "planning_ref", "council", "description", "template", "campaign"],
-      ...batchLeads.map((l) => [
-        l.applicant_name || "The Homeowner",
-        l.applicant_address || l.site_address,
-        l.postcode || "",
-        l.application_ref,
-        l.council_name,
-        (l.description || "").replace(/[\r\n]+/g, " "),
-        l.homeowner_letter_template || "A",
-        l.outreach_campaign || campaignFor(l.homeowner_letter_template || "A") || "",
-      ]),
+      ["applicant_name", "address", "postcode", "planning_ref", "council", "description", "template", "campaign", "letter_text"],
+      ...batchLeads.map((l) => {
+        const t = ((l.homeowner_letter_template as LetterTemplateId) || "A") as LetterTemplateId;
+        return [
+          l.applicant_name || "The Homeowner",
+          l.applicant_address || l.site_address,
+          l.postcode || "",
+          l.application_ref,
+          l.council_name,
+          (l.description || "").replace(/[\r\n]+/g, " "),
+          t,
+          l.outreach_campaign || campaignFor(t) || "",
+          fullLetterText(toRecipient(l), t).replace(/[\r\n]+/g, " \\n "),
+        ];
+      }),
     ];
     const csv = rows.map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\n");
     const url = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
@@ -984,9 +1200,9 @@ export default function PlanningPipeline() {
 
   const kpi = (label: string, value: string, delta: string | null, color = C.cream) => (
     <div>
-      <p style={{ fontSize: 9.5, color: C.faint, margin: 0, letterSpacing: "0.14em" }}>{label}</p>
-      <p style={{ fontSize: 24, fontWeight: 700, color, margin: "2px 0 0", lineHeight: 1.1 }}>{value}</p>
-      {delta && <p style={{ fontSize: 10.5, color: C.tealBright, margin: "2px 0 0" }}>{delta}</p>}
+      <p style={{ fontSize: 12.5, color: C.faint, margin: 0, letterSpacing: "0.06em", fontWeight: 600 }}>{label}</p>
+      <p style={{ fontSize: 28, fontWeight: 800, color, margin: "3px 0 0", lineHeight: 1.1 }}>{value}</p>
+      {delta && <p style={{ fontSize: 13, color: C.tealBright, margin: "3px 0 0" }}>{delta}</p>}
     </div>
   );
 
@@ -995,14 +1211,34 @@ export default function PlanningPipeline() {
       key={id}
       onClick={() => setTab(id)}
       style={{
-        padding: "12px 16px",
+        padding: "14px 18px",
         border: "none",
         background: "transparent",
         borderBottom: `2px solid ${tab === id ? C.teal : "transparent"}`,
         color: tab === id ? C.cream : C.dim,
-        fontSize: 12.5,
+        fontSize: 15,
         fontWeight: 700,
         cursor: "pointer",
+        fontFamily: "inherit",
+      }}
+    >
+      {label}
+    </button>
+  );
+
+  const todayChip = (label: string, onClick: () => void, color: string) => (
+    <button
+      onClick={onClick}
+      style={{
+        background: `${color}18`,
+        border: `1px solid ${color}55`,
+        color,
+        borderRadius: 10,
+        padding: "10px 16px",
+        fontSize: 14,
+        fontWeight: 700,
+        cursor: "pointer",
+        fontFamily: "inherit",
       }}
     >
       {label}
@@ -1016,29 +1252,32 @@ export default function PlanningPipeline() {
         flexDirection: "column",
         minHeight: "100vh",
         height: isMobile ? "auto" : "100vh",
-        fontFamily: "system-ui, sans-serif",
+        fontFamily: "system-ui, -apple-system, sans-serif",
         background: C.deep,
         width: "100%",
         overflowX: "hidden",
       }}
     >
+      <style>{PRINT_CSS}</style>
+      <PrintSheet leads={batchLeads} />
+
       {/* Masthead */}
       <div
         style={{
-          padding: isMobile ? "12px 14px" : "14px 24px",
+          padding: isMobile ? "14px 16px" : "18px 28px",
           display: "flex",
           flexWrap: "wrap",
           alignItems: "center",
           justifyContent: "space-between",
-          gap: 16,
+          gap: 20,
           flexShrink: 0,
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
           <Logo variant="light" className="h-8 w-auto inline-block" />
-          <span style={{ fontSize: 11, color: C.dim, fontWeight: 600, letterSpacing: "0.18em" }}>PLANNING PIPELINE</span>
+          <span style={{ fontSize: 14, color: C.dim, fontWeight: 700, letterSpacing: "0.12em" }}>PLANNING PIPELINE</span>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 18 : 32, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 20 : 36, flexWrap: "wrap" }}>
           {kpi("TOTAL LEADS", String(leads.length), newThisWeek ? `+${newThisWeek} this week` : null)}
           {kpi(
             "ESTIMATED VALUE",
@@ -1046,8 +1285,8 @@ export default function PlanningPipeline() {
             valueThisWeek ? `+${fmtCompact(valueThisWeek)} this week` : null,
             C.tealBright,
           )}
-          <span style={{ fontSize: 10.5, color: C.faint }}>{hotLeads} hot</span>
-          <div style={{ display: "flex", gap: 8 }}>
+          <span style={{ fontSize: 13, color: C.faint }}>{hotLeads} hot</span>
+          <div style={{ display: "flex", gap: 10 }}>
             <Link to="/admin/trade-scraper" style={{ ...btn("quiet"), textDecoration: "none" }}>
               Trade scraper
             </Link>
@@ -1061,77 +1300,104 @@ export default function PlanningPipeline() {
       {/* Funnel strip */}
       <div
         style={{
-          display: "flex",
-          gap: isMobile ? 14 : 28,
-          padding: isMobile ? "10px 14px" : "10px 24px",
           background: C.surface,
-          flexWrap: "wrap",
-          alignItems: "center",
+          padding: isMobile ? "12px 16px" : "14px 28px",
           flexShrink: 0,
         }}
       >
-        {(
-          [
-            ["IDENTIFIED", funnel.identified],
-            ["QUALIFIED", funnel.qualified],
-            ["CONTACTED", funnel.contacted],
-            ["RESPONDED", funnel.responded],
-            ["REGISTERED", funnel.registered],
-            ["PROJECTS", funnel.projects],
-          ] as [string, number][]
-        ).map(([label, n], i) => (
-          <div key={label} style={{ display: "flex", alignItems: "center", gap: isMobile ? 14 : 28 }}>
-            {i > 0 && <span style={{ color: C.faint, fontSize: 11 }}>→</span>}
-            <div>
-              <span style={{ fontSize: 15, fontWeight: 700, color: n ? C.cream : C.faint }}>{n}</span>{" "}
-              <span style={{ fontSize: 9.5, color: C.faint, letterSpacing: "0.1em" }}>{label}</span>
+        <div
+          style={{
+            display: "flex",
+            gap: isMobile ? 14 : 22,
+            alignItems: "center",
+            flexWrap: "wrap",
+            maxWidth: 1100,
+          }}
+        >
+          {(
+            [
+              ["Identified", funnel.identified],
+              ["Qualified", funnel.qualified],
+              ["Contacted", funnel.contacted],
+              ["Responded", funnel.responded],
+              ["Registered", funnel.registered],
+              ["Projects", funnel.projects],
+            ] as [string, number][]
+          ).map(([label, n], i) => (
+            <div key={label} style={{ display: "flex", alignItems: "center", gap: isMobile ? 14 : 22 }}>
+              {i > 0 && <span style={{ color: C.faint, fontSize: 15 }}>→</span>}
+              <div>
+                <p style={{ fontSize: 22, fontWeight: 800, color: n ? C.cream : C.faint, margin: 0, lineHeight: 1.1 }}>
+                  {n}
+                </p>
+                <p style={{ fontSize: 13, color: C.dim, margin: "2px 0 0", fontWeight: 600 }}>{label}</p>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
       {/* Today strip */}
       <div
         style={{
-          padding: isMobile ? "10px 14px" : "10px 24px",
+          padding: isMobile ? "14px 16px" : "16px 28px",
           display: "flex",
-          gap: 16,
+          gap: 12,
           flexWrap: "wrap",
           alignItems: "center",
           flexShrink: 0,
         }}
       >
-        <span style={{ fontSize: 9.5, color: C.faint, letterSpacing: "0.14em", fontWeight: 700 }}>TODAY</span>
+        <span style={{ fontSize: 15, color: C.cream, fontWeight: 800, letterSpacing: "0.06em", marginRight: 6 }}>
+          TODAY
+        </span>
         {today.total === 0 ? (
-          <span style={{ fontSize: 12, fontWeight: 700, color: C.tealBright }}>TODAY'S PIPELINE CLEARED ✓</span>
+          <span style={{ fontSize: 15, fontWeight: 700, color: C.tealBright }}>Today's pipeline is clear ✓</span>
         ) : (
           <>
-            {today.toReview > 0 && (
-              <button onClick={() => { setTab("leads"); setView("review"); }} style={btn("quiet")}>
-                {today.toReview} to review
-              </button>
-            )}
-            {today.lettersReady > 0 && (
-              <button onClick={() => setTab("batch")} style={btn("quiet", { color: C.amberBright })}>
-                {today.lettersReady} letters ready
-              </button>
-            )}
-            {today.responsesToAction > 0 && (
-              <button onClick={() => { setTab("leads"); setView("responses"); }} style={btn("quiet", { color: C.tealBright })}>
-                {today.responsesToAction} responses to action
-              </button>
-            )}
-            {today.followUpsDue > 0 && (
-              <button onClick={() => { setTab("leads"); setView("contacted"); }} style={btn("quiet", { color: C.amberBright })}>
-                {today.followUpsDue} follow-ups due
-              </button>
-            )}
+            {today.toReview > 0 &&
+              todayChip(`${today.toReview} to review`, () => {
+                setTab("leads");
+                setView("review");
+              }, C.tealBright)}
+            {today.lettersReady > 0 && todayChip(`${today.lettersReady} letters ready`, () => setTab("batch"), C.amberBright)}
+            {today.responsesToAction > 0 &&
+              todayChip(`${today.responsesToAction} response${today.responsesToAction === 1 ? "" : "s"}`, () => {
+                setTab("leads");
+                setView("responses");
+              }, C.tealBright)}
+            {today.followUpsDue > 0 &&
+              todayChip(`${today.followUpsDue} follow-ups due`, () => {
+                setTab("leads");
+                setView("contacted");
+              }, C.amberBright)}
           </>
+        )}
+        {today.historic > 0 && (
+          <button
+            onClick={() => {
+              setTab("leads");
+              setView("historic");
+            }}
+            style={btn("quiet", { fontSize: 13 })}
+            title="Older imported applications with no outreach history — not part of today's workload"
+          >
+            {today.historic} historic / unprocessed
+          </button>
         )}
       </div>
 
       {/* Tabs */}
-      <div style={{ display: "flex", gap: 4, padding: isMobile ? "0 8px" : "0 24px", borderBottom: `1px solid ${C.line}`, overflowX: "auto", flexShrink: 0 }}>
+      <div
+        style={{
+          display: "flex",
+          gap: 6,
+          padding: isMobile ? "0 10px" : "0 28px",
+          borderBottom: `1px solid ${C.line}`,
+          overflowX: "auto",
+          flexShrink: 0,
+        }}
+      >
         {navTab("leads", `Leads (${leads.length})`)}
         {navTab("batch", `Letter batch (${batchLeads.length})`)}
         {navTab("agents", `Architects & agents (${agents.length})`)}
@@ -1139,7 +1405,7 @@ export default function PlanningPipeline() {
       </div>
 
       {loading ? (
-        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: C.dim, padding: 40 }}>
+        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: C.dim, fontSize: 15, padding: 40 }}>
           Loading…
         </div>
       ) : tab === "leads" ? (
@@ -1147,29 +1413,30 @@ export default function PlanningPipeline() {
           {(!isMobile || !selectedLeadId) && (
             <div
               style={{
-                width: isMobile ? "100%" : 360,
+                width: isMobile ? "100%" : 370,
                 flexShrink: 0,
                 display: "flex",
                 flexDirection: "column",
                 overflow: "hidden",
-                background: "rgba(0,0,0,0.12)",
+                background: "rgba(0,0,0,0.14)",
               }}
             >
-              <div style={{ padding: "12px 14px", display: "grid", gap: 8 }}>
-                <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+              <div style={{ padding: "16px 16px 12px", display: "grid", gap: 10 }}>
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                   {QUICK_VIEWS.map((v) => (
                     <button
                       key={v.id}
                       onClick={() => setView(v.id)}
                       style={{
-                        background: view === v.id ? C.teal : "transparent",
+                        background: view === v.id ? C.teal : "rgba(255,255,255,0.05)",
                         color: view === v.id ? C.white : C.dim,
                         border: "none",
-                        borderRadius: 7,
-                        padding: "5px 11px",
-                        fontSize: 11,
+                        borderRadius: 8,
+                        padding: "8px 13px",
+                        fontSize: 13.5,
                         fontWeight: 700,
                         cursor: "pointer",
+                        fontFamily: "inherit",
                       }}
                     >
                       {v.label}
@@ -1182,7 +1449,7 @@ export default function PlanningPipeline() {
                   placeholder="Search address, reference, applicant…"
                   style={inp()}
                 />
-                <div style={{ display: "flex", gap: 6 }}>
+                <div style={{ display: "flex", gap: 8 }}>
                   <select value={valueBand} onChange={(e) => setValueBand(e.target.value)} style={{ ...inp(), flex: 1 }}>
                     {VALUE_BANDS.map((b) => (
                       <option key={b.id} value={b.id} style={{ color: "#1F2937" }}>
@@ -1190,31 +1457,38 @@ export default function PlanningPipeline() {
                       </option>
                     ))}
                   </select>
-                  <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} style={{ ...inp(), flex: 1.4 }}>
+                  <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} style={{ ...inp(), flex: 1.3 }}>
                     {SORT_OPTIONS.map((s) => (
                       <option key={s.id} value={s.id} style={{ color: "#1F2937" }}>
                         {s.label}
                       </option>
                     ))}
                   </select>
-                  <button onClick={() => setShowSkipped((v) => !v)} style={btn("quiet", { color: showSkipped ? C.tealBright : C.dim })}>
-                    Skipped
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
+                  <p style={{ fontSize: 13, color: C.dim, margin: 0 }}>
+                    {filteredLeads.length} matching · page {page + 1} of {pageCount}
+                  </p>
+                  <button
+                    onClick={() => setShowSkipped((v) => !v)}
+                    style={btn("quiet", { padding: "6px 12px", fontSize: 13, color: showSkipped ? C.tealBright : C.dim })}
+                  >
+                    {showSkipped ? "Hide skipped" : "Show skipped"}
                   </button>
                 </div>
-                <p style={{ fontSize: 10, color: C.faint, margin: 0 }}>
-                  {filteredLeads.length} matching · page {page + 1} of {pageCount}
-                </p>
               </div>
 
-              <div style={{ flex: 1, overflowY: "auto", padding: "0 12px 12px" }}>
+              <div style={{ flex: 1, overflowY: "auto", padding: "0 16px 16px" }}>
                 {pageLeads.map((lead) => (
                   <LeadCard key={lead.id} lead={lead} selected={selectedLeadId === lead.id} onSelect={(l) => setSelectedLeadId(l.id)} />
                 ))}
                 {filteredLeads.length === 0 && (
-                  <p style={{ color: C.faint, fontSize: 12, textAlign: "center", marginTop: 20 }}>No leads match these filters.</p>
+                  <p style={{ color: C.faint, fontSize: 14, textAlign: "center", marginTop: 24 }}>
+                    No leads match these filters.
+                  </p>
                 )}
                 {pageCount > 1 && (
-                  <div style={{ display: "flex", justifyContent: "space-between", gap: 8, marginTop: 10 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", gap: 10, marginTop: 12 }}>
                     <button onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={page === 0} style={btn("quiet", { opacity: page === 0 ? 0.4 : 1 })}>
                       ← Previous
                     </button>
@@ -1234,7 +1508,7 @@ export default function PlanningPipeline() {
           {(!isMobile || selectedLeadId) && (
             <div style={{ flex: 1, overflow: isMobile ? "visible" : "hidden", background: C.surface }}>
               {isMobile && selectedLeadId && (
-                <button onClick={() => setSelectedLeadId(null)} style={{ ...btn("quiet"), margin: "12px 0 0 16px" }}>
+                <button onClick={() => setSelectedLeadId(null)} style={{ ...btn("quiet"), margin: "14px 0 0 16px" }}>
                   ← Back to leads
                 </button>
               )}
@@ -1246,10 +1520,11 @@ export default function PlanningPipeline() {
                   onSaved={load}
                   onSkip={skipLead}
                   onLog={logEvent}
+                  onOpenBatch={() => setTab("batch")}
                 />
               ) : (
                 !isMobile && (
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: C.faint, fontSize: 13 }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: C.faint, fontSize: 16 }}>
                     Select a lead to review
                   </div>
                 )
@@ -1258,71 +1533,113 @@ export default function PlanningPipeline() {
           )}
         </div>
       ) : tab === "batch" ? (
-        <div style={{ flex: 1, overflowY: "auto", padding: isMobile ? 14 : 24, color: C.cream }}>
-          <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap", marginBottom: 14 }}>
-            <div>
-              <h2 style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>Letter batch</h2>
-              <p style={{ fontSize: 12, color: C.dim, margin: "4px 0 0" }}>
-                {batchLeads.length} lead{batchLeads.length === 1 ? "" : "s"} queued · export to the Batch Letter Printer,
-                then mark the batch sent to update every record.
-              </p>
-            </div>
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              <button onClick={exportBatchCsv} disabled={!batchLeads.length} style={btn("quiet", { opacity: batchLeads.length ? 1 : 0.4 })}>
-                Export batch CSV
-              </button>
-              <button onClick={() => window.print()} disabled={!batchLeads.length} style={btn("quiet", { opacity: batchLeads.length ? 1 : 0.4 })}>
-                Print list
-              </button>
-              <button onClick={markBatchSent} disabled={!batchLeads.length} style={btn("primary", { opacity: batchLeads.length ? 1 : 0.4 })}>
-                Mark batch sent
-              </button>
-            </div>
-          </div>
-          {batchLeads.length === 0 ? (
-            <Panel>
-              <p style={{ fontSize: 12.5, color: C.dim, margin: 0 }}>
-                No letters queued. Open a lead and choose “Add to letter batch”.
-              </p>
-            </Panel>
-          ) : (
-            <Panel style={{ padding: 0, overflow: "hidden" }}>
-              {batchLeads.map((l, i) => (
-                <div
-                  key={l.id}
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    gap: 12,
-                    padding: "12px 16px",
-                    borderTop: i ? `1px solid ${C.line}` : "none",
-                    flexWrap: "wrap",
-                  }}
+        <div style={{ flex: 1, overflowY: "auto", padding: isMobile ? 16 : 28, color: C.cream }}>
+          <div style={{ maxWidth: 1080, margin: "0 auto" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 16, flexWrap: "wrap", marginBottom: 18 }}>
+              <div>
+                <h2 style={{ fontSize: 26, fontWeight: 800, margin: 0 }}>Batch Letter Printer</h2>
+                <p style={{ fontSize: 14.5, color: C.dim, margin: "6px 0 0", maxWidth: 620, lineHeight: 1.55 }}>
+                  {batchLeads.length} lead{batchLeads.length === 1 ? "" : "s"} queued. Check the recipient details, choose a
+                  template per letter, print the batch, then mark it sent to record the outreach on every lead.
+                </p>
+              </div>
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "flex-start" }}>
+                <button onClick={exportBatchCsv} disabled={!batchLeads.length} style={btn("quiet", { opacity: batchLeads.length ? 1 : 0.4 })}>
+                  Export CSV
+                </button>
+                <button
+                  onClick={() => window.print()}
+                  disabled={!batchLeads.length}
+                  style={btn("ghost", { opacity: batchLeads.length ? 1 : 0.4 })}
                 >
-                  <div style={{ minWidth: 0 }}>
-                    <p style={{ fontSize: 13, fontWeight: 700, margin: 0 }}>
-                      {l.applicant_name || "The Homeowner"} · {l.applicant_address || l.site_address}
-                    </p>
-                    <p style={{ fontSize: 11, color: C.dim, margin: "3px 0 0" }}>
-                      {l.council_name} · {l.application_ref} · {l.description}
-                    </p>
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <Chip label={`TEMPLATE ${l.homeowner_letter_template || "A"}`} color={C.amberBright} />
-                    <button onClick={() => { setTab("leads"); setSelectedLeadId(l.id); }} style={btn("quiet")}>
-                      Open
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </Panel>
-          )}
+                  Print {batchLeads.length || ""} letter{batchLeads.length === 1 ? "" : "s"}
+                </button>
+                <button
+                  onClick={markBatchSent}
+                  disabled={!batchLeads.length || batchBusy}
+                  style={btn("primary", { opacity: batchLeads.length && !batchBusy ? 1 : 0.4 })}
+                >
+                  {batchBusy ? "Recording…" : "Mark batch sent"}
+                </button>
+              </div>
+            </div>
+
+            {batchLeads.length === 0 ? (
+              <Panel>
+                <p style={{ fontSize: 15, color: C.dim, margin: 0 }}>
+                  No letters queued. Open a lead and choose “Add to letter batch”.
+                </p>
+              </Panel>
+            ) : (
+              <div style={{ display: "grid", gap: 12 }}>
+                {batchLeads.map((l) => {
+                  const t = ((l.homeowner_letter_template as LetterTemplateId) || "A") as LetterTemplateId;
+                  const noRecipient = !l.applicant_name && !l.applicant_address;
+                  return (
+                    <Panel key={l.id}>
+                      <div style={{ display: "flex", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
+                        <div style={{ minWidth: 260, flex: 1 }}>
+                          <p style={{ fontSize: 17, fontWeight: 700, margin: 0 }}>{l.applicant_name || "The Homeowner"}</p>
+                          <p style={{ fontSize: 14.5, color: C.cream, margin: "5px 0 0", lineHeight: 1.5 }}>
+                            {l.applicant_address || l.site_address}
+                            {l.postcode ? `, ${l.postcode}` : ""}
+                          </p>
+                          <p style={{ fontSize: 13.5, color: C.dim, margin: "6px 0 0", lineHeight: 1.5 }}>
+                            {l.council_name} · {l.application_ref} · {l.description}
+                          </p>
+                          {noRecipient && (
+                            <p style={{ fontSize: 13.5, color: C.amberBright, margin: "8px 0 0" }}>
+                              No applicant address on file — letter will be addressed to the site address.
+                            </p>
+                          )}
+                          {letterAlreadySent(l) && (
+                            <p style={{ fontSize: 13.5, color: C.amberBright, margin: "6px 0 0" }}>
+                              A letter was already sent to this lead — this will print as a follow-up.
+                            </p>
+                          )}
+                        </div>
+                        <div style={{ display: "flex", flexDirection: "column", gap: 10, alignItems: "flex-end" }}>
+                          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                            <span style={{ fontSize: 13, color: C.faint, fontWeight: 600 }}>Template</span>
+                            {(["A", "B", "C"] as LetterTemplateId[]).map((opt) => (
+                              <button
+                                key={opt}
+                                onClick={() => setBatchTemplate(l, opt)}
+                                title={TEMPLATE_META[opt].purpose}
+                                style={btn(t === opt ? "primary" : "quiet", { padding: "7px 14px" })}
+                              >
+                                {opt}
+                              </button>
+                            ))}
+                          </div>
+                          <div style={{ display: "flex", gap: 8 }}>
+                            <button
+                              onClick={() => {
+                                setTab("leads");
+                                setSelectedLeadId(l.id);
+                              }}
+                              style={btn("quiet", { padding: "7px 14px" })}
+                            >
+                              Open lead
+                            </button>
+                            <button onClick={() => removeFromBatch(l)} style={btn("quiet", { padding: "7px 14px" })}>
+                              Remove
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </Panel>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
       ) : tab === "agents" ? (
         <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", flex: 1, overflow: isMobile ? "visible" : "hidden" }}>
           {(!isMobile || !selectedAgent) && (
-            <div style={{ width: isMobile ? "100%" : 320, flexShrink: 0, padding: 12, overflowY: "auto", background: "rgba(0,0,0,0.12)" }}>
-              <SectionLabel>Agent network ({agents.length})</SectionLabel>
+            <div style={{ width: isMobile ? "100%" : 340, flexShrink: 0, padding: 16, overflowY: "auto", background: "rgba(0,0,0,0.14)" }}>
+              <h3 style={{ fontSize: 15, fontWeight: 700, margin: "0 0 12px" }}>Agent network ({agents.length})</h3>
               {agents.map((agent) => (
                 <AgentCard
                   key={agent.id}
@@ -1332,145 +1649,97 @@ export default function PlanningPipeline() {
                   leadCount={leadsByAgent[agent.id] ?? 0}
                 />
               ))}
+              {agents.length === 0 && <p style={{ fontSize: 14, color: C.faint }}>No agents identified yet.</p>}
             </div>
           )}
           {(!isMobile || selectedAgent) && (
-            <div style={{ flex: 1, padding: isMobile ? 14 : 24, overflowY: "auto", color: C.cream, background: C.surface }}>
-              {isMobile && selectedAgent && (
-                <button onClick={() => setSelectedAgent(null)} style={{ ...btn("quiet"), marginBottom: 12 }}>
-                  ← Back to agents
-                </button>
-              )}
-              {selectedAgent ? (
-                <div style={{ display: "grid", gap: 12 }}>
-                  <div>
-                    <h2 style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>{selectedAgent.contact_name}</h2>
-                    <p style={{ fontSize: 13, color: C.tealBright, margin: "4px 0 8px" }}>{selectedAgent.company_name}</p>
-                    <Chip
-                      label={(AGENT_STATUS[selectedAgent.relationship_status] || AGENT_STATUS.identified).label}
-                      color={(AGENT_STATUS[selectedAgent.relationship_status] || AGENT_STATUS.identified).color}
-                    />
-                  </div>
-                  <Panel>
-                    <SectionLabel>Contact</SectionLabel>
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))", gap: 12 }}>
-                      {[
-                        ["Email", selectedAgent.email],
-                        ["Phone", selectedAgent.phone],
-                        ["Address", selectedAgent.address],
-                        ["Active councils", (selectedAgent.councils_active || []).join(", ")],
-                        ["Avg job value", fmt(selectedAgent.avg_job_value_estimate)],
-                        ["Associated planning projects", String(leadsByAgent[selectedAgent.id] ?? 0)],
-                      ].map(([k, v]) =>
-                        v ? (
-                          <div key={k as string}>
-                            <p style={{ fontSize: 9.5, color: C.faint, margin: 0, letterSpacing: "0.08em", textTransform: "uppercase" }}>{k}</p>
-                            <p style={{ fontSize: 12, margin: "2px 0 0", wordBreak: "break-word" }}>{v}</p>
-                          </div>
-                        ) : null,
-                      )}
-                    </div>
-                  </Panel>
-                  <Panel>
-                    <SectionLabel>Notes & relationship log</SectionLabel>
-                    <p style={{ fontSize: 12, color: selectedAgent.notes ? C.cream : C.faint, lineHeight: 1.65, margin: 0, whiteSpace: "pre-wrap" }}>
-                      {selectedAgent.notes || "No notes yet."}
+            <div style={{ flex: 1, padding: isMobile ? 16 : 28, overflowY: "auto", color: C.cream, background: C.surface }}>
+              <div style={{ maxWidth: 900, margin: "0 auto" }}>
+                {isMobile && selectedAgent && (
+                  <button onClick={() => setSelectedAgent(null)} style={{ ...btn("quiet"), marginBottom: 14 }}>
+                    ← Back
+                  </button>
+                )}
+                {selectedAgent ? (
+                  <>
+                    <h2 style={{ fontSize: 26, fontWeight: 800, margin: 0 }}>
+                      {selectedAgent.company_name || selectedAgent.contact_name}
+                    </h2>
+                    <p style={{ fontSize: 15, color: C.dim, margin: "6px 0 18px" }}>
+                      {selectedAgent.contact_name}
+                      {selectedAgent.email ? ` · ${selectedAgent.email}` : ""}
+                      {selectedAgent.phone ? ` · ${selectedAgent.phone}` : ""}
                     </p>
-                  </Panel>
-                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                    {(["contacted", "interested", "partner", "not_interested"] as const).map((s) => (
-                      <button
-                        key={s}
-                        onClick={async () => {
-                          const { error } = await supabase.from("planning_agents").update({ relationship_status: s }).eq("id", selectedAgent.id);
-                          if (error) toast({ title: "Update failed", description: error.message, variant: "destructive" });
-                          else {
-                            toast({ title: "Agent updated" });
-                            setSelectedAgent({ ...selectedAgent, relationship_status: s });
-                            void load();
-                          }
-                        }}
-                        style={btn("quiet", { color: AGENT_STATUS[s].color })}
-                      >
-                        Mark as {AGENT_STATUS[s].label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                !isMobile && (
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: C.faint, fontSize: 13 }}>
-                    Select an agent to view their profile
-                  </div>
-                )
-              )}
+                    <Panel>
+                      <SectionHeading>Relationship</SectionHeading>
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: 16 }}>
+                        <Field
+                          label="Status"
+                          value={(AGENT_STATUS[selectedAgent.relationship_status] || AGENT_STATUS.identified).label}
+                        />
+                        <Field label="Applications" value={String(leadsByAgent[selectedAgent.id] ?? 0)} />
+                        <Field label="Intro sent" value={selectedAgent.intro_sent ? "Yes" : "No"} />
+                        <Field label="Meeting held" value={selectedAgent.meeting_held ? "Yes" : "No"} />
+                      </div>
+                      {selectedAgent.notes && (
+                        <p style={{ fontSize: 14.5, color: C.dim, margin: "16px 0 0", lineHeight: 1.6 }}>
+                          {selectedAgent.notes}
+                        </p>
+                      )}
+                    </Panel>
+                  </>
+                ) : (
+                  !isMobile && (
+                    <div style={{ color: C.faint, fontSize: 16, textAlign: "center", marginTop: 60 }}>
+                      Select an agent to view the relationship.
+                    </div>
+                  )
+                )}
+              </div>
             </div>
           )}
         </div>
       ) : (
-        <div style={{ flex: 1, overflowY: "auto", padding: isMobile ? 14 : 24, color: C.cream }}>
-          <h2 style={{ fontSize: 20, fontWeight: 700, margin: "0 0 4px" }}>Planning insights</h2>
-          <p style={{ fontSize: 12, color: C.dim, margin: "0 0 16px" }}>
-            Simple statistics from the live dataset. Deeper analysis will be added once more outreach history exists.
-          </p>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 12 }}>
+        <div style={{ flex: 1, overflowY: "auto", padding: isMobile ? 16 : 28, color: C.cream }}>
+          <div style={{ maxWidth: 1080, margin: "0 auto", display: "grid", gap: 16 }}>
             <Panel>
-              <SectionLabel>Applications by council</SectionLabel>
-              {Object.entries(
-                leads.reduce<Record<string, number>>((m, l) => {
-                  m[l.council_name] = (m[l.council_name] || 0) + 1;
-                  return m;
-                }, {}),
-              )
-                .sort((a, b) => b[1] - a[1])
-                .map(([k, v]) => (
-                  <div key={k} style={{ display: "flex", justifyContent: "space-between", fontSize: 12, padding: "3px 0" }}>
-                    <span style={{ color: C.dim }}>{k}</span>
-                    <span style={{ fontWeight: 700 }}>{v}</span>
+              <SectionHeading>Market intelligence</SectionHeading>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 20 }}>
+                {kpi("TOTAL LEADS", String(leads.length), newThisWeek ? `+${newThisWeek} this week` : null)}
+                {kpi("ESTIMATED VALUE", fmtCompact(totalValue), valueThisWeek ? `+${fmtCompact(valueThisWeek)} this week` : null, C.tealBright)}
+                {kpi("HOT LEADS", String(hotLeads), null, C.amberBright)}
+                {kpi("HISTORIC / UNPROCESSED", String(today.historic), null, C.dim)}
+              </div>
+            </Panel>
+            <Panel>
+              <SectionHeading>Conversion funnel</SectionHeading>
+              <div style={{ display: "grid", gap: 12 }}>
+                {(
+                  [
+                    ["Identified", funnel.identified],
+                    ["Qualified", funnel.qualified],
+                    ["Contacted", funnel.contacted],
+                    ["Responded", funnel.responded],
+                    ["Registered", funnel.registered],
+                    ["Projects", funnel.projects],
+                  ] as [string, number][]
+                ).map(([label, n]) => (
+                  <div key={label} style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                    <span style={{ fontSize: 14, color: C.dim, width: 110, fontWeight: 600 }}>{label}</span>
+                    <div style={{ flex: 1, height: 12, background: "rgba(255,255,255,0.06)", borderRadius: 6 }}>
+                      <div
+                        style={{
+                          width: `${funnel.identified ? Math.max(1, (n / funnel.identified) * 100) : 0}%`,
+                          height: "100%",
+                          background: C.teal,
+                          borderRadius: 6,
+                        }}
+                      />
+                    </div>
+                    <span style={{ fontSize: 16, fontWeight: 700, width: 60, textAlign: "right" }}>{n}</span>
                   </div>
                 ))}
-            </Panel>
-            <Panel>
-              <SectionLabel>Value</SectionLabel>
-              <p style={{ fontSize: 12, color: C.dim, margin: 0 }}>Total estimated</p>
-              <p style={{ fontSize: 22, fontWeight: 700, color: C.tealBright, margin: "2px 0 10px" }}>{fmtCompact(totalValue)}</p>
-              <p style={{ fontSize: 12, color: C.dim, margin: 0 }}>Average per application</p>
-              <p style={{ fontSize: 18, fontWeight: 700, margin: "2px 0 0" }}>
-                {leads.length ? fmtCompact(Math.round(totalValue / leads.length)) : "—"}
-              </p>
-            </Panel>
-            <Panel>
-              <SectionLabel>Most active agents</SectionLabel>
-              {Object.entries(leadsByAgent)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 8)
-                .map(([id, count]) => (
-                  <div key={id} style={{ display: "flex", justifyContent: "space-between", fontSize: 12, padding: "3px 0" }}>
-                    <span style={{ color: C.dim }}>{agentsById[id]?.company_name || agentsById[id]?.contact_name || "Unknown"}</span>
-                    <span style={{ fontWeight: 700 }}>{count}</span>
-                  </div>
-                ))}
-              {Object.keys(leadsByAgent).length === 0 && (
-                <p style={{ fontSize: 12, color: C.faint, margin: 0 }}>No agents linked to leads yet.</p>
-              )}
-            </Panel>
-            <Panel>
-              <SectionLabel>Conversion</SectionLabel>
-              {(
-                [
-                  ["Contacted", funnel.contacted],
-                  ["Responded", funnel.responded],
-                  ["Registered", funnel.registered],
-                  ["Projects", funnel.projects],
-                ] as [string, number][]
-              ).map(([k, v]) => (
-                <div key={k} style={{ display: "flex", justifyContent: "space-between", fontSize: 12, padding: "3px 0" }}>
-                  <span style={{ color: C.dim }}>{k}</span>
-                  <span style={{ fontWeight: 700 }}>
-                    {v} {funnel.identified ? `· ${((v / funnel.identified) * 100).toFixed(1)}%` : ""}
-                  </span>
-                </div>
-              ))}
+              </div>
             </Panel>
           </div>
         </div>

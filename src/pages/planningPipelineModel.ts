@@ -262,27 +262,47 @@ export type TodayQueue = {
   lettersReady: number;
   responsesToAction: number;
   followUpsDue: number;
+  historic: number;
   total: number;
 };
 
+/**
+ * Historic backlog: leads imported before the outreach workflow existed.
+ * A lead is historic when the application is older than 120 days AND nothing
+ * has ever been done with it. These must not pollute "today's" workload.
+ */
+export const HISTORIC_AGE_DAYS = 120;
+
+export const isHistoric = (l: Lead) =>
+  !l.reviewed_at &&
+  !isContacted(l) &&
+  !l.response_state &&
+  !l.letter_batch_status &&
+  daysSince(l.submitted_date || l.created_at) > HISTORIC_AGE_DAYS;
+
 export const buildToday = (leads: Lead[]): TodayQueue => {
   const live = leads.filter((l) => !isSkipped(l));
-  const toReview = live.filter((l) => !l.reviewed_at && !isContacted(l) && isQualified(l)).length;
+  const current = live.filter((l) => !isHistoric(l));
+  const toReview = current.filter((l) => !l.reviewed_at && !isContacted(l) && isQualified(l)).length;
   const lettersReady = live.filter((l) => l.letter_batch_status === "queued").length;
   const responsesToAction = live.filter(
     (l) => l.response_state === "interested" || l.response_state === "draftline_enquiry",
   ).length;
-  const followUpsDue = live.filter(
-    (l) => nextActionFor(l).key === "follow_up",
-  ).length;
+  const followUpsDue = current.filter((l) => nextActionFor(l).key === "follow_up").length;
   return {
     toReview,
     lettersReady,
     responsesToAction,
     followUpsDue,
+    historic: live.filter(isHistoric).length,
     total: toReview + lettersReady + responsesToAction + followUpsDue,
   };
 };
+
+/** Duplicate protection: a letter has already physically gone out to this lead. */
+export const letterAlreadySent = (l: Lead) =>
+  Boolean(l.letter_batch_sent_at || l.letter_sent_at || l.outreach_status === "letter_sent");
+
 
 /* ---------- quick views ---------- */
 export const QUICK_VIEWS = [
@@ -291,6 +311,7 @@ export const QUICK_VIEWS = [
   { id: "ready", label: "Ready to send" },
   { id: "contacted", label: "Contacted" },
   { id: "responses", label: "Responses" },
+  { id: "historic", label: "Historic" },
 ] as const;
 
 export type QuickView = (typeof QUICK_VIEWS)[number]["id"];
@@ -298,14 +319,17 @@ export type QuickView = (typeof QUICK_VIEWS)[number]["id"];
 export const matchesView = (l: Lead, view: QuickView) => {
   switch (view) {
     case "review":
-      return !l.reviewed_at && !isContacted(l);
+      return !l.reviewed_at && !isContacted(l) && !isHistoric(l);
     case "ready":
       return l.letter_batch_status === "queued";
     case "contacted":
       return isContacted(l);
     case "responses":
       return hasResponded(l);
+    case "historic":
+      return isHistoric(l);
     default:
       return true;
   }
 };
+
