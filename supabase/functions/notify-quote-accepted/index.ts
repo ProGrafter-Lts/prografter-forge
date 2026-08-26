@@ -54,7 +54,7 @@ Deno.serve(async (req) => {
 
   const { data: quote } = await supabase
     .from('quotes')
-    .select('id, reference, amount, job_id, trade_id, tier_enabled, selected_tier, budget_price, standard_price, premium_price')
+    .select('id, reference, amount, job_id, trade_id, accept_token, tier_enabled, selected_tier, budget_price, standard_price, premium_price')
     .eq('id', quoteId)
     .maybeSingle()
   if (!quote) {
@@ -87,13 +87,16 @@ Deno.serve(async (req) => {
     .eq('id', quote.trade_id)
     .maybeSingle()
 
-  // Only a party to this quote (or an admin) may trigger these notifications.
-  const callerId = authData.user.id
-  const { data: isAdmin } = await supabase.rpc('has_role', { _user_id: callerId, _role: 'admin' })
-  if (!isAdmin && callerId !== homeowner?.user_id && callerId !== trade?.user_id) {
-    return new Response(JSON.stringify({ error: 'Forbidden' }), {
-      status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    })
+  // A party to this quote, an admin, or the holder of the quote's accept token
+  // (the homeowner following the emailed public link) may trigger these emails.
+  const tokenValid = !!token && !!quote.accept_token && token === quote.accept_token
+  if (!tokenValid) {
+    const { data: isAdmin } = await supabase.rpc('has_role', { _user_id: callerId, _role: 'admin' })
+    if (!isAdmin && callerId !== homeowner?.user_id && callerId !== trade?.user_id) {
+      return new Response(JSON.stringify({ error: 'Forbidden' }), {
+        status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
   }
 
   let tradeEmail: string | null = null
