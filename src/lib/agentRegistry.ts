@@ -5,6 +5,11 @@
  * states — `site` while the takeoff is calculating, `clean` once verified.
  */
 
+import ianClean from "@/assets/agents/ian-clean.png.asset.json";
+import ianSite from "@/assets/agents/ian-site.png.asset.json";
+import amyClean from "@/assets/agents/amy-clean.png.asset.json";
+import amySite from "@/assets/agents/amy-site.png.asset.json";
+
 export type AgentId =
   | "lee"
   | "ian"
@@ -37,10 +42,16 @@ export interface Agent {
   avatars: { clean: string; site: string };
 }
 
-const avatars = (id: AgentId) => ({
-  clean: `/avatars/agents/${id}-clean.png`,
-  site: `/avatars/agents/${id}-site.png`,
-});
+const REAL_AVATARS: Partial<Record<AgentId, { clean: string; site: string }>> = {
+  ian: { clean: ianClean.url, site: ianSite.url },
+  amy: { clean: amyClean.url, site: amySite.url },
+};
+
+const avatars = (id: AgentId) =>
+  REAL_AVATARS[id] ?? {
+    clean: `/avatars/agents/${id}-clean.png`,
+    site: `/avatars/agents/${id}-site.png`,
+  };
 
 export const AGENTS: Agent[] = [
   {
