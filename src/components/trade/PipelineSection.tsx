@@ -71,21 +71,36 @@ interface StageRow {
   note: string | null;
   next_action_date: string | null;
   last_status_change_at: string | null;
+  contact_status?: string;
   planning_alerts: {
     address: string | null;
     postcode: string | null;
     application_type: string | null;
     description: string | null;
     local_authority: string | null;
+    approved_date?: string | null;
   } | null;
 }
 
-/** Stage key -> shortlist contact_status it maps to (null = no data source yet). */
-const STAGE_STATUS: Partial<Record<keyof Counts, string>> = {
-  todo: "todo",
-  contacted: "contacted",
-  quoted: "quoted",
-  won: "won",
+const SELECT_COLS =
+  "id, planning_alert_id, note, next_action_date, last_status_change_at, contact_status, planning_alerts(address, postcode, application_type, description, local_authority, approved_date)";
+
+/**
+ * Derive which pipeline stage a shortlist row sits in.
+ * Site Visit and Planning Approved are derived from real lead data:
+ *  - Site Visit: an open lead with a scheduled next action date.
+ *  - Planning Approved: an open lead whose planning application has an approved date.
+ */
+const stageForRow = (row: StageRow): keyof Counts | null => {
+  const status = row.contact_status;
+  if (status === "won") return "won";
+  if (status === "dead") return "lost";
+  if (status === "quoted") return "quoted";
+  const open = status === "todo" || status === "contacted";
+  if (!open) return null;
+  if (row.next_action_date) return "site_visit";
+  if (row.planning_alerts?.approved_date) return "planning_approved";
+  return status as keyof Counts;
 };
 
 const PipelineSection = ({ tradeId }: Props) => {
