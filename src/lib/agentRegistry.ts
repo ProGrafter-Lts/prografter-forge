@@ -5,6 +5,11 @@
  * states — `site` while the takeoff is calculating, `clean` once verified.
  */
 
+import ianClean from "@/assets/agents/ian-clean.png.asset.json";
+import ianSite from "@/assets/agents/ian-site.png.asset.json";
+import amyClean from "@/assets/agents/amy-clean.png.asset.json";
+import amySite from "@/assets/agents/amy-site.png.asset.json";
+
 export type AgentId =
   | "lee"
   | "ian"
