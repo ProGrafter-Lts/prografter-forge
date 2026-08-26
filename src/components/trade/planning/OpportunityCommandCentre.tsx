@@ -299,7 +299,13 @@ export default function OpportunityCommandCentre({
         </Section>
 
         {/* Action buttons */}
-        <div className="grid grid-cols-1 gap-2 border-t border-white/10 pt-4">
+        <div
+          ref={actionsRef}
+          className={`grid grid-cols-1 gap-2 border-t border-white/10 pt-4 rounded-xl transition-all ${
+            highlightActions ? "ring-2 ring-secondary/60 ring-offset-2 ring-offset-transparent" : ""
+          }`}
+        >
+
           {features.can_create_homeowner_invite_links && (
             <ActionBtn icon={<Link2 className="w-3.5 h-3.5" />} primary onClick={handleInvite}>
               {busy ? "Creating…" : inviteUrl ? "Invite link ready" : "Create homeowner invite"}
