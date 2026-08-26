@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   X, AlertTriangle, MapPin, Clock, TrendingUp, Target, FileText, ExternalLink,
   Bookmark, CheckCircle2, CalendarClock, Mail, ArrowRightCircle, XCircle,
