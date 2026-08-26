@@ -56,6 +56,9 @@ export default function OpportunityCommandCentre({
   const [inviteUrl, setInviteUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [highlightActions, setHighlightActions] = useState(false);
+  const actionsRef = useRef<HTMLDivElement | null>(null);
+
 
   useEffect(() => {
     setNotesDraft(interaction?.notes ?? "");
@@ -75,11 +78,12 @@ export default function OpportunityCommandCentre({
   };
 
   const handleInvite = async () => {
-    if (inviteUrl) return;
+    if (inviteUrl) return inviteUrl;
     setBusy(true);
     const res = await onCreateInvite();
     setBusy(false);
     if (res) setInviteUrl(res.url);
+    return res?.url ?? null;
   };
 
   const handleLetter = async () => {
@@ -92,6 +96,19 @@ export default function OpportunityCommandCentre({
     setLetter(generateIntroLetter(app, trade ?? { name: "", company_name: "", trade_type: "" }, url));
     onLetterGenerated();
   };
+
+  // "Best action: Send intro now" — runs the existing intro flow rather than
+  // being decorative text: creates the homeowner invite link (and the intro
+  // letter when the trade has that feature), then scrolls to the actions block.
+  const runBestAction = async () => {
+    setShowMore(true);
+    actionsRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    setHighlightActions(true);
+    setTimeout(() => setHighlightActions(false), 2200);
+    if (features.can_create_homeowner_invite_links) await handleInvite();
+    if (features.can_generate_intro_letters && !letter) await handleLetter();
+  };
+
 
   const currentStatus = interaction?.status ?? "new";
 
@@ -176,13 +193,24 @@ export default function OpportunityCommandCentre({
           )}
           <div className="flex items-start gap-2 border-t border-white/10 pt-3">
             <Target className="w-4 h-4 text-secondary mt-0.5 flex-shrink-0" />
-            <div>
-              <p className="font-mono text-xs font-semibold text-secondary">
-                Best action: {engaged ? "Follow up through the existing job" : action.label}
-              </p>
+            <div className="min-w-0">
+              {engaged ? (
+                <p className="font-mono text-xs font-semibold text-secondary">
+                  Best action: Follow up through the existing job
+                </p>
+              ) : (
+                <button
+                  type="button"
+                  onClick={runBestAction}
+                  className="font-mono text-xs font-semibold text-secondary text-left underline decoration-secondary/40 underline-offset-4 hover:decoration-secondary transition-colors"
+                >
+                  Best action: {action.label} →
+                </button>
+              )}
               <p className="font-sans text-[11px] text-cream/70 mt-1 leading-relaxed">{engaged ? engaged : action.explanation}</p>
             </div>
           </div>
+
 
           <div className="grid grid-cols-2 gap-2 pt-1">
             <StatBox k="Est. value" v={app.estimated_value} />
