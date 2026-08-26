@@ -43,12 +43,19 @@ async function firecrawlScrape(url: string, formats: string[]): Promise<ScrapeRe
   return json;
 }
 
+// Council portals often serve PDFs from viewer/download endpoints with no .pdf extension.
+function looksLikeDocLink(href: string): boolean {
+  const h = href.toLowerCase();
+  if (/\.pdf(\?|#|$)/.test(h)) return true;
+  return /(docid=|docno=|documentid=|pagestream|showdoc|viewdoc|getfile|filedownload|downloaddocument|\/files\/|\/documents?\/|mediaid=|attachment)/.test(h);
+}
+
 // Score a link to find the most likely "application form" PDF.
 function scoreFormLink(href: string, label = ""): number {
+  if (!looksLikeDocLink(href)) return 0;
   const h = href.toLowerCase();
   const l = label.toLowerCase();
-  if (!h.endsWith(".pdf") && !h.includes(".pdf?")) return 0;
-  let s = 1;
+  let s = /\.pdf(\?|#|$)/.test(h) ? 2 : 1;
   const combined = `${h} ${l}`;
   if (/application[\s_-]*form/.test(combined)) s += 50;
   if (/\b1app\b/.test(combined)) s += 40;
@@ -60,21 +67,22 @@ function scoreFormLink(href: string, label = ""): number {
   return s;
 }
 
-// Extract candidate PDF links from markdown (handles `[label](url.pdf)` patterns).
+// Extract candidate document links from markdown (handles `[label](url)` patterns).
 function extractPdfLinks(markdown: string, fallbackLinks: string[]): Array<{ href: string; label: string }> {
   const out: Array<{ href: string; label: string }> = [];
-  const re = /\[([^\]]+)\]\(([^)]+\.pdf[^)]*)\)/gi;
+  const re = /\[([^\]]+)\]\(([^)\s]+)[^)]*\)/gi;
   let m: RegExpExecArray | null;
   while ((m = re.exec(markdown)) !== null) {
-    out.push({ label: m[1], href: m[2] });
+    if (looksLikeDocLink(m[2])) out.push({ label: m[1], href: m[2] });
   }
   for (const href of fallbackLinks ?? []) {
-    if (/\.pdf/i.test(href) && !out.some((x) => x.href === href)) {
+    if (looksLikeDocLink(href) && !out.some((x) => x.href === href)) {
       out.push({ href, label: "" });
     }
   }
   return out;
 }
+
 
 interface Extracted {
   applicant_name: string | null;
@@ -221,34 +229,77 @@ serve(async (req) => {
       });
     }
 
+    // Step 0: Civica portals (e.g. Ashfield) render documents via a JSON API, so the
+    // scraped HTML contains no links at all. Resolve the PDF straight from that API.
+    let civicaPdf: string | null = null;
+    try {
+      const u = new URL(lead.council_application_url);
+      const keyNo = u.searchParams.get("KeyNo") ?? u.searchParams.get("KeyNumb");
+      const refType = u.searchParams.get("RefType");
+      if (keyNo && refType) {
+        const listUrl = `${u.origin}/civica/Resource/Civica/Handler.ashx/doc/list`;
+        const r = await fetch(listUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "User-Agent": "Mozilla/5.0" },
+          body: JSON.stringify({ KeyNumb: keyNo, KeyText: "Subject", RefType: refType }),
+        });
+        if (r.ok) {
+          const j = await r.json();
+          const docs: Array<Record<string, string>> = j?.CompleteDocument ?? [];
+          const best = docs
+            .map((d) => ({
+              d,
+              score: scoreFormLink(
+                `x.${(d.FileExtension || "pdf").toLowerCase()}`,
+                `${d.DocDesc ?? ""} ${d.Title ?? ""} ${d.FileName ?? ""}`,
+              ),
+            }))
+            .sort((a, b) => b.score - a.score)[0];
+          if (best && best.score > 5) {
+            civicaPdf =
+              `${u.origin}/civica/Resource/Civica/Handler.ashx/Doc/pagestream?cd=inline&pdf=true&docno=${best.d.DocNo}`;
+            console.log(`[ENRICH] ${lead.application_ref}: Civica doc ${best.d.DocNo} (${best.d.DocDesc})`);
+          } else {
+            console.log(`[ENRICH] ${lead.application_ref}: Civica list had ${docs.length} docs, no form match`);
+          }
+        }
+      }
+    } catch (e) {
+      console.error("[ENRICH] Civica lookup failed:", (e as Error).message);
+    }
+
     // Step 1: scrape council page to find PDF (with documents sub-page fallback)
     console.log(`[ENRICH] ${lead.application_ref}: scraping ${lead.council_application_url}`);
-    const page = await firecrawlScrape(lead.council_application_url, ["markdown", "links"]);
-    const pageMd = page.data?.markdown ?? "";
-    const pageLinks = page.data?.links ?? [];
-    let candidates = extractPdfLinks(pageMd, pageLinks);
+    const page = civicaPdf ? null : await firecrawlScrape(lead.council_application_url, ["markdown", "links"]);
+    const pageMd = page?.data?.markdown ?? "";
+    const pageLinks = page?.data?.links ?? [];
+    let candidates = civicaPdf
+      ? [{ href: civicaPdf, label: "Application Form" }]
+      : extractPdfLinks(pageMd, pageLinks);
+
 
     // Fallback: many council portals hide PDFs behind a Documents/Associated docs sub-page.
     if (!candidates.some((c) => scoreFormLink(c.href, c.label) > 0)) {
-      const docHints = /(document|associated|supporting|files|attachments|drawing)/i;
+      const docHints = /(document|associated|supporting|files|attachments|drawing|application[\s_-]*form|view[\s_-]*app|activeTab=documents)/i;
       const subPages = new Set<string>();
       // From markdown [label](href) pairs
-      const mdLinkRe = /\[([^\]]+)\]\(([^)]+)\)/gi;
+      const mdLinkRe = /\[([^\]]+)\]\(([^)\s]+)[^)]*\)/gi;
       let m: RegExpExecArray | null;
       while ((m = mdLinkRe.exec(pageMd)) !== null) {
         const label = m[1];
         const href = m[2];
-        if (/\.pdf/i.test(href)) continue;
+        if (looksLikeDocLink(href)) continue;
         if (docHints.test(label) || docHints.test(href)) subPages.add(href);
       }
       // From raw link list
       for (const href of pageLinks) {
-        if (/\.pdf/i.test(href)) continue;
+        if (looksLikeDocLink(href)) continue;
         if (docHints.test(href)) subPages.add(href);
       }
 
       const tried: string[] = [];
-      for (const sub of Array.from(subPages).slice(0, 3)) {
+      for (const sub of Array.from(subPages).slice(0, 5)) {
+
         const subUrl = new URL(sub, lead.council_application_url).toString();
         tried.push(subUrl);
         console.log(`[ENRICH] ${lead.application_ref}: fallback scraping ${subUrl}`);
@@ -268,7 +319,13 @@ serve(async (req) => {
     const best = candidates.find((c) => scoreFormLink(c.href, c.label) > 0);
     if (!best) {
       return new Response(
-        JSON.stringify({ error: "No application-form PDF link found on council page", candidates_found: candidates.length }),
+        JSON.stringify({
+          error:
+            "Couldn't find an application-form document on this council page. Open the council link and check the Documents tab manually.",
+          candidates_found: candidates.length,
+          source_url: lead.council_application_url,
+        }),
+
         { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
