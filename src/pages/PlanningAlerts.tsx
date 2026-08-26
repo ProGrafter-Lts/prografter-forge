@@ -590,6 +590,7 @@ export default function PlanningAlerts() {
   const [searchParams, setSearchParams] = useSearchParams();
   const deepLinkId = searchParams.get("alert");
   const handledDeepLink = useRef<string | null>(null);
+  const deepLinkResolved = useRef<string | null>(null);
 
   useEffect(() => {
     if (!deepLinkId || loadingApps) return;
@@ -611,6 +612,7 @@ export default function PlanningAlerts() {
     const local = apps.find((a) => a.id === deepLinkId);
     if (local) {
       setSelectedApp(local);
+      deepLinkResolved.current = deepLinkId;
       return;
     }
     // Not in the loaded page (limit 200) — fetch that single record directly.
@@ -622,8 +624,10 @@ export default function PlanningAlerts() {
         )
         .eq("id", deepLinkId)
         .maybeSingle();
-      if (data) setSelectedApp(mapAlertToApp(data as PlanningAlertRow));
-      else
+      if (data) {
+        setSelectedApp(mapAlertToApp(data as PlanningAlertRow));
+        deepLinkResolved.current = deepLinkId;
+      } else
         toast({
           title: "Lead not found",
           description: "That planning lead is no longer in your feed.",
@@ -635,7 +639,9 @@ export default function PlanningAlerts() {
   // Keep the URL honest as the user moves between leads.
   useEffect(() => {
     if (!deepLinkId) return;
-    if (!selectedApp) {
+    // Only clear once the deep link has actually been handled and the user has
+    // since closed the panel — otherwise we'd strip it before it opens.
+    if (deepLinkResolved.current === deepLinkId && !selectedApp) {
       const next = new URLSearchParams(searchParams);
       next.delete("alert");
       setSearchParams(next, { replace: true });
