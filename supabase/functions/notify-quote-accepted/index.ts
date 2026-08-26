@@ -19,26 +19,14 @@ Deno.serve(async (req) => {
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
   )
 
-  // Require an authenticated caller.
-  const authHeader = req.headers.get('Authorization')
-  if (!authHeader?.startsWith('Bearer ')) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-      status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    })
-  }
-  const { data: authData, error: authErr } = await supabase.auth.getUser(
-    authHeader.replace('Bearer ', ''),
-  )
-  if (authErr || !authData?.user) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-      status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    })
-  }
-
+  // Parse the body first: public quote links authenticate with the quote's
+  // accept token rather than a user session.
   let quoteId: string
+  let token = ''
   try {
     const body = await req.json()
     quoteId = String(body.quote_id || body.quoteId || '')
+    token = String(body.token || '')
   } catch {
     return new Response(JSON.stringify({ error: 'Invalid JSON' }), {
       status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -49,6 +37,20 @@ Deno.serve(async (req) => {
       status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   }
+
+  // An authenticated caller is optional when a valid accept token is supplied.
+  const authHeader = req.headers.get('Authorization')
+  let callerId: string | null = null
+  if (authHeader?.startsWith('Bearer ')) {
+    const { data: authData } = await supabase.auth.getUser(authHeader.replace('Bearer ', ''))
+    callerId = authData?.user?.id ?? null
+  }
+  if (!callerId && !token) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
+  }
+
 
   const { data: quote } = await supabase
     .from('quotes')
