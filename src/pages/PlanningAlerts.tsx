@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { useSearchParams } from "react-router-dom";
 import SEO from "@/components/SEO";
 import TradeSidebar from "@/components/trade/TradeSidebar";
 import { supabase } from "@/integrations/supabase/client";
