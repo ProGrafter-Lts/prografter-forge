@@ -203,12 +203,13 @@ const PD_RULES: Record<string, Record<string, { pd: boolean | "maybe"; notes: st
 };
 
 // ── Status config (uses semantic tokens via Tailwind classes) ────────────────
-const STATUS_CFG: Record<string, { label: string; chip: string; dot: string; priority: string; accent: string; tone: BadgeTone }> = {
-  submitted:        { label:"Submitted",        chip:"bg-secondary/10 text-secondary border-secondary/30",        dot:"bg-secondary",        priority:"Act now",       accent:"text-secondary", tone:"blue" },
-  pending_decision: { label:"Pending decision", chip:"bg-amber-500/10 text-amber-700 border-amber-500/30",        dot:"bg-amber-500",        priority:"Still time",    accent:"text-amber-700", tone:"amber" },
-  approved:         { label:"Approved",         chip:"bg-emerald-500/10 text-emerald-700 border-emerald-500/30",  dot:"bg-emerald-500",      priority:"Ready",         accent:"text-emerald-700", tone:"green" },
-  refused:          { label:"Refused",          chip:"bg-destructive/10 text-destructive border-destructive/30",  dot:"bg-destructive",      priority:"No further action", accent:"text-destructive", tone:"grey" },
+const STATUS_CFG: Record<string, { label: string; chip: string; dot: string; priority: string; accent: string; tone: BadgeTone; activeBorder: string }> = {
+  submitted:        { label:"Submitted",        chip:"bg-secondary/10 text-secondary border-secondary/30",        dot:"bg-secondary",        priority:"Act now",       accent:"text-secondary", tone:"blue", activeBorder:"border-secondary" },
+  pending_decision: { label:"Pending decision", chip:"bg-amber-500/10 text-amber-700 border-amber-500/30",        dot:"bg-amber-500",        priority:"Still time",    accent:"text-amber-700", tone:"amber", activeBorder:"border-amber-500" },
+  approved:         { label:"Approved",         chip:"bg-emerald-500/10 text-emerald-700 border-emerald-500/30",  dot:"bg-emerald-500",      priority:"Ready",         accent:"text-emerald-700", tone:"green", activeBorder:"border-emerald-500" },
+  refused:          { label:"Refused",          chip:"bg-destructive/10 text-destructive border-destructive/30",  dot:"bg-destructive",      priority:"No further action", accent:"text-destructive", tone:"grey", activeBorder:"border-destructive" },
 };
+
 
 const PROP_TYPES = [
   { id:"detached",  name:"Detached house" },
@@ -821,11 +822,18 @@ export default function PlanningAlerts() {
                     return (
                       <button
                         key={s.status}
-                        onClick={()=>setFilterStatus(f=>f===s.status?"all":s.status)}
+                        aria-pressed={active}
+                        onClick={()=>setFilterStatus(f=>{
+                          const next = f===s.status?"all":s.status;
+                          // Refused rows are hidden by default; selecting the tile reveals them
+                          if (next === "refused") setShowRefused(true);
+                          return next;
+                        })}
                         className={`rounded-2xl px-4 py-3 border-2 cursor-pointer transition-all text-left flex flex-col ${
-                          active ? `${sc.chip.replace("text-","border-").split(" ").find(c=>c.startsWith("border-")) ?? "border-secondary"} bg-card`
+                          active ? `${sc.activeBorder} bg-card ring-2 ring-offset-1 ring-offset-background ring-current/20`
                                  : "bg-card border-border hover:border-secondary/40"
                         }`}
+
                       >
                         <span className={`font-mono text-2xl font-bold leading-none ${active ? sc.accent : "text-primary"}`}>
                           {s.count}
@@ -939,11 +947,50 @@ export default function PlanningAlerts() {
                         </p>
                       </div>
                     )}
-                    {!loadingApps && apps.length > 0 && sorted.length === 0 && (
-                      <div className="bg-card rounded-2xl border border-border p-8 text-center">
-                        <p className="font-sans text-sm text-muted-foreground">No applications match your filters</p>
-                      </div>
-                    )}
+                    {!loadingApps && apps.length > 0 && sorted.length === 0 && (() => {
+                      const tabLabel = PIPELINE_TABS.find(t => t.id === pipelineTab)?.label;
+                      const statusLabel = filterStatus !== "all" ? (STATUS_CFG[filterStatus]?.label ?? filterStatus) : null;
+                      const both = pipelineTab !== "all" && !!statusLabel;
+                      return (
+                        <div className="bg-card rounded-2xl border border-border p-8 text-center">
+                          <p className="font-sans text-sm text-primary font-semibold mb-1">
+                            {both
+                              ? `No applications are both “${tabLabel}” and “${statusLabel}”`
+                              : "No applications match your filters"}
+                          </p>
+                          {both && (
+                            <p className="font-sans text-xs text-muted-foreground mb-3">
+                              Two filters are active at once: the pipeline tab <strong>{tabLabel}</strong> (your interaction status)
+                              and the stat tile <strong>{statusLabel}</strong> (the council’s planning status). Clear one to see results.
+                            </p>
+                          )}
+                          {!both && (statusLabel || pipelineTab !== "all") && (
+                            <p className="font-sans text-xs text-muted-foreground mb-3">
+                              Active filter: {statusLabel ? `stat tile ${statusLabel}` : `pipeline tab ${tabLabel}`}.
+                            </p>
+                          )}
+                          <div className="flex flex-wrap gap-2 justify-center">
+                            {pipelineTab !== "all" && (
+                              <button
+                                onClick={() => setPipelineTab("all")}
+                                className="px-3 py-1.5 rounded-xl border border-border font-mono text-[11px] uppercase tracking-wider text-primary hover:bg-muted transition-colors"
+                              >
+                                Clear pipeline tab
+                              </button>
+                            )}
+                            {statusLabel && (
+                              <button
+                                onClick={() => setFilterStatus("all")}
+                                className="px-3 py-1.5 rounded-xl border border-border font-mono text-[11px] uppercase tracking-wider text-primary hover:bg-muted transition-colors"
+                              >
+                                Clear status tile
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })()}
+
                     {visible.map(app => (
                       <AppCard
                         key={app.id}
