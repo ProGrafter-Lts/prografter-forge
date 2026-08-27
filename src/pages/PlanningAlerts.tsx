@@ -624,11 +624,12 @@ export default function PlanningAlerts() {
 
   useEffect(() => {
     if (!deepLinkId || loadingApps) return;
-    // Re-open whenever the URL points at a lead that isn't the one on screen.
-    // (A ref-only guard left the panel showing the previous lead — or nothing —
-    // when the same page was already mounted.)
-    if (handledDeepLink.current === deepLinkId && (!selectedApp || selectedApp.id === deepLinkId)) return;
+    // Handle each deep-link id once. The ref is reset when the panel is closed
+    // (see below), so re-arriving at the same lead re-opens it, while manually
+    // browsing to another lead is never overridden.
+    if (handledDeepLink.current === deepLinkId) return;
     handledDeepLink.current = deepLinkId;
+
 
 
 
@@ -669,20 +670,22 @@ export default function PlanningAlerts() {
           variant: "destructive",
         });
     })();
-  }, [deepLinkId, loadingApps, apps, selectedApp]);
+  }, [deepLinkId, loadingApps, apps]);
 
   // Keep the URL honest as the user moves between leads.
   useEffect(() => {
     if (!deepLinkId) return;
-    // Only clear once the deep link has actually been handled and the user has
-    // since closed the panel — otherwise we'd strip it before it opens.
-    if (deepLinkResolved.current === deepLinkId && !selectedApp) {
+    // Clear once the deep link has been resolved and the user has either closed
+    // the panel or moved on to a different lead.
+    if (deepLinkResolved.current === deepLinkId && (!selectedApp || selectedApp.id !== deepLinkId)) {
       const next = new URLSearchParams(searchParams);
       next.delete("alert");
       setSearchParams(next, { replace: true });
       handledDeepLink.current = null;
+      deepLinkResolved.current = null;
     }
   }, [selectedApp, deepLinkId, searchParams, setSearchParams]);
+
 
 
 
