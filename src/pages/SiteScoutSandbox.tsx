@@ -261,13 +261,17 @@ const SiteScoutSandbox = () => {
   // ---------- Step 3: master BoQ ----------
   const baseBoq: BoqLine[] = useMemo(
     () => [
+      ...(prelimsResult?.boq ?? []),
       ...(ground?.boq ?? []),
+      ...(slabResult?.boq ?? []),
       ...(superResult?.boq ?? []),
+      ...(envResult?.boq ?? []),
       ...(mepResult?.boq ?? []),
       ...(finishesResult?.boq ?? []),
     ],
-    [ground, superResult, mepResult, finishesResult],
+    [ground, slabResult, superResult, envResult, mepResult, finishesResult, prelimsResult],
   );
+
 
   const masterBoq: MasterBoqLine[] = useMemo(() => {
     return buildMasterBoq(baseBoq).map((line) => {
