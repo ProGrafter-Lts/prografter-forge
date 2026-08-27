@@ -70,12 +70,16 @@ export const AGENT_BY_PHASE: Record<string, AgentId> = {
 
 /** Keyword → RFQ pack routing. First match wins; falls back to the phase. */
 const PACK_RULES: [RegExp, PackId][] = [
-  [/concrete|trench block|drainage|shingle|grab|skip|muck|excavat|clayboard|hardcore/i, "A"],
-  [/facing brick|brick|7n|dense block|inner block|pir|insulation|wall tie|lintel|cavity/i, "B"],
-  [/timber|joist|rafter|membrane|batten|tile|slate|verge|ridge|roof|felt|fascia/i, "C"],
-  [/plasterboard|board|skim|plaster|bead|bonding|render|skirting|architrave|door|decorat/i, "D"],
+  // Order matters — most specific trade wording first.
   [
-    /consumer unit|cable|socket|light|switch|first fix|second fix|radiator|pipe|ev |underfloor|heating|certif|electric/i,
+    /plasterboard|boarding|drylining|skim|thistle|plaster|bonding|bead|render|skirting|architrave|door set|decorat|emulsion/i,
+    "D",
+  ],
+  [/excavat|muck|grab|skip|clayboard|drainage|shingle|hardcore|ready-mix|trench block/i, "A"],
+  [/brick|block|pir|insulation|wall tie|lintel|cavity/i, "B"],
+  [/timber|joist|rafter|membrane|batten|tile|slate|verge|ridge|roof|fascia|felt/i, "C"],
+  [
+    /consumer unit|cable|socket|light|switch|first fix|second fix|radiator|pipe|ev charge|underfloor|heating|certif|electric/i,
     "E",
   ],
 ];
@@ -96,23 +100,24 @@ export function packForLine(line: BoqLine): PackId {
 export function categoryForLine(line: BoqLine): string {
   const d = line.description.toLowerCase();
   if (/excavat|muck|grab|skip/.test(d)) return "Excavation & Muck-Away";
-  if (/concrete/.test(d)) return "Concrete";
-  if (/trench block|7n/.test(d)) return "Substructure Masonry";
   if (/clayboard/.test(d)) return "Ground Movement Protection";
   if (/drainage/.test(d)) return "Below-Ground Drainage";
+  if (/trench block/.test(d)) return "Substructure Masonry";
+  if (/ready-mix|foundation pour/.test(d)) return "Concrete";
+  if (/plasterboard|boarding labour/.test(d)) return "Drylining";
+  if (/skirting|architrave|door/.test(d)) return "Second-Fix Joinery";
+  if (/skim|render|plaster/.test(d)) return "Plastering & Render";
+  if (/decorat|emulsion/.test(d)) return "Decoration";
+  if (/tile|slate|pantile/.test(d)) return "Roof Covering";
+  if (/roof|rafter|batten|membrane|verge|joist|timber/.test(d)) return "Roof Carcass";
+  if (/lintel|steel/.test(d)) return "Structural Steel";
+  if (/insulation|pir/.test(d)) return "Thermal Insulation";
   if (/brick/.test(d)) return "Facing Masonry";
   if (/block/.test(d)) return "Blockwork";
-  if (/insulation|pir/.test(d)) return "Thermal Insulation";
-  if (/lintel|steel/.test(d)) return "Structural Steel";
-  if (/roof|tile|slate|rafter|batten|membrane|verge/.test(d)) return "Roof";
   if (/consumer unit/.test(d)) return "Distribution & Protection";
-  if (/first fix|second fix|socket|light|switch/.test(d)) return "Power & Lighting";
-  if (/radiator|heating|underfloor|pipe|boiler/.test(d)) return "Mechanical & Heating";
   if (/certif|notif/.test(d)) return "Certification";
-  if (/plasterboard|board/.test(d)) return "Drylining";
-  if (/skim|plaster|render/.test(d)) return "Plastering & Render";
-  if (/skirting|architrave|door/.test(d)) return "Second-Fix Joinery";
-  if (/decorat|emulsion/.test(d)) return "Decoration";
+  if (/radiator|heating|underfloor|pipe|boiler/.test(d)) return "Mechanical & Heating";
+  if (/first fix|second fix|socket|light|switch/.test(d)) return "Power & Lighting";
   return line.phase;
 }
 
