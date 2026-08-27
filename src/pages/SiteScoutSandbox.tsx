@@ -178,6 +178,7 @@ const PHASE_BY_AGENT: Partial<Record<AgentId, string>> = {
   caleb: "Superstructure",
   megan: "MEP",
   ruby: "Finishes",
+  sharon: "Prelims",
 };
 
 /* =================================================================== page */
