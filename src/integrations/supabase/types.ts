@@ -2910,6 +2910,51 @@ export type Database = {
           },
         ]
       }
+      planning_lead_contact_log: {
+        Row: {
+          channel: string | null
+          created_at: string
+          detail: string | null
+          event_type: string
+          id: string
+          planning_alert_id: string
+          trade_id: string
+        }
+        Insert: {
+          channel?: string | null
+          created_at?: string
+          detail?: string | null
+          event_type: string
+          id?: string
+          planning_alert_id: string
+          trade_id: string
+        }
+        Update: {
+          channel?: string | null
+          created_at?: string
+          detail?: string | null
+          event_type?: string
+          id?: string
+          planning_alert_id?: string
+          trade_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "planning_lead_contact_log_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "trades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "planning_lead_contact_log_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "trades_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       planning_lead_events: {
         Row: {
           created_at: string
