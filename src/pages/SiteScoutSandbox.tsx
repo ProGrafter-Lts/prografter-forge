@@ -193,18 +193,30 @@ const SiteScoutSandbox = () => {
     ...DEFAULT_FINISHES_INPUTS,
     externalRenderArea: 28,
   });
+  const [slabInputs, setSlabInputs] = useState<SlabInputs>({ ...DEFAULT_SLAB_INPUTS });
+  const [envInputs, setEnvInputs] = useState<EnvelopeInputs>({ ...DEFAULT_ENVELOPE_INPUTS });
+  const [prelimsInputs, setPrelimsInputs] = useState<PrelimsInputs>({ ...DEFAULT_PRELIMS_INPUTS });
   const setSuper = <K extends keyof SuperstructureInputs>(k: K, v: SuperstructureInputs[K]) =>
     setSuperInputs((p) => ({ ...p, [k]: v }));
   const setMep = <K extends keyof MepInputs>(k: K, v: MepInputs[K]) =>
     setMepInputs((p) => ({ ...p, [k]: v }));
   const setFin = <K extends keyof FinishesInputs>(k: K, v: FinishesInputs[K]) =>
     setFinishesInputs((p) => ({ ...p, [k]: v }));
+  const setSlab = <K extends keyof SlabInputs>(k: K, v: SlabInputs[K]) =>
+    setSlabInputs((p) => ({ ...p, [k]: v }));
+  const setEnv = <K extends keyof EnvelopeInputs>(k: K, v: EnvelopeInputs[K]) =>
+    setEnvInputs((p) => ({ ...p, [k]: v }));
+  const setPrelims = <K extends keyof PrelimsInputs>(k: K, v: PrelimsInputs[K]) =>
+    setPrelimsInputs((p) => ({ ...p, [k]: v }));
 
   const [status, setStatus] = useState<RunStatus>("idle");
   const [ground, setGround] = useState<TakeoffResult | null>(null);
   const [superResult, setSuperResult] = useState<SuperstructureResult | null>(null);
   const [mepResult, setMepResult] = useState<MepResult | null>(null);
   const [finishesResult, setFinishesResult] = useState<FinishesResult | null>(null);
+  const [slabResult, setSlabResult] = useState<SlabResult | null>(null);
+  const [envResult, setEnvResult] = useState<EnvelopeResult | null>(null);
+  const [prelimsResult, setPrelimsResult] = useState<PrelimsResult | null>(null);
   const [overrides, setOverrides] = useState<
     Record<string, { quantity?: number; rate?: number; description?: string }>
   >({});
@@ -215,6 +227,9 @@ const SiteScoutSandbox = () => {
     setSuperInputs({ ...DEFAULT_SUPER_INPUTS });
     setMepInputs({ ...DEFAULT_MEP_INPUTS });
     setFinishesInputs({ ...DEFAULT_FINISHES_INPUTS, externalRenderArea: 28 });
+    setSlabInputs({ ...DEFAULT_SLAB_INPUTS });
+    setEnvInputs({ ...DEFAULT_ENVELOPE_INPUTS });
+    setPrelimsInputs({ ...DEFAULT_PRELIMS_INPUTS });
     setDrawingName("preset-rear-extension-6x4.pdf");
   };
 
@@ -247,16 +262,23 @@ const SiteScoutSandbox = () => {
       DEFAULT_MEP_RATES,
     );
     const f = runFinishesTakeoff(finishesInputs, DEFAULT_FINISHES_RATES);
+    const sl = runSlabTakeoff(slabInputs, DEFAULT_SLAB_RATES);
+    const en = runEnvelopeTakeoff(envInputs, DEFAULT_ENVELOPE_RATES);
+    const pr = runPrelimsTakeoff(prelimsInputs, DEFAULT_PRELIMS_RATES);
 
     window.setTimeout(() => {
       setGround(g);
       setSuperResult(s);
       setMepResult(m);
       setFinishesResult(f);
+      setSlabResult(sl);
+      setEnvResult(en);
+      setPrelimsResult(pr);
       setStatus("verified");
       setStep(3);
     }, 900);
   };
+
 
   // ---------- Step 3: master BoQ ----------
   const baseBoq: BoqLine[] = useMemo(
