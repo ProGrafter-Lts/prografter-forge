@@ -352,7 +352,7 @@ export default function OpportunityCommandCentre({
           {showMore && (
             <div className="grid grid-cols-2 gap-2">
               {features.can_generate_intro_letters && (
-                <ActionBtn icon={<Mail className="w-3.5 h-3.5" />} onClick={handleLetter}>Generate intro letter</ActionBtn>
+                <ActionBtn icon={<Mail className="w-3.5 h-3.5" />} onClick={() => handleLetter()}>Generate intro letter</ActionBtn>
               )}
               <ActionBtn icon={<CheckCircle2 className="w-3.5 h-3.5" />} active={currentStatus === "contacted"} onClick={() => onStatus("contacted")}>Mark contacted</ActionBtn>
               <ActionBtn icon={<ArrowRightCircle className="w-3.5 h-3.5" />} active={currentStatus === "converted"} onClick={() => onStatus("converted")}>Convert to project</ActionBtn>
