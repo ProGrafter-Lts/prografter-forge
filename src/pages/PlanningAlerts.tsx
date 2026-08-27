@@ -605,8 +605,13 @@ export default function PlanningAlerts() {
 
   useEffect(() => {
     if (!deepLinkId || loadingApps) return;
-    if (handledDeepLink.current === deepLinkId) return;
+    // Re-open whenever the URL points at a lead that isn't the one on screen.
+    // (A ref-only guard left the panel showing the previous lead — or nothing —
+    // when the same page was already mounted.)
+    if (handledDeepLink.current === deepLinkId && (!selectedApp || selectedApp.id === deepLinkId)) return;
     handledDeepLink.current = deepLinkId;
+
+
 
     setActiveTab("pipeline");
     // Clear anything that could filter the lead out of the feed behind it.
@@ -645,7 +650,7 @@ export default function PlanningAlerts() {
           variant: "destructive",
         });
     })();
-  }, [deepLinkId, loadingApps, apps]);
+  }, [deepLinkId, loadingApps, apps, selectedApp]);
 
   // Keep the URL honest as the user moves between leads.
   useEffect(() => {
