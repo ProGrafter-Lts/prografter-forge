@@ -1024,7 +1024,7 @@ const SiteScoutSandbox = () => {
                     ) : (
                       <>
                         <div className="overflow-x-auto">
-                          <table className="w-full text-left border-collapse">
+                          <table className="w-full min-w-[1180px] text-left border-collapse">
                             <thead>
                               <tr>
                                 {[
