@@ -56,6 +56,12 @@ export interface GroundworksInputs {
   accessType: AccessType;
   drainageInvertBaseline: number;
   notes: string;
+  /** Below-ground foul/surface water run (lm). */
+  drainageRunLength?: number;
+  /** SiteScout ground-truth dig depth (m). Overrides the internal rule when set. */
+  depthOverride?: number;
+  /** SiteScout ground-truth clayboard decision. Overrides the internal rule when set. */
+  clayboardOverride?: boolean;
 }
 
 export type MuckAwayBasis = "volume" | "grab_loads";
