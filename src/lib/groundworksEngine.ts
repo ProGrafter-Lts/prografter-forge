@@ -56,6 +56,12 @@ export interface GroundworksInputs {
   accessType: AccessType;
   drainageInvertBaseline: number;
   notes: string;
+  /** Below-ground foul/surface water run (lm). */
+  drainageRunLength?: number;
+  /** SiteScout ground-truth dig depth (m). Overrides the internal rule when set. */
+  depthOverride?: number;
+  /** SiteScout ground-truth clayboard decision. Overrides the internal rule when set. */
+  clayboardOverride?: boolean;
 }
 
 export type MuckAwayBasis = "volume" | "grab_loads";
@@ -95,8 +101,8 @@ export function runSubstructureTakeoff(
 
   // 1. Depth & regulation rule (NHBC 4.2 / Part A)
   const clayTreeTrigger = input.soilType === "Clay" && input.treeProximity < 10;
-  const digDepth = clayTreeTrigger ? 1.8 : 1.0;
-  const clayboardRequired = clayTreeTrigger;
+  const digDepth = input.depthOverride ?? (clayTreeTrigger ? 1.8 : 1.0);
+  const clayboardRequired = input.clayboardOverride ?? clayTreeTrigger;
 
   if (clayTreeTrigger) {
     auditNotes.push(
@@ -208,6 +214,19 @@ export function runSubstructureTakeoff(
       unit: "lm",
       rate: rates.clayboardPerLm,
       total: round2(input.trenchLength * rates.clayboardPerLm),
+    });
+  }
+
+  const drainageRun = input.drainageRunLength ?? 0;
+  if (drainageRun > 0) {
+    boq.push({
+      phase: "Substructure",
+      description: "Below-ground drainage run — 110mm pipe, shingle bed & surround",
+      formula: `${drainageRun} lm at ${input.drainageInvertBaseline}m invert`,
+      quantity: round2(drainageRun),
+      unit: "lm",
+      rate: 86,
+      total: round2(drainageRun * 86),
     });
   }
 

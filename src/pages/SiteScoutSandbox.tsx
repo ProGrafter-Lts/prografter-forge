@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import TradeSidebar from "@/components/trade/TradeSidebar";
 import AgentAvatar from "@/components/sitescout/AgentAvatar";
 import { AGENTS, type Agent, type AgentId } from "@/lib/agentRegistry";
@@ -6,11 +6,8 @@ import {
   DEFAULT_DIMENSIONS,
   DEFAULT_RATES,
   runSubstructureTakeoff,
-  type AccessType,
   type BoqLine,
-  type GroundworksDimensions,
   type GroundworksInputs,
-  type GroundworksRates,
   type MuckAwayBasis,
   type SoilType,
   type TakeoffResult,
@@ -41,36 +38,36 @@ import {
   type FinishesResult,
 } from "@/lib/finishesEngine";
 import {
-  DEFAULT_COMMERCIAL_SETTINGS,
-  runCommercialAnalysis,
-  type CommercialSettings,
-} from "@/lib/commercialEngine";
-import {
   buildComplianceChecklist,
   buildLogisticsPlan,
   type ComplianceItem,
 } from "@/lib/complianceEngine";
+import {
+  DEFAULT_GROUND_TRUTH,
+  deriveGroundTruth,
+  type ConsumerUnitType,
+  type GroundTruth,
+  type SystemType,
+} from "@/lib/siteScoutGroundTruth";
+import {
+  allPacksToCsv,
+  buildMasterBoq,
+  downloadText,
+  masterBoqToCsv,
+  packToCsv,
+  runArbitrage,
+  
+  type MasterBoqLine,
+  type PackId,
+} from "@/lib/procurementEngine";
 
-const SOIL_TYPES: SoilType[] = ["Clay", "Sand & Gravel", "Rock", "Made Ground"];
-const ACCESS_TYPES: AccessType[] = [
-  "8-Wheel Grab Direct Access",
-  "Narrow Access Skip Only",
-  "Conveyor Required",
-];
-const BRICK_FORMATS: BrickFormat[] = ["65mm Metric (60/m²)", "73mm Imperial (52/m²)"];
-const ROOF_TYPES: RoofType[] = [
-  "Duo-Pitch Gable (30°)",
-  "Mono-Pitch Lean-To (15°)",
-  "Flat Roof GRP/Warm Roof",
-];
-const ROOF_COVERINGS: RoofCovering[] = [
-  "Interlocking Concrete Pantiles",
-  "Natural Slate",
-  "Plain Clay Tiles",
-];
+/* ------------------------------------------------------------------ theme */
+
+const ACCENT = "#38bdf8";
+const BG = "#0f172a";
 
 const inputClass =
-  "w-full rounded-xl bg-white/5 border border-white/15 px-3 py-2 font-mono text-sm text-white/90 placeholder:text-white/35 focus:outline-none focus:border-[#1AC2BA]";
+  "w-full rounded-lg bg-white/5 border border-white/15 px-3 py-2 font-mono text-sm text-white/90 placeholder:text-white/35 focus:outline-none focus:border-[#38bdf8]";
 const labelClass = "block font-mono text-[10px] uppercase tracking-wider text-white/55 mb-1.5";
 const cardClass = "rounded-2xl border border-white/10 bg-white/[0.03] p-4 md:p-5";
 
@@ -88,23 +85,38 @@ const SectionTitle = ({ children }: { children: React.ReactNode }) => (
   <h3 className="font-heading text-base font-bold text-white mb-3">{children}</h3>
 );
 
-type RunStatus = "idle" | "analyzing" | "verified";
-type TabId = "Substructure" | "Superstructure" | "MEP" | "Finishes" | "Commercial" | "Compliance";
-const TABS: TabId[] = [
-  "Substructure",
-  "Superstructure",
-  "MEP",
-  "Finishes",
-  "Commercial",
-  "Compliance",
-];
+const Select = <T extends string>({
+  value,
+  options,
+  onChange,
+}: {
+  value: T;
+  options: readonly T[];
+  onChange: (v: T) => void;
+}) => (
+  <select className={inputClass} value={value} onChange={(e) => onChange(e.target.value as T)}>
+    {options.map((o) => (
+      <option key={o} value={o} style={{ backgroundColor: BG }}>
+        {o}
+      </option>
+    ))}
+  </select>
+);
 
-const PHASE_BY_AGENT: Partial<Record<AgentId, string>> = {
-  ian: "Substructure",
-  caleb: "Superstructure",
-  megan: "MEP",
-  ruby: "Finishes",
-};
+const Toggle = ({
+  label,
+  checked,
+  onChange,
+}: {
+  label: string;
+  checked: boolean;
+  onChange: (v: boolean) => void;
+}) => (
+  <label className="flex items-center gap-2 font-mono text-xs text-white/70 cursor-pointer">
+    <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} />
+    {label}
+  </label>
+);
 
 const stateStyle = (state: ComplianceItem["state"]) =>
   state === "attention"
@@ -113,74 +125,140 @@ const stateStyle = (state: ComplianceItem["state"]) =>
       ? { backgroundColor: "#bbf7d0", color: "#14532d" }
       : { backgroundColor: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.7)" };
 
+/* ---------------------------------------------------------------- options */
+
+const SOIL_TYPES: SoilType[] = ["Clay", "Sand & Gravel", "Rock", "Made Ground"];
+const CU_TYPES: ConsumerUnitType[] = [
+  "Modern metal 18th Ed.",
+  "Plastic (pre-2016)",
+  "Rewireable fuse board",
+];
+const SYSTEM_TYPES: SystemType[] = ["Combi", "System", "Regular"];
+const BRICK_FORMATS: BrickFormat[] = ["65mm Metric (60/m²)", "73mm Imperial (52/m²)"];
+const ROOF_TYPES: RoofType[] = [
+  "Duo-Pitch Gable (30°)",
+  "Mono-Pitch Lean-To (15°)",
+  "Flat Roof GRP/Warm Roof",
+];
+const ROOF_COVERINGS: RoofCovering[] = [
+  "Interlocking Concrete Pantiles",
+  "Natural Slate",
+  "Plain Clay Tiles",
+];
+
+type StepId = 1 | 2 | 3 | 4;
+const STEPS: { id: StepId; label: string; sub: string }[] = [
+  { id: 1, label: "SiteScout Survey", sub: "Ground truth" },
+  { id: 2, label: "Drawings & Agent Takeoffs", sub: "Geometry × rules" },
+  { id: 3, label: "Retail BoQ & RFQ Packs", sub: "Amy — tender out" },
+  { id: 4, label: "Margin Arbitrage", sub: "Trade gap split" },
+];
+
+type RunStatus = "idle" | "analyzing" | "verified";
+
+const PHASE_BY_AGENT: Partial<Record<AgentId, string>> = {
+  ian: "Substructure",
+  caleb: "Superstructure",
+  megan: "MEP",
+  ruby: "Finishes",
+};
+
+/* =================================================================== page */
+
 const SiteScoutSandbox = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [step, setStep] = useState<StepId>(1);
 
-  // ---------- survey inputs ----------
-  const [inputs, setInputs] = useState<GroundworksInputs>({
-    projectRef: "TEST-01-SMEDLEY",
-    trenchLength: 24.5,
-    soilType: "Clay",
-    treeProximity: 6.5,
-    treeSpecies: "Oak",
-    accessType: "8-Wheel Grab Direct Access",
-    drainageInvertBaseline: 1.0,
-    notes: "",
+  // ---------- Step 1: SiteScout ground truth ----------
+  const [gt, setGt] = useState<GroundTruth>({ ...DEFAULT_GROUND_TRUTH });
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
+    ground: true,
+    logistics: true,
+    services: true,
   });
-  const [rates] = useState<GroundworksRates>({ ...DEFAULT_RATES });
-  const [dims] = useState<GroundworksDimensions>({ ...DEFAULT_DIMENSIONS });
-  const [basis, setBasis] = useState<MuckAwayBasis>("volume");
+  const setGtField = <K extends keyof GroundTruth>(k: K, v: GroundTruth[K]) =>
+    setGt((p) => ({ ...p, [k]: v }));
+  const derived = useMemo(() => deriveGroundTruth(gt), [gt]);
 
+  // ---------- Step 2: drawing + geometry ----------
+  const [projectRef, setProjectRef] = useState("TEST-01-SMEDLEY");
+  const [drawingName, setDrawingName] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [trenchLength, setTrenchLength] = useState(24.5);
+  const [drainageRun, setDrainageRun] = useState(14);
+  const [basis, setBasis] = useState<MuckAwayBasis>("volume");
   const [superInputs, setSuperInputs] = useState<SuperstructureInputs>({ ...DEFAULT_SUPER_INPUTS });
   const [mepInputs, setMepInputs] = useState<MepInputs>({ ...DEFAULT_MEP_INPUTS });
   const [finishesInputs, setFinishesInputs] = useState<FinishesInputs>({
     ...DEFAULT_FINISHES_INPUTS,
+    externalRenderArea: 28,
   });
-  const [commercial, setCommercial] = useState<CommercialSettings>({
-    ...DEFAULT_COMMERCIAL_SETTINGS,
-  });
+  const setSuper = <K extends keyof SuperstructureInputs>(k: K, v: SuperstructureInputs[K]) =>
+    setSuperInputs((p) => ({ ...p, [k]: v }));
+  const setMep = <K extends keyof MepInputs>(k: K, v: MepInputs[K]) =>
+    setMepInputs((p) => ({ ...p, [k]: v }));
+  const setFin = <K extends keyof FinishesInputs>(k: K, v: FinishesInputs[K]) =>
+    setFinishesInputs((p) => ({ ...p, [k]: v }));
 
-  // ---------- run state ----------
   const [status, setStatus] = useState<RunStatus>("idle");
   const [ground, setGround] = useState<TakeoffResult | null>(null);
   const [superResult, setSuperResult] = useState<SuperstructureResult | null>(null);
   const [mepResult, setMepResult] = useState<MepResult | null>(null);
   const [finishesResult, setFinishesResult] = useState<FinishesResult | null>(null);
-  const [tab, setTab] = useState<TabId>("Substructure");
-  const [filterAgent, setFilterAgent] = useState<AgentId | null>(null);
-  const [overrides, setOverrides] = useState<Record<string, { quantity?: number; rate?: number }>>(
-    {},
-  );
+  const [overrides, setOverrides] = useState<
+    Record<string, { quantity?: number; rate?: number; description?: string }>
+  >({});
 
-  const set = <K extends keyof GroundworksInputs>(key: K, value: GroundworksInputs[K]) =>
-    setInputs((p) => ({ ...p, [key]: value }));
-  const setSuper = <K extends keyof SuperstructureInputs>(key: K, value: SuperstructureInputs[K]) =>
-    setSuperInputs((p) => ({ ...p, [key]: value }));
-  const setMep = <K extends keyof MepInputs>(key: K, value: MepInputs[K]) =>
-    setMepInputs((p) => ({ ...p, [key]: value }));
-  const setFin = <K extends keyof FinishesInputs>(key: K, value: FinishesInputs[K]) =>
-    setFinishesInputs((p) => ({ ...p, [key]: value }));
+  const loadPreset = () => {
+    setTrenchLength(24.5);
+    setDrainageRun(14);
+    setSuperInputs({ ...DEFAULT_SUPER_INPUTS });
+    setMepInputs({ ...DEFAULT_MEP_INPUTS });
+    setFinishesInputs({ ...DEFAULT_FINISHES_INPUTS, externalRenderArea: 28 });
+    setDrawingName("preset-rear-extension-6x4.pdf");
+  };
 
   const runTakeoff = () => {
     setStatus("analyzing");
     setOverrides({});
-    const g = runSubstructureTakeoff(inputs, rates, dims, basis);
-    // Caleb inherits the foundation perimeter baseline directly from Ian.
-    const s = runSuperstructureTakeoff(inputs.trenchLength, superInputs, DEFAULT_SUPER_RATES, {
+
+    const groundInputs: GroundworksInputs = {
+      projectRef,
+      trenchLength,
+      soilType: gt.soilType,
+      treeProximity: gt.treeProximity,
+      treeSpecies: gt.treeSpecies,
+      accessType: derived.accessType,
+      drainageInvertBaseline: gt.drainageInvertDepth,
+      notes: "",
+      drainageRunLength: drainageRun,
+      depthOverride: derived.digDepth,
+      clayboardOverride: derived.clayboardRequired,
+    };
+    const effectiveBasis: MuckAwayBasis =
+      derived.accessType === "8-Wheel Grab Direct Access" ? basis : "volume";
+
+    const g = runSubstructureTakeoff(groundInputs, DEFAULT_RATES, DEFAULT_DIMENSIONS, effectiveBasis);
+    const s = runSuperstructureTakeoff(trenchLength, superInputs, DEFAULT_SUPER_RATES, {
       ...DEFAULT_SUPER_DIMENSIONS,
     });
-    const m = runMepTakeoff(mepInputs, DEFAULT_MEP_RATES);
+    const m = runMepTakeoff(
+      { ...mepInputs, consumerUnitUpgrade: derived.consumerUnitUpgrade },
+      DEFAULT_MEP_RATES,
+    );
     const f = runFinishesTakeoff(finishesInputs, DEFAULT_FINISHES_RATES);
+
     window.setTimeout(() => {
       setGround(g);
       setSuperResult(s);
       setMepResult(m);
       setFinishesResult(f);
       setStatus("verified");
+      setStep(3);
     }, 900);
   };
 
-  // ---------- live BoQ with editable quantities & rates ----------
+  // ---------- Step 3: master BoQ ----------
   const baseBoq: BoqLine[] = useMemo(
     () => [
       ...(ground?.boq ?? []),
@@ -191,24 +269,52 @@ const SiteScoutSandbox = () => {
     [ground, superResult, mepResult, finishesResult],
   );
 
-  const keyFor = (line: BoqLine, i: number) => `${line.phase}-${i}-${line.description}`;
+  const masterBoq: MasterBoqLine[] = useMemo(() => {
+    return buildMasterBoq(baseBoq).map((line) => {
+      const o = overrides[line.key];
+      const quantity = o?.quantity ?? line.quantity;
+      const rate = o?.rate ?? line.rate;
+      return {
+        ...line,
+        description: o?.description ?? line.description,
+        quantity,
+        rate,
+        total: Number((quantity * rate).toFixed(2)),
+      };
+    });
+  }, [baseBoq, overrides]);
 
-  const liveBoq = useMemo(
-    () =>
-      baseBoq.map((line, i) => {
-        const o = overrides[keyFor(line, i)];
-        const quantity = o?.quantity ?? line.quantity;
-        const rate = o?.rate ?? line.rate;
-        return { ...line, quantity, rate, total: Number((quantity * rate).toFixed(2)) };
-      }),
-    [baseBoq, overrides],
+  const updateOverride = (
+    key: string,
+    field: "quantity" | "rate" | "description",
+    value: number | string,
+  ) => setOverrides((p) => ({ ...p, [key]: { ...p[key], [field]: value } }));
+
+  const [agentFilter, setAgentFilter] = useState<AgentId | null>(null);
+  const visibleBoq = agentFilter ? masterBoq.filter((l) => l.agent === agentFilter) : masterBoq;
+
+  // ---------- Step 4: arbitrage ----------
+  const [negotiated, setNegotiated] = useState<Record<PackId, number | undefined>>(
+    {} as Record<PackId, number | undefined>,
+  );
+  const [globalDiscount, setGlobalDiscount] = useState(18);
+  const [retainPct, setRetainPct] = useState(70);
+  const [vatRate, setVatRate] = useState(20);
+
+  const arbitrage = useMemo(
+    () => runArbitrage(masterBoq, negotiated, retainPct, vatRate),
+    [masterBoq, negotiated, retainPct, vatRate],
   );
 
-  const commercialResult = useMemo(
-    () => runCommercialAnalysis(liveBoq, commercial),
-    [liveBoq, commercial],
-  );
+  const applyGlobalDiscount = () => {
+    const next = {} as Record<PackId, number | undefined>;
+    for (const p of arbitrage.packs)
+      next[p.pack.id] = Number((p.retailTotal * (1 - globalDiscount / 100)).toFixed(2));
+    setNegotiated(next);
+  };
 
+  // ---------- shared derived ----------
+  const retailTotal = arbitrage.retailTotal;
   const complianceItems = useMemo(
     () =>
       buildComplianceChecklist({
@@ -220,137 +326,107 @@ const SiteScoutSandbox = () => {
     [ground, superResult, mepResult, finishesResult],
   );
   const logistics = useMemo(
-    () => buildLogisticsPlan({ ground, superstructure: superResult, accessType: inputs.accessType }),
-    [ground, superResult, inputs.accessType],
+    () =>
+      buildLogisticsPlan({
+        ground,
+        superstructure: superResult,
+        accessType: derived.accessType,
+      }),
+    [ground, superResult, derived.accessType],
   );
-
-  const netCost = commercialResult.netCost;
   const attentionCount = complianceItems.filter((c) => c.state === "attention").length;
-  const jobHealth =
-    status !== "verified"
-      ? "Awaiting takeoff"
-      : commercialResult.marginPct >= commercial.targetMarginPct - 0.5 && attentionCount <= 2
-        ? "Healthy — signed off"
-        : attentionCount > 2
-          ? `Review — ${attentionCount} compliance flags`
-          : "Margin under target";
-
   const phaseTotal = (phase: string) =>
-    liveBoq.filter((l) => l.phase === phase).reduce((s, l) => s + l.total, 0);
+    masterBoq.filter((l) => l.phase === phase).reduce((s, l) => s + l.total, 0);
+
+  const avatarState: "clean" | "site" = status === "analyzing" ? "site" : "clean";
 
   const dialogue = (agent: Agent): string => {
-    if (status === "idle") return "Standing by for the survey data.";
+    if (status === "idle")
+      return agent.id === "lee"
+        ? "Survey first. No drawing gets priced until SiteScout has set the ground truth."
+        : "Standing by for the SiteScout ground truth.";
     if (status === "analyzing") return "On site — measuring up and pricing now…";
     switch (agent.id) {
       case "lee":
-        return `Whole job stacks up at ${money(netCost)} net, ${money(commercialResult.sellPrice)} to the client before VAT. ${attentionCount} item(s) need a second look before I sign it off.`;
+        return `Retail benchmark ${money(retailTotal)}, negotiated trade ${money(arbitrage.negotiatedTotal)}. ${money(arbitrage.tradeGap)} of trade gap on the table (${arbitrage.tradeGapPct}%), ${retainPct}% retained. ${attentionCount} compliance flag(s) before I sign it off.`;
       case "ian":
         return ground
-          ? `${ground.digDepth}m dig, ${ground.bulkedMuckVolume} m³ bulked out over ${ground.grabWagonLoads} grab loads, ${ground.concreteVolume} m³ of concrete. ${money(phaseTotal("Substructure"))} in the ground.`
+          ? `SiteScout put me at ${ground.digDepth}m in ${gt.soilType.toLowerCase()}${derived.clayboardRequired ? " with clayboard" : ""}. ${gt.accessWidth}m access means ${derived.accessType.toLowerCase()} — ${ground.bulkedMuckVolume} m³ bulked across ${ground.grabWagonLoads} load(s). ${money(phaseTotal("Substructure"))} in the ground.`
           : "No substructure data yet.";
       case "caleb":
         return superResult
-          ? `${superResult.facingBricksQty} facings and ${superResult.denseBlocksQty} blocks over ${superResult.netWallArea} m² net. True roof surface ${superResult.trueRoofSurfaceArea} m² at ×${superResult.pitchMultiplier}. ${money(phaseTotal("Superstructure"))}.`
+          ? `Off the drawing: ${superResult.netWallArea} m² net wall after cutouts, ${superResult.facingBricksQty} facings (${superInputs.brickFormat}) and ${superResult.denseBlocksQty} inner blocks. True roof surface ${superResult.trueRoofSurfaceArea} m² at ×${superResult.pitchMultiplier}. ${money(phaseTotal("Superstructure"))}.`
           : "No superstructure data yet.";
       case "megan":
         return mepResult
-          ? `${mepResult.totalPoints} points first and second fix${mepInputs.consumerUnitUpgrade ? ", plus a metal board changeover" : ""}. Certification allowed for. ${money(phaseTotal("MEP"))}.`
+          ? `${mepResult.totalPoints} points first and second fix. SiteScout logged a "${gt.consumerUnitType}" with ${gt.spareWays} spare way(s) — ${derived.consumerUnitUpgrade ? "board changeover priced" : "no changeover needed"}. ${derived.boilerUpgradeLikely ? `Existing ${gt.boilerOutputKw}kW ${gt.systemType} flagged as marginal. ` : ""}${money(phaseTotal("MEP"))}.`
           : "No MEP data yet.";
       case "ruby":
         return finishesResult
-          ? `${finishesResult.boardSheets} sheets of 12.5mm, ${finishesResult.skimArea} m² skim, ${finishesInputs.skirtingRun} lm of skirting and ${finishesInputs.internalDoors} door sets. ${money(phaseTotal("Finishes"))}.`
+          ? `${finishesResult.boardSheets} sheets of 12.5mm, ${finishesResult.skimArea} m² skim, ${finishesInputs.externalRenderArea} m² external render, ${finishesInputs.skirtingRun} lm skirting. ${money(phaseTotal("Finishes"))}.`
           : "No finishes data yet.";
       case "amy":
-        return `Packs A–E out to tender. Retail benchmark ${money(commercialResult.totalRetailBenchmark)} against ${money(netCost)} trade — ${money(commercialResult.totalArbitrage)} of buying advantage held. Margin locked at ${commercialResult.marginPct}%.`;
+        return `${masterBoq.length} BoQ lines split into 5 RFQ tender packs at retail benchmark ${money(retailTotal)}. Merchants quoting back against ${money(arbitrage.negotiatedTotal)} — that's ${money(arbitrage.tradeGap)} of buying advantage I'm holding, not giving away by accident.`;
       case "elizabeth":
-        return `${complianceItems.length} building control checks raised across Parts A, B, C, E, H, L and P. ${attentionCount} flagged for attention before work starts.`;
+        return `${complianceItems.length} building control checks across Parts A, B, C, E, H, L and P. ${attentionCount} flagged.${gt.utilitiesCrossingFootprint ? " In-ground utilities cross the footprint — CAT scan before any machine work." : ""}`;
       case "sharon":
-        return `${logistics.length}-stage delivery sequence set against ${inputs.accessType.toLowerCase()}. Handover pack scheduled for the final week.`;
+        return `${logistics.length}-stage delivery sequence against ${gt.accessWidth}m access and ${gt.distanceToRoad}m to the road.${gt.overheadCables ? " GS6 exclusion zone applies to all lifting." : ""}`;
       default:
         return "";
     }
   };
 
-  const agentStatus = (agent: Agent) => {
-    if (status === "idle") return "Standing by";
-    if (status === "analyzing") return "On site";
-    return agent.id === "lee" ? "Signed off" : "Verified";
-  };
+  const agentStatus = () =>
+    status === "idle" ? "Standing by" : status === "analyzing" ? "On site" : "Verified";
 
-  const avatarState: "clean" | "site" = status === "analyzing" ? "site" : "clean";
+  /* ------------------------------------------------------------ renderers */
 
+  const Group = ({
+    id,
+    title,
+    children,
+  }: {
+    id: string;
+    title: string;
+    children: React.ReactNode;
+  }) => (
+    <div className="rounded-xl border border-white/10 bg-white/[0.02]">
+      <button
+        onClick={() => setOpenGroups((p) => ({ ...p, [id]: !p[id] }))}
+        className="w-full flex items-center justify-between px-3 py-2.5"
+      >
+        <span className="font-mono text-[11px] uppercase tracking-wider text-white/75">{title}</span>
+        <span style={{ color: ACCENT }} className="font-mono text-xs">
+          {openGroups[id] ? "−" : "+"}
+        </span>
+      </button>
+      {openGroups[id] && <div className="px-3 pb-3 grid grid-cols-2 gap-3">{children}</div>}
+    </div>
+  );
 
-  const updateOverride = (key: string, field: "quantity" | "rate", value: number) =>
-    setOverrides((p) => ({ ...p, [key]: { ...p[key], [field]: value } }));
-
-  const BoqTable = ({ phase }: { phase: string }) => {
-    const lines = baseBoq
-      .map((line, i) => ({ line, key: keyFor(line, i), i }))
-      .filter(({ line }) => line.phase === phase);
-    if (!lines.length)
-      return (
-        <p className="font-mono text-xs text-white/45">
-          No lines yet — run the master takeoff to populate this phase.
-        </p>
-      );
+  const StepBadge = ({ n }: { n: StepId }) => {
+    const active = step === n;
+    const s = STEPS[n - 1];
     return (
-      <div className="space-y-3">
-        {lines.map(({ line, key, i }) => {
-          const live = liveBoq[i];
-          return (
-            <div key={key} className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
-              <div className="flex items-start justify-between gap-3 flex-wrap">
-                <p className="font-mono text-xs text-white/85 flex-1 min-w-[200px]">
-                  {line.description}
-                </p>
-                <p className="font-heading text-sm text-[#1AC2BA] whitespace-nowrap">
-                  {money(live.total)}
-                </p>
-              </div>
-              <p className="font-mono text-[10px] text-white/40 mt-1">{line.formula}</p>
-              <div className="grid grid-cols-2 gap-3 mt-3">
-                <Field label={`Quantity (${line.unit})`}>
-                  <input
-                    type="number"
-                    step="0.01"
-                    className={inputClass}
-                    value={live.quantity}
-                    onChange={(e) => updateOverride(key, "quantity", Number(e.target.value))}
-                  />
-                </Field>
-                <Field label="Unit rate (£)">
-                  <input
-                    type="number"
-                    step="0.01"
-                    className={inputClass}
-                    value={live.rate}
-                    onChange={(e) => updateOverride(key, "rate", Number(e.target.value))}
-                  />
-                </Field>
-              </div>
-            </div>
-          );
-        })}
-        <div className="flex justify-between items-center border-t border-white/10 pt-3">
-          <span className="font-mono text-[11px] uppercase tracking-wider text-white/55">
-            {phase} subtotal
-          </span>
-          <span className="font-heading text-lg text-white">{money(phaseTotal(phase))}</span>
-        </div>
-      </div>
+      <button
+        onClick={() => setStep(n)}
+        aria-pressed={active}
+        className="flex-1 min-w-[170px] text-left rounded-xl border px-3 py-2.5 transition-colors"
+        style={{
+          borderColor: active ? ACCENT : "rgba(255,255,255,0.12)",
+          backgroundColor: active ? "rgba(56,189,248,0.10)" : "rgba(255,255,255,0.02)",
+        }}
+      >
+        <p
+          className="font-mono text-[10px] uppercase tracking-wider"
+          style={{ color: active ? ACCENT : "rgba(255,255,255,0.45)" }}
+        >
+          Step {n} · {s.sub}
+        </p>
+        <p className="font-heading text-sm font-bold text-white mt-0.5">{s.label}</p>
+      </button>
     );
   };
-
-  const auditNotesFor = (phase: string) =>
-    phase === "Substructure"
-      ? ground?.auditNotes
-      : phase === "Superstructure"
-        ? superResult?.auditNotes
-        : phase === "MEP"
-          ? mepResult?.auditNotes
-          : phase === "Finishes"
-            ? finishesResult?.auditNotes
-            : undefined;
 
   return (
     <div className="min-h-screen dashboard-dark flex">
@@ -363,638 +439,803 @@ const SiteScoutSandbox = () => {
       <main
         className="flex-1 overflow-auto"
         style={{
-          background:
-            "radial-gradient(1100px 560px at 10% -10%, rgba(20,168,161,0.10), transparent 60%), #0B1B30",
+          background: `radial-gradient(1100px 560px at 10% -10%, rgba(56,189,248,0.10), transparent 60%), ${BG}`,
         }}
       >
         <div className="max-w-[1700px] mx-auto px-4 md:px-8 pt-14 md:pt-10 pb-24">
-          <div className="mb-6">
-            <span className="inline-block font-mono text-[10px] uppercase tracking-[0.18em] text-[#1AC2BA] border border-[#1AC2BA]/40 rounded px-2 py-0.5 mb-3">
+          {/* ---------------- header ---------------- */}
+          <div className="mb-5">
+            <span
+              className="inline-block font-mono text-[10px] uppercase tracking-[0.18em] rounded px-2 py-0.5 mb-3"
+              style={{ color: ACCENT, border: `1px solid ${ACCENT}66` }}
+            >
               Internal Beta · Sandbox
             </span>
             <h1 className="font-heading text-2xl md:text-3xl font-bold text-white">
-              ProGrafter Multi-Agent Command Center &amp; BoQ Engine
+              2-Tier ProGrafter Engine — SiteScout Ground Truth + Multi-Agent Takeoff &amp; Merchant
+              Procurement Hub
             </h1>
-            <p className="font-mono text-sm text-white/55 mt-2 max-w-3xl">
-              Eight specialist agents run a deterministic takeoff off one SiteScout survey. Nothing
-              here is wired into live quoting — it exists to calibrate the maths.
+            <p className="font-mono text-sm text-white/55 mt-2 max-w-4xl">
+              Tier 1 sets the physical site baseline. Tier 2 runs four specialist takeoff agents
+              against the drawing geometry, compiles a retail-benchmark BoQ, tenders it as five
+              merchant RFQ packs, then splits the negotiated trade gap between profit and price.
             </p>
           </div>
 
-          {/* ---------- Lee: top command bar ---------- */}
+          {/* ---------------- Lee command bar ---------------- */}
           <div
-            className="rounded-2xl border p-4 md:p-5 mb-6"
+            className="rounded-2xl border p-4 md:p-5 mb-5"
             style={{
-              borderColor: "rgba(26,194,186,0.35)",
+              borderColor: "rgba(56,189,248,0.35)",
               background:
-                "linear-gradient(120deg, rgba(26,194,186,0.12), rgba(255,255,255,0.02) 60%)",
+                "linear-gradient(120deg, rgba(56,189,248,0.12), rgba(255,255,255,0.02) 60%)",
             }}
           >
             <div className="flex items-start gap-4 flex-wrap">
               <AgentAvatar agent={AGENTS[0]} state={avatarState} size={72} active />
-              <div className="flex-1 min-w-[220px]">
+              <div className="flex-1 min-w-[240px]">
                 <p className="font-heading text-lg font-bold text-white">
                   {AGENTS[0].name} — {AGENTS[0].title}
                 </p>
-                <p className="font-mono text-[10px] uppercase tracking-wider text-[#1AC2BA] mt-0.5">
+                <p
+                  className="font-mono text-[10px] uppercase tracking-wider mt-0.5"
+                  style={{ color: ACCENT }}
+                >
                   {AGENTS[0].roleBadge}
                 </p>
                 <p className="font-mono text-xs text-white/60 mt-2 italic">“{AGENTS[0].motto}”</p>
                 <p className="font-mono text-xs text-white/75 mt-2">{dialogue(AGENTS[0])}</p>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
                 <div>
-                  <p className={labelClass}>Total net build cost</p>
-                  <p className="font-heading text-xl text-white">{money(netCost)}</p>
+                  <p className={labelClass}>Retail benchmark</p>
+                  <p className="font-heading text-xl text-white">{money(retailTotal)}</p>
                 </div>
                 <div>
-                  <p className={labelClass}>Live trade margin</p>
-                  <p className="font-heading text-xl text-[#1AC2BA]">
-                    {money(commercialResult.marginAmount)}{" "}
-                    <span className="text-sm">/ {commercialResult.marginPct}%</span>
+                  <p className={labelClass}>Negotiated trade</p>
+                  <p className="font-heading text-xl text-white">
+                    {money(arbitrage.negotiatedTotal)}
                   </p>
                 </div>
                 <div>
-                  <p className={labelClass}>Overall job health</p>
+                  <p className={labelClass}>Trade gap</p>
+                  <p className="font-heading text-xl" style={{ color: ACCENT }}>
+                    {money(arbitrage.tradeGap)}{" "}
+                    <span className="text-sm">/ {arbitrage.tradeGapPct}%</span>
+                  </p>
+                </div>
+                <div>
+                  <p className={labelClass}>Job health</p>
                   <p
                     className="font-mono text-[11px] uppercase tracking-wider px-2 py-1 rounded-full inline-block"
                     style={stateStyle(
-                      status !== "verified"
-                        ? "info"
-                        : jobHealth.startsWith("Healthy")
-                          ? "required"
-                          : "attention",
+                      status !== "verified" ? "info" : attentionCount > 2 ? "attention" : "required",
                     )}
                   >
-                    {jobHealth}
+                    {status !== "verified"
+                      ? "Awaiting takeoff"
+                      : attentionCount > 2
+                        ? `Review — ${attentionCount} flags`
+                        : "Healthy — signed off"}
                   </p>
                 </div>
               </div>
             </div>
           </div>
 
+          {/* ---------------- pipeline steps ---------------- */}
+          <div className="flex flex-wrap gap-3 mb-6">
+            {STEPS.map((s) => (
+              <StepBadge key={s.id} n={s.id} />
+            ))}
+          </div>
+
           <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
-            {/* ---------- LEFT: survey inputs ---------- */}
-            <div className="xl:col-span-3 space-y-4">
+            {/* ================= LEFT: Step 1 ground truth ================= */}
+            <div className="xl:col-span-4 space-y-4">
               <div className={cardClass}>
-                <SectionTitle>Project meta</SectionTitle>
+                <div className="flex items-center justify-between mb-3">
+                  <SectionTitle>Step 1 · SiteScout Ground Truth</SectionTitle>
+                  <span
+                    className="font-mono text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-full"
+                    style={{ backgroundColor: "rgba(56,189,248,0.15)", color: ACCENT }}
+                  >
+                    Tier 1
+                  </span>
+                </div>
                 <div className="space-y-3">
+                  <Group id="ground" title="Ground & geotechnical">
+                    <Field label="Soil class">
+                      <Select
+                        value={gt.soilType}
+                        options={SOIL_TYPES}
+                        onChange={(v) => setGtField("soilType", v)}
+                      />
+                    </Field>
+                    <Field label="Tree species">
+                      <input
+                        className={inputClass}
+                        value={gt.treeSpecies}
+                        onChange={(e) => setGtField("treeSpecies", e.target.value)}
+                      />
+                    </Field>
+                    <Field label="Tree proximity (m)">
+                      <input
+                        type="number"
+                        step="0.1"
+                        className={inputClass}
+                        value={gt.treeProximity}
+                        onChange={(e) => setGtField("treeProximity", Number(e.target.value))}
+                      />
+                    </Field>
+                    <div className="flex items-end pb-2">
+                      <Toggle
+                        label="Utilities cross footprint"
+                        checked={gt.utilitiesCrossingFootprint}
+                        onChange={(v) => setGtField("utilitiesCrossingFootprint", v)}
+                      />
+                    </div>
+                  </Group>
+
+                  <Group id="logistics" title="Logistics & boundary">
+                    <Field label="Access width (m)">
+                      <input
+                        type="number"
+                        step="0.1"
+                        className={inputClass}
+                        value={gt.accessWidth}
+                        onChange={(e) => setGtField("accessWidth", Number(e.target.value))}
+                      />
+                    </Field>
+                    <Field label="Distance to road (m)">
+                      <input
+                        type="number"
+                        step="0.5"
+                        className={inputClass}
+                        value={gt.distanceToRoad}
+                        onChange={(e) => setGtField("distanceToRoad", Number(e.target.value))}
+                      />
+                    </Field>
+                    <div className="flex items-end pb-2 col-span-2">
+                      <Toggle
+                        label="Overhead cables on site"
+                        checked={gt.overheadCables}
+                        onChange={(v) => setGtField("overheadCables", v)}
+                      />
+                    </div>
+                  </Group>
+
+                  <Group id="services" title="Existing services">
+                    <div className="col-span-2">
+                      <Field label="Consumer unit type">
+                        <Select
+                          value={gt.consumerUnitType}
+                          options={CU_TYPES}
+                          onChange={(v) => setGtField("consumerUnitType", v)}
+                        />
+                      </Field>
+                    </div>
+                    <Field label="Spare ways">
+                      <input
+                        type="number"
+                        className={inputClass}
+                        value={gt.spareWays}
+                        onChange={(e) => setGtField("spareWays", Number(e.target.value))}
+                      />
+                    </Field>
+                    <Field label="Boiler output (kW)">
+                      <input
+                        type="number"
+                        className={inputClass}
+                        value={gt.boilerOutputKw}
+                        onChange={(e) => setGtField("boilerOutputKw", Number(e.target.value))}
+                      />
+                    </Field>
+                    <Field label="System type">
+                      <Select
+                        value={gt.systemType}
+                        options={SYSTEM_TYPES}
+                        onChange={(v) => setGtField("systemType", v)}
+                      />
+                    </Field>
+                    <Field label="Drainage invert (m)">
+                      <input
+                        type="number"
+                        step="0.1"
+                        className={inputClass}
+                        value={gt.drainageInvertDepth}
+                        onChange={(e) => setGtField("drainageInvertDepth", Number(e.target.value))}
+                      />
+                    </Field>
+                  </Group>
+                </div>
+              </div>
+
+              {/* derived rules */}
+              <div className={cardClass}>
+                <SectionTitle>Ground truth → agent rules</SectionTitle>
+                <div className="grid grid-cols-2 gap-3 mb-3">
+                  {[
+                    ["Dig depth", `${derived.digDepth} m`],
+                    ["Clayboard", derived.clayboardRequired ? "Required" : "Not required"],
+                    ["Muck-away", derived.accessType],
+                    ["Board upgrade", derived.consumerUnitUpgrade ? "Priced" : "Not needed"],
+                  ].map(([k, v]) => (
+                    <div key={k} className="rounded-lg border border-white/10 p-2.5">
+                      <p className={labelClass}>{k}</p>
+                      <p className="font-mono text-xs text-white/85">{v}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="rounded-xl border border-white/10 bg-black/25 p-3 space-y-2">
+                  {derived.notes.map((n, i) => (
+                    <p key={i} className="font-mono text-[11px] text-white/70 leading-relaxed">
+                      {n}
+                    </p>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* ================= RIGHT: steps 2–4 ================= */}
+            <div className="xl:col-span-8 space-y-5">
+              {/* ---------- STEP 2 ---------- */}
+              {step <= 2 && (
+                <div className={cardClass}>
+                  <SectionTitle>Step 2 · Drawing upload &amp; specialist agent takeoffs</SectionTitle>
+
+                  <div className="rounded-xl border border-dashed border-white/20 p-4 mb-4">
+                    <div className="flex flex-wrap items-center gap-3">
+                      <input
+                        ref={fileRef}
+                        type="file"
+                        accept=".pdf,.png,.jpg,.jpeg,.dwg,.txt"
+                        className="hidden"
+                        onChange={(e) => setDrawingName(e.target.files?.[0]?.name ?? null)}
+                      />
+                      <button
+                        onClick={() => fileRef.current?.click()}
+                        className="rounded-lg px-3 py-2 font-mono text-[11px] uppercase tracking-wider text-white/80 border border-white/20 hover:border-[#38bdf8]"
+                      >
+                        📐 Attach drawing / spec
+                      </button>
+                      <button
+                        onClick={loadPreset}
+                        className="rounded-lg px-3 py-2 font-mono text-[11px] uppercase tracking-wider text-white/80 border border-white/20 hover:border-[#38bdf8]"
+                      >
+                        Load preset — 6×4m rear extension
+                      </button>
+                      <span className="font-mono text-[11px] text-white/50">
+                        {drawingName ? `Attached: ${drawingName}` : "No drawing attached"}
+                      </span>
+                    </div>
+                    <p className="font-mono text-[10px] text-white/40 mt-2">
+                      Geometry below is the parsed baseline — confirm or correct it against the
+                      drawing before running the takeoff.
+                    </p>
+                  </div>
+
                   <Field label="Project reference">
                     <input
                       className={inputClass}
-                      value={inputs.projectRef}
-                      onChange={(e) => set("projectRef", e.target.value)}
+                      value={projectRef}
+                      onChange={(e) => setProjectRef(e.target.value)}
                     />
                   </Field>
-                  <Field label="Site access">
-                    <select
-                      className={inputClass}
-                      value={inputs.accessType}
-                      onChange={(e) => set("accessType", e.target.value as AccessType)}
-                    >
-                      {ACCESS_TYPES.map((a) => (
-                        <option key={a} value={a} className="bg-[#0B1B30]">
-                          {a}
-                        </option>
-                      ))}
-                    </select>
-                  </Field>
-                  <Field label="Survey notes">
-                    <textarea
-                      className={inputClass}
-                      rows={2}
-                      value={inputs.notes}
-                      onChange={(e) => set("notes", e.target.value)}
-                    />
-                  </Field>
-                </div>
-              </div>
 
-              <div className={cardClass}>
-                <SectionTitle>Substructure — Ian</SectionTitle>
-                <div className="grid grid-cols-2 gap-3">
-                  <Field label="Trench run (lm)">
-                    <input
-                      type="number"
-                      step="0.1"
-                      className={inputClass}
-                      value={inputs.trenchLength}
-                      onChange={(e) => set("trenchLength", Number(e.target.value))}
-                    />
-                  </Field>
-                  <Field label="Soil type">
-                    <select
-                      className={inputClass}
-                      value={inputs.soilType}
-                      onChange={(e) => set("soilType", e.target.value as SoilType)}
-                    >
-                      {SOIL_TYPES.map((s) => (
-                        <option key={s} value={s} className="bg-[#0B1B30]">
-                          {s}
-                        </option>
-                      ))}
-                    </select>
-                  </Field>
-                  <Field label="Tree proximity (m)">
-                    <input
-                      type="number"
-                      step="0.1"
-                      className={inputClass}
-                      value={inputs.treeProximity}
-                      onChange={(e) => set("treeProximity", Number(e.target.value))}
-                    />
-                  </Field>
-                  <Field label="Tree species">
-                    <input
-                      className={inputClass}
-                      value={inputs.treeSpecies}
-                      onChange={(e) => set("treeSpecies", e.target.value)}
-                    />
-                  </Field>
-                  <Field label="Drainage invert (m)">
-                    <input
-                      type="number"
-                      step="0.1"
-                      className={inputClass}
-                      value={inputs.drainageInvertBaseline}
-                      onChange={(e) => set("drainageInvertBaseline", Number(e.target.value))}
-                    />
-                  </Field>
-                  <Field label="Muckaway basis">
-                    <select
-                      className={inputClass}
-                      value={basis}
-                      onChange={(e) => setBasis(e.target.value as MuckAwayBasis)}
-                    >
-                      <option value="volume" className="bg-[#0B1B30]">
-                        Per m³
-                      </option>
-                      <option value="grab_loads" className="bg-[#0B1B30]">
-                        Per grab load
-                      </option>
-                    </select>
-                  </Field>
-                </div>
-              </div>
-
-              <div className={cardClass}>
-                <SectionTitle>Superstructure — Caleb</SectionTitle>
-                <div className="grid grid-cols-2 gap-3">
-                  <Field label="Brick format">
-                    <select
-                      className={inputClass}
-                      value={superInputs.brickFormat}
-                      onChange={(e) => setSuper("brickFormat", e.target.value as BrickFormat)}
-                    >
-                      {BRICK_FORMATS.map((b) => (
-                        <option key={b} value={b} className="bg-[#0B1B30]">
-                          {b}
-                        </option>
-                      ))}
-                    </select>
-                  </Field>
-                  <Field label="Wall height (m)">
-                    <input
-                      type="number"
-                      step="0.1"
-                      className={inputClass}
-                      value={superInputs.wallHeight}
-                      onChange={(e) => setSuper("wallHeight", Number(e.target.value))}
-                    />
-                  </Field>
-                  <Field label="Bi-fold width (m)">
-                    <input
-                      type="number"
-                      step="0.1"
-                      className={inputClass}
-                      value={superInputs.bifoldWidth}
-                      onChange={(e) => setSuper("bifoldWidth", Number(e.target.value))}
-                    />
-                  </Field>
-                  <Field label="Bi-fold height (m)">
-                    <input
-                      type="number"
-                      step="0.1"
-                      className={inputClass}
-                      value={superInputs.bifoldHeight}
-                      onChange={(e) => setSuper("bifoldHeight", Number(e.target.value))}
-                    />
-                  </Field>
-                  <Field label="Window openings (m²)">
-                    <input
-                      type="number"
-                      step="0.1"
-                      className={inputClass}
-                      value={superInputs.windowOpeningsArea}
-                      onChange={(e) => setSuper("windowOpeningsArea", Number(e.target.value))}
-                    />
-                  </Field>
-                  <Field label="Roof type">
-                    <select
-                      className={inputClass}
-                      value={superInputs.roofType}
-                      onChange={(e) => setSuper("roofType", e.target.value as RoofType)}
-                    >
-                      {ROOF_TYPES.map((r) => (
-                        <option key={r} value={r} className="bg-[#0B1B30]">
-                          {r}
-                        </option>
-                      ))}
-                    </select>
-                  </Field>
-                  <div className="col-span-2">
-                    <Field label="Roof covering">
-                      <select
-                        className={inputClass}
-                        value={superInputs.roofCovering}
-                        onChange={(e) => setSuper("roofCovering", e.target.value as RoofCovering)}
-                      >
-                        {ROOF_COVERINGS.map((r) => (
-                          <option key={r} value={r} className="bg-[#0B1B30]">
-                            {r}
-                          </option>
-                        ))}
-                      </select>
-                    </Field>
-                  </div>
-                </div>
-              </div>
-
-              <div className={cardClass}>
-                <SectionTitle>MEP — Megan</SectionTitle>
-                <div className="grid grid-cols-2 gap-3">
-                  <Field label="Floor area (m²)">
-                    <input
-                      type="number"
-                      className={inputClass}
-                      value={mepInputs.floorArea}
-                      onChange={(e) => setMep("floorArea", Number(e.target.value))}
-                    />
-                  </Field>
-                  <Field label="Double sockets">
-                    <input
-                      type="number"
-                      className={inputClass}
-                      value={mepInputs.doubleSockets}
-                      onChange={(e) => setMep("doubleSockets", Number(e.target.value))}
-                    />
-                  </Field>
-                  <Field label="Light points">
-                    <input
-                      type="number"
-                      className={inputClass}
-                      value={mepInputs.lightPoints}
-                      onChange={(e) => setMep("lightPoints", Number(e.target.value))}
-                    />
-                  </Field>
-                  <Field label="Switch plates">
-                    <input
-                      type="number"
-                      className={inputClass}
-                      value={mepInputs.switchPlates}
-                      onChange={(e) => setMep("switchPlates", Number(e.target.value))}
-                    />
-                  </Field>
-                  <Field label="Radiators">
-                    <input
-                      type="number"
-                      className={inputClass}
-                      value={mepInputs.radiators}
-                      onChange={(e) => setMep("radiators", Number(e.target.value))}
-                    />
-                  </Field>
-                  <div className="space-y-2 pt-5">
-                    {(
-                      [
-                        ["consumerUnitUpgrade", "CU upgrade"],
-                        ["evCharger", "EV charger"],
-                        ["underfloorHeating", "Wet UFH"],
-                      ] as [keyof MepInputs, string][]
-                    ).map(([k, lbl]) => (
-                      <label key={k} className="flex items-center gap-2 font-mono text-xs text-white/70">
-                        <input
-                          type="checkbox"
-                          checked={Boolean(mepInputs[k])}
-                          onChange={(e) => setMep(k, e.target.checked as never)}
-                        />
-                        {lbl}
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className={cardClass}>
-                <SectionTitle>Finishes — Ruby</SectionTitle>
-                <div className="grid grid-cols-2 gap-3">
-                  <Field label="Internal wall area (m²)">
-                    <input
-                      type="number"
-                      className={inputClass}
-                      value={finishesInputs.internalWallArea}
-                      onChange={(e) => setFin("internalWallArea", Number(e.target.value))}
-                    />
-                  </Field>
-                  <Field label="Ceiling area (m²)">
-                    <input
-                      type="number"
-                      className={inputClass}
-                      value={finishesInputs.ceilingArea}
-                      onChange={(e) => setFin("ceilingArea", Number(e.target.value))}
-                    />
-                  </Field>
-                  <Field label="Skirting run (lm)">
-                    <input
-                      type="number"
-                      className={inputClass}
-                      value={finishesInputs.skirtingRun}
-                      onChange={(e) => setFin("skirtingRun", Number(e.target.value))}
-                    />
-                  </Field>
-                  <Field label="Internal doors">
-                    <input
-                      type="number"
-                      className={inputClass}
-                      value={finishesInputs.internalDoors}
-                      onChange={(e) => setFin("internalDoors", Number(e.target.value))}
-                    />
-                  </Field>
-                  <label className="col-span-2 flex items-center gap-2 font-mono text-xs text-white/70">
-                    <input
-                      type="checkbox"
-                      checked={finishesInputs.twoCoatSkim}
-                      onChange={(e) => setFin("twoCoatSkim", e.target.checked)}
-                    />
-                    2-coat Thistle multi-finish skim
-                  </label>
-                </div>
-              </div>
-
-              <button
-                onClick={runTakeoff}
-                className="w-full rounded-xl px-4 py-3 font-mono text-sm uppercase tracking-wider text-[#04231F] font-bold transition-opacity hover:opacity-90"
-                style={{ backgroundColor: "#1AC2BA" }}
-              >
-                🚀 Run Master 8-Agent Takeoff &amp; Technical Audit
-              </button>
-            </div>
-
-            {/* ---------- CENTER: agent war room ---------- */}
-            <div className="xl:col-span-5 space-y-4">
-              <div className="flex items-center justify-between flex-wrap gap-2">
-                <SectionTitle>Agent war room</SectionTitle>
-                {filterAgent && (
-                  <button
-                    onClick={() => setFilterAgent(null)}
-                    className="font-mono text-[10px] uppercase tracking-wider text-[#1AC2BA] border border-[#1AC2BA]/40 rounded px-2 py-1"
-                  >
-                    Clear BoQ filter
-                  </button>
-                )}
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {AGENTS.map((agent) => {
-                  const active = filterAgent === agent.id;
-                  return (
-                    <div
-                      key={agent.id}
-                      className="rounded-2xl border p-4 transition-all duration-300"
-                      style={{
-                        borderColor: active ? "rgba(26,194,186,0.5)" : "rgba(255,255,255,0.10)",
-                        background: active ? "rgba(26,194,186,0.07)" : "rgba(255,255,255,0.03)",
-                      }}
-                    >
-                      <div className="flex items-start gap-3">
-                        <AgentAvatar
-                          agent={agent}
-                          state={avatarState}
-                          size={56}
-                          active={active || status === "analyzing"}
-                        />
-                        <div className="min-w-0 flex-1">
-                          <p className="font-heading text-sm font-bold text-white truncate">
-                            {agent.name}
-                          </p>
-                          <p className="font-mono text-[10px] uppercase tracking-wider text-[#1AC2BA]">
-                            {agent.roleBadge}
-                          </p>
-                          <span
-                            className="inline-block mt-1.5 font-mono text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-full"
-                            style={stateStyle(
-                              status === "verified"
-                                ? "required"
-                                : status === "analyzing"
-                                  ? "attention"
-                                  : "info",
-                            )}
-                          >
-                            {agentStatus(agent)}
-                          </span>
-                        </div>
-                      </div>
-                      <p className="font-mono text-[11px] text-white/45 mt-3">{agent.speciality}</p>
-                      <div className="mt-3 rounded-xl border border-white/10 bg-black/20 p-3">
-                        <p className="font-mono text-[11px] text-white/80 leading-relaxed">
-                          {dialogue(agent)}
-                        </p>
-                      </div>
-                      <button
-                        onClick={() => {
-                          setFilterAgent(active ? null : agent.id);
-                          const phase = PHASE_BY_AGENT[agent.id];
-                          if (phase) setTab(phase as TabId);
-                          else if (agent.id === "amy") setTab("Commercial");
-                          else if (agent.id === "elizabeth" || agent.id === "sharon")
-                            setTab("Compliance");
-                        }}
-                        className="mt-3 w-full rounded-lg border border-white/15 px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider text-white/70 hover:border-[#1AC2BA] hover:text-white transition-colors"
-                      >
-                        {active ? "Filtering BoQ" : "Highlight in BoQ"}
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* ---------- RIGHT: BoQ & arbitrage ---------- */}
-            <div className="xl:col-span-4 space-y-4">
-              <div className={cardClass}>
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {TABS.map((t) => (
-                    <button
-                      key={t}
-                      onClick={() => setTab(t)}
-                      className="font-mono text-[10px] uppercase tracking-wider px-2.5 py-1.5 rounded-lg border transition-colors"
-                      style={{
-                        borderColor: tab === t ? "#1AC2BA" : "rgba(255,255,255,0.15)",
-                        color: tab === t ? "#1AC2BA" : "rgba(255,255,255,0.6)",
-                        backgroundColor: tab === t ? "rgba(26,194,186,0.10)" : "transparent",
-                      }}
-                    >
-                      {t}
-                    </button>
-                  ))}
-                </div>
-
-                {tab !== "Commercial" && tab !== "Compliance" && (
-                  <>
-                    <BoqTable phase={tab} />
-                    {auditNotesFor(tab)?.length ? (
-                      <div className="mt-4 rounded-xl border border-white/10 bg-black/20 p-3 space-y-2">
-                        <p className="font-mono text-[10px] uppercase tracking-wider text-white/50">
-                          Technical audit
-                        </p>
-                        {auditNotesFor(tab)!.map((n, i) => (
-                          <p key={i} className="font-mono text-[11px] text-white/70 leading-relaxed">
-                            {n}
-                          </p>
-                        ))}
-                      </div>
-                    ) : null}
-                  </>
-                )}
-
-                {tab === "Commercial" && (
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-3">
-                      <Field label="Contingency %">
-                        <input
-                          type="number"
-                          className={inputClass}
-                          value={commercial.contingencyPct}
-                          onChange={(e) =>
-                            setCommercial((p) => ({ ...p, contingencyPct: Number(e.target.value) }))
-                          }
-                        />
-                      </Field>
-                      <Field label="Overhead %">
-                        <input
-                          type="number"
-                          className={inputClass}
-                          value={commercial.overheadPct}
-                          onChange={(e) =>
-                            setCommercial((p) => ({ ...p, overheadPct: Number(e.target.value) }))
-                          }
-                        />
-                      </Field>
-                      <Field label="Target margin %">
-                        <input
-                          type="number"
-                          className={inputClass}
-                          value={commercial.targetMarginPct}
-                          onChange={(e) =>
-                            setCommercial((p) => ({
-                              ...p,
-                              targetMarginPct: Number(e.target.value),
-                            }))
-                          }
-                        />
-                      </Field>
-                      <Field label="VAT %">
-                        <input
-                          type="number"
-                          className={inputClass}
-                          value={commercial.vatRate}
-                          onChange={(e) =>
-                            setCommercial((p) => ({ ...p, vatRate: Number(e.target.value) }))
-                          }
-                        />
-                      </Field>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3">
-                      {[
-                        ["Net cost", money(commercialResult.netCost)],
-                        ["Sell price (ex VAT)", money(commercialResult.sellPrice)],
-                        [
-                          "Margin",
-                          `${money(commercialResult.marginAmount)} / ${commercialResult.marginPct}%`,
-                        ],
-                        ["Client total inc VAT", money(commercialResult.clientTotalIncVat)],
-                      ].map(([k, v]) => (
-                        <div key={k} className="rounded-xl border border-white/10 p-3">
-                          <p className={labelClass}>{k}</p>
-                          <p className="font-heading text-base text-white">{v}</p>
-                        </div>
-                      ))}
-                    </div>
-
-                    <div>
-                      <p className="font-mono text-[10px] uppercase tracking-wider text-white/50 mb-2">
-                        Merchant tender splitter — Packs A–E
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    {/* Ian */}
+                    <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
+                      <p className="font-heading text-sm font-bold text-white mb-2">
+                        Ian · Groundworks &amp; Substructure
                       </p>
-                      <div className="space-y-2">
-                        {commercialResult.packs.map((p) => (
-                          <div
-                            key={p.pack.id}
-                            className="rounded-xl border border-white/10 bg-white/[0.02] p-3"
+                      <p className="font-mono text-[10px] text-white/45 mb-3">
+                        Inherits {derived.digDepth}m dig and {derived.accessType.toLowerCase()} from
+                        SiteScout.
+                      </p>
+                      <div className="grid grid-cols-2 gap-3">
+                        <Field label="Trench perimeter (lm)">
+                          <input
+                            type="number"
+                            step="0.1"
+                            className={inputClass}
+                            value={trenchLength}
+                            onChange={(e) => setTrenchLength(Number(e.target.value))}
+                          />
+                        </Field>
+                        <Field label="Drainage run (lm)">
+                          <input
+                            type="number"
+                            step="0.5"
+                            className={inputClass}
+                            value={drainageRun}
+                            onChange={(e) => setDrainageRun(Number(e.target.value))}
+                          />
+                        </Field>
+                        <div className="col-span-2">
+                          <Field label="Muck-away basis">
+                            <select
+                              className={inputClass}
+                              value={basis}
+                              disabled={derived.accessType !== "8-Wheel Grab Direct Access"}
+                              onChange={(e) => setBasis(e.target.value as MuckAwayBasis)}
+                            >
+                              <option value="volume" style={{ backgroundColor: BG }}>
+                                Per m³ (skip / conveyor)
+                              </option>
+                              <option value="grab_loads" style={{ backgroundColor: BG }}>
+                                Per 8-wheel grab load
+                              </option>
+                            </select>
+                          </Field>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Caleb */}
+                    <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
+                      <p className="font-heading text-sm font-bold text-white mb-2">
+                        Caleb · Superstructure, Masonry &amp; Roof
+                      </p>
+                      <p className="font-mono text-[10px] text-white/45 mb-3">
+                        Inherits the {trenchLength} lm perimeter from Ian.
+                      </p>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="col-span-2">
+                          <Field label="Brick format">
+                            <Select
+                              value={superInputs.brickFormat}
+                              options={BRICK_FORMATS}
+                              onChange={(v) => setSuper("brickFormat", v)}
+                            />
+                          </Field>
+                        </div>
+                        <Field label="Wall height (m)">
+                          <input
+                            type="number"
+                            step="0.1"
+                            className={inputClass}
+                            value={superInputs.wallHeight}
+                            onChange={(e) => setSuper("wallHeight", Number(e.target.value))}
+                          />
+                        </Field>
+                        <Field label="Window openings (m²)">
+                          <input
+                            type="number"
+                            step="0.1"
+                            className={inputClass}
+                            value={superInputs.windowOpeningsArea}
+                            onChange={(e) => setSuper("windowOpeningsArea", Number(e.target.value))}
+                          />
+                        </Field>
+                        <Field label="Bi-fold width (m)">
+                          <input
+                            type="number"
+                            step="0.1"
+                            className={inputClass}
+                            value={superInputs.bifoldWidth}
+                            onChange={(e) => setSuper("bifoldWidth", Number(e.target.value))}
+                          />
+                        </Field>
+                        <Field label="Bi-fold height (m)">
+                          <input
+                            type="number"
+                            step="0.1"
+                            className={inputClass}
+                            value={superInputs.bifoldHeight}
+                            onChange={(e) => setSuper("bifoldHeight", Number(e.target.value))}
+                          />
+                        </Field>
+                        <div className="col-span-2">
+                          <Field label="Roof type">
+                            <Select
+                              value={superInputs.roofType}
+                              options={ROOF_TYPES}
+                              onChange={(v) => setSuper("roofType", v)}
+                            />
+                          </Field>
+                        </div>
+                        <div className="col-span-2">
+                          <Field label="Roof covering">
+                            <Select
+                              value={superInputs.roofCovering}
+                              options={ROOF_COVERINGS}
+                              onChange={(v) => setSuper("roofCovering", v)}
+                            />
+                          </Field>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Megan */}
+                    <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
+                      <p className="font-heading text-sm font-bold text-white mb-2">
+                        Megan · Building Services &amp; MEP
+                      </p>
+                      <p className="font-mono text-[10px] text-white/45 mb-3">
+                        Board changeover is set by the SiteScout service survey
+                        {derived.consumerUnitUpgrade ? " — priced" : " — not required"}.
+                      </p>
+                      <div className="grid grid-cols-2 gap-3">
+                        <Field label="Floor area (m²)">
+                          <input
+                            type="number"
+                            className={inputClass}
+                            value={mepInputs.floorArea}
+                            onChange={(e) => setMep("floorArea", Number(e.target.value))}
+                          />
+                        </Field>
+                        <Field label="Double sockets">
+                          <input
+                            type="number"
+                            className={inputClass}
+                            value={mepInputs.doubleSockets}
+                            onChange={(e) => setMep("doubleSockets", Number(e.target.value))}
+                          />
+                        </Field>
+                        <Field label="Light points">
+                          <input
+                            type="number"
+                            className={inputClass}
+                            value={mepInputs.lightPoints}
+                            onChange={(e) => setMep("lightPoints", Number(e.target.value))}
+                          />
+                        </Field>
+                        <Field label="Switch plates">
+                          <input
+                            type="number"
+                            className={inputClass}
+                            value={mepInputs.switchPlates}
+                            onChange={(e) => setMep("switchPlates", Number(e.target.value))}
+                          />
+                        </Field>
+                        <Field label="Radiators">
+                          <input
+                            type="number"
+                            className={inputClass}
+                            value={mepInputs.radiators}
+                            onChange={(e) => setMep("radiators", Number(e.target.value))}
+                          />
+                        </Field>
+                        <div className="space-y-2 pt-5">
+                          <Toggle
+                            label="EV charger"
+                            checked={mepInputs.evCharger}
+                            onChange={(v) => setMep("evCharger", v)}
+                          />
+                          <Toggle
+                            label="Wet UFH"
+                            checked={mepInputs.underfloorHeating}
+                            onChange={(v) => setMep("underfloorHeating", v)}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Ruby */}
+                    <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
+                      <p className="font-heading text-sm font-bold text-white mb-2">
+                        Ruby · Drylining, Plastering &amp; Finishes
+                      </p>
+                      <p className="font-mono text-[10px] text-white/45 mb-3">
+                        Inherits internal areas and external elevation specs from the drawing.
+                      </p>
+                      <div className="grid grid-cols-2 gap-3">
+                        <Field label="Internal wall area (m²)">
+                          <input
+                            type="number"
+                            className={inputClass}
+                            value={finishesInputs.internalWallArea}
+                            onChange={(e) => setFin("internalWallArea", Number(e.target.value))}
+                          />
+                        </Field>
+                        <Field label="Ceiling area (m²)">
+                          <input
+                            type="number"
+                            className={inputClass}
+                            value={finishesInputs.ceilingArea}
+                            onChange={(e) => setFin("ceilingArea", Number(e.target.value))}
+                          />
+                        </Field>
+                        <Field label="External render (m²)">
+                          <input
+                            type="number"
+                            className={inputClass}
+                            value={finishesInputs.externalRenderArea}
+                            onChange={(e) => setFin("externalRenderArea", Number(e.target.value))}
+                          />
+                        </Field>
+                        <Field label="Skirting run (lm)">
+                          <input
+                            type="number"
+                            className={inputClass}
+                            value={finishesInputs.skirtingRun}
+                            onChange={(e) => setFin("skirtingRun", Number(e.target.value))}
+                          />
+                        </Field>
+                        <Field label="Internal doors">
+                          <input
+                            type="number"
+                            className={inputClass}
+                            value={finishesInputs.internalDoors}
+                            onChange={(e) => setFin("internalDoors", Number(e.target.value))}
+                          />
+                        </Field>
+                        <div className="flex items-end pb-2">
+                          <Toggle
+                            label="2-coat skim"
+                            checked={finishesInputs.twoCoatSkim}
+                            onChange={(v) => setFin("twoCoatSkim", v)}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={runTakeoff}
+                    disabled={status === "analyzing"}
+                    className="mt-4 w-full rounded-xl px-4 py-3 font-mono text-sm uppercase tracking-wider font-bold transition-opacity hover:opacity-90 disabled:opacity-60"
+                    style={{ backgroundColor: ACCENT, color: "#04233a" }}
+                  >
+                    {status === "analyzing"
+                      ? "Agents on site — calculating…"
+                      : "🚀 Run 4-agent takeoff against SiteScout ground truth"}
+                  </button>
+                </div>
+              )}
+
+              {/* ---------- STEP 3 ---------- */}
+              {step === 3 && (
+                <>
+                  <div className={cardClass}>
+                    <div className="flex items-center justify-between gap-3 flex-wrap mb-3">
+                      <SectionTitle>
+                        Step 3 · Master Bill of Quantities (Retail Benchmark)
+                      </SectionTitle>
+                      <div className="flex gap-2 flex-wrap">
+                        {agentFilter && (
+                          <button
+                            onClick={() => setAgentFilter(null)}
+                            className="font-mono text-[10px] uppercase tracking-wider rounded px-2 py-1 border"
+                            style={{ borderColor: `${ACCENT}66`, color: ACCENT }}
                           >
-                            <div className="flex justify-between gap-2 flex-wrap">
-                              <p className="font-mono text-xs text-white/85">{p.pack.name}</p>
-                              <p className="font-heading text-sm text-[#1AC2BA] whitespace-nowrap">
-                                {money(p.tradeCost)}
+                            Clear agent filter
+                          </button>
+                        )}
+                        <button
+                          onClick={() =>
+                            downloadText(
+                              `${projectRef}-master-boq.csv`,
+                              masterBoqToCsv(masterBoq, projectRef),
+                            )
+                          }
+                          className="font-mono text-[10px] uppercase tracking-wider rounded px-2 py-1 border border-white/20 text-white/75"
+                        >
+                          📥 Export master BoQ (CSV)
+                        </button>
+                      </div>
+                    </div>
+
+                    {!masterBoq.length ? (
+                      <p className="font-mono text-xs text-white/45">
+                        No lines yet — run the agent takeoff in Step 2.
+                      </p>
+                    ) : (
+                      <>
+                        <div className="overflow-x-auto">
+                          <table className="w-full min-w-[1180px] text-left border-collapse">
+                            <thead>
+                              <tr>
+                                {[
+                                  "Trade Agent",
+                                  "Category",
+                                  "Item Description",
+                                  "Formula / Metric",
+                                  "Qty",
+                                  "Unit",
+                                  "Retail Rate (£)",
+                                  "Retail Total (£)",
+                                ].map((h) => (
+                                  <th
+                                    key={h}
+                                    className="font-mono text-[9px] uppercase tracking-wider text-white/45 border-b border-white/10 pb-2 pr-3 whitespace-nowrap"
+                                  >
+                                    {h}
+                                  </th>
+                                ))}
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {visibleBoq.map((l) => (
+                                <tr key={l.key} className="border-b border-white/5 align-top">
+                                  <td className="py-2 pr-3">
+                                    <span
+                                      className="font-mono text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full"
+                                      style={{
+                                        backgroundColor: "rgba(56,189,248,0.14)",
+                                        color: ACCENT,
+                                      }}
+                                    >
+                                      {l.agent}
+                                    </span>
+                                    <span className="block font-mono text-[9px] text-white/35 mt-1">
+                                      Pack {l.pack}
+                                    </span>
+                                  </td>
+                                  <td className="py-2 pr-3 font-mono text-[11px] text-white/65 min-w-[120px]">
+                                    {l.category}
+                                  </td>
+                                  <td className="py-2 pr-3 min-w-[220px]">
+                                    <input
+                                      className={inputClass}
+                                      value={l.description}
+                                      onChange={(e) =>
+                                        updateOverride(l.key, "description", e.target.value)
+                                      }
+                                    />
+                                  </td>
+                                  <td className="py-2 pr-3 font-mono text-[10px] text-white/40 min-w-[160px]">
+                                    {l.formula}
+                                  </td>
+                                  <td className="py-2 pr-3 w-[110px]">
+                                    <input
+                                      type="number"
+                                      step="0.01"
+                                      className={inputClass}
+                                      value={l.quantity}
+                                      onChange={(e) =>
+                                        updateOverride(l.key, "quantity", Number(e.target.value))
+                                      }
+                                    />
+                                  </td>
+                                  <td className="py-2 pr-3 font-mono text-[11px] text-white/60">
+                                    {l.unit}
+                                  </td>
+                                  <td className="py-2 pr-3 w-[110px]">
+                                    <input
+                                      type="number"
+                                      step="0.01"
+                                      className={inputClass}
+                                      value={l.rate}
+                                      onChange={(e) =>
+                                        updateOverride(l.key, "rate", Number(e.target.value))
+                                      }
+                                    />
+                                  </td>
+                                  <td
+                                    className="py-2 font-heading text-sm whitespace-nowrap"
+                                    style={{ color: ACCENT }}
+                                  >
+                                    {money(l.total)}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+
+                        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mt-4">
+                          {["Substructure", "Superstructure", "MEP", "Finishes"].map((p) => (
+                            <div key={p} className="rounded-lg border border-white/10 p-2.5">
+                              <p className={labelClass}>{p}</p>
+                              <p className="font-mono text-xs text-white/85">
+                                {money(phaseTotal(p))}
                               </p>
                             </div>
-                            <p className="font-mono text-[10px] text-white/40 mt-1">
-                              {p.pack.merchantHint} · {p.lineCount} line(s)
+                          ))}
+                          <div
+                            className="rounded-lg border p-2.5"
+                            style={{ borderColor: `${ACCENT}66` }}
+                          >
+                            <p className={labelClass}>Retail benchmark</p>
+                            <p className="font-heading text-base" style={{ color: ACCENT }}>
+                              {money(retailTotal)}
                             </p>
-                            <div className="flex gap-4 mt-2 font-mono text-[10px] text-white/60 flex-wrap">
-                              <span>Retail benchmark {money(p.retailBenchmark)}</span>
-                              <span className="text-[#1AC2BA]">
-                                Arbitrage {money(p.arbitrage)} ({p.arbitragePct}%)
-                              </span>
-                            </div>
                           </div>
-                        ))}
+                        </div>
+                      </>
+                    )}
+                  </div>
+
+                  {/* RFQ packs */}
+                  <div className={cardClass}>
+                    <div className="flex items-center justify-between gap-3 flex-wrap mb-3">
+                      <SectionTitle>Amy · Merchant RFQ tender pack generator</SectionTitle>
+                      <div className="flex gap-2 flex-wrap">
+                        <button
+                          onClick={() =>
+                            downloadText(
+                              `${projectRef}-rfq-packs.csv`,
+                              allPacksToCsv(arbitrage.packs, projectRef),
+                            )
+                          }
+                          className="rounded-lg px-3 py-2 font-mono text-[11px] uppercase tracking-wider font-bold"
+                          style={{ backgroundColor: ACCENT, color: "#04233a" }}
+                        >
+                          📥 Export 5 merchant RFQ tender packs (CSV)
+                        </button>
                       </div>
                     </div>
-
-                    <div className="rounded-xl border border-white/10 bg-black/20 p-3 space-y-2">
-                      <p className="font-mono text-[10px] uppercase tracking-wider text-white/50">
-                        Amy — commercial audit
-                      </p>
-                      {commercialResult.auditNotes.map((n, i) => (
-                        <p key={i} className="font-mono text-[11px] text-white/70 leading-relaxed">
-                          {n}
-                        </p>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {tab === "Compliance" && (
-                  <div className="space-y-4">
                     <div className="space-y-2">
-                      {complianceItems.map((c) => (
+                      {arbitrage.packs.map((p) => (
                         <div
-                          key={c.part + c.title}
+                          key={p.pack.id}
                           className="rounded-xl border border-white/10 bg-white/[0.02] p-3"
                         >
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span
-                              className="font-mono text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-full"
-                              style={stateStyle(c.state)}
-                            >
-                              {c.part}
-                            </span>
-                            <p className="font-mono text-xs text-white/85">{c.title}</p>
+                          <div className="flex justify-between gap-2 flex-wrap items-start">
+                            <div className="min-w-[200px]">
+                              <p className="font-mono text-xs text-white/85">{p.pack.name}</p>
+                              <p className="font-mono text-[10px] text-white/40 mt-1">
+                                {p.pack.merchantHint} · {p.lines.length} line(s) · typical trade
+                                discount {p.pack.typicalDiscountPct}%
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <p
+                                className="font-heading text-sm whitespace-nowrap"
+                                style={{ color: ACCENT }}
+                              >
+                                {money(p.retailTotal)}
+                              </p>
+                              <button
+                                onClick={() =>
+                                  navigator.clipboard?.writeText(packToCsv(p, projectRef))
+                                }
+                                className="font-mono text-[10px] uppercase tracking-wider rounded px-2 py-1 border border-white/20 text-white/70"
+                              >
+                                Copy
+                              </button>
+                              <button
+                                onClick={() =>
+                                  downloadText(
+                                    `${projectRef}-pack-${p.pack.id}.csv`,
+                                    packToCsv(p, projectRef),
+                                  )
+                                }
+                                className="font-mono text-[10px] uppercase tracking-wider rounded px-2 py-1 border border-white/20 text-white/70"
+                              >
+                                CSV
+                              </button>
+                            </div>
                           </div>
-                          <p className="font-mono text-[11px] text-white/60 mt-2 leading-relaxed">
-                            {c.detail}
-                          </p>
-                          <p className="font-mono text-[10px] text-white/35 mt-1">Owner: {c.owner}</p>
                         </div>
                       ))}
                     </div>
-                    <div>
-                      <p className="font-mono text-[10px] uppercase tracking-wider text-white/50 mb-2">
-                        Sharon — logistics &amp; handover sequence
-                      </p>
+                  </div>
+
+                  {/* compliance + logistics */}
+                  <div className={cardClass}>
+                    <SectionTitle>Elizabeth &amp; Sharon · Compliance and logistics</SectionTitle>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="space-y-2">
+                        {complianceItems.map((c) => (
+                          <div
+                            key={c.part + c.title}
+                            className="rounded-xl border border-white/10 bg-white/[0.02] p-3"
+                          >
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span
+                                className="font-mono text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-full"
+                                style={stateStyle(c.state)}
+                              >
+                                {c.part}
+                              </span>
+                              <p className="font-mono text-xs text-white/85">{c.title}</p>
+                            </div>
+                            <p className="font-mono text-[11px] text-white/60 mt-2 leading-relaxed">
+                              {c.detail}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
                       <div className="space-y-2">
                         {logistics.map((l) => (
                           <div key={l.week} className="rounded-xl border border-white/10 p-3">
-                            <p className="font-mono text-[10px] uppercase tracking-wider text-[#1AC2BA]">
+                            <p
+                              className="font-mono text-[10px] uppercase tracking-wider"
+                              style={{ color: ACCENT }}
+                            >
                               {l.week} · {l.activity}
                             </p>
                             <p className="font-mono text-[11px] text-white/65 mt-1 leading-relaxed">
@@ -1005,24 +1246,239 @@ const SiteScoutSandbox = () => {
                       </div>
                     </div>
                   </div>
-                )}
-              </div>
+                </>
+              )}
 
-              <div className={cardClass}>
-                <SectionTitle>Unified totals</SectionTitle>
-                <div className="space-y-2">
-                  {["Substructure", "Superstructure", "MEP", "Finishes"].map((p) => (
-                    <div key={p} className="flex justify-between font-mono text-xs text-white/70">
-                      <span>{p}</span>
-                      <span>{money(phaseTotal(p))}</span>
+              {/* ---------- STEP 4 ---------- */}
+              {step === 4 && (
+                <>
+                  <div className={cardClass}>
+                    <SectionTitle>
+                      Step 4 · Procurement arbitrage &amp; trade margin gap
+                    </SectionTitle>
+
+                    <div className="flex items-end gap-3 flex-wrap mb-4">
+                      <div className="w-[180px]">
+                        <Field label="Blanket trade discount %">
+                          <input
+                            type="number"
+                            className={inputClass}
+                            value={globalDiscount}
+                            onChange={(e) => setGlobalDiscount(Number(e.target.value))}
+                          />
+                        </Field>
+                      </div>
+                      <button
+                        onClick={applyGlobalDiscount}
+                        className="rounded-lg px-3 py-2 font-mono text-[11px] uppercase tracking-wider border border-white/20 text-white/80 hover:border-[#38bdf8]"
+                      >
+                        Apply to all packs
+                      </button>
+                      <button
+                        onClick={() => setNegotiated({} as Record<PackId, number | undefined>)}
+                        className="rounded-lg px-3 py-2 font-mono text-[11px] uppercase tracking-wider border border-white/20 text-white/60"
+                      >
+                        Reset to typical
+                      </button>
+                      <div className="w-[120px]">
+                        <Field label="VAT %">
+                          <input
+                            type="number"
+                            className={inputClass}
+                            value={vatRate}
+                            onChange={(e) => setVatRate(Number(e.target.value))}
+                          />
+                        </Field>
+                      </div>
                     </div>
-                  ))}
-                  <div className="flex justify-between border-t border-white/10 pt-2">
-                    <span className="font-mono text-[11px] uppercase tracking-wider text-white/55">
-                      Net build cost
-                    </span>
-                    <span className="font-heading text-lg text-[#1AC2BA]">{money(netCost)}</span>
+
+                    <div className="space-y-2">
+                      {arbitrage.packs.map((p) => (
+                        <div
+                          key={p.pack.id}
+                          className="rounded-xl border border-white/10 bg-white/[0.02] p-3 grid grid-cols-1 md:grid-cols-4 gap-3 items-end"
+                        >
+                          <div className="md:col-span-2">
+                            <p className="font-mono text-xs text-white/85">{p.pack.name}</p>
+                            <p className="font-mono text-[10px] text-white/40 mt-1">
+                              Retail benchmark {money(p.retailTotal)}
+                            </p>
+                          </div>
+                          <Field label="Returned merchant quote (£)">
+                            <input
+                              type="number"
+                              step="0.01"
+                              className={inputClass}
+                              value={p.negotiatedTotal}
+                              onChange={(e) =>
+                                setNegotiated((prev) => ({
+                                  ...prev,
+                                  [p.pack.id]: Number(e.target.value),
+                                }))
+                              }
+                            />
+                          </Field>
+                          <div>
+                            <p className={labelClass}>Gap</p>
+                            <p className="font-heading text-sm" style={{ color: ACCENT }}>
+                              {money(p.gap)} <span className="text-xs">/ {p.gapPct}%</span>
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
+
+                  <div className={cardClass}>
+                    <SectionTitle>The trade gap breakdown</SectionTitle>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      {[
+                        ["Retail benchmark cost (customer quoting price)", money(retailTotal)],
+                        ["Negotiated trade merchant cost", money(arbitrage.negotiatedTotal)],
+                        [
+                          "Gross material trade gap (potential profit)",
+                          `${money(arbitrage.tradeGap)} (${arbitrage.tradeGapPct}%)`,
+                        ],
+                      ].map(([k, v], i) => (
+                        <div
+                          key={k}
+                          className="rounded-xl border p-3"
+                          style={{ borderColor: i === 2 ? `${ACCENT}66` : "rgba(255,255,255,0.10)" }}
+                        >
+                          <p className={labelClass}>{k}</p>
+                          <p
+                            className="font-heading text-lg"
+                            style={{ color: i === 2 ? ACCENT : "#fff" }}
+                          >
+                            {v}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="mt-5">
+                      <div className="flex justify-between font-mono text-[10px] uppercase tracking-wider text-white/55 mb-2">
+                        <span>Pass discount to customer</span>
+                        <span>Retain as contractor net profit</span>
+                      </div>
+                      <input
+                        type="range"
+                        min={0}
+                        max={100}
+                        step={1}
+                        value={retainPct}
+                        onChange={(e) => setRetainPct(Number(e.target.value))}
+                        className="w-full"
+                        style={{ accentColor: ACCENT }}
+                        aria-label="Margin split — retain as contractor net profit"
+                      />
+                      <div className="flex justify-between font-mono text-xs text-white/70 mt-1">
+                        <span>{100 - retainPct}% passed</span>
+                        <span style={{ color: ACCENT }}>{retainPct}% retained</span>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mt-4">
+                        {[
+                          ["Retained net profit", money(arbitrage.retainedProfit), true],
+                          ["Passed to customer", money(arbitrage.passedToCustomer), false],
+                          ["Final customer quote (ex VAT)", money(arbitrage.customerQuoteTotal), false],
+                          ["Customer total inc VAT", money(arbitrage.customerQuoteIncVat), false],
+                        ].map(([k, v, hl]) => (
+                          <div
+                            key={k as string}
+                            className="rounded-xl border p-3"
+                            style={{
+                              borderColor: hl ? `${ACCENT}66` : "rgba(255,255,255,0.10)",
+                            }}
+                          >
+                            <p className={labelClass}>{k as string}</p>
+                            <p
+                              className="font-heading text-base"
+                              style={{ color: hl ? ACCENT : "#fff" }}
+                            >
+                              {v as string}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                      <p className="font-mono text-[11px] text-white/50 mt-3 leading-relaxed">
+                        Passing {100 - retainPct}% of the gap drops the customer quote by{" "}
+                        {money(arbitrage.passedToCustomer)} against the retail benchmark while still
+                        leaving {money(arbitrage.retainedProfit)} of material margin in the job.
+                      </p>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* ---------- agent war room (always on) ---------- */}
+              <div className={cardClass}>
+                <SectionTitle>Agent war room</SectionTitle>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {AGENTS.map((agent) => {
+                    const active = agentFilter === agent.id;
+                    return (
+                      <div
+                        key={agent.id}
+                        className="rounded-2xl border p-4 transition-all duration-300"
+                        style={{
+                          borderColor: active ? `${ACCENT}80` : "rgba(255,255,255,0.10)",
+                          background: active ? "rgba(56,189,248,0.07)" : "rgba(255,255,255,0.03)",
+                        }}
+                      >
+                        <div className="flex items-start gap-3">
+                          <AgentAvatar
+                            agent={agent}
+                            state={avatarState}
+                            size={56}
+                            active={active || status === "analyzing"}
+                          />
+                          <div className="min-w-0 flex-1">
+                            <p className="font-heading text-sm font-bold text-white truncate">
+                              {agent.name}
+                            </p>
+                            <p
+                              className="font-mono text-[10px] uppercase tracking-wider"
+                              style={{ color: ACCENT }}
+                            >
+                              {agent.roleBadge}
+                            </p>
+                            <span
+                              className="inline-block mt-1.5 font-mono text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-full"
+                              style={stateStyle(
+                                status === "verified"
+                                  ? "required"
+                                  : status === "analyzing"
+                                    ? "attention"
+                                    : "info",
+                              )}
+                            >
+                              {agentStatus()}
+                            </span>
+                          </div>
+                        </div>
+                        <p className="font-mono text-[11px] text-white/45 mt-3">
+                          {agent.speciality}
+                        </p>
+                        <div className="mt-3 rounded-xl border border-white/10 bg-black/25 p-3">
+                          <p className="font-mono text-[11px] text-white/80 leading-relaxed">
+                            {dialogue(agent)}
+                          </p>
+                        </div>
+                        {PHASE_BY_AGENT[agent.id] && (
+                          <button
+                            onClick={() => {
+                              setAgentFilter(active ? null : agent.id);
+                              setStep(3);
+                            }}
+                            className="mt-3 w-full rounded-lg border border-white/15 px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider text-white/70 hover:text-white transition-colors"
+                          >
+                            {active ? "Filtering BoQ" : "Filter BoQ to this agent"}
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>
