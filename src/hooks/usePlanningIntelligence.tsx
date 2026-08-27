@@ -166,11 +166,39 @@ export function usePlanningIntelligence() {
               { onConflict: "trade_id,planning_alert_id" },
             );
         }
+
+        // Attribution/logging only: record the contact event against the lead
+        // when it moves into a contacted state.
+        if (payload.status !== existing?.status && (payload.status === "contacted" || payload.status === "follow_up")) {
+          await supabase.from("planning_lead_contact_log").insert({
+            trade_id: state.trade.id,
+            planning_alert_id: planningId,
+            event_type: payload.status === "follow_up" ? "follow_up_marked" : "marked_contacted",
+            channel: "find_work",
+            detail: "Marked as contacted in Find Work — outreach sent via ProGrafter",
+          } as any);
+        }
       }
       return data as Interaction | null;
     },
     [state.trade, state.interactions],
   );
+
+  /** Log an outreach event against a planning lead (attribution only). */
+  const logContactEvent = useCallback(
+    async (planningId: string, eventType: string, detail: string) => {
+      if (!state.trade) return;
+      await supabase.from("planning_lead_contact_log").insert({
+        trade_id: state.trade.id,
+        planning_alert_id: planningId,
+        event_type: eventType,
+        channel: "find_work",
+        detail,
+      } as any);
+    },
+    [state.trade],
+  );
+
 
 
   const createInviteLink = useCallback(
@@ -194,5 +222,5 @@ export function usePlanningIntelligence() {
     [state.trade, upsertInteraction],
   );
 
-  return { ...state, upsertInteraction, createInviteLink };
+  return { ...state, upsertInteraction, createInviteLink, logContactEvent };
 }

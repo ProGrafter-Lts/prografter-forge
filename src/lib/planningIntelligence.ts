@@ -319,7 +319,9 @@ Everything goes through ProGrafter, so your details stay protected and you stay 
 Kind regards,
 ${trade.name}
 ${company}
-ProGrafter-verified ${tradeLabel}`;
+ProGrafter-verified ${tradeLabel}
+
+Sent via ProGrafter (prografter.co.uk) — verified trades, documented projects.`;
 };
 
 const describeProject = (app: PlanningApp): string => {

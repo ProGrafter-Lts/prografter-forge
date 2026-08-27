@@ -1090,7 +1090,15 @@ export default function PlanningAlerts() {
                       onNotes={(notes) => pi.upsertInteraction(selectedApp.id, { notes })}
                       onFollowUp={(date) => pi.upsertInteraction(selectedApp.id, { status: date ? "follow_up" : (pi.interactions[selectedApp.id]?.status ?? "saved"), follow_up_date: date })}
                       onCreateInvite={() => pi.createInviteLink(selectedApp.id, getProjectType(selectedApp))}
-                      onLetterGenerated={() => pi.upsertInteraction(selectedApp.id, { intro_letter_generated: true })}
+                      onLetterGenerated={() => {
+                        void pi.upsertInteraction(selectedApp.id, { intro_letter_generated: true });
+                        void pi.logContactEvent(
+                          selectedApp.id,
+                          "intro_letter_generated",
+                          "Intro letter generated — sent via ProGrafter",
+                        );
+                      }}
+
                       engaged={engagements[engagementKey(selectedApp.address, selectedApp.postcode) ?? ""]}
                       autoIntro={introIntentId === selectedApp.id}
                       onAutoIntroHandled={() => setIntroIntentId(null)}
