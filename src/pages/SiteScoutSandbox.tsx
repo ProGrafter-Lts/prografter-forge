@@ -970,7 +970,121 @@ const SiteScoutSandbox = () => {
                         </div>
                       </div>
                     </div>
+
+                    {/* Slab, glazing, steel, roofline & prelims */}
+                    <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3 md:col-span-2">
+                      <p className="font-heading text-sm font-bold text-white mb-2">
+                        Ian &amp; Caleb &amp; Sharon · Slab, Glazing, Steel, Roofline &amp; Prelims
+                      </p>
+                      <p className="font-mono text-[10px] text-white/45 mb-3">
+                        Turnkey packages — oversite slab, external openings, knock-through steel,
+                        rainwater goods, plant hire and site prelims.
+                      </p>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <Field label="Ground-floor area (m²)">
+                          <input
+                            type="number"
+                            className={inputClass}
+                            value={slabInputs.floorArea}
+                            onChange={(e) => setSlab("floorArea", Number(e.target.value))}
+                          />
+                        </Field>
+                        <Field label="Bi-fold door sets (Nr)">
+                          <input
+                            type="number"
+                            className={inputClass}
+                            value={envInputs.bifoldSets}
+                            onChange={(e) => setEnv("bifoldSets", Number(e.target.value))}
+                          />
+                        </Field>
+                        <Field label="Casement windows (Nr)">
+                          <input
+                            type="number"
+                            className={inputClass}
+                            value={envInputs.windowCount}
+                            onChange={(e) => setEnv("windowCount", Number(e.target.value))}
+                          />
+                        </Field>
+                        <Field label="Rooflights (Nr)">
+                          <input
+                            type="number"
+                            className={inputClass}
+                            value={envInputs.rooflightCount}
+                            onChange={(e) => setEnv("rooflightCount", Number(e.target.value))}
+                          />
+                        </Field>
+                        <Field label="Steel span (lm)">
+                          <input
+                            type="number"
+                            step="0.1"
+                            className={inputClass}
+                            value={envInputs.steelSpan}
+                            onChange={(e) => setEnv("steelSpan", Number(e.target.value))}
+                          />
+                        </Field>
+                        <Field label="Roofline run (lm)">
+                          <input
+                            type="number"
+                            step="0.5"
+                            className={inputClass}
+                            value={envInputs.perimeterRun}
+                            onChange={(e) => setEnv("perimeterRun", Number(e.target.value))}
+                          />
+                        </Field>
+                        <Field label="Abutment lead run (lm)">
+                          <input
+                            type="number"
+                            step="0.5"
+                            className={inputClass}
+                            value={envInputs.abutmentRun}
+                            onChange={(e) => setEnv("abutmentRun", Number(e.target.value))}
+                          />
+                        </Field>
+                        <Field label="8-yard skips (Nr)">
+                          <input
+                            type="number"
+                            className={inputClass}
+                            value={prelimsInputs.skipCount}
+                            onChange={(e) => setPrelims("skipCount", Number(e.target.value))}
+                          />
+                        </Field>
+                        <Field label="Digger hire (weeks)">
+                          <input
+                            type="number"
+                            className={inputClass}
+                            value={prelimsInputs.diggerWeeks}
+                            onChange={(e) => setPrelims("diggerWeeks", Number(e.target.value))}
+                          />
+                        </Field>
+                        <Field label="Dumper hire (weeks)">
+                          <input
+                            type="number"
+                            className={inputClass}
+                            value={prelimsInputs.dumperWeeks}
+                            onChange={(e) => setPrelims("dumperWeeks", Number(e.target.value))}
+                          />
+                        </Field>
+                        <div className="flex items-end pb-2 gap-4 col-span-2">
+                          <Toggle
+                            label="Rooflights"
+                            checked={envInputs.rooflights}
+                            onChange={(v) => setEnv("rooflights", v)}
+                          />
+                          <Toggle
+                            label="Knock-through"
+                            checked={envInputs.knockThrough}
+                            onChange={(v) => setEnv("knockThrough", v)}
+                          />
+                          <Toggle
+                            label="Site setup"
+                            checked={prelimsInputs.siteSetup}
+                            onChange={(v) => setPrelims("siteSetup", v)}
+                          />
+                        </div>
+                      </div>
+                    </div>
                   </div>
+
 
                   <button
                     onClick={runTakeoff}
