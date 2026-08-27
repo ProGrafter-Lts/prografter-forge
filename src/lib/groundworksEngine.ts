@@ -101,8 +101,8 @@ export function runSubstructureTakeoff(
 
   // 1. Depth & regulation rule (NHBC 4.2 / Part A)
   const clayTreeTrigger = input.soilType === "Clay" && input.treeProximity < 10;
-  const digDepth = clayTreeTrigger ? 1.8 : 1.0;
-  const clayboardRequired = clayTreeTrigger;
+  const digDepth = input.depthOverride ?? (clayTreeTrigger ? 1.8 : 1.0);
+  const clayboardRequired = input.clayboardOverride ?? clayTreeTrigger;
 
   if (clayTreeTrigger) {
     auditNotes.push(
