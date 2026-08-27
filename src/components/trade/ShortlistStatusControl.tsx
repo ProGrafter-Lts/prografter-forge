@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { StickyNote, Check, X, Loader2 } from "lucide-react";
+import { mirrorShortlistToInteraction } from "@/lib/shortlistMirror";
 
 export type ShortlistStatus = "todo" | "contacted" | "quoted" | "won" | "dead";
 
