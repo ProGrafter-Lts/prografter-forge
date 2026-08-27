@@ -84,6 +84,8 @@ export const ShortlistStatusControl = ({ tradeId, planningAlertId, initial }: Pr
   const onStatusChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     const next = e.target.value as ShortlistStatus;
     await upsert({ contact_status: next });
+    // Keep Find Work's pipeline tabs in sync with Pipeline-side changes.
+    await mirrorShortlistToInteraction(tradeId, planningAlertId, next);
   };
 
   const saveNote = async () => {
