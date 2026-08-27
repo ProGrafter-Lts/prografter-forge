@@ -743,6 +743,26 @@ export default function PlanningAlerts() {
   };
 
 
+  const DATE_LABEL: Record<string, string> = {
+    all: "all dates",
+    "7": "approved or logged in the last 7 days",
+    "30": "approved or logged in the last 30 days",
+    "90": "approved or logged in the last 90 days",
+  };
+
+  // Honest description of everything narrowing the feed right now.
+  const activeFilterSummary = [
+    DATE_LABEL[filterDate],
+    showRefused ? "refused included" : "refused hidden",
+    mineOnly ? `matched to your trade (${tradeTypes.join(", ") || "your trade"})` : null,
+    filterTrade !== "all" ? `trade: ${filterTrade}` : null,
+    filterCouncil !== "all" ? `council: ${filterCouncil}` : null,
+    filterProjectType !== "all" ? `project type: ${filterProjectType.toLowerCase()}` : null,
+    filterStatus !== "all" ? `decision status: ${filterStatus.replace(/_/g, " ")}` : null,
+    searchQuery ? `search “${searchQuery}”` : null,
+    apps.length >= 200 ? "capped at the 200 most recent applications" : null,
+  ].filter(Boolean).join(" · ");
+
   const tabClass = (active: boolean) =>
     `px-4 py-2.5 rounded-xl font-mono text-xs uppercase tracking-wider transition-colors whitespace-nowrap ${
       active ? "bg-secondary text-primary-foreground" : "bg-transparent text-muted-foreground hover:text-primary"
@@ -813,11 +833,16 @@ export default function PlanningAlerts() {
                           active ? "bg-secondary text-primary-foreground" : "bg-card border border-border text-muted-foreground hover:text-primary"
                         }`}
                       >
-                        {t.label}{count !== undefined ? ` (${count})` : ""}
+                        {t.id === "all" ? "All in view" : t.label}{count !== undefined ? ` (${count})` : ""}
                       </button>
                     );
                   })}
                 </div>
+
+                <p className="font-mono text-[11px] text-muted-foreground mb-4 leading-relaxed">
+                  “All in view” is not your whole database — it shows applications matching the filters below:{" "}
+                  <span className="text-primary font-semibold">{activeFilterSummary}</span>.
+                </p>
 
                 {/* Stats row */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 mb-5">
