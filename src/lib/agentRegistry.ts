@@ -15,6 +15,8 @@ import calebClean from "@/assets/agents/caleb-clean.png.asset.json";
 import calebSite from "@/assets/agents/caleb-site.png.asset.json";
 import meganClean from "@/assets/agents/megan-clean.png.asset.json";
 import meganSite from "@/assets/agents/megan-site.png.asset.json";
+import elizabethClean from "@/assets/agents/elizabeth-clean.png.asset.json";
+import elizabethSite from "@/assets/agents/elizabeth-site.png.asset.json";
 
 export type AgentId =
   | "lee"
