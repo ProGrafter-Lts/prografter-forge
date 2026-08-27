@@ -624,11 +624,12 @@ export default function PlanningAlerts() {
 
   useEffect(() => {
     if (!deepLinkId || loadingApps) return;
-    // Re-open whenever the URL points at a lead that isn't the one on screen.
-    // (A ref-only guard left the panel showing the previous lead — or nothing —
-    // when the same page was already mounted.)
-    if (handledDeepLink.current === deepLinkId && (!selectedApp || selectedApp.id === deepLinkId)) return;
+    // Handle each deep-link id once. The ref is reset when the panel is closed
+    // (see below), so re-arriving at the same lead re-opens it, while manually
+    // browsing to another lead is never overridden.
+    if (handledDeepLink.current === deepLinkId) return;
     handledDeepLink.current = deepLinkId;
+
 
 
 
