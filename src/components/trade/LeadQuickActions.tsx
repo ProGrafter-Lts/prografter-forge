@@ -85,6 +85,7 @@ const LeadQuickActions = ({
       return false;
     }
     if (data) onStatusChanged(data as { id: string; contact_status: ShortlistStatus });
+    await mirrorShortlistToInteraction(tradeId, planningAlertId, "contacted");
     return true;
   };
 
