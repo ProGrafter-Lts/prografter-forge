@@ -217,6 +217,19 @@ export function runSubstructureTakeoff(
     });
   }
 
+  const drainageRun = input.drainageRunLength ?? 0;
+  if (drainageRun > 0) {
+    boq.push({
+      phase: "Substructure",
+      description: "Below-ground drainage run — 110mm pipe, shingle bed & surround",
+      formula: `${drainageRun} lm at ${input.drainageInvertBaseline}m invert`,
+      quantity: round2(drainageRun),
+      unit: "lm",
+      rate: 86,
+      total: round2(drainageRun * 86),
+    });
+  }
+
   const netCost = round2(boq.reduce((sum, line) => sum + line.total, 0));
 
   return {
