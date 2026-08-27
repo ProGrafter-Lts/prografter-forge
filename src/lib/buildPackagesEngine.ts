@@ -316,6 +316,10 @@ export interface PrelimsInputs {
   dumperWeeks: number;
   skipCount: number;
   siteSetup: boolean;
+  /** Scaffold to the working elevation(s) — 8-week hire period. */
+  scaffolding: boolean;
+  /** Building Control full plans + structural engineer calculations. */
+  statutoryFees: boolean;
 }
 
 export const DEFAULT_PRELIMS_INPUTS: PrelimsInputs = {
@@ -323,6 +327,8 @@ export const DEFAULT_PRELIMS_INPUTS: PrelimsInputs = {
   dumperWeeks: 2,
   skipCount: 3,
   siteSetup: true,
+  scaffolding: true,
+  statutoryFees: true,
 };
 
 export interface PrelimsRates {
@@ -334,6 +340,10 @@ export interface PrelimsRates {
   siteSetupLumpSum: number;
   /** 8-yard general mixed waste skip. */
   skipRate: number;
+  /** Scaffold erect, 8-week hire & dismantle — lump sum. */
+  scaffoldLumpSum: number;
+  /** Building Control full plans + SE calculations — lump sum. */
+  statutoryFeesLumpSum: number;
 }
 
 export const DEFAULT_PRELIMS_RATES: PrelimsRates = {
@@ -341,6 +351,8 @@ export const DEFAULT_PRELIMS_RATES: PrelimsRates = {
   dumperPerWeek: 210,
   siteSetupLumpSum: 950,
   skipRate: 290,
+  scaffoldLumpSum: 1850,
+  statutoryFeesLumpSum: 1150,
 };
 
 export interface PrelimsResult {
@@ -398,6 +410,30 @@ export function runPrelimsTakeoff(
       unit: "Nr",
       rate: rates.skipRate,
       total: round2(input.skipCount * rates.skipRate),
+    });
+  }
+
+  if (input.scaffolding) {
+    boq.push({
+      phase,
+      description: "Scaffold to working elevations — erect, 8-week hire, alter & dismantle",
+      formula: "1 Nr scaffold package inc. handover certificate & weekly inspections",
+      quantity: 1,
+      unit: "item",
+      rate: rates.scaffoldLumpSum,
+      total: round2(rates.scaffoldLumpSum),
+    });
+  }
+  if (input.statutoryFees) {
+    boq.push({
+      phase,
+      description:
+        "Building Control full plans application & structural engineer's calculations",
+      formula: "1 Nr statutory fees & design package",
+      quantity: 1,
+      unit: "item",
+      rate: rates.statutoryFeesLumpSum,
+      total: round2(rates.statutoryFeesLumpSum),
     });
   }
 

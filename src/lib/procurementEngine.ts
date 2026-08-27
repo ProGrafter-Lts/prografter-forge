@@ -74,7 +74,10 @@ const PACK_RULES: [RegExp, PackId][] = [
   // Order matters — most specific trade wording first.
   [/bi-fold|casement|rooflight|velux|glaz/i, "B"],
   [/mot type 1|sub-base|blinding|dpm|radon|floor slab|floor pir|a252|mesh/i, "A"],
-  [/digger|dumper|portaloo|heras|site setup|plant hire|acrow|strongboy|prop/i, "A"],
+  [
+    /digger|dumper|portaloo|heras|site setup|plant hire|acrow|strongboy|prop|scaffold|building control|overhead/i,
+    "A",
+  ],
   [/fascia|soffit|gutter|downpipe|hopper|rainwater|lead flashing|soaker|roofline/i, "C"],
   [/universal beam|\bub\b|padstone|structural steel/i, "B"],
   [
@@ -106,6 +109,10 @@ export function packForLine(line: BoqLine): PackId {
 /** Human-readable BoQ category derived from the line description. */
 export function categoryForLine(line: BoqLine): string {
   const d = line.description.toLowerCase();
+  if (/lintel/.test(d)) return "Structural Steel";
+  if (/overhead|oh&p|supervision/.test(d)) return "Overheads, Supervision & Profit";
+  if (/scaffold/.test(d)) return "Access & Scaffolding";
+  if (/building control|structural engineer/.test(d)) return "Statutory Fees & Design";
   if (/bi-fold|casement|rooflight|velux/.test(d)) return "Glazing & External Openings";
   if (/mot type 1|sub-base|blinding|dpm|radon|floor slab|a252/.test(d))
     return "Ground-Floor Slab & Oversite";
