@@ -75,7 +75,7 @@ const PACK_RULES: [RegExp, PackId][] = [
   [/bi-fold|casement|rooflight|velux|glaz/i, "B"],
   [/mot type 1|sub-base|blinding|dpm|radon|floor slab|floor pir|a252|mesh/i, "A"],
   [
-    /digger|dumper|portaloo|heras|site setup|plant hire|acrow|strongboy|prop|scaffold|building control|overhead/i,
+    /digger|dumper|portaloo|heras|site setup|plant hire|acrow|strongboy|prop|scaffold|full plans application|overhead/i,
     "A",
   ],
   [/fascia|soffit|gutter|downpipe|hopper|rainwater|lead flashing|soaker|roofline/i, "C"],
@@ -112,7 +112,7 @@ export function categoryForLine(line: BoqLine): string {
   if (/lintel/.test(d)) return "Structural Steel";
   if (/overhead|oh&p|supervision/.test(d)) return "Overheads, Supervision & Profit";
   if (/scaffold/.test(d)) return "Access & Scaffolding";
-  if (/building control|structural engineer/.test(d)) return "Statutory Fees & Design";
+  if (/full plans application|structural engineer/.test(d)) return "Statutory Fees & Design";
   if (/bi-fold|casement|rooflight|velux/.test(d)) return "Glazing & External Openings";
   if (/mot type 1|sub-base|blinding|dpm|radon|floor slab|a252/.test(d))
     return "Ground-Floor Slab & Oversite";
