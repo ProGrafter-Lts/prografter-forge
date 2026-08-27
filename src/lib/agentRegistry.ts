@@ -56,6 +56,7 @@ const REAL_AVATARS: Partial<Record<AgentId, { clean: string; site: string }>> = 
   ruby: { clean: rubyClean.url, site: rubySite.url },
   caleb: { clean: calebClean.url, site: calebSite.url },
   megan: { clean: meganClean.url, site: meganSite.url },
+  elizabeth: { clean: elizabethClean.url, site: elizabethSite.url },
 };
 
 const avatars = (id: AgentId) =>
