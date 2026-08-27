@@ -530,7 +530,7 @@ export default function PlanningAlerts() {
 
   const [filterTrade, setFilterTrade] = useState("all");
   const [filterCouncil, setFilterCouncil] = useState("all");
-  const [filterDate, setFilterDate] = useState<"all" | "7" | "30" | "90">("90");
+  const [filterDate, setFilterDate] = useState<"all" | "7" | "30" | "90">("30");
   const [filterProjectType, setFilterProjectType] = useState<"all" | ProjectKind>("all");
   const [showRefused, setShowRefused] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -911,6 +911,18 @@ export default function PlanningAlerts() {
                     <option value="30">Last 30 days</option>
                     <option value="90">Last 90 days</option>
                   </select>
+                  <button
+                    type="button"
+                    onClick={() => setFilterDate(filterDate === "7" ? "30" : "7")}
+                    aria-pressed={filterDate === "7"}
+                    className={`px-3 py-2.5 rounded-xl font-mono text-xs uppercase tracking-wider border transition-colors whitespace-nowrap ${
+                      filterDate === "7"
+                        ? "bg-secondary text-primary-foreground border-secondary"
+                        : "bg-card border-border text-primary hover:bg-muted"
+                    }`}
+                  >
+                    Last 7 days
+                  </button>
                   <label className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-border bg-card font-mono text-xs text-foreground cursor-pointer">
                     <input
                       type="checkbox"
@@ -921,7 +933,7 @@ export default function PlanningAlerts() {
                     Show refused applications
                   </label>
                   <button
-                    onClick={()=>{setFilterStatus("all");setFilterTrade("all");setFilterCouncil("all");setFilterProjectType("all");setFilterDate("90");setShowRefused(false);setSearchQuery("");}}
+                    onClick={()=>{setFilterStatus("all");setFilterTrade("all");setFilterCouncil("all");setFilterProjectType("all");setFilterDate("30");setShowRefused(false);setSearchQuery("");}}
                     className="px-4 py-2.5 bg-card border border-border rounded-xl font-mono text-xs text-primary uppercase tracking-wider hover:bg-muted transition-colors whitespace-nowrap"
                   >
                     Clear
