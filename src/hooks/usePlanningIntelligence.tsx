@@ -222,5 +222,5 @@ export function usePlanningIntelligence() {
     [state.trade, upsertInteraction],
   );
 
-  return { ...state, upsertInteraction, createInviteLink };
+  return { ...state, upsertInteraction, createInviteLink, logContactEvent };
 }
