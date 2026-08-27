@@ -15,6 +15,8 @@ export interface FinishesInputs {
   skirtingRun: number;
   internalDoors: number;
   twoCoatSkim: boolean;
+  /** External monocouche / silicone render area (m²). */
+  externalRenderArea: number;
 }
 
 export const DEFAULT_FINISHES_INPUTS: FinishesInputs = {
@@ -23,6 +25,7 @@ export const DEFAULT_FINISHES_INPUTS: FinishesInputs = {
   skirtingRun: 26,
   internalDoors: 3,
   twoCoatSkim: true,
+  externalRenderArea: 0,
 };
 
 export interface FinishesRates {
@@ -38,6 +41,8 @@ export interface FinishesRates {
   doorSetRate: number;
   /** Mist coat + 2 coats emulsion, per m². */
   decorationPerM2: number;
+  /** External monocouche / silicone render, per m². */
+  renderPerM2: number;
 }
 
 export const DEFAULT_FINISHES_RATES: FinishesRates = {
@@ -47,6 +52,7 @@ export const DEFAULT_FINISHES_RATES: FinishesRates = {
   skirtingPerLm: 16,
   doorSetRate: 260,
   decorationPerM2: 8.5,
+  renderPerM2: 46,
 };
 
 export interface FinishesResult {
@@ -127,6 +133,18 @@ export function runFinishesTakeoff(
       total: round2(totalBoardArea * rates.decorationPerM2),
     },
   ];
+
+  if (input.externalRenderArea > 0) {
+    boq.push({
+      phase: "Finishes",
+      description: "External monocouche / silicone render — beaded, base & top coat",
+      formula: `${input.externalRenderArea} m² external elevation`,
+      quantity: round2(input.externalRenderArea),
+      unit: "m²",
+      rate: rates.renderPerM2,
+      total: round2(input.externalRenderArea * rates.renderPerM2),
+    });
+  }
 
   const auditNotes: string[] = [
     `Board schedule: ${boardSheets} sheets allowed at ${Math.round((WASTE - 1) * 100)}% cut waste across ${totalBoardArea} m².`,
