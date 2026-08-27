@@ -724,7 +724,10 @@ export default function PlanningAlerts() {
     if (filterTrade !== "all" && !app.trades_needed.includes(filterTrade)) return false;
     if (filterCouncil !== "all" && app.council !== filterCouncil) return false;
     if (filterProjectType !== "all" && getProjectType(app) !== filterProjectType) return false;
-    if (filterDate !== "all") {
+    // Leads you've already actioned stay visible regardless of the date window
+    // — otherwise your own contacted/saved leads silently vanish from the tabs.
+    const actioned = (pi.interactions[app.id]?.status ?? "new") !== "new";
+    if (filterDate !== "all" && !actioned) {
       const cutoff = Date.now() - Number(filterDate) * 86400000;
       if (new Date(app.submitted_date).getTime() < cutoff) return false;
     }
