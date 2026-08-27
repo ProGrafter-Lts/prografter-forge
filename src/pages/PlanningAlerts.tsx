@@ -530,7 +530,7 @@ export default function PlanningAlerts() {
 
   const [filterTrade, setFilterTrade] = useState("all");
   const [filterCouncil, setFilterCouncil] = useState("all");
-  const [filterDate, setFilterDate] = useState<"all" | "7" | "30" | "90">("90");
+  const [filterDate, setFilterDate] = useState<"all" | "7" | "30" | "90">("30");
   const [filterProjectType, setFilterProjectType] = useState<"all" | ProjectKind>("all");
   const [showRefused, setShowRefused] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -743,6 +743,26 @@ export default function PlanningAlerts() {
   };
 
 
+  const DATE_LABEL: Record<string, string> = {
+    all: "all dates",
+    "7": "approved or logged in the last 7 days",
+    "30": "approved or logged in the last 30 days",
+    "90": "approved or logged in the last 90 days",
+  };
+
+  // Honest description of everything narrowing the feed right now.
+  const activeFilterSummary = [
+    DATE_LABEL[filterDate],
+    showRefused ? "refused included" : "refused hidden",
+    mineOnly ? `matched to your trade (${tradeTypes.join(", ") || "your trade"})` : null,
+    filterTrade !== "all" ? `trade: ${filterTrade}` : null,
+    filterCouncil !== "all" ? `council: ${filterCouncil}` : null,
+    filterProjectType !== "all" ? `project type: ${filterProjectType.toLowerCase()}` : null,
+    filterStatus !== "all" ? `decision status: ${filterStatus.replace(/_/g, " ")}` : null,
+    searchQuery ? `search “${searchQuery}”` : null,
+    apps.length >= 200 ? "capped at the 200 most recent applications" : null,
+  ].filter(Boolean).join(" · ");
+
   const tabClass = (active: boolean) =>
     `px-4 py-2.5 rounded-xl font-mono text-xs uppercase tracking-wider transition-colors whitespace-nowrap ${
       active ? "bg-secondary text-primary-foreground" : "bg-transparent text-muted-foreground hover:text-primary"
@@ -813,11 +833,16 @@ export default function PlanningAlerts() {
                           active ? "bg-secondary text-primary-foreground" : "bg-card border border-border text-muted-foreground hover:text-primary"
                         }`}
                       >
-                        {t.label}{count !== undefined ? ` (${count})` : ""}
+                        {t.id === "all" ? "All in view" : t.label}{count !== undefined ? ` (${count})` : ""}
                       </button>
                     );
                   })}
                 </div>
+
+                <p className="font-mono text-[11px] text-muted-foreground mb-4 leading-relaxed">
+                  “All in view” is not your whole database — it shows applications matching the filters below:{" "}
+                  <span className="text-primary font-semibold">{activeFilterSummary}</span>.
+                </p>
 
                 {/* Stats row */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 mb-5">
@@ -911,6 +936,18 @@ export default function PlanningAlerts() {
                     <option value="30">Last 30 days</option>
                     <option value="90">Last 90 days</option>
                   </select>
+                  <button
+                    type="button"
+                    onClick={() => setFilterDate(filterDate === "7" ? "30" : "7")}
+                    aria-pressed={filterDate === "7"}
+                    className={`px-3 py-2.5 rounded-xl font-mono text-xs uppercase tracking-wider border transition-colors whitespace-nowrap ${
+                      filterDate === "7"
+                        ? "bg-secondary text-primary-foreground border-secondary"
+                        : "bg-card border-border text-primary hover:bg-muted"
+                    }`}
+                  >
+                    Last 7 days
+                  </button>
                   <label className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-border bg-card font-mono text-xs text-foreground cursor-pointer">
                     <input
                       type="checkbox"
@@ -921,7 +958,7 @@ export default function PlanningAlerts() {
                     Show refused applications
                   </label>
                   <button
-                    onClick={()=>{setFilterStatus("all");setFilterTrade("all");setFilterCouncil("all");setFilterProjectType("all");setFilterDate("90");setShowRefused(false);setSearchQuery("");}}
+                    onClick={()=>{setFilterStatus("all");setFilterTrade("all");setFilterCouncil("all");setFilterProjectType("all");setFilterDate("30");setShowRefused(false);setSearchQuery("");}}
                     className="px-4 py-2.5 bg-card border border-border rounded-xl font-mono text-xs text-primary uppercase tracking-wider hover:bg-muted transition-colors whitespace-nowrap"
                   >
                     Clear

@@ -131,6 +131,8 @@ export default function OpportunityCommandCentre({
 
 
   const currentStatus = interaction?.status ?? "new";
+  const [confirmDismiss, setConfirmDismiss] = useState(false);
+
 
   const StatBox = ({ k, v }: { k: string; v: string }) => (
     <div className="bg-white/5 rounded-xl px-3 py-2.5 border border-white/10">
@@ -354,9 +356,27 @@ export default function OpportunityCommandCentre({
               )}
               <ActionBtn icon={<CheckCircle2 className="w-3.5 h-3.5" />} active={currentStatus === "contacted"} onClick={() => onStatus("contacted")}>Mark contacted</ActionBtn>
               <ActionBtn icon={<ArrowRightCircle className="w-3.5 h-3.5" />} active={currentStatus === "converted"} onClick={() => onStatus("converted")}>Convert to project</ActionBtn>
-              <ActionBtn icon={<XCircle className="w-3.5 h-3.5" />} active={currentStatus === "dismissed"} onClick={() => onStatus("dismissed")}>Dismiss</ActionBtn>
+              <ActionBtn icon={<XCircle className="w-3.5 h-3.5" />} active={currentStatus === "dismissed"} onClick={() => setConfirmDismiss(true)}>Dismiss</ActionBtn>
             </div>
           )}
+          {confirmDismiss && (
+            <div className="rounded-xl border border-red-400/40 bg-red-500/10 p-3 space-y-2">
+              <p className="font-sans text-[11px] text-cream/90 leading-relaxed">
+                Dismiss this lead? It moves to <span className="font-semibold">Dead</span> in your pipeline and is hidden
+                from your active feed. You can only get it back by selecting the Dismissed tab and re-saving it.
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                <ActionBtn
+                  icon={<XCircle className="w-3.5 h-3.5" />}
+                  onClick={() => { onStatus("dismissed"); setConfirmDismiss(false); }}
+                >
+                  Yes, dismiss
+                </ActionBtn>
+                <ActionBtn icon={<X className="w-3.5 h-3.5" />} onClick={() => setConfirmDismiss(false)}>Keep lead</ActionBtn>
+              </div>
+            </div>
+          )}
+
         </div>
 
         {/* Follow-up */}
