@@ -299,8 +299,10 @@ const SiteScoutSandbox = () => {
 
 
   // ---------- Step 3: master BoQ ----------
-  const baseBoq: BoqLine[] = useMemo(
-    () => [
+  const [ohpPct, setOhpPct] = useState(15);
+
+  const baseBoq: BoqLine[] = useMemo(() => {
+    const lines: BoqLine[] = [
       ...(prelimsResult?.boq ?? []),
       ...(ground?.boq ?? []),
       ...(slabResult?.boq ?? []),
@@ -308,9 +310,21 @@ const SiteScoutSandbox = () => {
       ...(envResult?.boq ?? []),
       ...(mepResult?.boq ?? []),
       ...(finishesResult?.boq ?? []),
-    ],
-    [ground, slabResult, superResult, envResult, mepResult, finishesResult, prelimsResult],
-  );
+    ];
+    if (lines.length && ohpPct > 0) {
+      const net = lines.reduce((sum, l) => sum + l.total, 0);
+      lines.push({
+        phase: "Prelims",
+        description: `Main contractor preliminaries, site supervision, overheads & profit (OH&P) @ ${ohpPct}%`,
+        formula: `${ohpPct}% of £${net.toFixed(2)} net trade works`,
+        quantity: 1,
+        unit: "item",
+        rate: Number(((net * ohpPct) / 100).toFixed(2)),
+        total: Number(((net * ohpPct) / 100).toFixed(2)),
+      });
+    }
+    return lines;
+  }, [ground, slabResult, superResult, envResult, mepResult, finishesResult, prelimsResult, ohpPct]);
 
 
   const masterBoq: MasterBoqLine[] = useMemo(() => {
@@ -1100,6 +1114,14 @@ const SiteScoutSandbox = () => {
                             onChange={(e) => setPrelims("diggerWeeks", Number(e.target.value))}
                           />
                         </Field>
+                        <Field label="OH&P (%)">
+                          <input
+                            type="number"
+                            className={inputClass}
+                            value={ohpPct}
+                            onChange={(e) => setOhpPct(Number(e.target.value))}
+                          />
+                        </Field>
                         <Field label="Dumper hire (weeks)">
                           <input
                             type="number"
@@ -1123,6 +1145,16 @@ const SiteScoutSandbox = () => {
                             label="Site setup"
                             checked={prelimsInputs.siteSetup}
                             onChange={(v) => setPrelims("siteSetup", v)}
+                          />
+                          <Toggle
+                            label="Scaffolding"
+                            checked={prelimsInputs.scaffolding}
+                            onChange={(v) => setPrelims("scaffolding", v)}
+                          />
+                          <Toggle
+                            label="BC / SE fees"
+                            checked={prelimsInputs.statutoryFees}
+                            onChange={(v) => setPrelims("statutoryFees", v)}
                           />
                         </div>
                       </div>
