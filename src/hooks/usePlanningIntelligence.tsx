@@ -134,11 +134,31 @@ export function usePlanningIntelligence() {
           ...s,
           interactions: { ...s.interactions, [planningId]: data as Interaction },
         }));
+
+        // Mirror the status into planning_alert_shortlist so the Pipeline view
+        // (which reads only that table) stays in sync with Find Work.
+        const contactStatus = SHORTLIST_STATUS[payload.status as PipelineStatus];
+        if (contactStatus) {
+          await supabase
+            .from("planning_alert_shortlist")
+            .upsert(
+              {
+                trade_id: state.trade.id,
+                planning_alert_id: planningId,
+                contact_status: contactStatus,
+                next_action_date: payload.follow_up_date,
+                last_status_change_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+              } as any,
+              { onConflict: "trade_id,planning_alert_id" },
+            );
+        }
       }
       return data as Interaction | null;
     },
     [state.trade, state.interactions],
   );
+
 
   const createInviteLink = useCallback(
     async (planningId: string, projectType: string | null) => {
