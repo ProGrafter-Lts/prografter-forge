@@ -38,6 +38,23 @@ import {
   type FinishesResult,
 } from "@/lib/finishesEngine";
 import {
+  DEFAULT_ENVELOPE_INPUTS,
+  DEFAULT_ENVELOPE_RATES,
+  DEFAULT_PRELIMS_INPUTS,
+  DEFAULT_PRELIMS_RATES,
+  DEFAULT_SLAB_INPUTS,
+  DEFAULT_SLAB_RATES,
+  runEnvelopeTakeoff,
+  runPrelimsTakeoff,
+  runSlabTakeoff,
+  type EnvelopeInputs,
+  type EnvelopeResult,
+  type PrelimsInputs,
+  type PrelimsResult,
+  type SlabInputs,
+  type SlabResult,
+} from "@/lib/buildPackagesEngine";
+import {
   buildComplianceChecklist,
   buildLogisticsPlan,
   type ComplianceItem,
@@ -161,6 +178,7 @@ const PHASE_BY_AGENT: Partial<Record<AgentId, string>> = {
   caleb: "Superstructure",
   megan: "MEP",
   ruby: "Finishes",
+  sharon: "Prelims",
 };
 
 /* =================================================================== page */
@@ -193,18 +211,30 @@ const SiteScoutSandbox = () => {
     ...DEFAULT_FINISHES_INPUTS,
     externalRenderArea: 28,
   });
+  const [slabInputs, setSlabInputs] = useState<SlabInputs>({ ...DEFAULT_SLAB_INPUTS });
+  const [envInputs, setEnvInputs] = useState<EnvelopeInputs>({ ...DEFAULT_ENVELOPE_INPUTS });
+  const [prelimsInputs, setPrelimsInputs] = useState<PrelimsInputs>({ ...DEFAULT_PRELIMS_INPUTS });
   const setSuper = <K extends keyof SuperstructureInputs>(k: K, v: SuperstructureInputs[K]) =>
     setSuperInputs((p) => ({ ...p, [k]: v }));
   const setMep = <K extends keyof MepInputs>(k: K, v: MepInputs[K]) =>
     setMepInputs((p) => ({ ...p, [k]: v }));
   const setFin = <K extends keyof FinishesInputs>(k: K, v: FinishesInputs[K]) =>
     setFinishesInputs((p) => ({ ...p, [k]: v }));
+  const setSlab = <K extends keyof SlabInputs>(k: K, v: SlabInputs[K]) =>
+    setSlabInputs((p) => ({ ...p, [k]: v }));
+  const setEnv = <K extends keyof EnvelopeInputs>(k: K, v: EnvelopeInputs[K]) =>
+    setEnvInputs((p) => ({ ...p, [k]: v }));
+  const setPrelims = <K extends keyof PrelimsInputs>(k: K, v: PrelimsInputs[K]) =>
+    setPrelimsInputs((p) => ({ ...p, [k]: v }));
 
   const [status, setStatus] = useState<RunStatus>("idle");
   const [ground, setGround] = useState<TakeoffResult | null>(null);
   const [superResult, setSuperResult] = useState<SuperstructureResult | null>(null);
   const [mepResult, setMepResult] = useState<MepResult | null>(null);
   const [finishesResult, setFinishesResult] = useState<FinishesResult | null>(null);
+  const [slabResult, setSlabResult] = useState<SlabResult | null>(null);
+  const [envResult, setEnvResult] = useState<EnvelopeResult | null>(null);
+  const [prelimsResult, setPrelimsResult] = useState<PrelimsResult | null>(null);
   const [overrides, setOverrides] = useState<
     Record<string, { quantity?: number; rate?: number; description?: string }>
   >({});
@@ -215,6 +245,9 @@ const SiteScoutSandbox = () => {
     setSuperInputs({ ...DEFAULT_SUPER_INPUTS });
     setMepInputs({ ...DEFAULT_MEP_INPUTS });
     setFinishesInputs({ ...DEFAULT_FINISHES_INPUTS, externalRenderArea: 28 });
+    setSlabInputs({ ...DEFAULT_SLAB_INPUTS });
+    setEnvInputs({ ...DEFAULT_ENVELOPE_INPUTS });
+    setPrelimsInputs({ ...DEFAULT_PRELIMS_INPUTS });
     setDrawingName("preset-rear-extension-6x4.pdf");
   };
 
@@ -247,27 +280,52 @@ const SiteScoutSandbox = () => {
       DEFAULT_MEP_RATES,
     );
     const f = runFinishesTakeoff(finishesInputs, DEFAULT_FINISHES_RATES);
+    const sl = runSlabTakeoff(slabInputs, DEFAULT_SLAB_RATES);
+    const en = runEnvelopeTakeoff(envInputs, DEFAULT_ENVELOPE_RATES);
+    const pr = runPrelimsTakeoff(prelimsInputs, DEFAULT_PRELIMS_RATES);
 
     window.setTimeout(() => {
       setGround(g);
       setSuperResult(s);
       setMepResult(m);
       setFinishesResult(f);
+      setSlabResult(sl);
+      setEnvResult(en);
+      setPrelimsResult(pr);
       setStatus("verified");
       setStep(3);
     }, 900);
   };
 
+
   // ---------- Step 3: master BoQ ----------
-  const baseBoq: BoqLine[] = useMemo(
-    () => [
+  const [ohpPct, setOhpPct] = useState(15);
+
+  const baseBoq: BoqLine[] = useMemo(() => {
+    const lines: BoqLine[] = [
+      ...(prelimsResult?.boq ?? []),
       ...(ground?.boq ?? []),
+      ...(slabResult?.boq ?? []),
       ...(superResult?.boq ?? []),
+      ...(envResult?.boq ?? []),
       ...(mepResult?.boq ?? []),
       ...(finishesResult?.boq ?? []),
-    ],
-    [ground, superResult, mepResult, finishesResult],
-  );
+    ];
+    if (lines.length && ohpPct > 0) {
+      const net = lines.reduce((sum, l) => sum + l.total, 0);
+      lines.push({
+        phase: "Prelims",
+        description: `Main contractor preliminaries, site supervision, overheads & profit (OH&P) @ ${ohpPct}%`,
+        formula: `${ohpPct}% of £${net.toFixed(2)} net trade works`,
+        quantity: 1,
+        unit: "item",
+        rate: Number(((net * ohpPct) / 100).toFixed(2)),
+        total: Number(((net * ohpPct) / 100).toFixed(2)),
+      });
+    }
+    return lines;
+  }, [ground, slabResult, superResult, envResult, mepResult, finishesResult, prelimsResult, ohpPct]);
+
 
   const masterBoq: MasterBoqLine[] = useMemo(() => {
     return buildMasterBoq(baseBoq).map((line) => {
@@ -970,7 +1028,139 @@ const SiteScoutSandbox = () => {
                         </div>
                       </div>
                     </div>
+
+                    {/* Slab, glazing, steel, roofline & prelims */}
+                    <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3 md:col-span-2">
+                      <p className="font-heading text-sm font-bold text-white mb-2">
+                        Ian &amp; Caleb &amp; Sharon · Slab, Glazing, Steel, Roofline &amp; Prelims
+                      </p>
+                      <p className="font-mono text-[10px] text-white/45 mb-3">
+                        Turnkey packages — oversite slab, external openings, knock-through steel,
+                        rainwater goods, plant hire and site prelims.
+                      </p>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <Field label="Ground-floor area (m²)">
+                          <input
+                            type="number"
+                            className={inputClass}
+                            value={slabInputs.floorArea}
+                            onChange={(e) => setSlab("floorArea", Number(e.target.value))}
+                          />
+                        </Field>
+                        <Field label="Bi-fold door sets (Nr)">
+                          <input
+                            type="number"
+                            className={inputClass}
+                            value={envInputs.bifoldSets}
+                            onChange={(e) => setEnv("bifoldSets", Number(e.target.value))}
+                          />
+                        </Field>
+                        <Field label="Casement windows (Nr)">
+                          <input
+                            type="number"
+                            className={inputClass}
+                            value={envInputs.windowCount}
+                            onChange={(e) => setEnv("windowCount", Number(e.target.value))}
+                          />
+                        </Field>
+                        <Field label="Rooflights (Nr)">
+                          <input
+                            type="number"
+                            className={inputClass}
+                            value={envInputs.rooflightCount}
+                            onChange={(e) => setEnv("rooflightCount", Number(e.target.value))}
+                          />
+                        </Field>
+                        <Field label="Steel span (lm)">
+                          <input
+                            type="number"
+                            step="0.1"
+                            className={inputClass}
+                            value={envInputs.steelSpan}
+                            onChange={(e) => setEnv("steelSpan", Number(e.target.value))}
+                          />
+                        </Field>
+                        <Field label="Roofline run (lm)">
+                          <input
+                            type="number"
+                            step="0.5"
+                            className={inputClass}
+                            value={envInputs.perimeterRun}
+                            onChange={(e) => setEnv("perimeterRun", Number(e.target.value))}
+                          />
+                        </Field>
+                        <Field label="Abutment lead run (lm)">
+                          <input
+                            type="number"
+                            step="0.5"
+                            className={inputClass}
+                            value={envInputs.abutmentRun}
+                            onChange={(e) => setEnv("abutmentRun", Number(e.target.value))}
+                          />
+                        </Field>
+                        <Field label="8-yard skips (Nr)">
+                          <input
+                            type="number"
+                            className={inputClass}
+                            value={prelimsInputs.skipCount}
+                            onChange={(e) => setPrelims("skipCount", Number(e.target.value))}
+                          />
+                        </Field>
+                        <Field label="Digger hire (weeks)">
+                          <input
+                            type="number"
+                            className={inputClass}
+                            value={prelimsInputs.diggerWeeks}
+                            onChange={(e) => setPrelims("diggerWeeks", Number(e.target.value))}
+                          />
+                        </Field>
+                        <Field label="OH&P (%)">
+                          <input
+                            type="number"
+                            className={inputClass}
+                            value={ohpPct}
+                            onChange={(e) => setOhpPct(Number(e.target.value))}
+                          />
+                        </Field>
+                        <Field label="Dumper hire (weeks)">
+                          <input
+                            type="number"
+                            className={inputClass}
+                            value={prelimsInputs.dumperWeeks}
+                            onChange={(e) => setPrelims("dumperWeeks", Number(e.target.value))}
+                          />
+                        </Field>
+                        <div className="flex items-end pb-2 gap-4 col-span-2">
+                          <Toggle
+                            label="Rooflights"
+                            checked={envInputs.rooflights}
+                            onChange={(v) => setEnv("rooflights", v)}
+                          />
+                          <Toggle
+                            label="Knock-through"
+                            checked={envInputs.knockThrough}
+                            onChange={(v) => setEnv("knockThrough", v)}
+                          />
+                          <Toggle
+                            label="Site setup"
+                            checked={prelimsInputs.siteSetup}
+                            onChange={(v) => setPrelims("siteSetup", v)}
+                          />
+                          <Toggle
+                            label="Scaffolding"
+                            checked={prelimsInputs.scaffolding}
+                            onChange={(v) => setPrelims("scaffolding", v)}
+                          />
+                          <Toggle
+                            label="BC / SE fees"
+                            checked={prelimsInputs.statutoryFees}
+                            onChange={(v) => setPrelims("statutoryFees", v)}
+                          />
+                        </div>
+                      </div>
+                    </div>
                   </div>
+
 
                   <button
                     onClick={runTakeoff}

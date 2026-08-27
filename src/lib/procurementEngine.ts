@@ -66,11 +66,20 @@ export const AGENT_BY_PHASE: Record<string, AgentId> = {
   Superstructure: "caleb",
   MEP: "megan",
   Finishes: "ruby",
+  Prelims: "sharon",
 };
 
 /** Keyword → RFQ pack routing. First match wins; falls back to the phase. */
 const PACK_RULES: [RegExp, PackId][] = [
   // Order matters — most specific trade wording first.
+  [/bi-fold|casement|rooflight|velux|glaz/i, "B"],
+  [/mot type 1|sub-base|blinding|dpm|radon|floor slab|floor pir|a252|mesh/i, "A"],
+  [
+    /digger|dumper|portaloo|heras|site setup|plant hire|acrow|strongboy|prop|scaffold|full plans application|overhead/i,
+    "A",
+  ],
+  [/fascia|soffit|gutter|downpipe|hopper|rainwater|lead flashing|soaker|roofline/i, "C"],
+  [/universal beam|\bub\b|padstone|structural steel/i, "B"],
   [
     /plasterboard|boarding|drylining|skim|thistle|plaster|bonding|bead|render|skirting|architrave|door set|decorat|emulsion/i,
     "D",
@@ -89,6 +98,7 @@ const PHASE_FALLBACK: Record<string, PackId> = {
   Superstructure: "B",
   MEP: "E",
   Finishes: "D",
+  Prelims: "A",
 };
 
 export function packForLine(line: BoqLine): PackId {
@@ -99,7 +109,21 @@ export function packForLine(line: BoqLine): PackId {
 /** Human-readable BoQ category derived from the line description. */
 export function categoryForLine(line: BoqLine): string {
   const d = line.description.toLowerCase();
-  if (/excavat|muck|grab|skip/.test(d)) return "Excavation & Muck-Away";
+  if (/lintel/.test(d)) return "Structural Steel";
+  if (/overhead|oh&p|supervision/.test(d)) return "Overheads, Supervision & Profit";
+  if (/scaffold/.test(d)) return "Access & Scaffolding";
+  if (/full plans application|structural engineer/.test(d)) return "Statutory Fees & Design";
+  if (/bi-fold|casement|rooflight|velux/.test(d)) return "Glazing & External Openings";
+  if (/mot type 1|sub-base|blinding|dpm|radon|floor slab|a252/.test(d))
+    return "Ground-Floor Slab & Oversite";
+  if (/floor pir/.test(d)) return "Ground-Floor Slab & Oversite";
+  if (/digger|dumper|portaloo|heras|site setup|acrow|strongboy/.test(d))
+    return "Plant Hire & Site Prelims";
+  if (/skip/.test(d)) return "Waste Management";
+  if (/fascia|soffit|gutter|downpipe|hopper|rainwater/.test(d)) return "Roofline & Rainwater Goods";
+  if (/lead flashing|soaker/.test(d)) return "Leadwork";
+  if (/universal beam|padstone|structural steel/.test(d)) return "Structural Steel";
+  if (/excavat|muck|grab/.test(d)) return "Excavation & Muck-Away";
   if (/clayboard/.test(d)) return "Ground Movement Protection";
   if (/drainage/.test(d)) return "Below-Ground Drainage";
   if (/trench block/.test(d)) return "Substructure Masonry";
@@ -120,6 +144,7 @@ export function categoryForLine(line: BoqLine): string {
   if (/first fix|second fix|socket|light|switch/.test(d)) return "Power & Lighting";
   return line.phase;
 }
+
 
 export interface MasterBoqLine extends BoqLine {
   key: string;
