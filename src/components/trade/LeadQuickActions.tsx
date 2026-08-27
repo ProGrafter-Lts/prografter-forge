@@ -3,6 +3,7 @@ import { Phone, Check, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import type { ShortlistStatus } from "./ShortlistStatusControl";
+import { mirrorShortlistToInteraction } from "@/lib/shortlistMirror";
 
 interface Props {
   tradeId: string;
@@ -62,6 +63,7 @@ const LeadQuickActions = ({
         return false;
       }
       if (data) onStatusChanged(data as { id: string; contact_status: ShortlistStatus });
+      await mirrorShortlistToInteraction(tradeId, planningAlertId, "contacted");
       return true;
     }
 
@@ -83,6 +85,7 @@ const LeadQuickActions = ({
       return false;
     }
     if (data) onStatusChanged(data as { id: string; contact_status: ShortlistStatus });
+    await mirrorShortlistToInteraction(tradeId, planningAlertId, "contacted");
     return true;
   };
 

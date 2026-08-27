@@ -561,9 +561,28 @@ export default function PlanningAlerts() {
       .eq("trade_id", tradeId)
       .order("created_at", { ascending: false })
       .limit(200);
-    setApps(((data ?? []) as PlanningAlertRow[]).map(mapAlertToApp));
+    let rows = (data ?? []) as PlanningAlertRow[];
+
+    // The 200-row recency cap can exclude older applications the trade has
+    // already actioned (saved / contacted / dismissed), which made the pipeline
+    // tab counts undercount vs the Pipeline view. Always pull those back in.
+    const actionedIds = Object.keys(pi.interactions);
+    const loaded = new Set(rows.map((r) => r.id));
+    const missing = actionedIds.filter((id) => !loaded.has(id));
+    if (missing.length) {
+      const { data: extra } = await supabase
+        .from("planning_alerts")
+        .select(
+          "id, application_ref, address, postcode, application_type, description, approved_date, created_at, local_authority, planning_portal_url",
+        )
+        .eq("trade_id", tradeId)
+        .in("id", missing);
+      if (extra?.length) rows = [...rows, ...(extra as PlanningAlertRow[])];
+    }
+
+    setApps(rows.map(mapAlertToApp));
     setLoadingApps(false);
-  }, [tradeId]);
+  }, [tradeId, pi.interactions]);
 
   // Existing engagements (quotes out, matches, invitations) so the feed never
   // suggests a cold intro to a homeowner already in conversation with us.
@@ -705,7 +724,10 @@ export default function PlanningAlerts() {
     if (filterTrade !== "all" && !app.trades_needed.includes(filterTrade)) return false;
     if (filterCouncil !== "all" && app.council !== filterCouncil) return false;
     if (filterProjectType !== "all" && getProjectType(app) !== filterProjectType) return false;
-    if (filterDate !== "all") {
+    // Leads you've already actioned stay visible regardless of the date window
+    // — otherwise your own contacted/saved leads silently vanish from the tabs.
+    const actioned = (pi.interactions[app.id]?.status ?? "new") !== "new";
+    if (filterDate !== "all" && !actioned) {
       const cutoff = Date.now() - Number(filterDate) * 86400000;
       if (new Date(app.submitted_date).getTime() < cutoff) return false;
     }
