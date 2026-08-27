@@ -26,6 +26,19 @@ export interface TradeIdentity {
   trade_type: string;
 }
 
+/**
+ * Find Work statuses (planning_opportunity_interactions.status) mapped onto the
+ * shortlist contact statuses the Pipeline view reads.
+ */
+export const SHORTLIST_STATUS: Record<PipelineStatus, "todo" | "contacted" | "quoted" | "won" | "dead"> = {
+  new: "todo",
+  saved: "todo",
+  contacted: "contacted",
+  follow_up: "contacted",
+  converted: "won",
+  dismissed: "dead",
+};
+
 interface State {
   ready: boolean;
   trade: TradeIdentity | null;
