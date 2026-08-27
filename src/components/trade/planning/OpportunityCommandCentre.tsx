@@ -131,6 +131,8 @@ export default function OpportunityCommandCentre({
 
 
   const currentStatus = interaction?.status ?? "new";
+  const [confirmDismiss, setConfirmDismiss] = useState(false);
+
 
   const StatBox = ({ k, v }: { k: string; v: string }) => (
     <div className="bg-white/5 rounded-xl px-3 py-2.5 border border-white/10">
