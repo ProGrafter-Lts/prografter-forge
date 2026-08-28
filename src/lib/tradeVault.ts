@@ -153,7 +153,8 @@ export const computeDisplayStatus = (
 ): VaultDisplayStatus => {
   if (!doc || !doc.file_url) {
     if (required && legacyVerified) return "legacy_verified";
-    return "missing";
+    // Optional documents that simply haven't been added yet are not "missing".
+    return required ? "missing" : "not_added";
   }
 
   const days = daysUntil(doc.expiry_date);
@@ -176,6 +177,7 @@ export const STATUS_META: Record<
   { label: string; tone: "green" | "amber" | "red" | "grey" }
 > = {
   missing: { label: "Missing", tone: "red" },
+  not_added: { label: "Not added", tone: "grey" },
   legacy_verified: { label: "Verified pre-TradeVault — re-upload requested", tone: "amber" },
   uploaded: { label: "Uploaded", tone: "amber" },
   pending_review: { label: "Pending Review", tone: "amber" },
