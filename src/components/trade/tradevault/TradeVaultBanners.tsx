@@ -13,6 +13,7 @@ interface Props {
 const TradeVaultBanners = ({ tradeId, onOpenVault }: Props) => {
   const [docs, setDocs] = useState<VaultDocument[] | null>(null);
   const [legacyVerified, setLegacyVerified] = useState(false);
+  const [tradeType, setTradeType] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -25,7 +26,7 @@ const TradeVaultBanners = ({ tradeId, onOpenVault }: Props) => {
           .eq("is_current", true),
         supabase
           .from("trades")
-          .select("verified, verification_status")
+          .select("trade_type, verified, verification_status")
           .eq("id", tradeId)
           .maybeSingle(),
       ]);
@@ -33,12 +34,13 @@ const TradeVaultBanners = ({ tradeId, onOpenVault }: Props) => {
       setDocs((docRes.data as VaultDocument[]) ?? []);
       const t = tradeRes.data as any;
       setLegacyVerified(!!(t && (t.verified || t.verification_status === "approved")));
+      setTradeType(t?.trade_type ?? null);
     })();
     return () => { cancelled = true; };
   }, [tradeId]);
 
   if (!docs) return null;
-  const summary = computeVaultSummary(docs);
+  const summary = computeVaultSummary(docs, tradeType);
 
   const banners: { key: string; tone: "red" | "amber"; icon: any; text: string; button: string }[] = [];
 
