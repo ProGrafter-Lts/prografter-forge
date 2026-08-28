@@ -204,6 +204,10 @@ const SiteScoutSandbox = () => {
   const setGtField = <K extends keyof GroundTruth>(k: K, v: GroundTruth[K]) =>
     setGt((p) => ({ ...p, [k]: v }));
   const derived = useMemo(() => deriveGroundTruth(gt), [gt]);
+  const riskSummary = useMemo(() => buildSiteRiskSummary(gt, derived), [gt, derived]);
+  const riskExclusions = useMemo(() => buildRiskExclusions(gt, derived), [gt, derived]);
+  const [groundTruthLocked, setGroundTruthLocked] = useState(false);
+
 
   // ---------- Step 2: drawing + geometry ----------
   const [projectRef, setProjectRef] = useState("TEST-01-SMEDLEY");
