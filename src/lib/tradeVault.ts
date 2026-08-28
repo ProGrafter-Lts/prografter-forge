@@ -332,8 +332,9 @@ const MIGRATION_MESSAGE =
 export const computeDashboardVerification = (
   docs: VaultDocument[],
   ctx: ManualVerificationContext,
+  tradeType?: string | null,
 ): DashboardVerification => {
-  const summary = computeVaultSummary(docs);
+  const summary = computeVaultSummary(docs, tradeType);
   const hasAnyDocs = docs.some((d) => d.is_current && d.file_url);
   const requiredComplete = summary.missingRequired.length === 0;
 
