@@ -706,7 +706,7 @@ const SiteScoutSandbox = () => {
 
               <div className={cardClass}>
                 <div className="flex items-center justify-between mb-3">
-                  <SectionTitle>Step 1 · SiteScout Ground Truth</SectionTitle>
+                  <SectionTitle>Stage 1 · Physical Ground Truth</SectionTitle>
                   <span
                     className="font-mono text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-full"
                     style={{ backgroundColor: "rgba(56,189,248,0.15)", color: ACCENT }}
