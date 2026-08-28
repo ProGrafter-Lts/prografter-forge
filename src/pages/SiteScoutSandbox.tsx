@@ -169,10 +169,10 @@ const ROOF_COVERINGS: RoofCovering[] = [
 
 type StepId = 1 | 2 | 3 | 4;
 const STEPS: { id: StepId; label: string; sub: string }[] = [
-  { id: 1, label: "SiteScout Survey", sub: "Ground truth" },
-  { id: 2, label: "Drawings & Agent Takeoffs", sub: "Geometry × rules" },
-  { id: 3, label: "Retail BoQ & RFQ Packs", sub: "Amy — tender out" },
-  { id: 4, label: "Margin Arbitrage", sub: "Trade gap split" },
+  { id: 1, label: "Physical Ground Truth", sub: "SiteScout baseline" },
+  { id: 2, label: "Takeoff & Retail Costing", sub: "Granular material list" },
+  { id: 3, label: "Customer Quote & Checker", sub: "Contract-ready" },
+  { id: 4, label: "Procurement & Trade Gap", sub: "Merchant arbitrage" },
 ];
 
 type RunStatus = "idle" | "analyzing" | "verified";
