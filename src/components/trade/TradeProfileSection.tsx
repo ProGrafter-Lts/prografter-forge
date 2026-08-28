@@ -13,6 +13,12 @@ import {
   fetchTradeSpecialisms,
   saveTradeSpecialisms,
 } from "@/lib/specialisms";
+import {
+  GENERAL_TRADE_TYPES,
+  RENEWABLE_TRADE_TYPES,
+  isOtherTradeType,
+  tradeTypeSelectionError,
+} from "@/lib/tradeTypes";
 
 interface TradeProfileSectionProps {
   tradeId: string;
@@ -43,10 +49,12 @@ const TradeProfileSection = ({ tradeId }: TradeProfileSectionProps) => {
     phone: "",
     postcode: "",
     trade_type: "",
+    trade_type_other: "",
     bio: "",
     website: "",
     years_experience: 0,
   });
+  const tradeTypeError = tradeTypeSelectionError(form.trade_type, form.trade_type_other);
   const [verified, setVerified] = useState(false);
   const [cpsScheme, setCpsScheme] = useState<string | null>(null);
   const [cpsRegistrationNumber, setCpsRegistrationNumber] = useState<string | null>(null);
