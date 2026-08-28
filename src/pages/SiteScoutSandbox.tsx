@@ -1534,6 +1534,16 @@ const SiteScoutSandbox = () => {
                                     </span>
                                   </span>
                                 </button>
+                                <div className="px-3 pb-2 -mt-1">
+                                  <button
+                                    onClick={() => setScrutiny({ kind: "pack", id: g.pack.id })}
+                                    className="font-mono text-[10px] uppercase tracking-wider rounded px-2 py-1 border border-white/20 text-white/70 hover:border-[#38bdf8] hover:text-white"
+                                  >
+                                    🔍 Scrutinise pack — retail vs trade, line variance &amp;
+                                    overrides
+                                  </button>
+                                </div>
+
                                 {open && (
                                   <div className="overflow-x-auto px-3 pb-3">
                                     <table className="w-full min-w-[1080px] text-left border-collapse">
