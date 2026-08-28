@@ -226,7 +226,7 @@ export const computeTasks = (input: BusinessHealthInput): HealthTask[] => {
     });
   }
 
-  const vault = computeVaultSummary(input.vaultDocs);
+  const vault = computeVaultSummary(input.vaultDocs, input.tradeType);
   if (vault.missingRequired.length > 0) {
     tasks.push({
       dot: "red",
