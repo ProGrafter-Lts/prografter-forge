@@ -1656,13 +1656,21 @@ const SiteScoutSandbox = () => {
 
                         <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mt-4">
                           {["Substructure", "Superstructure", "MEP", "Finishes"].map((p) => (
-                            <div key={p} className="rounded-lg border border-white/10 p-2.5">
+                            <button
+                              key={p}
+                              onClick={() => setScrutiny({ kind: "phase", id: p })}
+                              className="text-left rounded-lg border border-white/10 p-2.5 hover:border-[#38bdf8] transition-colors"
+                            >
                               <p className={labelClass}>{p}</p>
                               <p className="font-mono text-xs text-white/85">
                                 {money(phaseTotal(p))}
                               </p>
-                            </div>
+                              <p className="font-mono text-[9px] text-white/35 mt-1">
+                                Click to scrutinise
+                              </p>
+                            </button>
                           ))}
+
                           <div
                             className="rounded-lg border p-2.5"
                             style={{ borderColor: `${ACCENT}66` }}
