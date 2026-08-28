@@ -155,3 +155,36 @@ export function deriveGroundTruth(gt: GroundTruth): DerivedGroundTruth {
     notes,
   };
 }
+
+/**
+ * Stage 1 output — the locked "Site Risk & Ground Condition Summary" appended
+ * to the head of the quotation so the builder's assumptions are on record.
+ */
+export function buildSiteRiskSummary(gt: GroundTruth, d: DerivedGroundTruth): string[] {
+  return [
+    `Ground conditions: ${gt.soilType}${gt.soilType === "Clay" ? " (shrinkable)" : ""}. Foundations priced to ${d.digDepth}m dig depth${d.clayboardRequired ? " with compressible clayboard to the full trench run" : ""}.`,
+    `Vegetation: ${gt.treeSpecies || "no significant tree"}${gt.treeSpecies ? ` recorded at ${gt.treeProximity}m from the works — NHBC 4.2 zone of influence applied` : " within the zone of influence"}.`,
+    `Site access: ${gt.accessWidth}m clear access, ${gt.distanceToRoad}m to the highway — ${d.accessType}. ${d.muckAwayStrategy}`,
+    `Existing services: ${gt.consumerUnitType} with ${gt.spareWays} spare way(s) — ${d.consumerUnitUpgrade ? "consumer unit changeover included" : "no changeover required"}. Existing ${gt.boilerOutputKw}kW ${gt.systemType} boiler${d.boilerUpgradeLikely ? " flagged as marginal for the extended heat load" : " assessed as adequate"}.`,
+    `Drainage: existing invert recorded at ${gt.drainageInvertDepth}m${d.drainageConflict ? " — below the foundation formation level; local deepening or lintelling over the run is required and priced as a provisional item" : " — no conflict with the foundation formation level"}.`,
+    gt.utilitiesCrossingFootprint
+      ? "In-ground utilities cross the footprint: hand-dug trial holes and a CAT scan precede all machine excavation."
+      : "No in-ground utilities recorded crossing the footprint at survey stage.",
+    gt.overheadCables
+      ? "Overhead cables present: GS6 exclusion zone applies, machine height restricted and DNO consultation required."
+      : "No overhead cables recorded over the working area.",
+  ];
+}
+
+/** Ground-risk exclusions stated on the face of the quotation. */
+export function buildRiskExclusions(gt: GroundTruth, d: DerivedGroundTruth): string[] {
+  return [
+    `Excavation is priced to ${d.digDepth}m. Any deeper formation instructed by Building Control is a measured extra at the agreed day-rate.`,
+    "Unrecorded obstructions — old foundations, wells, tanks, contaminated ground or rock — are excluded and priced on discovery.",
+    gt.soilType === "Made Ground"
+      ? "Made Ground: bearing capacity is unproven pending trial holes; engineered solutions are excluded."
+      : "Groundwater ingress requiring pumping or dewatering is excluded.",
+    "Asbestos survey, removal and licensed disposal are excluded.",
+    "Statutory undertaker charges for new or diverted service connections are excluded.",
+  ];
+}
