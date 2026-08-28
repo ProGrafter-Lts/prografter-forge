@@ -282,7 +282,7 @@ export interface ScoreBooster {
 
 export const computeBoosters = (input: BusinessHealthInput): ScoreBooster[] => {
   const boosters: ScoreBooster[] = [];
-  const vault = computeVaultSummary(input.vaultDocs);
+  const vault = computeVaultSummary(input.vaultDocs, input.tradeType);
 
   if (vault.missingRequired.length > 0) {
     boosters.push({ points: 4, label: "Complete TradeVault documents", target: "tradevault" });
