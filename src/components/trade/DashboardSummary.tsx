@@ -61,7 +61,7 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
       setLoading(true);
       const todayIso = new Date().toISOString().slice(0, 10);
 
-      const [shortlistRes, quotesRes, matchesRes, vaultRes, contractsRes] = await Promise.all([
+      const [shortlistRes, quotesRes, matchesRes, vaultRes, contractsRes, tradeRes] = await Promise.all([
         supabase
           .from("planning_alert_shortlist")
           .select("contact_status, next_action_date")
@@ -79,6 +79,7 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
           .eq("status", "notified"),
         supabase.from("tradevault_documents").select("*").eq("trade_id", tradeId),
         supabase.from("contracts").select("job_id").eq("trade_id", tradeId),
+        supabase.from("trades").select("trade_type").eq("id", tradeId).maybeSingle(),
       ]);
 
       const jobIds = (contractsRes.data || []).map((c: any) => c.job_id).filter(Boolean);
