@@ -13,6 +13,13 @@ import {
   fetchTradeSpecialisms,
   saveTradeSpecialisms,
 } from "@/lib/specialisms";
+import {
+  ALL_TRADE_TYPES,
+  GENERAL_TRADE_TYPES,
+  RENEWABLE_TRADE_TYPES,
+  isOtherTradeType,
+  tradeTypeSelectionError,
+} from "@/lib/tradeTypes";
 
 interface TradeProfileSectionProps {
   tradeId: string;
@@ -43,10 +50,12 @@ const TradeProfileSection = ({ tradeId }: TradeProfileSectionProps) => {
     phone: "",
     postcode: "",
     trade_type: "",
+    trade_type_other: "",
     bio: "",
     website: "",
     years_experience: 0,
   });
+  const tradeTypeError = tradeTypeSelectionError(form.trade_type, form.trade_type_other);
   const [verified, setVerified] = useState(false);
   const [cpsScheme, setCpsScheme] = useState<string | null>(null);
   const [cpsRegistrationNumber, setCpsRegistrationNumber] = useState<string | null>(null);
@@ -69,7 +78,7 @@ const TradeProfileSection = ({ tradeId }: TradeProfileSectionProps) => {
       const { data, error } = await supabase
         .from("trades")
         .select(
-          "name, company_name, phone, postcode, trade_type, bio, website, years_experience, verification_status, cps_scheme, cps_registration_number, gas_safe_number, accepting_jobs, service_radius_miles, is_green_trade, mcs_number, mcs_verified, trustmark_number, trustmark_verified, pas_2030_accredited, pas_2035_coordinator, ozev_approved, fgas_registered, ciga_registered, inca_certified, green_cert_expiry",
+          "name, company_name, phone, postcode, trade_type, trade_type_other, bio, website, years_experience, verification_status, cps_scheme, cps_registration_number, gas_safe_number, accepting_jobs, service_radius_miles, is_green_trade, mcs_number, mcs_verified, trustmark_number, trustmark_verified, pas_2030_accredited, pas_2035_coordinator, ozev_approved, fgas_registered, ciga_registered, inca_certified, green_cert_expiry",
         )
         .eq("id", tradeId)
         .single();
@@ -83,6 +92,7 @@ const TradeProfileSection = ({ tradeId }: TradeProfileSectionProps) => {
           phone: data.phone || "",
           postcode: data.postcode || "",
           trade_type: data.trade_type || "",
+          trade_type_other: (data as any).trade_type_other || "",
           bio: data.bio || "",
           website: data.website || "",
           years_experience: data.years_experience || 0,
@@ -160,10 +170,19 @@ const TradeProfileSection = ({ tradeId }: TradeProfileSectionProps) => {
   };
 
   const handleSave = async () => {
+    if (tradeTypeError) {
+      toast.error(tradeTypeError);
+      return;
+    }
     setSaving(true);
     const { error } = await supabase
       .from("trades")
-      .update(form)
+      .update({
+        ...form,
+        trade_type_other: isOtherTradeType(form.trade_type)
+          ? form.trade_type_other.trim()
+          : null,
+      } as never)
       .eq("id", tradeId);
     setSaving(false);
 
@@ -232,11 +251,48 @@ const TradeProfileSection = ({ tradeId }: TradeProfileSectionProps) => {
             value={form.postcode}
             onChange={(v) => setForm({ ...form, postcode: v.toUpperCase() })}
           />
-          <Field
-            label="Trade type"
-            value={form.trade_type}
-            onChange={(v) => setForm({ ...form, trade_type: v })}
-          />
+          <div>
+            <label className="block font-mono text-xs text-muted-foreground mb-1.5 uppercase tracking-wider">
+              Trade type
+            </label>
+            <select
+              value={form.trade_type}
+              onChange={(e) => setForm({ ...form, trade_type: e.target.value })}
+              className="w-full bg-background border border-border rounded-xl px-4 py-2.5 font-mono text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+            >
+              <option value="">Select your trade…</option>
+              {form.trade_type &&
+                !ALL_TRADE_TYPES.includes(form.trade_type) && (
+                  <option value={form.trade_type}>{form.trade_type} (current)</option>
+                )}
+              <optgroup label="General">
+                {GENERAL_TRADE_TYPES.map((t) => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </optgroup>
+              <optgroup label="Renewable / Green">
+                {RENEWABLE_TRADE_TYPES.map((t) => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </optgroup>
+            </select>
+            {isOtherTradeType(form.trade_type) && (
+              <div className="mt-3">
+                <label className="block font-mono text-xs text-muted-foreground mb-1.5 uppercase tracking-wider">
+                  What trade do you do? *
+                </label>
+                <input
+                  value={form.trade_type_other}
+                  onChange={(e) => setForm({ ...form, trade_type_other: e.target.value })}
+                  placeholder="e.g. Groundworker, Damp Specialist"
+                  className="w-full bg-background border border-border rounded-xl px-4 py-2.5 font-mono text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                />
+                <p className="mt-1.5 font-mono text-xs text-muted-foreground">
+                  Required when your trade type is "Other".
+                </p>
+              </div>
+            )}
+          </div>
           <Field
             label="Website"
             value={form.website}

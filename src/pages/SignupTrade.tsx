@@ -56,20 +56,11 @@ type PortfolioDraft = {
 const SpecialismsPicker = lazy(() => import("@/components/SpecialismsPicker"));
 const TradeDateField = lazy(() => import("@/components/trade/TradeDateField"));
 
-const GENERAL_TRADE_TYPES = [
-  "Electrician",
-  "Plumber",
-  "Gas Engineer",
-  "Builder",
-  "Roofer",
-  "Plasterer",
-  "Carpenter",
-  "Tiler",
-  "Decorator",
-  "Scaffolder",
-  "Landscaper",
-  "Other",
-] as const;
+import {
+  GENERAL_TRADE_TYPES,
+  isOtherTradeType,
+  tradeTypeSelectionError,
+} from "@/lib/tradeTypes";
 
 const UK_POSTCODE = /^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}$/i;
 
@@ -137,6 +128,7 @@ const SignupTrade = () => {
 
   // Step 2: business
   const [tradeType, setTradeType] = useState("");
+  const [tradeTypeOther, setTradeTypeOther] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [businessStructure, setBusinessStructure] = useState<"" | "sole_trader" | "limited_company" | "partnership">("");
   const [companiesHouseNumber, setCompaniesHouseNumber] = useState("");
@@ -216,7 +208,7 @@ const SignupTrade = () => {
       const { data } = await supabase
         .from("trades")
         .select(
-          "id, name, company_name, phone, postcode, trade_type, years_experience, website, bio, mcs_number, trustmark_number, pas_2030_accredited, pas_2035_coordinator, ozev_approved, fgas_registered, ciga_registered, inca_certified, green_cert_expiry, insurance_cert_url, insurance_expiry, submitted_for_review_at, business_structure, companies_house_number, verification_route, band",
+          "id, name, company_name, phone, postcode, trade_type, trade_type_other, years_experience, website, bio, mcs_number, trustmark_number, pas_2030_accredited, pas_2035_coordinator, ozev_approved, fgas_registered, ciga_registered, inca_certified, green_cert_expiry, insurance_cert_url, insurance_expiry, submitted_for_review_at, business_structure, companies_house_number, verification_route, band",
         )
         .eq("user_id", user.id)
         .maybeSingle();
@@ -235,8 +227,11 @@ const SignupTrade = () => {
       setAgreedTerms(true);
 
       const tt = (data as any).trade_type ?? "";
-      // 'Other' is the placeholder set by handle_new_user — treat as empty.
-      setTradeType(tt && tt !== "Other" ? tt : "");
+      const tto = ((data as any).trade_type_other ?? "").trim();
+      // 'Other' with no free text is the placeholder set by handle_new_user —
+      // treat that as empty. 'Other' WITH free text is a genuine selection.
+      setTradeType(tt && (tt !== "Other" || tto) ? tt : "");
+      setTradeTypeOther(tto);
       setCompanyName((data as any).company_name ?? "");
       setBusinessStructure(((data as any).business_structure as any) ?? "");
       setCompaniesHouseNumber((data as any).companies_house_number ?? "");
@@ -319,6 +314,7 @@ const SignupTrade = () => {
       const chValid = !chNorm || COMPANIES_HOUSE_NUMBER.test(chNorm);
       const updates: Record<string, unknown> = {
         trade_type: tradeType || null,
+        trade_type_other: isOtherTradeType(tradeType) ? tradeTypeOther.trim() || null : null,
         company_name: companyName.trim() || null,
         business_structure: businessStructure || null,
         // Only persist a CH number once it's a valid 8-char format; otherwise leave null
@@ -552,6 +548,11 @@ const SignupTrade = () => {
       setError("Trade type and company name are required");
       return;
     }
+    const tradeTypeErr = tradeTypeSelectionError(tradeType, tradeTypeOther);
+    if (tradeTypeErr) {
+      setError(tradeTypeErr);
+      return;
+    }
     if (!businessStructure) {
       setError("Please select your business structure");
       return;
@@ -584,6 +585,7 @@ const SignupTrade = () => {
     try {
       const updates: Record<string, unknown> = {
         trade_type: tradeType,
+        trade_type_other: isOtherTradeType(tradeType) ? tradeTypeOther.trim() : null,
         company_name: companyName.trim(),
         business_structure: businessStructure,
         companies_house_number: chNorm || null,
@@ -1201,6 +1203,20 @@ const SignupTrade = () => {
                       {RENEWABLE_TRADE_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
                     </optgroup>
                   </select>
+                  {isOtherTradeType(tradeType) && (
+                    <div className="mt-3">
+                      <label className={labelClass}>What trade do you do? *</label>
+                      <input
+                        className={inputClass}
+                        value={tradeTypeOther}
+                        onChange={(e) => setTradeTypeOther(e.target.value)}
+                        placeholder="e.g. Groundworker, Damp Specialist, Locksmith"
+                      />
+                      <p className="mt-1.5 font-body text-xs text-cream/50">
+                        Required — we can't verify or match you without knowing your actual trade.
+                      </p>
+                    </div>
+                  )}
                   {isGreen && (
                     <p className="mt-2 inline-flex items-center gap-1.5 font-mono text-xs text-teal">
                       <Leaf className="w-3 h-3" /> Green trade — extra MCS / TrustMark fields appear below
