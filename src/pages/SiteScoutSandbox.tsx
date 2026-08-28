@@ -2043,6 +2043,13 @@ const SiteScoutSandbox = () => {
                                 {money(p.retailTotal)}
                               </p>
                               <button
+                                onClick={() => setScrutiny({ kind: "pack", id: p.pack.id })}
+                                className="font-mono text-[10px] uppercase tracking-wider rounded px-2 py-1 border border-white/20 text-white/70 hover:border-[#38bdf8] hover:text-white"
+                              >
+                                🔍 Scrutinise
+                              </button>
+                              <button
+
                                 onClick={() =>
                                   navigator.clipboard?.writeText(packToCsv(p, projectRef))
                                 }
