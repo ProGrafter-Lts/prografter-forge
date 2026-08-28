@@ -61,11 +61,14 @@ import {
 } from "@/lib/complianceEngine";
 import {
   DEFAULT_GROUND_TRUTH,
+  buildRiskExclusions,
+  buildSiteRiskSummary,
   deriveGroundTruth,
   type ConsumerUnitType,
   type GroundTruth,
   type SystemType,
 } from "@/lib/siteScoutGroundTruth";
+import { checkCompetitorQuote } from "@/lib/competitorQuoteChecker";
 import {
   allPacksToCsv,
   buildMasterBoq,
@@ -169,10 +172,10 @@ const ROOF_COVERINGS: RoofCovering[] = [
 
 type StepId = 1 | 2 | 3 | 4;
 const STEPS: { id: StepId; label: string; sub: string }[] = [
-  { id: 1, label: "SiteScout Survey", sub: "Ground truth" },
-  { id: 2, label: "Drawings & Agent Takeoffs", sub: "Geometry × rules" },
-  { id: 3, label: "Retail BoQ & RFQ Packs", sub: "Amy — tender out" },
-  { id: 4, label: "Margin Arbitrage", sub: "Trade gap split" },
+  { id: 1, label: "Physical Ground Truth", sub: "SiteScout baseline" },
+  { id: 2, label: "Takeoff & Retail Costing", sub: "Granular material list" },
+  { id: 3, label: "Customer Quote & Checker", sub: "Contract-ready" },
+  { id: 4, label: "Procurement & Trade Gap", sub: "Merchant arbitrage" },
 ];
 
 type RunStatus = "idle" | "analyzing" | "verified";
@@ -201,6 +204,10 @@ const SiteScoutSandbox = () => {
   const setGtField = <K extends keyof GroundTruth>(k: K, v: GroundTruth[K]) =>
     setGt((p) => ({ ...p, [k]: v }));
   const derived = useMemo(() => deriveGroundTruth(gt), [gt]);
+  const riskSummary = useMemo(() => buildSiteRiskSummary(gt, derived), [gt, derived]);
+  const riskExclusions = useMemo(() => buildRiskExclusions(gt, derived), [gt, derived]);
+  const [groundTruthLocked, setGroundTruthLocked] = useState(false);
+
 
   // ---------- Step 2: drawing + geometry ----------
   const [projectRef, setProjectRef] = useState("TEST-01-SMEDLEY");
@@ -323,7 +330,7 @@ const SiteScoutSandbox = () => {
       setEnvResult(en);
       setPrelimsResult(pr);
       setStatus("verified");
-      setStep(3);
+      setStep(2);
     }, 900);
   };
 
@@ -357,7 +364,7 @@ const SiteScoutSandbox = () => {
   };
 
 
-  // ---------- Step 3: master BoQ ----------
+  // ---------- Stage 2: master BoQ ----------
   const [ohpPct, setOhpPct] = useState(15);
 
   const baseBoq: BoqLine[] = useMemo(() => {
@@ -408,7 +415,14 @@ const SiteScoutSandbox = () => {
   ) => setOverrides((p) => ({ ...p, [key]: { ...p[key], [field]: value } }));
 
   const [agentFilter, setAgentFilter] = useState<AgentId | null>(null);
-  const visibleBoq = agentFilter ? masterBoq.filter((l) => l.agent === agentFilter) : masterBoq;
+
+  // Stage 2 — contractor profit markup on top of the measured cost roll-up.
+  const [markupPct, setMarkupPct] = useState(25);
+  const [openPacks, setOpenPacks] = useState<Record<string, boolean>>({ A: true });
+
+  // Stage 3 — competitor quote checker.
+  const [competitorText, setCompetitorText] = useState("");
+
 
   // ---------- Step 4: arbitrage ----------
   const [negotiated, setNegotiated] = useState<Record<PackId, number | undefined>>(
@@ -432,6 +446,35 @@ const SiteScoutSandbox = () => {
 
   // ---------- shared derived ----------
   const retailTotal = arbitrage.retailTotal;
+  /** Stage 2 cost roll-up + contractor markup = base retail customer quotation. */
+  const markupValue = Number(((retailTotal * markupPct) / 100).toFixed(2));
+  const baseRetailQuote = Number((retailTotal + markupValue).toFixed(2));
+  /** Stage 4 may pass part of the trade gap back to the customer. */
+  const finalCustomerExVat = Number((baseRetailQuote - arbitrage.passedToCustomer).toFixed(2));
+  const finalCustomerIncVat = Number((finalCustomerExVat * (1 + vatRate / 100)).toFixed(2));
+  const quoteArbitrage = useMemo(
+    () => ({
+      ...arbitrage,
+      retailTotal: baseRetailQuote,
+      customerQuoteTotal: finalCustomerExVat,
+      customerQuoteIncVat: finalCustomerIncVat,
+    }),
+    [arbitrage, baseRetailQuote, finalCustomerExVat, finalCustomerIncVat],
+  );
+  const competitorCheck = useMemo(
+    () => checkCompetitorQuote(masterBoq, competitorText, finalCustomerExVat),
+    [masterBoq, competitorText, finalCustomerExVat],
+  );
+  const packGroups = useMemo(
+    () =>
+      arbitrage.packs.map((p) => ({
+        pack: p.pack,
+        retailTotal: p.retailTotal,
+        lines: agentFilter ? p.lines.filter((l) => l.agent === agentFilter) : p.lines,
+      })),
+    [arbitrage.packs, agentFilter],
+  );
+
   const complianceItems = useMemo(
     () =>
       buildComplianceChecklist({
@@ -521,14 +564,21 @@ const SiteScoutSandbox = () => {
     </div>
   );
 
+  /** Strictly sequential — a stage only unlocks when the previous one has produced its output. */
+  const stageUnlocked = (n: StepId) =>
+    n === 1 ? true : n === 2 ? groundTruthLocked : status === "verified" && groundTruthLocked;
+
   const StepBadge = ({ n }: { n: StepId }) => {
     const active = step === n;
     const s = STEPS[n - 1];
+    const unlocked = stageUnlocked(n);
     return (
       <button
-        onClick={() => setStep(n)}
+        onClick={() => unlocked && setStep(n)}
         aria-pressed={active}
-        className="flex-1 min-w-[170px] text-left rounded-xl border px-3 py-2.5 transition-colors"
+        disabled={!unlocked}
+        title={unlocked ? undefined : "Complete the previous stage first"}
+        className="flex-1 min-w-[170px] text-left rounded-xl border px-3 py-2.5 transition-colors disabled:opacity-45 disabled:cursor-not-allowed"
         style={{
           borderColor: active ? ACCENT : "rgba(255,255,255,0.12)",
           backgroundColor: active ? "rgba(56,189,248,0.10)" : "rgba(255,255,255,0.02)",
@@ -538,7 +588,7 @@ const SiteScoutSandbox = () => {
           className="font-mono text-[10px] uppercase tracking-wider"
           style={{ color: active ? ACCENT : "rgba(255,255,255,0.45)" }}
         >
-          Step {n} · {s.sub}
+          Stage {n} · {s.sub} {unlocked ? "" : "🔒"}
         </p>
         <p className="font-heading text-sm font-bold text-white mt-0.5">{s.label}</p>
       </button>
@@ -569,13 +619,13 @@ const SiteScoutSandbox = () => {
               Internal Beta · Sandbox
             </span>
             <h1 className="font-heading text-2xl md:text-3xl font-bold text-white">
-              2-Tier ProGrafter Engine — SiteScout Ground Truth + Multi-Agent Takeoff &amp; Merchant
-              Procurement Hub
+              ProGrafter Master Workflow — Ground Truth → Takeoff → Customer Quote → Trade Gap
             </h1>
             <p className="font-mono text-sm text-white/55 mt-2 max-w-4xl">
-              Tier 1 sets the physical site baseline. Tier 2 runs four specialist takeoff agents
-              against the drawing geometry, compiles a retail-benchmark BoQ, tenders it as five
-              merchant RFQ packs, then splits the negotiated trade gap between profit and price.
+              Four sequential stages. Stage 1 locks the physical site baseline and risk summary.
+              Stage 2 measures the drawing and rolls every material, plant and labour line up to a
+              marked-up retail quotation. Stage 3 issues the contract-ready quote and cross-examines
+              competitor pricing. Stage 4 tenders the packs to merchants and splits the trade gap.
             </p>
           </div>
 
@@ -655,14 +705,14 @@ const SiteScoutSandbox = () => {
                 previewUrl={previewUrl}
                 onIngest={handleIngest}
                 onOpenViewer={() => {
-                  setStep(3);
+                  setStep(2);
                   setBoqTab("drawings");
                 }}
               />
 
               <div className={cardClass}>
                 <div className="flex items-center justify-between mb-3">
-                  <SectionTitle>Step 1 · SiteScout Ground Truth</SectionTitle>
+                  <SectionTitle>Stage 1 · Physical Ground Truth</SectionTitle>
                   <span
                     className="font-mono text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-full"
                     style={{ backgroundColor: "rgba(56,189,248,0.15)", color: ACCENT }}
@@ -802,14 +852,65 @@ const SiteScoutSandbox = () => {
                   ))}
                 </div>
               </div>
+
+              {/* Stage 1 output — locked site risk & ground condition summary */}
+              <div
+                className={cardClass}
+                style={groundTruthLocked ? { borderColor: `${ACCENT}66` } : undefined}
+              >
+                <div className="flex items-center justify-between gap-2 mb-3">
+                  <SectionTitle>Site Risk &amp; Ground Condition Summary</SectionTitle>
+                  <span
+                    className="font-mono text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-full"
+                    style={
+                      groundTruthLocked
+                        ? { backgroundColor: "rgba(56,189,248,0.15)", color: ACCENT }
+                        : { backgroundColor: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.6)" }
+                    }
+                  >
+                    {groundTruthLocked ? "Locked" : "Draft"}
+                  </span>
+                </div>
+                <div className="rounded-xl border border-white/10 bg-black/25 p-3 space-y-2">
+                  {riskSummary.map((n, i) => (
+                    <p key={i} className="font-mono text-[11px] text-white/75 leading-relaxed">
+                      • {n}
+                    </p>
+                  ))}
+                </div>
+                <p className={`${labelClass} mt-3`}>Stated ground-risk exclusions</p>
+                <div className="rounded-xl border border-white/10 p-3 space-y-2">
+                  {riskExclusions.map((n, i) => (
+                    <p key={i} className="font-mono text-[11px] text-white/55 leading-relaxed">
+                      • {n}
+                    </p>
+                  ))}
+                </div>
+                <button
+                  onClick={() => {
+                    setGroundTruthLocked(true);
+                    setStep(2);
+                  }}
+                  className="mt-3 w-full rounded-lg px-3 py-2 font-mono text-[11px] uppercase tracking-wider font-bold"
+                  style={
+                    groundTruthLocked
+                      ? { border: "1px solid rgba(255,255,255,0.18)", color: "rgba(255,255,255,0.7)" }
+                      : { backgroundColor: ACCENT, color: "#04233a" }
+                  }
+                >
+                  {groundTruthLocked
+                    ? "Ground truth locked · continue to Stage 2"
+                    : "🔒 Lock ground truth & open Stage 2"}
+                </button>
+              </div>
             </div>
 
-            {/* ================= RIGHT: steps 2–4 ================= */}
+            {/* ================= RIGHT: stages 2–4 ================= */}
             <div className="xl:col-span-8 space-y-5">
               {/* ---------- STEP 2 ---------- */}
               {step <= 2 && (
                 <div className={cardClass}>
-                  <SectionTitle>Step 2 · Drawing upload &amp; specialist agent takeoffs</SectionTitle>
+                  <SectionTitle>Stage 2 · Drawing geometry &amp; specialist agent takeoffs</SectionTitle>
 
                   <div className="rounded-xl border border-dashed border-white/20 p-4 mb-4">
                     <div className="flex flex-wrap items-center gap-3">
@@ -1244,13 +1345,13 @@ const SiteScoutSandbox = () => {
                 </div>
               )}
 
-              {/* ---------- STEP 3 ---------- */}
-              {step === 3 && (
+              {/* ---------- STAGE 2 OUTPUT: granular takeoff & retail costing ---------- */}
+              {step === 2 && status === "verified" && (
                 <>
                   <div className={cardClass}>
                     <div className="flex items-center justify-between gap-3 flex-wrap mb-3">
                       <SectionTitle>
-                        Step 3 · Master Bill of Quantities (Retail Benchmark)
+                        Stage 2 · Granular material takeoff (retail costing)
                       </SectionTitle>
                       <div className="flex gap-2 flex-wrap">
                         {agentFilter && (
@@ -1275,18 +1376,11 @@ const SiteScoutSandbox = () => {
                         </button>
                         <button
                           disabled={!masterBoq.length}
-                          onClick={() => {
-                            setQuoteLocked(true);
-                            generateClientQuotePdf(masterBoq, arbitrage, {
-                              projectRef,
-                              sheetName: extracted?.sheetName,
-                              vatRate,
-                            });
-                          }}
+                          onClick={() => setStep(3)}
                           className="font-mono text-[10px] uppercase tracking-wider rounded px-2.5 py-1 font-bold disabled:opacity-50"
                           style={{ backgroundColor: ACCENT, color: "#04233a" }}
                         >
-                          🔒 Lock &amp; Export Client Quote
+                          Continue to Stage 3 · Customer quote →
                         </button>
                       </div>
                     </div>
@@ -1327,100 +1421,157 @@ const SiteScoutSandbox = () => {
                       <DrawingMarkupViewer extracted={extracted} previewUrl={previewUrl} />
                     ) : !masterBoq.length ? (
                       <p className="font-mono text-xs text-white/45">
-                        No lines yet — run the agent takeoff in Step 2.
+                        No lines yet — run the agent takeoff in Stage 2.
                       </p>
                     ) : (
                       <>
-                        <div className="overflow-x-auto">
-                          <table className="w-full min-w-[1180px] text-left border-collapse">
-                            <thead>
-                              <tr>
-                                {[
-                                  "Trade Agent",
-                                  "Category",
-                                  "Item Description",
-                                  "Formula / Metric",
-                                  "Qty",
-                                  "Unit",
-                                  "Retail Rate (£)",
-                                  "Retail Total (£)",
-                                ].map((h) => (
-                                  <th
-                                    key={h}
-                                    className="font-mono text-[9px] uppercase tracking-wider text-white/45 border-b border-white/10 pb-2 pr-3 whitespace-nowrap"
-                                  >
-                                    {h}
-                                  </th>
-                                ))}
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {visibleBoq.map((l) => (
-                                <tr key={l.key} className="border-b border-white/5 align-top">
-                                  <td className="py-2 pr-3">
+                        <p className="font-mono text-[11px] text-white/45 mb-3">
+                          Every pack is expandable — click a pack to audit the exact formula,
+                          quantity, unit and rate behind each priced line.
+                        </p>
+                        <div className="space-y-2">
+                          {packGroups.map((g) => {
+                            const open = !!openPacks[g.pack.id];
+                            return (
+                              <div
+                                key={g.pack.id}
+                                className="rounded-xl border border-white/10 bg-white/[0.02]"
+                              >
+                                <button
+                                  onClick={() =>
+                                    setOpenPacks((p) => ({ ...p, [g.pack.id]: !p[g.pack.id] }))
+                                  }
+                                  aria-expanded={open}
+                                  className="w-full flex items-center justify-between gap-3 px-3 py-2.5 text-left"
+                                >
+                                  <span className="min-w-0">
+                                    <span className="block font-mono text-xs text-white/85 truncate">
+                                      {g.pack.name}
+                                    </span>
+                                    <span className="block font-mono text-[10px] text-white/40 mt-0.5">
+                                      {g.lines.length} line(s) · {g.pack.merchantHint}
+                                    </span>
+                                  </span>
+                                  <span className="flex items-center gap-3 shrink-0">
                                     <span
-                                      className="font-mono text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full"
-                                      style={{
-                                        backgroundColor: "rgba(56,189,248,0.14)",
-                                        color: ACCENT,
-                                      }}
+                                      className="font-heading text-sm"
+                                      style={{ color: ACCENT }}
                                     >
-                                      {l.agent}
+                                      {money(g.retailTotal)}
                                     </span>
-                                    <span className="block font-mono text-[9px] text-white/35 mt-1">
-                                      Pack {l.pack}
+                                    <span className="font-mono text-xs" style={{ color: ACCENT }}>
+                                      {open ? "−" : "+"}
                                     </span>
-                                  </td>
-                                  <td className="py-2 pr-3 font-mono text-[11px] text-white/65 min-w-[120px]">
-                                    {l.category}
-                                  </td>
-                                  <td className="py-2 pr-3 min-w-[220px]">
-                                    <input
-                                      className={inputClass}
-                                      value={l.description}
-                                      onChange={(e) =>
-                                        updateOverride(l.key, "description", e.target.value)
-                                      }
-                                    />
-                                  </td>
-                                  <td className="py-2 pr-3 font-mono text-[10px] text-white/40 min-w-[160px]">
-                                    {l.formula}
-                                  </td>
-                                  <td className="py-2 pr-3 w-[110px]">
-                                    <input
-                                      type="number"
-                                      step="0.01"
-                                      className={inputClass}
-                                      value={l.quantity}
-                                      onChange={(e) =>
-                                        updateOverride(l.key, "quantity", Number(e.target.value))
-                                      }
-                                    />
-                                  </td>
-                                  <td className="py-2 pr-3 font-mono text-[11px] text-white/60">
-                                    {l.unit}
-                                  </td>
-                                  <td className="py-2 pr-3 w-[110px]">
-                                    <input
-                                      type="number"
-                                      step="0.01"
-                                      className={inputClass}
-                                      value={l.rate}
-                                      onChange={(e) =>
-                                        updateOverride(l.key, "rate", Number(e.target.value))
-                                      }
-                                    />
-                                  </td>
-                                  <td
-                                    className="py-2 font-heading text-sm whitespace-nowrap"
-                                    style={{ color: ACCENT }}
-                                  >
-                                    {money(l.total)}
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
+                                  </span>
+                                </button>
+                                {open && (
+                                  <div className="overflow-x-auto px-3 pb-3">
+                                    <table className="w-full min-w-[1080px] text-left border-collapse">
+                                      <thead>
+                                        <tr>
+                                          {[
+                                            "Trade Agent",
+                                            "Category",
+                                            "Item Description",
+                                            "Formula / Metric",
+                                            "Qty",
+                                            "Unit",
+                                            "Retail Rate (£)",
+                                            "Retail Total (£)",
+                                          ].map((h) => (
+                                            <th
+                                              key={h}
+                                              className="font-mono text-[9px] uppercase tracking-wider text-white/45 border-b border-white/10 pb-2 pr-3 whitespace-nowrap"
+                                            >
+                                              {h}
+                                            </th>
+                                          ))}
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        {g.lines.map((l) => (
+                                          <tr
+                                            key={l.key}
+                                            className="border-b border-white/5 align-top"
+                                          >
+                                            <td className="py-2 pr-3">
+                                              <span
+                                                className="font-mono text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full"
+                                                style={{
+                                                  backgroundColor: "rgba(56,189,248,0.14)",
+                                                  color: ACCENT,
+                                                }}
+                                              >
+                                                {l.agent}
+                                              </span>
+                                            </td>
+                                            <td className="py-2 pr-3 font-mono text-[11px] text-white/65 min-w-[120px]">
+                                              {l.category}
+                                            </td>
+                                            <td className="py-2 pr-3 min-w-[220px]">
+                                              <input
+                                                className={inputClass}
+                                                value={l.description}
+                                                onChange={(e) =>
+                                                  updateOverride(
+                                                    l.key,
+                                                    "description",
+                                                    e.target.value,
+                                                  )
+                                                }
+                                              />
+                                            </td>
+                                            <td className="py-2 pr-3 font-mono text-[10px] text-white/40 min-w-[160px]">
+                                              {l.formula}
+                                            </td>
+                                            <td className="py-2 pr-3 w-[110px]">
+                                              <input
+                                                type="number"
+                                                step="0.01"
+                                                className={inputClass}
+                                                value={l.quantity}
+                                                onChange={(e) =>
+                                                  updateOverride(
+                                                    l.key,
+                                                    "quantity",
+                                                    Number(e.target.value),
+                                                  )
+                                                }
+                                              />
+                                            </td>
+                                            <td className="py-2 pr-3 font-mono text-[11px] text-white/60">
+                                              {l.unit}
+                                            </td>
+                                            <td className="py-2 pr-3 w-[110px]">
+                                              <input
+                                                type="number"
+                                                step="0.01"
+                                                className={inputClass}
+                                                value={l.rate}
+                                                onChange={(e) =>
+                                                  updateOverride(
+                                                    l.key,
+                                                    "rate",
+                                                    Number(e.target.value),
+                                                  )
+                                                }
+                                              />
+                                            </td>
+                                            <td
+                                              className="py-2 font-heading text-sm whitespace-nowrap"
+                                              style={{ color: ACCENT }}
+                                            >
+                                              {money(l.total)}
+                                            </td>
+                                          </tr>
+                                        ))}
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
                         </div>
 
                         <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mt-4">
@@ -1446,6 +1597,323 @@ const SiteScoutSandbox = () => {
                     )}
                   </div>
 
+                  {/* Stage 2 cost roll-up → base retail customer quotation */}
+                  <div className={cardClass}>
+                    <SectionTitle>Cost roll-up &amp; contractor markup</SectionTitle>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+                      <div className="md:col-span-1">
+                        <Field label="Contractor profit markup (%)">
+                          <input
+                            type="number"
+                            className={inputClass}
+                            value={markupPct}
+                            onChange={(e) => setMarkupPct(Number(e.target.value))}
+                          />
+                        </Field>
+                      </div>
+                      {[
+                        ["Measured cost roll-up (materials, plant, skips, labour)", money(retailTotal), false],
+                        [`Markup @ ${markupPct}%`, money(markupValue), false],
+                        ["Base retail customer quotation (ex VAT)", money(baseRetailQuote), true],
+                      ].map(([k, v, hl]) => (
+                        <div
+                          key={k as string}
+                          className="rounded-xl border p-3"
+                          style={{ borderColor: hl ? `${ACCENT}66` : "rgba(255,255,255,0.10)" }}
+                        >
+                          <p className={labelClass}>{k as string}</p>
+                          <p
+                            className="font-heading text-base"
+                            style={{ color: hl ? ACCENT : "#fff" }}
+                          >
+                            {v as string}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* ---------- STAGE 3: customer quote & competitor checker ---------- */}
+              {step === 3 && (
+                <>
+                  <div className={cardClass}>
+                    <div className="flex items-center justify-between gap-3 flex-wrap mb-3">
+                      <SectionTitle>Stage 3 · Contract-ready customer quotation</SectionTitle>
+                      <div className="flex gap-2 flex-wrap items-center">
+                        {quoteLocked && (
+                          <span
+                            className="font-mono text-[10px] uppercase tracking-wider px-2 py-1 rounded-full"
+                            style={{ backgroundColor: "rgba(56,189,248,0.15)", color: ACCENT }}
+                          >
+                            Quote locked &amp; exported
+                          </span>
+                        )}
+                        <button
+                          disabled={!masterBoq.length}
+                          onClick={() => {
+                            setQuoteLocked(true);
+                            generateClientQuotePdf(masterBoq, quoteArbitrage, {
+                              projectRef,
+                              sheetName: extracted?.sheetName,
+                              vatRate,
+                              riskSummary,
+                              exclusions: riskExclusions,
+                            });
+                          }}
+                          className="font-mono text-[10px] uppercase tracking-wider rounded px-2.5 py-1 font-bold disabled:opacity-50"
+                          style={{ backgroundColor: ACCENT, color: "#04233a" }}
+                        >
+                          🔒 Lock &amp; Export Client Quote (PDF)
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+                      {[
+                        ["Base retail quotation (ex VAT)", money(baseRetailQuote), false],
+                        ["Trade saving passed to customer", money(arbitrage.passedToCustomer), false],
+                        ["Total payable inc VAT", money(finalCustomerIncVat), true],
+                      ].map(([k, v, hl]) => (
+                        <div
+                          key={k as string}
+                          className="rounded-xl border p-3"
+                          style={{ borderColor: hl ? `${ACCENT}66` : "rgba(255,255,255,0.10)" }}
+                        >
+                          <p className={labelClass}>{k as string}</p>
+                          <p
+                            className="font-heading text-lg"
+                            style={{ color: hl ? ACCENT : "#fff" }}
+                          >
+                            {v as string}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+
+                    <p className={labelClass}>Schedule of works (as presented to the homeowner)</p>
+                    <div className="rounded-xl border border-white/10 bg-black/25 p-3 space-y-1.5 mb-4">
+                      {[...new Map(masterBoq.map((l) => [l.category, 0])).keys()].map((cat) => {
+                        const value = masterBoq
+                          .filter((l) => l.category === cat)
+                          .reduce((s, l) => s + l.total, 0);
+                        const factor = retailTotal > 0 ? finalCustomerExVat / retailTotal : 1;
+                        return (
+                          <div key={cat} className="flex justify-between gap-3">
+                            <span className="font-mono text-[11px] text-white/70">{cat}</span>
+                            <span className="font-mono text-[11px] text-white/85 whitespace-nowrap">
+                              {money(value * factor)}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    <p className={labelClass}>Ground-risk exclusions carried onto the quote</p>
+                    <div className="rounded-xl border border-white/10 p-3 space-y-1.5">
+                      {riskExclusions.map((e, i) => (
+                        <p key={i} className="font-mono text-[11px] text-white/55 leading-relaxed">
+                          • {e}
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Competitor quote checker */}
+                  <div className={cardClass}>
+                    <SectionTitle>Quote Checker · cross-examine a competitor quote</SectionTitle>
+                    <p className="font-mono text-[11px] text-white/45 mb-3">
+                      Paste the cheap, vague quote the homeowner has been given. Every priced
+                      package in your BoQ is checked against their wording.
+                    </p>
+                    <textarea
+                      className={`${inputClass} min-h-[140px]`}
+                      placeholder="Paste the competitor quotation text here — including their headline price…"
+                      value={competitorText}
+                      onChange={(e) => setCompetitorText(e.target.value)}
+                    />
+
+                    {competitorCheck.wordCount === 0 ? (
+                      <p className="font-mono text-xs text-white/45 mt-3">
+                        Nothing pasted yet — the comparison runs as soon as you paste their quote.
+                      </p>
+                    ) : (
+                      <>
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mt-4">
+                          {[
+                            [
+                              "Their headline price",
+                              competitorCheck.competitorTotal === null
+                                ? "No £ figure found"
+                                : money(competitorCheck.competitorTotal),
+                              false,
+                            ],
+                            ["Your quotation", money(finalCustomerExVat), false],
+                            [
+                              "Value of work they never mention",
+                              money(competitorCheck.unpricedValue),
+                              true,
+                            ],
+                            [
+                              "Their likely true cost",
+                              competitorCheck.trueLikelyCost === null
+                                ? "—"
+                                : money(competitorCheck.trueLikelyCost),
+                              true,
+                            ],
+                          ].map(([k, v, hl]) => (
+                            <div
+                              key={k as string}
+                              className="rounded-xl border p-3"
+                              style={{
+                                borderColor: hl ? `${ACCENT}66` : "rgba(255,255,255,0.10)",
+                              }}
+                            >
+                              <p className={labelClass}>{k as string}</p>
+                              <p
+                                className="font-heading text-base"
+                                style={{ color: hl ? ACCENT : "#fff" }}
+                              >
+                                {v as string}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
+                          <div>
+                            <p className={labelClass}>
+                              Missing from their quote ({competitorCheck.missing.length})
+                            </p>
+                            <div className="space-y-2">
+                              {competitorCheck.missing.length === 0 && (
+                                <p className="font-mono text-[11px] text-white/45">
+                                  Nothing obviously missing — compare on specification and
+                                  workmanship instead.
+                                </p>
+                              )}
+                              {competitorCheck.missing.map((f) => (
+                                <div
+                                  key={f.category}
+                                  className="rounded-xl border p-3"
+                                  style={{ borderColor: "rgba(248,113,113,0.45)" }}
+                                >
+                                  <div className="flex justify-between gap-2">
+                                    <p className="font-mono text-xs text-white/85">{f.category}</p>
+                                    <p
+                                      className="font-mono text-xs whitespace-nowrap"
+                                      style={{ color: "#fca5a5" }}
+                                    >
+                                      {money(f.ourValue)}
+                                    </p>
+                                  </div>
+                                  <p className="font-mono text-[11px] text-white/55 mt-1.5 leading-relaxed">
+                                    {f.risk}
+                                  </p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                          <div>
+                            <p className={labelClass}>
+                              Covered by both quotes ({competitorCheck.covered.length})
+                            </p>
+                            <div className="rounded-xl border border-white/10 p-3 space-y-1.5">
+                              {competitorCheck.covered.map((f) => (
+                                <div key={f.category} className="flex justify-between gap-3">
+                                  <span className="font-mono text-[11px] text-white/70">
+                                    {f.category}
+                                  </span>
+                                  <span className="font-mono text-[11px] text-white/50 whitespace-nowrap">
+                                    {money(f.ourValue)}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={() =>
+                            navigator.clipboard?.writeText(
+                              [
+                                `ProGrafter Quote Comparison — ${projectRef}`,
+                                `Our quotation (ex VAT): £${finalCustomerExVat.toFixed(2)}`,
+                                competitorCheck.competitorTotal !== null
+                                  ? `Competitor headline price: £${competitorCheck.competitorTotal.toFixed(2)}`
+                                  : "Competitor headline price: not stated",
+                                "",
+                                "Not mentioned anywhere in the competitor quotation:",
+                                ...competitorCheck.missing.map(
+                                  (f) => `• ${f.category} — ${f.risk} (we price this at £${f.ourValue.toFixed(2)})`,
+                                ),
+                                "",
+                                competitorCheck.trueLikelyCost !== null
+                                  ? `Adding the unpriced work back, their likely true cost is £${competitorCheck.trueLikelyCost.toFixed(2)}.`
+                                  : "",
+                                "Sent via ProGrafter (prografter.co.uk) — verified trades, documented projects.",
+                              ]
+                                .filter(Boolean)
+                                .join("\n"),
+                            )
+                          }
+                          className="mt-4 rounded-lg px-3 py-2 font-mono text-[11px] uppercase tracking-wider border border-white/20 text-white/80"
+                        >
+                          Copy comparison for the homeowner
+                        </button>
+                      </>
+                    )}
+                  </div>
+
+                  {/* compliance + logistics */}
+                  <div className={cardClass}>
+                    <SectionTitle>Elizabeth &amp; Sharon · Compliance and logistics</SectionTitle>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="space-y-2">
+                        {complianceItems.map((c) => (
+                          <div
+                            key={c.part + c.title}
+                            className="rounded-xl border border-white/10 bg-white/[0.02] p-3"
+                          >
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span
+                                className="font-mono text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-full"
+                                style={stateStyle(c.state)}
+                              >
+                                {c.part}
+                              </span>
+                              <p className="font-mono text-xs text-white/85">{c.title}</p>
+                            </div>
+                            <p className="font-mono text-[11px] text-white/60 mt-2 leading-relaxed">
+                              {c.detail}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="space-y-2">
+                        {logistics.map((l) => (
+                          <div key={l.week} className="rounded-xl border border-white/10 p-3">
+                            <p
+                              className="font-mono text-[10px] uppercase tracking-wider"
+                              style={{ color: ACCENT }}
+                            >
+                              {l.week} · {l.activity}
+                            </p>
+                            <p className="font-mono text-[11px] text-white/65 mt-1 leading-relaxed">
+                              {l.detail}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* ---------- STAGE 4: merchant procurement & the trade gap ---------- */}
+              {step === 4 && (
+                <>
                   {/* RFQ packs */}
                   <div className={cardClass}>
                     <div className="flex items-center justify-between gap-3 flex-wrap mb-3">
@@ -1511,58 +1979,9 @@ const SiteScoutSandbox = () => {
                       ))}
                     </div>
                   </div>
-
-                  {/* compliance + logistics */}
-                  <div className={cardClass}>
-                    <SectionTitle>Elizabeth &amp; Sharon · Compliance and logistics</SectionTitle>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <div className="space-y-2">
-                        {complianceItems.map((c) => (
-                          <div
-                            key={c.part + c.title}
-                            className="rounded-xl border border-white/10 bg-white/[0.02] p-3"
-                          >
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span
-                                className="font-mono text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-full"
-                                style={stateStyle(c.state)}
-                              >
-                                {c.part}
-                              </span>
-                              <p className="font-mono text-xs text-white/85">{c.title}</p>
-                            </div>
-                            <p className="font-mono text-[11px] text-white/60 mt-2 leading-relaxed">
-                              {c.detail}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                      <div className="space-y-2">
-                        {logistics.map((l) => (
-                          <div key={l.week} className="rounded-xl border border-white/10 p-3">
-                            <p
-                              className="font-mono text-[10px] uppercase tracking-wider"
-                              style={{ color: ACCENT }}
-                            >
-                              {l.week} · {l.activity}
-                            </p>
-                            <p className="font-mono text-[11px] text-white/65 mt-1 leading-relaxed">
-                              {l.detail}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {/* ---------- STEP 4 ---------- */}
-              {step === 4 && (
-                <>
                   <div className={cardClass}>
                     <SectionTitle>
-                      Step 4 · Procurement arbitrage &amp; trade margin gap
+                      Stage 4 · Trade Gap calculator &amp; margin splitter
                     </SectionTitle>
 
                     <div className="flex items-end gap-3 flex-wrap mb-4">
@@ -1641,7 +2060,7 @@ const SiteScoutSandbox = () => {
                     <SectionTitle>The trade gap breakdown</SectionTitle>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                       {[
-                        ["Retail benchmark cost (customer quoting price)", money(retailTotal)],
+                        ["Base retail customer quotation (inc markup)", money(baseRetailQuote)],
                         ["Negotiated trade merchant cost", money(arbitrage.negotiatedTotal)],
                         [
                           "Gross material trade gap (potential profit)",
@@ -1689,8 +2108,8 @@ const SiteScoutSandbox = () => {
                         {[
                           ["Retained net profit", money(arbitrage.retainedProfit), true],
                           ["Passed to customer", money(arbitrage.passedToCustomer), false],
-                          ["Final customer quote (ex VAT)", money(arbitrage.customerQuoteTotal), false],
-                          ["Customer total inc VAT", money(arbitrage.customerQuoteIncVat), false],
+                          ["Final customer quote (ex VAT)", money(finalCustomerExVat), false],
+                          ["Customer total inc VAT", money(finalCustomerIncVat), false],
                         ].map(([k, v, hl]) => (
                           <div
                             key={k as string}
@@ -1777,7 +2196,7 @@ const SiteScoutSandbox = () => {
                           <button
                             onClick={() => {
                               setAgentFilter(active ? null : agent.id);
-                              setStep(3);
+                              setStep(2);
                             }}
                             className="mt-3 w-full rounded-lg border border-white/15 px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider text-white/70 hover:text-white transition-colors"
                           >

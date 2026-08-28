@@ -19,6 +19,10 @@ export interface ClientQuoteMeta {
   sheetName?: string;
   clientName?: string;
   vatRate: number;
+  /** Stage 1 locked "Site Risk & Ground Condition Summary". */
+  riskSummary?: string[];
+  /** Ground-risk exclusions stated on the face of the quotation. */
+  exclusions?: string[];
 }
 
 /** Groups the BoQ into presentation-level packages — homeowners never see 40+ lines. */
@@ -73,6 +77,25 @@ export function generateClientQuotePdf(
     y,
   );
   y += 26;
+
+  // Stage 1 — locked site risk & ground condition summary, on the quote header.
+  if (meta.riskSummary?.length) {
+    const bodyW = W - M * 2;
+    const wrapped = meta.riskSummary.map((line) => doc.splitTextToSize(`•  ${line}`, bodyW - 24));
+    const blockH = 34 + wrapped.reduce((s, w) => s + w.length * 11 + 4, 0);
+    doc.setFillColor(243, 248, 253);
+    doc.rect(M, y - 4, bodyW, blockH, "F");
+    doc.setFont("helvetica", "bold").setFontSize(10).setTextColor(...NAVY);
+    doc.text("Site Risk & Ground Condition Summary", M + 12, y + 14);
+    let ry = y + 30;
+    doc.setFont("helvetica", "normal").setFontSize(8).setTextColor(...GREY);
+    for (const w of wrapped) {
+      doc.text(w, M + 12, ry);
+      ry += w.length * 11 + 4;
+    }
+    y += blockH + 14;
+  }
+
 
   // package table
   doc.setDrawColor(...CYAN).setLineWidth(1.2);
@@ -159,6 +182,25 @@ export function generateClientQuotePdf(
     doc.text(`•  ${line}`, M, y, { maxWidth: W - M * 2 });
     y += 15;
   }
+
+  const exclusions = meta.exclusions ?? [];
+  if (exclusions.length) {
+    y += 12;
+    if (y + 26 + exclusions.length * 24 > H - 72) {
+      doc.addPage();
+      y = 72;
+    }
+    doc.setFont("helvetica", "bold").setFontSize(10).setTextColor(...NAVY);
+    doc.text("Ground-risk exclusions", M, y);
+    y += 16;
+    doc.setFont("helvetica", "normal").setFontSize(9).setTextColor(...GREY);
+    for (const line of exclusions) {
+      const w = doc.splitTextToSize(`•  ${line}`, W - M * 2);
+      doc.text(w, M, y);
+      y += w.length * 12 + 3;
+    }
+  }
+
 
   const pages = doc.getNumberOfPages();
   for (let p = 1; p <= pages; p++) {
