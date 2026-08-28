@@ -271,6 +271,18 @@ const TradeDashboard = () => {
 
   return (
     <div className="min-h-screen dashboard-dark flex">
+      {trade?.trade_type_confirmation_required && (
+        <ConfirmTradeTypeModal
+          tradeId={trade.id}
+          onConfirmed={(tradeType) =>
+            setTrade((prev) =>
+              prev
+                ? { ...prev, trade_type: tradeType, trade_type_confirmation_required: false }
+                : prev,
+            )
+          }
+        />
+      )}
       <TradeSidebar
         activeNav={activeNav}
         setActiveNav={setActiveNav}
