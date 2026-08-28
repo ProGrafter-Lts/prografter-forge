@@ -161,6 +161,7 @@ const PackScrutinyModal = ({
                           {editing === `${l.key}:q` ? (
                             <input
                               autoFocus
+                              onFocus={(e) => e.currentTarget.select()}
                               type="number"
                               step="0.01"
                               className={inputCls}
@@ -194,6 +195,7 @@ const PackScrutinyModal = ({
                           {editing === `${l.key}:t` ? (
                             <input
                               autoFocus
+                              onFocus={(e) => e.currentTarget.select()}
                               type="number"
                               step="0.01"
                               className={inputCls}
