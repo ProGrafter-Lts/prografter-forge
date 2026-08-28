@@ -121,7 +121,7 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
         0,
       );
 
-      const vault = computeVaultSummary((vaultRes.data as VaultDocument[]) || []);
+      const vault = computeVaultSummary((vaultRes.data as VaultDocument[]) || [], tradeRes.data?.trade_type);
       const docsNeeded = vault.missingRequired.length + vault.expiredRequiredDocs.length;
 
       const nextShortlist = shortlist
