@@ -158,8 +158,14 @@ const TradeVaultSection = ({ tradeId }: Props) => {
   }
 
   const applicableTypes = VAULT_DOC_TYPES.filter((d) => isDocTypeApplicableToTrade(d, manualCtx.tradeType));
-  const requiredTypes = applicableTypes.filter((d) => d.required);
-  const optionalTypes = applicableTypes.filter((d) => !d.required);
+  const isCompleted = (cfg: VaultDocTypeConfig) => {
+    const s = computeDisplayStatus(currentByType.get(cfg.key), cfg.required, manualCtx.manuallyVerified);
+    return s === "approved" || s === "expiring_soon";
+  };
+  const completedTypes = applicableTypes.filter(isCompleted);
+  const outstandingTypes = applicableTypes.filter((d) => !isCompleted(d));
+  const requiredTypes = outstandingTypes.filter((d) => d.required);
+  const optionalTypes = outstandingTypes.filter((d) => !d.required);
 
   return (
     <div className="space-y-6">
