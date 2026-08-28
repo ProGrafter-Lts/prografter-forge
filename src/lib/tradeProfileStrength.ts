@@ -147,6 +147,7 @@ export interface PriorityInput {
   strength: ProfileStrength;
   verification: DashboardVerification;
   vaultDocs: VaultDocument[];
+  tradeType?: string | null;
   specialismCount: number;
   bio: string | null;
   calendarConnected: boolean;
@@ -156,7 +157,7 @@ export interface PriorityInput {
 
 export const computePriorities = (input: PriorityInput): Priority[] => {
   const priorities: Priority[] = [];
-  const summary = computeVaultSummary(input.vaultDocs);
+  const summary = computeVaultSummary(input.vaultDocs, input.tradeType);
   const hasVaultDocs = input.vaultDocs.some((d) => d.is_current && d.file_url);
 
   // 1. Legacy manual verified with no TradeVault docs → migration.
