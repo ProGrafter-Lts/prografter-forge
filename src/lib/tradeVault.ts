@@ -10,6 +10,7 @@ export type VaultBaseStatus =
 // Derived statuses shown to the user (base + expiry-aware)
 export type VaultDisplayStatus =
   | "missing"
+  | "not_added"
   | "legacy_verified"
   | "uploaded"
   | "pending_review"
