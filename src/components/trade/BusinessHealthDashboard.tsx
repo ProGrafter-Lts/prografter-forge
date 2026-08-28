@@ -237,6 +237,7 @@ const BusinessHealthDashboard = ({
         },
         quotes: { submitted: quoteRows.length, won, lost, pending, totalValue },
         vaultDocs,
+        tradeType: t.trade_type,
         profileStrength: ps,
         availability: {
           serviceRadiusMiles: t.service_radius_miles,
