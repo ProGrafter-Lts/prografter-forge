@@ -77,6 +77,10 @@ import {
   type MasterBoqLine,
   type PackId,
 } from "@/lib/procurementEngine";
+import DrawingIngestZone from "@/components/sitescout/DrawingIngestZone";
+import DrawingMarkupViewer from "@/components/sitescout/DrawingMarkupViewer";
+import { type ExtractedDrawing } from "@/lib/drawingIngestion";
+import { generateClientQuotePdf } from "@/lib/clientQuotePdf";
 
 /* ------------------------------------------------------------------ theme */
 
@@ -202,6 +206,10 @@ const SiteScoutSandbox = () => {
   const [projectRef, setProjectRef] = useState("TEST-01-SMEDLEY");
   const [drawingName, setDrawingName] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [extracted, setExtracted] = useState<ExtractedDrawing | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [boqTab, setBoqTab] = useState<"boq" | "drawings">("boq");
+  const [quoteLocked, setQuoteLocked] = useState(false);
   const [trenchLength, setTrenchLength] = useState(24.5);
   const [drainageRun, setDrainageRun] = useState(14);
   const [basis, setBasis] = useState<MuckAwayBasis>("volume");
@@ -251,38 +259,60 @@ const SiteScoutSandbox = () => {
     setDrawingName("preset-rear-extension-6x4.pdf");
   };
 
-  const runTakeoff = () => {
+  /** Runs every agent engine. Explicit config lets drawing ingestion run without stale state. */
+  const runTakeoff = (cfg?: {
+    trenchLength?: number;
+    drainageRun?: number;
+    superInputs?: SuperstructureInputs;
+    mepInputs?: MepInputs;
+    finishesInputs?: FinishesInputs;
+    slabInputs?: SlabInputs;
+    envInputs?: EnvelopeInputs;
+    prelimsInputs?: PrelimsInputs;
+    groundTruth?: GroundTruth;
+  }) => {
     setStatus("analyzing");
     setOverrides({});
 
+    const gtNow = cfg?.groundTruth ?? gt;
+    const derivedNow = cfg?.groundTruth ? deriveGroundTruth(cfg.groundTruth) : derived;
+    const trench = cfg?.trenchLength ?? trenchLength;
+    const drain = cfg?.drainageRun ?? drainageRun;
+    const sup = cfg?.superInputs ?? superInputs;
+    const mep = cfg?.mepInputs ?? mepInputs;
+    const fin = cfg?.finishesInputs ?? finishesInputs;
+    const slab = cfg?.slabInputs ?? slabInputs;
+    const env = cfg?.envInputs ?? envInputs;
+    const prel = cfg?.prelimsInputs ?? prelimsInputs;
+
     const groundInputs: GroundworksInputs = {
       projectRef,
-      trenchLength,
-      soilType: gt.soilType,
-      treeProximity: gt.treeProximity,
-      treeSpecies: gt.treeSpecies,
-      accessType: derived.accessType,
-      drainageInvertBaseline: gt.drainageInvertDepth,
+      trenchLength: trench,
+      soilType: gtNow.soilType,
+      treeProximity: gtNow.treeProximity,
+      treeSpecies: gtNow.treeSpecies,
+      accessType: derivedNow.accessType,
+      drainageInvertBaseline: gtNow.drainageInvertDepth,
       notes: "",
-      drainageRunLength: drainageRun,
-      depthOverride: derived.digDepth,
-      clayboardOverride: derived.clayboardRequired,
+      drainageRunLength: drain,
+      depthOverride: derivedNow.digDepth,
+      clayboardOverride: derivedNow.clayboardRequired,
     };
     const effectiveBasis: MuckAwayBasis =
-      derived.accessType === "8-Wheel Grab Direct Access" ? basis : "volume";
+      derivedNow.accessType === "8-Wheel Grab Direct Access" ? basis : "volume";
 
     const g = runSubstructureTakeoff(groundInputs, DEFAULT_RATES, DEFAULT_DIMENSIONS, effectiveBasis);
-    const s = runSuperstructureTakeoff(trenchLength, superInputs, DEFAULT_SUPER_RATES, {
+    const s = runSuperstructureTakeoff(trench, sup, DEFAULT_SUPER_RATES, {
       ...DEFAULT_SUPER_DIMENSIONS,
     });
     const m = runMepTakeoff(
-      { ...mepInputs, consumerUnitUpgrade: derived.consumerUnitUpgrade },
+      { ...mep, consumerUnitUpgrade: derivedNow.consumerUnitUpgrade },
       DEFAULT_MEP_RATES,
     );
-    const f = runFinishesTakeoff(finishesInputs, DEFAULT_FINISHES_RATES);
-    const sl = runSlabTakeoff(slabInputs, DEFAULT_SLAB_RATES);
-    const en = runEnvelopeTakeoff(envInputs, DEFAULT_ENVELOPE_RATES);
-    const pr = runPrelimsTakeoff(prelimsInputs, DEFAULT_PRELIMS_RATES);
+    const f = runFinishesTakeoff(fin, DEFAULT_FINISHES_RATES);
+    const sl = runSlabTakeoff(slab, DEFAULT_SLAB_RATES);
+    const en = runEnvelopeTakeoff(env, DEFAULT_ENVELOPE_RATES);
+    const pr = runPrelimsTakeoff(prel, DEFAULT_PRELIMS_RATES);
 
     window.setTimeout(() => {
       setGround(g);
@@ -295,6 +325,35 @@ const SiteScoutSandbox = () => {
       setStatus("verified");
       setStep(3);
     }, 900);
+  };
+
+  /** Drawing ingestion → auto-populate every agent input, then run the takeoff. */
+  const handleIngest = (data: ExtractedDrawing, url: string | null) => {
+    const nextGt: GroundTruth = { ...gt, ...data.groundTruthPatch };
+    setExtracted(data);
+    setPreviewUrl(url);
+    setDrawingName(data.sheetName);
+    setGt(nextGt);
+    setTrenchLength(data.trenchLength);
+    setDrainageRun(data.drainageRun);
+    setSuperInputs(data.superInputs);
+    setMepInputs(data.mepInputs);
+    setFinishesInputs(data.finishesInputs);
+    setSlabInputs(data.slabInputs);
+    setEnvInputs(data.envelopeInputs);
+    setPrelimsInputs(data.prelimsInputs);
+    setBoqTab("boq");
+    runTakeoff({
+      trenchLength: data.trenchLength,
+      drainageRun: data.drainageRun,
+      superInputs: data.superInputs,
+      mepInputs: data.mepInputs,
+      finishesInputs: data.finishesInputs,
+      slabInputs: data.slabInputs,
+      envInputs: data.envelopeInputs,
+      prelimsInputs: data.prelimsInputs,
+      groundTruth: nextGt,
+    });
   };
 
 
@@ -591,6 +650,16 @@ const SiteScoutSandbox = () => {
           <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
             {/* ================= LEFT: Step 1 ground truth ================= */}
             <div className="xl:col-span-4 space-y-4">
+              <DrawingIngestZone
+                extracted={extracted}
+                previewUrl={previewUrl}
+                onIngest={handleIngest}
+                onOpenViewer={() => {
+                  setStep(3);
+                  setBoqTab("drawings");
+                }}
+              />
+
               <div className={cardClass}>
                 <div className="flex items-center justify-between mb-3">
                   <SectionTitle>Step 1 · SiteScout Ground Truth</SectionTitle>
@@ -1163,7 +1232,7 @@ const SiteScoutSandbox = () => {
 
 
                   <button
-                    onClick={runTakeoff}
+                    onClick={() => runTakeoff()}
                     disabled={status === "analyzing"}
                     className="mt-4 w-full rounded-xl px-4 py-3 font-mono text-sm uppercase tracking-wider font-bold transition-opacity hover:opacity-90 disabled:opacity-60"
                     style={{ backgroundColor: ACCENT, color: "#04233a" }}
@@ -1204,10 +1273,59 @@ const SiteScoutSandbox = () => {
                         >
                           📥 Export master BoQ (CSV)
                         </button>
+                        <button
+                          disabled={!masterBoq.length}
+                          onClick={() => {
+                            setQuoteLocked(true);
+                            generateClientQuotePdf(masterBoq, arbitrage, {
+                              projectRef,
+                              sheetName: extracted?.sheetName,
+                              vatRate,
+                            });
+                          }}
+                          className="font-mono text-[10px] uppercase tracking-wider rounded px-2.5 py-1 font-bold disabled:opacity-50"
+                          style={{ backgroundColor: ACCENT, color: "#04233a" }}
+                        >
+                          🔒 Lock &amp; Export Client Quote
+                        </button>
                       </div>
                     </div>
 
-                    {!masterBoq.length ? (
+                    <div className="flex gap-2 mb-4">
+                      {([
+                        ["boq", "Bill of Quantities"],
+                        ["drawings", "Drawings & Markup"],
+                      ] as const).map(([id, label]) => {
+                        const on = boqTab === id;
+                        return (
+                          <button
+                            key={id}
+                            onClick={() => setBoqTab(id)}
+                            aria-pressed={on}
+                            className="rounded-lg px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider border transition-colors"
+                            style={{
+                              borderColor: on ? ACCENT : "rgba(255,255,255,0.15)",
+                              backgroundColor: on ? "rgba(56,189,248,0.12)" : "transparent",
+                              color: on ? ACCENT : "rgba(255,255,255,0.65)",
+                            }}
+                          >
+                            {label}
+                          </button>
+                        );
+                      })}
+                      {quoteLocked && (
+                        <span
+                          className="self-center font-mono text-[10px] uppercase tracking-wider px-2 py-1 rounded-full"
+                          style={{ backgroundColor: "rgba(56,189,248,0.15)", color: ACCENT }}
+                        >
+                          Quote locked &amp; exported
+                        </span>
+                      )}
+                    </div>
+
+                    {boqTab === "drawings" ? (
+                      <DrawingMarkupViewer extracted={extracted} previewUrl={previewUrl} />
+                    ) : !masterBoq.length ? (
                       <p className="font-mono text-xs text-white/45">
                         No lines yet — run the agent takeoff in Step 2.
                       </p>
