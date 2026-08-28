@@ -100,8 +100,8 @@ export const scoreQuotes = (q: QuotesInput): number => {
 
 // ── TradeVault ───────────────────────────────────────────────────────────
 
-export const scoreTradeVault = (docs: VaultDocument[]): number => {
-  const summary = computeVaultSummary(docs);
+export const scoreTradeVault = (docs: VaultDocument[], tradeType?: string | null): number => {
+  const summary = computeVaultSummary(docs, tradeType);
   if (summary.requiredTotal === 0) return 100;
   let score = (summary.requiredUploaded / summary.requiredTotal) * 100;
   score -= summary.expired * 15;
