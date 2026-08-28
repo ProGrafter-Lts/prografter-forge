@@ -85,8 +85,8 @@ const TradeVaultSection = ({ tradeId }: Props) => {
   const currentByType = new Map<string, VaultDocument>();
   docs.filter((d) => d.is_current).forEach((d) => currentByType.set(d.document_type, d));
 
-  const summary = computeVaultSummary(docs);
-  const dashVerification = computeDashboardVerification(docs, manualCtx);
+  const summary = computeVaultSummary(docs, manualCtx.tradeType);
+  const dashVerification = computeDashboardVerification(docs, manualCtx, manualCtx.tradeType);
 
   const viewFile = async (doc: VaultDocument) => {
     if (!doc.file_url) return;
