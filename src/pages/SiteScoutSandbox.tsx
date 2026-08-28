@@ -2280,8 +2280,39 @@ const SiteScoutSandbox = () => {
           </div>
         </div>
       </main>
+
+      {scrutinyView && (
+        <PackScrutinyModal
+          title={scrutinyView.title}
+          subtitle={scrutinyView.subtitle}
+          lines={scrutinyView.lines}
+          onClose={() => setScrutiny(null)}
+          onQuantityChange={(key, value) =>
+            Number.isFinite(value) && updateOverride(key, "quantity", value)
+          }
+          onTradeRateChange={(key, value) =>
+            Number.isFinite(value) &&
+            setTradeRateOverrides((p) => ({ ...p, [key]: Number(value.toFixed(2)) }))
+          }
+          onResetLine={(key) => {
+            setOverrides((p) => {
+              const next = { ...p };
+              if (next[key]) next[key] = { ...next[key], quantity: undefined };
+              return next;
+            });
+            setTradeRateOverrides((p) => {
+              const next = { ...p };
+              delete next[key];
+              return next;
+            });
+          }}
+          tradeGap={arbitrage.tradeGap}
+          tradeGapPct={arbitrage.tradeGapPct}
+        />
+      )}
     </div>
   );
 };
+
 
 export default SiteScoutSandbox;
