@@ -312,7 +312,7 @@ const BusinessHealthDashboard = ({
   const summary = buildSummarySentence(health, input);
   const toneHex = TONE_HEX[health.tone];
 
-  const vault = computeVaultSummary(input.vaultDocs);
+  const vault = computeVaultSummary(input.vaultDocs, input.tradeType);
   const pendingAmount = allQuotes
     .filter((q) => q.status === "pending")
     .reduce((s, q) => s + Number(q.amount || 0), 0);
