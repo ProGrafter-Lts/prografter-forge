@@ -1203,6 +1203,20 @@ const SignupTrade = () => {
                       {RENEWABLE_TRADE_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
                     </optgroup>
                   </select>
+                  {isOtherTradeType(tradeType) && (
+                    <div className="mt-3">
+                      <label className={labelClass}>What trade do you do? *</label>
+                      <input
+                        className={inputClass}
+                        value={tradeTypeOther}
+                        onChange={(e) => setTradeTypeOther(e.target.value)}
+                        placeholder="e.g. Groundworker, Damp Specialist, Locksmith"
+                      />
+                      <p className="mt-1.5 font-body text-xs text-cream/50">
+                        Required — we can't verify or match you without knowing your actual trade.
+                      </p>
+                    </div>
+                  )}
                   {isGreen && (
                     <p className="mt-2 inline-flex items-center gap-1.5 font-mono text-xs text-teal">
                       <Leaf className="w-3 h-3" /> Green trade — extra MCS / TrustMark fields appear below
