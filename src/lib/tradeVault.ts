@@ -37,12 +37,35 @@ export interface VaultDocTypeConfig {
 export const normalizeTradeType = (tradeType?: string | null): string =>
   (tradeType ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
 
+/**
+ * Every trade type named by at least one document config. Anything outside this
+ * set ("Other", free-text, legacy or new trades) is treated as unknown.
+ */
+let knownTradeTypesCache: Set<string> | null = null;
+const getKnownTradeTypes = (): Set<string> => {
+  if (!knownTradeTypesCache) {
+    knownTradeTypesCache = new Set(
+      VAULT_DOC_TYPES.flatMap((cfg) => cfg.applicableTradeTypes ?? []).map(normalizeTradeType),
+    );
+  }
+  return knownTradeTypesCache;
+};
+
+/** True when we don't recognise the trade type and must not filter anything out. */
+export const isUnknownTradeType = (tradeType?: string | null): boolean => {
+  const normalized = normalizeTradeType(tradeType);
+  if (!normalized) return true;
+  return !getKnownTradeTypes().has(normalized);
+};
+
 export const isDocTypeApplicableToTrade = (
   cfg: VaultDocTypeConfig,
   tradeType?: string | null,
 ): boolean => {
   if (!cfg.applicableTradeTypes || cfg.applicableTradeTypes.length === 0) return true;
-  if (!tradeType) return true;
+  // Unknown / unmatched trade type ("Other", blank, a trade we haven't mapped):
+  // show the full optional set rather than silently hiding credentials.
+  if (isUnknownTradeType(tradeType)) return true;
   const normalized = normalizeTradeType(tradeType);
   return cfg.applicableTradeTypes.some((t) => normalizeTradeType(t) === normalized);
 };
