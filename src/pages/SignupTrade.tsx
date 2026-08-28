@@ -236,8 +236,11 @@ const SignupTrade = () => {
       setAgreedTerms(true);
 
       const tt = (data as any).trade_type ?? "";
-      // 'Other' is the placeholder set by handle_new_user — treat as empty.
-      setTradeType(tt && tt !== "Other" ? tt : "");
+      const tto = ((data as any).trade_type_other ?? "").trim();
+      // 'Other' with no free text is the placeholder set by handle_new_user —
+      // treat that as empty. 'Other' WITH free text is a genuine selection.
+      setTradeType(tt && (tt !== "Other" || tto) ? tt : "");
+      setTradeTypeOther(tto);
       setCompanyName((data as any).company_name ?? "");
       setBusinessStructure(((data as any).business_structure as any) ?? "");
       setCompaniesHouseNumber((data as any).companies_house_number ?? "");
