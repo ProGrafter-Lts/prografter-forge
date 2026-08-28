@@ -115,8 +115,8 @@ export const SAMPLE_DRAWING_PACK: ExtractedDrawing = {
     rooflights: true,
     rooflightCount: 2,
     knockThrough: true,
-    steelSpan: 3.6,
-    perimeterRun: 14,
+    steelSpan: 5.5,
+    perimeterRun: 20,
     abutmentRun: 6,
   },
   prelimsInputs: {

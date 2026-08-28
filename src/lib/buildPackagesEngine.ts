@@ -141,8 +141,10 @@ export const DEFAULT_ENVELOPE_INPUTS: EnvelopeInputs = {
   rooflights: true,
   rooflightCount: 2,
   knockThrough: true,
-  steelSpan: 3.6,
-  perimeterRun: 14,
+  // 5.5m rear knock-through opening into the existing house.
+  steelSpan: 5.5,
+  // Fascia / soffit / gutter run around the new roofline.
+  perimeterRun: 20,
   abutmentRun: 6,
 };
 
