@@ -846,9 +846,60 @@ const SiteScoutSandbox = () => {
                   ))}
                 </div>
               </div>
+
+              {/* Stage 1 output — locked site risk & ground condition summary */}
+              <div
+                className={cardClass}
+                style={groundTruthLocked ? { borderColor: `${ACCENT}66` } : undefined}
+              >
+                <div className="flex items-center justify-between gap-2 mb-3">
+                  <SectionTitle>Site Risk &amp; Ground Condition Summary</SectionTitle>
+                  <span
+                    className="font-mono text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-full"
+                    style={
+                      groundTruthLocked
+                        ? { backgroundColor: "rgba(56,189,248,0.15)", color: ACCENT }
+                        : { backgroundColor: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.6)" }
+                    }
+                  >
+                    {groundTruthLocked ? "Locked" : "Draft"}
+                  </span>
+                </div>
+                <div className="rounded-xl border border-white/10 bg-black/25 p-3 space-y-2">
+                  {riskSummary.map((n, i) => (
+                    <p key={i} className="font-mono text-[11px] text-white/75 leading-relaxed">
+                      • {n}
+                    </p>
+                  ))}
+                </div>
+                <p className={`${labelClass} mt-3`}>Stated ground-risk exclusions</p>
+                <div className="rounded-xl border border-white/10 p-3 space-y-2">
+                  {riskExclusions.map((n, i) => (
+                    <p key={i} className="font-mono text-[11px] text-white/55 leading-relaxed">
+                      • {n}
+                    </p>
+                  ))}
+                </div>
+                <button
+                  onClick={() => {
+                    setGroundTruthLocked(true);
+                    setStep(2);
+                  }}
+                  className="mt-3 w-full rounded-lg px-3 py-2 font-mono text-[11px] uppercase tracking-wider font-bold"
+                  style={
+                    groundTruthLocked
+                      ? { border: "1px solid rgba(255,255,255,0.18)", color: "rgba(255,255,255,0.7)" }
+                      : { backgroundColor: ACCENT, color: "#04233a" }
+                  }
+                >
+                  {groundTruthLocked
+                    ? "Ground truth locked · continue to Stage 2"
+                    : "🔒 Lock ground truth & open Stage 2"}
+                </button>
+              </div>
             </div>
 
-            {/* ================= RIGHT: steps 2–4 ================= */}
+            {/* ================= RIGHT: stages 2–4 ================= */}
             <div className="xl:col-span-8 space-y-5">
               {/* ---------- STEP 2 ---------- */}
               {step <= 2 && (
