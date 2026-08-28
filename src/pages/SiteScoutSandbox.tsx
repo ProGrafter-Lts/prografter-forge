@@ -699,7 +699,7 @@ const SiteScoutSandbox = () => {
                 previewUrl={previewUrl}
                 onIngest={handleIngest}
                 onOpenViewer={() => {
-                  setStep(3);
+                  setStep(2);
                   setBoqTab("drawings");
                 }}
               />
