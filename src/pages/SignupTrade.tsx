@@ -323,6 +323,7 @@ const SignupTrade = () => {
       const chValid = !chNorm || COMPANIES_HOUSE_NUMBER.test(chNorm);
       const updates: Record<string, unknown> = {
         trade_type: tradeType || null,
+        trade_type_other: isOtherTradeType(tradeType) ? tradeTypeOther.trim() || null : null,
         company_name: companyName.trim() || null,
         business_structure: businessStructure || null,
         // Only persist a CH number once it's a valid 8-char format; otherwise leave null
@@ -554,6 +555,11 @@ const SignupTrade = () => {
     setCompaniesHouseError("");
     if (!tradeType || !companyName.trim()) {
       setError("Trade type and company name are required");
+      return;
+    }
+    const tradeTypeErr = tradeTypeSelectionError(tradeType, tradeTypeOther);
+    if (tradeTypeErr) {
+      setError(tradeTypeErr);
       return;
     }
     if (!businessStructure) {
