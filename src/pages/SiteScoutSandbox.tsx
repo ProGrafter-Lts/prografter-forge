@@ -87,7 +87,9 @@ import {
 import DrawingIngestZone from "@/components/sitescout/DrawingIngestZone";
 import DrawingMarkupViewer from "@/components/sitescout/DrawingMarkupViewer";
 import { type ExtractedDrawing } from "@/lib/drawingIngestion";
-import { generateClientQuotePdf } from "@/lib/clientQuotePdf";
+
+import DispatchHub from "@/components/sitescout/DispatchHub";
+
 
 /* ------------------------------------------------------------------ theme */
 
@@ -178,7 +180,7 @@ type StepId = 1 | 2 | 3 | 4;
 const STEPS: { id: StepId; label: string; sub: string }[] = [
   { id: 1, label: "Physical Ground Truth", sub: "SiteScout baseline" },
   { id: 2, label: "Takeoff & Retail Costing", sub: "Granular material list" },
-  { id: 3, label: "Customer Quote & Checker", sub: "Contract-ready" },
+  { id: 3, label: "Dispatch & Handover Hub", sub: "Client-facing PDF" },
   { id: 4, label: "Procurement & Trade Gap", sub: "Merchant arbitrage" },
 ];
 
@@ -220,7 +222,7 @@ const SiteScoutSandbox = () => {
   const [extracted, setExtracted] = useState<ExtractedDrawing | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [boqTab, setBoqTab] = useState<"boq" | "drawings">("boq");
-  const [quoteLocked, setQuoteLocked] = useState(false);
+  
   const [trenchLength, setTrenchLength] = useState(24.5);
   const [drainageRun, setDrainageRun] = useState(14);
   const [basis, setBasis] = useState<MuckAwayBasis>("volume");
@@ -501,6 +503,16 @@ const SiteScoutSandbox = () => {
     () => checkCompetitorQuote(masterBoq, competitorText, finalCustomerExVat),
     [masterBoq, competitorText, finalCustomerExVat],
   );
+  /** Homeowner-facing package roll-up (retail only — never merchant pricing). */
+  const clientPackages = useMemo<[string, number][]>(() => {
+    const factor = retailTotal > 0 ? finalCustomerExVat / retailTotal : 1;
+    const map = new Map<string, number>();
+    for (const l of masterBoq) map.set(l.category, (map.get(l.category) ?? 0) + l.total * factor);
+    return [...map.entries()]
+      .map(([k, v]) => [k, Number(v.toFixed(2))] as [string, number])
+      .sort((a, b) => b[1] - a[1]);
+  }, [masterBoq, retailTotal, finalCustomerExVat]);
+
   const packGroups = useMemo(
     () =>
       arbitrage.packs.map((p) => ({
@@ -1477,14 +1489,6 @@ const SiteScoutSandbox = () => {
                           </button>
                         );
                       })}
-                      {quoteLocked && (
-                        <span
-                          className="self-center font-mono text-[10px] uppercase tracking-wider px-2 py-1 rounded-full"
-                          style={{ backgroundColor: "rgba(56,189,248,0.15)", color: ACCENT }}
-                        >
-                          Quote locked &amp; exported
-                        </span>
-                      )}
                     </div>
 
                     {boqTab === "drawings" ? (
@@ -1723,42 +1727,23 @@ const SiteScoutSandbox = () => {
                 </>
               )}
 
-              {/* ---------- STAGE 3: customer quote & competitor checker ---------- */}
+              {/* ---------- STAGE 3: dispatch & handover hub ---------- */}
               {step === 3 && (
                 <>
                   <div className={cardClass}>
                     <div className="flex items-center justify-between gap-3 flex-wrap mb-3">
-                      <SectionTitle>Stage 3 · Contract-ready customer quotation</SectionTitle>
-                      <div className="flex gap-2 flex-wrap items-center">
-                        {quoteLocked && (
-                          <span
-                            className="font-mono text-[10px] uppercase tracking-wider px-2 py-1 rounded-full"
-                            style={{ backgroundColor: "rgba(56,189,248,0.15)", color: ACCENT }}
-                          >
-                            Quote locked &amp; exported
-                          </span>
-                        )}
-                        <button
-                          disabled={!masterBoq.length}
-                          onClick={() => {
-                            setQuoteLocked(true);
-                            generateClientQuotePdf(masterBoq, quoteArbitrage, {
-                              projectRef,
-                              sheetName: extracted?.sheetName,
-                              vatRate,
-                              riskSummary,
-                              exclusions: riskExclusions,
-                            });
-                          }}
-                          className="font-mono text-[10px] uppercase tracking-wider rounded px-2.5 py-1 font-bold disabled:opacity-50"
-                          style={{ backgroundColor: ACCENT, color: "#04233a" }}
-                        >
-                          🔒 Lock &amp; Export Client Quote (PDF)
-                        </button>
-                      </div>
+                      <SectionTitle>Stage 3 · Dispatch &amp; Handover Hub</SectionTitle>
+                      <span className="font-mono text-[10px] uppercase tracking-wider text-white/45">
+                        Client-facing document builder
+                      </span>
                     </div>
+                    <p className="font-mono text-[11px] text-white/45 mb-4">
+                      Amy's retail benchmark roll-up wrapped in your own branding, the locked
+                      SiteScout ground truth, Sharon's programme and your contractual terms. No
+                      merchant or trade-gap figures are ever shown to the homeowner.
+                    </p>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                       {[
                         ["Base retail quotation (ex VAT)", money(baseRetailQuote), false],
                         ["Trade saving passed to customer", money(arbitrage.passedToCustomer), false],
@@ -1779,34 +1764,19 @@ const SiteScoutSandbox = () => {
                         </div>
                       ))}
                     </div>
-
-                    <p className={labelClass}>Schedule of works (as presented to the homeowner)</p>
-                    <div className="rounded-xl border border-white/10 bg-black/25 p-3 space-y-1.5 mb-4">
-                      {[...new Map(masterBoq.map((l) => [l.category, 0])).keys()].map((cat) => {
-                        const value = masterBoq
-                          .filter((l) => l.category === cat)
-                          .reduce((s, l) => s + l.total, 0);
-                        const factor = retailTotal > 0 ? finalCustomerExVat / retailTotal : 1;
-                        return (
-                          <div key={cat} className="flex justify-between gap-3">
-                            <span className="font-mono text-[11px] text-white/70">{cat}</span>
-                            <span className="font-mono text-[11px] text-white/85 whitespace-nowrap">
-                              {money(value * factor)}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-
-                    <p className={labelClass}>Ground-risk exclusions carried onto the quote</p>
-                    <div className="rounded-xl border border-white/10 p-3 space-y-1.5">
-                      {riskExclusions.map((e, i) => (
-                        <p key={i} className="font-mono text-[11px] text-white/55 leading-relaxed">
-                          • {e}
-                        </p>
-                      ))}
-                    </div>
                   </div>
+
+                  <DispatchHub
+                    boq={masterBoq}
+                    projectRef={projectRef}
+                    riskSummary={riskSummary}
+                    exclusions={riskExclusions}
+                    packages={clientPackages}
+                    subtotalExVat={finalCustomerExVat}
+                    totalIncVat={finalCustomerIncVat}
+                    vatRate={vatRate}
+                  />
+
 
                   {/* Competitor quote checker */}
                   <div className={cardClass}>
