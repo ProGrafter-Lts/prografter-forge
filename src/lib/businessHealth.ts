@@ -320,7 +320,7 @@ export const buildSummarySentence = (health: BusinessHealth, input: BusinessHeal
       : "Your business needs attention today.";
 
   const actions: string[] = [];
-  const vault = computeVaultSummary(input.vaultDocs);
+  const vault = computeVaultSummary(input.vaultDocs, input.tradeType);
   if (vault.missingRequired.length > 0) actions.push("completing your TradeVault");
   if (input.pipeline.toContact > 0) actions.push(`following up ${input.pipeline.toContact} homeowner${input.pipeline.toContact > 1 ? "s" : ""}`);
   if (input.profileStrength.percent < 80) actions.push("finishing your profile");
