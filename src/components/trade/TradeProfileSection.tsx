@@ -14,6 +14,7 @@ import {
   saveTradeSpecialisms,
 } from "@/lib/specialisms";
 import {
+  ALL_TRADE_TYPES,
   GENERAL_TRADE_TYPES,
   RENEWABLE_TRADE_TYPES,
   isOtherTradeType,
