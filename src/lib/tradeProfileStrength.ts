@@ -147,6 +147,7 @@ export interface PriorityInput {
   strength: ProfileStrength;
   verification: DashboardVerification;
   vaultDocs: VaultDocument[];
+  tradeType?: string | null;
   specialismCount: number;
   bio: string | null;
   calendarConnected: boolean;
