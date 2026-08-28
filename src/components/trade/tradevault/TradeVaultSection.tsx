@@ -218,17 +218,34 @@ const TradeVaultSection = ({ tradeId }: Props) => {
         </div>
       )}
 
+      {/* Completed documents — surfaced first so progress is obvious */}
+      {completedTypes.length > 0 && (
+        <div className="rounded-2xl border-2 border-emerald-500/40 bg-emerald-500/5 p-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-emerald-600" />
+            <h3 className="font-mono text-sm uppercase tracking-wide text-emerald-700">
+              Completed · {completedTypes.length} approved
+            </h3>
+          </div>
+          {completedTypes.map(renderDocRow)}
+        </div>
+      )}
+
       {/* Required documents */}
-      <div className="space-y-3">
-        <h3 className="font-mono text-sm uppercase tracking-wide text-muted-foreground">Required for verification</h3>
-        {requiredTypes.map(renderDocRow)}
-      </div>
+      {requiredTypes.length > 0 && (
+        <div className="space-y-3">
+          <h3 className="font-mono text-sm uppercase tracking-wide text-muted-foreground">Still required for verification</h3>
+          {requiredTypes.map(renderDocRow)}
+        </div>
+      )}
 
       {/* Optional documents */}
-      <div className="space-y-3">
-        <h3 className="font-mono text-sm uppercase tracking-wide text-muted-foreground">Optional but important</h3>
-        {optionalTypes.map(renderDocRow)}
-      </div>
+      {optionalTypes.length > 0 && (
+        <div className="space-y-3">
+          <h3 className="font-mono text-sm uppercase tracking-wide text-muted-foreground">Optional but important</h3>
+          {optionalTypes.map(renderDocRow)}
+        </div>
+      )}
 
       {/* Future-proofing placeholders */}
       <div className="space-y-3">
