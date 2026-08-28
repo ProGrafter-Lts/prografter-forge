@@ -417,6 +417,14 @@ const SiteScoutSandbox = () => {
   const [agentFilter, setAgentFilter] = useState<AgentId | null>(null);
   const visibleBoq = agentFilter ? masterBoq.filter((l) => l.agent === agentFilter) : masterBoq;
 
+  // Stage 2 — contractor profit markup on top of the measured cost roll-up.
+  const [markupPct, setMarkupPct] = useState(25);
+  const [openPacks, setOpenPacks] = useState<Record<string, boolean>>({ A: true });
+
+  // Stage 3 — competitor quote checker.
+  const [competitorText, setCompetitorText] = useState("");
+
+
   // ---------- Step 4: arbitrage ----------
   const [negotiated, setNegotiated] = useState<Record<PackId, number | undefined>>(
     {} as Record<PackId, number | undefined>,
