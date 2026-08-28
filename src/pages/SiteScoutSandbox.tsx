@@ -1912,12 +1912,77 @@ const SiteScoutSandbox = () => {
                 </>
               )}
 
-              {/* ---------- STEP 4 ---------- */}
+              {/* ---------- STAGE 4: merchant procurement & the trade gap ---------- */}
               {step === 4 && (
                 <>
+                  {/* RFQ packs */}
+                  <div className={cardClass}>
+                    <div className="flex items-center justify-between gap-3 flex-wrap mb-3">
+                      <SectionTitle>Amy · Merchant RFQ tender pack generator</SectionTitle>
+                      <div className="flex gap-2 flex-wrap">
+                        <button
+                          onClick={() =>
+                            downloadText(
+                              `${projectRef}-rfq-packs.csv`,
+                              allPacksToCsv(arbitrage.packs, projectRef),
+                            )
+                          }
+                          className="rounded-lg px-3 py-2 font-mono text-[11px] uppercase tracking-wider font-bold"
+                          style={{ backgroundColor: ACCENT, color: "#04233a" }}
+                        >
+                          📥 Export 5 merchant RFQ tender packs (CSV)
+                        </button>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      {arbitrage.packs.map((p) => (
+                        <div
+                          key={p.pack.id}
+                          className="rounded-xl border border-white/10 bg-white/[0.02] p-3"
+                        >
+                          <div className="flex justify-between gap-2 flex-wrap items-start">
+                            <div className="min-w-[200px]">
+                              <p className="font-mono text-xs text-white/85">{p.pack.name}</p>
+                              <p className="font-mono text-[10px] text-white/40 mt-1">
+                                {p.pack.merchantHint} · {p.lines.length} line(s) · typical trade
+                                discount {p.pack.typicalDiscountPct}%
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <p
+                                className="font-heading text-sm whitespace-nowrap"
+                                style={{ color: ACCENT }}
+                              >
+                                {money(p.retailTotal)}
+                              </p>
+                              <button
+                                onClick={() =>
+                                  navigator.clipboard?.writeText(packToCsv(p, projectRef))
+                                }
+                                className="font-mono text-[10px] uppercase tracking-wider rounded px-2 py-1 border border-white/20 text-white/70"
+                              >
+                                Copy
+                              </button>
+                              <button
+                                onClick={() =>
+                                  downloadText(
+                                    `${projectRef}-pack-${p.pack.id}.csv`,
+                                    packToCsv(p, projectRef),
+                                  )
+                                }
+                                className="font-mono text-[10px] uppercase tracking-wider rounded px-2 py-1 border border-white/20 text-white/70"
+                              >
+                                CSV
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                   <div className={cardClass}>
                     <SectionTitle>
-                      Step 4 · Procurement arbitrage &amp; trade margin gap
+                      Stage 4 · Trade Gap calculator &amp; margin splitter
                     </SectionTitle>
 
                     <div className="flex items-end gap-3 flex-wrap mb-4">
