@@ -180,7 +180,7 @@ type StepId = 1 | 2 | 3 | 4;
 const STEPS: { id: StepId; label: string; sub: string }[] = [
   { id: 1, label: "Physical Ground Truth", sub: "SiteScout baseline" },
   { id: 2, label: "Takeoff & Retail Costing", sub: "Granular material list" },
-  { id: 3, label: "Customer Quote & Checker", sub: "Contract-ready" },
+  { id: 3, label: "Dispatch & Handover Hub", sub: "Client-facing PDF" },
   { id: 4, label: "Procurement & Trade Gap", sub: "Merchant arbitrage" },
 ];
 
