@@ -166,7 +166,7 @@ const scoreMessages = (m: BusinessHealthInput["messages"]): number => {
 export const computeBusinessHealth = (input: BusinessHealthInput): BusinessHealth => {
   const raw: Record<ModuleKey, number> = {
     pipeline: scorePipeline(input.pipeline),
-    tradevault: scoreTradeVault(input.vaultDocs),
+    tradevault: scoreTradeVault(input.vaultDocs, input.tradeType),
     profile: clamp(input.profileStrength.percent),
     quotes: scoreQuotes(input.quotes),
     availability: scoreAvailability(input.availability),
