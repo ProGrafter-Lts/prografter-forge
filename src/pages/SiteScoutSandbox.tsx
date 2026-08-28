@@ -330,7 +330,7 @@ const SiteScoutSandbox = () => {
       setEnvResult(en);
       setPrelimsResult(pr);
       setStatus("verified");
-      setStep(3);
+      setStep(2);
     }, 900);
   };
 
