@@ -56,20 +56,11 @@ type PortfolioDraft = {
 const SpecialismsPicker = lazy(() => import("@/components/SpecialismsPicker"));
 const TradeDateField = lazy(() => import("@/components/trade/TradeDateField"));
 
-const GENERAL_TRADE_TYPES = [
-  "Electrician",
-  "Plumber",
-  "Gas Engineer",
-  "Builder",
-  "Roofer",
-  "Plasterer",
-  "Carpenter",
-  "Tiler",
-  "Decorator",
-  "Scaffolder",
-  "Landscaper",
-  "Other",
-] as const;
+import {
+  GENERAL_TRADE_TYPES,
+  isOtherTradeType,
+  tradeTypeSelectionError,
+} from "@/lib/tradeTypes";
 
 const UK_POSTCODE = /^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}$/i;
 
@@ -594,6 +585,7 @@ const SignupTrade = () => {
     try {
       const updates: Record<string, unknown> = {
         trade_type: tradeType,
+        trade_type_other: isOtherTradeType(tradeType) ? tradeTypeOther.trim() : null,
         company_name: companyName.trim(),
         business_structure: businessStructure,
         companies_house_number: chNorm || null,
