@@ -46,7 +46,7 @@ const strengthLabel = (percent: number): ProfileStrength["label"] => {
 };
 
 export const computeProfileStrength = (t: TradeStrengthInput): ProfileStrength => {
-  const summary = computeVaultSummary(t.vaultDocs);
+  const summary = computeVaultSummary(t.vaultDocs, t.trade_type);
   const vaultComplete = summary.missingRequired.length === 0 && t.vaultDocs.length > 0;
 
   const insuranceDone =
