@@ -157,8 +157,9 @@ const TradeVaultSection = ({ tradeId }: Props) => {
     );
   }
 
-  const requiredTypes = VAULT_DOC_TYPES.filter((d) => d.required);
-  const optionalTypes = VAULT_DOC_TYPES.filter((d) => !d.required);
+  const applicableTypes = VAULT_DOC_TYPES.filter((d) => isDocTypeApplicableToTrade(d, manualCtx.tradeType));
+  const requiredTypes = applicableTypes.filter((d) => d.required);
+  const optionalTypes = applicableTypes.filter((d) => !d.required);
 
   return (
     <div className="space-y-6">
