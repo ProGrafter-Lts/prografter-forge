@@ -169,10 +169,19 @@ const TradeProfileSection = ({ tradeId }: TradeProfileSectionProps) => {
   };
 
   const handleSave = async () => {
+    if (tradeTypeError) {
+      toast.error(tradeTypeError);
+      return;
+    }
     setSaving(true);
     const { error } = await supabase
       .from("trades")
-      .update(form)
+      .update({
+        ...form,
+        trade_type_other: isOtherTradeType(form.trade_type)
+          ? form.trade_type_other.trim()
+          : null,
+      } as never)
       .eq("id", tradeId);
     setSaving(false);
 
@@ -241,11 +250,48 @@ const TradeProfileSection = ({ tradeId }: TradeProfileSectionProps) => {
             value={form.postcode}
             onChange={(v) => setForm({ ...form, postcode: v.toUpperCase() })}
           />
-          <Field
-            label="Trade type"
-            value={form.trade_type}
-            onChange={(v) => setForm({ ...form, trade_type: v })}
-          />
+          <div>
+            <label className="block font-mono text-xs text-muted-foreground mb-1.5 uppercase tracking-wider">
+              Trade type
+            </label>
+            <select
+              value={form.trade_type}
+              onChange={(e) => setForm({ ...form, trade_type: e.target.value })}
+              className="w-full bg-background border border-border rounded-xl px-4 py-2.5 font-mono text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+            >
+              <option value="">Select your trade…</option>
+              {form.trade_type &&
+                !ALL_TRADE_TYPES.includes(form.trade_type) && (
+                  <option value={form.trade_type}>{form.trade_type} (current)</option>
+                )}
+              <optgroup label="General">
+                {GENERAL_TRADE_TYPES.map((t) => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </optgroup>
+              <optgroup label="Renewable / Green">
+                {RENEWABLE_TRADE_TYPES.map((t) => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </optgroup>
+            </select>
+            {isOtherTradeType(form.trade_type) && (
+              <div className="mt-3">
+                <label className="block font-mono text-xs text-muted-foreground mb-1.5 uppercase tracking-wider">
+                  What trade do you do? *
+                </label>
+                <input
+                  value={form.trade_type_other}
+                  onChange={(e) => setForm({ ...form, trade_type_other: e.target.value })}
+                  placeholder="e.g. Groundworker, Damp Specialist"
+                  className="w-full bg-background border border-border rounded-xl px-4 py-2.5 font-mono text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                />
+                <p className="mt-1.5 font-mono text-xs text-muted-foreground">
+                  Required when your trade type is "Other".
+                </p>
+              </div>
+            )}
+          </div>
           <Field
             label="Website"
             value={form.website}
