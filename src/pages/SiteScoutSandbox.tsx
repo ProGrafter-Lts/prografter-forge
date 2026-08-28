@@ -619,13 +619,13 @@ const SiteScoutSandbox = () => {
               Internal Beta · Sandbox
             </span>
             <h1 className="font-heading text-2xl md:text-3xl font-bold text-white">
-              2-Tier ProGrafter Engine — SiteScout Ground Truth + Multi-Agent Takeoff &amp; Merchant
-              Procurement Hub
+              ProGrafter Master Workflow — Ground Truth → Takeoff → Customer Quote → Trade Gap
             </h1>
             <p className="font-mono text-sm text-white/55 mt-2 max-w-4xl">
-              Tier 1 sets the physical site baseline. Tier 2 runs four specialist takeoff agents
-              against the drawing geometry, compiles a retail-benchmark BoQ, tenders it as five
-              merchant RFQ packs, then splits the negotiated trade gap between profit and price.
+              Four sequential stages. Stage 1 locks the physical site baseline and risk summary.
+              Stage 2 measures the drawing and rolls every material, plant and labour line up to a
+              marked-up retail quotation. Stage 3 issues the contract-ready quote and cross-examines
+              competitor pricing. Stage 4 tenders the packs to merchants and splits the trade gap.
             </p>
           </div>
 
