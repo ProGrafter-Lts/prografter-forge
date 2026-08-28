@@ -565,14 +565,21 @@ const SiteScoutSandbox = () => {
     </div>
   );
 
+  /** Strictly sequential — a stage only unlocks when the previous one has produced its output. */
+  const stageUnlocked = (n: StepId) =>
+    n === 1 ? true : n === 2 ? groundTruthLocked : status === "verified" && groundTruthLocked;
+
   const StepBadge = ({ n }: { n: StepId }) => {
     const active = step === n;
     const s = STEPS[n - 1];
+    const unlocked = stageUnlocked(n);
     return (
       <button
-        onClick={() => setStep(n)}
+        onClick={() => unlocked && setStep(n)}
         aria-pressed={active}
-        className="flex-1 min-w-[170px] text-left rounded-xl border px-3 py-2.5 transition-colors"
+        disabled={!unlocked}
+        title={unlocked ? undefined : "Complete the previous stage first"}
+        className="flex-1 min-w-[170px] text-left rounded-xl border px-3 py-2.5 transition-colors disabled:opacity-45 disabled:cursor-not-allowed"
         style={{
           borderColor: active ? ACCENT : "rgba(255,255,255,0.12)",
           backgroundColor: active ? "rgba(56,189,248,0.10)" : "rgba(255,255,255,0.02)",
@@ -582,7 +589,7 @@ const SiteScoutSandbox = () => {
           className="font-mono text-[10px] uppercase tracking-wider"
           style={{ color: active ? ACCENT : "rgba(255,255,255,0.45)" }}
         >
-          Step {n} · {s.sub}
+          Stage {n} · {s.sub} {unlocked ? "" : "🔒"}
         </p>
         <p className="font-heading text-sm font-bold text-white mt-0.5">{s.label}</p>
       </button>
