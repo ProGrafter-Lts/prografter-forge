@@ -61,11 +61,14 @@ import {
 } from "@/lib/complianceEngine";
 import {
   DEFAULT_GROUND_TRUTH,
+  buildRiskExclusions,
+  buildSiteRiskSummary,
   deriveGroundTruth,
   type ConsumerUnitType,
   type GroundTruth,
   type SystemType,
 } from "@/lib/siteScoutGroundTruth";
+import { checkCompetitorQuote } from "@/lib/competitorQuoteChecker";
 import {
   allPacksToCsv,
   buildMasterBoq,
