@@ -88,6 +88,8 @@ import DrawingIngestZone from "@/components/sitescout/DrawingIngestZone";
 import DrawingMarkupViewer from "@/components/sitescout/DrawingMarkupViewer";
 import { type ExtractedDrawing } from "@/lib/drawingIngestion";
 import { generateClientQuotePdf } from "@/lib/clientQuotePdf";
+import DispatchHub from "@/components/sitescout/DispatchHub";
+
 
 /* ------------------------------------------------------------------ theme */
 
@@ -501,6 +503,16 @@ const SiteScoutSandbox = () => {
     () => checkCompetitorQuote(masterBoq, competitorText, finalCustomerExVat),
     [masterBoq, competitorText, finalCustomerExVat],
   );
+  /** Homeowner-facing package roll-up (retail only — never merchant pricing). */
+  const clientPackages = useMemo<[string, number][]>(() => {
+    const factor = retailTotal > 0 ? finalCustomerExVat / retailTotal : 1;
+    const map = new Map<string, number>();
+    for (const l of masterBoq) map.set(l.category, (map.get(l.category) ?? 0) + l.total * factor);
+    return [...map.entries()]
+      .map(([k, v]) => [k, Number(v.toFixed(2))] as [string, number])
+      .sort((a, b) => b[1] - a[1]);
+  }, [masterBoq, retailTotal, finalCustomerExVat]);
+
   const packGroups = useMemo(
     () =>
       arbitrage.packs.map((p) => ({
