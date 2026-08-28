@@ -1377,18 +1377,11 @@ const SiteScoutSandbox = () => {
                         </button>
                         <button
                           disabled={!masterBoq.length}
-                          onClick={() => {
-                            setQuoteLocked(true);
-                            generateClientQuotePdf(masterBoq, arbitrage, {
-                              projectRef,
-                              sheetName: extracted?.sheetName,
-                              vatRate,
-                            });
-                          }}
+                          onClick={() => setStep(3)}
                           className="font-mono text-[10px] uppercase tracking-wider rounded px-2.5 py-1 font-bold disabled:opacity-50"
                           style={{ backgroundColor: ACCENT, color: "#04233a" }}
                         >
-                          🔒 Lock &amp; Export Client Quote
+                          Continue to Stage 3 · Customer quote →
                         </button>
                       </div>
                     </div>
