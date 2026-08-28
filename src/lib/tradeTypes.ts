@@ -42,3 +42,8 @@ export const tradeTypeSelectionError = (
   if (isOtherTradeType(other)) return "Please describe your actual trade, not 'Other'";
   return null;
 };
+
+export const ALL_TRADE_TYPES: string[] = [
+  ...GENERAL_TRADE_TYPES,
+  ...RENEWABLE_TRADE_TYPES,
+];
