@@ -1346,13 +1346,13 @@ const SiteScoutSandbox = () => {
                 </div>
               )}
 
-              {/* ---------- STEP 3 ---------- */}
-              {step === 3 && (
+              {/* ---------- STAGE 2 OUTPUT: granular takeoff & retail costing ---------- */}
+              {step === 2 && status === "verified" && (
                 <>
                   <div className={cardClass}>
                     <div className="flex items-center justify-between gap-3 flex-wrap mb-3">
                       <SectionTitle>
-                        Step 3 · Master Bill of Quantities (Retail Benchmark)
+                        Stage 2 · Granular material takeoff (retail costing)
                       </SectionTitle>
                       <div className="flex gap-2 flex-wrap">
                         {agentFilter && (
