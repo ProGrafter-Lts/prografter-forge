@@ -447,6 +447,35 @@ const SiteScoutSandbox = () => {
 
   // ---------- shared derived ----------
   const retailTotal = arbitrage.retailTotal;
+  /** Stage 2 cost roll-up + contractor markup = base retail customer quotation. */
+  const markupValue = Number(((retailTotal * markupPct) / 100).toFixed(2));
+  const baseRetailQuote = Number((retailTotal + markupValue).toFixed(2));
+  /** Stage 4 may pass part of the trade gap back to the customer. */
+  const finalCustomerExVat = Number((baseRetailQuote - arbitrage.passedToCustomer).toFixed(2));
+  const finalCustomerIncVat = Number((finalCustomerExVat * (1 + vatRate / 100)).toFixed(2));
+  const quoteArbitrage = useMemo(
+    () => ({
+      ...arbitrage,
+      retailTotal: baseRetailQuote,
+      customerQuoteTotal: finalCustomerExVat,
+      customerQuoteIncVat: finalCustomerIncVat,
+    }),
+    [arbitrage, baseRetailQuote, finalCustomerExVat, finalCustomerIncVat],
+  );
+  const competitorCheck = useMemo(
+    () => checkCompetitorQuote(masterBoq, competitorText, finalCustomerExVat),
+    [masterBoq, competitorText, finalCustomerExVat],
+  );
+  const packGroups = useMemo(
+    () =>
+      arbitrage.packs.map((p) => ({
+        pack: p.pack,
+        retailTotal: p.retailTotal,
+        lines: agentFilter ? p.lines.filter((l) => l.agent === agentFilter) : p.lines,
+      })),
+    [arbitrage.packs, agentFilter],
+  );
+
   const complianceItems = useMemo(
     () =>
       buildComplianceChecklist({
