@@ -386,20 +386,21 @@ const Login = () => {
               {homeownerSent && (
                 <form onSubmit={handleHomeownerCode} className="space-y-3 mt-3 pt-3 border-t border-navy/10">
                   <p className="font-mono text-xs text-navy">
-                    Enter the code from the email:
+                    Enter the 8-digit code from the email:
                   </p>
                   <input
                     type="text"
                     inputMode="numeric"
                     autoComplete="one-time-code"
+                    maxLength={8}
                     value={homeownerCode}
                     onChange={(e) => setHomeownerCode(e.target.value.replace(/\D/g, "").slice(0, 8))}
-                    placeholder="123456"
+                    placeholder="12345678"
                     className="w-full px-3 py-2 rounded-lg border border-navy/20 bg-white font-mono text-sm tracking-[0.3em] text-center focus:outline-none focus:ring-2 focus:ring-teal/40 focus:border-teal"
                   />
                   <button
                     type="submit"
-                    disabled={codeLoading || homeownerCode.length < 6}
+                    disabled={codeLoading || homeownerCode.length < 8}
                     className="w-full py-2 bg-teal text-cream font-mono text-xs rounded-lg hover:bg-teal-hover transition-colors disabled:opacity-50"
                   >
                     {codeLoading ? "Verifying..." : "Sign in with code"}
