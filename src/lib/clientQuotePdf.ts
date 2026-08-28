@@ -183,6 +183,25 @@ export function generateClientQuotePdf(
     y += 15;
   }
 
+  const exclusions = meta.exclusions ?? [];
+  if (exclusions.length) {
+    y += 12;
+    if (y + 26 + exclusions.length * 24 > H - 72) {
+      doc.addPage();
+      y = 72;
+    }
+    doc.setFont("helvetica", "bold").setFontSize(10).setTextColor(...NAVY);
+    doc.text("Ground-risk exclusions", M, y);
+    y += 16;
+    doc.setFont("helvetica", "normal").setFontSize(9).setTextColor(...GREY);
+    for (const line of exclusions) {
+      const w = doc.splitTextToSize(`•  ${line}`, W - M * 2);
+      doc.text(w, M, y);
+      y += w.length * 12 + 3;
+    }
+  }
+
+
   const pages = doc.getNumberOfPages();
   for (let p = 1; p <= pages; p++) {
     doc.setPage(p);
