@@ -19,6 +19,10 @@ export interface ClientQuoteMeta {
   sheetName?: string;
   clientName?: string;
   vatRate: number;
+  /** Stage 1 locked "Site Risk & Ground Condition Summary". */
+  riskSummary?: string[];
+  /** Ground-risk exclusions stated on the face of the quotation. */
+  exclusions?: string[];
 }
 
 /** Groups the BoQ into presentation-level packages — homeowners never see 40+ lines. */
