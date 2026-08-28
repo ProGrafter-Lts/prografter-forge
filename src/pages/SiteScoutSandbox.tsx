@@ -87,7 +87,7 @@ import {
 import DrawingIngestZone from "@/components/sitescout/DrawingIngestZone";
 import DrawingMarkupViewer from "@/components/sitescout/DrawingMarkupViewer";
 import { type ExtractedDrawing } from "@/lib/drawingIngestion";
-import { generateClientQuotePdf } from "@/lib/clientQuotePdf";
+
 import DispatchHub from "@/components/sitescout/DispatchHub";
 
 
@@ -222,7 +222,7 @@ const SiteScoutSandbox = () => {
   const [extracted, setExtracted] = useState<ExtractedDrawing | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [boqTab, setBoqTab] = useState<"boq" | "drawings">("boq");
-  const [quoteLocked, setQuoteLocked] = useState(false);
+  
   const [trenchLength, setTrenchLength] = useState(24.5);
   const [drainageRun, setDrainageRun] = useState(14);
   const [basis, setBasis] = useState<MuckAwayBasis>("volume");
@@ -1489,14 +1489,6 @@ const SiteScoutSandbox = () => {
                           </button>
                         );
                       })}
-                      {quoteLocked && (
-                        <span
-                          className="self-center font-mono text-[10px] uppercase tracking-wider px-2 py-1 rounded-full"
-                          style={{ backgroundColor: "rgba(56,189,248,0.15)", color: ACCENT }}
-                        >
-                          Quote locked &amp; exported
-                        </span>
-                      )}
                     </div>
 
                     {boqTab === "drawings" ? (
