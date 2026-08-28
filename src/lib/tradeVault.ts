@@ -219,14 +219,19 @@ export interface VaultSummary {
 
 /**
  * Roll up an overall verification summary from the current documents.
+ * Pass the trade's trade_type to filter out documents that don't apply to that trade.
  */
-export const computeVaultSummary = (docs: VaultDocument[]): VaultSummary => {
+export const computeVaultSummary = (
+  docs: VaultDocument[],
+  tradeType?: string | null,
+): VaultSummary => {
   const currentByType = new Map<string, VaultDocument>();
   docs
     .filter((d) => d.is_current)
     .forEach((d) => currentByType.set(d.document_type, d));
 
-  const requiredTypes = VAULT_DOC_TYPES.filter((d) => d.required);
+  const applicableTypes = VAULT_DOC_TYPES.filter((cfg) => isDocTypeApplicableToTrade(cfg, tradeType));
+  const requiredTypes = applicableTypes.filter((d) => d.required);
   let requiredUploaded = 0;
   let expiringSoon = 0;
   let expired = 0;
@@ -234,8 +239,8 @@ export const computeVaultSummary = (docs: VaultDocument[]): VaultSummary => {
   const expiringDocs: { config: VaultDocTypeConfig; days: number }[] = [];
   const expiredRequiredDocs: VaultDocTypeConfig[] = [];
 
-  // Count expiring/expired across ALL types
-  VAULT_DOC_TYPES.forEach((cfg) => {
+  // Count expiring/expired across applicable types only
+  applicableTypes.forEach((cfg) => {
     const doc = currentByType.get(cfg.key);
     const status = computeDisplayStatus(doc, cfg.required);
     if (status === "expiring_soon") {
