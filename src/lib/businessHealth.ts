@@ -349,7 +349,7 @@ export const buildBriefing = (
   input: BusinessHealthInput,
 ): BriefingContent => {
   const focus: string[] = [];
-  const vault = computeVaultSummary(input.vaultDocs);
+  const vault = computeVaultSummary(input.vaultDocs, input.tradeType);
 
   if (input.pipeline.toContact > 0)
     focus.push(`Contact ${input.pipeline.toContact} warm homeowner lead${input.pipeline.toContact > 1 ? "s" : ""}.`);
