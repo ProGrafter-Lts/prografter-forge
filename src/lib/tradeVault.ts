@@ -28,23 +28,59 @@ export interface VaultDocTypeConfig {
   hasCover?: boolean;
   hasPolicy?: boolean;
   hasExpiry?: boolean;
+  /** If set, the document only applies to these trade types. If omitted, applies to all. */
+  applicableTradeTypes?: string[];
 }
 
+// Normalise trade-type strings so "Painter & Decorator" and "painterdecorator" match.
+export const normalizeTradeType = (tradeType?: string | null): string =>
+  (tradeType ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
+
+export const isDocTypeApplicableToTrade = (
+  cfg: VaultDocTypeConfig,
+  tradeType?: string | null,
+): boolean => {
+  if (!cfg.applicableTradeTypes || cfg.applicableTradeTypes.length === 0) return true;
+  if (!tradeType) return true;
+  const normalized = normalizeTradeType(tradeType);
+  return cfg.applicableTradeTypes.some((t) => normalizeTradeType(t) === normalized);
+};
+
 export const VAULT_DOC_TYPES: VaultDocTypeConfig[] = [
-  // Required for verification
+  // Required for verification — every trade
   { key: "public_liability", label: "Public liability insurance", required: true, hasProvider: true, hasCover: true, hasPolicy: true, hasExpiry: true },
   { key: "proof_of_identity", label: "Proof of identity", required: true, hasExpiry: true },
   { key: "trade_qualifications", label: "Trade qualifications / certificates", required: true, hasProvider: true, hasPolicy: true, hasExpiry: true },
   { key: "company_details", label: "Company or sole trader details", required: true, hasPolicy: true },
-  // Optional but important
+  // Optional but important — most trades
   { key: "professional_indemnity", label: "Professional indemnity insurance", required: false, hasProvider: true, hasCover: true, hasPolicy: true, hasExpiry: true },
   { key: "employers_liability", label: "Employer's liability insurance", required: false, hasProvider: true, hasCover: true, hasPolicy: true, hasExpiry: true },
   { key: "tool_insurance", label: "Tool insurance", required: false, hasProvider: true, hasCover: true, hasPolicy: true, hasExpiry: true },
   { key: "van_insurance", label: "Van insurance", required: false, hasProvider: true, hasCover: true, hasPolicy: true, hasExpiry: true },
-  { key: "cscs_card", label: "CSCS card", required: false, hasPolicy: true, hasExpiry: true },
-  { key: "gas_safe", label: "Gas Safe registration", required: false, hasPolicy: true, hasExpiry: true },
-  { key: "niceic_napit", label: "NICEIC / NAPIT registration", required: false, hasPolicy: true, hasExpiry: true },
-  { key: "mcs", label: "MCS certification", required: false, hasPolicy: true, hasExpiry: true },
+  // Trade-specific optional credentials
+  {
+    key: "cscs_card",
+    label: "CSCS card",
+    required: false,
+    hasPolicy: true,
+    hasExpiry: true,
+    applicableTradeTypes: [
+      "Builder",
+      "Bricklayer",
+      "Plasterer",
+      "Roofer",
+      "Painter & Decorator",
+      "Tiler",
+      "Landscaper",
+      "Kitchen Fitter",
+      "Bathroom Fitter",
+      "Carpenter / Joiner",
+      "General Builder",
+    ],
+  },
+  { key: "gas_safe", label: "Gas Safe registration", required: false, hasPolicy: true, hasExpiry: true, applicableTradeTypes: ["Plumber"] },
+  { key: "niceic_napit", label: "NICEIC / NAPIT registration", required: false, hasPolicy: true, hasExpiry: true, applicableTradeTypes: ["Electrician"] },
+  { key: "mcs", label: "MCS certification", required: false, hasPolicy: true, hasExpiry: true, applicableTradeTypes: ["Electrician", "Plumber", "Builder", "General Builder", "Kitchen Fitter", "Bathroom Fitter"] },
   { key: "trustmark", label: "TrustMark registration", required: false, hasPolicy: true, hasExpiry: true },
   { key: "pas_accreditation", label: "PAS 2030 / PAS 2035 accreditation", required: false, hasProvider: true, hasPolicy: true, hasExpiry: true },
   { key: "other_accreditation", label: "Other accreditation", required: false, hasProvider: true, hasPolicy: true, hasExpiry: true },
