@@ -364,7 +364,7 @@ const SiteScoutSandbox = () => {
   };
 
 
-  // ---------- Step 3: master BoQ ----------
+  // ---------- Stage 2: master BoQ ----------
   const [ohpPct, setOhpPct] = useState(15);
 
   const baseBoq: BoqLine[] = useMemo(() => {
@@ -415,7 +415,6 @@ const SiteScoutSandbox = () => {
   ) => setOverrides((p) => ({ ...p, [key]: { ...p[key], [field]: value } }));
 
   const [agentFilter, setAgentFilter] = useState<AgentId | null>(null);
-  const visibleBoq = agentFilter ? masterBoq.filter((l) => l.agent === agentFilter) : masterBoq;
 
   // Stage 2 — contractor profit markup on top of the measured cost roll-up.
   const [markupPct, setMarkupPct] = useState(25);
@@ -911,7 +910,7 @@ const SiteScoutSandbox = () => {
               {/* ---------- STEP 2 ---------- */}
               {step <= 2 && (
                 <div className={cardClass}>
-                  <SectionTitle>Step 2 · Drawing upload &amp; specialist agent takeoffs</SectionTitle>
+                  <SectionTitle>Stage 2 · Drawing geometry &amp; specialist agent takeoffs</SectionTitle>
 
                   <div className="rounded-xl border border-dashed border-white/20 p-4 mb-4">
                     <div className="flex flex-wrap items-center gap-3">
@@ -1422,7 +1421,7 @@ const SiteScoutSandbox = () => {
                       <DrawingMarkupViewer extracted={extracted} previewUrl={previewUrl} />
                     ) : !masterBoq.length ? (
                       <p className="font-mono text-xs text-white/45">
-                        No lines yet — run the agent takeoff in Step 2.
+                        No lines yet — run the agent takeoff in Stage 2.
                       </p>
                     ) : (
                       <>
@@ -2061,7 +2060,7 @@ const SiteScoutSandbox = () => {
                     <SectionTitle>The trade gap breakdown</SectionTitle>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                       {[
-                        ["Retail benchmark cost (customer quoting price)", money(retailTotal)],
+                        ["Base retail customer quotation (inc markup)", money(baseRetailQuote)],
                         ["Negotiated trade merchant cost", money(arbitrage.negotiatedTotal)],
                         [
                           "Gross material trade gap (potential profit)",
@@ -2109,8 +2108,8 @@ const SiteScoutSandbox = () => {
                         {[
                           ["Retained net profit", money(arbitrage.retainedProfit), true],
                           ["Passed to customer", money(arbitrage.passedToCustomer), false],
-                          ["Final customer quote (ex VAT)", money(arbitrage.customerQuoteTotal), false],
-                          ["Customer total inc VAT", money(arbitrage.customerQuoteIncVat), false],
+                          ["Final customer quote (ex VAT)", money(finalCustomerExVat), false],
+                          ["Customer total inc VAT", money(finalCustomerIncVat), false],
                         ].map(([k, v, hl]) => (
                           <div
                             key={k as string}
@@ -2197,7 +2196,7 @@ const SiteScoutSandbox = () => {
                           <button
                             onClick={() => {
                               setAgentFilter(active ? null : agent.id);
-                              setStep(3);
+                              setStep(2);
                             }}
                             className="mt-3 w-full rounded-lg border border-white/15 px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider text-white/70 hover:text-white transition-colors"
                           >
