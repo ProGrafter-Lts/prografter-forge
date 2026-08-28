@@ -119,12 +119,13 @@ const CommandCentre = ({ tradeId, jobMatchCount, onNavigate }: Props) => {
         manuallyVerified:
           t.verified || t.verification_status === "approved" || t.verification_status === "verified",
         verifiedAt: t.verified_on_prografter_at,
-      });
+      }, t.trade_type);
 
       const prios = computePriorities({
         strength: ps,
         verification,
         vaultDocs,
+        tradeType: t.trade_type,
         specialismCount,
         bio: t.bio,
         calendarConnected: calConnected,
