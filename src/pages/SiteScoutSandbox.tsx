@@ -509,6 +509,40 @@ const SiteScoutSandbox = () => {
     [arbitrage.packs, agentFilter],
   );
 
+  /** Lines currently under granular scrutiny, enriched with trade rate + override flags. */
+  const scrutinyView = useMemo(() => {
+    if (!scrutiny) return null;
+    const lines =
+      scrutiny.kind === "pack"
+        ? masterBoq.filter((l) => l.pack === scrutiny.id)
+        : masterBoq.filter((l) => l.phase === scrutiny.id);
+    const title =
+      scrutiny.kind === "pack"
+        ? (PACK_BY_ID[scrutiny.id as PackId]?.name ?? `Pack ${scrutiny.id}`)
+        : `${scrutiny.id} phase breakdown`;
+    const subtitle =
+      scrutiny.kind === "pack"
+        ? PACK_BY_ID[scrutiny.id as PackId]?.merchantHint
+        : `${lines.length} priced line(s) across all merchant packs`;
+    return {
+      title,
+      subtitle,
+      lines: lines.map((l) => {
+        const tradeRate = tradeRateFor(l);
+        return {
+          ...l,
+          tradeRate,
+          tradeTotal: Number((tradeRate * l.quantity).toFixed(2)),
+          quantityOverridden: overrides[l.key]?.quantity !== undefined,
+          tradeRateOverridden: tradeRateOverrides[l.key] !== undefined,
+        };
+      }),
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scrutiny, masterBoq, overrides, tradeRateOverrides]);
+
+
+
   const complianceItems = useMemo(
     () =>
       buildComplianceChecklist({
