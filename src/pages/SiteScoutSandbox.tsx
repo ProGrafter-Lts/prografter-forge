@@ -69,6 +69,8 @@ import {
   type SystemType,
 } from "@/lib/siteScoutGroundTruth";
 import { checkCompetitorQuote } from "@/lib/competitorQuoteChecker";
+import PackScrutinyModal from "@/components/sitescout/PackScrutinyModal";
+
 import {
   allPacksToCsv,
   buildMasterBoq,
@@ -76,7 +78,9 @@ import {
   masterBoqToCsv,
   packToCsv,
   runArbitrage,
-  
+  PACK_BY_ID,
+  RFQ_PACKS,
+
   type MasterBoqLine,
   type PackId,
 } from "@/lib/procurementEngine";
@@ -432,10 +436,42 @@ const SiteScoutSandbox = () => {
   const [retainPct, setRetainPct] = useState(70);
   const [vatRate, setVatRate] = useState(20);
 
+  // ---------- Granular scrutiny: per-line trade rates ----------
+  const [tradeRateOverrides, setTradeRateOverrides] = useState<Record<string, number>>({});
+  const [scrutiny, setScrutiny] = useState<
+    { kind: "pack"; id: PackId } | { kind: "phase"; id: string } | null
+  >(null);
+
+  const defaultTradeRate = (line: MasterBoqLine) => {
+    const discount = PACK_BY_ID[line.pack]?.typicalDiscountPct ?? 0;
+    return Number((line.rate * (1 - discount / 100)).toFixed(2));
+  };
+  const tradeRateFor = (line: MasterBoqLine) =>
+    tradeRateOverrides[line.key] ?? defaultTradeRate(line);
+
+  /**
+   * Per-pack negotiated totals. Any manual line-level trade rate in a pack makes
+   * that pack's negotiated total the sum of its own priced lines.
+   */
+  const effectiveNegotiated = useMemo(() => {
+    const next: Record<PackId, number | undefined> = { ...negotiated };
+    for (const pack of RFQ_PACKS) {
+      const lines = masterBoq.filter((l) => l.pack === pack.id);
+      const hasOverride = lines.some((l) => tradeRateOverrides[l.key] !== undefined);
+      if (hasOverride)
+        next[pack.id] = Number(
+          lines.reduce((s, l) => s + tradeRateFor(l) * l.quantity, 0).toFixed(2),
+        );
+    }
+    return next;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [masterBoq, negotiated, tradeRateOverrides]);
+
   const arbitrage = useMemo(
-    () => runArbitrage(masterBoq, negotiated, retainPct, vatRate),
-    [masterBoq, negotiated, retainPct, vatRate],
+    () => runArbitrage(masterBoq, effectiveNegotiated, retainPct, vatRate),
+    [masterBoq, effectiveNegotiated, retainPct, vatRate],
   );
+
 
   const applyGlobalDiscount = () => {
     const next = {} as Record<PackId, number | undefined>;
@@ -474,6 +510,40 @@ const SiteScoutSandbox = () => {
       })),
     [arbitrage.packs, agentFilter],
   );
+
+  /** Lines currently under granular scrutiny, enriched with trade rate + override flags. */
+  const scrutinyView = useMemo(() => {
+    if (!scrutiny) return null;
+    const lines =
+      scrutiny.kind === "pack"
+        ? masterBoq.filter((l) => l.pack === scrutiny.id)
+        : masterBoq.filter((l) => l.phase === scrutiny.id);
+    const title =
+      scrutiny.kind === "pack"
+        ? (PACK_BY_ID[scrutiny.id as PackId]?.name ?? `Pack ${scrutiny.id}`)
+        : `${scrutiny.id} phase breakdown`;
+    const subtitle =
+      scrutiny.kind === "pack"
+        ? PACK_BY_ID[scrutiny.id as PackId]?.merchantHint
+        : `${lines.length} priced line(s) across all merchant packs`;
+    return {
+      title,
+      subtitle,
+      lines: lines.map((l) => {
+        const tradeRate = tradeRateFor(l);
+        return {
+          ...l,
+          tradeRate,
+          tradeTotal: Number((tradeRate * l.quantity).toFixed(2)),
+          quantityOverridden: overrides[l.key]?.quantity !== undefined,
+          tradeRateOverridden: tradeRateOverrides[l.key] !== undefined,
+        };
+      }),
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scrutiny, masterBoq, overrides, tradeRateOverrides]);
+
+
 
   const complianceItems = useMemo(
     () =>
@@ -1464,6 +1534,16 @@ const SiteScoutSandbox = () => {
                                     </span>
                                   </span>
                                 </button>
+                                <div className="px-3 pb-2 -mt-1">
+                                  <button
+                                    onClick={() => setScrutiny({ kind: "pack", id: g.pack.id })}
+                                    className="font-mono text-[10px] uppercase tracking-wider rounded px-2 py-1 border border-white/20 text-white/70 hover:border-[#38bdf8] hover:text-white"
+                                  >
+                                    🔍 Scrutinise pack — retail vs trade, line variance &amp;
+                                    overrides
+                                  </button>
+                                </div>
+
                                 {open && (
                                   <div className="overflow-x-auto px-3 pb-3">
                                     <table className="w-full min-w-[1080px] text-left border-collapse">
@@ -1576,13 +1656,21 @@ const SiteScoutSandbox = () => {
 
                         <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mt-4">
                           {["Substructure", "Superstructure", "MEP", "Finishes"].map((p) => (
-                            <div key={p} className="rounded-lg border border-white/10 p-2.5">
+                            <button
+                              key={p}
+                              onClick={() => setScrutiny({ kind: "phase", id: p })}
+                              className="text-left rounded-lg border border-white/10 p-2.5 hover:border-[#38bdf8] transition-colors"
+                            >
                               <p className={labelClass}>{p}</p>
                               <p className="font-mono text-xs text-white/85">
                                 {money(phaseTotal(p))}
                               </p>
-                            </div>
+                              <p className="font-mono text-[9px] text-white/35 mt-1">
+                                Click to scrutinise
+                              </p>
+                            </button>
                           ))}
+
                           <div
                             className="rounded-lg border p-2.5"
                             style={{ borderColor: `${ACCENT}66` }}
@@ -1955,6 +2043,13 @@ const SiteScoutSandbox = () => {
                                 {money(p.retailTotal)}
                               </p>
                               <button
+                                onClick={() => setScrutiny({ kind: "pack", id: p.pack.id })}
+                                className="font-mono text-[10px] uppercase tracking-wider rounded px-2 py-1 border border-white/20 text-white/70 hover:border-[#38bdf8] hover:text-white"
+                              >
+                                🔍 Scrutinise
+                              </button>
+                              <button
+
                                 onClick={() =>
                                   navigator.clipboard?.writeText(packToCsv(p, projectRef))
                                 }
@@ -2212,8 +2307,39 @@ const SiteScoutSandbox = () => {
           </div>
         </div>
       </main>
+
+      {scrutinyView && (
+        <PackScrutinyModal
+          title={scrutinyView.title}
+          subtitle={scrutinyView.subtitle}
+          lines={scrutinyView.lines}
+          onClose={() => setScrutiny(null)}
+          onQuantityChange={(key, value) =>
+            Number.isFinite(value) && updateOverride(key, "quantity", value)
+          }
+          onTradeRateChange={(key, value) =>
+            Number.isFinite(value) &&
+            setTradeRateOverrides((p) => ({ ...p, [key]: Number(value.toFixed(2)) }))
+          }
+          onResetLine={(key) => {
+            setOverrides((p) => {
+              const next = { ...p };
+              if (next[key]) next[key] = { ...next[key], quantity: undefined };
+              return next;
+            });
+            setTradeRateOverrides((p) => {
+              const next = { ...p };
+              delete next[key];
+              return next;
+            });
+          }}
+          tradeGap={arbitrage.tradeGap}
+          tradeGapPct={arbitrage.tradeGapPct}
+        />
+      )}
     </div>
   );
 };
+
 
 export default SiteScoutSandbox;
