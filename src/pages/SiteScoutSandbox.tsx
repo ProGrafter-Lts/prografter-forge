@@ -69,6 +69,8 @@ import {
   type SystemType,
 } from "@/lib/siteScoutGroundTruth";
 import { checkCompetitorQuote } from "@/lib/competitorQuoteChecker";
+import PackScrutinyModal from "@/components/sitescout/PackScrutinyModal";
+
 import {
   allPacksToCsv,
   buildMasterBoq,
