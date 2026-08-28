@@ -432,10 +432,42 @@ const SiteScoutSandbox = () => {
   const [retainPct, setRetainPct] = useState(70);
   const [vatRate, setVatRate] = useState(20);
 
+  // ---------- Granular scrutiny: per-line trade rates ----------
+  const [tradeRateOverrides, setTradeRateOverrides] = useState<Record<string, number>>({});
+  const [scrutiny, setScrutiny] = useState<
+    { kind: "pack"; id: PackId } | { kind: "phase"; id: string } | null
+  >(null);
+
+  const defaultTradeRate = (line: MasterBoqLine) => {
+    const discount = PACK_BY_ID[line.pack]?.typicalDiscountPct ?? 0;
+    return Number((line.rate * (1 - discount / 100)).toFixed(2));
+  };
+  const tradeRateFor = (line: MasterBoqLine) =>
+    tradeRateOverrides[line.key] ?? defaultTradeRate(line);
+
+  /**
+   * Per-pack negotiated totals. Any manual line-level trade rate in a pack makes
+   * that pack's negotiated total the sum of its own priced lines.
+   */
+  const effectiveNegotiated = useMemo(() => {
+    const next: Record<PackId, number | undefined> = { ...negotiated };
+    for (const pack of RFQ_PACKS) {
+      const lines = masterBoq.filter((l) => l.pack === pack.id);
+      const hasOverride = lines.some((l) => tradeRateOverrides[l.key] !== undefined);
+      if (hasOverride)
+        next[pack.id] = Number(
+          lines.reduce((s, l) => s + tradeRateFor(l) * l.quantity, 0).toFixed(2),
+        );
+    }
+    return next;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [masterBoq, negotiated, tradeRateOverrides]);
+
   const arbitrage = useMemo(
-    () => runArbitrage(masterBoq, negotiated, retainPct, vatRate),
-    [masterBoq, negotiated, retainPct, vatRate],
+    () => runArbitrage(masterBoq, effectiveNegotiated, retainPct, vatRate),
+    [masterBoq, effectiveNegotiated, retainPct, vatRate],
   );
+
 
   const applyGlobalDiscount = () => {
     const next = {} as Record<PackId, number | undefined>;
