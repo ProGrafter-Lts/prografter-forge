@@ -142,6 +142,8 @@ export interface BusinessHealthInput {
   pipeline: PipelineInput;
   quotes: QuotesInput;
   vaultDocs: VaultDocument[];
+  /** Trade type used to filter TradeVault documents to only those relevant to the trade. */
+  tradeType?: string | null;
   profileStrength: ProfileStrength;
   availability: AvailabilityInput;
   calendarConnected: boolean;
