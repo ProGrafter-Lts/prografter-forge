@@ -64,7 +64,7 @@ const TradeVaultSection = ({ tradeId }: Props) => {
         .order("created_at", { ascending: false }),
       supabase
         .from("trades")
-        .select("verified, verification_status, verified_on_prografter_at")
+        .select("trade_type, verified, verification_status, verified_on_prografter_at")
         .eq("id", tradeId)
         .maybeSingle(),
     ]);
@@ -74,6 +74,7 @@ const TradeVaultSection = ({ tradeId }: Props) => {
     setManualCtx({
       manuallyVerified: !!(t && (t.verified || t.verification_status === "approved" || t.verification_status === "verified")),
       verifiedAt: t?.verified_on_prografter_at ?? null,
+      tradeType: t?.trade_type ?? null,
     });
     setLoading(false);
   }, [tradeId]);
