@@ -65,7 +65,7 @@ const PackScrutinyModal = ({
         className="absolute inset-0 bg-black/70 backdrop-blur-sm"
       />
       <aside
-        className="relative h-full w-full max-w-[1080px] overflow-y-auto animate-slide-in-right"
+        className="relative h-full w-full max-w-[1080px] overflow-y-auto animate-in slide-in-from-right duration-300"
         style={{ backgroundColor: "#0f172a", borderLeft: "1px solid rgba(255,255,255,0.12)" }}
       >
         <header
