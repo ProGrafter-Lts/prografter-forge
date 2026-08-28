@@ -49,9 +49,10 @@ const TradeVaultSection = ({ tradeId }: Props) => {
   const [docs, setDocs] = useState<VaultDocument[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogConfig, setDialogConfig] = useState<VaultDocTypeConfig | null>(null);
-  const [manualCtx, setManualCtx] = useState<{ manuallyVerified: boolean; verifiedAt: string | null }>({
+  const [manualCtx, setManualCtx] = useState<{ manuallyVerified: boolean; verifiedAt: string | null; tradeType: string | null }>({
     manuallyVerified: false,
     verifiedAt: null,
+    tradeType: null,
   });
 
   const load = useCallback(async () => {
