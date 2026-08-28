@@ -21,6 +21,7 @@ import { isContractedActiveJob } from "@/lib/activeProjects";
 import LegalReviewBanner from "@/components/LegalReviewBanner";
 import { isTestRecord } from "@/lib/testData";
 import DashboardSummary from "@/components/trade/DashboardSummary";
+import ConfirmTradeTypeModal from "@/components/trade/ConfirmTradeTypeModal";
 import type { PriorityTarget } from "@/lib/tradeProfileStrength";
 
 
@@ -48,6 +49,7 @@ interface TradeProfile {
   tier: string | null;
   verification_status: string | null;
   submitted_for_review_at: string | null;
+  trade_type_confirmation_required?: boolean | null;
 }
 
 const TradeDashboard = () => {
@@ -97,7 +99,7 @@ const TradeDashboard = () => {
     try {
       const { data: tradeData, error: tradeError } = await supabase
         .from("trades")
-        .select("id, name, company_name, verified, trade_type, phone, is_green_trade, mcs_number, trustmark_number, pas_2030_accredited, pas_2035_coordinator, ozev_approved, fgas_registered, ciga_registered, inca_certified, green_cert_expiry, specialisms_prompt_seen, completed_jobs_count, review_count, avg_rating, tier, verification_status, submitted_for_review_at")
+        .select("id, name, company_name, verified, trade_type, trade_type_confirmation_required, phone, is_green_trade, mcs_number, trustmark_number, pas_2030_accredited, pas_2035_coordinator, ozev_approved, fgas_registered, ciga_registered, inca_certified, green_cert_expiry, specialisms_prompt_seen, completed_jobs_count, review_count, avg_rating, tier, verification_status, submitted_for_review_at")
         .eq("id", tradeId)
         .maybeSingle();
 
