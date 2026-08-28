@@ -52,13 +52,13 @@ const HomeownerSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen
        }`}
       >
         <div className="p-6 border-b border-white/10">
-          <Logo variant="light" className="h-10 w-auto" />
+          <Logo variant="light" className="h-12 w-auto" />
           <p className="font-mono text-[10px] mt-1 tracking-wider uppercase" style={{ color: "rgba(255,255,255,0.65)" }}>
             Homeowner
           </p>
         </div>
 
-        <nav className="flex-1 p-4 space-y-1">
+        <nav className="flex-1 p-4 space-y-1 overflow-y-auto no-scrollbar">
           {NAV_ITEMS.map((item) => {
             const isActive = activeNav === item.id;
             const isGreen = item.id === "grants";

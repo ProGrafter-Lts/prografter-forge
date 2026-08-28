@@ -100,8 +100,8 @@ export const scoreQuotes = (q: QuotesInput): number => {
 
 // ── TradeVault ───────────────────────────────────────────────────────────
 
-export const scoreTradeVault = (docs: VaultDocument[]): number => {
-  const summary = computeVaultSummary(docs);
+export const scoreTradeVault = (docs: VaultDocument[], tradeType?: string | null): number => {
+  const summary = computeVaultSummary(docs, tradeType);
   if (summary.requiredTotal === 0) return 100;
   let score = (summary.requiredUploaded / summary.requiredTotal) * 100;
   score -= summary.expired * 15;
@@ -142,6 +142,8 @@ export interface BusinessHealthInput {
   pipeline: PipelineInput;
   quotes: QuotesInput;
   vaultDocs: VaultDocument[];
+  /** Trade type used to filter TradeVault documents to only those relevant to the trade. */
+  tradeType?: string | null;
   profileStrength: ProfileStrength;
   availability: AvailabilityInput;
   calendarConnected: boolean;
@@ -164,7 +166,7 @@ const scoreMessages = (m: BusinessHealthInput["messages"]): number => {
 export const computeBusinessHealth = (input: BusinessHealthInput): BusinessHealth => {
   const raw: Record<ModuleKey, number> = {
     pipeline: scorePipeline(input.pipeline),
-    tradevault: scoreTradeVault(input.vaultDocs),
+    tradevault: scoreTradeVault(input.vaultDocs, input.tradeType),
     profile: clamp(input.profileStrength.percent),
     quotes: scoreQuotes(input.quotes),
     availability: scoreAvailability(input.availability),
@@ -224,7 +226,7 @@ export const computeTasks = (input: BusinessHealthInput): HealthTask[] => {
     });
   }
 
-  const vault = computeVaultSummary(input.vaultDocs);
+  const vault = computeVaultSummary(input.vaultDocs, input.tradeType);
   if (vault.missingRequired.length > 0) {
     tasks.push({
       dot: "red",
@@ -280,7 +282,7 @@ export interface ScoreBooster {
 
 export const computeBoosters = (input: BusinessHealthInput): ScoreBooster[] => {
   const boosters: ScoreBooster[] = [];
-  const vault = computeVaultSummary(input.vaultDocs);
+  const vault = computeVaultSummary(input.vaultDocs, input.tradeType);
 
   if (vault.missingRequired.length > 0) {
     boosters.push({ points: 4, label: "Complete TradeVault documents", target: "tradevault" });
@@ -318,7 +320,7 @@ export const buildSummarySentence = (health: BusinessHealth, input: BusinessHeal
       : "Your business needs attention today.";
 
   const actions: string[] = [];
-  const vault = computeVaultSummary(input.vaultDocs);
+  const vault = computeVaultSummary(input.vaultDocs, input.tradeType);
   if (vault.missingRequired.length > 0) actions.push("completing your TradeVault");
   if (input.pipeline.toContact > 0) actions.push(`following up ${input.pipeline.toContact} homeowner${input.pipeline.toContact > 1 ? "s" : ""}`);
   if (input.profileStrength.percent < 80) actions.push("finishing your profile");
@@ -347,7 +349,7 @@ export const buildBriefing = (
   input: BusinessHealthInput,
 ): BriefingContent => {
   const focus: string[] = [];
-  const vault = computeVaultSummary(input.vaultDocs);
+  const vault = computeVaultSummary(input.vaultDocs, input.tradeType);
 
   if (input.pipeline.toContact > 0)
     focus.push(`Contact ${input.pipeline.toContact} warm homeowner lead${input.pipeline.toContact > 1 ? "s" : ""}.`);

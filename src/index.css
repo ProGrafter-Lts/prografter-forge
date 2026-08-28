@@ -548,6 +548,17 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
   color: #1AC2BA;
 }
 
+/* Hide scrollbars while preserving scrollability */
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
 /* Opt-out: light marketing sections embedded inside dashboards keep their original styling */
 .dashboard-dark .grants-light-section,
 .dashboard-dark .grants-light-section * {
