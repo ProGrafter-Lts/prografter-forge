@@ -63,6 +63,14 @@ const AdminNav = () => {
         )}
 
         <Link
+          to="/dashboard/homeowner"
+          className="shrink-0 font-mono text-xs text-cream/80 hover:text-teal transition-colors"
+        >
+          Homeowner dashboard →
+        </Link>
+
+
+        <Link
           to="/"
           className="shrink-0 font-mono text-xs text-cream/70 hover:text-teal transition-colors"
         >
