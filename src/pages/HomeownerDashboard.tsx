@@ -112,16 +112,55 @@ const HomeownerDashboard = () => {
       return;
     }
 
-    if (!ho) {
-      // Signed-in user has no homeowner record — likely a trade.
-      const { data: tradeRow } = await supabase
-        .from("trades")
-        .select("id")
+    let homeowner = ho as { id: string; name: string } | null;
+
+    if (!homeowner) {
+      // Admins can review/edit the homeowner experience: give them their own
+      // homeowner record instead of bouncing them out.
+      const { data: adminRole } = await supabase
+        .from("user_roles")
+        .select("role")
         .eq("user_id", userId)
+        .eq("role", "admin")
         .maybeSingle();
-      navigate(tradeRow ? "/dashboard/trade" : "/post-a-job", { replace: true });
-      return;
+
+      if (adminRole) {
+        const { data: { user: authUser } } = await supabase.auth.getUser();
+        const email = authUser?.email ?? "admin@prografter.co.uk";
+        const { data: created, error: createError } = await supabase
+          .from("homeowners")
+          .insert({
+            user_id: userId,
+            name:
+              (typeof authUser?.user_metadata?.name === "string" && authUser.user_metadata.name) ||
+              email.split("@")[0],
+            email,
+            phone: "",
+          })
+          .select("id, name")
+          .maybeSingle();
+
+        if (createError || !created) {
+          console.error("Failed to create admin homeowner record", createError);
+          setLoadError("We couldn't open the homeowner dashboard for this admin account.");
+          setLoading(false);
+          return;
+        }
+        homeowner = created;
+      } else {
+        // Signed-in user has no homeowner record — likely a trade.
+        const { data: tradeRow } = await supabase
+          .from("trades")
+          .select("id")
+          .eq("user_id", userId)
+          .maybeSingle();
+        navigate(tradeRow ? "/dashboard/trade" : "/post-a-job", { replace: true });
+        return;
+      }
     }
+
+    const ho2 = homeowner;
+
     setHomeownerName(ho.name);
     setLoading(false);
 
