@@ -255,6 +255,7 @@ const AppRoutes = () => {
               <Route path="/atlas/:id/capture" element={<SiteScoutGate><AtlasCapture /></SiteScoutGate>} />
               <Route path="/atlas/:id/capture-report" element={<SiteScoutGate><AtlasCaptureReport /></SiteScoutGate>} />
               <Route path="/sitescout-sandbox" element={<SiteScoutSandbox />} />
+              <Route path="/sitescout-v2" element={<SiteScoutV2 />} />
 
               <Route path="/dashboard/homeowner" element={<HomeownerDashboard />} />
               <Route path="/dashboard/quote-checks" element={<MyQuoteChecks />} />
