@@ -161,7 +161,7 @@ const HomeownerDashboard = () => {
 
     const ho2 = homeowner;
 
-    setHomeownerName(ho.name);
+    setHomeownerName(ho2.name);
     setLoading(false);
 
     // Job briefs (the account-less-to-account spine) + free quote-check entitlements.
@@ -186,7 +186,7 @@ const HomeownerDashboard = () => {
     const { data: jobData } = await supabase
       .from("jobs")
       .select("id, title, job_type, postcode, status, stage, description, created_at, photo_urls, is_test")
-      .eq("homeowner_id", ho.id)
+      .eq("homeowner_id", ho2.id)
       .eq("is_test", false)
       .order("created_at", { ascending: false });
 
