@@ -20,6 +20,8 @@ const SECTIONS: { to: string; label: string; desc: string }[] = [
   { to: "/admin/quote-checker-modules", label: "Quote Checker Modules", desc: "Module status & homeowner manual review requests" },
   { to: "/admin/advanced-quote-review", label: "Advanced Review Engine", desc: "Full fixed-standard checklist, project-readiness & audit trail (beta)" },
   { to: "/admin/analytics", label: "Analytics", desc: "Traffic and conversions (GA4)" },
+  { to: "/dashboard/homeowner", label: "Homeowner dashboard", desc: "Open the homeowner experience to review and edit it" },
+
 ];
 
 export default function AdminHome() {
