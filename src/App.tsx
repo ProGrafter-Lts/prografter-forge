@@ -36,6 +36,7 @@ const AtlasSummary = lazyRetry(() => import("./atlas/pages/AtlasSummary.tsx"));
 const AtlasCapture = lazyRetry(() => import("./atlas/pages/AtlasCapture.tsx"));
 const AtlasCaptureReport = lazyRetry(() => import("./atlas/pages/AtlasCaptureReport.tsx"));
 const SiteScoutSandbox = lazyRetry(() => import("./pages/SiteScoutSandbox.tsx"));
+const SiteScoutV2 = lazyRetry(() => import("./pages/SiteScoutV2.tsx"));
 
 const TradeSettings = lazyRetry(() => import("./pages/TradeSettings.tsx"));
 const HomeownerDashboard = lazyRetry(() => import("./pages/HomeownerDashboard.tsx"));
