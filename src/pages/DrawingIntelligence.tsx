@@ -201,6 +201,12 @@ export default function DrawingIntelligence() {
 
   const generateSurvey = () => {
     if (!analysis) return;
+    if (unclassified.length) {
+      toast.error(
+        `${unclassified.length} sheet(s) still need manual Existing/Proposed classification before delta comparison.`,
+      );
+      return;
+    }
     const injection = buildInjection(analysis);
     saveInjection(injection);
     toast.success(
@@ -325,7 +331,7 @@ export default function DrawingIntelligence() {
               <p className="text-sm font-semibold text-white">Awaiting Backend Extraction</p>
             </div>
             <p className="mt-1 text-[12px] leading-relaxed text-sky-100/80">
-              {existing.length + proposed.length} file(s) queued. Stated facts, derived measurements and delta
+              {drawings.length + calcs.length} file(s) queued. Stated facts, derived measurements and delta
               clashes will populate when the extraction backend returns a payload. Nothing is estimated locally.
             </p>
             <div className="mt-3 space-y-2">
