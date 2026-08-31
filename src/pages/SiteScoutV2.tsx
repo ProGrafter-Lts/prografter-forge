@@ -86,6 +86,13 @@ export default function SiteScoutV2() {
   const [s, setS] = useState<SurveyState>(INITIAL);
   const set = (patch: Partial<SurveyState>) => setS((p) => ({ ...p, ...patch }));
 
+  // Mandatory checks injected by the Drawing Intelligence & Delta Module.
+  const [injection, setInjection] = useState<SiteScoutInjection | null>(null);
+  const [deltaAnswers, setDeltaAnswers] = useState<Record<string, string>>({});
+  useEffect(() => setInjection(loadInjection()), []);
+  const deltaChecks = injection?.checks ?? [];
+  const deltaOutstanding = deltaChecks.filter((c) => !(deltaAnswers[c.id] ?? "").trim()).length;
+
   const narrowAccess = s.accessWidth !== "" && Number(s.accessWidth) < 1.2;
 
   return (
