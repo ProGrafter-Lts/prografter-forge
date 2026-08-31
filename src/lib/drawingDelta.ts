@@ -1,12 +1,28 @@
 /**
- * Drawing Intelligence & Delta Module — deterministic ingestion engine.
+ * Drawing Intelligence & Delta Module — ingestion contract.
  *
- * Sandbox-only: sits before the live SiteScout survey (/sitescout-v2) and
- * pre-populates it with mandatory site verification checks. Nothing here is
- * wired into live quoting tools.
+ * IMPORTANT: this module never invents dimensions. Uploading a file only puts
+ * the UI into an "Awaiting Backend Extraction" state. Real numbers arrive from
+ * the extraction backend. A manual Test Mode payload (48 Thorsby Road) exists
+ * purely so the UI can be verified against real decimal values.
  */
 
 export type Confidence = "STATED" | "DERIVED" | "SITE_VERIFICATION_REQUIRED";
+
+/** Keys must match SiteScout survey category keys (see siteScoutCategories). */
+export type SiteScoutCategoryKey =
+  | "ext_services"
+  | "trees"
+  | "drainage"
+  | "roofline"
+  | "alteration_area"
+  | "sequencing"
+  | "roof"
+  | "ground_conditions"
+  | "existing_services"
+  | "electrical"
+  | "access"
+  | "handover";
 
 export interface DataPoint {
   id: string;
@@ -16,6 +32,8 @@ export interface DataPoint {
   confidence: Confidence;
   /** Calculation trail for derived values, or the reason verification is needed. */
   basis: string;
+  /** Which SiteScout category this verification belongs inside. */
+  category?: SiteScoutCategoryKey;
 }
 
 export interface DeltaClash {
@@ -24,6 +42,7 @@ export interface DeltaClash {
   detail: string;
   /** Structural changes always demand on-site verification. */
   verificationQuestion: string;
+  category: SiteScoutCategoryKey;
 }
 
 export interface DrawingAnalysis {
@@ -36,6 +55,11 @@ export interface DrawingAnalysis {
   clashes: DeltaClash[];
   unverified: DataPoint[];
 }
+
+export type IngestionState =
+  | "IDLE"
+  | "AWAITING_BACKEND_EXTRACTION"
+  | "TEST_PAYLOAD_LOADED";
 
 export const CONFIDENCE_META: Record<
   Confidence,
@@ -65,27 +89,23 @@ export interface ExtractionStream {
   id: "stated" | "derived" | "delta";
   title: string;
   blurb: string;
-  duration: number;
 }
 
 export const EXTRACTION_STREAMS: ExtractionStream[] = [
   {
     id: "stated",
     title: "Stated Facts",
-    blurb: "Reading written dimensions, annotation text and structural calc span tables…",
-    duration: 1100,
+    blurb: "Written dimensions, annotation text and structural calc span tables.",
   },
   {
     id: "derived",
     title: "Derived Measurements",
-    blurb: "Calibrating scale from one stated dimension and solving unwritten lengths…",
-    duration: 1200,
+    blurb: "Scale calibrated from one stated dimension to solve unwritten lengths.",
   },
   {
     id: "delta",
     title: "The Delta Clash",
-    blurb: "Comparing Existing vs Proposed to isolate structural alterations…",
-    duration: 1100,
+    blurb: "Existing vs Proposed compared to isolate structural alterations.",
   },
 ];
 
@@ -97,105 +117,71 @@ export const ext = (name: string) => name.slice(name.lastIndexOf(".")).toLowerCa
 export const isImageDrawing = (name: string) => IMAGE_EXT.includes(ext(name));
 export const isAcceptedDrawing = (name: string) => ACCEPTED_EXT.includes(ext(name));
 
+/* ---------------- Test Mode payload ---------------- */
+
 /**
- * Deterministic analysis of an uploaded existing/proposed drawing set.
- * Scale calibration is anchored on the single stated 6.00m rear wall run.
+ * Real 48 Thorsby Road extraction payload. Used only by the manual
+ * "Test Mode" button so the UI can be verified against true decimals.
  */
-export function analyseDrawings(existingFiles: string[], proposedFiles: string[]): DrawingAnalysis {
-  const stated: DataPoint[] = [
+export const THORSBY_TEST_PAYLOAD: DrawingAnalysis = {
+  projectName: "48 Thorsby Road",
+  scaleCalibration:
+    "Calibrated on stated 6.903 m rear wall run → 0.0500 m per plan unit (1:50 @ A1 confirmed against scale bar).",
+  existingFiles: [],
+  proposedFiles: [],
+  stated: [
     {
       id: "s1",
       label: "Rear extension width",
-      value: "6.00 m",
+      value: "6.903 m",
       source: "Proposed GA plan — dimension string",
       confidence: "STATED",
-      basis: "Written dimension 6000 read directly off the plan.",
+      basis: "Written dimension 6903 read directly off the plan.",
     },
     {
       id: "s2",
-      label: "Rear extension projection",
-      value: "4.00 m",
-      source: "Proposed GA plan — dimension string",
+      label: "Structural rear opening",
+      value: "3.400 m",
+      source: "Proposed GA plan — opening dimension",
       confidence: "STATED",
-      basis: "Written dimension 4000 read directly off the plan.",
+      basis: "Written structural opening 3400 read directly off the plan.",
     },
     {
       id: "s3",
-      label: "Structural steel — rear opening",
-      value: "203 × 133 × 30 UB, 5.50 m span",
-      source: "Structural calcs — beam schedule B1",
-      confidence: "STATED",
-      basis: "Span table row B1: 5.5 m clear span, 30 kg/m UB, 100mm bearing each end.",
-    },
-    {
-      id: "s4",
-      label: "Bi-fold opening",
-      value: "3.00 m × 2.10 m",
-      source: "Proposed rear elevation — opening schedule",
-      confidence: "STATED",
-      basis: "Schedule reference W/D-01, written structural opening size.",
-    },
-    {
-      id: "s5",
       label: "Drawing scale",
       value: "1:50 @ A1",
       source: "Title block",
       confidence: "STATED",
       basis: "Scale bar and title block both read 1:50 @ A1.",
     },
-  ];
-
-  const derived: DataPoint[] = [
+  ],
+  derived: [
     {
       id: "d1",
-      label: "Trench perimeter run",
-      value: "24.50 lm",
+      label: "Rear wall run (external face)",
+      value: "6.903 lm",
       source: "Derived from calibrated GA plan",
       confidence: "DERIVED",
-      basis: "(6.00 + 4.00) × 2 outer face + 4.50 lm return to existing = 24.50 lm.",
+      basis: "138.06 plan units × 0.0500 m/unit = 6.903 lm.",
     },
     {
       id: "d2",
-      label: "Ground-floor footprint",
-      value: "24.00 m²",
-      source: "Derived from calibrated GA plan",
+      label: "Steel bearing span required",
+      value: "3.600 m",
+      source: "Derived from stated opening",
       confidence: "DERIVED",
-      basis: "6.00 m × 4.00 m = 24.00 m² oversite area.",
+      basis: "3.400 m clear opening + 0.100 m bearing each end = 3.600 m span.",
     },
-    {
-      id: "d3",
-      label: "Eaves height",
-      value: "2.70 m",
-      source: "Derived from calibrated rear elevation",
-      confidence: "DERIVED",
-      basis: "Pixel run 54.0 units × calibration factor 0.050 m/unit = 2.70 m.",
-    },
-    {
-      id: "d4",
-      label: "Roofline / rainwater run",
-      value: "14.00 lm",
-      source: "Derived from calibrated roof plan",
-      confidence: "DERIVED",
-      basis: "6.00 m eaves × 2 + 2.00 lm verge returns = 14.00 lm fascia and gutter.",
-    },
-    {
-      id: "d5",
-      label: "Internal wall area",
-      value: "64.80 m²",
-      source: "Derived from calibrated GA plan",
-      confidence: "DERIVED",
-      basis: "24.00 lm internal perimeter × 2.70 m height = 64.80 m² board and skim.",
-    },
-  ];
-
-  const clashes: DeltaClash[] = [
+  ],
+  clashes: [
     {
       id: "c1",
       title: "Wall removal detected at Rear Elevation",
       detail:
-        "Existing 3.60 lm load-bearing masonry rear wall is absent on the Proposed plan — replaced by the B1 steel opening.",
+        "Existing masonry rear wall is absent on the Proposed plan across the 3.400 m opening; no beam schedule reference is annotated.",
       verificationQuestion:
         "Confirm on site: is the rear wall being removed load-bearing masonry, and what is the actual clear opening width?",
+      category: "alteration_area",
     },
     {
       id: "c2",
@@ -204,6 +190,7 @@ export function analyseDrawings(existingFiles: string[], proposedFiles: string[]
         "No foundation depth is stated on either set, and no NHBC 4.2 tree/soil note appears on the Proposed drawings.",
       verificationQuestion:
         "Confirm on site: soil class, nearest mature tree species and distance, so NHBC 4.2 depth can be fixed.",
+      category: "ground_conditions",
     },
     {
       id: "c3",
@@ -212,17 +199,19 @@ export function analyseDrawings(existingFiles: string[], proposedFiles: string[]
         "A soil branch shown on the Existing plan is over-built by the Proposed footprint; no new invert level is annotated.",
       verificationQuestion:
         "Confirm on site: existing drainage invert depth and whether the run can be diverted or must be built over.",
+      category: "drainage",
     },
-  ];
-
-  const unverified: DataPoint[] = [
+  ],
+  unverified: [
     {
       id: "u1",
       label: "Foundation depth",
       value: "Not dimensioned",
       source: "Absent from Proposed set & structural calcs",
       confidence: "SITE_VERIFICATION_REQUIRED",
-      basis: clashes[1].verificationQuestion,
+      basis:
+        "Confirm on site: soil class, nearest mature tree species and distance, so NHBC 4.2 depth can be fixed.",
+      category: "ground_conditions",
     },
     {
       id: "u2",
@@ -230,7 +219,9 @@ export function analyseDrawings(existingFiles: string[], proposedFiles: string[]
       value: "Load-bearing (assumed)",
       source: "Delta clash — Existing vs Proposed",
       confidence: "SITE_VERIFICATION_REQUIRED",
-      basis: clashes[0].verificationQuestion,
+      basis:
+        "Confirm on site: is the rear wall being removed load-bearing masonry, and what is the actual clear opening width (drawing states 3.400 m)?",
+      category: "alteration_area",
     },
     {
       id: "u3",
@@ -238,21 +229,20 @@ export function analyseDrawings(existingFiles: string[], proposedFiles: string[]
       value: "Not annotated",
       source: "Delta clash — Existing vs Proposed",
       confidence: "SITE_VERIFICATION_REQUIRED",
-      basis: clashes[2].verificationQuestion,
+      basis:
+        "Confirm on site: existing drainage invert depth and whether the run can be diverted or must be built over.",
+      category: "drainage",
     },
-  ];
+  ],
+};
 
-  return {
-    projectName: "Smedley Close",
-    scaleCalibration:
-      "Calibrated on stated 6.00 m rear wall → 0.050 m per plan unit (1:50 @ A1 confirmed against scale bar).",
-    existingFiles,
-    proposedFiles,
-    stated,
-    derived,
-    clashes,
-    unverified,
-  };
+/** Attach the uploaded filenames to a payload without altering its numbers. */
+export function withFiles(
+  analysis: DrawingAnalysis,
+  existingFiles: string[],
+  proposedFiles: string[],
+): DrawingAnalysis {
+  return { ...analysis, existingFiles, proposedFiles };
 }
 
 /* ---------------- SiteScout injection ---------------- */
@@ -262,6 +252,7 @@ export interface InjectedCheck {
   label: string;
   question: string;
   context: string;
+  category: SiteScoutCategoryKey;
 }
 
 export interface SiteScoutInjection {
@@ -281,6 +272,7 @@ export function buildInjection(a: DrawingAnalysis): SiteScoutInjection {
       label: u.label,
       question: u.basis,
       context: `${u.value} · ${u.source}`,
+      category: u.category ?? "handover",
     })),
   };
 }

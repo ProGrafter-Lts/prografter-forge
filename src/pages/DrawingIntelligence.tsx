@@ -1,19 +1,21 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { AlertTriangle, ArrowRight, FileWarning, ScanLine, Upload, X } from "lucide-react";
+import { AlertTriangle, ArrowRight, FileWarning, FlaskConical, Hourglass, Upload, X } from "lucide-react";
 
 import {
   CONFIDENCE_META,
   EXTRACTION_STREAMS,
-  analyseDrawings,
+  THORSBY_TEST_PAYLOAD,
   buildInjection,
   isAcceptedDrawing,
   isImageDrawing,
   saveInjection,
+  withFiles,
   type Confidence,
   type DataPoint,
   type DrawingAnalysis,
+  type IngestionState,
 } from "@/lib/drawingDelta";
 
 type Zone = "existing" | "proposed";
@@ -112,6 +114,7 @@ function UploadZone({
 }
 
 function DataTable({ title, rows }: { title: string; rows: DataPoint[] }) {
+  if (!rows.length) return null;
   return (
     <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
       <h3 className="mb-3 text-sm font-semibold text-white">{title}</h3>
@@ -137,16 +140,15 @@ export default function DrawingIntelligence() {
   const [existing, setExisting] = useState<string[]>([]);
   const [proposed, setProposed] = useState<string[]>([]);
   const [pendingScan, setPendingScan] = useState<{ zone: Zone; names: string[] } | null>(null);
-  const [processing, setProcessing] = useState(false);
-  const [streamIndex, setStreamIndex] = useState(0);
+  const [state, setState] = useState<IngestionState>("IDLE");
   const [analysis, setAnalysis] = useState<DrawingAnalysis | null>(null);
-  const timers = useRef<number[]>([]);
-
-  useEffect(() => () => timers.current.forEach((t) => window.clearTimeout(t)), []);
 
   const addFiles = (zone: Zone, names: string[]) => {
     const setter = zone === "existing" ? setExisting : setProposed;
     setter((prev) => Array.from(new Set([...prev, ...names])));
+    // Uploading NEVER fabricates data — we simply wait for the backend.
+    setAnalysis(null);
+    setState("AWAITING_BACKEND_EXTRACTION");
   };
 
   const handleFiles = (zone: Zone, list: FileList | null) => {
@@ -166,24 +168,10 @@ export default function DrawingIntelligence() {
     if (images.length) setPendingScan({ zone, names: images });
   };
 
-  const runEngine = () => {
-    timers.current.forEach((t) => window.clearTimeout(t));
-    timers.current = [];
-    setAnalysis(null);
-    setProcessing(true);
-    setStreamIndex(0);
-
-    let elapsed = 0;
-    EXTRACTION_STREAMS.forEach((s, i) => {
-      elapsed += s.duration;
-      timers.current.push(window.setTimeout(() => setStreamIndex(i + 1), elapsed));
-    });
-    timers.current.push(
-      window.setTimeout(() => {
-        setProcessing(false);
-        setAnalysis(analyseDrawings(existing, proposed));
-      }, elapsed + 400),
-    );
+  const loadTestPayload = () => {
+    setAnalysis(withFiles(THORSBY_TEST_PAYLOAD, existing, proposed));
+    setState("TEST_PAYLOAD_LOADED");
+    toast.success("Test Mode payload loaded — 48 Thorsby Road (width 6.903 m, rear opening 3.400 m).");
   };
 
   const generateSurvey = () => {
@@ -191,12 +179,10 @@ export default function DrawingIntelligence() {
     const injection = buildInjection(analysis);
     saveInjection(injection);
     toast.success(
-      `Delta Engine has added ${injection.checks.length} mandatory structural verification checks to your ${analysis.projectName} SiteScout route.`,
+      `Delta Engine has injected ${injection.checks.length} verification checks into their SiteScout categories for ${analysis.projectName}.`,
     );
     window.setTimeout(() => navigate("/sitescout-v2"), 900);
   };
-
-  const canRun = existing.length > 0 && proposed.length > 0;
 
   return (
     <div className="min-h-screen bg-[#0f172a] text-white">
@@ -205,8 +191,8 @@ export default function DrawingIntelligence() {
           <p className="font-mono text-[10px] uppercase tracking-widest text-teal-300">Tier 0 · Pre-survey</p>
           <h1 className="mt-1 text-xl font-semibold tracking-tight">Drawing Intelligence &amp; Delta Module</h1>
           <p className="mt-1 text-sm text-white/50">
-            Strict ingestion filter that reads the drawing set, calibrates scale, isolates Existing vs Proposed
-            changes and pre-populates the on-site SiteScout visit.
+            Strict ingestion filter. Uploads are queued for backend extraction — no dimensions are ever generated
+            locally.
           </p>
         </div>
       </header>
@@ -237,57 +223,48 @@ export default function DrawingIntelligence() {
           />
         </div>
 
-        <button
-          type="button"
-          onClick={runEngine}
-          disabled={!canRun || processing}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-teal-400 px-4 py-4 text-base font-semibold text-[#0f172a] transition hover:bg-teal-300 disabled:opacity-40"
-        >
-          <ScanLine className="h-4 w-4" />
-          {processing ? "Running Extraction & Delta Engine…" : "Run Extraction & Delta Engine"}
-        </button>
-        {!canRun && (
-          <p className="text-center text-[11px] text-white/40">
-            Upload at least one Existing layout and one Proposed drawing to run the delta comparison.
-          </p>
-        )}
-
-        {(processing || analysis) && (
-          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-            <h3 className="mb-3 text-sm font-semibold text-white">Extraction streams</h3>
-            <div className="space-y-2">
-              {EXTRACTION_STREAMS.map((s, i) => {
-                const done = analysis !== null || i < streamIndex;
-                const active = processing && i === streamIndex;
-                return (
-                  <div
-                    key={s.id}
-                    className="rounded-xl border p-3"
-                    style={{
-                      borderColor: done
-                        ? "rgba(45,212,191,0.45)"
-                        : active
-                          ? "rgba(255,255,255,0.25)"
-                          : "rgba(255,255,255,0.1)",
-                      backgroundColor: done ? "rgba(45,212,191,0.06)" : "rgba(255,255,255,0.02)",
-                    }}
-                  >
-                    <p className="text-sm font-medium text-white">
-                      {done ? "✓" : active ? "▸" : "·"} {s.title}
-                    </p>
-                    <p className="mt-1 font-mono text-[11px] leading-relaxed text-white/50">{s.blurb}</p>
-                  </div>
-                );
-              })}
+        {state === "AWAITING_BACKEND_EXTRACTION" && (
+          <div className="rounded-2xl border border-sky-400/35 bg-sky-400/[0.07] p-4">
+            <div className="flex items-center gap-2">
+              <Hourglass className="h-4 w-4 animate-pulse text-sky-300" />
+              <p className="text-sm font-semibold text-white">Awaiting Backend Extraction</p>
+            </div>
+            <p className="mt-1 text-[12px] leading-relaxed text-sky-100/80">
+              {existing.length + proposed.length} file(s) queued. Stated facts, derived measurements and delta
+              clashes will populate when the extraction backend returns a payload. Nothing is estimated locally.
+            </p>
+            <div className="mt-3 space-y-2">
+              {EXTRACTION_STREAMS.map((s) => (
+                <div key={s.id} className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
+                  <p className="text-sm font-medium text-white">· {s.title}</p>
+                  <p className="mt-1 font-mono text-[11px] leading-relaxed text-white/45">{s.blurb}</p>
+                  <p className="mt-1 font-mono text-[10px] uppercase tracking-wider text-sky-200/70">Pending</p>
+                </div>
+              ))}
             </div>
           </div>
         )}
 
+        <button
+          type="button"
+          onClick={loadTestPayload}
+          className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-teal-400/50 bg-teal-400/10 px-4 py-4 text-base font-semibold text-teal-200 transition hover:bg-teal-400/20"
+        >
+          <FlaskConical className="h-4 w-4" />
+          Test Mode — inject 48 Thorsby Road payload
+        </button>
+        <p className="text-center text-[11px] text-white/40">
+          Manual QA only: loads the real extracted JSON (width 6.903 m, rear opening 3.400 m) to verify decimal
+          handling.
+        </p>
+
         {analysis && (
           <>
-            <div className="rounded-2xl border border-sky-400/35 bg-sky-400/[0.07] p-4">
-              <p className="text-sm font-semibold text-white">Scale calibration</p>
-              <p className="mt-1 font-mono text-[11px] leading-relaxed text-sky-100/80">
+            <div className="rounded-2xl border border-teal-400/35 bg-teal-400/[0.07] p-4">
+              <p className="text-sm font-semibold text-white">
+                {analysis.projectName} · payload loaded (Test Mode)
+              </p>
+              <p className="mt-1 font-mono text-[11px] leading-relaxed text-teal-100/80">
                 {analysis.scaleCalibration}
               </p>
             </div>
@@ -307,6 +284,9 @@ export default function DrawingIntelligence() {
                     <p className="mt-1 text-[11px] leading-relaxed text-white/55">{c.detail}</p>
                     <p className="mt-1.5 text-[11px] leading-relaxed text-orange-100/90">
                       On-site question: {c.verificationQuestion}
+                    </p>
+                    <p className="mt-1 font-mono text-[10px] uppercase tracking-wider text-orange-200/70">
+                      Injects into SiteScout category: {c.category.replace(/_/g, " ")}
                     </p>
                   </div>
                 ))}
