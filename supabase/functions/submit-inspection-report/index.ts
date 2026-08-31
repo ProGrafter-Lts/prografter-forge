@@ -132,8 +132,20 @@ Deno.serve(async (req) => {
       admin.from('trades').select('id').eq('id', wallet.trade_id).eq('user_id', user.id).maybeSingle(),
       admin.rpc('has_role', { _user_id: user.id, _role: 'admin' }),
     ])
-    if (!ho && !tr && !isAdmin) return json({ error: 'Not a party to this project' }, 403)
-    const actorRole = tr ? 'trade' : ho ? 'homeowner' : 'admin'
+    // Chain of custody: only the trade may upload an inspection report, with
+    // admin override. Homeowners never upload the document that decides
+    // whether their own money is released.
+    if (!tr && !isAdmin) {
+      return json(
+        {
+          error: !ho
+            ? 'Not a party to this project'
+            : 'Inspection reports are uploaded by the trade (or ProGrafter admin). Building Control sends the report to all dutyholders — ask your contractor to upload it, or contact us.',
+        },
+        403,
+      )
+    }
+    const actorRole = tr ? 'trade' : 'admin'
 
     const frozen = await assertNotFrozen(admin, wallet.id)
 
@@ -202,6 +214,9 @@ Deno.serve(async (req) => {
         resolved_items: result.resolvedItems,
         clear_phrases: result.clearPhrases,
         unable_to_assess: result.unableToAssess,
+        // MIXED explicitly means "needs a human" — queue it for admin review.
+        review_status: result.classification === 'MIXED' ? 'pending' : 'not_required',
+        original_classification: result.classification,
       })
       .select()
       .single()

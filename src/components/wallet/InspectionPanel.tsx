@@ -9,6 +9,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { FileCheck2, Snowflake } from "lucide-react";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 export type InspectionReport = {
   id: string;
@@ -45,6 +46,7 @@ interface Props {
 }
 
 const InspectionPanel = ({ jobId, role, stages, reports, frozen, onChanged }: Props) => {
+  const { isAdmin } = useIsAdmin();
   const [busy, setBusy] = useState(false);
   const [stageId, setStageId] = useState<string>(stages[0]?.id ?? "");
   const [file, setFile] = useState<File | null>(null);
@@ -123,9 +125,18 @@ const InspectionPanel = ({ jobId, role, stages, reports, frozen, onChanged }: Pr
         Every stage release needs an inspection classified CLEAR and the stage funded. Reports are never scored pass/fail —
         CLEAR, HOLD or MIXED, with MIXED always routed to manual review.
       </p>
+      {role === "homeowner" && (
+        <p className="font-mono text-xs text-secondary-text">
+          Inspection reports are uploaded by your contractor — Building Control sends the report to all dutyholders.
+          If it hasn't appeared here, ask them to upload it or contact ProGrafter.
+        </p>
+      )}
 
-      {role === "trade" && (
+      {(role === "trade" || isAdmin) && (
         <div className="rounded-2xl border border-navy/10 bg-card p-5 space-y-3">
+          {role !== "trade" && (
+            <p className="font-mono text-xs text-secondary-text">Admin override upload.</p>
+          )}
           <Select value={stageId} onValueChange={setStageId}>
             <SelectTrigger className="font-mono text-sm">
               <SelectValue placeholder="Stage this inspection covers" />

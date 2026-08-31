@@ -91,6 +91,7 @@ const TraderReviews = lazyRetry(() => import("./pages/TraderReviews.tsx"));
 const DisputeRaise = lazyRetry(() => import("./pages/DisputeRaise.tsx"));
 const DisputeDetail = lazyRetry(() => import("./pages/DisputeDetail.tsx"));
 const AdminDisputes = lazyRetry(() => import("./pages/AdminDisputes.tsx"));
+const AdminMixedInspections = lazyRetry(() => import("./pages/AdminMixedInspections.tsx"));
 const PlanningPipeline = lazyRetry(() => import("./pages/PlanningPipeline.tsx"));
 const AdminTradeScraper = lazyRetry(() => import("./pages/AdminTradeScraper.tsx"));
 const AdminApplications = lazyRetry(() => import("./pages/AdminApplications.tsx"));
@@ -299,6 +300,7 @@ const AppRoutes = () => {
             <Route path="/prografter-intelligence" element={<ProGrafterIntelligence />} />
             <Route path="/traders/:id/reviews" element={<TraderReviews />} />
             <Route path="/admin/disputes" element={<AdminRoute><AdminDisputes /></AdminRoute>} />
+            <Route path="/admin/mixed-inspections" element={<AdminRoute><AdminMixedInspections /></AdminRoute>} />
             <Route path="/admin/planning-pipeline" element={<AdminRoute><PlanningPipeline /></AdminRoute>} />
             <Route path="/admin/trade-scraper" element={<AdminRoute><AdminTradeScraper /></AdminRoute>} />
             <Route path="/admin/applications" element={<AdminRoute><AdminApplications /></AdminRoute>} />

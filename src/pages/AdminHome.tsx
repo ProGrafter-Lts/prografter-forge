@@ -11,6 +11,7 @@ const SECTIONS: { to: string; label: string; desc: string }[] = [
   { to: "/admin/scoping-calls", label: "Customer Discovery", desc: "Guided scoping & discovery calls with homeowners" },
   { to: "/admin/lead-distribution", label: "Lead distribution", desc: "Which trades got which briefs; area balance" },
   { to: "/admin/disputes", label: "Disputes", desc: "Open and resolved disputes" },
+  { to: "/admin/mixed-inspections", label: "MIXED inspection review", desc: "Inspection reports with resolved and open items — decide CLEAR or HOLD before any release" },
   { to: "/admin/suppliers", label: "Suppliers", desc: "Supplier directory" },
   { to: "/admin/testimonials", label: "Testimonials", desc: "Review submitted testimonials" },
   { to: "/admin/planning-pipeline", label: "Planning pipeline", desc: "Planning leads pipeline" },

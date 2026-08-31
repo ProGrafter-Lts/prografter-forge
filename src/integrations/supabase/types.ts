@@ -5142,10 +5142,15 @@ export type Database = {
           inspector_name: string | null
           job_id: string
           open_items: Json
+          original_classification: string | null
           raw_text: string | null
           report_date: string | null
           required_actions: Json
           resolved_items: Json
+          review_note: string | null
+          review_status: string
+          reviewed_at: string | null
+          reviewed_by: string | null
           status: string
           unable_to_assess: Json
           uploaded_by: string | null
@@ -5164,10 +5169,15 @@ export type Database = {
           inspector_name?: string | null
           job_id: string
           open_items?: Json
+          original_classification?: string | null
           raw_text?: string | null
           report_date?: string | null
           required_actions?: Json
           resolved_items?: Json
+          review_note?: string | null
+          review_status?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           status?: string
           unable_to_assess?: Json
           uploaded_by?: string | null
@@ -5186,10 +5196,15 @@ export type Database = {
           inspector_name?: string | null
           job_id?: string
           open_items?: Json
+          original_classification?: string | null
           raw_text?: string | null
           report_date?: string | null
           required_actions?: Json
           resolved_items?: Json
+          review_note?: string | null
+          review_status?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           status?: string
           unable_to_assess?: Json
           uploaded_by?: string | null
