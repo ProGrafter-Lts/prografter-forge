@@ -152,18 +152,35 @@ export default function DrawingIntelligence() {
   const [state, setState] = useState<IngestionState>("IDLE");
   const [analysis, setAnalysis] = useState<DrawingAnalysis | null>(null);
 
-  const existing = sheets.filter((s) => s.classification === "EXISTING").map((s) => s.fileName);
-  const proposed = sheets.filter((s) => s.classification === "PROPOSED").map((s) => s.fileName);
-  const unclassified = sheets.filter((s) => s.classification === "UNCLASSIFIED");
+  // A SPLIT sheet contributes to both sides — its regions carry the classification.
+  const existing = sheets
+    .filter((s) => s.classification === "EXISTING" || (s.regions ?? []).some((r) => r.classification === "EXISTING"))
+    .map((s) => s.fileName);
+  const proposed = sheets
+    .filter((s) => s.classification === "PROPOSED" || (s.regions ?? []).some((r) => r.classification === "PROPOSED"))
+    .map((s) => s.fileName);
+  const unresolved = unresolvedSheets(sheets);
 
   const setSheetClass = (id: string, classification: SheetClassification) =>
     setSheets((prev) =>
       prev.map((s) =>
         s.id === id
-          ? { ...s, classification, manual: true, reason: "Manually classified by the user." }
+          ? {
+              ...s,
+              classification,
+              manual: true,
+              regions: classification === "SPLIT" ? (s.regions ?? []) : [],
+              reason:
+                classification === "SPLIT"
+                  ? "Marked as a combined sheet — each plan region is tagged separately."
+                  : "Manually classified by the user.",
+            }
           : s,
       ),
     );
+
+  const setSheetRegions = (id: string, regions: SheetRegion[]) =>
+    setSheets((prev) => prev.map((s) => (s.id === id ? { ...s, regions } : s)));
 
   const addFiles = (zone: Zone, names: string[]) => {
     const setter = zone === "drawings" ? setDrawings : setCalcs;
