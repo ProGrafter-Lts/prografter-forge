@@ -69,7 +69,7 @@ Deno.serve(async (req) => {
       },
       configuration: {
         recipient: {
-          capabilities: { stripe_transfers: { requested: true } },
+          capabilities: { stripe_balance: { stripe_transfers: { requested: true } } },
         },
       },
       defaults: {
