@@ -1,62 +1,182 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { AlertTriangle, ArrowLeft, ArrowRight, CheckCircle2, Send } from "lucide-react";
 
-import { loadInjection, type SiteScoutInjection } from "@/lib/drawingDelta";
+import { loadInjection, type SiteScoutCategoryKey, type SiteScoutInjection } from "@/lib/drawingDelta";
 
-const STEPS = ["Ground & Geo", "Access & Logistics", "Existing Services", "Handover"];
+/* ------------------------------------------------------------------ *
+ * The detailed 12-category SiteScout structure.
+ * Delta clashes are NOT a category — they overlay the category they
+ * belong to (see injectedFor()).
+ * ------------------------------------------------------------------ */
 
-const SOILS = ["Clay", "Sand & Gravel", "Chalk", "Rock", "Made Ground"];
-const SPECIES = ["Oak", "Willow", "Poplar", "Elm", "Eucalyptus", "Sycamore", "Ash", "Other / Unknown"];
-const UNITS = ["Plastic pre-2016", "Metal AMD3", "Rewirable Fuses"];
-const BOILERS = ["Combi", "System", "Regular"];
+type FieldType = "text" | "textarea" | "number" | "select" | "yes_no";
 
-interface SurveyState {
-  soil: string;
-  treesNearby: boolean;
-  treeDistance: string;
-  treeSpecies: string;
-  invertDepth: string;
-  accessWidth: string;
-  distanceToHighway: string;
-  overheadCables: boolean;
-  consumerUnit: string;
-  spareWays: string;
-  boilerType: string;
-  boilerKw: string;
+interface FieldDef {
+  key: string;
+  label: string;
+  type: FieldType;
+  options?: string[];
+  placeholder?: string;
+  hint?: string;
+  unit?: string;
 }
 
-const INITIAL: SurveyState = {
-  soil: "",
-  treesNearby: false,
-  treeDistance: "",
-  treeSpecies: "",
-  invertDepth: "",
-  accessWidth: "",
-  distanceToHighway: "",
-  overheadCables: false,
-  consumerUnit: "",
-  spareWays: "",
-  boilerType: "",
-  boilerKw: "",
-};
+interface CategoryDef {
+  key: SiteScoutCategoryKey;
+  title: string;
+  blurb: string;
+  fields: FieldDef[];
+}
+
+export const SITESCOUT_CATEGORIES: CategoryDef[] = [
+  {
+    key: "ground_conditions",
+    title: "Ground conditions",
+    blurb: "Soil, made ground and anything that drives foundation depth.",
+    fields: [
+      {
+        key: "soil",
+        label: "Soil classification",
+        type: "select",
+        options: ["Clay", "Sand & Gravel", "Chalk", "Rock", "Made Ground", "Unknown"],
+      },
+      { key: "foundation_depth", label: "Observed / assumed foundation depth", type: "number", unit: "m" },
+      { key: "trial_hole", label: "Trial hole or site investigation available?", type: "yes_no" },
+      { key: "ground_notes", label: "Ground observations", type: "textarea", placeholder: "Spoil, water table, fill…" },
+    ],
+  },
+  {
+    key: "trees",
+    title: "Trees & NHBC 4.2",
+    blurb: "Species and proximity drive NHBC Chapter 4.2 foundation depth.",
+    fields: [
+      { key: "trees_present", label: "Mature trees on or near the site?", type: "yes_no" },
+      {
+        key: "tree_species",
+        label: "Nearest tree species",
+        type: "select",
+        options: ["Oak", "Willow", "Poplar", "Elm", "Eucalyptus", "Sycamore", "Ash", "Other / Unknown"],
+      },
+      { key: "tree_distance", label: "Distance to works", type: "number", unit: "m" },
+      { key: "tree_height", label: "Approx. mature height", type: "select", options: ["Under 5m", "5–10m", "10–15m", "Over 15m", "Unknown"] },
+    ],
+  },
+  {
+    key: "drainage",
+    title: "Drainage",
+    blurb: "Manholes, foul/surface split and invert depths.",
+    fields: [
+      { key: "manholes", label: "Manhole positions & condition", type: "textarea" },
+      { key: "foul_surface", label: "Foul / surface water arrangement", type: "select", options: ["Separate", "Combined", "Unknown"] },
+      { key: "invert_depth", label: "Existing invert depth", type: "number", unit: "m" },
+      { key: "build_over", label: "Build-over or diversion required?", type: "yes_no" },
+    ],
+  },
+  {
+    key: "alteration_area",
+    title: "Alteration area",
+    blurb: "The structural opening / wall removal zone.",
+    fields: [
+      { key: "alteration_desc", label: "Alteration area description", type: "textarea" },
+      { key: "wall_status", label: "Wall to be removed — load-bearing?", type: "select", options: ["Load-bearing", "Non load-bearing", "Unconfirmed"] },
+      { key: "clear_opening", label: "Measured clear opening width", type: "number", unit: "m" },
+      { key: "temp_works", label: "Temporary propping / needling required?", type: "yes_no" },
+    ],
+  },
+  {
+    key: "ext_services",
+    title: "Incoming services",
+    blurb: "Meter positions and proximity to the dig.",
+    fields: [
+      { key: "electric_meter", label: "Electric meter position", type: "text" },
+      { key: "gas_meter", label: "Gas meter position", type: "text" },
+      { key: "stop_tap", label: "Stop tap location", type: "text" },
+      { key: "within_3m", label: "Any service within 3m of the dig area?", type: "yes_no" },
+    ],
+  },
+  {
+    key: "existing_services",
+    title: "Existing services",
+    blurb: "Boiler and heating provision serving the works.",
+    fields: [
+      { key: "boiler_type", label: "Existing boiler type", type: "select", options: ["Combi", "System", "Regular", "None"] },
+      { key: "boiler_kw", label: "Boiler output", type: "number", unit: "kW" },
+      { key: "boiler_notes", label: "Boiler position / age notes", type: "textarea" },
+    ],
+  },
+  {
+    key: "electrical",
+    title: "Electrical",
+    blurb: "Consumer unit, spare ways and proposed new loads.",
+    fields: [
+      { key: "consumer_unit", label: "Consumer unit type", type: "select", options: ["Plastic pre-2016", "Metal AMD3", "Rewirable Fuses", "Unknown"] },
+      { key: "spare_ways", label: "Spare breaker ways", type: "number" },
+      { key: "earthing", label: "Earthing arrangement observations", type: "text" },
+      { key: "new_loads", label: "Proposed new loads", type: "textarea", placeholder: "Kitchen, EV, heating…" },
+    ],
+  },
+  {
+    key: "roof",
+    title: "Roof",
+    blurb: "Covering, pitch and junction detailing.",
+    fields: [
+      { key: "roof_type", label: "Roof type", type: "select", options: ["Pitched", "Flat"] },
+      { key: "covering", label: "Tile / membrane type, colour & profile", type: "text" },
+      { key: "junctions", label: "Ridge, hip, valley or upstand notes", type: "textarea" },
+    ],
+  },
+  {
+    key: "roofline",
+    title: "Soffit, fascia & guttering",
+    blurb: "Material matching for the roofline run.",
+    fields: [
+      { key: "roofline_type", label: "Covering type", type: "text", placeholder: "e.g. uPVC fascia, ventilated soffit" },
+      { key: "roofline_colour", label: "Colour", type: "text" },
+      { key: "downpipe", label: "Downpipe type", type: "text", placeholder: "e.g. 68mm round uPVC, black" },
+    ],
+  },
+  {
+    key: "access",
+    title: "Access & logistics",
+    blurb: "Plant accessibility, muck-away and storage.",
+    fields: [
+      { key: "access_width", label: "Clear access width", type: "number", unit: "m" },
+      { key: "highway_distance", label: "Distance from highway to dig", type: "number", unit: "m" },
+      { key: "overhead", label: "Overhead cables or obstructions?", type: "yes_no" },
+      { key: "skip_storage", label: "Skip & material storage location", type: "textarea" },
+    ],
+  },
+  {
+    key: "sequencing",
+    title: "Sequencing",
+    blurb: "What must happen first, and why.",
+    fields: [
+      { key: "sequence_notes", label: "Critical sequence", type: "textarea" },
+      { key: "occupied", label: "Property occupied during works?", type: "yes_no" },
+      { key: "restrictions", label: "Working hour or noise restrictions", type: "text" },
+    ],
+  },
+  {
+    key: "handover",
+    title: "Handover & review",
+    blurb: "Confirm everything captured, then transmit.",
+    fields: [],
+  },
+];
 
 const fieldCls =
   "w-full rounded-xl bg-white/[0.05] border border-white/15 px-4 py-4 text-base text-white placeholder:text-white/30 focus:outline-none focus:border-teal-400/60";
 const labelCls = "block text-sm font-medium text-white/90 mb-2";
 
-function Toggle({
-  value,
-  onChange,
-}: {
-  value: boolean;
-  onChange: (v: boolean) => void;
-}) {
+type Values = Record<string, string>;
+
+function Toggle({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   return (
     <div className="grid grid-cols-2 gap-3">
-      {[true, false].map((opt) => (
+      {["Yes", "No"].map((opt) => (
         <button
-          key={String(opt)}
+          key={opt}
           type="button"
           onClick={() => onChange(opt)}
           className={`rounded-xl border px-4 py-4 text-base font-medium transition ${
@@ -65,9 +185,50 @@ function Toggle({
               : "bg-white/[0.04] border-white/15 text-white/70"
           }`}
         >
-          {opt ? "Yes" : "No"}
+          {opt}
         </button>
       ))}
+    </div>
+  );
+}
+
+function Field({ def, value, onChange }: { def: FieldDef; value: string; onChange: (v: string) => void }) {
+  return (
+    <div>
+      <label className={labelCls}>
+        {def.label}
+        {def.unit ? ` (${def.unit})` : ""}
+      </label>
+      {def.hint && <p className="mb-2 text-[11px] text-white/45">{def.hint}</p>}
+      {def.type === "yes_no" ? (
+        <Toggle value={value} onChange={onChange} />
+      ) : def.type === "select" ? (
+        <select className={fieldCls} value={value} onChange={(e) => onChange(e.target.value)}>
+          <option value="">Select…</option>
+          {(def.options ?? []).map((o) => (
+            <option key={o} value={o}>
+              {o}
+            </option>
+          ))}
+        </select>
+      ) : def.type === "textarea" ? (
+        <textarea
+          rows={3}
+          className={fieldCls}
+          placeholder={def.placeholder}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+        />
+      ) : (
+        <input
+          type={def.type === "number" ? "number" : "text"}
+          inputMode={def.type === "number" ? "decimal" : "text"}
+          className={fieldCls}
+          placeholder={def.placeholder}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+        />
+      )}
     </div>
   );
 }
@@ -83,298 +244,150 @@ function Row({ label, value }: { label: string; value: string }) {
 
 export default function SiteScoutV2() {
   const [step, setStep] = useState(0);
-  const [s, setS] = useState<SurveyState>(INITIAL);
-  const set = (patch: Partial<SurveyState>) => setS((p) => ({ ...p, ...patch }));
+  const [values, setValues] = useState<Values>({});
+  const set = (key: string, v: string) => setValues((p) => ({ ...p, [key]: v }));
 
-  // Mandatory checks injected by the Drawing Intelligence & Delta Module.
   const [injection, setInjection] = useState<SiteScoutInjection | null>(null);
   const [deltaAnswers, setDeltaAnswers] = useState<Record<string, string>>({});
   useEffect(() => setInjection(loadInjection()), []);
-  const deltaChecks = injection?.checks ?? [];
-  const deltaOutstanding = deltaChecks.filter((c) => !(deltaAnswers[c.id] ?? "").trim()).length;
 
-  const narrowAccess = s.accessWidth !== "" && Number(s.accessWidth) < 1.2;
+  const checks = injection?.checks ?? [];
+  const injectedFor = useMemo(
+    () => (key: SiteScoutCategoryKey) => checks.filter((c) => c.category === key),
+    [checks],
+  );
+  const outstanding = checks.filter((c) => !(deltaAnswers[c.id] ?? "").trim());
+
+  const category = SITESCOUT_CATEGORIES[step];
+  const isLast = step === SITESCOUT_CATEGORIES.length - 1;
+
+  const narrowAccess = values.access_width !== undefined && values.access_width !== "" && Number(values.access_width) < 1.2;
 
   return (
     <div className="min-h-screen bg-[#0f172a] text-white flex flex-col">
       <header className="sticky top-0 z-10 bg-[#0f172a]/95 backdrop-blur border-b border-white/10 px-4 pt-5 pb-4">
         <h1 className="text-lg font-semibold tracking-tight">Live SiteScout Guided Survey</h1>
         <p className="text-xs text-white/50 mt-0.5">
-          Step {step + 1} of {STEPS.length} · {STEPS[step]}
+          Category {step + 1} of {SITESCOUT_CATEGORIES.length} · {category.title}
         </p>
-        <div className="mt-3 flex gap-1.5">
-          {STEPS.map((label, i) => (
-            <div key={label} className="flex-1">
-              <div
-                className={`h-1.5 rounded-full transition ${
-                  i < step ? "bg-teal-400" : i === step ? "bg-teal-300" : "bg-white/12"
-                }`}
+        <div className="mt-3 flex gap-1">
+          {SITESCOUT_CATEGORIES.map((c, i) => {
+            const flagged = injectedFor(c.key).length > 0;
+            return (
+              <button
+                key={c.key}
+                type="button"
+                aria-label={c.title}
+                onClick={() => setStep(i)}
+                className={`h-1.5 flex-1 rounded-full transition ${
+                  flagged ? "bg-orange-400/80" : i < step ? "bg-teal-400" : i === step ? "bg-teal-300" : "bg-white/12"
+                } ${i === step ? "ring-1 ring-white/50" : ""}`}
               />
-              <span
-                className={`mt-1.5 block text-[10px] leading-tight ${
-                  i <= step ? "text-teal-200/80" : "text-white/35"
-                }`}
-              >
-                {i + 1}. {label}
-              </span>
-            </div>
-          ))}
+            );
+          })}
         </div>
+        {outstanding.length > 0 && (
+          <p className="mt-2 text-[11px] text-orange-200/80">
+            {outstanding.length} Delta Engine check{outstanding.length === 1 ? "" : "s"} outstanding — see the
+            highlighted categories.
+          </p>
+        )}
       </header>
 
       <main className="flex-1 px-4 py-6 space-y-5 max-w-xl w-full mx-auto">
-        {step === 0 && (
-          <>
-            {deltaChecks.length > 0 && (
-              <div className="rounded-xl border border-orange-400/45 bg-orange-400/[0.08] p-4">
-                <div className="flex items-center gap-2">
-                  <AlertTriangle className="w-4 h-4 text-orange-300" />
-                  <h2 className="text-sm font-semibold text-orange-100">
-                    Mandatory structural verification · {injection?.projectName}
-                  </h2>
-                </div>
-                <p className="mt-1 text-[11px] text-orange-100/70">
-                  The Delta Engine added {deltaChecks.length} checks from the drawing set. All must be answered
-                  before transmitting.
-                </p>
-                <div className="mt-3 space-y-3">
-                  {deltaChecks.map((c) => (
-                    <div key={c.id}>
-                      <label className={labelCls}>{c.label}</label>
-                      <p className="mb-2 text-[11px] leading-relaxed text-white/55">{c.question}</p>
-                      <input
-                        className={fieldCls}
-                        placeholder="Record what you measured on site…"
-                        value={deltaAnswers[c.id] ?? ""}
-                        onChange={(e) => setDeltaAnswers((p) => ({ ...p, [c.id]: e.target.value }))}
-                      />
-                      <p className="mt-1 font-mono text-[10px] text-white/35">{c.context}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+        <div>
+          <h2 className="text-base font-semibold">{category.title}</h2>
+          <p className="mt-0.5 text-xs text-white/45">{category.blurb}</p>
+        </div>
 
-            <div>
-              <label className={labelCls}>Soil classification</label>
-              <select className={fieldCls} value={s.soil} onChange={(e) => set({ soil: e.target.value })}>
-                <option value="">Select soil type…</option>
-                {SOILS.map((o) => (
-                  <option key={o} value={o}>
-                    {o}
-                  </option>
-                ))}
-              </select>
+        {/* Delta clashes pinned to the top of their own category */}
+        {injectedFor(category.key).map((c) => (
+          <div key={c.id} className="rounded-xl border border-orange-400/45 bg-orange-400/[0.08] p-4">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-orange-300 shrink-0" />
+              <h3 className="text-sm font-semibold text-orange-100">Delta clash · {c.label}</h3>
             </div>
+            <p className="mt-1.5 text-[12px] leading-relaxed text-orange-100/80">{c.question}</p>
+            <input
+              className={`${fieldCls} mt-3`}
+              placeholder="Record what you measured on site…"
+              value={deltaAnswers[c.id] ?? ""}
+              onChange={(e) => setDeltaAnswers((p) => ({ ...p, [c.id]: e.target.value }))}
+            />
+            <p className="mt-1 font-mono text-[10px] text-white/40">
+              {injection?.projectName} · {c.context}
+            </p>
+          </div>
+        ))}
 
-            <div>
-              <label className={labelCls}>Mature trees in proximity?</label>
-              <Toggle value={s.treesNearby} onChange={(v) => set({ treesNearby: v })} />
-            </div>
+        {!isLast &&
+          category.fields.map((f) => (
+            <Field key={f.key} def={f} value={values[f.key] ?? ""} onChange={(v) => set(f.key, v)} />
+          ))}
 
-            {s.treesNearby && (
-              <div className="space-y-5 rounded-xl border border-white/10 bg-white/[0.03] p-4">
-                <div>
-                  <label className={labelCls}>Distance to nearest tree (m)</label>
-                  <input
-                    type="number"
-                    inputMode="decimal"
-                    className={fieldCls}
-                    placeholder="e.g. 6.5"
-                    value={s.treeDistance}
-                    onChange={(e) => set({ treeDistance: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <label className={labelCls}>Species</label>
-                  <select
-                    className={fieldCls}
-                    value={s.treeSpecies}
-                    onChange={(e) => set({ treeSpecies: e.target.value })}
-                  >
-                    <option value="">Select species…</option>
-                    {SPECIES.map((o) => (
-                      <option key={o} value={o}>
-                        {o}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            )}
-
-            <div>
-              <label className={labelCls}>Existing drainage invert depth (m)</label>
-              <input
-                type="number"
-                inputMode="decimal"
-                className={fieldCls}
-                placeholder="e.g. 1.0"
-                value={s.invertDepth}
-                onChange={(e) => set({ invertDepth: e.target.value })}
-              />
-            </div>
-          </>
+        {category.key === "access" && narrowAccess && (
+          <div className="flex items-start gap-2 rounded-xl border border-amber-400/30 bg-amber-400/10 p-3">
+            <AlertTriangle className="w-4 h-4 text-amber-300 mt-0.5 shrink-0" />
+            <p className="text-xs text-amber-100">
+              Access below 1.2m — micro-plant and skip-only muck-away will be required. Allow barrow runs and
+              extended durations.
+            </p>
+          </div>
+        )}
+        {category.key === "access" && values.overhead === "Yes" && (
+          <p className="text-xs text-amber-200/80">
+            GS6 exclusion zone applies — machine height restricted and DNO consultation required.
+          </p>
+        )}
+        {category.key === "trees" && values.trees_present === "Yes" && (
+          <p className="text-xs text-amber-200/80">
+            NHBC Chapter 4.2 applies — soil type and precaution category must be assessed before foundation design
+            is finalised.
+          </p>
         )}
 
-        {step === 1 && (
-          <>
-            <div>
-              <label className={labelCls}>Clear access width (m)</label>
-              <input
-                type="number"
-                inputMode="decimal"
-                className={fieldCls}
-                placeholder="e.g. 2.8"
-                value={s.accessWidth}
-                onChange={(e) => set({ accessWidth: e.target.value })}
-              />
-              {narrowAccess && (
-                <div className="mt-3 flex items-start gap-2 rounded-xl border border-amber-400/30 bg-amber-400/10 p-3">
-                  <AlertTriangle className="w-4 h-4 text-amber-300 mt-0.5 shrink-0" />
-                  <p className="text-xs text-amber-100">
-                    Access below 1.2m — micro-plant and skip-only muck-away will be required. Allow barrow runs and
-                    extended durations.
-                  </p>
-                </div>
-              )}
-            </div>
-
-            <div>
-              <label className={labelCls}>Distance from highway to dig site (m)</label>
-              <input
-                type="number"
-                inputMode="decimal"
-                className={fieldCls}
-                placeholder="e.g. 12"
-                value={s.distanceToHighway}
-                onChange={(e) => set({ distanceToHighway: e.target.value })}
-              />
-            </div>
-
-            <div>
-              <label className={labelCls}>Overhead cables or obstructions?</label>
-              <Toggle value={s.overheadCables} onChange={(v) => set({ overheadCables: v })} />
-              {s.overheadCables && (
-                <p className="mt-3 text-xs text-amber-200/80">
-                  GS6 exclusion zone applies — machine height restricted and DNO consultation required.
-                </p>
-              )}
-            </div>
-          </>
-        )}
-
-        {step === 2 && (
-          <>
-            <div>
-              <label className={labelCls}>Existing consumer unit</label>
-              <select
-                className={fieldCls}
-                value={s.consumerUnit}
-                onChange={(e) => set({ consumerUnit: e.target.value })}
-              >
-                <option value="">Select board type…</option>
-                {UNITS.map((o) => (
-                  <option key={o} value={o}>
-                    {o}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className={labelCls}>Spare breaker ways available</label>
-              <input
-                type="number"
-                inputMode="numeric"
-                className={fieldCls}
-                placeholder="e.g. 2"
-                value={s.spareWays}
-                onChange={(e) => set({ spareWays: e.target.value })}
-              />
-            </div>
-
-            <div>
-              <label className={labelCls}>Existing boiler setup</label>
-              <select className={fieldCls} value={s.boilerType} onChange={(e) => set({ boilerType: e.target.value })}>
-                <option value="">Select boiler type…</option>
-                {BOILERS.map((o) => (
-                  <option key={o} value={o}>
-                    {o}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className={labelCls}>Boiler output (kW)</label>
-              <input
-                type="number"
-                inputMode="decimal"
-                className={fieldCls}
-                placeholder="e.g. 24"
-                value={s.boilerKw}
-                onChange={(e) => set({ boilerKw: e.target.value })}
-              />
-            </div>
-          </>
-        )}
-
-        {step === 3 && (
+        {isLast && (
           <>
             <div className="flex items-center gap-2">
               <CheckCircle2 className="w-5 h-5 text-teal-300" />
               <h2 className="text-base font-semibold">SiteScout Summary</h2>
             </div>
 
-            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
-              <p className="text-[11px] uppercase tracking-widest text-white/40 mb-2">Ground & Geotechnical</p>
-              <Row label="Soil classification" value={s.soil} />
-              <Row label="Mature trees nearby" value={s.treesNearby ? "Yes" : "No"} />
-              {s.treesNearby && <Row label="Tree distance" value={s.treeDistance ? `${s.treeDistance} m` : ""} />}
-              {s.treesNearby && <Row label="Species" value={s.treeSpecies} />}
-              <Row label="Drainage invert depth" value={s.invertDepth ? `${s.invertDepth} m` : ""} />
-            </div>
-
-            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
-              <p className="text-[11px] uppercase tracking-widest text-white/40 mb-2">Access & Logistics</p>
-              <Row label="Clear access width" value={s.accessWidth ? `${s.accessWidth} m` : ""} />
-              <Row label="Distance from highway" value={s.distanceToHighway ? `${s.distanceToHighway} m` : ""} />
-              <Row label="Overhead cables" value={s.overheadCables ? "Yes" : "No"} />
-              {narrowAccess && <Row label="Plant strategy" value="Micro-plant / skip only" />}
-            </div>
-
-            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
-              <p className="text-[11px] uppercase tracking-widest text-white/40 mb-2">Existing MEP Services</p>
-              <Row label="Consumer unit" value={s.consumerUnit} />
-              <Row label="Spare ways" value={s.spareWays} />
-              <Row label="Boiler setup" value={s.boilerType} />
-              <Row label="Boiler output" value={s.boilerKw ? `${s.boilerKw} kW` : ""} />
-            </div>
-
-            {deltaChecks.length > 0 && (
-              <div className="rounded-xl border border-orange-400/40 bg-orange-400/[0.06] p-4">
-                <p className="text-[11px] uppercase tracking-widest text-orange-200/70 mb-2">
-                  Delta Engine verification
-                </p>
-                {deltaChecks.map((c) => (
-                  <Row key={c.id} label={c.label} value={deltaAnswers[c.id] ?? ""} />
+            {SITESCOUT_CATEGORIES.filter((c) => c.fields.length > 0).map((c) => (
+              <div key={c.key} className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
+                <p className="text-[11px] uppercase tracking-widest text-white/40 mb-2">{c.title}</p>
+                {c.fields.map((f) => (
+                  <Row
+                    key={f.key}
+                    label={f.label}
+                    value={values[f.key] ? `${values[f.key]}${f.unit ? ` ${f.unit}` : ""}` : ""}
+                  />
+                ))}
+                {injectedFor(c.key).map((chk) => (
+                  <Row key={chk.id} label={`Δ ${chk.label}`} value={deltaAnswers[chk.id] ?? ""} />
                 ))}
               </div>
-            )}
+            ))}
 
             <button
               type="button"
-              disabled={deltaOutstanding > 0}
+              disabled={outstanding.length > 0}
               onClick={() => toast.success("SiteScout data captured and ready for Engine processing.")}
               className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-teal-400 px-4 py-4 text-base font-semibold text-[#0f172a] hover:bg-teal-300 transition disabled:opacity-40"
             >
               <Send className="w-4 h-4" /> Transmit to ProGrafter Engine
             </button>
-            {deltaOutstanding > 0 && (
+            {outstanding.length > 0 && (
               <p className="text-center text-[11px] text-orange-200/80">
-                {deltaOutstanding} mandatory structural verification check
-                {deltaOutstanding === 1 ? "" : "s"} still outstanding in Step 1.
+                Outstanding Delta checks in:{" "}
+                {Array.from(
+                  new Set(
+                    outstanding.map(
+                      (c) => SITESCOUT_CATEGORIES.find((cat) => cat.key === c.category)?.title ?? c.category,
+                    ),
+                  ),
+                ).join(", ")}
+                .
               </p>
             )}
           </>
@@ -393,8 +406,8 @@ export default function SiteScoutV2() {
           </button>
           <button
             type="button"
-            disabled={step === STEPS.length - 1}
-            onClick={() => setStep((v) => Math.min(STEPS.length - 1, v + 1))}
+            disabled={isLast}
+            onClick={() => setStep((v) => Math.min(SITESCOUT_CATEGORIES.length - 1, v + 1))}
             className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-white/10 border border-white/20 px-4 py-4 text-base font-medium text-white disabled:opacity-35"
           >
             Next <ArrowRight className="w-4 h-4" />
