@@ -92,5 +92,35 @@ Deno.serve(async (req) => {
     out.create_body = await res.json().catch(() => null)
   }
 
+  const upd = new URL(req.url).searchParams.get('activate')
+  if (upd) {
+    const res = await fetch(`https://api.stripe.com/v2/core/accounts/${upd}`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${key}`,
+        'Content-Type': 'application/json',
+        'Stripe-Version': '2026-06-24.preview',
+      },
+      body: JSON.stringify({
+        defaults: { profile: { business_url: 'https://prografter.co.uk' } },
+        identity: {
+          attestations: {
+            terms_of_service: {
+              account: { date: new Date().toISOString().replace(/\.\d{3}Z$/, 'Z'), ip: '81.2.69.142' },
+            },
+          },
+        },
+        include: ['configuration.recipient', 'requirements'],
+      }),
+    })
+    out.activate_status = res.status
+    const b: any = await res.json().catch(() => null)
+    out.activate_result = b?.error ?? {
+      id: b?.id,
+      capabilities: b?.configuration?.recipient?.capabilities,
+      requirements: b?.requirements?.entries?.map((e: any) => e.description),
+    }
+  }
+
   return json(out)
 })
