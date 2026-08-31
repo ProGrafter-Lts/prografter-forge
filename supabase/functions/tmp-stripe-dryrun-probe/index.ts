@@ -55,7 +55,7 @@ Deno.serve(async (req) => {
     const payload = {
       contact_email: 'dryrun-trade@prografter.co.uk',
       display_name: 'ProGrafter Dry Run Trade',
-      dashboard: 'express',
+      dashboard: 'none',
       identity: {
         country: 'gb',
         entity_type: 'individual',
@@ -67,6 +67,11 @@ Deno.serve(async (req) => {
           address: { line1: '10 Downing Street', city: 'London', postal_code: 'SW1A 2AA', country: 'GB' },
           phone: '+447000000000',
         },
+        attestations: {
+          terms_of_service: {
+            account: { date: new Date().toISOString().replace(/\.\d{3}Z$/, 'Z'), ip: '81.2.69.142' },
+          },
+        },
       },
       configuration: {
         recipient: {
@@ -75,6 +80,7 @@ Deno.serve(async (req) => {
       },
       defaults: {
         currency: 'gbp',
+        profile: { business_url: 'https://prografter.co.uk' },
         responsibilities: { fees_collector: 'application', losses_collector: 'application' },
       },
       include: ['configuration.recipient', 'identity', 'requirements'],
