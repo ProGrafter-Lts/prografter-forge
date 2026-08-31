@@ -286,23 +286,25 @@ export default function DrawingIntelligence() {
               Read from each sheet's own title block — never from the upload zone, because one document often
               contains both existing and proposed sheets.
             </p>
-            {unclassified.length > 0 && (
+            {unresolved.length > 0 && (
               <p className="mt-3 rounded-lg border border-orange-400/40 bg-orange-400/[0.08] px-3 py-2 text-[11px] text-orange-100/90">
-                {unclassified.length} sheet(s) could not be classified from the title block. Set them manually
-                before delta comparison — nothing is guessed.
+                {unresolved.length} sheet(s) unresolved. Classify them, or mark a combined sheet as Split and tag
+                each plan region — nothing is guessed.
               </p>
             )}
             <div className="mt-3 space-y-2">
-              {sheets.map((s) => (
+              {sheets.map((s) => {
+                const resolved = isSheetResolved(s);
+                return (
                 <div key={s.id} className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <span className="truncate font-mono text-[11px] text-white/75">{s.label}</span>
                     <span
                       className="rounded-full border px-2 py-0.5 font-mono text-[9px] uppercase tracking-wider"
                       style={
-                        s.classification === "UNCLASSIFIED"
-                          ? { backgroundColor: "rgba(249,115,22,0.16)", color: "#fb923c", borderColor: "rgba(251,146,60,0.5)" }
-                          : { backgroundColor: "rgba(56,189,248,0.14)", color: "#38bdf8", borderColor: "rgba(56,189,248,0.45)" }
+                        resolved
+                          ? { backgroundColor: "rgba(56,189,248,0.14)", color: "#38bdf8", borderColor: "rgba(56,189,248,0.45)" }
+                          : { backgroundColor: "rgba(249,115,22,0.16)", color: "#fb923c", borderColor: "rgba(251,146,60,0.5)" }
                       }
                     >
                       {s.classification}
@@ -310,38 +312,43 @@ export default function DrawingIntelligence() {
                     </span>
                   </div>
                   <p className="mt-1 text-[11px] leading-relaxed text-white/50">{s.reason}</p>
-                  {s.classification === "UNCLASSIFIED" && (
-                    <div className="mt-2">
-                      <p className="text-[11px] text-white/70">Is this Existing or Proposed?</p>
-                      <div className="mt-1.5 grid grid-cols-2 gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setSheetClass(s.id, "EXISTING")}
-                          className="rounded-lg border border-white/15 bg-white/[0.04] px-3 py-2 text-[12px] text-white/85"
-                        >
-                          Existing
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setSheetClass(s.id, "PROPOSED")}
-                          className="rounded-lg border border-white/15 bg-white/[0.04] px-3 py-2 text-[12px] text-white/85"
-                        >
-                          Proposed
-                        </button>
-                      </div>
-                    </div>
+                  {!resolved && s.classification !== "SPLIT" && (
+                    <p className="mt-1 text-[11px] text-orange-200/80">{unresolvedReason(s)}</p>
                   )}
-                  {s.classification !== "UNCLASSIFIED" && (
-                    <button
-                      type="button"
-                      onClick={() => setSheetClass(s.id, s.classification === "EXISTING" ? "PROPOSED" : "EXISTING")}
-                      className="mt-2 font-mono text-[10px] uppercase tracking-wider text-teal-300"
-                    >
-                      Switch to {s.classification === "EXISTING" ? "Proposed" : "Existing"}
-                    </button>
+
+                  <div className="mt-2 grid grid-cols-3 gap-2">
+                    {(["EXISTING", "PROPOSED", "SPLIT"] as const).map((c) => (
+                      <button
+                        key={c}
+                        type="button"
+                        onClick={() => setSheetClass(s.id, c)}
+                        className="rounded-lg border px-2 py-2 text-[12px]"
+                        style={
+                          s.classification === c
+                            ? { borderColor: "rgba(56,189,248,0.6)", backgroundColor: "rgba(56,189,248,0.12)", color: "#7dd3fc" }
+                            : { borderColor: "rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.8)" }
+                        }
+                      >
+                        {c === "SPLIT" ? "Both (split)" : c === "EXISTING" ? "Existing" : "Proposed"}
+                      </button>
+                    ))}
+                  </div>
+
+                  {s.classification === "SPLIT" && (
+                    <>
+                      <SheetRegionSplitter sheet={s} onChange={(r) => setSheetRegions(s.id, r)} />
+                      {!resolved && (
+                        <p className="mt-2 text-[11px] text-orange-200/80">{unresolvedReason(s)}</p>
+                      )}
+                      <p className="mt-2 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-[10px] leading-relaxed text-white/45">
+                        Region tags are captured and stored only. Delta comparison still runs on whole files —
+                        region-scoped extraction is backend work that is not built yet.
+                      </p>
+                    </>
                   )}
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
