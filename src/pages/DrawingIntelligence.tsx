@@ -233,20 +233,90 @@ export default function DrawingIntelligence() {
 
         <div className="grid gap-4 md:grid-cols-2">
           <UploadZone
-            title="Existing Layouts"
-            subtitle="As-built plans, elevations and existing drainage layouts"
-            files={existing}
-            onFiles={(l) => handleFiles("existing", l)}
-            onRemove={(n) => setExisting((p) => p.filter((x) => x !== n))}
+            title="Technical Drawings"
+            subtitle="One combined set or separate sheets — existing/proposed is read from each title block"
+            files={drawings}
+            onFiles={(l) => handleFiles("drawings", l)}
+            onRemove={(n) => {
+              setDrawings((p) => p.filter((x) => x !== n));
+              setSheets((p) => p.filter((s) => s.fileName !== n));
+            }}
           />
           <UploadZone
-            title="Proposed Drawings & Structural Calcs"
-            subtitle="Proposed GA plans, elevations, beam schedules and calcs"
-            files={proposed}
-            onFiles={(l) => handleFiles("proposed", l)}
-            onRemove={(n) => setProposed((p) => p.filter((x) => x !== n))}
+            title="Structural Calculations"
+            subtitle="Engineer's calcs, beam schedules and span tables"
+            files={calcs}
+            onFiles={(l) => handleFiles("calcs", l)}
+            onRemove={(n) => setCalcs((p) => p.filter((x) => x !== n))}
           />
         </div>
+
+        {sheets.length > 0 && (
+          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+            <h3 className="text-sm font-semibold text-white">Sheet classification</h3>
+            <p className="mt-0.5 text-[11px] text-white/45">
+              Read from each sheet's own title block — never from the upload zone, because one document often
+              contains both existing and proposed sheets.
+            </p>
+            {unclassified.length > 0 && (
+              <p className="mt-3 rounded-lg border border-orange-400/40 bg-orange-400/[0.08] px-3 py-2 text-[11px] text-orange-100/90">
+                {unclassified.length} sheet(s) could not be classified from the title block. Set them manually
+                before delta comparison — nothing is guessed.
+              </p>
+            )}
+            <div className="mt-3 space-y-2">
+              {sheets.map((s) => (
+                <div key={s.id} className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span className="truncate font-mono text-[11px] text-white/75">{s.label}</span>
+                    <span
+                      className="rounded-full border px-2 py-0.5 font-mono text-[9px] uppercase tracking-wider"
+                      style={
+                        s.classification === "UNCLASSIFIED"
+                          ? { backgroundColor: "rgba(249,115,22,0.16)", color: "#fb923c", borderColor: "rgba(251,146,60,0.5)" }
+                          : { backgroundColor: "rgba(56,189,248,0.14)", color: "#38bdf8", borderColor: "rgba(56,189,248,0.45)" }
+                      }
+                    >
+                      {s.classification}
+                      {s.manual ? " · manual" : ""}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-[11px] leading-relaxed text-white/50">{s.reason}</p>
+                  {s.classification === "UNCLASSIFIED" && (
+                    <div className="mt-2">
+                      <p className="text-[11px] text-white/70">Is this Existing or Proposed?</p>
+                      <div className="mt-1.5 grid grid-cols-2 gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setSheetClass(s.id, "EXISTING")}
+                          className="rounded-lg border border-white/15 bg-white/[0.04] px-3 py-2 text-[12px] text-white/85"
+                        >
+                          Existing
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setSheetClass(s.id, "PROPOSED")}
+                          className="rounded-lg border border-white/15 bg-white/[0.04] px-3 py-2 text-[12px] text-white/85"
+                        >
+                          Proposed
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  {s.classification !== "UNCLASSIFIED" && (
+                    <button
+                      type="button"
+                      onClick={() => setSheetClass(s.id, s.classification === "EXISTING" ? "PROPOSED" : "EXISTING")}
+                      className="mt-2 font-mono text-[10px] uppercase tracking-wider text-teal-300"
+                    >
+                      Switch to {s.classification === "EXISTING" ? "Proposed" : "Existing"}
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {state === "AWAITING_BACKEND_EXTRACTION" && (
           <div className="rounded-2xl border border-sky-400/35 bg-sky-400/[0.07] p-4">
