@@ -223,9 +223,9 @@ export default function DrawingIntelligence() {
 
   const generateSurvey = () => {
     if (!analysis) return;
-    if (unclassified.length) {
+    if (unresolved.length) {
       toast.error(
-        `${unclassified.length} sheet(s) still need manual Existing/Proposed classification before delta comparison.`,
+        `${unresolved.length} sheet(s) unresolved — split sheets need every region tagged before delta comparison.`,
       );
       return;
     }
