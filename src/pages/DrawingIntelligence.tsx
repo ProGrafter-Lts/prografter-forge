@@ -11,14 +11,17 @@ import {
   isAcceptedDrawing,
   isImageDrawing,
   saveInjection,
+  sheetsFromFileName,
   withFiles,
   type Confidence,
   type DataPoint,
   type DrawingAnalysis,
+  type DrawingSheet,
   type IngestionState,
+  type SheetClassification,
 } from "@/lib/drawingDelta";
 
-type Zone = "existing" | "proposed";
+type Zone = "drawings" | "calcs";
 
 function ConfidenceBadge({ confidence }: { confidence: Confidence }) {
   const m = CONFIDENCE_META[confidence];
