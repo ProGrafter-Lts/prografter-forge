@@ -4,6 +4,7 @@ import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 import { createClient } from 'npm:@supabase/supabase-js@2.57.2'
 import { z } from 'npm:zod@3.23.8'
 import { logDrawdownEvent, penceToPounds } from '../_shared/drawdown.ts'
+import { assertNotFrozen } from '../_shared/escrow.ts'
 import { enqueueTransactionalEmail } from '../_shared/enqueue-transactional-email.ts'
 
 const BodySchema = z.object({
@@ -48,6 +49,9 @@ Deno.serve(async (req) => {
     if (!stage) return json({ error: 'Wallet stage not found' }, 404)
     const wallet: any = stage.project_wallets
     if (!wallet) return json({ error: 'Wallet not found' }, 404)
+
+    const frozen = await assertNotFrozen(admin, wallet.id)
+    if (frozen) return json({ error: frozen }, 409)
 
     const { data: trade } = await admin
       .from('trades')

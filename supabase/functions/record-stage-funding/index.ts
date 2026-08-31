@@ -8,6 +8,7 @@ import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 import { createClient } from 'npm:@supabase/supabase-js@2.57.2'
 import { z } from 'npm:zod@3.23.8'
 import { logDrawdownEvent } from '../_shared/drawdown.ts'
+import { attemptStageRelease } from '../_shared/escrow.ts'
 
 const BodySchema = z.object({
   wallet_stage_id: z.string().uuid(),
@@ -85,7 +86,19 @@ Deno.serve(async (req) => {
       },
     })
 
-    return json({ stage: updated })
+    // Inspection already CLEAR on this stage? The release fires automatically
+    // the moment funding completes — no approval click.
+    let release: unknown = null
+    if (funded >= Number(stage.expected_amount_pence)) {
+      release = await attemptStageRelease(admin, {
+        walletStageId: stage.id,
+        actorUserId: user.id,
+        actorRole: 'admin',
+        trigger: 'stage_funded',
+      })
+    }
+
+    return json({ stage: updated, release })
   } catch (e) {
     console.error('[record-stage-funding]', e)
     return json({ error: e instanceof Error ? e.message : 'Unexpected error' }, 500)

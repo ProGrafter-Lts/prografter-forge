@@ -1876,6 +1876,82 @@ export type Database = {
         }
         Relationships: []
       }
+      inspection_disputes: {
+        Row: {
+          created_at: string
+          evidence_notes: string | null
+          evidence_path: string | null
+          evidence_reference: string
+          evidence_type: string
+          id: string
+          inspection_report_id: string
+          job_id: string
+          raised_by_role: string
+          raised_by_user_id: string
+          resolution_note: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+          wallet_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          evidence_notes?: string | null
+          evidence_path?: string | null
+          evidence_reference: string
+          evidence_type: string
+          id?: string
+          inspection_report_id: string
+          job_id: string
+          raised_by_role: string
+          raised_by_user_id: string
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          wallet_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          evidence_notes?: string | null
+          evidence_path?: string | null
+          evidence_reference?: string
+          evidence_type?: string
+          id?: string
+          inspection_report_id?: string
+          job_id?: string
+          raised_by_role?: string
+          raised_by_user_id?: string
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          wallet_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inspection_disputes_inspection_report_id_fkey"
+            columns: ["inspection_report_id"]
+            isOneToOne: false
+            referencedRelation: "stage_inspection_reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inspection_disputes_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inspection_disputes_wallet_id_fkey"
+            columns: ["wallet_id"]
+            isOneToOne: false
+            referencedRelation: "project_wallets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       job_brief_files: {
         Row: {
           category: string | null
@@ -3430,6 +3506,10 @@ export type Database = {
           issuing_body: string | null
           job_id: string
           reference_number: string | null
+          released_at: string | null
+          stage_order: number | null
+          visible_to_homeowner: boolean
+          wallet_stage_id: string | null
         }
         Insert: {
           cert_type?: string
@@ -3441,6 +3521,10 @@ export type Database = {
           issuing_body?: string | null
           job_id: string
           reference_number?: string | null
+          released_at?: string | null
+          stage_order?: number | null
+          visible_to_homeowner?: boolean
+          wallet_stage_id?: string | null
         }
         Update: {
           cert_type?: string
@@ -3452,6 +3536,10 @@ export type Database = {
           issuing_body?: string | null
           job_id?: string
           reference_number?: string | null
+          released_at?: string | null
+          stage_order?: number | null
+          visible_to_homeowner?: boolean
+          wallet_stage_id?: string | null
         }
         Relationships: [
           {
@@ -3634,8 +3722,12 @@ export type Database = {
           funded_at: string | null
           funding_status: string
           id: string
+          inspection_passed_at: string | null
+          inspection_report_id: string | null
+          inspection_status: string | null
           is_mobilization: boolean
           project_stage_id: string | null
+          release_block_reason: string | null
           released_amount_pence: number
           released_at: string | null
           stage_name: string
@@ -3653,8 +3745,12 @@ export type Database = {
           funded_at?: string | null
           funding_status?: string
           id?: string
+          inspection_passed_at?: string | null
+          inspection_report_id?: string | null
+          inspection_status?: string | null
           is_mobilization?: boolean
           project_stage_id?: string | null
+          release_block_reason?: string | null
           released_amount_pence?: number
           released_at?: string | null
           stage_name: string
@@ -3672,8 +3768,12 @@ export type Database = {
           funded_at?: string | null
           funding_status?: string
           id?: string
+          inspection_passed_at?: string | null
+          inspection_report_id?: string | null
+          inspection_status?: string | null
           is_mobilization?: boolean
           project_stage_id?: string | null
+          release_block_reason?: string | null
           released_amount_pence?: number
           released_at?: string | null
           stage_name?: string
@@ -3704,6 +3804,12 @@ export type Database = {
           contract_id: string | null
           created_at: string
           currency: string
+          final_stage_pct: number | null
+          final_stage_warning: boolean
+          frozen: boolean
+          frozen_at: string | null
+          frozen_by_dispute_id: string | null
+          frozen_reason: string | null
           homeowner_id: string
           id: string
           job_id: string
@@ -3719,6 +3825,12 @@ export type Database = {
           contract_id?: string | null
           created_at?: string
           currency?: string
+          final_stage_pct?: number | null
+          final_stage_warning?: boolean
+          frozen?: boolean
+          frozen_at?: string | null
+          frozen_by_dispute_id?: string | null
+          frozen_reason?: string | null
           homeowner_id: string
           id?: string
           job_id: string
@@ -3734,6 +3846,12 @@ export type Database = {
           contract_id?: string | null
           created_at?: string
           currency?: string
+          final_stage_pct?: number | null
+          final_stage_warning?: boolean
+          frozen?: boolean
+          frozen_at?: string | null
+          frozen_by_dispute_id?: string | null
+          frozen_reason?: string | null
           homeowner_id?: string
           id?: string
           job_id?: string
@@ -5011,6 +5129,97 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      stage_inspection_reports: {
+        Row: {
+          classification: string
+          classification_reason: string | null
+          clear_phrases: Json
+          created_at: string
+          file_name: string | null
+          file_path: string | null
+          id: string
+          inspector_name: string | null
+          job_id: string
+          open_items: Json
+          raw_text: string | null
+          report_date: string | null
+          required_actions: Json
+          resolved_items: Json
+          status: string
+          unable_to_assess: Json
+          uploaded_by: string | null
+          uploader_role: string
+          wallet_id: string | null
+          wallet_stage_id: string | null
+        }
+        Insert: {
+          classification: string
+          classification_reason?: string | null
+          clear_phrases?: Json
+          created_at?: string
+          file_name?: string | null
+          file_path?: string | null
+          id?: string
+          inspector_name?: string | null
+          job_id: string
+          open_items?: Json
+          raw_text?: string | null
+          report_date?: string | null
+          required_actions?: Json
+          resolved_items?: Json
+          status?: string
+          unable_to_assess?: Json
+          uploaded_by?: string | null
+          uploader_role?: string
+          wallet_id?: string | null
+          wallet_stage_id?: string | null
+        }
+        Update: {
+          classification?: string
+          classification_reason?: string | null
+          clear_phrases?: Json
+          created_at?: string
+          file_name?: string | null
+          file_path?: string | null
+          id?: string
+          inspector_name?: string | null
+          job_id?: string
+          open_items?: Json
+          raw_text?: string | null
+          report_date?: string | null
+          required_actions?: Json
+          resolved_items?: Json
+          status?: string
+          unable_to_assess?: Json
+          uploaded_by?: string | null
+          uploader_role?: string
+          wallet_id?: string | null
+          wallet_stage_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stage_inspection_reports_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stage_inspection_reports_wallet_id_fkey"
+            columns: ["wallet_id"]
+            isOneToOne: false
+            referencedRelation: "project_wallets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stage_inspection_reports_wallet_stage_id_fkey"
+            columns: ["wallet_stage_id"]
+            isOneToOne: false
+            referencedRelation: "project_wallet_stages"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       stage_updates: {
         Row: {

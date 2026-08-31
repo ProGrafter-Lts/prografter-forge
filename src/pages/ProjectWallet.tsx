@@ -6,7 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { AlertTriangle, ShieldCheck, Lock } from "lucide-react";
+import { AlertTriangle, ShieldCheck, Lock, Snowflake } from "lucide-react";
+import InspectionPanel, { type InspectionReport } from "@/components/wallet/InspectionPanel";
 
 type WalletStage = {
   id: string;
@@ -19,6 +20,8 @@ type WalletStage = {
   funding_status: string;
   awaiting_funds: boolean;
   deposit_requested_at: string | null;
+  inspection_status: string | null;
+  release_block_reason: string | null;
 };
 
 type Wallet = {
@@ -30,6 +33,10 @@ type Wallet = {
   mobilization_target_request_date: string | null;
   mobilization_hard_deadline: string | null;
   start_date_at_risk: boolean;
+  frozen: boolean;
+  frozen_reason: string | null;
+  final_stage_pct: number | null;
+  final_stage_warning: boolean;
 };
 
 type DrawdownRequest = {
@@ -69,6 +76,7 @@ const ProjectWallet = () => {
   const [stages, setStages] = useState<WalletStage[]>([]);
   const [requests, setRequests] = useState<DrawdownRequest[]>([]);
   const [audit, setAudit] = useState<AuditEvent[]>([]);
+  const [reports, setReports] = useState<InspectionReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
 
@@ -101,15 +109,17 @@ const ProjectWallet = () => {
     ]);
     setRole(ho ? "homeowner" : tr ? "trade" : null);
 
-    const [stageRes, reqRes, auditRes] = await Promise.all([
+    const [stageRes, reqRes, auditRes, reportRes] = await Promise.all([
       supabase.from("project_wallet_stages").select("*").eq("wallet_id", walletRow.id).order("stage_order"),
       supabase.from("drawdown_requests").select("id, amount_pence, description, status, created_at, decided_at, decline_reason, stripe_transfer_id, wallet_stage_id").eq("wallet_id", walletRow.id).order("created_at", { ascending: false }),
       supabase.from("drawdown_audit_events").select("id, event_type, actor_role, created_at, detail").eq("wallet_id", walletRow.id).order("created_at", { ascending: false }),
+      supabase.from("stage_inspection_reports").select("*").eq("wallet_id", walletRow.id).order("created_at", { ascending: false }),
     ]);
 
     setStages((stageRes.data ?? []) as WalletStage[]);
     setRequests((reqRes.data ?? []) as DrawdownRequest[]);
     setAudit((auditRes.data ?? []) as AuditEvent[]);
+    setReports((reportRes.data ?? []) as unknown as InspectionReport[]);
     setLoading(false);
   }, [jobId]);
 
@@ -202,6 +212,32 @@ const ProjectWallet = () => {
           </p>
         </header>
 
+        {wallet.frozen && (
+          <div className="rounded-2xl border border-sky-300 bg-sky-50 p-4 flex gap-3">
+            <Snowflake className="w-5 h-5 text-sky-600 shrink-0" />
+            <div>
+              <p className="font-mono text-sm text-sky-900 font-semibold">Project frozen</p>
+              <p className="font-mono text-xs text-sky-800 mt-1">
+                {wallet.frozen_reason ?? "A disputed inspection report has frozen this project."} No payments move and no
+                further stage funding is requested until an admin lifts the freeze.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {wallet.final_stage_warning && (
+          <div className="rounded-2xl border border-amber-300 bg-amber-50 p-4 flex gap-3">
+            <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
+            <div>
+              <p className="font-mono text-sm text-amber-900 font-semibold">Final payment sizing</p>
+              <p className="font-mono text-xs text-amber-800 mt-1">
+                The final stage is {Number(wallet.final_stage_pct ?? 0).toFixed(1)}% of contract value, above the 5% guide.
+                Confirm this is intended before the schedule is agreed.
+              </p>
+            </div>
+          </div>
+        )}
+
         {wallet.start_date_at_risk && (
           <div className="rounded-2xl border border-amber-300 bg-amber-50 p-4 flex gap-3">
             <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
@@ -239,6 +275,12 @@ const ProjectWallet = () => {
                   </p>
                   {s.awaiting_funds && (
                     <p className="font-mono text-xs text-amber-700 mt-1">Inspection passed — awaiting funds</p>
+                  )}
+                  {s.inspection_status && (
+                    <p className="font-mono text-xs text-secondary-text mt-1">Inspection: {s.inspection_status}</p>
+                  )}
+                  {s.release_block_reason && s.funding_status !== "released" && (
+                    <p className="font-mono text-xs text-secondary-text mt-1">{s.release_block_reason}</p>
                   )}
                 </div>
                 <Badge variant="secondary" className="font-mono text-xs shrink-0">
@@ -298,6 +340,15 @@ const ProjectWallet = () => {
             )}
           </section>
         )}
+
+        <InspectionPanel
+          jobId={wallet.job_id}
+          role={role}
+          stages={stages.map((s) => ({ id: s.id, stage_name: s.stage_name }))}
+          reports={reports}
+          frozen={wallet.frozen}
+          onChanged={load}
+        />
 
         {/* Audit trail */}
         <section className="space-y-3">

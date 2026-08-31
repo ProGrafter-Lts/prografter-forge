@@ -7,6 +7,7 @@ import Stripe from 'https://esm.sh/stripe@18.5.0'
 import { z } from 'npm:zod@3.23.8'
 import { logDrawdownEvent, penceToPounds, requestNextStageDeposit } from '../_shared/drawdown.ts'
 import { notifyTrade } from '../_shared/trade-notify.ts'
+import { assertNotFrozen } from '../_shared/escrow.ts'
 import { enqueueTransactionalEmail } from '../_shared/enqueue-transactional-email.ts'
 
 const BodySchema = z.object({
@@ -46,6 +47,9 @@ Deno.serve(async (req) => {
     if (request.status !== 'pending_approval') {
       return json({ error: `Request is already ${request.status}` }, 409)
     }
+
+    const frozenReason = await assertNotFrozen(admin, request.wallet_id)
+    if (frozenReason) return json({ error: frozenReason }, 409)
 
     // Strictly the homeowner on this project.
     const { data: homeowner } = await admin
