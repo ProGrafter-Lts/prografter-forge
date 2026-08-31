@@ -24,15 +24,33 @@ export async function assertNotFrozen(admin: any, walletId: string): Promise<str
   return null
 }
 
-/** Statutory certificates for a released stage become homeowner-visible. */
+/**
+ * Statutory certificates for a released stage become homeowner-visible.
+ * STRICT one-to-one: a certificate belongs to exactly the stage it was issued
+ * for. No inheritance from earlier stage orders — a certificate is never
+ * released on the back of a different stage's release.
+ */
 async function releaseCertificates(admin: any, jobId: string, walletStageId: string, stageOrder: number) {
   const nowIso = new Date().toISOString()
+  const patch = { visible_to_homeowner: true, released_at: nowIso }
+
+  // Primary link: explicit wallet_stage_id.
   await admin
     .from('project_certificates')
-    .update({ visible_to_homeowner: true, released_at: nowIso })
+    .update(patch)
     .eq('job_id', jobId)
     .eq('visible_to_homeowner', false)
-    .or(`wallet_stage_id.eq.${walletStageId},stage_order.lte.${stageOrder}`)
+    .eq('wallet_stage_id', walletStageId)
+
+  // Legacy fallback: certificates recorded before wallet_stage_id existed,
+  // matched on the EXACT stage order only.
+  await admin
+    .from('project_certificates')
+    .update(patch)
+    .eq('job_id', jobId)
+    .eq('visible_to_homeowner', false)
+    .is('wallet_stage_id', null)
+    .eq('stage_order', stageOrder)
 }
 
 /** Fire the already-built sequential funding hook. */
