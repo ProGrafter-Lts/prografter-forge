@@ -10,6 +10,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2.57.2'
 import { z } from 'npm:zod@3.23.8'
 import { logDrawdownEvent, penceToPounds, requestNextStageDeposit } from '../_shared/drawdown.ts'
 import { enqueueTransactionalEmail } from '../_shared/enqueue-transactional-email.ts'
+import { assertNotFrozen } from '../_shared/escrow.ts'
 
 const BodySchema = z.object({
   job_id: z.string().uuid(),
@@ -41,6 +42,10 @@ Deno.serve(async (req) => {
     const { data: wallet } = await admin
       .from('project_wallets').select('*').eq('job_id', input.job_id).maybeSingle()
     if (!wallet) return json({ error: 'No wallet for this project' }, 404)
+
+    // A frozen project moves no money and requests no further funding.
+    const frozenReason = await assertNotFrozen(admin, wallet.id)
+    if (frozenReason) return json({ ok: false, frozen: true, reason: frozenReason, next_stage: null }, 409)
 
     if (input.awaiting_funds_stage_id) {
       await admin
