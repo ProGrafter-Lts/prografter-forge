@@ -189,6 +189,10 @@ export async function attemptStageRelease(
   }
 
   const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', { apiVersion: '2025-08-27.basil' })
+  // The idempotency key must be stable for a single attempt but must change
+  // after a failure — Stripe replays cached errors, so a fixed key would make a
+  // transient failure (platform balance, network) permanently unretryable.
+  const attempt = Number(stage.release_attempt ?? 0)
   let transfer: any
   try {
     transfer = await stripe.transfers.create(
@@ -199,12 +203,14 @@ export async function attemptStageRelease(
         description: `Milestone release — ${stage.stage_name}`.slice(0, 200),
         metadata: { job_id: wallet.job_id, wallet_stage_id: stage.id, inspection_report_id: report.id },
       },
-      { idempotencyKey: `milestone-release-${stage.id}` },
+      { idempotencyKey: `milestone-release-${stage.id}-${available}-${attempt}` },
     )
   } catch (e) {
     const message = e instanceof Error ? e.message : 'Stripe transfer failed'
     await admin.from('project_wallet_stages')
-      .update({ release_block_reason: `Transfer failed: ${message}` }).eq('id', stage.id)
+      .update({ release_block_reason: `Transfer failed: ${message}`, release_attempt: attempt + 1 })
+      .eq('id', stage.id)
+
     await logDrawdownEvent(admin, {
       walletId: wallet.id,
       eventType: 'milestone_release_transfer_failed',
