@@ -117,6 +117,103 @@ export const ext = (name: string) => name.slice(name.lastIndexOf(".")).toLowerCa
 export const isImageDrawing = (name: string) => IMAGE_EXT.includes(ext(name));
 export const isAcceptedDrawing = (name: string) => ACCEPTED_EXT.includes(ext(name));
 
+/* ---------------- Sheet classification (Existing vs Proposed) ---------------- */
+
+/**
+ * Drawings routinely arrive as ONE combined document containing both the
+ * existing and the proposed sheets. Classification is therefore done per
+ * sheet, from the sheet's own title-block / label text — never from which
+ * upload zone the file came from.
+ */
+export type SheetClassification = "EXISTING" | "PROPOSED" | "UNCLASSIFIED";
+
+export interface SheetConvention {
+  id: string;
+  /** Human description of the title-block convention. */
+  label: string;
+  pattern: RegExp;
+  classification: Exclude<SheetClassification, "UNCLASSIFIED">;
+}
+
+/**
+ * Title-block conventions handled. Ordered — the first match wins, and a
+ * label containing BOTH sides (e.g. "Existing & Proposed Ground Floor")
+ * is deliberately left UNCLASSIFIED for manual resolution.
+ */
+export const SHEET_CONVENTIONS: SheetConvention[] = [
+  { id: "word-existing", label: '"Existing" in the title block', pattern: /\bexisting\b/i, classification: "EXISTING" },
+  { id: "word-asbuilt", label: '"As Built" / "As-Built" / "Survey"', pattern: /\bas[-\s]?built\b|\bmeasured survey\b/i, classification: "EXISTING" },
+  { id: "word-demolition", label: '"Demolition" / "Existing to be removed"', pattern: /\bdemolition\b|\bto be (removed|demolished)\b/i, classification: "EXISTING" },
+  { id: "abbr-existing", label: 'Abbreviated "Ex." / "EXG" / "EXIST"', pattern: /\b(ex|exg|exist|extg)\b\.?/i, classification: "EXISTING" },
+  { id: "code-existing", label: 'Sheet code prefix "EX-", "E-", "(E)"', pattern: /(^|[^a-z])(ex|e)[-_]\d|\(e\)/i, classification: "EXISTING" },
+  { id: "word-proposed", label: '"Proposed" in the title block', pattern: /\bproposed\b/i, classification: "PROPOSED" },
+  { id: "word-scheme", label: '"Scheme" / "New" / "Planning Issue"', pattern: /\bscheme\b|\bnew (ground|first|second|floor|layout|plan)\b|\bplanning (issue|application)\b/i, classification: "PROPOSED" },
+  { id: "abbr-proposed", label: 'Abbreviated "Prop." / "PROP"', pattern: /\b(prop|prpsd)\b\.?/i, classification: "PROPOSED" },
+  { id: "code-proposed", label: 'Sheet code prefix "PR-", "P-", "PL-", "(P)"', pattern: /(^|[^a-z])(pr|p|pl)[-_]\d|\(p\)/i, classification: "PROPOSED" },
+];
+
+export interface ClassificationResult {
+  classification: SheetClassification;
+  /** Which convention matched, or why it could not be determined. */
+  reason: string;
+}
+
+/** Classify a single sheet from its title-block / label text. */
+export function classifySheetLabel(text: string): ClassificationResult {
+  const t = (text ?? "").trim();
+  if (!t) return { classification: "UNCLASSIFIED", reason: "No title-block or label text read from the sheet." };
+
+  const hits = SHEET_CONVENTIONS.filter((c) => c.pattern.test(t));
+  const existing = hits.filter((h) => h.classification === "EXISTING");
+  const proposed = hits.filter((h) => h.classification === "PROPOSED");
+
+  if (existing.length && proposed.length) {
+    return {
+      classification: "UNCLASSIFIED",
+      reason: `Title block references both existing and proposed (${existing[0].label} + ${proposed[0].label}) — manual classification required.`,
+    };
+  }
+  if (existing.length) return { classification: "EXISTING", reason: `Matched ${existing[0].label}.` };
+  if (proposed.length) return { classification: "PROPOSED", reason: `Matched ${proposed[0].label}.` };
+  return {
+    classification: "UNCLASSIFIED",
+    reason: "No recognised existing/proposed convention in the title block — manual classification required.",
+  };
+}
+
+export interface DrawingSheet {
+  id: string;
+  /** Source document the sheet came from (one file may hold many sheets). */
+  fileName: string;
+  /** Title-block / label text read off the sheet. */
+  label: string;
+  classification: SheetClassification;
+  reason: string;
+  /** True once the user has manually set the classification. */
+  manual: boolean;
+}
+
+/**
+ * Builds provisional sheet records for an uploaded document. Until the
+ * extraction backend returns per-sheet title-block text, the document's own
+ * filename is the only label available, so a file whose name carries no
+ * convention is flagged for manual classification rather than guessed.
+ */
+export function sheetsFromFileName(fileName: string): DrawingSheet[] {
+  const label = fileName.replace(/\.[^.]+$/, "").replace(/[_]+/g, " ");
+  const res = classifySheetLabel(label);
+  return [
+    {
+      id: `${fileName}::1`,
+      fileName,
+      label,
+      classification: res.classification,
+      reason: res.reason,
+      manual: false,
+    },
+  ];
+}
+
 /* ---------------- Test Mode payload ---------------- */
 
 /**
