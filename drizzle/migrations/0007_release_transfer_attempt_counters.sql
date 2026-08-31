@@ -1,0 +1,2 @@
+ALTER TABLE public.project_wallet_stages ADD COLUMN IF NOT EXISTS release_attempt integer NOT NULL DEFAULT 0;
+ALTER TABLE public.drawdown_requests ADD COLUMN IF NOT EXISTS transfer_attempt integer NOT NULL DEFAULT 0;

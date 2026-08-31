@@ -1,8 +1,8 @@
 // TEMPORARY harness for the mobilization drawdown / escrow dry run.
-// Resets the password of the three known dry-run test users so the flow can be
-// executed as real authenticated actors. Delete after the dry run.
+// Delete after the dry run.
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 import { createClient } from 'npm:@supabase/supabase-js@2.57.2'
+import Stripe from 'https://esm.sh/stripe@18.5.0'
 
 const USERS = [
   { id: '78be78e5-07b4-4ad0-8bc9-0dc684c9740c', role: 'homeowner' },
@@ -28,6 +28,27 @@ Deno.serve(async (req) => {
   const password = url.searchParams.get('pw') ?? ''
   if (password.length < 16) return json({ error: 'pw required' }, 400)
 
+  const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
+    apiVersion: '2025-08-27.basil',
+  })
+
+  const topup = Number(url.searchParams.get('topup_pence') ?? '0')
+  if (topup > 0) {
+    const charge = await stripe.charges.create({
+      amount: topup,
+      currency: 'gbp',
+      source: 'tok_bypassPending',
+      description: 'Dry run available-balance top-up',
+    })
+    const balance = await stripe.balance.retrieve()
+    return json({ charge_id: charge.id, status: charge.status, balance: balance.available })
+  }
+
+  if (url.searchParams.get('balance')) {
+    const balance = await stripe.balance.retrieve()
+    return json({ available: balance.available, pending: balance.pending })
+  }
+
   const out: Record<string, unknown> = {}
   for (const u of USERS) {
     const { data, error } = await admin.auth.admin.updateUserById(u.id, {
@@ -36,6 +57,5 @@ Deno.serve(async (req) => {
     })
     out[u.role] = error ? { error: error.message } : { id: data.user?.id, ok: true }
   }
-
   return json(out)
 })

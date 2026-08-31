@@ -133,6 +133,9 @@ Deno.serve(async (req) => {
       apiVersion: '2025-08-27.basil',
     })
 
+    // Stable per attempt, but rotated after a failure — Stripe replays cached
+    // errors, so a fixed key would make a transient failure unretryable.
+    const attempt = Number((request as any).transfer_attempt ?? 0)
     let transfer: any
     try {
       transfer = await stripe.transfers.create(
@@ -147,14 +150,15 @@ Deno.serve(async (req) => {
             wallet_stage_id: request.wallet_stage_id,
           },
         },
-        { idempotencyKey: `drawdown-${request.id}` },
+        { idempotencyKey: `drawdown-${request.id}-${request.amount_pence}-${attempt}` },
       )
     } catch (e) {
       const message = e instanceof Error ? e.message : 'Stripe transfer failed'
       await admin
         .from('drawdown_requests')
-        .update({ status: 'transfer_failed', transfer_error: message })
+        .update({ status: 'transfer_failed', transfer_error: message, transfer_attempt: attempt + 1 })
         .eq('id', request.id)
+
       await logDrawdownEvent(admin, {
         walletId: request.wallet_id,
         requestId: request.id,
