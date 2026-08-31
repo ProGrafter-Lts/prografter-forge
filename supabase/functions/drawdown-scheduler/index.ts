@@ -51,7 +51,7 @@ Deno.serve(async (req) => {
       })
 
       const [{ data: trade }, { data: homeowner }, { data: job }] = await Promise.all([
-        admin.from('trades').select('id, name, company_name, user_id, email').eq('id', wallet.trade_id).maybeSingle(),
+        admin.from('trades').select('id, name, company_name, user_id').eq('id', wallet.trade_id).maybeSingle(),
         admin.from('homeowners').select('name, email').eq('id', wallet.homeowner_id).maybeSingle(),
         admin.from('jobs').select('title').eq('id', wallet.job_id).maybeSingle(),
       ])
