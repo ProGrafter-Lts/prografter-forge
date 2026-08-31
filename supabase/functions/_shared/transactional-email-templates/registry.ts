@@ -34,6 +34,9 @@ import { template as testimonialRequest } from './testimonial-request.tsx'
 import { template as testimonialReceived } from './testimonial-received.tsx'
 import { template as paymentReleasedTrade } from './payment-released-trade.tsx'
 import { template as paymentReleasedHomeowner } from './payment-released-homeowner.tsx'
+import { template as drawdownApprovalNeeded } from './drawdown-approval-needed.tsx'
+import { template as stageDepositRequested } from './stage-deposit-requested.tsx'
+import { template as mobilizationAtRisk } from './mobilization-at-risk.tsx'
 import { template as quoteReceived } from './quote-received.tsx'
 import { template as projectOverdueTrade } from './project-overdue-trade.tsx'
 import { template as projectOverdueHomeowner } from './project-overdue-homeowner.tsx'
@@ -79,6 +82,9 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'testimonial-received': testimonialReceived,
   'payment-released-trade': paymentReleasedTrade,
   'payment-released-homeowner': paymentReleasedHomeowner,
+  'drawdown-approval-needed': drawdownApprovalNeeded,
+  'stage-deposit-requested': stageDepositRequested,
+  'mobilization-at-risk': mobilizationAtRisk,
   'quote-received': quoteReceived,
   'project-overdue-trade': projectOverdueTrade,
   'project-overdue-homeowner': projectOverdueHomeowner,

@@ -42,6 +42,7 @@ const DrawingIntelligence = lazyRetry(() => import("./pages/DrawingIntelligence.
 const TradeSettings = lazyRetry(() => import("./pages/TradeSettings.tsx"));
 const HomeownerDashboard = lazyRetry(() => import("./pages/HomeownerDashboard.tsx"));
 const ProjectDetail = lazyRetry(() => import("./pages/ProjectDetail.tsx"));
+const ProjectWallet = lazyRetry(() => import("./pages/ProjectWallet.tsx"));
 const CompareQuotes = lazyRetry(() => import("./pages/CompareQuotes.tsx"));
 const NotFound = lazyRetry(() => import("./pages/NotFound.tsx"));
 const QuoteChecker = lazyRetry(() => import("./pages/QuoteChecker.tsx"));
@@ -265,6 +266,7 @@ const AppRoutes = () => {
               <Route path="/project/:id" element={<ProjectDetail />} />
               <Route path="/project/:id/compare" element={<CompareQuotes />} />
               <Route path="/project/:id/contract" element={<ContractPage />} />
+              <Route path="/project/:id/wallet" element={<ProjectWallet />} />
               <Route path="/manual/:id" element={<HomeownerManual />} />
               <Route path="/quote-builder/quickbuild" element={<QuickBuildPage />} />
               <Route path="/jobs/:jobId/quote" element={<QuoteBuilder />} />
@@ -347,6 +349,7 @@ const AppRoutes = () => {
             <Route path="/project/:id" element={<ProjectDetail />} />
             <Route path="/project/:id/compare" element={<CompareQuotes />} />
             <Route path="/project/:id/contract" element={<ContractPage />} />
+              <Route path="/project/:id/wallet" element={<ProjectWallet />} />
             <Route path="/dashboard/quote-checks/:id" element={<QuoteCheckDetail />} />
           </Route>
         </Routes>
