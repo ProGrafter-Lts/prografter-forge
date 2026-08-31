@@ -68,14 +68,17 @@ Deno.serve(async (req) => {
           link: `/project/${wallet.job_id}/wallet`,
           jobId: wallet.job_id,
         })
-        if ((trade as any).email) {
+        const { data: tradeProfile } = trade.user_id
+          ? await admin.from('profiles').select('email, full_name').eq('user_id', trade.user_id).maybeSingle()
+          : { data: null }
+        if (tradeProfile?.email) {
           try {
             await enqueueTransactionalEmail(admin, {
               templateName: 'mobilization-at-risk',
-              recipientEmail: (trade as any).email,
+              recipientEmail: tradeProfile.email,
               idempotencyKey: `mobilization-at-risk-trade-${wallet.id}`,
               templateData: {
-                firstName: trade.name?.split(' ')[0],
+                firstName: (tradeProfile.full_name || trade.name)?.split(' ')[0],
                 amount: `£${penceToPounds(shortfall)}`,
                 projectTitle: job?.title ?? 'the project',
                 startDate: wallet.booked_start_date ?? 'the booked start date',
