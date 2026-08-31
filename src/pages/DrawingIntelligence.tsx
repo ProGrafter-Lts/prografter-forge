@@ -140,15 +140,37 @@ function DataTable({ title, rows }: { title: string; rows: DataPoint[] }) {
 
 export default function DrawingIntelligence() {
   const navigate = useNavigate();
-  const [existing, setExisting] = useState<string[]>([]);
-  const [proposed, setProposed] = useState<string[]>([]);
+  const [drawings, setDrawings] = useState<string[]>([]);
+  const [calcs, setCalcs] = useState<string[]>([]);
+  const [sheets, setSheets] = useState<DrawingSheet[]>([]);
   const [pendingScan, setPendingScan] = useState<{ zone: Zone; names: string[] } | null>(null);
   const [state, setState] = useState<IngestionState>("IDLE");
   const [analysis, setAnalysis] = useState<DrawingAnalysis | null>(null);
 
+  const existing = sheets.filter((s) => s.classification === "EXISTING").map((s) => s.fileName);
+  const proposed = sheets.filter((s) => s.classification === "PROPOSED").map((s) => s.fileName);
+  const unclassified = sheets.filter((s) => s.classification === "UNCLASSIFIED");
+
+  const setSheetClass = (id: string, classification: SheetClassification) =>
+    setSheets((prev) =>
+      prev.map((s) =>
+        s.id === id
+          ? { ...s, classification, manual: true, reason: "Manually classified by the user." }
+          : s,
+      ),
+    );
+
   const addFiles = (zone: Zone, names: string[]) => {
-    const setter = zone === "existing" ? setExisting : setProposed;
+    const setter = zone === "drawings" ? setDrawings : setCalcs;
     setter((prev) => Array.from(new Set([...prev, ...names])));
+    if (zone === "drawings") {
+      // Classification is read from each sheet's own title block, never the zone.
+      setSheets((prev) => {
+        const known = new Set(prev.map((s) => s.fileName));
+        const added = names.filter((n) => !known.has(n)).flatMap(sheetsFromFileName);
+        return [...prev, ...added];
+      });
+    }
     // Uploading NEVER fabricates data — we simply wait for the backend.
     setAnalysis(null);
     setState("AWAITING_BACKEND_EXTRACTION");
