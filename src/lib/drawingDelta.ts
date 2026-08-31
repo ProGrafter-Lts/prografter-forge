@@ -125,7 +125,7 @@ export const isAcceptedDrawing = (name: string) => ACCEPTED_EXT.includes(ext(nam
  * sheet, from the sheet's own title-block / label text — never from which
  * upload zone the file came from.
  */
-export type SheetClassification = "EXISTING" | "PROPOSED" | "UNCLASSIFIED";
+export type SheetClassification = "EXISTING" | "PROPOSED" | "UNCLASSIFIED" | "SPLIT";
 
 export interface SheetConvention {
   id: string;
