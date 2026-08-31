@@ -83,7 +83,7 @@ Deno.serve(async (req) => {
       headers: {
         Authorization: `Bearer ${key}`,
         'Content-Type': 'application/json',
-        'Stripe-Version': '2025-08-27.basil',
+        'Stripe-Version': '2026-06-24.preview',
       },
       body: JSON.stringify(payload),
     })
