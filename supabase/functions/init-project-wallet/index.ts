@@ -152,7 +152,34 @@ Deno.serve(async (req) => {
       .eq('wallet_id', wallet.id)
       .order('stage_order', { ascending: true })
 
-    return json({ wallet, stages: finalStages ?? [] })
+    // Final payment auto-sizing check: the last stage should be a meaningful
+    // retention. Warn (never block) when it is 5% or less of contract value.
+    const total = (finalStages ?? []).reduce((s: number, x: any) => s + Number(x.expected_amount_pence ?? 0), 0)
+    const last = (finalStages ?? [])[(finalStages ?? []).length - 1]
+    const finalPct = total > 0 && last ? (Number(last.expected_amount_pence) / total) * 100 : null
+    const finalWarning = finalPct != null && finalPct > 5
+    if (finalPct != null) {
+      const { data: w2 } = await admin
+        .from('project_wallets')
+        .update({ final_stage_pct: Number(finalPct.toFixed(2)), final_stage_warning: finalWarning })
+        .eq('id', wallet.id)
+        .select()
+        .maybeSingle()
+      if (w2) wallet = w2
+    }
+
+    return json({
+      wallet,
+      stages: finalStages ?? [],
+      final_stage_warning: finalWarning
+        ? {
+            pct: Number((finalPct ?? 0).toFixed(2)),
+            stage_name: last?.stage_name,
+            message: `The final stage is ${(finalPct ?? 0).toFixed(1)}% of contract value (over the 5% guide). Confirm this is intended before the schedule is agreed.`,
+          }
+        : null,
+    })
+
   } catch (e) {
     console.error('[init-project-wallet]', e)
     return json({ error: e instanceof Error ? e.message : 'Unexpected error' }, 500)
