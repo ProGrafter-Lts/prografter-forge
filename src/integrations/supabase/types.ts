@@ -1396,6 +1396,163 @@ export type Database = {
           },
         ]
       }
+      drawdown_audit_events: {
+        Row: {
+          actor_role: string | null
+          actor_user_id: string | null
+          created_at: string
+          detail: Json
+          event_type: string
+          id: string
+          request_id: string | null
+          wallet_id: string
+        }
+        Insert: {
+          actor_role?: string | null
+          actor_user_id?: string | null
+          created_at?: string
+          detail?: Json
+          event_type: string
+          id?: string
+          request_id?: string | null
+          wallet_id: string
+        }
+        Update: {
+          actor_role?: string | null
+          actor_user_id?: string | null
+          created_at?: string
+          detail?: Json
+          event_type?: string
+          id?: string
+          request_id?: string | null
+          wallet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "drawdown_audit_events_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "drawdown_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "drawdown_audit_events_wallet_id_fkey"
+            columns: ["wallet_id"]
+            isOneToOne: false
+            referencedRelation: "project_wallets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      drawdown_requests: {
+        Row: {
+          amount_pence: number
+          created_at: string
+          created_by: string
+          decided_at: string | null
+          decided_by: string | null
+          decline_reason: string | null
+          description: string
+          homeowner_id: string
+          id: string
+          job_id: string
+          proforma_filename: string | null
+          proforma_path: string
+          status: string
+          stripe_transfer_id: string | null
+          trade_id: string
+          transfer_error: string | null
+          updated_at: string
+          wallet_id: string
+          wallet_stage_id: string
+        }
+        Insert: {
+          amount_pence: number
+          created_at?: string
+          created_by: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decline_reason?: string | null
+          description: string
+          homeowner_id: string
+          id?: string
+          job_id: string
+          proforma_filename?: string | null
+          proforma_path: string
+          status?: string
+          stripe_transfer_id?: string | null
+          trade_id: string
+          transfer_error?: string | null
+          updated_at?: string
+          wallet_id: string
+          wallet_stage_id: string
+        }
+        Update: {
+          amount_pence?: number
+          created_at?: string
+          created_by?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decline_reason?: string | null
+          description?: string
+          homeowner_id?: string
+          id?: string
+          job_id?: string
+          proforma_filename?: string | null
+          proforma_path?: string
+          status?: string
+          stripe_transfer_id?: string | null
+          trade_id?: string
+          transfer_error?: string | null
+          updated_at?: string
+          wallet_id?: string
+          wallet_stage_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "drawdown_requests_homeowner_id_fkey"
+            columns: ["homeowner_id"]
+            isOneToOne: false
+            referencedRelation: "homeowners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "drawdown_requests_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "drawdown_requests_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "trades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "drawdown_requests_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "trades_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "drawdown_requests_wallet_id_fkey"
+            columns: ["wallet_id"]
+            isOneToOne: false
+            referencedRelation: "project_wallets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "drawdown_requests_wallet_stage_id_fkey"
+            columns: ["wallet_stage_id"]
+            isOneToOne: false
+            referencedRelation: "project_wallet_stages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       early_signups: {
         Row: {
           admin_notes: string | null
@@ -3466,6 +3623,172 @@ export type Database = {
           },
         ]
       }
+      project_wallet_stages: {
+        Row: {
+          awaiting_funds: boolean
+          created_at: string
+          deposit_reminder_sent_at: string | null
+          deposit_requested_at: string | null
+          expected_amount_pence: number
+          funded_amount_pence: number
+          funded_at: string | null
+          funding_status: string
+          id: string
+          is_mobilization: boolean
+          project_stage_id: string | null
+          released_amount_pence: number
+          released_at: string | null
+          stage_name: string
+          stage_order: number
+          updated_at: string
+          wallet_id: string
+        }
+        Insert: {
+          awaiting_funds?: boolean
+          created_at?: string
+          deposit_reminder_sent_at?: string | null
+          deposit_requested_at?: string | null
+          expected_amount_pence: number
+          funded_amount_pence?: number
+          funded_at?: string | null
+          funding_status?: string
+          id?: string
+          is_mobilization?: boolean
+          project_stage_id?: string | null
+          released_amount_pence?: number
+          released_at?: string | null
+          stage_name: string
+          stage_order: number
+          updated_at?: string
+          wallet_id: string
+        }
+        Update: {
+          awaiting_funds?: boolean
+          created_at?: string
+          deposit_reminder_sent_at?: string | null
+          deposit_requested_at?: string | null
+          expected_amount_pence?: number
+          funded_amount_pence?: number
+          funded_at?: string | null
+          funding_status?: string
+          id?: string
+          is_mobilization?: boolean
+          project_stage_id?: string | null
+          released_amount_pence?: number
+          released_at?: string | null
+          stage_name?: string
+          stage_order?: number
+          updated_at?: string
+          wallet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_wallet_stages_project_stage_id_fkey"
+            columns: ["project_stage_id"]
+            isOneToOne: false
+            referencedRelation: "project_stages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_wallet_stages_wallet_id_fkey"
+            columns: ["wallet_id"]
+            isOneToOne: false
+            referencedRelation: "project_wallets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_wallets: {
+        Row: {
+          booked_start_date: string | null
+          contract_id: string | null
+          created_at: string
+          currency: string
+          homeowner_id: string
+          id: string
+          job_id: string
+          mobilization_hard_deadline: string | null
+          mobilization_target_request_date: string | null
+          start_date_at_risk: boolean
+          start_date_at_risk_at: string | null
+          trade_id: string
+          updated_at: string
+        }
+        Insert: {
+          booked_start_date?: string | null
+          contract_id?: string | null
+          created_at?: string
+          currency?: string
+          homeowner_id: string
+          id?: string
+          job_id: string
+          mobilization_hard_deadline?: string | null
+          mobilization_target_request_date?: string | null
+          start_date_at_risk?: boolean
+          start_date_at_risk_at?: string | null
+          trade_id: string
+          updated_at?: string
+        }
+        Update: {
+          booked_start_date?: string | null
+          contract_id?: string | null
+          created_at?: string
+          currency?: string
+          homeowner_id?: string
+          id?: string
+          job_id?: string
+          mobilization_hard_deadline?: string | null
+          mobilization_target_request_date?: string | null
+          start_date_at_risk?: boolean
+          start_date_at_risk_at?: string | null
+          trade_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_wallets_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_wallets_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts_compat"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_wallets_homeowner_id_fkey"
+            columns: ["homeowner_id"]
+            isOneToOne: false
+            referencedRelation: "homeowners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_wallets_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: true
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_wallets_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "trades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_wallets_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "trades_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_warranties: {
         Row: {
           claim_contact: string | null
@@ -5397,6 +5720,7 @@ export type Database = {
           service_radius_miles: number
           site_assessment_done: boolean
           specialisms_prompt_seen: boolean
+          stripe_connect_account_id: string | null
           submitted_for_review_at: string | null
           tier: string
           tier_updated_at: string | null
@@ -5477,6 +5801,7 @@ export type Database = {
           service_radius_miles?: number
           site_assessment_done?: boolean
           specialisms_prompt_seen?: boolean
+          stripe_connect_account_id?: string | null
           submitted_for_review_at?: string | null
           tier?: string
           tier_updated_at?: string | null
@@ -5557,6 +5882,7 @@ export type Database = {
           service_radius_miles?: number
           site_assessment_done?: boolean
           specialisms_prompt_seen?: boolean
+          stripe_connect_account_id?: string | null
           submitted_for_review_at?: string | null
           tier?: string
           tier_updated_at?: string | null
