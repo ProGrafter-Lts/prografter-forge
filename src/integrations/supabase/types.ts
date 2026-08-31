@@ -1461,6 +1461,7 @@ export type Database = {
           status: string
           stripe_transfer_id: string | null
           trade_id: string
+          transfer_attempt: number
           transfer_error: string | null
           updated_at: string
           wallet_id: string
@@ -1482,6 +1483,7 @@ export type Database = {
           status?: string
           stripe_transfer_id?: string | null
           trade_id: string
+          transfer_attempt?: number
           transfer_error?: string | null
           updated_at?: string
           wallet_id: string
@@ -1503,6 +1505,7 @@ export type Database = {
           status?: string
           stripe_transfer_id?: string | null
           trade_id?: string
+          transfer_attempt?: number
           transfer_error?: string | null
           updated_at?: string
           wallet_id?: string
@@ -3727,6 +3730,7 @@ export type Database = {
           inspection_status: string | null
           is_mobilization: boolean
           project_stage_id: string | null
+          release_attempt: number
           release_block_reason: string | null
           released_amount_pence: number
           released_at: string | null
@@ -3750,6 +3754,7 @@ export type Database = {
           inspection_status?: string | null
           is_mobilization?: boolean
           project_stage_id?: string | null
+          release_attempt?: number
           release_block_reason?: string | null
           released_amount_pence?: number
           released_at?: string | null
@@ -3773,6 +3778,7 @@ export type Database = {
           inspection_status?: string | null
           is_mobilization?: boolean
           project_stage_id?: string | null
+          release_attempt?: number
           release_block_reason?: string | null
           released_amount_pence?: number
           released_at?: string | null

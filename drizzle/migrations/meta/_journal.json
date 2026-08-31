@@ -50,6 +50,13 @@
       "when": 1788214367284,
       "tag": "0006_fix_drawdown_proforma_storage_policies",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1788217589667,
+      "tag": "0007_release_transfer_attempt_counters",
+      "breakpoints": true
     }
   ]
 }
