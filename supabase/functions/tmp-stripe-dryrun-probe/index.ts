@@ -1,8 +1,14 @@
 // TEMPORARY harness for the mobilization drawdown / escrow dry run.
-// Creates the three test auth users needed to execute the flow as real
-// authenticated actors. Delete after the dry run.
+// Resets the password of the three known dry-run test users so the flow can be
+// executed as real authenticated actors. Delete after the dry run.
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 import { createClient } from 'npm:@supabase/supabase-js@2.57.2'
+
+const USERS = [
+  { id: '78be78e5-07b4-4ad0-8bc9-0dc684c9740c', role: 'homeowner' },
+  { id: 'c4e2ccb1-0e63-473d-8ed1-d5dcb08e62dc', role: 'trade' },
+  { id: '1c2d92b0-a9a3-4f99-9d19-54dfff94f365', role: 'admin' },
+]
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
@@ -22,32 +28,13 @@ Deno.serve(async (req) => {
   const password = url.searchParams.get('pw') ?? ''
   if (password.length < 16) return json({ error: 'pw required' }, 400)
 
-  const wanted = [
-    { email: 'dryrun-homeowner@prografter.co.uk', role: 'homeowner' },
-    { email: 'dryrun-trade@prografter.co.uk', role: 'trade' },
-    { email: 'dryrun-admin@prografter.co.uk', role: 'admin' },
-  ]
-
   const out: Record<string, unknown> = {}
-  for (const w of wanted) {
-    const { data, error } = await admin.auth.admin.createUser({
-      email: w.email,
+  for (const u of USERS) {
+    const { data, error } = await admin.auth.admin.updateUserById(u.id, {
       password,
       email_confirm: true,
-      user_metadata: { full_name: `Dry Run ${w.role}` },
     })
-    if (error) {
-      const { data: list } = await admin.auth.admin.listUsers({ page: 1, perPage: 200 })
-      const found = list?.users?.find((u) => u.email === w.email)
-      if (found) {
-        await admin.auth.admin.updateUserById(found.id, { password, email_confirm: true })
-        out[w.role] = { id: found.id, email: w.email, reused: true }
-        continue
-      }
-      out[w.role] = { error: error.message }
-      continue
-    }
-    out[w.role] = { id: data.user?.id, email: w.email }
+    out[u.role] = error ? { error: error.message } : { id: data.user?.id, ok: true }
   }
 
   return json(out)
