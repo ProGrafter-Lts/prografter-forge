@@ -95,7 +95,15 @@ Deno.serve(async (req) => {
       body: JSON.stringify(payload),
     })
     out.create_status = res.status
-    out.create_body = await res.json().catch(() => null)
+    const cb: any = await res.json().catch(() => null)
+    out.create_body = cb?.error ?? {
+      id: cb?.id,
+      capabilities: cb?.configuration?.recipient?.capabilities,
+      requirements: cb?.requirements?.entries?.map((e: any) => ({
+        need: e.description,
+        blocks: e.impact?.restricts_capabilities?.map((c: any) => c.capability),
+      })),
+    }
   }
 
   const upd = new URL(req.url).searchParams.get('activate')
