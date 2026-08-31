@@ -91,6 +91,7 @@ const TraderReviews = lazyRetry(() => import("./pages/TraderReviews.tsx"));
 const DisputeRaise = lazyRetry(() => import("./pages/DisputeRaise.tsx"));
 const DisputeDetail = lazyRetry(() => import("./pages/DisputeDetail.tsx"));
 const AdminDisputes = lazyRetry(() => import("./pages/AdminDisputes.tsx"));
+const AdminMixedInspections = lazyRetry(() => import("./pages/AdminMixedInspections.tsx"));
 const PlanningPipeline = lazyRetry(() => import("./pages/PlanningPipeline.tsx"));
 const AdminTradeScraper = lazyRetry(() => import("./pages/AdminTradeScraper.tsx"));
 const AdminApplications = lazyRetry(() => import("./pages/AdminApplications.tsx"));
