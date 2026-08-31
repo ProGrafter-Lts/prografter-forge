@@ -90,6 +90,20 @@ Deno.serve(async (req) => {
       return json({ error: 'Invalid proforma path' }, 400)
     }
 
+    // And it must actually exist — no drawdown against a phantom document.
+    {
+      const slash = input.proforma_path.lastIndexOf('/')
+      const folder = input.proforma_path.slice(0, slash)
+      const filename = input.proforma_path.slice(slash + 1)
+      const { data: listed, error: listError } = await admin.storage
+        .from('drawdown-proformas')
+        .list(folder, { search: filename, limit: 100 })
+      if (listError) return json({ error: `Could not verify proforma: ${listError.message}` }, 400)
+      if (!(listed ?? []).some((o) => o.name === filename)) {
+        return json({ error: 'Proforma file was not found in storage — upload it before requesting a drawdown' }, 400)
+      }
+    }
+
     const { data: request, error } = await admin
       .from('drawdown_requests')
       .insert({
