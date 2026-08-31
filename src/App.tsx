@@ -37,6 +37,7 @@ const AtlasCapture = lazyRetry(() => import("./atlas/pages/AtlasCapture.tsx"));
 const AtlasCaptureReport = lazyRetry(() => import("./atlas/pages/AtlasCaptureReport.tsx"));
 const SiteScoutSandbox = lazyRetry(() => import("./pages/SiteScoutSandbox.tsx"));
 const SiteScoutV2 = lazyRetry(() => import("./pages/SiteScoutV2.tsx"));
+const DrawingIntelligence = lazyRetry(() => import("./pages/DrawingIntelligence.tsx"));
 
 const TradeSettings = lazyRetry(() => import("./pages/TradeSettings.tsx"));
 const HomeownerDashboard = lazyRetry(() => import("./pages/HomeownerDashboard.tsx"));
@@ -256,6 +257,7 @@ const AppRoutes = () => {
               <Route path="/atlas/:id/capture-report" element={<SiteScoutGate><AtlasCaptureReport /></SiteScoutGate>} />
               <Route path="/sitescout-sandbox" element={<SiteScoutSandbox />} />
               <Route path="/sitescout-v2" element={<SiteScoutV2 />} />
+              <Route path="/drawing-intelligence" element={<DrawingIntelligence />} />
 
               <Route path="/dashboard/homeowner" element={<HomeownerDashboard />} />
               <Route path="/dashboard/quote-checks" element={<MyQuoteChecks />} />

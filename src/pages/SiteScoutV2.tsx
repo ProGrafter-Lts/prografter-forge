@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { AlertTriangle, ArrowLeft, ArrowRight, CheckCircle2, Send } from "lucide-react";
+
+import { loadInjection, type SiteScoutInjection } from "@/lib/drawingDelta";
 
 const STEPS = ["Ground & Geo", "Access & Logistics", "Existing Services", "Handover"];
 
@@ -84,6 +86,13 @@ export default function SiteScoutV2() {
   const [s, setS] = useState<SurveyState>(INITIAL);
   const set = (patch: Partial<SurveyState>) => setS((p) => ({ ...p, ...patch }));
 
+  // Mandatory checks injected by the Drawing Intelligence & Delta Module.
+  const [injection, setInjection] = useState<SiteScoutInjection | null>(null);
+  const [deltaAnswers, setDeltaAnswers] = useState<Record<string, string>>({});
+  useEffect(() => setInjection(loadInjection()), []);
+  const deltaChecks = injection?.checks ?? [];
+  const deltaOutstanding = deltaChecks.filter((c) => !(deltaAnswers[c.id] ?? "").trim()).length;
+
   const narrowAccess = s.accessWidth !== "" && Number(s.accessWidth) < 1.2;
 
   return (
@@ -116,6 +125,36 @@ export default function SiteScoutV2() {
       <main className="flex-1 px-4 py-6 space-y-5 max-w-xl w-full mx-auto">
         {step === 0 && (
           <>
+            {deltaChecks.length > 0 && (
+              <div className="rounded-xl border border-orange-400/45 bg-orange-400/[0.08] p-4">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-orange-300" />
+                  <h2 className="text-sm font-semibold text-orange-100">
+                    Mandatory structural verification · {injection?.projectName}
+                  </h2>
+                </div>
+                <p className="mt-1 text-[11px] text-orange-100/70">
+                  The Delta Engine added {deltaChecks.length} checks from the drawing set. All must be answered
+                  before transmitting.
+                </p>
+                <div className="mt-3 space-y-3">
+                  {deltaChecks.map((c) => (
+                    <div key={c.id}>
+                      <label className={labelCls}>{c.label}</label>
+                      <p className="mb-2 text-[11px] leading-relaxed text-white/55">{c.question}</p>
+                      <input
+                        className={fieldCls}
+                        placeholder="Record what you measured on site…"
+                        value={deltaAnswers[c.id] ?? ""}
+                        onChange={(e) => setDeltaAnswers((p) => ({ ...p, [c.id]: e.target.value }))}
+                      />
+                      <p className="mt-1 font-mono text-[10px] text-white/35">{c.context}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div>
               <label className={labelCls}>Soil classification</label>
               <select className={fieldCls} value={s.soil} onChange={(e) => set({ soil: e.target.value })}>
@@ -313,13 +352,31 @@ export default function SiteScoutV2() {
               <Row label="Boiler output" value={s.boilerKw ? `${s.boilerKw} kW` : ""} />
             </div>
 
+            {deltaChecks.length > 0 && (
+              <div className="rounded-xl border border-orange-400/40 bg-orange-400/[0.06] p-4">
+                <p className="text-[11px] uppercase tracking-widest text-orange-200/70 mb-2">
+                  Delta Engine verification
+                </p>
+                {deltaChecks.map((c) => (
+                  <Row key={c.id} label={c.label} value={deltaAnswers[c.id] ?? ""} />
+                ))}
+              </div>
+            )}
+
             <button
               type="button"
+              disabled={deltaOutstanding > 0}
               onClick={() => toast.success("SiteScout data captured and ready for Engine processing.")}
-              className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-teal-400 px-4 py-4 text-base font-semibold text-[#0f172a] hover:bg-teal-300 transition"
+              className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-teal-400 px-4 py-4 text-base font-semibold text-[#0f172a] hover:bg-teal-300 transition disabled:opacity-40"
             >
               <Send className="w-4 h-4" /> Transmit to ProGrafter Engine
             </button>
+            {deltaOutstanding > 0 && (
+              <p className="text-center text-[11px] text-orange-200/80">
+                {deltaOutstanding} mandatory structural verification check
+                {deltaOutstanding === 1 ? "" : "s"} still outstanding in Step 1.
+              </p>
+            )}
           </>
         )}
       </main>
