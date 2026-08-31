@@ -125,7 +125,7 @@ export const isAcceptedDrawing = (name: string) => ACCEPTED_EXT.includes(ext(nam
  * sheet, from the sheet's own title-block / label text — never from which
  * upload zone the file came from.
  */
-export type SheetClassification = "EXISTING" | "PROPOSED" | "UNCLASSIFIED";
+export type SheetClassification = "EXISTING" | "PROPOSED" | "UNCLASSIFIED" | "SPLIT";
 
 export interface SheetConvention {
   id: string;
@@ -181,6 +181,25 @@ export function classifySheetLabel(text: string): ClassificationResult {
   };
 }
 
+/**
+ * A user-drawn rectangle on a single sheet, in normalised (0-1) page
+ * coordinates so it survives any render size. Used when one physical sheet
+ * carries an existing plan and a proposed plan side by side.
+ *
+ * NOTE: regions are captured and stored only. The delta engine still runs on
+ * whole files — region-scoped extraction is backend work that is not built.
+ */
+export interface SheetRegion {
+  id: string;
+  label: string;
+  /** Normalised 0-1 rect relative to the sheet page. */
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  classification: Exclude<SheetClassification, "SPLIT">;
+}
+
 export interface DrawingSheet {
   id: string;
   /** Source document the sheet came from (one file may hold many sheets). */
@@ -191,6 +210,37 @@ export interface DrawingSheet {
   reason: string;
   /** True once the user has manually set the classification. */
   manual: boolean;
+  /** Populated only when classification === "SPLIT". */
+  regions?: SheetRegion[];
+}
+
+/** Minimum normalised size for a drawn region (guards accidental clicks). */
+export const MIN_REGION_SIZE = 0.05;
+
+/**
+ * A sheet is resolved when it is definitively EXISTING or PROPOSED, or it is
+ * SPLIT with at least two regions and every region classified.
+ */
+export function isSheetResolved(s: DrawingSheet): boolean {
+  if (s.classification === "EXISTING" || s.classification === "PROPOSED") return true;
+  if (s.classification !== "SPLIT") return false;
+  const regions = s.regions ?? [];
+  return regions.length >= 2 && regions.every((r) => r.classification !== "UNCLASSIFIED");
+}
+
+export function unresolvedSheets(sheets: DrawingSheet[]): DrawingSheet[] {
+  return sheets.filter((s) => !isSheetResolved(s));
+}
+
+/** Short human explanation of why a sheet is still blocking delta comparison. */
+export function unresolvedReason(s: DrawingSheet): string {
+  if (isSheetResolved(s)) return "";
+  if (s.classification === "SPLIT") {
+    const regions = s.regions ?? [];
+    if (regions.length < 2) return "Split sheet needs at least two regions drawn.";
+    return "Every region on this split sheet must be tagged Existing or Proposed.";
+  }
+  return "Needs manual Existing / Proposed classification.";
 }
 
 /**
@@ -210,6 +260,7 @@ export function sheetsFromFileName(fileName: string): DrawingSheet[] {
       classification: res.classification,
       reason: res.reason,
       manual: false,
+      regions: [],
     },
   ];
 }
