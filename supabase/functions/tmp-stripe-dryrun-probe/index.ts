@@ -51,5 +51,28 @@ Deno.serve(async (req) => {
     out.balance_error = e instanceof Error ? e.message : String(e)
   }
 
+  if (new URL(req.url).searchParams.get('create') === '1') {
+    try {
+      const created = await stripe.accounts.create({
+        type: 'custom',
+        country: 'GB',
+        email: 'dryrun-trade@prografter.co.uk',
+        business_type: 'individual',
+        capabilities: { transfers: { requested: true } },
+        business_profile: { mcc: '1711', url: 'https://prografter.co.uk', product_description: 'Test building contractor' },
+        individual: {
+          first_name: 'Dry', last_name: 'Run', email: 'dryrun-trade@prografter.co.uk',
+          phone: '+447000000000', dob: { day: 1, month: 1, year: 1980 },
+          address: { line1: '10 Downing Street', city: 'London', postal_code: 'SW1A 2AA', country: 'GB' },
+        },
+        external_account: { object: 'bank_account', country: 'GB', currency: 'gbp', account_holder_name: 'Dry Run', account_number: '00012345', routing_number: '108800' } as never,
+        tos_acceptance: { date: Math.floor(Date.now() / 1000), ip: '81.2.69.142' },
+      })
+      out.created_account = { id: created.id, capabilities: created.capabilities, payouts_enabled: created.payouts_enabled }
+    } catch (e) {
+      out.create_error = e instanceof Error ? e.message : String(e)
+    }
+  }
+
   return json(out)
 })
