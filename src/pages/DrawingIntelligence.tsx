@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { AlertTriangle, ArrowRight, FileWarning, FlaskConical, Hourglass, Upload, X } from "lucide-react";
 
+import SheetRegionSplitter from "@/components/drawings/SheetRegionSplitter";
 import {
   CONFIDENCE_META,
   EXTRACTION_STREAMS,
@@ -10,8 +11,11 @@ import {
   buildInjection,
   isAcceptedDrawing,
   isImageDrawing,
+  isSheetResolved,
   saveInjection,
   sheetsFromFileName,
+  unresolvedReason,
+  unresolvedSheets,
   withFiles,
   type Confidence,
   type DataPoint,
@@ -19,6 +23,7 @@ import {
   type DrawingSheet,
   type IngestionState,
   type SheetClassification,
+  type SheetRegion,
 } from "@/lib/drawingDelta";
 
 type Zone = "drawings" | "calcs";
