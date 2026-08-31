@@ -1,9 +1,8 @@
-// TEMPORARY diagnostic for the mobilization drawdown dry run.
-// Verifies which Stripe account the project's STRIPE_SECRET_KEY belongs to,
-// whether Connect is enabled, and whether a given connected account is visible.
-// Delete after the dry run.
+// TEMPORARY harness for the mobilization drawdown / escrow dry run.
+// Creates the three test auth users needed to execute the flow as real
+// authenticated actors. Delete after the dry run.
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
-import Stripe from 'https://esm.sh/stripe@18.5.0'
+import { createClient } from 'npm:@supabase/supabase-js@2.57.2'
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
@@ -14,126 +13,41 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
 
-  const key = Deno.env.get('STRIPE_SECRET_KEY') || ''
-  const stripe = new Stripe(key, { apiVersion: '2025-08-27.basil' })
+  const admin = createClient(
+    Deno.env.get('SUPABASE_URL') ?? '',
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+  )
 
-  const out: Record<string, unknown> = {
-    key_mode: key.startsWith('sk_test') ? 'test' : key.startsWith('sk_live') ? 'live' : 'unknown',
-  }
+  const url = new URL(req.url)
+  const password = url.searchParams.get('pw') ?? ''
+  if (password.length < 16) return json({ error: 'pw required' }, 400)
 
-  try {
-    const acct = await stripe.accounts.retrieve()
-    out.platform_account_id = acct.id
-    out.charges_enabled = acct.charges_enabled
-  } catch (e) {
-    out.platform_error = e instanceof Error ? e.message : String(e)
-  }
+  const wanted = [
+    { email: 'dryrun-homeowner@prografter.co.uk', role: 'homeowner' },
+    { email: 'dryrun-trade@prografter.co.uk', role: 'trade' },
+    { email: 'dryrun-admin@prografter.co.uk', role: 'admin' },
+  ]
 
-  const target = new URL(req.url).searchParams.get('account')
-  if (target) {
-    try {
-      const a = await stripe.accounts.retrieve(target)
-      out.target_account = {
-        id: a.id,
-        charges_enabled: a.charges_enabled,
-        payouts_enabled: a.payouts_enabled,
-        capabilities: a.capabilities,
+  const out: Record<string, unknown> = {}
+  for (const w of wanted) {
+    const { data, error } = await admin.auth.admin.createUser({
+      email: w.email,
+      password,
+      email_confirm: true,
+      user_metadata: { full_name: `Dry Run ${w.role}` },
+    })
+    if (error) {
+      const { data: list } = await admin.auth.admin.listUsers({ page: 1, perPage: 200 })
+      const found = list?.users?.find((u) => u.email === w.email)
+      if (found) {
+        await admin.auth.admin.updateUserById(found.id, { password, email_confirm: true })
+        out[w.role] = { id: found.id, email: w.email, reused: true }
+        continue
       }
-    } catch (e) {
-      out.target_account_error = e instanceof Error ? e.message : String(e)
+      out[w.role] = { error: error.message }
+      continue
     }
-  }
-
-  try {
-    const bal = await stripe.balance.retrieve()
-    out.balance = bal.available
-  } catch (e) {
-    out.balance_error = e instanceof Error ? e.message : String(e)
-  }
-
-  if (new URL(req.url).searchParams.get('create') === '1') {
-    const payload = {
-      contact_email: 'dryrun-trade@prografter.co.uk',
-      display_name: 'ProGrafter Dry Run Trade',
-      dashboard: 'none',
-      identity: {
-        country: 'gb',
-        entity_type: 'individual',
-        individual: {
-          given_name: 'Dry',
-          surname: 'Run',
-          email: 'dryrun-trade@prografter.co.uk',
-          date_of_birth: { day: 1, month: 1, year: 1980 },
-          address: { line1: '10 Downing Street', city: 'London', postal_code: 'SW1A 2AA', country: 'GB' },
-          phone: '+447000000000',
-        },
-        attestations: {
-          terms_of_service: {
-            account: { date: new Date().toISOString().replace(/\.\d{3}Z$/, 'Z'), ip: '81.2.69.142' },
-          },
-        },
-      },
-      configuration: {
-        recipient: {
-          capabilities: { stripe_balance: { stripe_transfers: { requested: true } } },
-        },
-      },
-      defaults: {
-        currency: 'gbp',
-        profile: { business_url: 'https://prografter.co.uk' },
-        responsibilities: { fees_collector: 'application', losses_collector: 'application' },
-      },
-      include: ['configuration.recipient', 'identity', 'requirements'],
-    }
-    const res = await fetch('https://api.stripe.com/v2/core/accounts', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${key}`,
-        'Content-Type': 'application/json',
-        'Stripe-Version': '2026-06-24.preview',
-      },
-      body: JSON.stringify(payload),
-    })
-    out.create_status = res.status
-    const cb: any = await res.json().catch(() => null)
-    out.create_body = cb?.error ?? {
-      id: cb?.id,
-      capabilities: cb?.configuration?.recipient?.capabilities,
-      requirements: cb?.requirements?.entries?.map((e: any) => ({
-        need: e.description,
-        blocks: e.impact?.restricts_capabilities?.map((c: any) => c.capability),
-      })),
-    }
-  }
-
-  const upd = new URL(req.url).searchParams.get('activate')
-  if (upd) {
-    const res = await fetch(`https://api.stripe.com/v2/core/accounts/${upd}`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${key}`,
-        'Content-Type': 'application/json',
-        'Stripe-Version': '2026-06-24.preview',
-      },
-      body: JSON.stringify({
-        defaults: { profile: { business_url: 'https://prografter.co.uk' } },
-        identity: {
-          attestations: {
-            terms_of_service: {
-              account: { date: new Date().toISOString().replace(/\.\d{3}Z$/, 'Z'), ip: '81.2.69.142' },
-            },
-          },
-        },
-        include: ['configuration.recipient', 'requirements'],
-      }),
-    })
-    out.activate_status = res.status
-    const b: any = await res.json().catch(() => null)
-    out.activate_result = b?.error ?? {
-      id: b?.id,
-      capabilities: b?.configuration?.recipient?.capabilities,
-      requirements: b?.requirements?.entries?.map((e: any) => e.description),
-    }
+    out[w.role] = { id: data.user?.id, email: w.email }
   }
 
   return json(out)
