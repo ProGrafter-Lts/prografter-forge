@@ -75,7 +75,7 @@ Deno.serve(async (req) => {
       },
       defaults: {
         currency: 'gbp',
-        responsibilities: { fees_collector: 'stripe', losses_collector: 'stripe' },
+        responsibilities: { fees_collector: 'application', losses_collector: 'application' },
       },
       include: ['configuration.recipient', 'identity', 'requirements'],
     }
