@@ -125,6 +125,36 @@ export default function SiteScoutV2() {
       <main className="flex-1 px-4 py-6 space-y-5 max-w-xl w-full mx-auto">
         {step === 0 && (
           <>
+            {deltaChecks.length > 0 && (
+              <div className="rounded-xl border border-orange-400/45 bg-orange-400/[0.08] p-4">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-orange-300" />
+                  <h2 className="text-sm font-semibold text-orange-100">
+                    Mandatory structural verification · {injection?.projectName}
+                  </h2>
+                </div>
+                <p className="mt-1 text-[11px] text-orange-100/70">
+                  The Delta Engine added {deltaChecks.length} checks from the drawing set. All must be answered
+                  before transmitting.
+                </p>
+                <div className="mt-3 space-y-3">
+                  {deltaChecks.map((c) => (
+                    <div key={c.id}>
+                      <label className={labelCls}>{c.label}</label>
+                      <p className="mb-2 text-[11px] leading-relaxed text-white/55">{c.question}</p>
+                      <input
+                        className={fieldCls}
+                        placeholder="Record what you measured on site…"
+                        value={deltaAnswers[c.id] ?? ""}
+                        onChange={(e) => setDeltaAnswers((p) => ({ ...p, [c.id]: e.target.value }))}
+                      />
+                      <p className="mt-1 font-mono text-[10px] text-white/35">{c.context}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div>
               <label className={labelCls}>Soil classification</label>
               <select className={fieldCls} value={s.soil} onChange={(e) => set({ soil: e.target.value })}>
