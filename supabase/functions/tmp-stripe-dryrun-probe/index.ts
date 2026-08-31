@@ -52,26 +52,43 @@ Deno.serve(async (req) => {
   }
 
   if (new URL(req.url).searchParams.get('create') === '1') {
-    try {
-      const created = await stripe.accounts.create({
-        type: 'custom',
-        country: 'GB',
-        email: 'dryrun-trade@prografter.co.uk',
-        business_type: 'individual',
-        capabilities: { transfers: { requested: true } },
-        business_profile: { mcc: '1711', url: 'https://prografter.co.uk', product_description: 'Test building contractor' },
+    const payload = {
+      contact_email: 'dryrun-trade@prografter.co.uk',
+      display_name: 'ProGrafter Dry Run Trade',
+      identity: {
+        country: 'gb',
+        entity_type: 'individual',
         individual: {
-          first_name: 'Dry', last_name: 'Run', email: 'dryrun-trade@prografter.co.uk',
-          phone: '+447000000000', dob: { day: 1, month: 1, year: 1980 },
+          given_name: 'Dry',
+          surname: 'Run',
+          email: 'dryrun-trade@prografter.co.uk',
+          date_of_birth: { day: 1, month: 1, year: 1980 },
           address: { line1: '10 Downing Street', city: 'London', postal_code: 'SW1A 2AA', country: 'GB' },
+          phone: '+447000000000',
         },
-        external_account: { object: 'bank_account', country: 'GB', currency: 'gbp', account_holder_name: 'Dry Run', account_number: '00012345', routing_number: '108800' } as never,
-        tos_acceptance: { date: Math.floor(Date.now() / 1000), ip: '81.2.69.142' },
-      })
-      out.created_account = { id: created.id, capabilities: created.capabilities, payouts_enabled: created.payouts_enabled }
-    } catch (e) {
-      out.create_error = e instanceof Error ? e.message : String(e)
+      },
+      configuration: {
+        recipient: {
+          capabilities: { stripe_transfers: { requested: true } },
+        },
+      },
+      defaults: {
+        currency: 'gbp',
+        responsibilities: { fees_collector: 'stripe', losses_collector: 'stripe' },
+      },
+      include: ['configuration.recipient', 'identity', 'requirements'],
     }
+    const res = await fetch('https://api.stripe.com/v2/core/accounts', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${key}`,
+        'Content-Type': 'application/json',
+        'Stripe-Version': '2025-08-27.basil',
+      },
+      body: JSON.stringify(payload),
+    })
+    out.create_status = res.status
+    out.create_body = await res.json().catch(() => null)
   }
 
   return json(out)
