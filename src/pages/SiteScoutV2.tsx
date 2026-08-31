@@ -352,13 +352,31 @@ export default function SiteScoutV2() {
               <Row label="Boiler output" value={s.boilerKw ? `${s.boilerKw} kW` : ""} />
             </div>
 
+            {deltaChecks.length > 0 && (
+              <div className="rounded-xl border border-orange-400/40 bg-orange-400/[0.06] p-4">
+                <p className="text-[11px] uppercase tracking-widest text-orange-200/70 mb-2">
+                  Delta Engine verification
+                </p>
+                {deltaChecks.map((c) => (
+                  <Row key={c.id} label={c.label} value={deltaAnswers[c.id] ?? ""} />
+                ))}
+              </div>
+            )}
+
             <button
               type="button"
+              disabled={deltaOutstanding > 0}
               onClick={() => toast.success("SiteScout data captured and ready for Engine processing.")}
-              className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-teal-400 px-4 py-4 text-base font-semibold text-[#0f172a] hover:bg-teal-300 transition"
+              className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-teal-400 px-4 py-4 text-base font-semibold text-[#0f172a] hover:bg-teal-300 transition disabled:opacity-40"
             >
               <Send className="w-4 h-4" /> Transmit to ProGrafter Engine
             </button>
+            {deltaOutstanding > 0 && (
+              <p className="text-center text-[11px] text-orange-200/80">
+                {deltaOutstanding} mandatory structural verification check
+                {deltaOutstanding === 1 ? "" : "s"} still outstanding in Step 1.
+              </p>
+            )}
           </>
         )}
       </main>
