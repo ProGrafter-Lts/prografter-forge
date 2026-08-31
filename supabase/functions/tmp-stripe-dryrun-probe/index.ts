@@ -55,6 +55,7 @@ Deno.serve(async (req) => {
     const payload = {
       contact_email: 'dryrun-trade@prografter.co.uk',
       display_name: 'ProGrafter Dry Run Trade',
+      dashboard: 'express',
       identity: {
         country: 'gb',
         entity_type: 'individual',
