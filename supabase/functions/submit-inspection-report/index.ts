@@ -214,6 +214,9 @@ Deno.serve(async (req) => {
         resolved_items: result.resolvedItems,
         clear_phrases: result.clearPhrases,
         unable_to_assess: result.unableToAssess,
+        // MIXED explicitly means "needs a human" — queue it for admin review.
+        review_status: result.classification === 'MIXED' ? 'pending' : 'not_required',
+        original_classification: result.classification,
       })
       .select()
       .single()
