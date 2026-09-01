@@ -386,7 +386,7 @@ async function runAnalysis(supabase: any, args: RunArgs): Promise<void> {
       try {
         const base = "https://prografter.co.uk";
         const reportUrl = `${base}/bathroom-quote-report/${checkId}?t=${encodeURIComponent(lookupToken)}`;
-        await supabase.functions.invoke("send-transactional-email", {
+        await supabase.functions.invoke("send-app-email", {
           body: {
             templateName: "quote-health-check-ready",
             recipientEmail: email,

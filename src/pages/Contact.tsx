@@ -84,7 +84,7 @@ const Contact = () => {
     }
     setSubmitting(true);
     try {
-      const { error } = await supabase.functions.invoke("send-transactional-email", {
+      const { error } = await supabase.functions.invoke("send-app-email", {
         body: {
           template: "contact-message",
           data: parsed.data,

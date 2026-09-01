@@ -392,7 +392,7 @@ const QuoteBuilder = () => {
         const projectTitle = job.title || job.job_type || "your project";
         const projectAddress = [job.address, job.postcode].filter(Boolean).join(", ");
         if ((ownerRow as any)?.email) {
-          void supabase.functions.invoke("send-transactional-email", {
+          void supabase.functions.invoke("send-app-email", {
             body: {
               templateName: "quote-received",
               recipientEmail: (ownerRow as any).email,
@@ -406,7 +406,7 @@ const QuoteBuilder = () => {
             },
           });
         }
-        void supabase.functions.invoke("send-transactional-email", {
+        void supabase.functions.invoke("send-app-email", {
           body: {
             templateName: "new-quote-admin",
             recipientEmail: "hello@prografter.co.uk",

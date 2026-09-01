@@ -437,7 +437,7 @@ Deno.serve(async (req) => {
       try {
         const base = "https://prografter.co.uk";
         const reportUrl = `${base}/${meta.reportRoute}/${checkId}?t=${encodeURIComponent(checkRow.lookup_token)}`;
-        await supabase.functions.invoke("send-transactional-email", {
+        await supabase.functions.invoke("send-app-email", {
           body: {
             templateName: "quote-health-check-ready",
             recipientEmail: checkRow.email,

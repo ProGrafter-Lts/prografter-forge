@@ -98,7 +98,7 @@ Deno.serve(async (req) => {
             .select('name, company_name')
             .eq('id', c.trade_id)
             .maybeSingle()
-          await supabase.functions.invoke('send-transactional-email', {
+          await supabase.functions.invoke('send-app-email', {
             body: {
               templateName: 'project-overdue-homeowner',
               recipientEmail: owner.email,
@@ -131,7 +131,7 @@ Deno.serve(async (req) => {
             .eq('user_id', trade.user_id)
             .maybeSingle()
           if (profile?.email) {
-            await supabase.functions.invoke('send-transactional-email', {
+            await supabase.functions.invoke('send-app-email', {
               body: {
                 templateName: 'project-overdue-trade',
                 recipientEmail: profile.email,

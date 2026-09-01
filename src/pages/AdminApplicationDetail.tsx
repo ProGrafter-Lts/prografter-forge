@@ -164,7 +164,7 @@ export default function AdminApplicationDetail() {
     } else if (decision === "rejected" && app.applicant_email) {
       const firstName = (app.full_name || "").trim().split(/\s+/)[0] || "";
       try {
-        const { error: emailError } = await supabase.functions.invoke("send-transactional-email", {
+        const { error: emailError } = await supabase.functions.invoke("send-app-email", {
           body: {
             templateName: "trade-rejected",
             recipientEmail: app.applicant_email,

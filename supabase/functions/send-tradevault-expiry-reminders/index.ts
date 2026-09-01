@@ -108,7 +108,7 @@ Deno.serve(async (req) => {
       const label = LABELS[doc.document_type as string] ?? 'A verification document'
       const expired = stage === 'expired'
 
-      const { error: sendErr } = await supabase.functions.invoke('send-transactional-email', {
+      const { error: sendErr } = await supabase.functions.invoke('send-app-email', {
         body: {
           templateName: 'tradevault-doc-expiring',
           recipientEmail: profile.email,

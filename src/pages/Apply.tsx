@@ -416,7 +416,7 @@ export default function Apply() {
       // screen if email delivery is delayed.
       const firstName = (form.full_name as string)?.trim().split(/\s+/)[0] || "";
       try {
-        await supabase.functions.invoke("send-transactional-email", {
+        await supabase.functions.invoke("send-app-email", {
           body: {
             templateName: "trade-signup-admin-notification",
             idempotencyKey: `trade-application-admin-${applicationId}`,
@@ -436,7 +436,7 @@ export default function Apply() {
       }
 
       try {
-        await supabase.functions.invoke("send-transactional-email", {
+        await supabase.functions.invoke("send-app-email", {
           body: {
             templateName: "trade-welcome",
             recipientEmail: applicantEmail,
@@ -452,7 +452,7 @@ export default function Apply() {
       // no manual admin step. Same template the Verifications queue used.
       if (outOfArea) {
         try {
-          await supabase.functions.invoke("send-transactional-email", {
+          await supabase.functions.invoke("send-app-email", {
             body: {
               templateName: "trade-coming-soon",
               recipientEmail: applicantEmail,

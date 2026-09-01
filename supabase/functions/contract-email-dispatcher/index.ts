@@ -2,7 +2,7 @@
 //
 // Receives a contract_id + event_type from a Postgres trigger (via pg_net),
 // fetches the contract context, formats data, and dispatches the appropriate
-// transactional email(s) by invoking send-transactional-email. Also writes
+// transactional email(s) by invoking send-app-email. Also writes
 // an `email_sent` audit row to contract_events for each successful enqueue.
 //
 // IMPORTANT: This function authenticates via a shared secret header
@@ -122,7 +122,7 @@ Deno.serve(async (req) => {
   const sendEmail = async (templateName: string, recipientEmail: string, recipientRole: string, templateData: Record<string, any>) => {
     const idem = `${templateName}-${contract_id}-${recipientRole}-${variation_id ?? ''}`
       .replace(/[^a-zA-Z0-9_-]/g, '-')
-    const { error } = await sb.functions.invoke('send-transactional-email', {
+    const { error } = await sb.functions.invoke('send-app-email', {
       body: {
         templateName,
         recipientEmail,

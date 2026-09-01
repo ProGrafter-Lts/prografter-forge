@@ -83,7 +83,7 @@ export async function releaseNextBatch(
     })
     const { data: tp } = await supabase.from('profiles').select('email').eq('user_id', trade.user_id).maybeSingle()
     if (!tp?.email) continue
-    sends.push(supabase.functions.invoke('send-transactional-email', {
+    sends.push(supabase.functions.invoke('send-app-email', {
       body: {
         templateName: 'new-job-in-area',
         recipientEmail: tp.email,

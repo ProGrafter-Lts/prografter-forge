@@ -127,7 +127,7 @@ Deno.serve(async (req) => {
   const sends: Promise<unknown>[] = []
 
   if (otherParty.email) {
-    sends.push(supabase.functions.invoke('send-transactional-email', {
+    sends.push(supabase.functions.invoke('send-app-email', {
       body: {
         templateName: 'dispute-raised-other-party',
         recipientEmail: otherParty.email,
@@ -142,7 +142,7 @@ Deno.serve(async (req) => {
   }
 
   if (claimant.email) {
-    sends.push(supabase.functions.invoke('send-transactional-email', {
+    sends.push(supabase.functions.invoke('send-app-email', {
       body: {
         templateName: 'dispute-raised-claimant',
         recipientEmail: claimant.email,
@@ -155,7 +155,7 @@ Deno.serve(async (req) => {
     }))
   }
 
-  sends.push(supabase.functions.invoke('send-transactional-email', {
+  sends.push(supabase.functions.invoke('send-app-email', {
     body: {
       templateName: 'dispute-raised-admin',
       recipientEmail: ADMIN_EMAIL,

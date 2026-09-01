@@ -304,7 +304,7 @@ const ProjectDetail = () => {
       // Homeowner email
       if (owner?.email) {
         const firstName = owner.name?.split(" ")[0];
-        void supabase.functions.invoke("send-transactional-email", {
+        void supabase.functions.invoke("send-app-email", {
           body: {
             templateName: "payment-released-homeowner",
             recipientEmail: owner.email,
@@ -329,7 +329,7 @@ const ProjectDetail = () => {
           .maybeSingle();
         if (tradeProfile?.email) {
           const firstName = tradeProfile.full_name?.split(" ")[0];
-          void supabase.functions.invoke("send-transactional-email", {
+          void supabase.functions.invoke("send-app-email", {
             body: {
               templateName: "payment-released-trade",
               recipientEmail: tradeProfile.email,
