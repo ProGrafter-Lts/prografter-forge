@@ -512,21 +512,14 @@ const ProjectDetail = () => {
                   )
                 )}
 
-                {hoTab === "documents" && (
-                  <EmptyModule
-                    icon={FolderArchive}
-                    title="Documents"
-                    message="This is where quotes, contracts, certificates, drawings and warranties will be stored."
-                    hint="No project documents uploaded yet."
-                  />
-                )}
+                {hoTab === "documents" && <ProjectDocuments jobId={id!} />}
 
                 {hoTab === "photos" && (
-                  <EmptyModule
-                    icon={ImageIcon}
-                    title="Photos"
-                    message="Progress photographs uploaded by you or your tradesperson will appear here."
-                    hint="No progress photos yet."
+                  <ProjectPhotos
+                    jobId={id!}
+                    stages={stages}
+                    updates={updates}
+                    jobPhotoUrls={(job as any).photo_urls || []}
                   />
                 )}
 
