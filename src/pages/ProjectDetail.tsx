@@ -519,8 +519,12 @@ const ProjectDetail = () => {
                     stages={stages}
                     updates={updates}
                     jobPhotoUrls={(job as any).photo_urls || []}
+                    canUpload={userRole === "homeowner"}
+                    uploaderRole="homeowner"
+                    viewerRole="homeowner"
                   />
                 )}
+
 
                 {hoTab === "messages" && (
                   <MessagingPanel
