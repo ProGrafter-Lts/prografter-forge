@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import SEO from "@/components/SEO";
+import ProjectPhotos from "@/components/project/ProjectPhotos";
 import { toast } from "sonner";
 import Logo from "@/components/Logo";
 
@@ -48,6 +49,7 @@ interface VariationRow {
   reason: string | null;
   status: string;
   cost_change_pence: number | null;
+  commission_pence: number | null;
   programme_impact_days: number | null;
   proposed_by: string;
   homeowner_signed_at: string | null;
@@ -62,6 +64,12 @@ interface EventRow {
   created_at: string;
   payload: any;
 }
+
+/** Platform commission: 7.5% of cumulative job value, capped at £900 total. */
+const COMMISSION_RATE = 0.075;
+const COMMISSION_CAP_PENCE = 90000;
+const commissionFor = (jobValuePence: number) =>
+  Math.min(Math.round(Math.max(jobValuePence, 0) * COMMISSION_RATE), COMMISSION_CAP_PENCE);
 
 const formatGBP = (pence: number) =>
   `£${(pence / 100).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -290,8 +298,29 @@ const ContractPage = () => {
 
   const milestones: any[] = Array.isArray(contract.payment_milestones) ? contract.payment_milestones : [];
 
+  // Cap-aware commission: recalculated across the cumulative job value, with
+  // each accepted variation's share being the marginal delta it caused.
+  const baseValuePence = contract.total_value_incl_vat_pence ?? 0;
+  const acceptedVariations = [...variations]
+    .filter((v) => v.status === "accepted")
+    .sort((a, b) => a.sequence - b.sequence);
+  const variationCommissionById = new Map<string, number>();
+  let runningValue = baseValuePence;
+  let runningCommission = commissionFor(runningValue);
+  const baseCommissionPence = runningCommission;
+  for (const v of acceptedVariations) {
+    runningValue += v.cost_change_pence ?? 0;
+    const next = commissionFor(runningValue);
+    variationCommissionById.set(v.id, Math.max(next - runningCommission, 0));
+    runningCommission = next;
+  }
+  const acceptedVariationsPence = runningValue - baseValuePence;
+  const cumulativeValuePence = runningValue;
+  const totalCommissionPence = runningCommission;
+  const variationCommissionPence = Math.max(totalCommissionPence - baseCommissionPence, 0);
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen dashboard-dark bg-background">
       <SEO
         title={`Contract ${contract.reference ?? ""} — ProGrafter`}
         description="Review, sign and manage your construction contract on ProGrafter."
@@ -363,12 +392,14 @@ const ContractPage = () => {
         )}
 
         <Tabs defaultValue="document" className="w-full">
-          <TabsList className="grid grid-cols-4 w-full bg-card border border-border h-auto p-1">
+          <TabsList className="grid grid-cols-3 sm:grid-cols-6 w-full bg-card border border-border h-auto p-1">
             <TabsTrigger value="document" className="text-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs sm:text-sm">Document</TabsTrigger>
             <TabsTrigger value="bespoke" className="text-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs sm:text-sm">Bespoke</TabsTrigger>
             <TabsTrigger value="variations" className="text-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs sm:text-sm">
               Variations{variations.length > 0 ? ` (${variations.length})` : ""}
             </TabsTrigger>
+            <TabsTrigger value="commission" className="text-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs sm:text-sm">Commission</TabsTrigger>
+            <TabsTrigger value="photos" className="text-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs sm:text-sm">Photos</TabsTrigger>
             <TabsTrigger value="activity" className="text-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs sm:text-sm">Activity</TabsTrigger>
           </TabsList>
 
@@ -581,12 +612,69 @@ const ContractPage = () => {
                         <span>Cost change: {formatGBP(v.cost_change_pence ?? 0)}</span>
                         <span>Programme: {v.programme_impact_days ?? 0} day(s)</span>
                         <span>Proposed by: {v.proposed_by}</span>
+                        <span>
+                          Commission impact:{" "}
+                          {v.status === "accepted"
+                            ? formatGBP(variationCommissionById.get(v.id) ?? 0)
+                            : "— (on acceptance)"}
+                        </span>
                       </div>
                     </li>
                   ))}
                 </ul>
               )}
             </div>
+          </TabsContent>
+
+          {/* COMMISSION */}
+          <TabsContent value="commission" className="mt-4 space-y-4">
+            <div className="bg-card border border-border rounded-2xl p-5 space-y-3">
+              <h2 className="font-heading text-primary text-lg">Platform commission</h2>
+              <p className="font-mono text-xs text-muted-foreground">
+                7.5% of the cumulative job value (original contract plus every accepted variation),
+                capped at {formatGBP(COMMISSION_CAP_PENCE)} per job. Variations never push the total
+                past the cap.
+              </p>
+              <dl className="grid sm:grid-cols-2 gap-3 font-mono text-xs pt-2">
+                <div className="border border-border rounded-xl p-3">
+                  <dt className="text-muted-foreground">Original contract value</dt>
+                  <dd className="text-foreground text-base">{formatGBP(baseValuePence)}</dd>
+                </div>
+                <div className="border border-border rounded-xl p-3">
+                  <dt className="text-muted-foreground">Accepted variations</dt>
+                  <dd className="text-foreground text-base">{formatGBP(acceptedVariationsPence)}</dd>
+                </div>
+                <div className="border border-border rounded-xl p-3">
+                  <dt className="text-muted-foreground">Cumulative job value</dt>
+                  <dd className="text-foreground text-base">{formatGBP(cumulativeValuePence)}</dd>
+                </div>
+                <div className="border border-border rounded-xl p-3">
+                  <dt className="text-muted-foreground">Total commission owed</dt>
+                  <dd className="text-foreground text-base">
+                    {formatGBP(totalCommissionPence)}
+                    {totalCommissionPence >= COMMISSION_CAP_PENCE && (
+                      <span className="ml-2 text-[10px] uppercase tracking-wide text-amber-600">cap reached</span>
+                    )}
+                  </dd>
+                </div>
+              </dl>
+              <p className="font-mono text-[11px] text-muted-foreground">
+                Commission from variations so far:{" "}
+                <span className="text-foreground">{formatGBP(variationCommissionPence)}</span> ·
+                remaining headroom under the cap:{" "}
+                <span className="text-foreground">{formatGBP(COMMISSION_CAP_PENCE - totalCommissionPence)}</span>
+              </p>
+            </div>
+          </TabsContent>
+
+          {/* PHOTOS */}
+          <TabsContent value="photos" className="mt-4 space-y-4">
+            <ProjectPhotos
+              jobId={jobId!}
+              stages={[]}
+              updates={[]}
+              viewerRole={role ?? "observer"}
+            />
           </TabsContent>
 
           {/* ACTIVITY */}

@@ -10,15 +10,25 @@ interface Props {
   jobId: string;
   uploadedBy: "trade" | "homeowner";
   onUploaded: () => void;
+  title?: string;
+  hint?: string;
 }
 
 const MAX_BATCH = 12;
 
 /**
- * Daily site-diary photo upload. Writes to the existing job_photos table
- * (bucket path diary/<jobId>/...). Independent of stage_updates.photo_urls.
+ * Site photo upload against the job itself. Writes to the existing job_photos
+ * table (bucket path diary/<jobId>/...), tagging every file in one selection
+ * with a shared batch_id so the diary, replies and the activity feed can treat
+ * the upload as a single entry. Independent of stage_updates.photo_urls.
  */
-const PhotoDiaryUploader = ({ jobId, uploadedBy, onUploaded }: Props) => {
+const PhotoDiaryUploader = ({
+  jobId,
+  uploadedBy,
+  onUploaded,
+  title = "Add site photos to this job",
+  hint = "Photos are timestamped, shared with the other party, and appear on the Photos tab and the activity feed.",
+}: Props) => {
   const [caption, setCaption] = useState("");
   const [busy, setBusy] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -34,6 +44,11 @@ const PhotoDiaryUploader = ({ jobId, uploadedBy, onUploaded }: Props) => {
         toast.error("You need to be signed in to upload photos.");
         return;
       }
+
+      const batchId =
+        typeof crypto !== "undefined" && "randomUUID" in crypto
+          ? crypto.randomUUID()
+          : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
       let ok = 0;
       for (const file of batch) {
@@ -54,6 +69,7 @@ const PhotoDiaryUploader = ({ jobId, uploadedBy, onUploaded }: Props) => {
           label: caption.trim().slice(0, 200),
           uploaded_by: uploadedBy,
           uploader_user_id: userId,
+          batch_id: batchId,
         });
         if (insErr) {
           toast.error(`Could not save photo: ${insErr.message}`);
@@ -62,7 +78,7 @@ const PhotoDiaryUploader = ({ jobId, uploadedBy, onUploaded }: Props) => {
         ok += 1;
       }
       if (ok > 0) {
-        toast.success(`${ok} photo${ok === 1 ? "" : "s"} added to today's site diary.`);
+        toast.success(`${ok} photo${ok === 1 ? "" : "s"} added to this job.`);
         setCaption("");
         onUploaded();
       }
@@ -75,10 +91,8 @@ const PhotoDiaryUploader = ({ jobId, uploadedBy, onUploaded }: Props) => {
   return (
     <div className="bg-card border border-border rounded-2xl p-5 space-y-3">
       <div>
-        <h3 className="font-heading text-primary text-base">Add to today's site diary</h3>
-        <p className="font-mono text-xs text-muted-foreground mt-1">
-          Photos are timestamped with today's date and shared with the homeowner.
-        </p>
+        <h3 className="font-heading text-primary text-base">{title}</h3>
+        <p className="font-mono text-xs text-muted-foreground mt-1">{hint}</p>
       </div>
       <Input
         value={caption}

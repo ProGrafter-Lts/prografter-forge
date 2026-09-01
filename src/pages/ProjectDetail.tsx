@@ -519,8 +519,12 @@ const ProjectDetail = () => {
                     stages={stages}
                     updates={updates}
                     jobPhotoUrls={(job as any).photo_urls || []}
+                    canUpload={userRole === "homeowner"}
+                    uploaderRole="homeowner"
+                    viewerRole="homeowner"
                   />
                 )}
+
 
                 {hoTab === "messages" && (
                   <MessagingPanel
@@ -549,7 +553,7 @@ const ProjectDetail = () => {
               onAssignSub={userRole === "trade" ? (stageId) => setSubTradeStageId(stageId) : undefined}
             />
 
-            {/* Daily photo log / site diary */}
+            {/* Site photos / diary */}
             <div className="space-y-3">
               <h3 className="font-heading text-primary text-lg">Site diary</h3>
               <ProjectPhotos
@@ -559,8 +563,10 @@ const ProjectDetail = () => {
                 jobPhotoUrls={(job as any).photo_urls || []}
                 canUpload={userRole === "trade"}
                 uploaderRole="trade"
+                viewerRole={userRole === "trade" ? "trade" : "observer"}
               />
             </div>
+
 
             {/* Unified activity feed — identical content for homeowner and trade */}
             <div className="space-y-3">

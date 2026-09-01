@@ -103,7 +103,10 @@ const ProjectActivity = ({ jobId, onOpenTab }: Props) => {
       const [contractsRes, walletsRes, disputesRes, surveysRes] = await Promise.all([
         supabase.from("contracts").select("id, reference").eq("job_id", jobId),
         supabase.from("project_wallets").select("id").eq("job_id", jobId),
-        supabase.from("disputes").select("id, ref").eq("job_id", jobId),
+        supabase
+          .from("disputes")
+          .select("id, ref, status, resolution, created_at, resolved_at, raised_by_role")
+          .eq("job_id", jobId),
         supabase.from("atlas_surveys").select("id, project_title").eq("job_id", jobId),
       ]);
 
@@ -255,6 +258,29 @@ const ProjectActivity = ({ jobId, onOpenTab }: Props) => {
           linkLabel: "Open dispute",
           route: `/disputes/${e.dispute_id}`,
         });
+      }
+
+      for (const d of disputesRes.data || []) {
+        next.push({
+          id: `dispute-open-${d.id}`,
+          at: d.created_at,
+          category: "dispute",
+          label: "Dispute",
+          description: `Dispute ${d.ref} raised by ${d.raised_by_role || "a party"}`,
+          linkLabel: "Open dispute",
+          route: `/disputes/${d.id}`,
+        });
+        if (d.status === "resolved" && d.resolved_at) {
+          next.push({
+            id: `dispute-resolved-${d.id}`,
+            at: d.resolved_at,
+            category: "dispute",
+            label: "Dispute",
+            description: `Dispute ${d.ref} resolved — finding for ${d.resolution || "—"}`,
+            linkLabel: "Open dispute",
+            route: `/disputes/${d.id}`,
+          });
+        }
       }
 
       for (const e of atlasEvents.data || []) {

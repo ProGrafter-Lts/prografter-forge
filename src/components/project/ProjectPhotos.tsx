@@ -3,16 +3,15 @@ import { CalendarDays, Image as ImageIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import JobPhoto from "@/components/JobPhoto";
 import PhotoDiaryUploader from "@/components/project/PhotoDiaryUploader";
-import { groupByDay, type DiaryPhoto } from "@/lib/photoDiary";
+import PhotoBatchThread, { type BatchReply } from "@/components/project/PhotoBatchThread";
+import { groupByDay, groupIntoBatches, type DiaryPhoto } from "@/lib/photoDiary";
 import {
   AccentCard,
   JobFileEmpty,
   JobFilePanel,
   SectionHeading,
   TonePill,
-  type JobFileTone,
 } from "@/components/project/jobFileUi";
-
 
 interface Props {
   jobId: string;
@@ -20,15 +19,17 @@ interface Props {
   updates: { stage_id: string; photo_urls: string[] | null; created_at: string }[];
   /** Photos posted with the original job listing. */
   jobPhotoUrls?: string[];
-  /** Show the daily photo-log upload control (trade / homeowner on the project). */
+  /** Show the site photo upload control. */
   canUpload?: boolean;
   uploaderRole?: "trade" | "homeowner";
+  /** Who is looking — controls whether replies can be posted. */
+  viewerRole?: "trade" | "homeowner" | "observer";
 }
 
 /**
  * Site diary: job_photos + stage_updates.photo_urls + original job listing
- * photos, grouped by the day they were captured so a week of daily photos
- * reads as a timeline.
+ * photos, grouped by day and then by upload batch, each batch with its own
+ * reply thread.
  */
 const ProjectPhotos = ({
   jobId,
@@ -37,16 +38,28 @@ const ProjectPhotos = ({
   jobPhotoUrls = [],
   canUpload = false,
   uploaderRole = "trade",
+  viewerRole,
 }: Props) => {
   const [jobPhotos, setJobPhotos] = useState<any[]>([]);
+  const [replies, setReplies] = useState<BatchReply[]>([]);
+
+  const effectiveViewer = viewerRole ?? (canUpload ? uploaderRole : "observer");
 
   const loadJobPhotos = useCallback(async () => {
-    const { data } = await supabase
-      .from("job_photos")
-      .select("id, photo_url, label, stage, created_at")
-      .eq("job_id", jobId)
-      .order("created_at", { ascending: false });
-    setJobPhotos(data || []);
+    const [{ data: photos }, { data: reps }] = await Promise.all([
+      supabase
+        .from("job_photos")
+        .select("id, photo_url, label, stage, batch_id, uploaded_by, created_at")
+        .eq("job_id", jobId)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("job_photo_replies")
+        .select("id, batch_id, body, author_role, created_at")
+        .eq("job_id", jobId)
+        .order("created_at", { ascending: true }),
+    ]);
+    setJobPhotos(photos || []);
+    setReplies((reps as BatchReply[]) || []);
   }, [jobId]);
 
   useEffect(() => {
@@ -64,6 +77,8 @@ const ProjectPhotos = ({
         caption: stage?.stage_name || "Site update",
         source: "Stage update",
         createdAt: update.created_at,
+        batchId: null,
+        uploadedBy: "trade",
       });
     }
   }
@@ -71,9 +86,11 @@ const ProjectPhotos = ({
   for (const jp of jobPhotos) {
     dated.push({
       url: jp.photo_url,
-      caption: jp.label || "Daily site photo",
+      caption: jp.label || "Site photo",
       source: "Photo log",
       createdAt: jp.created_at,
+      batchId: jp.batch_id ?? null,
+      uploadedBy: jp.uploaded_by || "trade",
     });
   }
 
@@ -89,41 +106,6 @@ const ProjectPhotos = ({
   const days = groupByDay(dated);
   const total = dated.length + undated.length;
 
-  const sourceTone = (source: string): JobFileTone =>
-    source === "Photo log" ? "teal" : source === "Stage update" ? "sky" : "grey";
-
-  const grid = (photos: DiaryPhoto[]) => (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-      {photos.map((photo, i) => (
-        <div
-          key={`${photo.url}-${i}`}
-          className="rounded-xl overflow-hidden bg-card border border-border"
-        >
-          <JobPhoto
-            source={photo.url}
-            alt={photo.caption}
-            className="w-full h-32 object-cover"
-            loading="lazy"
-          />
-          <div className="p-2 space-y-1.5">
-            <p className="font-mono text-[10px] text-foreground truncate">{photo.caption}</p>
-            <div className="flex items-center gap-1.5">
-              <TonePill tone={sourceTone(photo.source)}>{photo.source}</TonePill>
-              {photo.createdAt && (
-                <span className="font-mono text-[10px] text-muted-foreground">
-                  {new Date(photo.createdAt).toLocaleTimeString("en-GB", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-
   return (
     <JobFilePanel className="space-y-5">
       {canUpload && (
@@ -132,8 +114,8 @@ const ProjectPhotos = ({
 
       {total === 0 ? (
         <JobFileEmpty icon={<ImageIcon className="w-6 h-6" />}>
-          No progress photos yet. Photos uploaded to the site diary or against a stage will appear
-          here, grouped by day.
+          No progress photos yet. Photos uploaded to the job or against a stage will appear here,
+          grouped by day.
         </JobFileEmpty>
       ) : (
         <div className="space-y-4">
@@ -143,14 +125,23 @@ const ProjectPhotos = ({
           </p>
 
           {days.map((day) => (
-            <AccentCard key={day.key} tone="teal">
+            <div key={day.key} className="space-y-3">
               <SectionHeading
-                icon={<CalendarDays className="w-4 h-4 text-teal-600" />}
+                icon={<CalendarDays className="w-4 h-4 text-teal-400" />}
                 title={day.label}
                 count={day.photos.length}
               />
-              {grid(day.photos)}
-            </AccentCard>
+              {groupIntoBatches(day.photos).map((batch) => (
+                <PhotoBatchThread
+                  key={batch.key}
+                  jobId={jobId}
+                  batch={batch}
+                  replies={replies.filter((r) => r.batch_id === batch.batchId)}
+                  viewerRole={effectiveViewer}
+                  onReplied={loadJobPhotos}
+                />
+              ))}
+            </div>
           ))}
 
           {undated.length > 0 && (
@@ -160,7 +151,24 @@ const ProjectPhotos = ({
                 title="Original job posting"
                 count={undated.length}
               />
-              {grid(undated)}
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                {undated.map((photo, i) => (
+                  <div
+                    key={`${photo.url}-${i}`}
+                    className="rounded-xl overflow-hidden bg-card border border-border"
+                  >
+                    <JobPhoto
+                      source={photo.url}
+                      alt={photo.caption}
+                      className="w-full h-32 object-cover"
+                      loading="lazy"
+                    />
+                    <div className="p-2">
+                      <TonePill tone="grey">Job listing</TonePill>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </AccentCard>
           )}
         </div>
@@ -168,6 +176,5 @@ const ProjectPhotos = ({
     </JobFilePanel>
   );
 };
-
 
 export default ProjectPhotos;

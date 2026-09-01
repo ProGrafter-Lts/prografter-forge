@@ -16,7 +16,8 @@ import GreenCertificatePack from "@/components/GreenCertificatePack";
 import GreenSchemesBreakdown from "@/components/GreenSchemesBreakdown";
 import { isGreenTrade } from "@/lib/greenTrades";
 import { isActiveJob } from "@/lib/activeProjects";
-import { BookOpen, Leaf, FolderKanban, SearchCheck, ArrowRight, MessageSquare } from "lucide-react";
+import { BookOpen, Leaf, FolderKanban, SearchCheck, ArrowRight, MessageSquare, Camera } from "lucide-react";
+import SiteDiaryInbox from "@/components/homeowner/SiteDiaryInbox";
 import ProjectConversations from "@/components/messages/ProjectConversations";
 import HomeownerProfileSection from "@/components/homeowner/HomeownerProfileSection";
 import NextSteps from "@/components/homeowner/NextSteps";
@@ -456,6 +457,21 @@ const HomeownerDashboard = () => {
                 briefs={briefs}
               />
               <MyJobs jobs={jobs} />
+            </section>
+          )}
+
+          {/* Site diary inbox — every project's photo batches, replyable */}
+          {activeNav === "diary" && (
+            <section className="space-y-6">
+              <div>
+                <h2 className="font-heading text-primary text-2xl flex items-center gap-2">
+                  <Camera className="w-5 h-5" /> Site Diary
+                </h2>
+                <p className="font-mono text-xs text-muted-foreground mt-1">
+                  Daily site photos from every project, grouped by day — reply to any batch.
+                </p>
+              </div>
+              <SiteDiaryInbox jobs={(activeJobs.length > 0 ? activeJobs : jobs) as any[]} />
             </section>
           )}
 
