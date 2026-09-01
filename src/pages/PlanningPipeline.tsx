@@ -1257,8 +1257,8 @@ export default function PlanningPipeline() {
       style={{
         display: "flex",
         flexDirection: "column",
-        minHeight: "100vh",
-        height: isMobile ? "auto" : "100vh",
+        minHeight: isMobile ? "100vh" : "auto",
+        height: isMobile ? "auto" : "calc(100vh - 56px)",
         fontFamily: "system-ui, -apple-system, sans-serif",
         background: C.deep,
         width: "100%",
@@ -1268,98 +1268,91 @@ export default function PlanningPipeline() {
       <style>{PRINT_CSS}</style>
       <PrintSheet leads={batchLeads} />
 
-      {/* Masthead */}
+      {/* Masthead — single compact line */}
       <div
         style={{
-          padding: isMobile ? "14px 16px" : "18px 28px",
+          padding: isMobile ? "10px 14px" : "10px 20px",
           display: "flex",
           flexWrap: "wrap",
           alignItems: "center",
           justifyContent: "space-between",
-          gap: 20,
+          gap: 14,
           flexShrink: 0,
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-          <Logo variant="light" className="h-8 w-auto inline-block" />
-          <span style={{ fontSize: 14, color: C.dim, fontWeight: 700, letterSpacing: "0.12em" }}>PLANNING PIPELINE</span>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 20 : 36, flexWrap: "wrap" }}>
-          {kpi("TOTAL LEADS", String(leads.length), newThisWeek ? `+${newThisWeek} this week` : null)}
+        <div style={{ display: "flex", alignItems: "center", gap: 18, flexWrap: "wrap" }}>
+          <span style={{ fontSize: 12, color: C.dim, fontWeight: 700, letterSpacing: "0.12em" }}>PLANNING PIPELINE</span>
+          {kpi("LEADS", String(leads.length), newThisWeek ? `+${newThisWeek} wk` : null)}
           {kpi(
-            "ESTIMATED VALUE",
+            "VALUE",
             fmtCompact(totalValue),
-            valueThisWeek ? `+${fmtCompact(valueThisWeek)} this week` : null,
+            valueThisWeek ? `+${fmtCompact(valueThisWeek)} wk` : null,
             C.tealBright,
           )}
-          <span style={{ fontSize: 13, color: C.faint }}>{hotLeads} hot</span>
-          <div style={{ display: "flex", gap: 10 }}>
-            <Link to="/admin/trade-scraper" style={{ ...btn("quiet"), textDecoration: "none" }}>
-              Trade scraper
-            </Link>
-            <button onClick={runIngest} disabled={ingesting} style={btn("primary", { opacity: ingesting ? 0.6 : 1 })}>
-              {ingesting ? "Ingesting…" : "Ingest Notts planning"}
-            </button>
-          </div>
+          <span style={{ fontSize: 12, color: C.faint }}>{hotLeads} hot</span>
+        </div>
+        <div style={{ display: "flex", gap: 8 }}>
+          <Link to="/admin/trade-scraper" style={{ ...btn("quiet"), textDecoration: "none", padding: "6px 12px", fontSize: 13 }}>
+            Trade scraper
+          </Link>
+          <button
+            onClick={runIngest}
+            disabled={ingesting}
+            style={btn("primary", { opacity: ingesting ? 0.6 : 1, padding: "6px 12px", fontSize: 13 })}
+          >
+            {ingesting ? "Ingesting…" : "Ingest Notts planning"}
+          </button>
         </div>
       </div>
 
-      {/* Funnel strip */}
+      {/* Funnel + Today — one compact band */}
       <div
         style={{
           background: C.surface,
-          padding: isMobile ? "12px 16px" : "14px 28px",
+          padding: isMobile ? "8px 14px" : "8px 20px",
+          display: "flex",
+          alignItems: "center",
+          gap: 16,
+          flexWrap: "wrap",
           flexShrink: 0,
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            gap: isMobile ? 14 : 22,
-            alignItems: "center",
-            flexWrap: "wrap",
-            maxWidth: 1100,
-          }}
-        >
-          {(
-            [
-              ["Identified", funnel.identified],
-              ["Qualified", funnel.qualified],
-              ["Contacted", funnel.contacted],
-              ["Responded", funnel.responded],
-              ["Registered", funnel.registered],
-              ["Projects", funnel.projects],
-            ] as [string, number][]
-          ).map(([label, n], i) => (
-            <div key={label} style={{ display: "flex", alignItems: "center", gap: isMobile ? 14 : 22 }}>
-              {i > 0 && <span style={{ color: C.faint, fontSize: 15 }}>→</span>}
-              <div>
-                <p style={{ fontSize: 22, fontWeight: 800, color: n ? C.cream : C.faint, margin: 0, lineHeight: 1.1 }}>
-                  {n}
-                </p>
-                <p style={{ fontSize: 13, color: C.dim, margin: "2px 0 0", fontWeight: 600 }}>{label}</p>
-              </div>
-            </div>
-          ))}
-        </div>
+        {(
+          [
+            ["Identified", funnel.identified],
+            ["Qualified", funnel.qualified],
+            ["Contacted", funnel.contacted],
+            ["Responded", funnel.responded],
+            ["Registered", funnel.registered],
+            ["Projects", funnel.projects],
+          ] as [string, number][]
+        ).map(([label, n], i) => (
+          <div key={label} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            {i > 0 && <span style={{ color: C.faint, fontSize: 12 }}>→</span>}
+            <span style={{ display: "flex", alignItems: "baseline", gap: 5 }}>
+              <span style={{ fontSize: 15, fontWeight: 800, color: n ? C.cream : C.faint, lineHeight: 1 }}>{n}</span>
+              <span style={{ fontSize: 11.5, color: C.dim, fontWeight: 600 }}>{label}</span>
+            </span>
+          </div>
+        ))}
       </div>
 
       {/* Today strip */}
       <div
         style={{
-          padding: isMobile ? "14px 16px" : "16px 28px",
+          padding: isMobile ? "8px 14px" : "8px 20px",
           display: "flex",
-          gap: 12,
+          gap: 8,
           flexWrap: "wrap",
           alignItems: "center",
           flexShrink: 0,
         }}
       >
-        <span style={{ fontSize: 15, color: C.cream, fontWeight: 800, letterSpacing: "0.06em", marginRight: 6 }}>
+        <span style={{ fontSize: 11.5, color: C.dim, fontWeight: 800, letterSpacing: "0.08em", marginRight: 2 }}>
           TODAY
         </span>
         {today.total === 0 ? (
-          <span style={{ fontSize: 15, fontWeight: 700, color: C.tealBright }}>Today's pipeline is clear ✓</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: C.tealBright }}>Today's pipeline is clear ✓</span>
         ) : (
           <>
             {today.toReview > 0 &&
@@ -1386,7 +1379,7 @@ export default function PlanningPipeline() {
               setTab("leads");
               setView("historic");
             }}
-            style={btn("quiet", { fontSize: 13 })}
+            style={btn("quiet", { fontSize: 12.5, padding: "5px 11px" })}
             title="Older imported applications with no outreach history — not part of today's workload"
           >
             {today.historic} historic / unprocessed
@@ -1398,8 +1391,8 @@ export default function PlanningPipeline() {
       <div
         style={{
           display: "flex",
-          gap: 6,
-          padding: isMobile ? "0 10px" : "0 28px",
+          gap: 4,
+          padding: isMobile ? "0 10px" : "0 20px",
           borderBottom: `1px solid ${C.line}`,
           overflowX: "auto",
           flexShrink: 0,
@@ -1410,6 +1403,7 @@ export default function PlanningPipeline() {
         {navTab("agents", `Architects & agents (${agents.length})`)}
         {navTab("insights", "Insights")}
       </div>
+
 
       {loading ? (
         <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: C.dim, fontSize: 15, padding: 40 }}>
