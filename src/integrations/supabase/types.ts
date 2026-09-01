@@ -3672,6 +3672,7 @@ export type Database = {
           message_text: string
           sender_id: string
           sender_type: string
+          stage_id: string | null
         }
         Insert: {
           created_at?: string
@@ -3680,6 +3681,7 @@ export type Database = {
           message_text: string
           sender_id: string
           sender_type?: string
+          stage_id?: string | null
         }
         Update: {
           created_at?: string
@@ -3688,6 +3690,7 @@ export type Database = {
           message_text?: string
           sender_id?: string
           sender_type?: string
+          stage_id?: string | null
         }
         Relationships: [
           {
@@ -3695,6 +3698,13 @@ export type Database = {
             columns: ["job_id"]
             isOneToOne: false
             referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_messages_stage_id_fkey"
+            columns: ["stage_id"]
+            isOneToOne: false
+            referencedRelation: "project_stages"
             referencedColumns: ["id"]
           },
         ]
@@ -3712,6 +3722,8 @@ export type Database = {
           payment_status: string
           planned_end: string | null
           planned_start: string | null
+          scope_detail: string | null
+          source: string
           stage_name: string
           stage_order: number
           status: string
@@ -3729,6 +3741,8 @@ export type Database = {
           payment_status?: string
           planned_end?: string | null
           planned_start?: string | null
+          scope_detail?: string | null
+          source?: string
           stage_name: string
           stage_order?: number
           status?: string
@@ -3746,6 +3760,8 @@ export type Database = {
           payment_status?: string
           planned_end?: string | null
           planned_start?: string | null
+          scope_detail?: string | null
+          source?: string
           stage_name?: string
           stage_order?: number
           status?: string
