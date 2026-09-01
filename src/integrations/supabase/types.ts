@@ -2276,8 +2276,47 @@ export type Database = {
           },
         ]
       }
+      job_photo_replies: {
+        Row: {
+          author_role: string
+          author_user_id: string
+          batch_id: string
+          body: string
+          created_at: string
+          id: string
+          job_id: string
+        }
+        Insert: {
+          author_role?: string
+          author_user_id: string
+          batch_id: string
+          body: string
+          created_at?: string
+          id?: string
+          job_id: string
+        }
+        Update: {
+          author_role?: string
+          author_user_id?: string
+          batch_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          job_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_photo_replies_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       job_photos: {
         Row: {
+          batch_id: string | null
           created_at: string
           id: string
           job_id: string
@@ -2288,6 +2327,7 @@ export type Database = {
           uploader_user_id: string | null
         }
         Insert: {
+          batch_id?: string | null
           created_at?: string
           id?: string
           job_id: string
@@ -2298,6 +2338,7 @@ export type Database = {
           uploader_user_id?: string | null
         }
         Update: {
+          batch_id?: string | null
           created_at?: string
           id?: string
           job_id?: string
