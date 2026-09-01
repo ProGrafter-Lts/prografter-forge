@@ -658,6 +658,7 @@ export type Database = {
       contract_variations: {
         Row: {
           activated_at: string | null
+          commission_pence: number | null
           contract_id: string
           cost_change_pence: number
           created_at: string
@@ -665,6 +666,7 @@ export type Database = {
           homeowner_signature_hash: string | null
           homeowner_signed_at: string | null
           id: string
+          legacy_variation_id: string | null
           programme_impact_days: number
           proposed_by: string
           reason: string | null
@@ -679,6 +681,7 @@ export type Database = {
         }
         Insert: {
           activated_at?: string | null
+          commission_pence?: number | null
           contract_id: string
           cost_change_pence?: number
           created_at?: string
@@ -686,6 +689,7 @@ export type Database = {
           homeowner_signature_hash?: string | null
           homeowner_signed_at?: string | null
           id?: string
+          legacy_variation_id?: string | null
           programme_impact_days?: number
           proposed_by: string
           reason?: string | null
@@ -700,6 +704,7 @@ export type Database = {
         }
         Update: {
           activated_at?: string | null
+          commission_pence?: number | null
           contract_id?: string
           cost_change_pence?: number
           created_at?: string
@@ -707,6 +712,7 @@ export type Database = {
           homeowner_signature_hash?: string | null
           homeowner_signed_at?: string | null
           id?: string
+          legacy_variation_id?: string | null
           programme_impact_days?: number
           proposed_by?: string
           reason?: string | null
@@ -6317,6 +6323,63 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      variations_archive: {
+        Row: {
+          archived_at: string
+          created_at: string | null
+          description: string | null
+          id: string
+          job_id: string | null
+          labour_cost: number | null
+          materials_cost: number | null
+          migrated_contract_variation_id: string | null
+          programme_impact_days: number | null
+          reason: string | null
+          signed_at: string | null
+          signed_by: string | null
+          status: string | null
+          title: string | null
+          trade_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          archived_at?: string
+          created_at?: string | null
+          description?: string | null
+          id: string
+          job_id?: string | null
+          labour_cost?: number | null
+          materials_cost?: number | null
+          migrated_contract_variation_id?: string | null
+          programme_impact_days?: number | null
+          reason?: string | null
+          signed_at?: string | null
+          signed_by?: string | null
+          status?: string | null
+          title?: string | null
+          trade_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          archived_at?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          job_id?: string | null
+          labour_cost?: number | null
+          materials_cost?: number | null
+          migrated_contract_variation_id?: string | null
+          programme_impact_days?: number | null
+          reason?: string | null
+          signed_at?: string | null
+          signed_by?: string | null
+          status?: string | null
+          title?: string | null
+          trade_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
       }
     }
     Views: {

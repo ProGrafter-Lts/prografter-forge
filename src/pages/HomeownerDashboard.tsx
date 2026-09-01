@@ -202,9 +202,8 @@ const HomeownerDashboard = () => {
         .in("job_id", jobIds)
         .order("created_at", { ascending: false }),
       supabase
-        .from("variations")
-        .select("id, title, description, materials_cost, labour_cost, programme_impact_days, status, job_id")
-        .eq("status", "pending")
+        .from("contracts")
+        .select("id, job_id, contract_variations(id, contract_id, sequence, title, description, cost_change_pence, commission_pence, programme_impact_days, status, homeowner_signed_at)")
         .in("job_id", jobIds),
       supabase
         .from("stage_updates")
@@ -214,7 +213,14 @@ const HomeownerDashboard = () => {
     ]);
 
     setQuotes(quoteRes.data || []);
-    setVariations(variationRes.data || []);
+    // Formal contract variations awaiting this homeowner's signature.
+    setVariations(
+      (variationRes.data || []).flatMap((c: any) =>
+        (c.contract_variations || [])
+          .filter((v: any) => v.status === "pending" && !v.homeowner_signed_at)
+          .map((v: any) => ({ ...v, job_id: c.job_id })),
+      ),
+    );
 
     // Map site updates
     const mappedUpdates = (updatesRes.data || []).map((u: any) => ({
