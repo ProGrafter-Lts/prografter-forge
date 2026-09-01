@@ -310,7 +310,7 @@ const AdminVerifications = () => {
     if (!trade.email) return;
     const firstName = (trade.name || "").trim().split(/\s+/)[0] || "";
     try {
-      await supabase.functions.invoke("send-transactional-email", {
+      await supabase.functions.invoke("send-app-email", {
         body: {
           templateName: "trade-verified",
           recipientEmail: trade.email,
@@ -327,7 +327,7 @@ const AdminVerifications = () => {
     if (!trade.email) return;
     const firstName = (trade.name || "").trim().split(/\s+/)[0] || "";
     try {
-      await supabase.functions.invoke("send-transactional-email", {
+      await supabase.functions.invoke("send-app-email", {
         body: {
           templateName: "trade-verification-query",
           recipientEmail: trade.email,
@@ -364,7 +364,7 @@ const AdminVerifications = () => {
     if (!trade.email) return;
     const firstName = (trade.name || "").trim().split(/\s+/)[0] || "";
     try {
-      await supabase.functions.invoke("send-transactional-email", {
+      await supabase.functions.invoke("send-app-email", {
         body: {
           templateName: "trade-rejected",
           recipientEmail: trade.email,
@@ -439,7 +439,7 @@ const AdminVerifications = () => {
     if (alsoEmail && trade.email) {
       const firstName = (trade.name || "").trim().split(/\s+/)[0] || "";
       try {
-        await supabase.functions.invoke("send-transactional-email", {
+        await supabase.functions.invoke("send-app-email", {
           body: {
             templateName: "trade-coming-soon",
             recipientEmail: trade.email,

@@ -149,7 +149,7 @@ Deno.serve(async (req) => {
         .eq("id", tradeId)
         .maybeSingle();
       if (owner?.email) {
-        const res = await admin.functions.invoke("send-transactional-email", {
+        const res = await admin.functions.invoke("send-app-email", {
           body: {
             templateName: "agreed-quote-on-file",
             recipientEmail: owner.email,

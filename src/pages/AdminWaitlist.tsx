@@ -120,7 +120,7 @@ const AdminWaitlist = () => {
     setWorking(row.id);
     const firstName = (row.name || "").trim().split(/\s+/)[0] || "";
     try {
-      const { error } = await supabase.functions.invoke("send-transactional-email", {
+      const { error } = await supabase.functions.invoke("send-app-email", {
         body: {
           templateName: "waitlist-out-of-area",
           recipientEmail: row.email,

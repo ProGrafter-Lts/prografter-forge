@@ -67,7 +67,7 @@ Deno.serve(async (req) => {
 
   // Fire-and-forget admin notification — don't block the response if email fails.
   try {
-    await sb.functions.invoke('send-transactional-email', {
+    await sb.functions.invoke('send-app-email', {
       body: {
         template: 'testimonial-received',
         purpose: 'transactional',

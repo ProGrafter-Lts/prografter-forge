@@ -470,7 +470,7 @@ const SignupTrade = () => {
       if (userId) {
         try {
           const firstName = fullName.trim().split(/\s+/)[0] || "";
-          await supabase.functions.invoke("send-transactional-email", {
+          await supabase.functions.invoke("send-app-email", {
             body: {
               templateName: "trade-welcome",
               recipientEmail: email.trim(),
@@ -479,7 +479,7 @@ const SignupTrade = () => {
             },
           });
           // Delivery-check email — proves our emails reach this inbox.
-          await supabase.functions.invoke("send-transactional-email", {
+          await supabase.functions.invoke("send-app-email", {
             body: {
               templateName: "delivery-confirmation",
               recipientEmail: email.trim(),
@@ -493,7 +493,7 @@ const SignupTrade = () => {
 
         // Admin notification — alert team that a new trade signed up
         try {
-          await supabase.functions.invoke("send-transactional-email", {
+          await supabase.functions.invoke("send-app-email", {
             body: {
               templateName: "trade-signup-admin-notification",
               idempotencyKey: `trade-admin-signup-${userId}`,
@@ -875,7 +875,7 @@ const SignupTrade = () => {
 
       // Fire confirmation email (best-effort)
       try {
-        await supabase.functions.invoke("send-transactional-email", {
+        await supabase.functions.invoke("send-app-email", {
           body: {
             templateName: "trade-verification-submitted",
             recipientEmail: email.trim(),
@@ -887,7 +887,7 @@ const SignupTrade = () => {
 
       // Admin notification — alert team that the trade has submitted for review
       try {
-        await supabase.functions.invoke("send-transactional-email", {
+        await supabase.functions.invoke("send-app-email", {
           body: {
             templateName: "trade-signup-admin-notification",
             idempotencyKey: `trade-admin-submitted-${createdTradeId}`,

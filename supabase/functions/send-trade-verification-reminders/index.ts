@@ -55,7 +55,7 @@ Deno.serve(async (req) => {
 
       const reminderNumber = (trade.verification_reminder_count ?? 0) + 1
 
-      const { error: sendErr } = await supabase.functions.invoke('send-transactional-email', {
+      const { error: sendErr } = await supabase.functions.invoke('send-app-email', {
         body: {
           templateName: 'trade-finish-verification',
           recipientEmail: profile.email,

@@ -117,7 +117,7 @@ const SignupHomeowner = () => {
       if (userId) {
         try {
           const firstName = form.fullName.trim().split(/\s+/)[0] || "";
-          await supabase.functions.invoke("send-transactional-email", {
+          await supabase.functions.invoke("send-app-email", {
             body: {
               templateName: "homeowner-welcome",
               recipientEmail: form.email,
@@ -126,7 +126,7 @@ const SignupHomeowner = () => {
             },
           });
           // Delivery-check email — proves our emails reach this inbox.
-          await supabase.functions.invoke("send-transactional-email", {
+          await supabase.functions.invoke("send-app-email", {
             body: {
               templateName: "delivery-confirmation",
               recipientEmail: form.email,

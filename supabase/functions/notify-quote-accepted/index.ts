@@ -122,7 +122,7 @@ Deno.serve(async (req) => {
   const sends: Promise<unknown>[] = []
 
   if (tradeEmail) {
-    sends.push(supabase.functions.invoke('send-transactional-email', {
+    sends.push(supabase.functions.invoke('send-app-email', {
       body: {
         templateName: 'quote-accepted-trade',
         recipientEmail: tradeEmail,
@@ -139,7 +139,7 @@ Deno.serve(async (req) => {
   }
 
   if (homeowner?.email) {
-    sends.push(supabase.functions.invoke('send-transactional-email', {
+    sends.push(supabase.functions.invoke('send-app-email', {
       body: {
         templateName: 'quote-accepted-homeowner',
         recipientEmail: homeowner.email,
@@ -157,7 +157,7 @@ Deno.serve(async (req) => {
     }))
   }
 
-  sends.push(supabase.functions.invoke('send-transactional-email', {
+  sends.push(supabase.functions.invoke('send-app-email', {
     body: {
       templateName: 'quote-accepted-admin',
       recipientEmail: ADMIN_EMAIL,
