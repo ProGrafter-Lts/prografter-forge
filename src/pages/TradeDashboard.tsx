@@ -22,6 +22,7 @@ import LegalReviewBanner from "@/components/LegalReviewBanner";
 import { isTestRecord } from "@/lib/testData";
 import DashboardSummary from "@/components/trade/DashboardSummary";
 import ConfirmTradeTypeModal from "@/components/trade/ConfirmTradeTypeModal";
+import TradeMessagesSection from "@/components/trade/TradeMessagesSection";
 import type { PriorityTarget } from "@/lib/tradeProfileStrength";
 
 
