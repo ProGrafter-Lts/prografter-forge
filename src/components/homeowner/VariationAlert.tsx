@@ -1,17 +1,25 @@
 import { AlertTriangle } from "lucide-react";
+import { Link } from "react-router-dom";
 
-interface Variation {
+export interface PendingContractVariation {
   id: string;
+  contract_id: string;
+  job_id?: string | null;
+  sequence: number;
   title: string;
   description: string;
-  materials_cost: number;
-  labour_cost: number;
+  cost_change_pence: number;
+  commission_pence: number | null;
   programme_impact_days: number;
   status: string;
+  homeowner_signed_at: string | null;
 }
 
-const VariationAlert = ({ variations }: { variations: Variation[] }) => {
-  const pending = variations.filter((v) => v.status === "pending");
+const gbp = (pence: number) =>
+  `£${(pence / 100).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+const VariationAlert = ({ variations }: { variations: PendingContractVariation[] }) => {
+  const pending = variations.filter((v) => v.status === "pending" && !v.homeowner_signed_at);
   if (pending.length === 0) return null;
 
   return (
@@ -23,13 +31,21 @@ const VariationAlert = ({ variations }: { variations: Variation[] }) => {
         >
           <AlertTriangle className="w-6 h-6 text-amber-500 flex-shrink-0 mt-0.5" />
           <div className="flex-1">
-            <h3 className="font-heading text-primary text-lg">{v.title}</h3>
+            <h3 className="font-heading text-primary text-lg">
+              Variation #{v.sequence} — {v.title}
+            </h3>
             <p className="font-mono text-xs text-muted-foreground mt-1 line-clamp-2">
               {v.description}
             </p>
-            <div className="flex items-center gap-4 mt-2 font-mono text-xs text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-4 mt-2 font-mono text-xs text-muted-foreground">
               <span>
-                Cost: <span className="text-primary font-medium">£{(v.materials_cost + v.labour_cost).toLocaleString()}</span>
+                Cost change: <span className="text-primary font-medium">{gbp(v.cost_change_pence)}</span>
+              </span>
+              <span>
+                Commission (3.75%):{" "}
+                <span className="text-primary font-medium">
+                  {gbp(v.commission_pence ?? Math.round(Math.max(v.cost_change_pence, 0) * 0.0375))}
+                </span>
               </span>
               {v.programme_impact_days > 0 && (
                 <span>
@@ -37,9 +53,14 @@ const VariationAlert = ({ variations }: { variations: Variation[] }) => {
                 </span>
               )}
             </div>
-            <button className="mt-3 bg-amber-500 text-white font-mono text-xs px-4 py-2 rounded-xl hover:bg-amber-600 transition-colors">
-              Review & Sign
-            </button>
+            {v.job_id && (
+              <Link
+                to={`/project/${v.job_id}`}
+                className="inline-block mt-3 bg-amber-500 text-white font-mono text-xs px-4 py-2 rounded-xl hover:bg-amber-600 transition-colors"
+              >
+                Review & Sign
+              </Link>
+            )}
           </div>
         </div>
       ))}
