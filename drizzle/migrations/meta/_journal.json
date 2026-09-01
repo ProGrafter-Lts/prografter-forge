@@ -71,6 +71,13 @@
       "when": 1788236457550,
       "tag": "0009_certs_visible_when_no_escrow_wallet",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1788253153081,
+      "tag": "0010_consolidate_variations_into_contract_variations",
+      "breakpoints": true
     }
   ]
 }
