@@ -48,7 +48,11 @@ const GlobalLegalFooter = () => {
     };
   }, [location.pathname]);
 
+  // Admin workspace pages are full-height working surfaces — the tall legal
+  // footer eats the fixed viewport there, so it is not rendered on /admin.
+  if (location.pathname.startsWith("/admin")) return null;
   if (!show) return null;
+
 
   return (
     <footer className="border-t border-cream/10 bg-deep px-6 py-5">
