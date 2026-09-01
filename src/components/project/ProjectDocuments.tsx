@@ -302,7 +302,8 @@ const ProjectDocuments = ({ jobId }: Props) => {
           </section>
         ))}
 
-    </div>
+    </JobFilePanel>
+
   );
 };
 
