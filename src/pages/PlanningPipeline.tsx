@@ -1414,7 +1414,7 @@ export default function PlanningPipeline() {
           {(!isMobile || !selectedLeadId) && (
             <div
               style={{
-                width: isMobile ? "100%" : 370,
+                width: isMobile ? "100%" : 400,
                 flexShrink: 0,
                 display: "flex",
                 flexDirection: "column",
@@ -1422,8 +1422,8 @@ export default function PlanningPipeline() {
                 background: "rgba(0,0,0,0.14)",
               }}
             >
-              <div style={{ padding: "16px 16px 12px", display: "grid", gap: 10 }}>
-                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+              <div style={{ padding: "10px 12px 8px", display: "grid", gap: 7 }}>
+                <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
                   {QUICK_VIEWS.map((v) => (
                     <button
                       key={v.id}
@@ -1432,9 +1432,9 @@ export default function PlanningPipeline() {
                         background: view === v.id ? C.teal : "rgba(255,255,255,0.05)",
                         color: view === v.id ? C.white : C.dim,
                         border: "none",
-                        borderRadius: 8,
-                        padding: "8px 13px",
-                        fontSize: 13.5,
+                        borderRadius: 7,
+                        padding: "5px 10px",
+                        fontSize: 12.5,
                         fontWeight: 700,
                         cursor: "pointer",
                         fontFamily: "inherit",
@@ -1444,42 +1444,56 @@ export default function PlanningPipeline() {
                     </button>
                   ))}
                 </div>
-                <input
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search address, reference, applicant…"
-                  style={inp()}
-                />
-                <div style={{ display: "flex", gap: 8 }}>
-                  <select value={valueBand} onChange={(e) => setValueBand(e.target.value)} style={{ ...inp(), flex: 1 }}>
+                <div style={{ display: "flex", gap: 6 }}>
+                  <input
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Search address, ref, applicant…"
+                    style={{ ...inp(), flex: 1.4, padding: "7px 10px", fontSize: 13 }}
+                  />
+                  <select
+                    value={valueBand}
+                    onChange={(e) => setValueBand(e.target.value)}
+                    style={{ ...inp(), flex: 1, padding: "7px 8px", fontSize: 13 }}
+                  >
                     {VALUE_BANDS.map((b) => (
                       <option key={b.id} value={b.id} style={{ color: "#1F2937" }}>
                         {b.label}
                       </option>
                     ))}
                   </select>
-                  <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} style={{ ...inp(), flex: 1.3 }}>
+                </div>
+                <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    style={{ ...inp(), flex: 1, padding: "7px 8px", fontSize: 13 }}
+                  >
                     {SORT_OPTIONS.map((s) => (
                       <option key={s.id} value={s.id} style={{ color: "#1F2937" }}>
                         {s.label}
                       </option>
                     ))}
                   </select>
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
-                  <p style={{ fontSize: 13, color: C.dim, margin: 0 }}>
-                    {filteredLeads.length} matching · page {page + 1} of {pageCount}
-                  </p>
                   <button
                     onClick={() => setShowSkipped((v) => !v)}
-                    style={btn("quiet", { padding: "6px 12px", fontSize: 13, color: showSkipped ? C.tealBright : C.dim })}
+                    style={btn("quiet", {
+                      padding: "6px 10px",
+                      fontSize: 12.5,
+                      whiteSpace: "nowrap",
+                      color: showSkipped ? C.tealBright : C.dim,
+                    })}
                   >
                     {showSkipped ? "Hide skipped" : "Show skipped"}
                   </button>
                 </div>
+                <p style={{ fontSize: 11.5, color: C.faint, margin: 0 }}>
+                  {filteredLeads.length} matching · page {page + 1} of {pageCount}
+                </p>
               </div>
 
-              <div style={{ flex: 1, overflowY: "auto", padding: "0 16px 16px" }}>
+              <div style={{ flex: 1, overflowY: "auto", padding: "0 12px 12px" }}>
+
                 {pageLeads.map((lead) => (
                   <LeadCard key={lead.id} lead={lead} selected={selectedLeadId === lead.id} onSelect={(l) => setSelectedLeadId(l.id)} />
                 ))}
