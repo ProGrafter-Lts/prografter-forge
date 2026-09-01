@@ -545,10 +545,24 @@ const ProjectDetail = () => {
               onAssignSub={userRole === "trade" ? (stageId) => setSubTradeStageId(stageId) : undefined}
             />
 
+            {/* Daily photo log / site diary */}
+            <div className="space-y-3">
+              <h3 className="font-heading text-primary text-lg">Site diary</h3>
+              <ProjectPhotos
+                jobId={id!}
+                stages={stages}
+                updates={updates}
+                jobPhotoUrls={(job as any).photo_urls || []}
+                canUpload={userRole === "trade"}
+                uploaderRole="trade"
+              />
+            </div>
+
             {/* Green Certificate Pack */}
             {job.is_green_job && (
               <GreenCertificatePack jobType={job.job_type} isComplete={job.status === "complete" || job.stage === "completed"} />
             )}
+
 
             {/* 5 — Messages */}
             <MessagingPanel
