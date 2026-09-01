@@ -29,7 +29,13 @@ interface Props {
   userRole: "trade" | "homeowner" | null;
 }
 
-const COMMISSION_RATE = 0.0375;
+interface CommissionPreview {
+  commission_before_pence: number;
+  commission_after_pence: number;
+  variation_commission_pence: number;
+  headroom_before_pence: number;
+  capped: boolean;
+}
 
 const REASON_OPTIONS = [
   "Client request",
