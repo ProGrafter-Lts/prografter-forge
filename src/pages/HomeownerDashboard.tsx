@@ -452,6 +452,25 @@ const HomeownerDashboard = () => {
             </section>
           )}
 
+          {/* Messages tab — index of real per-project conversations */}
+          {activeNav === "messages" && (
+            <section className="space-y-6">
+              <div>
+                <h2 className="font-heading text-primary text-2xl flex items-center gap-2">
+                  <MessageSquare className="w-5 h-5" /> Messages
+                </h2>
+                <p className="font-mono text-xs text-muted-foreground mt-1">
+                  Your conversations with tradespeople, one thread per project.
+                </p>
+              </div>
+              <ProjectConversations
+                jobs={(activeJobs.length > 0 ? activeJobs : jobs) as any[]}
+                viewerRole="homeowner"
+              />
+            </section>
+          )}
+
+
           {/* Quote Checker tab */}
           {activeNav === "quotes" && (
             <section className="space-y-6">
