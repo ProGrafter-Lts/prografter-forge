@@ -10,7 +10,7 @@ import ProjectActivity from "@/components/project/ProjectActivity";
 import { toast } from "sonner";
 import GreenCertificatePack from "@/components/GreenCertificatePack";
 import ProjectHeader from "@/components/project/ProjectHeader";
-import StageTimeline from "@/components/project/StageTimeline";
+import StageWorkspace from "@/components/project/StageWorkspace";
 import MessagingPanel from "@/components/project/MessagingPanel";
 import PaymentSchedule from "@/components/project/PaymentSchedule";
 import ContractVariationsPanel from "@/components/project/ContractVariationsPanel";
