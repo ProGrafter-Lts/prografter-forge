@@ -562,6 +562,12 @@ const ProjectDetail = () => {
               />
             </div>
 
+            {/* Unified activity feed — identical content for homeowner and trade */}
+            <div className="space-y-3">
+              <h3 className="font-heading text-primary text-lg">Project activity</h3>
+              <ProjectActivity jobId={id!} />
+            </div>
+
             {/* Green Certificate Pack */}
             {job.is_green_job && (
               <GreenCertificatePack jobType={job.job_type} isComplete={job.status === "complete" || job.stage === "completed"} />
