@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Logo from "@/components/Logo";
+import DisputeEvidencePanel from "@/components/project/DisputeEvidencePanel";
 
 const C = {
   cream:"#F5F0E8", deep:"#0F2238", navy:"#27396A",
@@ -228,6 +229,30 @@ export default function DisputeDetail() {
             )}
           </div>
         </div>
+
+        {/* Evidence — both parties can submit */}
+        <DisputeEvidencePanel
+          disputeId={dispute.id}
+          jobId={dispute.job_id}
+          role={meRole}
+          canUpload={meRole !== "observer" && dispute.status !== "resolved"}
+        />
+
+        {/* Resolution */}
+        {dispute.status === "resolved" && (
+          <div style={{ background:C.greenBg, border:`1.5px solid ${C.greenBorder}`,
+            borderRadius:12, padding:"12px 14px", marginBottom:14 }}>
+            <p style={{ fontSize:10, fontWeight:700, color:C.green, letterSpacing:"0.08em",
+              textTransform:"uppercase", margin:"0 0 8px" }}>Resolved</p>
+            <p style={{ fontSize:12, color:C.body, lineHeight:1.65, margin:0 }}>
+              Finding for <strong>{dispute.resolution || "—"}</strong>
+              {dispute.resolved_at && (
+                <> · {new Date(dispute.resolved_at).toLocaleDateString("en-GB",
+                  { day:"numeric", month:"short", year:"numeric" })}</>
+              )}
+            </p>
+          </div>
+        )}
 
         {/* Recommendation */}
         {dispute.recommendation && (

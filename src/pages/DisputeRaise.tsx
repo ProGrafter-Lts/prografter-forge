@@ -121,6 +121,11 @@ export default function DisputeRaise() {
     }).select("id").single();
 
     if (dErr || !dispute) { setError(dErr?.message || "Failed to raise dispute"); setSubmitting(false); return; }
+    await supabase.from("dispute_events").insert({
+      dispute_id: dispute.id,
+      event_type: "dispute",
+      event_text: `Dispute raised by ${role}${form.reason ? ` — ${form.reason}` : ""}`,
+    });
     void supabase.functions.invoke("notify-dispute-raised", { body: { dispute_id: dispute.id } });
     trackEvent("dispute_raise", { reason: form.reason });
     setCreatedDisputeId(dispute.id);
