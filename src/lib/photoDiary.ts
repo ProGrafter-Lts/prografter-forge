@@ -3,6 +3,10 @@ export interface DiaryPhoto {
   caption: string;
   source: string;
   createdAt: string;
+  /** Upload batch this photo belongs to (job_photos.batch_id). */
+  batchId?: string | null;
+  /** 'trade' | 'homeowner' */
+  uploadedBy?: string;
 }
 
 export interface DiaryDay {
@@ -52,4 +56,84 @@ export function groupByDay(photos: DiaryPhoto[]): DiaryDay[] {
         (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
       ),
     }));
+}
+
+export interface DiaryBatch {
+  /** batch_id when present, otherwise a synthetic key */
+  key: string;
+  batchId: string | null;
+  caption: string;
+  uploadedBy: string;
+  createdAt: string;
+  photos: DiaryPhoto[];
+}
+
+const BATCH_WINDOW_MS = 10 * 60 * 1000;
+
+/**
+ * Group photos of a single day into upload batches: photos sharing a
+ * `batchId` belong together; legacy rows without one fall back to
+ * "same uploader within 10 minutes".
+ */
+export function groupIntoBatches(photos: DiaryPhoto[]): DiaryBatch[] {
+  const withId = new Map<string, DiaryPhoto[]>();
+  const legacy: DiaryPhoto[] = [];
+
+  for (const p of photos) {
+    if (p.batchId) {
+      const arr = withId.get(p.batchId);
+      if (arr) arr.push(p);
+      else withId.set(p.batchId, [p]);
+    } else {
+      legacy.push(p);
+    }
+  }
+
+  const batches: DiaryBatch[] = [];
+
+  for (const [batchId, items] of withId) {
+    batches.push(makeBatch(batchId, batchId, items));
+  }
+
+  const sortedLegacy = [...legacy].sort(
+    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+  );
+  let current: DiaryPhoto[] = [];
+  const flush = () => {
+    if (!current.length) return;
+    batches.push(makeBatch(`legacy-${current[0].createdAt}-${current[0].url}`, null, current));
+    current = [];
+  };
+  for (const p of sortedLegacy) {
+    const prev = current[current.length - 1];
+    if (
+      prev &&
+      prev.uploadedBy === p.uploadedBy &&
+      new Date(p.createdAt).getTime() - new Date(prev.createdAt).getTime() < BATCH_WINDOW_MS
+    ) {
+      current.push(p);
+    } else {
+      flush();
+      current.push(p);
+    }
+  }
+  flush();
+
+  return batches.sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  );
+}
+
+function makeBatch(key: string, batchId: string | null, items: DiaryPhoto[]): DiaryBatch {
+  const sorted = [...items].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  );
+  return {
+    key,
+    batchId,
+    caption: sorted.find((p) => p.caption && p.caption !== "Daily site photo")?.caption || sorted[0].caption,
+    uploadedBy: sorted[0].uploadedBy || "trade",
+    createdAt: sorted[0].createdAt,
+    photos: sorted,
+  };
 }
