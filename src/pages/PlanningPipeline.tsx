@@ -3,7 +3,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Link } from "react-router-dom";
-import Logo from "@/components/Logo";
 import {
   C,
   CONTACT_METHODS,
@@ -143,27 +142,27 @@ const LeadCard = ({
       onClick={() => onSelect(lead)}
       style={{
         display: "flex",
-        gap: 12,
+        gap: 10,
         background: selected ? "rgba(13,148,136,0.16)" : "rgba(255,255,255,0.035)",
         boxShadow: selected ? `inset 0 0 0 1px ${C.teal}` : "none",
-        borderRadius: 12,
-        padding: "14px 14px 14px 12px",
+        borderRadius: 10,
+        padding: "9px 10px 9px 8px",
         cursor: "pointer",
-        marginBottom: 10,
+        marginBottom: 6,
         opacity: isSkipped(lead) ? 0.55 : 1,
         transition: "background 0.12s",
       }}
     >
-      <span style={{ width: 4, borderRadius: 4, background: chip.color, flexShrink: 0 }} />
+      <span style={{ width: 3, borderRadius: 3, background: chip.color, flexShrink: 0 }} />
       <div style={{ minWidth: 0, flex: 1 }}>
         <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
           <p
             style={{
-              fontSize: 16,
+              fontSize: 14.5,
               fontWeight: 700,
               color: C.cream,
               margin: 0,
-              lineHeight: 1.35,
+              lineHeight: 1.3,
               overflow: "hidden",
               textOverflow: "ellipsis",
               whiteSpace: "nowrap",
@@ -171,37 +170,50 @@ const LeadCard = ({
           >
             {lead.site_address}
           </p>
-          <span style={{ fontSize: 15, fontWeight: 700, color: C.tealBright, flexShrink: 0 }}>
+          <span style={{ fontSize: 14, fontWeight: 700, color: C.tealBright, flexShrink: 0 }}>
             {fmt(lead.estimated_value_max)}
           </span>
         </div>
         {lead.description && (
           <p
             style={{
-              fontSize: 13,
+              fontSize: 12.5,
               color: C.dim,
-              margin: "6px 0 0",
-              lineHeight: 1.5,
-              display: "-webkit-box",
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: "vertical",
+              margin: "3px 0 0",
+              lineHeight: 1.4,
               overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
             }}
           >
             {lead.description}
           </p>
         )}
-        <p style={{ fontSize: 12.5, color: C.faint, margin: "6px 0 0" }}>
-          {lead.council_name} · {lead.application_ref}
-        </p>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginTop: 10 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 8,
+            marginTop: 6,
+          }}
+        >
           <Chip label={chip.label} color={chip.color} />
-          <span style={{ fontSize: 12.5, color: C.faint, whiteSpace: "nowrap" }}>
-            {chip.date ? fmtDate(chip.date) : `${days} days old`}
+          <span
+            style={{
+              fontSize: 11.5,
+              color: C.faint,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
+            {lead.council_name} · {chip.date ? fmtDate(chip.date) : `${days}d`}
           </span>
         </div>
       </div>
     </div>
+
   );
 };
 
@@ -232,7 +244,7 @@ const LeadDetail = ({
     (lead.homeowner_letter_template as LetterTemplateId) || "A",
   );
   const [editUrl, setEditUrl] = useState(false);
-  const [more, setMore] = useState(false);
+  
   const [councilUrl, setCouncilUrl] = useState(lead.council_application_url || "");
   const [busy, setBusy] = useState(false);
   const [enriching, setEnriching] = useState(false);
@@ -243,7 +255,7 @@ const LeadDetail = ({
     setTemplate((lead.homeowner_letter_template as LetterTemplateId) || "A");
     setCouncilUrl(lead.council_application_url || "");
     setEditUrl(false);
-    setMore(false);
+    
   }, [lead.id]);
 
   const patch = useCallback(
@@ -448,8 +460,7 @@ const LeadDetail = ({
             {isHistoric(lead) && <Chip label="HISTORIC — UNPROCESSED" color={C.faint} />}
           </div>
 
-          {/* Primary actions */}
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 18 }}>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 14 }}>
             <a
               href={lead.council_application_url || undefined}
               target="_blank"
@@ -487,31 +498,24 @@ const LeadDetail = ({
                 Open letter batch
               </button>
             )}
-            <button onClick={() => setMore((v) => !v)} style={btn("quiet")}>
-              {more ? "Less ▲" : "More ▾"}
+            <button
+              onClick={() => lead.council_application_url && copy(lead.council_application_url, "Link")}
+              disabled={!lead.council_application_url}
+              style={btn("quiet", { opacity: lead.council_application_url ? 1 : 0.5 })}
+            >
+              Copy link
+            </button>
+            <button onClick={() => setEditUrl((v) => !v)} style={btn("quiet")}>
+              {editUrl ? "Close URL editor" : "Edit URL"}
+            </button>
+            <button onClick={enrichFromPdf} disabled={enriching || !lead.council_application_url} style={btn("quiet")}>
+              {enriching ? "Reading PDF…" : lead.pdf_enriched_at ? "Re-read PDF form" : "Read PDF form"}
+            </button>
+            <button onClick={() => onSkip(lead, !isSkipped(lead))} style={btn("quiet")}>
+              {isSkipped(lead) ? "Restore lead" : "Skip lead"}
             </button>
           </div>
 
-          {more && (
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 10 }}>
-              <button
-                onClick={() => lead.council_application_url && copy(lead.council_application_url, "Link")}
-                disabled={!lead.council_application_url}
-                style={btn("quiet", { opacity: lead.council_application_url ? 1 : 0.5 })}
-              >
-                Copy link
-              </button>
-              <button onClick={() => setEditUrl((v) => !v)} style={btn("quiet")}>
-                {editUrl ? "Close URL editor" : "Edit URL"}
-              </button>
-              <button onClick={enrichFromPdf} disabled={enriching || !lead.council_application_url} style={btn("quiet")}>
-                {enriching ? "Reading PDF…" : lead.pdf_enriched_at ? "Re-read PDF form" : "Read PDF form"}
-              </button>
-              <button onClick={() => onSkip(lead, !isSkipped(lead))} style={btn("quiet")}>
-                {isSkipped(lead) ? "Restore lead" : "Skip lead"}
-              </button>
-            </div>
-          )}
 
           {editUrl && (
             <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
@@ -1199,10 +1203,10 @@ export default function PlanningPipeline() {
   };
 
   const kpi = (label: string, value: string, delta: string | null, color = C.cream) => (
-    <div>
-      <p style={{ fontSize: 12.5, color: C.faint, margin: 0, letterSpacing: "0.06em", fontWeight: 600 }}>{label}</p>
-      <p style={{ fontSize: 28, fontWeight: 800, color, margin: "3px 0 0", lineHeight: 1.1 }}>{value}</p>
-      {delta && <p style={{ fontSize: 13, color: C.tealBright, margin: "3px 0 0" }}>{delta}</p>}
+    <div style={{ display: "flex", alignItems: "baseline", gap: 7 }}>
+      <span style={{ fontSize: 19, fontWeight: 800, color, lineHeight: 1 }}>{value}</span>
+      <span style={{ fontSize: 11, color: C.faint, letterSpacing: "0.06em", fontWeight: 600 }}>{label}</span>
+      {delta && <span style={{ fontSize: 11.5, color: C.tealBright }}>{delta}</span>}
     </div>
   );
 
@@ -1211,15 +1215,16 @@ export default function PlanningPipeline() {
       key={id}
       onClick={() => setTab(id)}
       style={{
-        padding: "14px 18px",
+        padding: "9px 14px",
         border: "none",
         background: "transparent",
         borderBottom: `2px solid ${tab === id ? C.teal : "transparent"}`,
         color: tab === id ? C.cream : C.dim,
-        fontSize: 15,
+        fontSize: 13.5,
         fontWeight: 700,
         cursor: "pointer",
         fontFamily: "inherit",
+        whiteSpace: "nowrap",
       }}
     >
       {label}
@@ -1233,9 +1238,9 @@ export default function PlanningPipeline() {
         background: `${color}18`,
         border: `1px solid ${color}55`,
         color,
-        borderRadius: 10,
-        padding: "10px 16px",
-        fontSize: 14,
+        borderRadius: 8,
+        padding: "5px 11px",
+        fontSize: 12.5,
         fontWeight: 700,
         cursor: "pointer",
         fontFamily: "inherit",
@@ -1245,13 +1250,14 @@ export default function PlanningPipeline() {
     </button>
   );
 
+
   return (
     <div
       style={{
         display: "flex",
         flexDirection: "column",
-        minHeight: "100vh",
-        height: isMobile ? "auto" : "100vh",
+        minHeight: isMobile ? "100vh" : "auto",
+        height: isMobile ? "auto" : "calc(100vh - 56px)",
         fontFamily: "system-ui, -apple-system, sans-serif",
         background: C.deep,
         width: "100%",
@@ -1261,98 +1267,91 @@ export default function PlanningPipeline() {
       <style>{PRINT_CSS}</style>
       <PrintSheet leads={batchLeads} />
 
-      {/* Masthead */}
+      {/* Masthead — single compact line */}
       <div
         style={{
-          padding: isMobile ? "14px 16px" : "18px 28px",
+          padding: isMobile ? "10px 14px" : "10px 20px",
           display: "flex",
           flexWrap: "wrap",
           alignItems: "center",
           justifyContent: "space-between",
-          gap: 20,
+          gap: 14,
           flexShrink: 0,
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-          <Logo variant="light" className="h-8 w-auto inline-block" />
-          <span style={{ fontSize: 14, color: C.dim, fontWeight: 700, letterSpacing: "0.12em" }}>PLANNING PIPELINE</span>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 20 : 36, flexWrap: "wrap" }}>
-          {kpi("TOTAL LEADS", String(leads.length), newThisWeek ? `+${newThisWeek} this week` : null)}
+        <div style={{ display: "flex", alignItems: "center", gap: 18, flexWrap: "wrap" }}>
+          <span style={{ fontSize: 12, color: C.dim, fontWeight: 700, letterSpacing: "0.12em" }}>PLANNING PIPELINE</span>
+          {kpi("LEADS", String(leads.length), newThisWeek ? `+${newThisWeek} wk` : null)}
           {kpi(
-            "ESTIMATED VALUE",
+            "VALUE",
             fmtCompact(totalValue),
-            valueThisWeek ? `+${fmtCompact(valueThisWeek)} this week` : null,
+            valueThisWeek ? `+${fmtCompact(valueThisWeek)} wk` : null,
             C.tealBright,
           )}
-          <span style={{ fontSize: 13, color: C.faint }}>{hotLeads} hot</span>
-          <div style={{ display: "flex", gap: 10 }}>
-            <Link to="/admin/trade-scraper" style={{ ...btn("quiet"), textDecoration: "none" }}>
-              Trade scraper
-            </Link>
-            <button onClick={runIngest} disabled={ingesting} style={btn("primary", { opacity: ingesting ? 0.6 : 1 })}>
-              {ingesting ? "Ingesting…" : "Ingest Notts planning"}
-            </button>
-          </div>
+          <span style={{ fontSize: 12, color: C.faint }}>{hotLeads} hot</span>
+        </div>
+        <div style={{ display: "flex", gap: 8 }}>
+          <Link to="/admin/trade-scraper" style={{ ...btn("quiet"), textDecoration: "none", padding: "6px 12px", fontSize: 13 }}>
+            Trade scraper
+          </Link>
+          <button
+            onClick={runIngest}
+            disabled={ingesting}
+            style={btn("primary", { opacity: ingesting ? 0.6 : 1, padding: "6px 12px", fontSize: 13 })}
+          >
+            {ingesting ? "Ingesting…" : "Ingest Notts planning"}
+          </button>
         </div>
       </div>
 
-      {/* Funnel strip */}
+      {/* Funnel + Today — one compact band */}
       <div
         style={{
           background: C.surface,
-          padding: isMobile ? "12px 16px" : "14px 28px",
+          padding: isMobile ? "8px 14px" : "8px 20px",
+          display: "flex",
+          alignItems: "center",
+          gap: 16,
+          flexWrap: "wrap",
           flexShrink: 0,
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            gap: isMobile ? 14 : 22,
-            alignItems: "center",
-            flexWrap: "wrap",
-            maxWidth: 1100,
-          }}
-        >
-          {(
-            [
-              ["Identified", funnel.identified],
-              ["Qualified", funnel.qualified],
-              ["Contacted", funnel.contacted],
-              ["Responded", funnel.responded],
-              ["Registered", funnel.registered],
-              ["Projects", funnel.projects],
-            ] as [string, number][]
-          ).map(([label, n], i) => (
-            <div key={label} style={{ display: "flex", alignItems: "center", gap: isMobile ? 14 : 22 }}>
-              {i > 0 && <span style={{ color: C.faint, fontSize: 15 }}>→</span>}
-              <div>
-                <p style={{ fontSize: 22, fontWeight: 800, color: n ? C.cream : C.faint, margin: 0, lineHeight: 1.1 }}>
-                  {n}
-                </p>
-                <p style={{ fontSize: 13, color: C.dim, margin: "2px 0 0", fontWeight: 600 }}>{label}</p>
-              </div>
-            </div>
-          ))}
-        </div>
+        {(
+          [
+            ["Identified", funnel.identified],
+            ["Qualified", funnel.qualified],
+            ["Contacted", funnel.contacted],
+            ["Responded", funnel.responded],
+            ["Registered", funnel.registered],
+            ["Projects", funnel.projects],
+          ] as [string, number][]
+        ).map(([label, n], i) => (
+          <div key={label} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            {i > 0 && <span style={{ color: C.faint, fontSize: 12 }}>→</span>}
+            <span style={{ display: "flex", alignItems: "baseline", gap: 5 }}>
+              <span style={{ fontSize: 15, fontWeight: 800, color: n ? C.cream : C.faint, lineHeight: 1 }}>{n}</span>
+              <span style={{ fontSize: 11.5, color: C.dim, fontWeight: 600 }}>{label}</span>
+            </span>
+          </div>
+        ))}
       </div>
 
       {/* Today strip */}
       <div
         style={{
-          padding: isMobile ? "14px 16px" : "16px 28px",
+          padding: isMobile ? "8px 14px" : "8px 20px",
           display: "flex",
-          gap: 12,
+          gap: 8,
           flexWrap: "wrap",
           alignItems: "center",
           flexShrink: 0,
         }}
       >
-        <span style={{ fontSize: 15, color: C.cream, fontWeight: 800, letterSpacing: "0.06em", marginRight: 6 }}>
+        <span style={{ fontSize: 11.5, color: C.dim, fontWeight: 800, letterSpacing: "0.08em", marginRight: 2 }}>
           TODAY
         </span>
         {today.total === 0 ? (
-          <span style={{ fontSize: 15, fontWeight: 700, color: C.tealBright }}>Today's pipeline is clear ✓</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: C.tealBright }}>Today's pipeline is clear ✓</span>
         ) : (
           <>
             {today.toReview > 0 &&
@@ -1379,7 +1378,7 @@ export default function PlanningPipeline() {
               setTab("leads");
               setView("historic");
             }}
-            style={btn("quiet", { fontSize: 13 })}
+            style={btn("quiet", { fontSize: 12.5, padding: "5px 11px" })}
             title="Older imported applications with no outreach history — not part of today's workload"
           >
             {today.historic} historic / unprocessed
@@ -1391,8 +1390,8 @@ export default function PlanningPipeline() {
       <div
         style={{
           display: "flex",
-          gap: 6,
-          padding: isMobile ? "0 10px" : "0 28px",
+          gap: 4,
+          padding: isMobile ? "0 10px" : "0 20px",
           borderBottom: `1px solid ${C.line}`,
           overflowX: "auto",
           flexShrink: 0,
@@ -1404,6 +1403,7 @@ export default function PlanningPipeline() {
         {navTab("insights", "Insights")}
       </div>
 
+
       {loading ? (
         <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: C.dim, fontSize: 15, padding: 40 }}>
           Loading…
@@ -1413,7 +1413,7 @@ export default function PlanningPipeline() {
           {(!isMobile || !selectedLeadId) && (
             <div
               style={{
-                width: isMobile ? "100%" : 370,
+                width: isMobile ? "100%" : 400,
                 flexShrink: 0,
                 display: "flex",
                 flexDirection: "column",
@@ -1421,8 +1421,8 @@ export default function PlanningPipeline() {
                 background: "rgba(0,0,0,0.14)",
               }}
             >
-              <div style={{ padding: "16px 16px 12px", display: "grid", gap: 10 }}>
-                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+              <div style={{ padding: "10px 12px 8px", display: "grid", gap: 7 }}>
+                <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
                   {QUICK_VIEWS.map((v) => (
                     <button
                       key={v.id}
@@ -1431,9 +1431,9 @@ export default function PlanningPipeline() {
                         background: view === v.id ? C.teal : "rgba(255,255,255,0.05)",
                         color: view === v.id ? C.white : C.dim,
                         border: "none",
-                        borderRadius: 8,
-                        padding: "8px 13px",
-                        fontSize: 13.5,
+                        borderRadius: 7,
+                        padding: "5px 10px",
+                        fontSize: 12.5,
                         fontWeight: 700,
                         cursor: "pointer",
                         fontFamily: "inherit",
@@ -1443,42 +1443,56 @@ export default function PlanningPipeline() {
                     </button>
                   ))}
                 </div>
-                <input
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search address, reference, applicant…"
-                  style={inp()}
-                />
-                <div style={{ display: "flex", gap: 8 }}>
-                  <select value={valueBand} onChange={(e) => setValueBand(e.target.value)} style={{ ...inp(), flex: 1 }}>
+                <div style={{ display: "flex", gap: 6 }}>
+                  <input
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Search address, ref, applicant…"
+                    style={{ ...inp(), flex: 1.4, padding: "7px 10px", fontSize: 13 }}
+                  />
+                  <select
+                    value={valueBand}
+                    onChange={(e) => setValueBand(e.target.value)}
+                    style={{ ...inp(), flex: 1, padding: "7px 8px", fontSize: 13 }}
+                  >
                     {VALUE_BANDS.map((b) => (
                       <option key={b.id} value={b.id} style={{ color: "#1F2937" }}>
                         {b.label}
                       </option>
                     ))}
                   </select>
-                  <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} style={{ ...inp(), flex: 1.3 }}>
+                </div>
+                <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    style={{ ...inp(), flex: 1, padding: "7px 8px", fontSize: 13 }}
+                  >
                     {SORT_OPTIONS.map((s) => (
                       <option key={s.id} value={s.id} style={{ color: "#1F2937" }}>
                         {s.label}
                       </option>
                     ))}
                   </select>
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
-                  <p style={{ fontSize: 13, color: C.dim, margin: 0 }}>
-                    {filteredLeads.length} matching · page {page + 1} of {pageCount}
-                  </p>
                   <button
                     onClick={() => setShowSkipped((v) => !v)}
-                    style={btn("quiet", { padding: "6px 12px", fontSize: 13, color: showSkipped ? C.tealBright : C.dim })}
+                    style={btn("quiet", {
+                      padding: "6px 10px",
+                      fontSize: 12.5,
+                      whiteSpace: "nowrap",
+                      color: showSkipped ? C.tealBright : C.dim,
+                    })}
                   >
                     {showSkipped ? "Hide skipped" : "Show skipped"}
                   </button>
                 </div>
+                <p style={{ fontSize: 11.5, color: C.faint, margin: 0 }}>
+                  {filteredLeads.length} matching · page {page + 1} of {pageCount}
+                </p>
               </div>
 
-              <div style={{ flex: 1, overflowY: "auto", padding: "0 16px 16px" }}>
+              <div style={{ flex: 1, overflowY: "auto", padding: "0 12px 12px" }}>
+
                 {pageLeads.map((lead) => (
                   <LeadCard key={lead.id} lead={lead} selected={selectedLeadId === lead.id} onSelect={(l) => setSelectedLeadId(l.id)} />
                 ))}
