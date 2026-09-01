@@ -13,6 +13,15 @@ import {
   Compass,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  AccentCard,
+  JobFileEmpty,
+  JobFilePanel,
+  JOB_FILE_ICON_TONE,
+  TonePill,
+  type JobFileTone,
+} from "@/components/project/jobFileUi";
+
 
 interface Props {
   jobId: string;
