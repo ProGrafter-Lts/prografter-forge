@@ -82,7 +82,12 @@ const ProjectDetail = () => {
   const [contract, setContract] = useState<Contract | null>(null);
   const [subAssignments, setSubAssignments] = useState<SubAssignment[]>([]);
   const [viewerContextReady, setViewerContextReady] = useState(false);
-  const [hoTab, setHoTab] = useState("overview");
+  const [hoTab, setHoTab] = useState(() => {
+    const t = searchParams.get("tab");
+    return t && ["overview", "quotes", "timeline", "payments", "documents", "photos", "messages"].includes(t)
+      ? t
+      : "overview";
+  });
 
   const [userRole, setUserRole] = useState<UserRole>(null);
   const [userId, setUserId] = useState<string | null>(null);
