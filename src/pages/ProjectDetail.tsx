@@ -509,6 +509,8 @@ const ProjectDetail = () => {
                   )
                 )}
 
+                {hoTab === "activity" && <ProjectActivity jobId={id!} onOpenTab={setHoTab} />}
+
                 {hoTab === "documents" && <ProjectDocuments jobId={id!} />}
 
                 {hoTab === "photos" && (
