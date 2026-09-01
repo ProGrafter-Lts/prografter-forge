@@ -2,6 +2,15 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FolderArchive, ShieldCheck, FileText, Package, ClipboardCheck, BadgeCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  AccentCard,
+  JobFileEmpty,
+  JobFilePanel,
+  JOB_FILE_ICON_TONE,
+  SectionHeading,
+  TonePill,
+  type JobFileTone,
+} from "@/components/project/jobFileUi";
 
 interface Props {
   jobId: string;
@@ -12,6 +21,9 @@ interface DocItem {
   name: string;
   meta: string;
   date: string | null;
+  /** Short status/category label rendered as a TradeVault-style badge. */
+  status?: string;
+  statusTone?: JobFileTone;
   /** Direct URL (certificates) */
   href?: string;
   /** Storage path + bucket — signed on click */
@@ -25,10 +37,28 @@ interface Group {
   key: string;
   label: string;
   icon: typeof FileText;
+  tone: JobFileTone;
   items: DocItem[];
 }
 
 const fmt = (d: string | null) => (d ? new Date(d).toLocaleDateString("en-GB") : "—");
+
+const statusTone = (status?: string | null): JobFileTone => {
+  const s = (status || "").toLowerCase();
+  if (["signed", "accepted", "approved", "active", "complete", "completed"].includes(s)) return "green";
+  if (["rejected", "expired", "declined", "cancelled"].includes(s)) return "red";
+  if (["draft", "pending", "sent", "awaiting_signature", "issued"].includes(s)) return "amber";
+  return "grey";
+};
+
+const classificationTone = (c?: string | null): JobFileTone => {
+  const s = (c || "").toUpperCase();
+  if (s === "CLEAR") return "green";
+  if (s === "HOLD") return "red";
+  if (s === "MIXED") return "amber";
+  return "grey";
+};
+
 
 /**
  * Read-only aggregation of everything that already exists for a project:
