@@ -16,7 +16,8 @@ import GreenCertificatePack from "@/components/GreenCertificatePack";
 import GreenSchemesBreakdown from "@/components/GreenSchemesBreakdown";
 import { isGreenTrade } from "@/lib/greenTrades";
 import { isActiveJob } from "@/lib/activeProjects";
-import { BookOpen, Leaf, FolderKanban, SearchCheck, ArrowRight } from "lucide-react";
+import { BookOpen, Leaf, FolderKanban, SearchCheck, ArrowRight, MessageSquare } from "lucide-react";
+import ProjectConversations from "@/components/messages/ProjectConversations";
 import HomeownerProfileSection from "@/components/homeowner/HomeownerProfileSection";
 import NextSteps from "@/components/homeowner/NextSteps";
 import { buildNextSteps } from "@/lib/homeownerNextSteps";
@@ -43,7 +44,7 @@ const HomeownerDashboard = () => {
   const [searchParams] = useSearchParams();
   const [activeNav, setActiveNav] = useState(() => {
     const tab = searchParams.get("tab");
-    const valid = ["overview", "projects", "quotes", "grants", "manual", "profile"];
+    const valid = ["overview", "projects", "messages", "quotes", "grants", "manual", "profile"];
     return tab && valid.includes(tab) ? tab : "overview";
   });
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -52,7 +53,7 @@ const HomeownerDashboard = () => {
   // "Back to dashboard" on the Quote Checks page).
   useEffect(() => {
     const tab = searchParams.get("tab");
-    const valid = ["overview", "projects", "quotes", "grants", "manual", "profile"];
+    const valid = ["overview", "projects", "messages", "quotes", "grants", "manual", "profile"];
     if (tab && valid.includes(tab)) setActiveNav(tab);
   }, [searchParams]);
 
@@ -451,6 +452,25 @@ const HomeownerDashboard = () => {
               <MyJobs jobs={jobs} />
             </section>
           )}
+
+          {/* Messages tab — index of real per-project conversations */}
+          {activeNav === "messages" && (
+            <section className="space-y-6">
+              <div>
+                <h2 className="font-heading text-primary text-2xl flex items-center gap-2">
+                  <MessageSquare className="w-5 h-5" /> Messages
+                </h2>
+                <p className="font-mono text-xs text-muted-foreground mt-1">
+                  Your conversations with tradespeople, one thread per project.
+                </p>
+              </div>
+              <ProjectConversations
+                jobs={(activeJobs.length > 0 ? activeJobs : jobs) as any[]}
+                viewerRole="homeowner"
+              />
+            </section>
+          )}
+
 
           {/* Quote Checker tab */}
           {activeNav === "quotes" && (

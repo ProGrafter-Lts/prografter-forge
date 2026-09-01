@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, ShieldCheck, LayoutDashboard, ClipboardList, CalendarClock, CreditCard, FolderArchive, Image as ImageIcon, MessageSquare } from "lucide-react";
 import ControlCentreTabs, { type ControlCentreTab } from "@/components/project/ControlCentreTabs";
 import EmptyModule from "@/components/project/EmptyModule";
+import ProjectDocuments from "@/components/project/ProjectDocuments";
+import ProjectPhotos from "@/components/project/ProjectPhotos";
 import { toast } from "sonner";
 import GreenCertificatePack from "@/components/GreenCertificatePack";
 import ProjectHeader from "@/components/project/ProjectHeader";
@@ -80,7 +82,12 @@ const ProjectDetail = () => {
   const [contract, setContract] = useState<Contract | null>(null);
   const [subAssignments, setSubAssignments] = useState<SubAssignment[]>([]);
   const [viewerContextReady, setViewerContextReady] = useState(false);
-  const [hoTab, setHoTab] = useState("overview");
+  const [hoTab, setHoTab] = useState(() => {
+    const t = searchParams.get("tab");
+    return t && ["overview", "quotes", "timeline", "payments", "documents", "photos", "messages"].includes(t)
+      ? t
+      : "overview";
+  });
 
   const [userRole, setUserRole] = useState<UserRole>(null);
   const [userId, setUserId] = useState<string | null>(null);
@@ -512,21 +519,14 @@ const ProjectDetail = () => {
                   )
                 )}
 
-                {hoTab === "documents" && (
-                  <EmptyModule
-                    icon={FolderArchive}
-                    title="Documents"
-                    message="This is where quotes, contracts, certificates, drawings and warranties will be stored."
-                    hint="No project documents uploaded yet."
-                  />
-                )}
+                {hoTab === "documents" && <ProjectDocuments jobId={id!} />}
 
                 {hoTab === "photos" && (
-                  <EmptyModule
-                    icon={ImageIcon}
-                    title="Photos"
-                    message="Progress photographs uploaded by you or your tradesperson will appear here."
-                    hint="No progress photos yet."
+                  <ProjectPhotos
+                    jobId={id!}
+                    stages={stages}
+                    updates={updates}
+                    jobPhotoUrls={(job as any).photo_urls || []}
                   />
                 )}
 

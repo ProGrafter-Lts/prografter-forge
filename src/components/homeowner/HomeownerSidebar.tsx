@@ -5,6 +5,7 @@ import {
   LayoutDashboard,
   FolderKanban,
   SearchCheck,
+  MessageSquare,
   Leaf,
   BookOpen,
   UserCircle,
@@ -14,6 +15,7 @@ import {
 const NAV_ITEMS = [
   { label: "Overview", icon: LayoutDashboard, id: "overview" },
   { label: "My Projects", icon: FolderKanban, id: "projects" },
+  { label: "Messages", icon: MessageSquare, id: "messages" },
   { label: "Quotes & Checks", icon: SearchCheck, id: "quotes" },
   { label: "Green Grants", icon: Leaf, id: "grants" },
   { label: "Homeowner Manual", icon: BookOpen, id: "manual" },

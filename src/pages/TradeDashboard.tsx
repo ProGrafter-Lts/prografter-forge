@@ -22,6 +22,7 @@ import LegalReviewBanner from "@/components/LegalReviewBanner";
 import { isTestRecord } from "@/lib/testData";
 import DashboardSummary from "@/components/trade/DashboardSummary";
 import ConfirmTradeTypeModal from "@/components/trade/ConfirmTradeTypeModal";
+import TradeMessagesSection from "@/components/trade/TradeMessagesSection";
 import type { PriorityTarget } from "@/lib/tradeProfileStrength";
 
 
@@ -460,14 +461,7 @@ const TradeDashboard = () => {
                 <h1 className="font-heading text-primary text-3xl">Messages</h1>
                 <p className="font-mono text-sm text-muted-foreground mt-1">Conversations with homeowners appear here.</p>
               </div>
-              <div
-                className="rounded-xl p-12 text-center"
-                style={{ backgroundColor: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
-              >
-                <p className="font-mono text-sm text-muted-foreground">
-                  No messages yet. Once a homeowner starts a conversation, it'll show up here.
-                </p>
-              </div>
+              <TradeMessagesSection tradeId={trade.id} />
             </div>
           )}
 
