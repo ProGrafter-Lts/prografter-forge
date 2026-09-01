@@ -50,19 +50,21 @@ export const JOB_FILE_ACCENT: Record<JobFileTone, string> = {
   indigo: "#6366f1",
   purple: "#a855f7",
   orange: "#f97316",
+};
 
-
-/** Icon colour per tone — matches the `text-*-600` icon convention. */
+/** Icon colour per tone — matches the `text-*` icon convention, tuned a step
+ *  lighter so it reads on the navy dashboard surface. */
 export const JOB_FILE_ICON_TONE: Record<JobFileTone, string> = {
-  green: "text-emerald-600",
-  amber: "text-amber-600",
-  red: "text-red-600",
+  green: "text-emerald-400",
+  amber: "text-amber-400",
+  red: "text-red-400",
   grey: "text-muted-foreground",
-  teal: "text-teal-600",
-  sky: "text-sky-600",
-  indigo: "text-indigo-600",
-  purple: "text-purple-600",
-  orange: "text-orange-600",
+  teal: "text-teal-400",
+  sky: "text-sky-400",
+  indigo: "text-indigo-400",
+  purple: "text-purple-400",
+  orange: "text-orange-400",
+
 };
 
 /** Dark navy surface wrapper — same theme class the dashboards use. */
