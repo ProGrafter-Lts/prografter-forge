@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, ShieldCheck, LayoutDashboard, ClipboardList, CalendarClock, CreditCard, FolderArchive, Image as ImageIcon, MessageSquare } from "lucide-react";
 import ControlCentreTabs, { type ControlCentreTab } from "@/components/project/ControlCentreTabs";
 import EmptyModule from "@/components/project/EmptyModule";
+import ProjectDocuments from "@/components/project/ProjectDocuments";
+import ProjectPhotos from "@/components/project/ProjectPhotos";
 import { toast } from "sonner";
 import GreenCertificatePack from "@/components/GreenCertificatePack";
 import ProjectHeader from "@/components/project/ProjectHeader";
