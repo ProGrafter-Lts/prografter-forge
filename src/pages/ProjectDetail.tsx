@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, ShieldCheck, LayoutDashboard, ClipboardList, CalendarClock, CreditCard, FolderArchive, Image as ImageIcon, MessageSquare } from "lucide-react";
+import { ArrowLeft, ShieldCheck, LayoutDashboard, ClipboardList, CalendarClock, CreditCard, FolderArchive, Image as ImageIcon, MessageSquare, Activity } from "lucide-react";
 import ControlCentreTabs, { type ControlCentreTab } from "@/components/project/ControlCentreTabs";
 import EmptyModule from "@/components/project/EmptyModule";
 import ProjectDocuments from "@/components/project/ProjectDocuments";
 import ProjectPhotos from "@/components/project/ProjectPhotos";
+import ProjectActivity from "@/components/project/ProjectActivity";
 import { toast } from "sonner";
 import GreenCertificatePack from "@/components/GreenCertificatePack";
 import ProjectHeader from "@/components/project/ProjectHeader";
@@ -432,6 +433,7 @@ const ProjectDetail = () => {
               { id: "overview", label: "Overview", icon: LayoutDashboard },
               { id: "quotes", label: "Quotes", icon: ClipboardList },
               { id: "timeline", label: "Timeline", icon: CalendarClock },
+              { id: "activity", label: "Activity", icon: Activity },
               { id: "payments", label: "Payments", icon: CreditCard },
               { id: "documents", label: "Documents", icon: FolderArchive },
               { id: "photos", label: "Photos", icon: ImageIcon },
@@ -507,6 +509,8 @@ const ProjectDetail = () => {
                   )
                 )}
 
+                {hoTab === "activity" && <ProjectActivity jobId={id!} onOpenTab={setHoTab} />}
+
                 {hoTab === "documents" && <ProjectDocuments jobId={id!} />}
 
                 {hoTab === "photos" && (
@@ -556,6 +560,12 @@ const ProjectDetail = () => {
                 canUpload={userRole === "trade"}
                 uploaderRole="trade"
               />
+            </div>
+
+            {/* Unified activity feed — identical content for homeowner and trade */}
+            <div className="space-y-3">
+              <h3 className="font-heading text-primary text-lg">Project activity</h3>
+              <ProjectActivity jobId={id!} />
             </div>
 
             {/* Green Certificate Pack */}
