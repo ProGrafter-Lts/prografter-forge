@@ -57,6 +57,13 @@
       "when": 1788217589667,
       "tag": "0007_release_transfer_attempt_counters",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1788230247997,
+      "tag": "0008_admin_stage_visibility_and_clear_block_reason",
+      "breakpoints": true
     }
   ]
 }
