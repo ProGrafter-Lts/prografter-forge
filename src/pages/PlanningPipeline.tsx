@@ -245,7 +245,7 @@ const LeadDetail = ({
     (lead.homeowner_letter_template as LetterTemplateId) || "A",
   );
   const [editUrl, setEditUrl] = useState(false);
-  const [more, setMore] = useState(false);
+  
   const [councilUrl, setCouncilUrl] = useState(lead.council_application_url || "");
   const [busy, setBusy] = useState(false);
   const [enriching, setEnriching] = useState(false);
