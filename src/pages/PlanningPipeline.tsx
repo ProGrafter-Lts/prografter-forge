@@ -143,27 +143,27 @@ const LeadCard = ({
       onClick={() => onSelect(lead)}
       style={{
         display: "flex",
-        gap: 12,
+        gap: 10,
         background: selected ? "rgba(13,148,136,0.16)" : "rgba(255,255,255,0.035)",
         boxShadow: selected ? `inset 0 0 0 1px ${C.teal}` : "none",
-        borderRadius: 12,
-        padding: "14px 14px 14px 12px",
+        borderRadius: 10,
+        padding: "9px 10px 9px 8px",
         cursor: "pointer",
-        marginBottom: 10,
+        marginBottom: 6,
         opacity: isSkipped(lead) ? 0.55 : 1,
         transition: "background 0.12s",
       }}
     >
-      <span style={{ width: 4, borderRadius: 4, background: chip.color, flexShrink: 0 }} />
+      <span style={{ width: 3, borderRadius: 3, background: chip.color, flexShrink: 0 }} />
       <div style={{ minWidth: 0, flex: 1 }}>
         <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
           <p
             style={{
-              fontSize: 16,
+              fontSize: 14.5,
               fontWeight: 700,
               color: C.cream,
               margin: 0,
-              lineHeight: 1.35,
+              lineHeight: 1.3,
               overflow: "hidden",
               textOverflow: "ellipsis",
               whiteSpace: "nowrap",
@@ -171,37 +171,50 @@ const LeadCard = ({
           >
             {lead.site_address}
           </p>
-          <span style={{ fontSize: 15, fontWeight: 700, color: C.tealBright, flexShrink: 0 }}>
+          <span style={{ fontSize: 14, fontWeight: 700, color: C.tealBright, flexShrink: 0 }}>
             {fmt(lead.estimated_value_max)}
           </span>
         </div>
         {lead.description && (
           <p
             style={{
-              fontSize: 13,
+              fontSize: 12.5,
               color: C.dim,
-              margin: "6px 0 0",
-              lineHeight: 1.5,
-              display: "-webkit-box",
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: "vertical",
+              margin: "3px 0 0",
+              lineHeight: 1.4,
               overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
             }}
           >
             {lead.description}
           </p>
         )}
-        <p style={{ fontSize: 12.5, color: C.faint, margin: "6px 0 0" }}>
-          {lead.council_name} · {lead.application_ref}
-        </p>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginTop: 10 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 8,
+            marginTop: 6,
+          }}
+        >
           <Chip label={chip.label} color={chip.color} />
-          <span style={{ fontSize: 12.5, color: C.faint, whiteSpace: "nowrap" }}>
-            {chip.date ? fmtDate(chip.date) : `${days} days old`}
+          <span
+            style={{
+              fontSize: 11.5,
+              color: C.faint,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
+            {lead.council_name} · {chip.date ? fmtDate(chip.date) : `${days}d`}
           </span>
         </div>
       </div>
     </div>
+
   );
 };
 
