@@ -13,6 +13,15 @@ import {
   Compass,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  AccentCard,
+  JobFileEmpty,
+  JobFilePanel,
+  JOB_FILE_ICON_TONE,
+  TonePill,
+  type JobFileTone,
+} from "@/components/project/jobFileUi";
+
 
 interface Props {
   jobId: string;
@@ -42,17 +51,18 @@ interface ActivityItem {
   tab?: string;
 }
 
-const CAT_META: Record<Category, { icon: typeof Activity; label: string; tone: string }> = {
-  funding: { icon: Banknote, label: "Funding", tone: "text-emerald-600" },
-  contract: { icon: FileSignature, label: "Contract", tone: "text-sky-600" },
-  variation: { icon: FilePlus2, label: "Variation", tone: "text-amber-600" },
-  dispute: { icon: Gavel, label: "Dispute", tone: "text-red-600" },
-  escalation: { icon: AlertTriangle, label: "Escalation", tone: "text-orange-600" },
-  inspection: { icon: ClipboardCheck, label: "Inspection", tone: "text-indigo-600" },
-  message: { icon: MessageSquare, label: "Message", tone: "text-teal-600" },
-  photos: { icon: ImageIcon, label: "Site diary", tone: "text-purple-600" },
-  survey: { icon: Compass, label: "Survey", tone: "text-slate-600" },
+const CAT_META: Record<Category, { icon: typeof Activity; label: string; tone: JobFileTone }> = {
+  funding: { icon: Banknote, label: "Funding", tone: "green" },
+  contract: { icon: FileSignature, label: "Contract", tone: "sky" },
+  variation: { icon: FilePlus2, label: "Variation", tone: "amber" },
+  dispute: { icon: Gavel, label: "Dispute", tone: "red" },
+  escalation: { icon: AlertTriangle, label: "Escalation", tone: "orange" },
+  inspection: { icon: ClipboardCheck, label: "Inspection", tone: "indigo" },
+  message: { icon: MessageSquare, label: "Message", tone: "teal" },
+  photos: { icon: ImageIcon, label: "Site diary", tone: "purple" },
+  survey: { icon: Compass, label: "Survey", tone: "grey" },
 };
+
 
 const humanise = (s: string) =>
   s.replace(/[_.]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
@@ -339,20 +349,24 @@ const ProjectActivity = ({ jobId, onOpenTab }: Props) => {
   }, [jobId]);
 
   if (loading) {
-    return <p className="font-mono text-sm text-muted-foreground">Loading project activity…</p>;
+    return (
+      <JobFilePanel>
+        <p className="font-mono text-sm text-muted-foreground">Loading project activity…</p>
+      </JobFilePanel>
+    );
   }
 
   if (items.length === 0) {
     return (
-      <div className="bg-card border border-border rounded-2xl p-10 text-center">
-        <Activity className="w-6 h-6 text-muted-foreground mx-auto mb-3" />
-        <p className="font-mono text-sm text-muted-foreground">
+      <JobFilePanel>
+        <JobFileEmpty icon={<Activity className="w-6 h-6" />}>
           No activity recorded yet. Funding, contract, inspection, message and photo events appear
           here in the order they happened.
-        </p>
-      </div>
+        </JobFileEmpty>
+      </JobFilePanel>
     );
   }
+
 
   const present = Array.from(new Set(items.map((i) => i.category))) as Category[];
   const shown = filter === "all" ? items : items.filter((i) => i.category === filter);
@@ -363,15 +377,17 @@ const ProjectActivity = ({ jobId, onOpenTab }: Props) => {
   };
 
   return (
-    <div className="space-y-4">
+    <JobFilePanel className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
         <p className="font-mono text-xs text-muted-foreground mr-1">
           {items.length} event{items.length === 1 ? "" : "s"} · shared factual record
         </p>
         <button
           onClick={() => setFilter("all")}
-          className={`font-mono text-[10px] px-2.5 py-1 rounded-full border ${
-            filter === "all" ? "border-secondary text-secondary" : "border-border text-muted-foreground"
+          className={`font-mono text-[10px] uppercase tracking-wide px-2.5 py-1 rounded-full border ${
+            filter === "all"
+              ? "bg-secondary/15 text-secondary border-secondary/40"
+              : "bg-card border-border text-muted-foreground"
           }`}
         >
           All
@@ -380,8 +396,10 @@ const ProjectActivity = ({ jobId, onOpenTab }: Props) => {
           <button
             key={c}
             onClick={() => setFilter(c)}
-            className={`font-mono text-[10px] px-2.5 py-1 rounded-full border ${
-              filter === c ? "border-secondary text-secondary" : "border-border text-muted-foreground"
+            className={`font-mono text-[10px] uppercase tracking-wide px-2.5 py-1 rounded-full border ${
+              filter === c
+                ? "bg-secondary/15 text-secondary border-secondary/40"
+                : "bg-card border-border text-muted-foreground"
             }`}
           >
             {CAT_META[c].label}
@@ -389,47 +407,45 @@ const ProjectActivity = ({ jobId, onOpenTab }: Props) => {
         ))}
       </div>
 
-      <div className="bg-card border border-border rounded-2xl p-5">
-        <ol className="relative">
-          {shown.map((item, i) => {
-            const meta = CAT_META[item.category];
-            const Icon = meta.icon;
-            return (
-              <li key={item.id} className="flex gap-3 pb-4 last:pb-0">
-                <div className="flex flex-col items-center">
-                  <span className="w-7 h-7 rounded-full border border-border flex items-center justify-center bg-background">
-                    <Icon className={`w-3.5 h-3.5 ${meta.tone}`} />
+      <ol className="space-y-2">
+        {shown.map((item) => {
+          const meta = CAT_META[item.category];
+          const Icon = meta.icon;
+          return (
+            <li key={item.id}>
+              <AccentCard tone={meta.tone}>
+                <div className="flex gap-3">
+                  <span className="w-8 h-8 rounded-lg bg-background border border-border flex items-center justify-center flex-shrink-0">
+                    <Icon className={`w-4 h-4 ${JOB_FILE_ICON_TONE[meta.tone]}`} />
                   </span>
-                  {i < shown.length - 1 && <span className="flex-1 w-px bg-border mt-1" />}
-                </div>
-                <div className="flex-1 min-w-0 pt-0.5">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
-                      {meta.label}
-                    </span>
-                    <span className="font-mono text-[10px] text-muted-foreground">
-                      {fmtWhen(item.at)}
-                    </span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <TonePill tone={meta.tone}>{meta.label}</TonePill>
+                      <span className="font-mono text-[10px] text-muted-foreground">
+                        {fmtWhen(item.at)}
+                      </span>
+                    </div>
+                    <p className="font-mono text-xs text-foreground mt-1.5 break-words">
+                      {item.description}
+                    </p>
+                    {(item.route || item.tab) && (
+                      <button
+                        onClick={() => open(item)}
+                        className="font-mono text-[10px] text-secondary hover:underline mt-1"
+                      >
+                        {item.linkLabel || "Open"} →
+                      </button>
+                    )}
                   </div>
-                  <p className="font-mono text-xs text-foreground mt-0.5 break-words">
-                    {item.description}
-                  </p>
-                  {(item.route || item.tab) && (
-                    <button
-                      onClick={() => open(item)}
-                      className="font-mono text-[10px] text-secondary hover:underline mt-1"
-                    >
-                      {item.linkLabel || "Open"} →
-                    </button>
-                  )}
                 </div>
-              </li>
-            );
-          })}
-        </ol>
-      </div>
-    </div>
+              </AccentCard>
+            </li>
+          );
+        })}
+      </ol>
+    </JobFilePanel>
   );
+
 };
 
 export default ProjectActivity;

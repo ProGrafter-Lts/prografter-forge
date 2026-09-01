@@ -1,9 +1,18 @@
 import { useCallback, useEffect, useState } from "react";
-import { Image as ImageIcon } from "lucide-react";
+import { CalendarDays, Image as ImageIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import JobPhoto from "@/components/JobPhoto";
 import PhotoDiaryUploader from "@/components/project/PhotoDiaryUploader";
 import { groupByDay, type DiaryPhoto } from "@/lib/photoDiary";
+import {
+  AccentCard,
+  JobFileEmpty,
+  JobFilePanel,
+  SectionHeading,
+  TonePill,
+  type JobFileTone,
+} from "@/components/project/jobFileUi";
+
 
 interface Props {
   jobId: string;
@@ -80,27 +89,35 @@ const ProjectPhotos = ({
   const days = groupByDay(dated);
   const total = dated.length + undated.length;
 
+  const sourceTone = (source: string): JobFileTone =>
+    source === "Photo log" ? "teal" : source === "Stage update" ? "sky" : "grey";
+
   const grid = (photos: DiaryPhoto[]) => (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
       {photos.map((photo, i) => (
-        <div key={`${photo.url}-${i}`} className="rounded-xl overflow-hidden border border-border">
+        <div
+          key={`${photo.url}-${i}`}
+          className="rounded-xl overflow-hidden bg-card border border-border"
+        >
           <JobPhoto
             source={photo.url}
             alt={photo.caption}
             className="w-full h-32 object-cover"
             loading="lazy"
           />
-          <div className="p-2">
+          <div className="p-2 space-y-1.5">
             <p className="font-mono text-[10px] text-foreground truncate">{photo.caption}</p>
-            <p className="font-mono text-[10px] text-muted-foreground">
-              {photo.source}
-              {photo.createdAt
-                ? ` · ${new Date(photo.createdAt).toLocaleTimeString("en-GB", {
+            <div className="flex items-center gap-1.5">
+              <TonePill tone={sourceTone(photo.source)}>{photo.source}</TonePill>
+              {photo.createdAt && (
+                <span className="font-mono text-[10px] text-muted-foreground">
+                  {new Date(photo.createdAt).toLocaleTimeString("en-GB", {
                     hour: "2-digit",
                     minute: "2-digit",
-                  })}`
-                : ""}
-            </p>
+                  })}
+                </span>
+              )}
+            </div>
           </div>
         </div>
       ))}
@@ -108,52 +125,49 @@ const ProjectPhotos = ({
   );
 
   return (
-    <div className="space-y-5">
+    <JobFilePanel className="space-y-5">
       {canUpload && (
         <PhotoDiaryUploader jobId={jobId} uploadedBy={uploaderRole} onUploaded={loadJobPhotos} />
       )}
 
       {total === 0 ? (
-        <div className="bg-card border border-border rounded-2xl p-10 text-center">
-          <ImageIcon className="w-6 h-6 text-muted-foreground mx-auto mb-3" />
-          <p className="font-mono text-sm text-muted-foreground">
-            No progress photos yet. Photos uploaded to the site diary or against a stage will
-            appear here, grouped by day.
-          </p>
-        </div>
+        <JobFileEmpty icon={<ImageIcon className="w-6 h-6" />}>
+          No progress photos yet. Photos uploaded to the site diary or against a stage will appear
+          here, grouped by day.
+        </JobFileEmpty>
       ) : (
-        <div className="bg-card border border-border rounded-2xl p-5 space-y-6">
+        <div className="space-y-4">
           <p className="font-mono text-xs text-muted-foreground">
             {total} photo{total === 1 ? "" : "s"} across {days.length} day
             {days.length === 1 ? "" : "s"} of site activity.
           </p>
 
           {days.map((day) => (
-            <section key={day.key}>
-              <div className="flex items-center gap-3 mb-3">
-                <h4 className="font-heading text-primary text-sm">{day.label}</h4>
-                <span className="font-mono text-[10px] text-muted-foreground">
-                  {day.photos.length} photo{day.photos.length === 1 ? "" : "s"}
-                </span>
-                <div className="flex-1 h-px bg-border" />
-              </div>
+            <AccentCard key={day.key} tone="teal">
+              <SectionHeading
+                icon={<CalendarDays className="w-4 h-4 text-teal-600" />}
+                title={day.label}
+                count={day.photos.length}
+              />
               {grid(day.photos)}
-            </section>
+            </AccentCard>
           ))}
 
           {undated.length > 0 && (
-            <section>
-              <div className="flex items-center gap-3 mb-3">
-                <h4 className="font-heading text-primary text-sm">Original job posting</h4>
-                <div className="flex-1 h-px bg-border" />
-              </div>
+            <AccentCard tone="grey">
+              <SectionHeading
+                icon={<ImageIcon className="w-4 h-4 text-muted-foreground" />}
+                title="Original job posting"
+                count={undated.length}
+              />
               {grid(undated)}
-            </section>
+            </AccentCard>
           )}
         </div>
       )}
-    </div>
+    </JobFilePanel>
   );
 };
+
 
 export default ProjectPhotos;

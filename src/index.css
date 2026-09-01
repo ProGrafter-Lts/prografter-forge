@@ -1655,3 +1655,10 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
   letter-spacing: 0.02em;
   line-height: 1.05;
 }
+
+/* Job-file surfaces (Documents / Site Diary / Activity): keep the TradeVault-style
+   status-coloured left border visible inside .dashboard-dark, which otherwise
+   forces border-color on .bg-card with !important. */
+.dashboard-dark .jobfile-accent {
+  border-left-color: var(--jobfile-accent) !important;
+}
