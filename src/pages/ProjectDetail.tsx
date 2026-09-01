@@ -433,6 +433,7 @@ const ProjectDetail = () => {
               { id: "overview", label: "Overview", icon: LayoutDashboard },
               { id: "quotes", label: "Quotes", icon: ClipboardList },
               { id: "timeline", label: "Timeline", icon: CalendarClock },
+              { id: "activity", label: "Activity", icon: Activity },
               { id: "payments", label: "Payments", icon: CreditCard },
               { id: "documents", label: "Documents", icon: FolderArchive },
               { id: "photos", label: "Photos", icon: ImageIcon },
