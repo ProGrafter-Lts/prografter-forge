@@ -94,8 +94,10 @@ export const AccentCard = ({
   className?: string;
 }) => (
   <div
-    className={`bg-card border border-border border-l-4 ${JOB_FILE_ACCENT[tone]} rounded-xl p-4 ${className}`}
+    className={`bg-card border border-border border-l-4 rounded-xl p-4 ${className}`}
+    style={{ borderLeftColor: JOB_FILE_ACCENT[tone] }}
   >
+
     {children}
   </div>
 );
