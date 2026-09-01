@@ -64,6 +64,13 @@
       "when": 1788230247997,
       "tag": "0008_admin_stage_visibility_and_clear_block_reason",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1788236457550,
+      "tag": "0009_certs_visible_when_no_escrow_wallet",
+      "breakpoints": true
     }
   ]
 }
