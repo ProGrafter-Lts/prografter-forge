@@ -74,7 +74,7 @@ RAISING A VARIATION:
 6. Optionally add supporting photos
 7. Submit — the homeowner receives a notification
 8. Do NOT start the extra work until the homeowner has digitally approved and signed the variation
-9. ProGrafter charges 3.75% commission on approved variations
+9. Variations use the standard 7.5% commission, capped at £900 total per job — an accepted variation only adds commission up to any remaining headroom under the cap
 
 REQUESTING A STAGE PAYMENT:
 1. Go to the project page

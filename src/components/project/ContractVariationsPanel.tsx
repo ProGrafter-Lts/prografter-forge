@@ -29,7 +29,13 @@ interface Props {
   userRole: "trade" | "homeowner" | null;
 }
 
-const COMMISSION_RATE = 0.0375;
+interface CommissionPreview {
+  commission_before_pence: number;
+  commission_after_pence: number;
+  variation_commission_pence: number;
+  headroom_before_pence: number;
+  capped: boolean;
+}
 
 const REASON_OPTIONS = [
   "Client request",
@@ -61,6 +67,24 @@ const ContractVariationsPanel = ({ contractId, contractStatus, userRole }: Props
   }, [contractId]);
 
   useEffect(() => { void load(); }, [load]);
+
+  const [preview, setPreview] = useState<CommissionPreview | null>(null);
+  const previewCostPence = Math.round(
+    ((Number(varForm.materials_cost) || 0) + (Number(varForm.labour_cost) || 0)) * 100,
+  );
+
+  useEffect(() => {
+    if (!showModal || !contractId) { setPreview(null); return; }
+    let cancelled = false;
+    const t = setTimeout(async () => {
+      const { data } = await supabase.rpc("variation_commission_delta", {
+        _contract_id: contractId,
+        _cost_change_pence: previewCostPence,
+      });
+      if (!cancelled) setPreview((data ?? null) as unknown as CommissionPreview | null);
+    }, 250);
+    return () => { cancelled = true; clearTimeout(t); };
+  }, [showModal, contractId, previewCostPence]);
 
   if (!contractId) return null;
 
@@ -116,7 +140,7 @@ const ContractVariationsPanel = ({ contractId, contractStatus, userRole }: Props
       {awaitingHomeowner.length > 0 && userRole === "homeowner" && (
         <div className="space-y-3">
           {awaitingHomeowner.map((v) => {
-            const commission = v.commission_pence ?? Math.round(Math.max(v.cost_change_pence, 0) * COMMISSION_RATE);
+            const commission = v.commission_pence ?? 0;
             return (
               <div key={v.id} className="bg-amber-50 border border-amber-300 rounded-2xl p-5 flex flex-col md:flex-row items-start gap-4">
                 <AlertTriangle className="w-6 h-6 text-amber-500 flex-shrink-0 mt-0.5" />
@@ -127,7 +151,10 @@ const ContractVariationsPanel = ({ contractId, contractStatus, userRole }: Props
                   <div className="flex flex-wrap gap-4 mt-2 font-mono text-xs text-secondary-text">
                     <span>Cost change: {gbp(v.cost_change_pence)}</span>
                     <span>Impact: {v.programme_impact_days} days</span>
-                    <span className="text-teal">Commission (3.75%): {gbp(commission)}</span>
+                    <span className="text-teal">
+                      Added platform commission: {gbp(commission)}
+                      {commission === 0 && " — job already at the £900 cap"}
+                    </span>
                   </div>
                   <p className="font-mono text-[10px] text-secondary-text mt-2">
                     Signing adds this variation to your contract terms.
@@ -169,7 +196,7 @@ const ContractVariationsPanel = ({ contractId, contractStatus, userRole }: Props
         ) : (
           <div className="space-y-3">
             {variations.map((v) => {
-              const commission = v.commission_pence ?? Math.round(Math.max(v.cost_change_pence, 0) * COMMISSION_RATE);
+              const commission = v.commission_pence ?? 0;
               return (
                 <div key={v.id} className="bg-card rounded-2xl p-4 border border-navy/10 shadow-sm">
                   <div className="flex items-center justify-between">
@@ -186,7 +213,7 @@ const ContractVariationsPanel = ({ contractId, contractStatus, userRole }: Props
                   {v.reason && <p className="font-mono text-[10px] text-secondary-text mt-1 italic">Reason: {v.reason}</p>}
                   <div className="flex flex-wrap gap-3 mt-2 font-mono text-[10px] text-secondary-text">
                     <span>{gbp(v.cost_change_pence)}</span>
-                    <span>Commission {gbp(commission)}</span>
+                    <span>Commission impact {gbp(commission)}</span>
                     <span>{v.programme_impact_days}d impact</span>
                     <span>Proposed by {v.proposed_by}</span>
                     {v.activated_at && <span className="text-green-600">Signed into contract {new Date(v.activated_at).toLocaleDateString("en-GB")}</span>}
@@ -235,14 +262,22 @@ const ContractVariationsPanel = ({ contractId, contractStatus, userRole }: Props
                 </div>
               </div>
 
-              {(varForm.materials_cost || varForm.labour_cost) && (() => {
-                const total = (Number(varForm.materials_cost) || 0) + (Number(varForm.labour_cost) || 0);
-                return (
-                  <div className="bg-cream/60 rounded-xl px-4 py-2 font-mono text-xs text-navy">
-                    Total: £{total.toLocaleString()} · Commission (3.75%): £{(total * COMMISSION_RATE).toFixed(2)}
-                  </div>
-                );
-              })()}
+              {(varForm.materials_cost || varForm.labour_cost) && (
+                <div className="bg-cream/60 rounded-xl px-4 py-2 font-mono text-xs text-navy space-y-1">
+                  <div>Total: {gbp(previewCostPence)}</div>
+                  {preview && (
+                    <>
+                      <div>
+                        Added platform commission: {gbp(preview.variation_commission_pence)}
+                        {preview.variation_commission_pence === 0 && " — £900 cap already reached"}
+                      </div>
+                      <div className="text-secondary-text">
+                        Job commission {gbp(preview.commission_before_pence)} → {gbp(preview.commission_after_pence)} (7.5%, capped at £900)
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
 
               <div>
                 <label className="font-mono text-[10px] text-secondary-text uppercase">Programme Impact (days)</label>

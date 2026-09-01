@@ -6753,6 +6753,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      platform_commission_pence: {
+        Args: { _value_pence: number }
+        Returns: number
+      }
       propose_variation: {
         Args: {
           _contract_id: string
@@ -6827,6 +6831,14 @@ export type Database = {
       user_owns_homeowner: {
         Args: { _homeowner_id: string; _user_id: string }
         Returns: boolean
+      }
+      variation_commission_delta: {
+        Args: {
+          _contract_id: string
+          _cost_change_pence: number
+          _exclude_variation_id?: string
+        }
+        Returns: Json
       }
       verify_contract_integrity: {
         Args: { _contract_id: string }

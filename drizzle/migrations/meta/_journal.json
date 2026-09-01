@@ -78,6 +78,13 @@
       "when": 1788253153081,
       "tag": "0010_consolidate_variations_into_contract_variations",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1788253934321,
+      "tag": "0011_variation_commission_cap_aware",
+      "breakpoints": true
     }
   ]
 }

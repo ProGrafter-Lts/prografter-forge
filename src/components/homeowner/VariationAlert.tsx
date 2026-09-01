@@ -42,10 +42,9 @@ const VariationAlert = ({ variations }: { variations: PendingContractVariation[]
                 Cost change: <span className="text-primary font-medium">{gbp(v.cost_change_pence)}</span>
               </span>
               <span>
-                Commission (3.75%):{" "}
-                <span className="text-primary font-medium">
-                  {gbp(v.commission_pence ?? Math.round(Math.max(v.cost_change_pence, 0) * 0.0375))}
-                </span>
+                Added platform commission:{" "}
+                <span className="text-primary font-medium">{gbp(v.commission_pence ?? 0)}</span>
+                {(v.commission_pence ?? 0) === 0 && " (job already at the £900 cap)"}
               </span>
               {v.programme_impact_days > 0 && (
                 <span>
