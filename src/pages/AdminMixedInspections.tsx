@@ -60,9 +60,16 @@ export default function AdminMixedInspections() {
     if (stageIds.length) {
       const { data: stages } = await supabase
         .from("project_wallet_stages")
-        .select("id, stage_name")
+        .select("id, stage_name, stage_order")
         .in("id", stageIds);
-      setStageNames(Object.fromEntries((stages ?? []).map((s: any) => [s.id, s.stage_name])));
+      setStageNames(
+        Object.fromEntries(
+          (stages ?? []).map((s: any) => [
+            s.id,
+            s.stage_order != null ? `Stage ${s.stage_order} — ${s.stage_name}` : s.stage_name,
+          ]),
+        ),
+      );
     }
     setLoading(false);
   }, [tab]);
