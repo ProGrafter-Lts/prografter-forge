@@ -16,7 +16,7 @@ import GreenCertificatePack from "@/components/GreenCertificatePack";
 import GreenSchemesBreakdown from "@/components/GreenSchemesBreakdown";
 import { isGreenTrade } from "@/lib/greenTrades";
 import { isActiveJob } from "@/lib/activeProjects";
-import { BookOpen, Leaf, FolderKanban, SearchCheck, ArrowRight, MessageSquare } from "lucide-react";
+import { BookOpen, Leaf, FolderKanban, SearchCheck, ArrowRight, MessageSquare, Camera } from "lucide-react";
 import SiteDiaryInbox from "@/components/homeowner/SiteDiaryInbox";
 import ProjectConversations from "@/components/messages/ProjectConversations";
 import HomeownerProfileSection from "@/components/homeowner/HomeownerProfileSection";
