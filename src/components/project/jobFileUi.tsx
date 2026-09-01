@@ -26,16 +26,21 @@ export type JobFileTone =
   | "purple"
   | "orange";
 
-/** Badge classes — TradeVault tones, extended with the extra hues the
- *  activity feed needs, following exactly the same bg/text/border recipe. */
+/** Badge classes — the TradeVault `TONE_CLASSES` recipe (bg/15, text, border/30),
+ *  extended with the extra hues the activity feed needs and stepped one shade
+ *  lighter so the pills read on the navy dashboard surface. */
 export const JOB_FILE_TONE_CLASSES: Record<JobFileTone, string> = {
-  ...(TONE_CLASSES as Record<string, string>),
-  teal: "bg-teal-500/15 text-teal-600 border-teal-500/30",
-  sky: "bg-sky-500/15 text-sky-600 border-sky-500/30",
-  indigo: "bg-indigo-500/15 text-indigo-600 border-indigo-500/30",
-  purple: "bg-purple-500/15 text-purple-600 border-purple-500/30",
-  orange: "bg-orange-500/15 text-orange-600 border-orange-500/30",
-} as Record<JobFileTone, string>;
+  green: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
+  amber: "bg-amber-500/15 text-amber-300 border-amber-500/30",
+  red: "bg-red-500/15 text-red-300 border-red-500/30",
+  grey: TONE_CLASSES.grey,
+  teal: "bg-teal-500/15 text-teal-300 border-teal-500/30",
+  sky: "bg-sky-500/15 text-sky-300 border-sky-500/30",
+  indigo: "bg-indigo-500/15 text-indigo-300 border-indigo-500/30",
+  purple: "bg-purple-500/15 text-purple-300 border-purple-500/30",
+  orange: "bg-orange-500/15 text-orange-300 border-orange-500/30",
+};
+
 
 /** Left-border accent colour per tone (TradeVault-style status colouring).
  *  Applied inline because `.dashboard-dark .bg-card` forces `border-color`
