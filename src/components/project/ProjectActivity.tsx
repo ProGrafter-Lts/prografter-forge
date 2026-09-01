@@ -349,20 +349,24 @@ const ProjectActivity = ({ jobId, onOpenTab }: Props) => {
   }, [jobId]);
 
   if (loading) {
-    return <p className="font-mono text-sm text-muted-foreground">Loading project activity…</p>;
+    return (
+      <JobFilePanel>
+        <p className="font-mono text-sm text-muted-foreground">Loading project activity…</p>
+      </JobFilePanel>
+    );
   }
 
   if (items.length === 0) {
     return (
-      <div className="bg-card border border-border rounded-2xl p-10 text-center">
-        <Activity className="w-6 h-6 text-muted-foreground mx-auto mb-3" />
-        <p className="font-mono text-sm text-muted-foreground">
+      <JobFilePanel>
+        <JobFileEmpty icon={<Activity className="w-6 h-6" />}>
           No activity recorded yet. Funding, contract, inspection, message and photo events appear
           here in the order they happened.
-        </p>
-      </div>
+        </JobFileEmpty>
+      </JobFilePanel>
     );
   }
+
 
   const present = Array.from(new Set(items.map((i) => i.category))) as Category[];
   const shown = filter === "all" ? items : items.filter((i) => i.category === filter);
