@@ -147,8 +147,9 @@ export default function AdminMixedInspections() {
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="font-mono text-sm text-navy font-semibold">
-                      {r.wallet_stage_id ? stageNames[r.wallet_stage_id] ?? "Stage" : "Stage"} ·{" "}
-                      {r.file_name ?? "Inspection report"}
+                      {(r.wallet_stage_id && stageNames[r.wallet_stage_id]) ||
+                        (r.wallet_stage_id ? "Stage (name unavailable)" : "Whole-project report")}{" "}
+                      · {r.file_name ?? "Inspection report"}
                     </p>
                     <p className="font-mono text-xs text-secondary-text">
                       {r.inspector_name ? `${r.inspector_name} · ` : ""}
