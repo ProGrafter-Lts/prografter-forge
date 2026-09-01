@@ -217,78 +217,91 @@ const ProjectDocuments = ({ jobId }: Props) => {
   };
 
   if (loading) {
-    return <p className="font-mono text-sm text-muted-foreground">Loading project documents…</p>;
+    return (
+      <JobFilePanel>
+        <p className="font-mono text-sm text-muted-foreground">Loading project documents…</p>
+      </JobFilePanel>
+    );
   }
 
   const total = groups.reduce((n, g) => n + g.items.length, 0);
 
   if (total === 0) {
     return (
-      <div className="bg-card border border-border rounded-2xl p-10 text-center">
-        <FolderArchive className="w-6 h-6 text-muted-foreground mx-auto mb-3" />
-        <p className="font-mono text-sm text-muted-foreground">
+      <JobFilePanel>
+        <JobFileEmpty icon={<FolderArchive className="w-6 h-6" />}>
           No documents yet. Quotes, contracts, certificates, warranties, materials and inspection reports
           appear here automatically as they're added to the project.
-        </p>
-      </div>
+        </JobFileEmpty>
+      </JobFilePanel>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <JobFilePanel className="space-y-6">
       <p className="font-mono text-xs text-muted-foreground">
         {total} item{total === 1 ? "" : "s"} · read-only record of everything filed against this project.
       </p>
       {groups
         .filter((g) => g.items.length > 0)
         .map((group) => (
-          <section key={group.key} className="bg-card border border-border rounded-2xl p-5">
-            <h3 className="font-heading text-primary text-lg mb-3 flex items-center gap-2">
-              <group.icon className="w-4 h-4 text-secondary" />
-              {group.label}
-              <span className="font-mono text-[10px] text-muted-foreground">({group.items.length})</span>
-            </h3>
-            <div className="divide-y divide-border">
+          <section key={group.key}>
+            <SectionHeading
+              icon={<group.icon className={`w-4 h-4 ${JOB_FILE_ICON_TONE[group.tone]}`} />}
+              title={group.label}
+              count={group.items.length}
+            />
+            <div className="space-y-2">
               {group.items.map((item) => (
-                <div key={item.id} className="py-2.5 flex items-start gap-3">
-                  <div className="flex-1 min-w-0">
-                    <p className="font-mono text-xs text-foreground truncate">{item.name}</p>
-                    {item.meta && (
-                      <p className="font-mono text-[10px] text-muted-foreground mt-0.5 truncate">{item.meta}</p>
-                    )}
+                <AccentCard key={item.id} tone={item.statusTone || group.tone}>
+                  <div className="flex items-start gap-3">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-mono text-xs text-foreground truncate">{item.name}</p>
+                      {item.meta && (
+                        <p className="font-mono text-[10px] text-muted-foreground mt-0.5 truncate">{item.meta}</p>
+                      )}
+                      {item.status && (
+                        <TonePill tone={item.statusTone || group.tone} className="mt-2">
+                          {item.status}
+                        </TonePill>
+                      )}
+                    </div>
+                    <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                      <span className="font-mono text-[10px] text-muted-foreground">{fmt(item.date)}</span>
+                      {item.href ? (
+                        <a
+                          href={item.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-mono text-[10px] text-secondary hover:underline"
+                        >
+                          View →
+                        </a>
+                      ) : item.bucket && item.path ? (
+                        <button
+                          onClick={() => openStored(item.bucket!, item.path!)}
+                          className="font-mono text-[10px] text-secondary hover:underline"
+                        >
+                          View →
+                        </button>
+                      ) : item.route ? (
+                        <button
+                          onClick={() => navigate(item.route!)}
+                          className="font-mono text-[10px] text-secondary hover:underline"
+                        >
+                          Open →
+                        </button>
+                      ) : (
+                        <span className="font-mono text-[10px] text-muted-foreground/50">Record</span>
+                      )}
+                    </div>
                   </div>
-                  <span className="font-mono text-[10px] text-muted-foreground flex-shrink-0">{fmt(item.date)}</span>
-                  {item.href ? (
-                    <a
-                      href={item.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-mono text-[10px] text-secondary hover:underline flex-shrink-0"
-                    >
-                      View →
-                    </a>
-                  ) : item.bucket && item.path ? (
-                    <button
-                      onClick={() => openStored(item.bucket!, item.path!)}
-                      className="font-mono text-[10px] text-secondary hover:underline flex-shrink-0"
-                    >
-                      View →
-                    </button>
-                  ) : item.route ? (
-                    <button
-                      onClick={() => navigate(item.route!)}
-                      className="font-mono text-[10px] text-secondary hover:underline flex-shrink-0"
-                    >
-                      Open →
-                    </button>
-                  ) : (
-                    <span className="font-mono text-[10px] text-muted-foreground/50 flex-shrink-0">Record</span>
-                  )}
-                </div>
+                </AccentCard>
               ))}
             </div>
           </section>
         ))}
+
     </div>
   );
 };
