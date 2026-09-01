@@ -12,7 +12,7 @@ import ProjectHeader from "@/components/project/ProjectHeader";
 import StageTimeline from "@/components/project/StageTimeline";
 import MessagingPanel from "@/components/project/MessagingPanel";
 import PaymentSchedule from "@/components/project/PaymentSchedule";
-import VariationsPanel from "@/components/project/VariationsPanel";
+import ContractVariationsPanel from "@/components/project/ContractVariationsPanel";
 import ContractPanel from "@/components/project/ContractPanel";
 import SubTradeModal from "@/components/project/SubTradeModal";
 import GenerateQuotePdfButton from "@/components/trade/GenerateQuotePdfButton";
@@ -38,11 +38,6 @@ interface StageUpdate {
 interface ProjectMessage {
   id: string; job_id: string; sender_id: string; sender_type: string;
   message_text: string; created_at: string;
-}
-interface Variation {
-  id: string; job_id: string; trade_id: string; title: string; description: string;
-  materials_cost: number; labour_cost: number; programme_impact_days: number;
-  status: string; reason?: string; signed_at?: string; signed_by?: string; created_at: string;
 }
 interface Quote {
   id: string; amount: number; message: string | null; status: string; trade_id: string;
@@ -77,7 +72,6 @@ const ProjectDetail = () => {
   const [stages, setStages] = useState<Stage[]>([]);
   const [updates, setUpdates] = useState<StageUpdate[]>([]);
   const [messages, setMessages] = useState<ProjectMessage[]>([]);
-  const [variations, setVariations] = useState<Variation[]>([]);
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [contract, setContract] = useState<Contract | null>(null);
   const [subAssignments, setSubAssignments] = useState<SubAssignment[]>([]);
@@ -107,7 +101,6 @@ const ProjectDetail = () => {
     setStages([]);
     setUpdates([]);
     setMessages([]);
-    setVariations([]);
     setQuotes([]);
     setContract(null);
     setSubAssignments([]);
@@ -188,10 +181,9 @@ const ProjectDetail = () => {
       setTradeVerified(!!t2.verified);
     }
 
-    const [stageRes, msgRes, varRes, quoteRes, contractRes] = await Promise.allSettled([
+    const [stageRes, msgRes, quoteRes, contractRes] = await Promise.allSettled([
       supabase.from("project_stages").select("*").eq("job_id", id!).order("stage_order"),
       supabase.from("project_messages").select("*").eq("job_id", id!).order("created_at"),
-      supabase.from("variations").select("*").eq("job_id", id!).order("created_at", { ascending: false }),
       supabase.from("quotes").select("*").eq("job_id", id!),
       supabase.from("contracts_compat").select("*").eq("job_id", id!).maybeSingle(),
     ]);
@@ -212,8 +204,6 @@ const ProjectDetail = () => {
     const msgData = msgRes.status === "fulfilled" ? msgRes.value.data : null;
     if (msgData) setMessages(msgData as ProjectMessage[]);
 
-    const varData = varRes.status === "fulfilled" ? varRes.value.data : null;
-    if (varData) setVariations(varData as Variation[]);
 
     const quoteData = quoteRes.status === "fulfilled" ? quoteRes.value.data : null;
     if (quoteData) setQuotes(quoteData as Quote[]);
@@ -430,12 +420,10 @@ const ProjectDetail = () => {
         )}
 
         {/* Variation alerts */}
-        <VariationsPanel
-          variations={variations}
+        <ContractVariationsPanel
+          contractId={contract?.id ?? null}
+          contractStatus={contract?.status ?? null}
           userRole={userRole}
-          userId={userId}
-          jobId={id!}
-          onRefresh={refreshProject}
         />
 
         {userRole === "homeowner" ? (
