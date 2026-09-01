@@ -377,15 +377,17 @@ const ProjectActivity = ({ jobId, onOpenTab }: Props) => {
   };
 
   return (
-    <div className="space-y-4">
+    <JobFilePanel className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
         <p className="font-mono text-xs text-muted-foreground mr-1">
           {items.length} event{items.length === 1 ? "" : "s"} · shared factual record
         </p>
         <button
           onClick={() => setFilter("all")}
-          className={`font-mono text-[10px] px-2.5 py-1 rounded-full border ${
-            filter === "all" ? "border-secondary text-secondary" : "border-border text-muted-foreground"
+          className={`font-mono text-[10px] uppercase tracking-wide px-2.5 py-1 rounded-full border ${
+            filter === "all"
+              ? "bg-secondary/15 text-secondary border-secondary/40"
+              : "bg-card border-border text-muted-foreground"
           }`}
         >
           All
@@ -394,8 +396,10 @@ const ProjectActivity = ({ jobId, onOpenTab }: Props) => {
           <button
             key={c}
             onClick={() => setFilter(c)}
-            className={`font-mono text-[10px] px-2.5 py-1 rounded-full border ${
-              filter === c ? "border-secondary text-secondary" : "border-border text-muted-foreground"
+            className={`font-mono text-[10px] uppercase tracking-wide px-2.5 py-1 rounded-full border ${
+              filter === c
+                ? "bg-secondary/15 text-secondary border-secondary/40"
+                : "bg-card border-border text-muted-foreground"
             }`}
           >
             {CAT_META[c].label}
@@ -403,47 +407,45 @@ const ProjectActivity = ({ jobId, onOpenTab }: Props) => {
         ))}
       </div>
 
-      <div className="bg-card border border-border rounded-2xl p-5">
-        <ol className="relative">
-          {shown.map((item, i) => {
-            const meta = CAT_META[item.category];
-            const Icon = meta.icon;
-            return (
-              <li key={item.id} className="flex gap-3 pb-4 last:pb-0">
-                <div className="flex flex-col items-center">
-                  <span className="w-7 h-7 rounded-full border border-border flex items-center justify-center bg-background">
-                    <Icon className={`w-3.5 h-3.5 ${meta.tone}`} />
+      <ol className="space-y-2">
+        {shown.map((item) => {
+          const meta = CAT_META[item.category];
+          const Icon = meta.icon;
+          return (
+            <li key={item.id}>
+              <AccentCard tone={meta.tone}>
+                <div className="flex gap-3">
+                  <span className="w-8 h-8 rounded-lg bg-background border border-border flex items-center justify-center flex-shrink-0">
+                    <Icon className={`w-4 h-4 ${JOB_FILE_ICON_TONE[meta.tone]}`} />
                   </span>
-                  {i < shown.length - 1 && <span className="flex-1 w-px bg-border mt-1" />}
-                </div>
-                <div className="flex-1 min-w-0 pt-0.5">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
-                      {meta.label}
-                    </span>
-                    <span className="font-mono text-[10px] text-muted-foreground">
-                      {fmtWhen(item.at)}
-                    </span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <TonePill tone={meta.tone}>{meta.label}</TonePill>
+                      <span className="font-mono text-[10px] text-muted-foreground">
+                        {fmtWhen(item.at)}
+                      </span>
+                    </div>
+                    <p className="font-mono text-xs text-foreground mt-1.5 break-words">
+                      {item.description}
+                    </p>
+                    {(item.route || item.tab) && (
+                      <button
+                        onClick={() => open(item)}
+                        className="font-mono text-[10px] text-secondary hover:underline mt-1"
+                      >
+                        {item.linkLabel || "Open"} →
+                      </button>
+                    )}
                   </div>
-                  <p className="font-mono text-xs text-foreground mt-0.5 break-words">
-                    {item.description}
-                  </p>
-                  {(item.route || item.tab) && (
-                    <button
-                      onClick={() => open(item)}
-                      className="font-mono text-[10px] text-secondary hover:underline mt-1"
-                    >
-                      {item.linkLabel || "Open"} →
-                    </button>
-                  )}
                 </div>
-              </li>
-            );
-          })}
-        </ol>
-      </div>
-    </div>
+              </AccentCard>
+            </li>
+          );
+        })}
+      </ol>
+    </JobFilePanel>
   );
+
 };
 
 export default ProjectActivity;
