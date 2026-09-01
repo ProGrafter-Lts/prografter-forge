@@ -1204,10 +1204,10 @@ export default function PlanningPipeline() {
   };
 
   const kpi = (label: string, value: string, delta: string | null, color = C.cream) => (
-    <div>
-      <p style={{ fontSize: 12.5, color: C.faint, margin: 0, letterSpacing: "0.06em", fontWeight: 600 }}>{label}</p>
-      <p style={{ fontSize: 28, fontWeight: 800, color, margin: "3px 0 0", lineHeight: 1.1 }}>{value}</p>
-      {delta && <p style={{ fontSize: 13, color: C.tealBright, margin: "3px 0 0" }}>{delta}</p>}
+    <div style={{ display: "flex", alignItems: "baseline", gap: 7 }}>
+      <span style={{ fontSize: 19, fontWeight: 800, color, lineHeight: 1 }}>{value}</span>
+      <span style={{ fontSize: 11, color: C.faint, letterSpacing: "0.06em", fontWeight: 600 }}>{label}</span>
+      {delta && <span style={{ fontSize: 11.5, color: C.tealBright }}>{delta}</span>}
     </div>
   );
 
@@ -1216,15 +1216,16 @@ export default function PlanningPipeline() {
       key={id}
       onClick={() => setTab(id)}
       style={{
-        padding: "14px 18px",
+        padding: "9px 14px",
         border: "none",
         background: "transparent",
         borderBottom: `2px solid ${tab === id ? C.teal : "transparent"}`,
         color: tab === id ? C.cream : C.dim,
-        fontSize: 15,
+        fontSize: 13.5,
         fontWeight: 700,
         cursor: "pointer",
         fontFamily: "inherit",
+        whiteSpace: "nowrap",
       }}
     >
       {label}
@@ -1238,9 +1239,9 @@ export default function PlanningPipeline() {
         background: `${color}18`,
         border: `1px solid ${color}55`,
         color,
-        borderRadius: 10,
-        padding: "10px 16px",
-        fontSize: 14,
+        borderRadius: 8,
+        padding: "5px 11px",
+        fontSize: 12.5,
         fontWeight: 700,
         cursor: "pointer",
         fontFamily: "inherit",
@@ -1249,6 +1250,7 @@ export default function PlanningPipeline() {
       {label}
     </button>
   );
+
 
   return (
     <div
