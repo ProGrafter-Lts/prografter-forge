@@ -1,9 +1,18 @@
 import { useCallback, useEffect, useState } from "react";
-import { Image as ImageIcon } from "lucide-react";
+import { CalendarDays, Image as ImageIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import JobPhoto from "@/components/JobPhoto";
 import PhotoDiaryUploader from "@/components/project/PhotoDiaryUploader";
 import { groupByDay, type DiaryPhoto } from "@/lib/photoDiary";
+import {
+  AccentCard,
+  JobFileEmpty,
+  JobFilePanel,
+  SectionHeading,
+  TonePill,
+  type JobFileTone,
+} from "@/components/project/jobFileUi";
+
 
 interface Props {
   jobId: string;
