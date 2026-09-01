@@ -44,7 +44,7 @@ const HomeownerDashboard = () => {
   const [searchParams] = useSearchParams();
   const [activeNav, setActiveNav] = useState(() => {
     const tab = searchParams.get("tab");
-    const valid = ["overview", "projects", "quotes", "grants", "manual", "profile"];
+    const valid = ["overview", "projects", "messages", "quotes", "grants", "manual", "profile"];
     return tab && valid.includes(tab) ? tab : "overview";
   });
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -53,7 +53,7 @@ const HomeownerDashboard = () => {
   // "Back to dashboard" on the Quote Checks page).
   useEffect(() => {
     const tab = searchParams.get("tab");
-    const valid = ["overview", "projects", "quotes", "grants", "manual", "profile"];
+    const valid = ["overview", "projects", "messages", "quotes", "grants", "manual", "profile"];
     if (tab && valid.includes(tab)) setActiveNav(tab);
   }, [searchParams]);
 
