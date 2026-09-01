@@ -30,6 +30,7 @@ interface Stage {
   planned_start: string | null; planned_end: string | null;
   actual_start: string | null; actual_end: string | null;
   status: string; payment_amount: number; payment_status: string;
+  scope_detail?: string | null;
   homeowner_confirmed?: boolean; homeowner_confirmed_at?: string | null;
 }
 interface StageUpdate {
@@ -38,8 +39,9 @@ interface StageUpdate {
 }
 interface ProjectMessage {
   id: string; job_id: string; sender_id: string; sender_type: string;
-  message_text: string; created_at: string;
+  message_text: string; created_at: string; stage_id?: string | null;
 }
+
 interface Quote {
   id: string; amount: number; message: string | null; status: string; trade_id: string;
   tier_enabled?: boolean; budget_price?: number | null; budget_description?: string | null;
