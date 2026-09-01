@@ -42,17 +42,18 @@ interface ActivityItem {
   tab?: string;
 }
 
-const CAT_META: Record<Category, { icon: typeof Activity; label: string; tone: string }> = {
-  funding: { icon: Banknote, label: "Funding", tone: "text-emerald-600" },
-  contract: { icon: FileSignature, label: "Contract", tone: "text-sky-600" },
-  variation: { icon: FilePlus2, label: "Variation", tone: "text-amber-600" },
-  dispute: { icon: Gavel, label: "Dispute", tone: "text-red-600" },
-  escalation: { icon: AlertTriangle, label: "Escalation", tone: "text-orange-600" },
-  inspection: { icon: ClipboardCheck, label: "Inspection", tone: "text-indigo-600" },
-  message: { icon: MessageSquare, label: "Message", tone: "text-teal-600" },
-  photos: { icon: ImageIcon, label: "Site diary", tone: "text-purple-600" },
-  survey: { icon: Compass, label: "Survey", tone: "text-slate-600" },
+const CAT_META: Record<Category, { icon: typeof Activity; label: string; tone: JobFileTone }> = {
+  funding: { icon: Banknote, label: "Funding", tone: "green" },
+  contract: { icon: FileSignature, label: "Contract", tone: "sky" },
+  variation: { icon: FilePlus2, label: "Variation", tone: "amber" },
+  dispute: { icon: Gavel, label: "Dispute", tone: "red" },
+  escalation: { icon: AlertTriangle, label: "Escalation", tone: "orange" },
+  inspection: { icon: ClipboardCheck, label: "Inspection", tone: "indigo" },
+  message: { icon: MessageSquare, label: "Message", tone: "teal" },
+  photos: { icon: ImageIcon, label: "Site diary", tone: "purple" },
+  survey: { icon: Compass, label: "Survey", tone: "grey" },
 };
+
 
 const humanise = (s: string) =>
   s.replace(/[_.]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
