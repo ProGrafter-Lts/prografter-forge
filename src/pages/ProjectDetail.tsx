@@ -3,14 +3,14 @@ import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, ShieldCheck, LayoutDashboard, ClipboardList, CalendarClock, CreditCard, FolderArchive, Image as ImageIcon, MessageSquare, Activity } from "lucide-react";
 import ControlCentreTabs, { type ControlCentreTab } from "@/components/project/ControlCentreTabs";
-import EmptyModule from "@/components/project/EmptyModule";
+
 import ProjectDocuments from "@/components/project/ProjectDocuments";
 import ProjectPhotos from "@/components/project/ProjectPhotos";
 import ProjectActivity from "@/components/project/ProjectActivity";
 import { toast } from "sonner";
 import GreenCertificatePack from "@/components/GreenCertificatePack";
 import ProjectHeader from "@/components/project/ProjectHeader";
-import StageTimeline from "@/components/project/StageTimeline";
+import StageWorkspace from "@/components/project/StageWorkspace";
 import MessagingPanel from "@/components/project/MessagingPanel";
 import PaymentSchedule from "@/components/project/PaymentSchedule";
 import ContractVariationsPanel from "@/components/project/ContractVariationsPanel";
@@ -30,6 +30,7 @@ interface Stage {
   planned_start: string | null; planned_end: string | null;
   actual_start: string | null; actual_end: string | null;
   status: string; payment_amount: number; payment_status: string;
+  scope_detail?: string | null;
   homeowner_confirmed?: boolean; homeowner_confirmed_at?: string | null;
 }
 interface StageUpdate {
@@ -38,8 +39,9 @@ interface StageUpdate {
 }
 interface ProjectMessage {
   id: string; job_id: string; sender_id: string; sender_type: string;
-  message_text: string; created_at: string;
+  message_text: string; created_at: string; stage_id?: string | null;
 }
+
 interface Quote {
   id: string; amount: number; message: string | null; status: string; trade_id: string;
   tier_enabled?: boolean; budget_price?: number | null; budget_description?: string | null;
@@ -384,10 +386,28 @@ const ProjectDetail = () => {
   }
 
 
+  const agreedSchedule =
+    (contract as any)?.payment_schedule ??
+    (quotes.find((q) => q.status === "accepted") as any)?.payment_schedule ??
+    null;
+
+  const tabs: ControlCentreTab[] = [
+    { id: "overview", label: "Overview", icon: LayoutDashboard },
+    { id: "quotes", label: "Quote & contract", icon: ClipboardList },
+    { id: "timeline", label: "Stages", icon: CalendarClock },
+    { id: "payments", label: "Payments", icon: CreditCard },
+    { id: "activity", label: "Activity", icon: Activity },
+    { id: "documents", label: "Documents", icon: FolderArchive },
+    { id: "photos", label: "Photos", icon: ImageIcon },
+    { id: "messages", label: "Messages", icon: MessageSquare },
+  ];
+
+  const isTrade = userRole === "trade";
+
   return (
-    <div className="min-h-screen bg-cream">
-      <div className="max-w-6xl mx-auto p-4 md:p-8 space-y-8">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-2 font-mono text-sm text-secondary-text hover:text-navy transition-colors">
+    <div className="dashboard-dark min-h-screen bg-background">
+      <div className="max-w-6xl mx-auto p-4 md:p-8 space-y-6">
+        <button onClick={() => navigate(-1)} className="flex items-center gap-2 font-mono text-sm text-muted-foreground hover:text-foreground transition-colors">
           <ArrowLeft className="w-4 h-4" /> Back to Dashboard
         </button>
 
@@ -405,14 +425,12 @@ const ProjectDetail = () => {
         />
 
         {/* Funds Verified panel — only shown to trades when verified */}
-        {userRole === "trade" && job.funds_verified && (
+        {isTrade && job.funds_verified && (
           <div className="bg-secondary/10 border border-secondary/30 rounded-2xl p-4 flex items-start gap-3">
             <ShieldCheck className="w-5 h-5 text-secondary flex-shrink-0 mt-0.5" />
             <div>
-              <p className="font-mono text-xs text-secondary uppercase tracking-wide mb-1">
-                ✓ Funds Verified
-              </p>
-              <p className="font-body text-sm text-primary">
+              <p className="font-mono text-xs text-secondary uppercase tracking-wide mb-1">✓ Funds Verified</p>
+              <p className="font-body text-sm text-foreground">
                 This homeowner has verified their funds are in place for this project.
                 Documentation held securely by ProGrafter.
               </p>
@@ -427,175 +445,27 @@ const ProjectDetail = () => {
           userRole={userRole}
         />
 
-        {userRole === "homeowner" ? (
-          (() => {
-            const tabs: ControlCentreTab[] = [
-              { id: "overview", label: "Overview", icon: LayoutDashboard },
-              { id: "quotes", label: "Quotes", icon: ClipboardList },
-              { id: "timeline", label: "Timeline", icon: CalendarClock },
-              { id: "activity", label: "Activity", icon: Activity },
-              { id: "payments", label: "Payments", icon: CreditCard },
-              { id: "documents", label: "Documents", icon: FolderArchive },
-              { id: "photos", label: "Photos", icon: ImageIcon },
-              { id: "messages", label: "Messages", icon: MessageSquare },
-            ];
-            return (
-              <div className="space-y-6">
-                <ControlCentreTabs tabs={tabs} active={hoTab} onChange={setHoTab} />
+        <ControlCentreTabs tabs={tabs} active={hoTab} onChange={setHoTab} />
 
-                {hoTab === "overview" && (
-                  <div className="space-y-6">
-                    <div className="bg-card rounded-2xl p-6 border border-border shadow-sm">
-                      <h3 className="font-heading text-primary text-lg mb-2">Project summary</h3>
-                      <p className="font-mono text-sm text-muted-foreground whitespace-pre-line leading-relaxed">
-                        {job.description || "No description provided."}
-                      </p>
-                    </div>
-                    {job.is_green_job && (
-                      <GreenCertificatePack jobType={job.job_type} isComplete={job.status === "complete" || job.stage === "completed"} />
-                    )}
-                  </div>
-                )}
-
-                {hoTab === "quotes" && (
-                  <ContractPanel
-                    jobId={id!}
-                    jobType={job.job_type}
-                    quotes={quotes}
-                    contract={contract}
-                    userRole={userRole}
-                    userId={userId}
-                    tradeName={tradeName}
-                    homeownerName={homeownerName}
-                    onRefresh={refreshProject}
-                  />
-                )}
-
-                {hoTab === "timeline" && (
-                  stages.length > 0 ? (
-                    <StageTimeline
-                      stages={stages}
-                      updates={updates}
-                      subAssignments={subAssignments}
-                      userRole={userRole}
-                      userId={userId}
-                      onRefresh={refreshProject}
-                    />
-                  ) : (
-                    <EmptyModule
-                      icon={CalendarClock}
-                      title="Timeline"
-                      message="Major project events, inspections and milestones will appear here."
-                      hint="No project updates have been posted yet."
-                    />
-                  )
-                )}
-
-                {hoTab === "payments" && (
-                  stages.length > 0 ? (
-                    <PaymentSchedule
-                      stages={stages}
-                      contractValue={contractValue}
-                      userRole={userRole}
-                      onReleasePayment={releasePayment}
-                    />
-                  ) : (
-                    <EmptyModule
-                      icon={CreditCard}
-                      title="Payments"
-                      message="Agreed payment stages and completed payments will appear here."
-                      hint="No payment stages have been agreed yet."
-                    />
-                  )
-                )}
-
-                {hoTab === "activity" && <ProjectActivity jobId={id!} onOpenTab={setHoTab} />}
-
-                {hoTab === "documents" && <ProjectDocuments jobId={id!} />}
-
-                {hoTab === "photos" && (
-                  <ProjectPhotos
-                    jobId={id!}
-                    stages={stages}
-                    updates={updates}
-                    jobPhotoUrls={(job as any).photo_urls || []}
-                    canUpload={userRole === "homeowner"}
-                    uploaderRole="homeowner"
-                    viewerRole="homeowner"
-                  />
-                )}
-
-
-                {hoTab === "messages" && (
-                  <MessagingPanel
-                    messages={messages}
-                    userId={userId}
-                    msgText={msgText}
-                    onMsgTextChange={setMsgText}
-                    onSendMessage={sendMessage}
-                  />
-                )}
-              </div>
-            );
-          })()
-        ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Left column */}
-          <div className="md:col-span-2 space-y-8">
-            {/* 2 — Stage Timeline */}
-            <StageTimeline
-              stages={stages}
-              updates={updates}
-              subAssignments={subAssignments}
-              userRole={userRole}
-              userId={userId}
-              onRefresh={refreshProject}
-              onAssignSub={userRole === "trade" ? (stageId) => setSubTradeStageId(stageId) : undefined}
-            />
-
-            {/* Site photos / diary */}
-            <div className="space-y-3">
-              <h3 className="font-heading text-primary text-lg">Site diary</h3>
-              <ProjectPhotos
-                jobId={id!}
-                stages={stages}
-                updates={updates}
-                jobPhotoUrls={(job as any).photo_urls || []}
-                canUpload={userRole === "trade"}
-                uploaderRole="trade"
-                viewerRole={userRole === "trade" ? "trade" : "observer"}
-              />
+        {hoTab === "overview" && (
+          <div className="space-y-6">
+            <div className="bg-card rounded-2xl p-6 border border-border">
+              <h3 className="font-heading text-foreground text-lg mb-2">Project summary</h3>
+              <p className="font-mono text-sm text-muted-foreground whitespace-pre-line leading-relaxed">
+                {job.description || "No description provided."}
+              </p>
             </div>
-
-
-            {/* Unified activity feed — identical content for homeowner and trade */}
-            <div className="space-y-3">
-              <h3 className="font-heading text-primary text-lg">Project activity</h3>
-              <ProjectActivity jobId={id!} />
-            </div>
-
-            {/* Green Certificate Pack */}
             {job.is_green_job && (
               <GreenCertificatePack jobType={job.job_type} isComplete={job.status === "complete" || job.stage === "completed"} />
             )}
-
-
-            {/* 5 — Messages */}
-            <MessagingPanel
-              messages={messages}
-              userId={userId}
-              msgText={msgText}
-              onMsgTextChange={setMsgText}
-              onSendMessage={sendMessage}
-            />
           </div>
+        )}
 
-          {/* Right column */}
-          <div className="space-y-8">
-            {/* Trade quote submission — full-page builder */}
-            {userRole === "trade" && userId && !contract && !quotes.some((q) => q.trade_id === userId) && (
-              <div className="bg-card rounded-2xl p-5 border border-border shadow-sm space-y-3">
-                <h3 className="font-heading text-primary text-lg">Submit your quote</h3>
+        {hoTab === "quotes" && (
+          <div className="space-y-6">
+            {isTrade && userId && !contract && !quotes.some((q) => q.trade_id === userId) && (
+              <div className="bg-card rounded-2xl p-5 border border-border space-y-3">
+                <h3 className="font-heading text-foreground text-lg">Submit your quote</h3>
                 <p className="font-mono text-[11px] text-muted-foreground">
                   A guided 4-stage quote builder with a live homeowner preview.
                 </p>
@@ -614,25 +484,20 @@ const ProjectDetail = () => {
               </div>
             )}
 
-
-            {/* Trade: download branded PDF of their submitted quote */}
-            {isFeatureEnabled("quotePdf") && userRole === "trade" && userId && (() => {
+            {isFeatureEnabled("quotePdf") && isTrade && userId && (() => {
               const myQuote = quotes.find((q) => q.trade_id === userId);
               if (!myQuote) return null;
               return (
-                <div className="bg-card rounded-2xl p-4 border border-primary/10 flex items-center justify-between gap-3">
+                <div className="bg-card rounded-2xl p-4 border border-border flex items-center justify-between gap-3">
                   <div>
-                    <p className="font-heading text-primary text-sm">Your quote PDF</p>
-                    <p className="font-mono text-xs text-muted-foreground">
-                      Branded Schedule of Works
-                    </p>
+                    <p className="font-heading text-foreground text-sm">Your quote PDF</p>
+                    <p className="font-mono text-xs text-muted-foreground">Branded Schedule of Works</p>
                   </div>
                   <GenerateQuotePdfButton quoteId={myQuote.id} />
                 </div>
               );
             })()}
 
-            {/* 3 — Contract */}
             <ContractPanel
               jobId={id!}
               jobType={job.job_type}
@@ -644,19 +509,67 @@ const ProjectDetail = () => {
               homeownerName={homeownerName}
               onRefresh={refreshProject}
             />
-
-            {/* 6 — Payment Schedule */}
-            <PaymentSchedule
-              stages={stages}
-              contractValue={contractValue}
-              userRole={userRole}
-              onReleasePayment={undefined}
-            />
           </div>
-        </div>
         )}
 
+        {hoTab === "timeline" && (
+          <StageWorkspace
+            jobId={id!}
+            stages={stages}
+            updates={updates}
+            messages={messages}
+            subAssignments={subAssignments}
+            userRole={userRole}
+            userId={userId}
+            contractValue={contractValue}
+            onRefresh={refreshProject}
+            onAssignSub={isTrade ? (stageId) => setSubTradeStageId(stageId) : undefined}
+          />
+        )}
+
+        {hoTab === "payments" && (
+          <PaymentSchedule
+            stages={stages}
+            contractValue={contractValue}
+            userRole={userRole}
+            onReleasePayment={userRole === "homeowner" ? releasePayment : undefined}
+            jobId={id!}
+            projectTitle={job.title || job.job_type}
+            reference={(job as any).ref || undefined}
+            tradeName={tradeName}
+            homeownerName={homeownerName}
+            agreedSchedule={agreedSchedule}
+            onRefresh={refreshProject}
+          />
+        )}
+
+        {hoTab === "activity" && <ProjectActivity jobId={id!} onOpenTab={setHoTab} />}
+
+        {hoTab === "documents" && <ProjectDocuments jobId={id!} />}
+
+        {hoTab === "photos" && (
+          <ProjectPhotos
+            jobId={id!}
+            stages={stages}
+            updates={updates}
+            jobPhotoUrls={(job as any).photo_urls || []}
+            canUpload={userRole === "trade" || userRole === "homeowner"}
+            uploaderRole={isTrade ? "trade" : "homeowner"}
+            viewerRole={isTrade ? "trade" : "homeowner"}
+          />
+        )}
+
+        {hoTab === "messages" && (
+          <MessagingPanel
+            messages={messages.filter((m) => !m.stage_id)}
+            userId={userId}
+            msgText={msgText}
+            onMsgTextChange={setMsgText}
+            onSendMessage={sendMessage}
+          />
+        )}
       </div>
+
 
       {/* Sub-trade assignment modal */}
       {subTradeStageId && userId && (
