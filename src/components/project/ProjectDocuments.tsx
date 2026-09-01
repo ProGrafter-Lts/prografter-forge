@@ -108,13 +108,16 @@ const ProjectDocuments = ({ jobId }: Props) => {
           key: "certificates",
           label: "Certificates & compliance",
           icon: ShieldCheck,
+          tone: "green",
           items: (certs.data || []).map((c: any) => ({
             id: c.id,
             name: c.document_name || c.cert_type,
-            meta: [c.cert_type, c.issuing_body, c.reference_number && `Ref ${c.reference_number}`]
+            meta: [c.issuing_body, c.reference_number && `Ref ${c.reference_number}`]
               .filter(Boolean)
               .join(" · "),
             date: c.issue_date || c.created_at,
+            status: c.cert_type,
+            statusTone: "green" as JobFileTone,
             href: c.file_url || undefined,
           })),
         },
@@ -122,10 +125,13 @@ const ProjectDocuments = ({ jobId }: Props) => {
           key: "contracts",
           label: "Contracts",
           icon: FileText,
+          tone: "sky",
           items: (contracts.data || []).map((c: any) => ({
             id: c.id,
             name: c.reference ? `Contract ${c.reference}` : "Contract",
-            meta: `Status: ${c.status}`,
+            meta: "Signed contract record",
+            status: c.status,
+            statusTone: statusTone(c.status),
             date: c.latest_pdf_generated_at || c.created_at,
             bucket: c.latest_pdf_path ? "quote-pdfs" : undefined,
             path: c.latest_pdf_path || undefined,
@@ -136,12 +142,13 @@ const ProjectDocuments = ({ jobId }: Props) => {
           key: "quotes",
           label: "Quotes",
           icon: FileText,
+          tone: "teal",
           items: (quotes.data || []).map((q: any) => ({
             id: q.id,
             name: q.reference ? `Quote ${q.reference}` : "Quote",
-            meta: [q.amount ? `£${Number(q.amount).toLocaleString()}` : null, `Status: ${q.status}`]
-              .filter(Boolean)
-              .join(" · "),
+            meta: q.amount ? `£${Number(q.amount).toLocaleString()}` : "Amount not set",
+            status: q.status,
+            statusTone: statusTone(q.status),
             date: q.pdf_generated_at || q.created_at,
             bucket: q.pdf_path ? "quote-pdfs" : undefined,
             path: q.pdf_path || undefined,
@@ -152,10 +159,13 @@ const ProjectDocuments = ({ jobId }: Props) => {
           key: "inspections",
           label: "Inspection reports",
           icon: ClipboardCheck,
+          tone: "indigo",
           items: (reports.data || []).map((r: any) => ({
             id: r.id,
             name: r.file_name || "Inspection report",
-            meta: [r.inspector_name, r.classification].filter(Boolean).join(" · "),
+            meta: r.inspector_name || "Inspector not recorded",
+            status: r.classification || undefined,
+            statusTone: classificationTone(r.classification),
             date: r.report_date || r.created_at,
             bucket: r.file_path ? "inspection-reports" : undefined,
             path: r.file_path || undefined,
@@ -165,16 +175,13 @@ const ProjectDocuments = ({ jobId }: Props) => {
           key: "warranties",
           label: "Warranties",
           icon: BadgeCheck,
+          tone: "amber",
           items: (warranties.data || []).map((w: any) => ({
             id: w.id,
             name: w.item,
-            meta: [
-              w.manufacturer,
-              w.warranty_period_months ? `${w.warranty_period_months} months` : null,
-              w.claim_contact,
-            ]
-              .filter(Boolean)
-              .join(" · "),
+            meta: [w.manufacturer, w.claim_contact].filter(Boolean).join(" · "),
+            status: w.warranty_period_months ? `${w.warranty_period_months} months` : undefined,
+            statusTone: "amber" as JobFileTone,
             date: w.expiry_date || w.created_at,
           })),
         },
@@ -182,14 +189,18 @@ const ProjectDocuments = ({ jobId }: Props) => {
           key: "materials",
           label: "Materials log",
           icon: Package,
+          tone: "purple",
           items: (materials.data || []).map((m: any) => ({
             id: m.id,
             name: m.product_name || m.category,
             meta: [m.manufacturer, m.specification, m.quantity, m.supplier].filter(Boolean).join(" · "),
+            status: m.category || undefined,
+            statusTone: "purple" as JobFileTone,
             date: m.created_at,
           })),
         },
       ];
+
 
       setGroups(next);
       setLoading(false);
