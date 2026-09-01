@@ -461,8 +461,7 @@ const LeadDetail = ({
             {isHistoric(lead) && <Chip label="HISTORIC — UNPROCESSED" color={C.faint} />}
           </div>
 
-          {/* Primary actions */}
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 18 }}>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 14 }}>
             <a
               href={lead.council_application_url || undefined}
               target="_blank"
@@ -500,31 +499,24 @@ const LeadDetail = ({
                 Open letter batch
               </button>
             )}
-            <button onClick={() => setMore((v) => !v)} style={btn("quiet")}>
-              {more ? "Less ▲" : "More ▾"}
+            <button
+              onClick={() => lead.council_application_url && copy(lead.council_application_url, "Link")}
+              disabled={!lead.council_application_url}
+              style={btn("quiet", { opacity: lead.council_application_url ? 1 : 0.5 })}
+            >
+              Copy link
+            </button>
+            <button onClick={() => setEditUrl((v) => !v)} style={btn("quiet")}>
+              {editUrl ? "Close URL editor" : "Edit URL"}
+            </button>
+            <button onClick={enrichFromPdf} disabled={enriching || !lead.council_application_url} style={btn("quiet")}>
+              {enriching ? "Reading PDF…" : lead.pdf_enriched_at ? "Re-read PDF form" : "Read PDF form"}
+            </button>
+            <button onClick={() => onSkip(lead, !isSkipped(lead))} style={btn("quiet")}>
+              {isSkipped(lead) ? "Restore lead" : "Skip lead"}
             </button>
           </div>
 
-          {more && (
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 10 }}>
-              <button
-                onClick={() => lead.council_application_url && copy(lead.council_application_url, "Link")}
-                disabled={!lead.council_application_url}
-                style={btn("quiet", { opacity: lead.council_application_url ? 1 : 0.5 })}
-              >
-                Copy link
-              </button>
-              <button onClick={() => setEditUrl((v) => !v)} style={btn("quiet")}>
-                {editUrl ? "Close URL editor" : "Edit URL"}
-              </button>
-              <button onClick={enrichFromPdf} disabled={enriching || !lead.council_application_url} style={btn("quiet")}>
-                {enriching ? "Reading PDF…" : lead.pdf_enriched_at ? "Re-read PDF form" : "Read PDF form"}
-              </button>
-              <button onClick={() => onSkip(lead, !isSkipped(lead))} style={btn("quiet")}>
-                {isSkipped(lead) ? "Restore lead" : "Skip lead"}
-              </button>
-            </div>
-          )}
 
           {editUrl && (
             <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
