@@ -256,7 +256,7 @@ const LeadDetail = ({
     setTemplate((lead.homeowner_letter_template as LetterTemplateId) || "A");
     setCouncilUrl(lead.council_application_url || "");
     setEditUrl(false);
-    setMore(false);
+    
   }, [lead.id]);
 
   const patch = useCallback(
