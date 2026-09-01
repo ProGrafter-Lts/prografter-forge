@@ -37,18 +37,20 @@ export const JOB_FILE_TONE_CLASSES: Record<JobFileTone, string> = {
   orange: "bg-orange-500/15 text-orange-600 border-orange-500/30",
 } as Record<JobFileTone, string>;
 
-/** Left-border accent colour per tone (TradeVault-style status colouring). */
+/** Left-border accent colour per tone (TradeVault-style status colouring).
+ *  Applied inline because `.dashboard-dark .bg-card` forces `border-color`
+ *  with `!important`, which would otherwise flatten the accent. */
 export const JOB_FILE_ACCENT: Record<JobFileTone, string> = {
-  green: "border-l-emerald-500",
-  amber: "border-l-amber-500",
-  red: "border-l-red-500",
-  grey: "border-l-border",
-  teal: "border-l-teal-500",
-  sky: "border-l-sky-500",
-  indigo: "border-l-indigo-500",
-  purple: "border-l-purple-500",
-  orange: "border-l-orange-500",
-};
+  green: "#10b981",
+  amber: "#f59e0b",
+  red: "#ef4444",
+  grey: "rgba(255,255,255,0.25)",
+  teal: "#14b8a6",
+  sky: "#0ea5e9",
+  indigo: "#6366f1",
+  purple: "#a855f7",
+  orange: "#f97316",
+
 
 /** Icon colour per tone — matches the `text-*-600` icon convention. */
 export const JOB_FILE_ICON_TONE: Record<JobFileTone, string> = {
