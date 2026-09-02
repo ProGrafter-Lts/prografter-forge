@@ -9,6 +9,8 @@ project_id = "xryinqaxjclcmhebdcex"
     verify_jwt = false
   [functions.handle-email-events]
     verify_jwt = false
+  [functions.handle-email-unsubscribe]
+    verify_jwt = false
   [functions.submit-job-brief]
     verify_jwt = false
   [functions.ics-feed]
