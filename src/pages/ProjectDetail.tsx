@@ -15,9 +15,12 @@ import MessagingPanel from "@/components/project/MessagingPanel";
 import PaymentSchedule from "@/components/project/PaymentSchedule";
 import ContractVariationsPanel from "@/components/project/ContractVariationsPanel";
 import ContractPanel from "@/components/project/ContractPanel";
+import ContractWorkspace from "@/components/project/ContractWorkspace";
 import SubTradeModal from "@/components/project/SubTradeModal";
 import GenerateQuotePdfButton from "@/components/trade/GenerateQuotePdfButton";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { isFeatureEnabled } from "@/lib/featureFlags";
+
 
 // Types
 interface Job {
