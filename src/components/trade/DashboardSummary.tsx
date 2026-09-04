@@ -82,20 +82,28 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
           .eq("trade_id", tradeId)
           .eq("status", "notified"),
         supabase.from("tradevault_documents").select("*").eq("trade_id", tradeId),
-        supabase.from("contracts").select("job_id").eq("trade_id", tradeId),
+        supabase
+          .from("contracts")
+          .select("job_id, total_value_incl_vat_pence, total_value_excl_vat_pence")
+          .eq("trade_id", tradeId),
         supabase.from("trades").select("trade_type").eq("id", tradeId).maybeSingle(),
       ]);
 
       const jobIds = (contractsRes.data || []).map((c: any) => c.job_id).filter(Boolean);
-      const stagesRes = jobIds.length
-        ? await supabase
-            .from("project_stages")
-            .select("stage_name, planned_start")
-            .in("job_id", jobIds)
-            .gte("planned_start", todayIso)
-            .order("planned_start", { ascending: true })
-            .limit(1)
-        : { data: [] as any[] };
+      const [stagesRes, jobsRes] = await Promise.all([
+        jobIds.length
+          ? supabase
+              .from("project_stages")
+              .select("stage_name, planned_start")
+              .in("job_id", jobIds)
+              .gte("planned_start", todayIso)
+              .order("planned_start", { ascending: true })
+              .limit(1)
+          : { data: [] as any[] },
+        jobIds.length
+          ? supabase.from("jobs").select("id, stage").in("id", jobIds)
+          : { data: [] as any[] },
+      ]);
 
       if (cancelled) return;
 
