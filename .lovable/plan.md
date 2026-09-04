@@ -1,80 +1,81 @@
-# Project Clarity — Homeowner Onboarding Journey
+# Fix: accepted quotes don't fully become active projects
 
-A guided, multi-step discovery flow that captures a homeowner's project details, uploads, description, budget and current stage, then analyses readiness and shows a results dashboard. All data is stored in a new "Project Intelligence Record" so the flow is fully resumable and editable, and the components are reusable across the wider ProGrafter OS.
+## What's broken today
 
-## Route & entry points
+Accepting a quote only nudges the job's stage/status. The trigger
+`on_quote_accepted_advance_job` fires on `status = 'accepted'` only, and does
+nothing else. The offline path (`status = 'agreed_offline'`, set by the
+admin-only record-agreed-quote function) isn't covered at all.
 
-- New route: `/project-clarity` (main flow) and `/project-clarity/:recordId` (resume/edit)
-- Homepage: link the existing "I'm planning a project" card to `/project-clarity` (currently points to `/project-cost-guide`, which stays available)
+So on acceptance today: no `contracts` row, other quotes on the job stay
+`pending` (hence "chase up overdue"), and `job_matches` stays `notified`.
 
-## Data model (Lovable Cloud)
+`generate_contract_for_quote` today refuses to run unless `auth.uid()` is the
+homeowner. That check is correct for the button on the homeowner's screen, but
+it means a database trigger or an admin recording an offline agreement can
+never call it — which is exactly why the contract is missing.
 
-New table `project_intelligence_records`:
+## Proposed fix
 
-- `id uuid pk`, `user_id uuid` (nullable — supports pre-auth guest capture with localStorage handoff)
-- `status text` — `draft` | `analysing` | `complete`
-- `current_step smallint` (0–9)
-- `project_type text`, `address jsonb`, `property_type text`, `property_age text`
-- `current_stage text`, `description text`, `budget_band text`
-- `documents jsonb` (array of `{path, name, size, kind}`)
-- `analysis jsonb` — readiness score, budget guidance, status assessment, next action
-- `created_at`, `updated_at`
+### 1. Split the contract generator in two
+- New internal function `create_contract_for_quote_internal(_quote_id)` —
+  everything the current function does *after* the caller check (template
+  lookup, pricing, milestones, insert, event log). Idempotent: if a contract
+  already exists for that quote it returns the existing id.
+- `generate_contract_for_quote` keeps its homeowner-only check and then calls
+  the internal one. No change for the existing homeowner "Accept Quote" button.
 
-RLS: owner-only read/write when `user_id` matches; anon can insert + read/update rows they created via localStorage-stored record id (guarded by a per-row `edit_token`). Grants added per project convention.
+### 2. Widen the acceptance trigger
+Rename/extend `on_quote_accepted_advance_job` to fire when a quote moves into
+either `accepted` or `agreed_offline`, and to do all four steps in one
+transaction:
 
-Storage: reuse existing `job-brief-files` bucket for uploads under `project-clarity/<recordId>/…`, or add a new `project-clarity` private bucket if the bucket doesn't fit — decided at implementation time based on current bucket policies.
+a. Advance the job — as now, but also allow `quoting -> scheduled` for the
+   offline path (Smedley Close is stuck on `quoting`).
+b. Call `create_contract_for_quote_internal(NEW.id)`.
+c. Mark sibling quotes on the same job that are still `pending` as
+   `superseded` (new status value, distinct from a trade-side `declined`), and
+   close their `job_trade_invitations` rows so the chase/escalation job stops
+   picking them up.
+d. Move that job's `job_matches` rows off `notified` — the winning trade's row
+   to `won`, the rest to `closed` — so the job stops looking open for matching.
+   `guard_job_match_update` needs to permit these system transitions.
 
-## Screens
+### 3. Failure behaviour
+If contract generation can't complete (e.g. no active contract template), the
+trigger should log the reason to `contract_events`/`job_escalation_events` and
+still let the acceptance stand, rather than blocking the accept. A job with a
+missing contract then shows up in an admin report instead of failing silently.
 
-Single-page shell (`ProjectClarity.tsx`) with an animated step router and sticky progress bar (segmented, 9 steps). Each step is its own component under `src/project-clarity/steps/` so they can be embedded elsewhere later.
+## Effect on existing data
 
-1. **Welcome** — Editorial hero, single CTA "Start Project Clarity".
-2. **Project Type** — Grid of large tactile cards (11 options listed in the brief).
-3. **Property Information** — Address (with simple UK postcode helper), property type select, approx age select.
-4. **Current Stage** — 7 selectable pill cards.
-5. **Document Upload** — Drag-and-drop zone with categorised buckets (Drawings, Structural, Quotes, Images), per-file progress, remove/replace.
-6. **Project Description** — Rich textarea + voice-input button that uses the existing Lovable AI transcription pattern (calls a small edge function `transcribe-clarity-voice` wrapping the gateway STT endpoint).
-7. **Budget Expectations** — Segmented slider with 5 bands.
-8. **Review** — Grouped summary cards, each with an Edit button that jumps back to that step without losing data.
-9. **Analysis** — Animated multi-line status ticker ("Reading uploads…", "Assessing readiness…", "Benchmarking budget…") while a new edge function `analyse-project-clarity` returns the results.
-10. **Results Dashboard** — Four hero cards (Readiness Score ring, Budget Guidance, Project Status, Recommended Next Action) + CTA row: View Detailed Report, Run AI Quote Checker, Find Trades, Save Project.
+The trigger only fires on future status changes, so **nothing is repaired
+retroactively**. Smedley Close (PG-GEMANN) needs a one-time correction
+alongside the fix.
 
-## Analysis logic (`analyse-project-clarity`)
+Currently stuck (live, no contract row):
 
-Deterministic scoring first (project type + stage + docs presence + description length + budget band) that produces a 0–100 readiness score, a budget-vs-typical-range verdict, a stage summary and a single recommended next action. Optional Lovable AI polish pass generates the human-readable copy for each of the four dashboard cards. Result written back to `project_intelligence_records.analysis`.
+| Job | Quote | Quote status | Job stage | Pending siblings | job_matches |
+|---|---|---|---|---|---|
+| PG-GEMANN (7 Smedley Close, £48,500) | QPG-2026-0018 | agreed_offline | quoting | 1 | notified |
+| PG-WVERBR | QPG-2026-0015 | accepted | scheduled | 0 | notified |
+| PG-V5GNZ6 | QPG-2026-0007 | accepted | enquiry (job still `awaiting_quotes`) | 0 | notified |
 
-## UX & design
+Also: 8 older `completed` jobs have accepted quotes with no contract row. These
+are historic/seed records — recommendation is to leave them alone rather than
+back-generate contracts for finished work.
 
-- Palette: existing navy / teal / cream tokens only, no hardcoded colours.
-- Typography: existing `font-heading` and `font-mono` system.
-- Motion: framer-motion-free — use existing Tailwind `animate-fade-in`, `animate-scale-in`, and a small custom transition wrapper for step changes.
-- One primary CTA per step, generous whitespace, mobile-first with `md:` refinements.
-- Progress bar visible on every step from 2 onward; back button on every step (never destructive).
+One-time backfill (run once, after the fix, on those three jobs only):
+generate the contract, supersede PG-GEMANN's one leftover pending quote, set
+PG-GEMANN stage to `in_progress` (work is physically underway), set PG-V5GNZ6's
+job to `in_progress`/`scheduled`, and settle the three `job_matches` rows.
 
-## Reusability
+## Technical notes
+- All of the above is one database migration plus a small backfill script; no
+  frontend changes are required — the trade dashboard's Active Projects list
+  already reads from `contracts`, so a contract row is what makes these jobs
+  appear.
+- `superseded` needs adding wherever quote statuses are labelled in the UI so
+  it doesn't render as a raw string.
 
-- `useProjectIntelligenceRecord(recordId?)` hook — load/create/update/patch, plus autosave-on-change (debounced).
-- Step components accept `{ record, onPatch, onNext, onBack }` props so they can be reused inside the trade dashboard's brief-builder later.
-- `ReadinessScoreCard`, `BudgetGuidanceCard`, `ProjectStatusCard`, `NextActionCard` exported from `src/project-clarity/components/` for reuse elsewhere in the OS.
-
-## Files to create / change
-
-Created:
-- `supabase/migrations/<ts>_project_intelligence_records.sql`
-- `supabase/functions/analyse-project-clarity/index.ts`
-- `supabase/functions/transcribe-clarity-voice/index.ts`
-- `src/pages/ProjectClarity.tsx`
-- `src/project-clarity/hooks/useProjectIntelligenceRecord.ts`
-- `src/project-clarity/components/*` (progress bar, step shell, upload zone, voice input, result cards)
-- `src/project-clarity/steps/*` (10 step components)
-
-Changed:
-- `src/App.tsx` — register `/project-clarity` and `/project-clarity/:recordId` routes
-- `src/components/WhereAreYouSection.tsx` — repoint "I'm planning a project" CTA to `/project-clarity`
-
-## Out of scope for this pass
-
-- Deep integration into the trade-facing Job Brief flow (kept for a follow-up so we don't destabilise existing brief tables).
-- Payments / paid analysis tiers.
-
-Once the plan is approved I'll implement everything above in one pass, run typecheck, and verify the flow renders end-to-end in the preview.
+Nothing will be run until you confirm.
