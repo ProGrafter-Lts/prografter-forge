@@ -150,7 +150,7 @@ const ActiveProjectsView = ({ tradeId }: { tradeId: string }) => {
                 No active projects yet. Head to Available Jobs to submit your first quote.
               </p>
               <button
-                onClick={() => navigate("/dashboard/trade?view=jobs")}
+                onClick={() => navigate("/planning-alerts")}
                 className="inline-flex items-center gap-1 bg-secondary text-secondary-foreground font-mono text-xs px-4 py-2 rounded-xl hover:opacity-90 transition-opacity"
               >
                 Browse Available Jobs
