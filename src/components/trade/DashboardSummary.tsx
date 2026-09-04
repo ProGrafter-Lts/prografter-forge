@@ -37,6 +37,8 @@ interface SummaryData {
   docsLabel: string;
   nextDate: { date: string; label: string } | null;
   overdueFollowUps: number;
+  activeProjects: number;
+  activeProjectsValue: number;
 }
 
 const gbp = (n: number) =>
