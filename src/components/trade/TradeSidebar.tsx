@@ -17,11 +17,12 @@ import {
   ShieldCheck,
   Map,
   FlaskConical,
-
+  Briefcase,
 } from "lucide-react";
 
 const NAV_ITEMS = [
   { label: "Dashboard", icon: LayoutDashboard, id: "dashboard" },
+  { label: "Projects", icon: Briefcase, id: "projects" },
   { label: "Find Work", icon: Search, id: "find-work" },
   { label: "Pipeline", icon: FolderKanban, id: "pipeline" },
   { label: "Quotes", icon: FileText, id: "quotes" },

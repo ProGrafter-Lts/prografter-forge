@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   AlertCircle,
   ArrowRight,
+  Briefcase,
   CalendarDays,
   Clock,
   FileText,
@@ -13,6 +14,7 @@ import {
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { computeVaultSummary, type VaultDocument } from "@/lib/tradeVault";
+import { isContractedActiveJob } from "@/lib/activeProjects";
 import { isTestRecord } from "@/lib/testData";
 
 
@@ -35,6 +37,8 @@ interface SummaryData {
   docsLabel: string;
   nextDate: { date: string; label: string } | null;
   overdueFollowUps: number;
+  activeProjects: number;
+  activeProjectsValue: number;
 }
 
 const gbp = (n: number) =>
@@ -78,20 +82,28 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
           .eq("trade_id", tradeId)
           .eq("status", "notified"),
         supabase.from("tradevault_documents").select("*").eq("trade_id", tradeId),
-        supabase.from("contracts").select("job_id").eq("trade_id", tradeId),
+        supabase
+          .from("contracts")
+          .select("job_id, total_value_incl_vat_pence, total_value_excl_vat_pence")
+          .eq("trade_id", tradeId),
         supabase.from("trades").select("trade_type").eq("id", tradeId).maybeSingle(),
       ]);
 
       const jobIds = (contractsRes.data || []).map((c: any) => c.job_id).filter(Boolean);
-      const stagesRes = jobIds.length
-        ? await supabase
-            .from("project_stages")
-            .select("stage_name, planned_start")
-            .in("job_id", jobIds)
-            .gte("planned_start", todayIso)
-            .order("planned_start", { ascending: true })
-            .limit(1)
-        : { data: [] as any[] };
+      const [stagesRes, jobsRes] = await Promise.all([
+        jobIds.length
+          ? supabase
+              .from("project_stages")
+              .select("stage_name, planned_start")
+              .in("job_id", jobIds)
+              .gte("planned_start", todayIso)
+              .order("planned_start", { ascending: true })
+              .limit(1)
+          : { data: [] as any[] },
+        jobIds.length
+          ? supabase.from("jobs").select("id, stage").in("id", jobIds)
+          : { data: [] as any[] },
+      ]);
 
       if (cancelled) return;
 
@@ -137,6 +149,16 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
         nextDate = { date: nextStage.planned_start, label: nextStage.stage_name || "Project stage" };
       }
 
+      const contractsByJobId = new Map((contractsRes.data || []).map((c: any) => [c.job_id, c]));
+      const activeProjectRows = (jobsRes.data || []).filter(isContractedActiveJob);
+      const activeProjects = activeProjectRows.length;
+      const activeProjectsValue = activeProjectRows.reduce((sum: number, job: any) => {
+        const c = contractsByJobId.get(job.id);
+        if (!c) return sum;
+        const pence = c.total_value_incl_vat_pence ?? c.total_value_excl_vat_pence;
+        return sum + (pence ? Number(pence) / 100 : 0);
+      }, 0);
+
       setData({
         pipelineActive: pipelineTodo + pipelineWaiting + pipelineQuoted,
         pipelineTodo,
@@ -150,6 +172,8 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
         docsLabel: `${vault.requiredUploaded} of ${vault.requiredTotal} required documents in place`,
         nextDate,
         overdueFollowUps,
+        activeProjects,
+        activeProjectsValue,
       });
       setLoading(false);
     })();
@@ -345,6 +369,21 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
       onClick: () => onOpenView("tradevault"),
       urgency: data.docsNeeded > 0 ? 3 : 0,
       alert: data.docsNeeded > 0 ? "Missing or expired documents" : undefined,
+    },
+    {
+      key: "projects",
+      label: "Projects",
+      icon: Briefcase,
+      accent: "#22C55E",
+      value: String(data.activeProjects),
+      unit: data.activeProjects === 1 ? "active project" : "active projects",
+      sub:
+        data.activeProjectsValue > 0
+          ? `${gbp(data.activeProjectsValue)} contracted value`
+          : "No active projects yet",
+      cta: "Open Projects",
+      onClick: () => onOpenView("projects"),
+      urgency: data.activeProjects > 0 ? 1 : 0,
     },
     {
       key: "calendar",
