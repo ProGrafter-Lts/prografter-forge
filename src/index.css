@@ -1679,13 +1679,13 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
   color: #FFFFFF !important;
 }
 /* shadcn `ghost` variant — transparent and unreadable at rest on navy */
-.dashboard-dark button.hover\\:bg-accent:not(.border-input),
-.dashboard-dark a.hover\\:bg-accent:not(.border-input) {
+.dashboard-dark button.hover\:bg-accent:not(.border-input),
+.dashboard-dark a.hover\:bg-accent:not(.border-input) {
   border: 1px solid rgba(255, 255, 255, 0.16);
   color: rgba(255, 255, 255, 0.92);
 }
-.dashboard-dark button.hover\\:bg-accent:not(.border-input):hover,
-.dashboard-dark a.hover\\:bg-accent:not(.border-input):hover {
+.dashboard-dark button.hover\:bg-accent:not(.border-input):hover,
+.dashboard-dark a.hover\:bg-accent:not(.border-input):hover {
   background-color: rgba(94, 234, 212, 0.18) !important;
   border-color: rgba(94, 234, 212, 0.5);
   color: #FFFFFF !important;
