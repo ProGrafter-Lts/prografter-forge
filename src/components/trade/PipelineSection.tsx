@@ -424,7 +424,11 @@ const PipelineSection = ({ tradeId }: Props) => {
             <div>
               <p className="font-sans font-semibold text-white">
                 {CARD_DEFS.find((c) => c.key === openStage)?.label} —{" "}
-                {counts[openStage]} {counts[openStage] === 1 ? "lead" : "leads"}
+                {openStage === "won"
+                  ? `${contracted.length} ${contracted.length === 1 ? "project" : "projects"}${
+                      contractedValue > 0 ? ` · ${formatGBP(contractedValue)}` : ""
+                    }`
+                  : `${counts[openStage]} ${counts[openStage] === 1 ? "lead" : "leads"}`}
               </p>
               <p className="font-sans text-xs text-white/55 mt-1">
                 {CARD_DEFS.find((c) => c.key === openStage)?.subtitle}
