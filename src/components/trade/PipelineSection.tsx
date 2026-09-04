@@ -235,9 +235,9 @@ const PipelineSection = ({ tradeId }: Props) => {
     for (const r of (data ?? []) as StageRow[]) {
       const stage = stageForRow(r);
       if (!stage) continue;
-      if (stage === "won" && !(r.last_status_change_at && r.last_status_change_at >= ninetyDaysAgo)) {
-        continue;
-      }
+      // Lead outreach statuses never populate the final stage — that stage
+      // is driven by signed contracts only.
+      if (stage === "won") continue;
       next[stage] += 1;
       (byStage[stage] ||= []).push(r);
     }
