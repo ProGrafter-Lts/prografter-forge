@@ -57,12 +57,26 @@ const CARD_DEFS: {
   },
   {
     key: "won",
-    label: "Won",
-    subtitle: "Converted in last 90 days",
+    label: "Project Value",
+    subtitle: "Contracted work under way",
     color: "#34d399",
-    filter: "won",
   },
 ];
+
+interface ContractedProject {
+  jobId: string;
+  title: string;
+  postcode: string | null;
+  stage: string | null;
+  value: number | null;
+}
+
+const formatGBP = (n: number) =>
+  new Intl.NumberFormat("en-GB", {
+    style: "currency",
+    currency: "GBP",
+    maximumFractionDigits: 0,
+  }).format(n);
 
 
 interface StageRow {
