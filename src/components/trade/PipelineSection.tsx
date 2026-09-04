@@ -445,7 +445,41 @@ const PipelineSection = ({ tradeId }: Props) => {
           </div>
 
           <div className="mt-4 space-y-2">
-            {stageLoading ? (
+            {openStage === "won" ? (
+              contracted.length === 0 ? (
+                <p className="font-sans text-sm text-white/60">
+                  No signed contracts yet. Once a quote is accepted and the contract is in place, the
+                  project appears here.
+                </p>
+              ) : (
+                contracted.map((p) => (
+                  <button
+                    key={p.jobId}
+                    type="button"
+                    onClick={() => navigate(`/dashboard/trade?view=projects`)}
+                    className="w-full text-left rounded-xl bg-white/5 hover:bg-white/10 transition-colors p-4"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <p className="font-sans font-semibold text-sm text-white">{p.title}</p>
+                      {p.value != null && (
+                        <span className="font-mono text-xs text-emerald-300 shrink-0">
+                          {formatGBP(p.value)}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap items-center gap-3 mt-1.5 font-mono text-[11px] text-white/55">
+                      {p.postcode && (
+                        <span className="inline-flex items-center gap-1">
+                          <MapPin className="w-3 h-3" />
+                          {p.postcode}
+                        </span>
+                      )}
+                      {p.stage && <span>{p.stage.replace(/_/g, " ")}</span>}
+                    </div>
+                  </button>
+                ))
+              )
+            ) : stageLoading ? (
               <>
                 <Skeleton className="h-16 w-full" />
                 <Skeleton className="h-16 w-full" />
