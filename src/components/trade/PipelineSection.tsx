@@ -356,7 +356,8 @@ const PipelineSection = ({ tradeId }: Props) => {
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
           {CARD_DEFS.map((card, i) => {
-            const value = counts[card.key];
+            const isContractStage = card.key === "won";
+            const value = valueForCard(card.key);
             const isZero = value === 0;
             return (
               <button
