@@ -270,20 +270,24 @@ const PipelineSection = ({ tradeId }: Props) => {
     };
   }, [load]);
 
+  const contractedValue = contracted.reduce((sum, p) => sum + (p.value ?? 0), 0);
+  const valueForCard = (key: keyof Counts) =>
+    key === "won" ? contracted.length : counts[key];
+
   const totalLeads =
     counts.todo +
     counts.contacted +
     counts.planning_approved +
     counts.site_visit +
     counts.quoted +
-    counts.won +
+    contracted.length +
     counts.lost;
 
   return (
     <Workspace
       icon={GitBranch}
       title="Pipeline"
-      subtitle="Every lead, moving left to right toward won work."
+      subtitle="Every lead, moving left to right into contracted work."
       accent="orange"
       surface="1"
       texture="grid"
