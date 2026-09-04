@@ -135,7 +135,7 @@ const ProjectDocuments = ({ jobId }: Props) => {
             date: c.latest_pdf_generated_at || c.created_at,
             bucket: c.latest_pdf_path ? "quote-pdfs" : undefined,
             path: c.latest_pdf_path || undefined,
-            route: c.latest_pdf_path ? undefined : `/project/${jobId}/contract`,
+            route: c.latest_pdf_path ? undefined : `/project/${jobId}?panel=contract`,
           })),
         },
         {
