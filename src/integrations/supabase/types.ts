@@ -6582,6 +6582,10 @@ export type Database = {
       }
       compute_contract_hash: { Args: { _contract_id: string }; Returns: string }
       count_verified_trades: { Args: never; Returns: number }
+      create_contract_for_quote_internal: {
+        Args: { _actor?: string; _quote_id: string }
+        Returns: string
+      }
       create_quote_check: {
         Args: {
           _description: string
