@@ -12,6 +12,7 @@ import SEO from "@/components/SEO";
 import ProjectPhotos from "@/components/project/ProjectPhotos";
 import { toast } from "sonner";
 import Logo from "@/components/Logo";
+import { AccentCard, TonePill, type JobFileTone } from "@/components/project/jobFileUi";
 
 interface ContractRow {
   id: string;
@@ -640,13 +641,13 @@ const ContractPage = () => {
               </p>
               <dl className="grid sm:grid-cols-2 gap-3 font-mono text-xs pt-1">
                 {[
-                  { label: "Original contract value", value: baseValuePence, tone: "sky" as const },
-                  { label: "Accepted variations", value: acceptedVariationsPence, tone: "indigo" as const },
-                  { label: "Cumulative job value", value: cumulativeValuePence, tone: "teal" as const },
+                  { label: "Original contract value", value: baseValuePence, tone: "sky" as JobFileTone },
+                  { label: "Accepted variations", value: acceptedVariationsPence, tone: "indigo" as JobFileTone },
+                  { label: "Cumulative job value", value: cumulativeValuePence, tone: "teal" as JobFileTone },
                   {
                     label: "Total commission owed",
                     value: totalCommissionPence,
-                    tone: (totalCommissionPence >= COMMISSION_CAP_PENCE ? "amber" : "green") as const,
+                    tone: (totalCommissionPence >= COMMISSION_CAP_PENCE ? "amber" : "green") as JobFileTone,
                   },
                 ].map((row) => (
                   <AccentCard key={row.label} tone={row.tone}>
