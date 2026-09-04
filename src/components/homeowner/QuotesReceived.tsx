@@ -212,7 +212,7 @@ const QuotesReceived = ({ quotes, onQuoteAccepted }: QuotesReceivedProps) => {
     const targetJobId = pendingAccept.job_id;
     setPendingAccept(null);
     onQuoteAccepted?.();
-    openDrawer(`/project/${targetJobId}/contract`);
+    openDrawer(`/project/${targetJobId}?panel=contract`);
   };
 
   if (quotes.length === 0) {

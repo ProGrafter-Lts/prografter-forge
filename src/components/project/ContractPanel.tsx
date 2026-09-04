@@ -143,7 +143,7 @@ const ContractPanel = ({ jobId, quotes, contract, userRole, userId, onRefresh }:
 
     toast.success("Quote accepted. Review and sign your contract now.");
     onRefresh();
-    navigate(`/project/${jobId}/contract`);
+    navigate(`/project/${jobId}?panel=contract`);
   };
 
   // Homeowner: quote acceptance (no contract yet)
@@ -216,7 +216,7 @@ const ContractPanel = ({ jobId, quotes, contract, userRole, userId, onRefresh }:
           </div>
 
           <button
-            onClick={() => navigate(`/project/${jobId}/contract`)}
+            onClick={() => navigate(`/project/${jobId}?panel=contract`)}
             className={`mt-3 w-full inline-flex items-center justify-center gap-2 font-mono text-sm py-2.5 rounded-xl transition-colors ${
               needsMySignature
                 ? "bg-teal text-white hover:bg-teal-hover"

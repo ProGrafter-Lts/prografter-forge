@@ -15,9 +15,12 @@ import MessagingPanel from "@/components/project/MessagingPanel";
 import PaymentSchedule from "@/components/project/PaymentSchedule";
 import ContractVariationsPanel from "@/components/project/ContractVariationsPanel";
 import ContractPanel from "@/components/project/ContractPanel";
+import ContractWorkspace from "@/components/project/ContractWorkspace";
 import SubTradeModal from "@/components/project/SubTradeModal";
 import GenerateQuotePdfButton from "@/components/trade/GenerateQuotePdfButton";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { isFeatureEnabled } from "@/lib/featureFlags";
+
 
 // Types
 interface Job {
@@ -79,12 +82,35 @@ const ProjectDetail = () => {
   const [contract, setContract] = useState<Contract | null>(null);
   const [subAssignments, setSubAssignments] = useState<SubAssignment[]>([]);
   const [viewerContextReady, setViewerContextReady] = useState(false);
-  const [hoTab, setHoTab] = useState(() => {
-    const t = searchParams.get("tab");
-    return t && ["overview", "quotes", "timeline", "payments", "documents", "photos", "messages"].includes(t)
-      ? t
-      : "overview";
-  });
+  const TAB_IDS = [
+    "overview",
+    "quotes",
+    "timeline",
+    "payments",
+    "activity",
+    "documents",
+    "photos",
+    "messages",
+  ];
+  const tabParam = searchParams.get("tab");
+  const hoTab = tabParam && TAB_IDS.includes(tabParam) ? tabParam : "overview";
+  const openPanel = searchParams.get("panel");
+
+  /** Section switches and panel opens both live in the URL, so the browser back
+   *  button closes a panel and returns to the exact section the user was on. */
+  const setHoTab = (tab: string) => {
+    const next = new URLSearchParams(searchParams);
+    next.set("tab", tab);
+    next.delete("panel");
+    setSearchParams(next, { replace: true });
+  };
+  const setPanel = (panel: string | null) => {
+    const next = new URLSearchParams(searchParams);
+    if (panel) next.set("panel", panel);
+    else next.delete("panel");
+    setSearchParams(next);
+  };
+
 
   const [userRole, setUserRole] = useState<UserRole>(null);
   const [userId, setUserId] = useState<string | null>(null);
@@ -548,7 +574,14 @@ const ProjectDetail = () => {
           />
         )}
 
-        {hoTab === "activity" && <ProjectActivity jobId={id!} onOpenTab={setHoTab} />}
+        {hoTab === "activity" && (
+          <ProjectActivity
+            jobId={id!}
+            onOpenTab={setHoTab}
+            initialFilter={(searchParams.get("filter") as any) || "all"}
+          />
+        )}
+
 
         {hoTab === "documents" && <ProjectDocuments jobId={id!} />}
 
@@ -575,8 +608,32 @@ const ProjectDetail = () => {
         )}
       </div>
 
+      {/* In-place panel layer — sections open over the project screen, so the
+          header and dashboard link stay one step away, never five. */}
+      <Sheet open={openPanel === "contract"} onOpenChange={(open) => !open && setPanel(null)}>
+        <SheetContent
+          side="right"
+          className="dashboard-dark w-full sm:max-w-3xl lg:max-w-5xl overflow-y-auto bg-background"
+        >
+          {openPanel === "contract" && (
+            <div className="pt-4">
+              <ContractWorkspace
+                jobId={id!}
+                onClose={() => setPanel(null)}
+                onOpenActivity={() => {
+                  const next = new URLSearchParams(searchParams);
+                  next.set("tab", "activity");
+                  next.set("filter", "contract");
+                  next.delete("panel");
+                  setSearchParams(next);
+                }}
+              />
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
 
-      {/* Sub-trade assignment modal */}
+
       {subTradeStageId && userId && (
         <SubTradeModal
           stageId={subTradeStageId}

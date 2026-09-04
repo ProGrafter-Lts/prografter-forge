@@ -27,7 +27,10 @@ interface Props {
   jobId: string;
   /** Optional: switch the homeowner control-centre tab instead of navigating away. */
   onOpenTab?: (tab: string) => void;
+  /** Pre-select a category filter (e.g. "contract" when opened from the contract panel). */
+  initialFilter?: Category | "all";
 }
+
 
 type Category =
   | "funding"
@@ -88,11 +91,11 @@ const BATCH_WINDOW_MS = 10 * 60 * 1000;
  * Read-only chronological merge of every existing event source for a project.
  * No new tables — purely a view over data other features already write.
  */
-const ProjectActivity = ({ jobId, onOpenTab }: Props) => {
+const ProjectActivity = ({ jobId, onOpenTab, initialFilter = "all" }: Props) => {
   const navigate = useNavigate();
   const [items, setItems] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<Category | "all">("all");
+  const [filter, setFilter] = useState<Category | "all">(initialFilter);
 
   useEffect(() => {
     let cancelled = false;
@@ -206,7 +209,7 @@ const ProjectActivity = ({ jobId, onOpenTab }: Props) => {
             .filter(Boolean)
             .join(" · "),
           linkLabel: "Open contract",
-          route: `/project/${jobId}/contract`,
+          route: `/project/${jobId}?panel=contract`,
         });
       }
 
@@ -221,7 +224,7 @@ const ProjectActivity = ({ jobId, onOpenTab }: Props) => {
             label: "Variation",
             description: [`Variation ${verb}: ${v.title}`, cost].filter(Boolean).join(" · "),
             linkLabel: "Open contract",
-            route: `/project/${jobId}/contract`,
+            route: `/project/${jobId}?panel=contract`,
           });
         };
         push(v.created_at, "proposed");
