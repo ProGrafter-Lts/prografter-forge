@@ -32,9 +32,9 @@ type StatusKey = "submitted" | "accepted" | "declined" | "withdrawn";
 
 const normaliseStatus = (raw: string | null): StatusKey => {
   const s = (raw || "").toLowerCase();
-  if (["accepted", "won", "awarded"].includes(s)) return "accepted";
+  if (["accepted", "won", "awarded", "agreed_offline"].includes(s)) return "accepted";
   if (["declined", "rejected", "lost", "not_selected"].includes(s)) return "declined";
-  if (["withdrawn", "cancelled", "expired"].includes(s)) return "withdrawn";
+  if (["withdrawn", "cancelled", "expired", "superseded"].includes(s)) return "withdrawn";
   return "submitted";
 };
 

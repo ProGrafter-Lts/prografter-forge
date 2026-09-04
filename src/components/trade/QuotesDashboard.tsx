@@ -49,14 +49,14 @@ const statusMeta: Record<StatusKey, { label: string; tone: BadgeTone; icon: type
   submitted: { label: "Awaiting decision", tone: "amber", icon: Clock },
   accepted: { label: "Accepted", tone: "green", icon: CheckCircle2 },
   declined: { label: "Not selected", tone: "red", icon: XCircle },
-  withdrawn: { label: "Withdrawn", tone: "grey", icon: XCircle },
+  withdrawn: { label: "Withdrawn / superseded", tone: "grey", icon: XCircle },
 };
 
 const normaliseStatus = (raw: string | null): StatusKey => {
   const s = (raw || "").toLowerCase();
-  if (["accepted", "won", "awarded"].includes(s)) return "accepted";
+  if (["accepted", "won", "awarded", "agreed_offline"].includes(s)) return "accepted";
   if (["declined", "rejected", "lost", "not_selected"].includes(s)) return "declined";
-  if (["withdrawn", "cancelled", "expired"].includes(s)) return "withdrawn";
+  if (["withdrawn", "cancelled", "expired", "superseded"].includes(s)) return "withdrawn";
   return "submitted";
 };
 
