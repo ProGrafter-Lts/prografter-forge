@@ -113,6 +113,13 @@
       "when": 1788274523516,
       "tag": "0015_stage_workspace_fields",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1788520655085,
+      "tag": "0016_quote_acceptance_promotes_job",
+      "breakpoints": true
     }
   ]
 }
