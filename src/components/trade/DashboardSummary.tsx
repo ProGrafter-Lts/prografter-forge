@@ -371,6 +371,21 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
       alert: data.docsNeeded > 0 ? "Missing or expired documents" : undefined,
     },
     {
+      key: "projects",
+      label: "Projects",
+      icon: Briefcase,
+      accent: "#22C55E",
+      value: String(data.activeProjects),
+      unit: data.activeProjects === 1 ? "active project" : "active projects",
+      sub:
+        data.activeProjectsValue > 0
+          ? `${gbp(data.activeProjectsValue)} contracted value`
+          : "No active projects yet",
+      cta: "Open Projects",
+      onClick: () => onOpenView("projects"),
+      urgency: data.activeProjects > 0 ? 1 : 0,
+    },
+    {
       key: "calendar",
       label: "Calendar",
       icon: CalendarDays,
