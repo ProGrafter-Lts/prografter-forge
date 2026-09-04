@@ -608,8 +608,32 @@ const ProjectDetail = () => {
         )}
       </div>
 
+      {/* In-place panel layer — sections open over the project screen, so the
+          header and dashboard link stay one step away, never five. */}
+      <Sheet open={openPanel === "contract"} onOpenChange={(open) => !open && setPanel(null)}>
+        <SheetContent
+          side="right"
+          className="dashboard-dark w-full sm:max-w-3xl lg:max-w-5xl overflow-y-auto bg-background"
+        >
+          {openPanel === "contract" && (
+            <div className="pt-4">
+              <ContractWorkspace
+                jobId={id!}
+                onClose={() => setPanel(null)}
+                onOpenActivity={() => {
+                  const next = new URLSearchParams(searchParams);
+                  next.set("tab", "activity");
+                  next.set("filter", "contract");
+                  next.delete("panel");
+                  setSearchParams(next);
+                }}
+              />
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
 
-      {/* Sub-trade assignment modal */}
+
       {subTradeStageId && userId && (
         <SubTradeModal
           stageId={subTradeStageId}
