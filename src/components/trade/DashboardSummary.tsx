@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   AlertCircle,
   ArrowRight,
+  Briefcase,
   CalendarDays,
   Clock,
   FileText,
@@ -13,6 +14,7 @@ import {
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { computeVaultSummary, type VaultDocument } from "@/lib/tradeVault";
+import { isContractedActiveJob } from "@/lib/activeProjects";
 import { isTestRecord } from "@/lib/testData";
 
 
