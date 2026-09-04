@@ -82,12 +82,35 @@ const ProjectDetail = () => {
   const [contract, setContract] = useState<Contract | null>(null);
   const [subAssignments, setSubAssignments] = useState<SubAssignment[]>([]);
   const [viewerContextReady, setViewerContextReady] = useState(false);
-  const [hoTab, setHoTab] = useState(() => {
-    const t = searchParams.get("tab");
-    return t && ["overview", "quotes", "timeline", "payments", "documents", "photos", "messages"].includes(t)
-      ? t
-      : "overview";
-  });
+  const TAB_IDS = [
+    "overview",
+    "quotes",
+    "timeline",
+    "payments",
+    "activity",
+    "documents",
+    "photos",
+    "messages",
+  ];
+  const tabParam = searchParams.get("tab");
+  const hoTab = tabParam && TAB_IDS.includes(tabParam) ? tabParam : "overview";
+  const openPanel = searchParams.get("panel");
+
+  /** Section switches and panel opens both live in the URL, so the browser back
+   *  button closes a panel and returns to the exact section the user was on. */
+  const setHoTab = (tab: string) => {
+    const next = new URLSearchParams(searchParams);
+    next.set("tab", tab);
+    next.delete("panel");
+    setSearchParams(next, { replace: true });
+  };
+  const setPanel = (panel: string | null) => {
+    const next = new URLSearchParams(searchParams);
+    if (panel) next.set("panel", panel);
+    else next.delete("panel");
+    setSearchParams(next);
+  };
+
 
   const [userRole, setUserRole] = useState<UserRole>(null);
   const [userId, setUserId] = useState<string | null>(null);
