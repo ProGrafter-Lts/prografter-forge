@@ -27,7 +27,10 @@ interface Props {
   jobId: string;
   /** Optional: switch the homeowner control-centre tab instead of navigating away. */
   onOpenTab?: (tab: string) => void;
+  /** Pre-select a category filter (e.g. "contract" when opened from the contract panel). */
+  initialFilter?: Category | "all";
 }
+
 
 type Category =
   | "funding"
