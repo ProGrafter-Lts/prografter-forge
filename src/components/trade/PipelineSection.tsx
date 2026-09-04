@@ -136,11 +136,64 @@ const PipelineSection = ({ tradeId }: Props) => {
   const [stageLoading, setStageLoading] = useState(false);
   const [rowsByStage, setRowsByStage] = useState<Partial<Record<keyof Counts, StageRow[]>>>({});
   const [stageError, setStageError] = useState<string | null>(null);
+  const [contracted, setContracted] = useState<ContractedProject[]>([]);
+
+  /**
+   * The final pipeline stage tracks REAL contracted work, not lead outreach
+   * statuses. It uses the same source of truth as the Projects view:
+   * the active_projects_for_user RPC + contract values from `contracts`.
+   */
+  const loadContracted = useCallback(async () => {
+    const { data: authData } = await supabase.auth.getUser();
+    const userId = authData.user?.id;
+    if (!userId) {
+      setContracted([]);
+      return;
+    }
+    const { data, error: rpcError } = await supabase.rpc("active_projects_for_user", {
+      _user_id: userId,
+    });
+    if (rpcError) {
+      console.error("Failed to load contracted projects", rpcError);
+      setContracted([]);
+      return;
+    }
+    const rows = ((data || []) as any[]).filter(
+      (r) => r.role === "trade" && r.trade_id === tradeId && r.contract_id,
+    );
+    const byJob = new Map<string, ContractedProject>();
+    const contractIds: string[] = [];
+    rows.forEach((r) => {
+      if (byJob.has(r.id)) return;
+      contractIds.push(r.contract_id);
+      byJob.set(r.id, {
+        jobId: r.id,
+        title: r.title || r.job_type || "Project",
+        postcode: r.postcode ?? null,
+        stage: r.stage ?? null,
+        value: null,
+      });
+    });
+    if (contractIds.length) {
+      const { data: contracts } = await supabase
+        .from("contracts")
+        .select("id, job_id, total_value_incl_vat_pence, total_value_excl_vat_pence")
+        .in("id", contractIds);
+      (contracts || []).forEach((c: any) => {
+        const p = byJob.get(c.job_id);
+        if (!p) return;
+        const pence = c.total_value_incl_vat_pence ?? c.total_value_excl_vat_pence;
+        if (pence != null) p.value = Number(pence) / 100;
+      });
+    }
+    setContracted(Array.from(byJob.values()));
+  }, [tradeId]);
 
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
-    const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
+    void loadContracted();
+
 
     // Race the query against a 6s timeout so the section never hangs.
     const queryPromise = supabase
