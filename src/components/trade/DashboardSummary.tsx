@@ -149,6 +149,16 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
         nextDate = { date: nextStage.planned_start, label: nextStage.stage_name || "Project stage" };
       }
 
+      const contractsByJobId = new Map((contractsRes.data || []).map((c: any) => [c.job_id, c]));
+      const activeProjectRows = (jobsRes.data || []).filter(isContractedActiveJob);
+      const activeProjects = activeProjectRows.length;
+      const activeProjectsValue = activeProjectRows.reduce((sum: number, job: any) => {
+        const c = contractsByJobId.get(job.id);
+        if (!c) return sum;
+        const pence = c.total_value_incl_vat_pence ?? c.total_value_excl_vat_pence;
+        return sum + (pence ? Number(pence) / 100 : 0);
+      }, 0);
+
       setData({
         pipelineActive: pipelineTodo + pipelineWaiting + pipelineQuoted,
         pipelineTodo,
@@ -162,6 +172,8 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
         docsLabel: `${vault.requiredUploaded} of ${vault.requiredTotal} required documents in place`,
         nextDate,
         overdueFollowUps,
+        activeProjects,
+        activeProjectsValue,
       });
       setLoading(false);
     })();
