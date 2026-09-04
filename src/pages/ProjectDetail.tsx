@@ -574,7 +574,14 @@ const ProjectDetail = () => {
           />
         )}
 
-        {hoTab === "activity" && <ProjectActivity jobId={id!} onOpenTab={setHoTab} />}
+        {hoTab === "activity" && (
+          <ProjectActivity
+            jobId={id!}
+            onOpenTab={setHoTab}
+            initialFilter={(searchParams.get("filter") as any) || "all"}
+          />
+        )}
+
 
         {hoTab === "documents" && <ProjectDocuments jobId={id!} />}
 
