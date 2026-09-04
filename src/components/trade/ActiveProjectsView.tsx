@@ -36,10 +36,19 @@ const ActiveProjectsView = ({ tradeId }: { tradeId: string }) => {
     let cancelled = false;
     const load = async () => {
       setLoading(true);
-      const { data, error } = await supabase
-        .from("contracts")
-        .select("agreed_price, jobs(id, title, job_type, postcode, stage, status)")
-        .eq("trade_id", tradeId);
+
+      const { data: authData } = await supabase.auth.getUser();
+      const userId = authData.user?.id;
+      if (!userId) {
+        if (!cancelled) {
+          setProjects([]);
+          setLoading(false);
+        }
+        return;
+      }
+
+      // Single source of truth shared with the homeowner dashboard.
+      const { data, error } = await supabase.rpc("active_projects_for_user", { _user_id: userId });
 
       if (error) {
         console.error("Failed to load projects", error);
@@ -50,22 +59,39 @@ const ActiveProjectsView = ({ tradeId }: { tradeId: string }) => {
         return;
       }
 
+      const rows = ((data || []) as any[]).filter(
+        (r) => r.role === "trade" && r.trade_id === tradeId
+      );
+
       const seen = new Map<string, ProjectRow>();
-      (data || []).forEach((row: any) => {
-        const job = row.jobs;
-        if (!job) return;
-        if (!seen.has(job.id)) {
-          seen.set(job.id, {
-            id: job.id,
-            title: job.title,
-            job_type: job.job_type,
-            postcode: job.postcode,
-            stage: job.stage,
-            status: job.status,
-            agreed_price: row.agreed_price ? Number(row.agreed_price) : null,
-          });
-        }
+      const contractIds: string[] = [];
+      rows.forEach((row) => {
+        if (seen.has(row.id)) return;
+        if (row.contract_id) contractIds.push(row.contract_id);
+        seen.set(row.id, {
+          id: row.id,
+          title: row.title,
+          job_type: row.job_type,
+          postcode: row.postcode,
+          stage: row.stage,
+          status: row.status,
+          agreed_price: null,
+        });
       });
+
+      // Contract values live in pence on the contracts table.
+      if (contractIds.length > 0) {
+        const { data: contracts } = await supabase
+          .from("contracts")
+          .select("id, job_id, total_value_incl_vat_pence, total_value_excl_vat_pence")
+          .in("id", contractIds);
+        (contracts || []).forEach((c: any) => {
+          const project = seen.get(c.job_id);
+          if (!project) return;
+          const pence = c.total_value_incl_vat_pence ?? c.total_value_excl_vat_pence;
+          if (pence != null) project.agreed_price = Number(pence) / 100;
+        });
+      }
 
       if (!cancelled) {
         setProjects(Array.from(seen.values()));
