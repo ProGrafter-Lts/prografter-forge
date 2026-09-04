@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { useDrawerNavigate } from "@/hooks/useDrawerNavigate";
 import { ArrowLeft, FileText, ShieldAlert, Check, Clock, Loader2, Lock, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -79,7 +78,6 @@ type UnavailableReason = "no_contract" | "awaiting_signatures" | "permission_den
 const ContractPage = () => {
   const { id: jobId } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const openDrawer = useDrawerNavigate();
 
   const [loading, setLoading] = useState(true);
   const [contract, setContract] = useState<ContractRow | null>(null);
