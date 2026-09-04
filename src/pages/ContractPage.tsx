@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { useDrawerNavigate } from "@/hooks/useDrawerNavigate";
 import { ArrowLeft, FileText, ShieldAlert, Check, Clock, Loader2, Lock, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -13,6 +12,7 @@ import SEO from "@/components/SEO";
 import ProjectPhotos from "@/components/project/ProjectPhotos";
 import { toast } from "sonner";
 import Logo from "@/components/Logo";
+import { AccentCard, TonePill, type JobFileTone } from "@/components/project/jobFileUi";
 
 interface ContractRow {
   id: string;
@@ -79,7 +79,6 @@ type UnavailableReason = "no_contract" | "awaiting_signatures" | "permission_den
 const ContractPage = () => {
   const { id: jobId } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const openDrawer = useDrawerNavigate();
 
   const [loading, setLoading] = useState(true);
   const [contract, setContract] = useState<ContractRow | null>(null);
@@ -326,10 +325,10 @@ const ContractPage = () => {
         description="Review, sign and manage your construction contract on ProGrafter."
         noindex
       />
-      <div className="max-w-4xl mx-auto px-4 py-6">
+      <div className="max-w-6xl mx-auto px-4 md:px-8 py-6">
         <button
-          onClick={() => openDrawer(`/project/${jobId}`)}
-          className="font-mono text-xs text-muted-foreground hover:text-primary inline-flex items-center gap-1 mb-4"
+          onClick={() => navigate(`/project/${jobId}`)}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-1.5 font-mono text-xs text-foreground hover:border-primary/50 transition-colors mb-4"
         >
           <ArrowLeft className="w-3.5 h-3.5" /> Back to project
         </button>
@@ -628,42 +627,47 @@ const ContractPage = () => {
 
           {/* COMMISSION */}
           <TabsContent value="commission" className="mt-4 space-y-4">
-            <div className="bg-card border border-border rounded-2xl p-5 space-y-3">
-              <h2 className="font-heading text-primary text-lg">Platform commission</h2>
+            <div className="bg-card border border-border rounded-2xl p-5 space-y-4">
+              <div className="flex items-center justify-between gap-3 flex-wrap">
+                <h2 className="font-heading text-primary text-lg">Platform commission</h2>
+                <TonePill tone={totalCommissionPence >= COMMISSION_CAP_PENCE ? "amber" : "teal"}>
+                  {totalCommissionPence >= COMMISSION_CAP_PENCE ? "Cap reached" : "7.5% · capped"}
+                </TonePill>
+              </div>
               <p className="font-mono text-xs text-muted-foreground">
                 7.5% of the cumulative job value (original contract plus every accepted variation),
                 capped at {formatGBP(COMMISSION_CAP_PENCE)} per job. Variations never push the total
                 past the cap.
               </p>
-              <dl className="grid sm:grid-cols-2 gap-3 font-mono text-xs pt-2">
-                <div className="border border-border rounded-xl p-3">
-                  <dt className="text-muted-foreground">Original contract value</dt>
-                  <dd className="text-foreground text-base">{formatGBP(baseValuePence)}</dd>
-                </div>
-                <div className="border border-border rounded-xl p-3">
-                  <dt className="text-muted-foreground">Accepted variations</dt>
-                  <dd className="text-foreground text-base">{formatGBP(acceptedVariationsPence)}</dd>
-                </div>
-                <div className="border border-border rounded-xl p-3">
-                  <dt className="text-muted-foreground">Cumulative job value</dt>
-                  <dd className="text-foreground text-base">{formatGBP(cumulativeValuePence)}</dd>
-                </div>
-                <div className="border border-border rounded-xl p-3">
-                  <dt className="text-muted-foreground">Total commission owed</dt>
-                  <dd className="text-foreground text-base">
-                    {formatGBP(totalCommissionPence)}
-                    {totalCommissionPence >= COMMISSION_CAP_PENCE && (
-                      <span className="ml-2 text-[10px] uppercase tracking-wide text-amber-600">cap reached</span>
-                    )}
-                  </dd>
-                </div>
+              <dl className="grid sm:grid-cols-2 gap-3 font-mono text-xs pt-1">
+                {[
+                  { label: "Original contract value", value: baseValuePence, tone: "sky" as JobFileTone },
+                  { label: "Accepted variations", value: acceptedVariationsPence, tone: "indigo" as JobFileTone },
+                  { label: "Cumulative job value", value: cumulativeValuePence, tone: "teal" as JobFileTone },
+                  {
+                    label: "Total commission owed",
+                    value: totalCommissionPence,
+                    tone: (totalCommissionPence >= COMMISSION_CAP_PENCE ? "amber" : "green") as JobFileTone,
+                  },
+                ].map((row) => (
+                  <AccentCard key={row.label} tone={row.tone}>
+                    <dt className="text-muted-foreground uppercase tracking-wide text-[10px]">{row.label}</dt>
+                    <dd className="text-foreground text-lg font-semibold mt-1">{formatGBP(row.value)}</dd>
+                  </AccentCard>
+                ))}
               </dl>
-              <p className="font-mono text-[11px] text-muted-foreground">
-                Commission from variations so far:{" "}
-                <span className="text-foreground">{formatGBP(variationCommissionPence)}</span> ·
-                remaining headroom under the cap:{" "}
-                <span className="text-foreground">{formatGBP(COMMISSION_CAP_PENCE - totalCommissionPence)}</span>
-              </p>
+              <div className="grid sm:grid-cols-2 gap-3 font-mono text-[11px]">
+                <div className="rounded-xl border border-border p-3">
+                  <span className="text-muted-foreground">Commission from variations so far</span>
+                  <p className="text-foreground text-sm mt-1">{formatGBP(variationCommissionPence)}</p>
+                </div>
+                <div className="rounded-xl border border-border p-3">
+                  <span className="text-muted-foreground">Remaining headroom under the cap</span>
+                  <p className="text-foreground text-sm mt-1">
+                    {formatGBP(Math.max(COMMISSION_CAP_PENCE - totalCommissionPence, 0))}
+                  </p>
+                </div>
+              </div>
             </div>
           </TabsContent>
 

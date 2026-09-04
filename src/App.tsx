@@ -350,8 +350,6 @@ const AppRoutes = () => {
           >
             <Route path="/project/:id" element={<ProjectDetail />} />
             <Route path="/project/:id/compare" element={<CompareQuotes />} />
-            <Route path="/project/:id/contract" element={<ContractPage />} />
-              <Route path="/project/:id/wallet" element={<ProjectWallet />} />
             <Route path="/dashboard/quote-checks/:id" element={<QuoteCheckDetail />} />
           </Route>
         </Routes>
