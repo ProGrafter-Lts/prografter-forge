@@ -369,7 +369,11 @@ const PipelineSection = ({ tradeId }: Props) => {
                 } ${isZero ? "opacity-70" : ""}`}
                 style={{ ["--ws-accent" as any]: "251 146 60" }}
                 aria-expanded={openStage === card.key}
-                aria-label={`${value} ${card.label} leads. ${card.subtitle}. Tap to see the leads in this stage.`}
+                aria-label={
+                  isContractStage
+                    ? `${value} contracted ${value === 1 ? "project" : "projects"} worth ${formatGBP(contractedValue)}. Tap to see them.`
+                    : `${value} ${card.label} leads. ${card.subtitle}. Tap to see the leads in this stage.`
+                }
               >
                 {/* Animated connector to the next stage */}
                 {i < CARD_DEFS.length - 1 && (
