@@ -57,12 +57,26 @@ const CARD_DEFS: {
   },
   {
     key: "won",
-    label: "Won",
-    subtitle: "Converted in last 90 days",
+    label: "Project Value",
+    subtitle: "Contracted work under way",
     color: "#34d399",
-    filter: "won",
   },
 ];
+
+interface ContractedProject {
+  jobId: string;
+  title: string;
+  postcode: string | null;
+  stage: string | null;
+  value: number | null;
+}
+
+const formatGBP = (n: number) =>
+  new Intl.NumberFormat("en-GB", {
+    style: "currency",
+    currency: "GBP",
+    maximumFractionDigits: 0,
+  }).format(n);
 
 
 interface StageRow {
@@ -122,11 +136,64 @@ const PipelineSection = ({ tradeId }: Props) => {
   const [stageLoading, setStageLoading] = useState(false);
   const [rowsByStage, setRowsByStage] = useState<Partial<Record<keyof Counts, StageRow[]>>>({});
   const [stageError, setStageError] = useState<string | null>(null);
+  const [contracted, setContracted] = useState<ContractedProject[]>([]);
+
+  /**
+   * The final pipeline stage tracks REAL contracted work, not lead outreach
+   * statuses. It uses the same source of truth as the Projects view:
+   * the active_projects_for_user RPC + contract values from `contracts`.
+   */
+  const loadContracted = useCallback(async () => {
+    const { data: authData } = await supabase.auth.getUser();
+    const userId = authData.user?.id;
+    if (!userId) {
+      setContracted([]);
+      return;
+    }
+    const { data, error: rpcError } = await supabase.rpc("active_projects_for_user", {
+      _user_id: userId,
+    });
+    if (rpcError) {
+      console.error("Failed to load contracted projects", rpcError);
+      setContracted([]);
+      return;
+    }
+    const rows = ((data || []) as any[]).filter(
+      (r) => r.role === "trade" && r.trade_id === tradeId && r.contract_id,
+    );
+    const byJob = new Map<string, ContractedProject>();
+    const contractIds: string[] = [];
+    rows.forEach((r) => {
+      if (byJob.has(r.id)) return;
+      contractIds.push(r.contract_id);
+      byJob.set(r.id, {
+        jobId: r.id,
+        title: r.title || r.job_type || "Project",
+        postcode: r.postcode ?? null,
+        stage: r.stage ?? null,
+        value: null,
+      });
+    });
+    if (contractIds.length) {
+      const { data: contracts } = await supabase
+        .from("contracts")
+        .select("id, job_id, total_value_incl_vat_pence, total_value_excl_vat_pence")
+        .in("id", contractIds);
+      (contracts || []).forEach((c: any) => {
+        const p = byJob.get(c.job_id);
+        if (!p) return;
+        const pence = c.total_value_incl_vat_pence ?? c.total_value_excl_vat_pence;
+        if (pence != null) p.value = Number(pence) / 100;
+      });
+    }
+    setContracted(Array.from(byJob.values()));
+  }, [tradeId]);
 
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
-    const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
+    void loadContracted();
+
 
     // Race the query against a 6s timeout so the section never hangs.
     const queryPromise = supabase
@@ -168,16 +235,16 @@ const PipelineSection = ({ tradeId }: Props) => {
     for (const r of (data ?? []) as StageRow[]) {
       const stage = stageForRow(r);
       if (!stage) continue;
-      if (stage === "won" && !(r.last_status_change_at && r.last_status_change_at >= ninetyDaysAgo)) {
-        continue;
-      }
+      // Lead outreach statuses never populate the final stage — that stage
+      // is driven by signed contracts only.
+      if (stage === "won") continue;
       next[stage] += 1;
       (byStage[stage] ||= []).push(r);
     }
     setCounts(next);
     setRowsByStage(byStage);
     setLoading(false);
-  }, [tradeId]);
+  }, [tradeId, loadContracted]);
 
   const openStageDetail = useCallback(
     (key: keyof Counts) => {
@@ -203,20 +270,24 @@ const PipelineSection = ({ tradeId }: Props) => {
     };
   }, [load]);
 
+  const contractedValue = contracted.reduce((sum, p) => sum + (p.value ?? 0), 0);
+  const valueForCard = (key: keyof Counts) =>
+    key === "won" ? contracted.length : counts[key];
+
   const totalLeads =
     counts.todo +
     counts.contacted +
     counts.planning_approved +
     counts.site_visit +
     counts.quoted +
-    counts.won +
+    contracted.length +
     counts.lost;
 
   return (
     <Workspace
       icon={GitBranch}
       title="Pipeline"
-      subtitle="Every lead, moving left to right toward won work."
+      subtitle="Every lead, moving left to right into contracted work."
       accent="orange"
       surface="1"
       texture="grid"
@@ -285,7 +356,8 @@ const PipelineSection = ({ tradeId }: Props) => {
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
           {CARD_DEFS.map((card, i) => {
-            const value = counts[card.key];
+            const isContractStage = card.key === "won";
+            const value = valueForCard(card.key);
             const isZero = value === 0;
             return (
               <button
@@ -297,7 +369,11 @@ const PipelineSection = ({ tradeId }: Props) => {
                 } ${isZero ? "opacity-70" : ""}`}
                 style={{ ["--ws-accent" as any]: "251 146 60" }}
                 aria-expanded={openStage === card.key}
-                aria-label={`${value} ${card.label} leads. ${card.subtitle}. Tap to see the leads in this stage.`}
+                aria-label={
+                  isContractStage
+                    ? `${value} contracted ${value === 1 ? "project" : "projects"} worth ${formatGBP(contractedValue)}. Tap to see them.`
+                    : `${value} ${card.label} leads. ${card.subtitle}. Tap to see the leads in this stage.`
+                }
               >
                 {/* Animated connector to the next stage */}
                 {i < CARD_DEFS.length - 1 && (
@@ -323,10 +399,18 @@ const PipelineSection = ({ tradeId }: Props) => {
                   {card.label}
                 </div>
                 <div className="mt-1 font-sans text-[11px] text-white/50 leading-snug">
-                  {card.subtitle}
+                  {isContractStage
+                    ? contractedValue > 0
+                      ? `${formatGBP(contractedValue)} contracted`
+                      : card.subtitle
+                    : card.subtitle}
                 </div>
                 <div className="mt-2 font-mono text-[10px] uppercase tracking-wider ws-accent-fg">
-                  {openStage === card.key ? "Hide leads" : "View leads"}
+                  {openStage === card.key
+                    ? "Hide"
+                    : isContractStage
+                      ? "View projects"
+                      : "View leads"}
                 </div>
               </button>
             );
@@ -340,7 +424,11 @@ const PipelineSection = ({ tradeId }: Props) => {
             <div>
               <p className="font-sans font-semibold text-white">
                 {CARD_DEFS.find((c) => c.key === openStage)?.label} —{" "}
-                {counts[openStage]} {counts[openStage] === 1 ? "lead" : "leads"}
+                {openStage === "won"
+                  ? `${contracted.length} ${contracted.length === 1 ? "project" : "projects"}${
+                      contractedValue > 0 ? ` · ${formatGBP(contractedValue)}` : ""
+                    }`
+                  : `${counts[openStage]} ${counts[openStage] === 1 ? "lead" : "leads"}`}
               </p>
               <p className="font-sans text-xs text-white/55 mt-1">
                 {CARD_DEFS.find((c) => c.key === openStage)?.subtitle}
@@ -357,7 +445,41 @@ const PipelineSection = ({ tradeId }: Props) => {
           </div>
 
           <div className="mt-4 space-y-2">
-            {stageLoading ? (
+            {openStage === "won" ? (
+              contracted.length === 0 ? (
+                <p className="font-sans text-sm text-white/60">
+                  No signed contracts yet. Once a quote is accepted and the contract is in place, the
+                  project appears here.
+                </p>
+              ) : (
+                contracted.map((p) => (
+                  <button
+                    key={p.jobId}
+                    type="button"
+                    onClick={() => navigate(`/dashboard/trade?view=projects`)}
+                    className="w-full text-left rounded-xl bg-white/5 hover:bg-white/10 transition-colors p-4"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <p className="font-sans font-semibold text-sm text-white">{p.title}</p>
+                      {p.value != null && (
+                        <span className="font-mono text-xs text-emerald-300 shrink-0">
+                          {formatGBP(p.value)}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap items-center gap-3 mt-1.5 font-mono text-[11px] text-white/55">
+                      {p.postcode && (
+                        <span className="inline-flex items-center gap-1">
+                          <MapPin className="w-3 h-3" />
+                          {p.postcode}
+                        </span>
+                      )}
+                      {p.stage && <span>{p.stage.replace(/_/g, " ")}</span>}
+                    </div>
+                  </button>
+                ))
+              )
+            ) : stageLoading ? (
               <>
                 <Skeleton className="h-16 w-full" />
                 <Skeleton className="h-16 w-full" />
