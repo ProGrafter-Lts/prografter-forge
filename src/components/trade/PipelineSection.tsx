@@ -244,7 +244,7 @@ const PipelineSection = ({ tradeId }: Props) => {
     setCounts(next);
     setRowsByStage(byStage);
     setLoading(false);
-  }, [tradeId]);
+  }, [tradeId, loadContracted]);
 
   const openStageDetail = useCallback(
     (key: keyof Counts) => {
