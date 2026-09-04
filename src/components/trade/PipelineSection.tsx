@@ -399,10 +399,18 @@ const PipelineSection = ({ tradeId }: Props) => {
                   {card.label}
                 </div>
                 <div className="mt-1 font-sans text-[11px] text-white/50 leading-snug">
-                  {card.subtitle}
+                  {isContractStage
+                    ? contractedValue > 0
+                      ? `${formatGBP(contractedValue)} contracted`
+                      : card.subtitle
+                    : card.subtitle}
                 </div>
                 <div className="mt-2 font-mono text-[10px] uppercase tracking-wider ws-accent-fg">
-                  {openStage === card.key ? "Hide leads" : "View leads"}
+                  {openStage === card.key
+                    ? "Hide"
+                    : isContractStage
+                      ? "View projects"
+                      : "View leads"}
                 </div>
               </button>
             );
