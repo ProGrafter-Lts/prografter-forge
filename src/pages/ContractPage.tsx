@@ -326,10 +326,10 @@ const ContractPage = () => {
         description="Review, sign and manage your construction contract on ProGrafter."
         noindex
       />
-      <div className="max-w-4xl mx-auto px-4 py-6">
+      <div className="max-w-6xl mx-auto px-4 md:px-8 py-6">
         <button
-          onClick={() => openDrawer(`/project/${jobId}`)}
-          className="font-mono text-xs text-muted-foreground hover:text-primary inline-flex items-center gap-1 mb-4"
+          onClick={() => navigate(`/project/${jobId}`)}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-1.5 font-mono text-xs text-foreground hover:border-primary/50 transition-colors mb-4"
         >
           <ArrowLeft className="w-3.5 h-3.5" /> Back to project
         </button>
