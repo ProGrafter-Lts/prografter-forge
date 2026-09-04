@@ -127,6 +127,13 @@
       "when": 1788520731359,
       "tag": "0017_fix_contract_insurance_ref_field",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1788520793240,
+      "tag": "0018_fix_contract_dates_placeholder",
+      "breakpoints": true
     }
   ]
 }
