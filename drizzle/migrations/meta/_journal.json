@@ -120,6 +120,13 @@
       "when": 1788520655085,
       "tag": "0016_quote_acceptance_promotes_job",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1788520731359,
+      "tag": "0017_fix_contract_insurance_ref_field",
+      "breakpoints": true
     }
   ]
 }
