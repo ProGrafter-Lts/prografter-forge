@@ -1339,6 +1339,17 @@ const FixedStandardReport = ({ report, admin = false }: { report: ReportJson; ad
   const questions = admin ? prioritisedQuestions : prioritisedQuestions.slice(0, MAX_CONSUMER_QUESTIONS);
   const hiddenQuestionCount = admin ? 0 : Math.max(0, prioritisedQuestions.length - questions.length);
   const questionsText = questions.map((q, i) => `${i + 1}. ${q.question}`).join("\n");
+  // The suggested message must mirror the questions shown above it, exactly.
+  const cleanQuestion = (q: string) =>
+    q.replace(/^Regarding\s+/i, "").replace(/\s*\([^()]*\)\s*$/, "").trim();
+  const builderMessage = questions.length
+    ? [
+        "Thanks for the quote. Before we decide, please confirm the following in writing:",
+        "",
+        ...questions.map((q, i) => `${i + 1}. ${cleanQuestion(q.question)}`),
+      ].join("\n")
+    : report.builder_message;
+
   // showChecklist retained for potential external toggling; appendix uses SectionCard collapse.
   void showChecklist;
   void setShowChecklist;
