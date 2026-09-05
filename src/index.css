@@ -1166,8 +1166,8 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
   color: #52606d;
   margin: 0.55rem 0 0;
 }
-.qr-metric2-ringrow { display: flex; align-items: center; gap: 0.9rem; margin-top: 0.55rem; }
-.qr-metric2-ringrow .qr-metric2-explain { margin-top: 0; }
+.qr-metric2-ringrow { display: flex; flex-wrap: wrap; align-items: center; gap: 0.9rem; margin-top: 0.55rem; }
+.qr-metric2-ringrow .qr-metric2-explain { margin-top: 0; flex: 1 1 150px; min-width: 150px; }
 
 /* progress bars */
 .qr-bar {
@@ -1769,3 +1769,76 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
 .dashboard-dark h2,
 .dashboard-dark h3 { letter-spacing: 0.03em; margin-bottom: 0.5rem; }
 .dashboard-dark p  { line-height: 1.6; }
+
+
+/* ============================================================
+   Quote report type scale (.qr-*) — token driven.
+   Screen sizes lift ~6-11% for readability; @media print maps the
+   same tokens onto conservative point sizes so printed/PDF reports
+   stay inside the page. Change a value here, not in 60 places.
+   ============================================================ */
+:root {
+  --qr-label: 0.72rem;
+  --qr-small: 0.79rem;
+  --qr-body-sm: 0.84rem;
+  --qr-body: 0.9rem;
+  --qr-body-lg: 0.95rem;
+  --qr-h4: 1.05rem;
+  --qr-h2: 1.22rem;
+  --qr-h1: 1.4rem;
+  --qr-display: 1.65rem;
+  --qr-display-lg: 2.1rem;
+  --qr-score: 2.6rem;
+}
+.qr-hero-metalabel, .qr-ring-den,
+.qr-metric-label, .qr-flagcol-sub, .qr-final-action-label,
+.qr-hero-kicker, .qr-strip-label, .qr-final-tag,
+.qr-score-label, .qr-metric-sub, .qr-collapse-btn,
+.qr-hero-prepared, .qr-pill { font-size: var(--qr-label); }
+
+.qr-metric2-explain, .qr-disclaimer,
+.qr-actionplan-list li span, .qr-copyall-btn { font-size: var(--qr-small); }
+
+.qr-badge, .qr-report table, .qr-hero-risk, .qr-final-btn, .qr-chip,
+.qr-flaglist li, .qr-report .qr-checklist li, .qr-issue,
+.qr-section2-intro, .qr-actionplan-sub, .qr-qtext,
+.qr-insight-title, .qr-insight-body { font-size: var(--qr-body-sm); }
+
+.qr-nextstep2-text, .qr-report p, .qr-report ol li,
+.qr-report .qr-figures li, .qr-msgbox, .qr-hero-desc,
+.qr-final-why, .qr-final-action p { font-size: var(--qr-body); }
+
+.qr-report h3, .qr-appendix-h3, .qr-actionplan-list li,
+.qr-qgroup-title, .qr-flagcol-title { font-size: var(--qr-body-lg); }
+
+.qr-hero-metavalue { font-size: var(--qr-h4); }
+.qr-report h2, .qr-section2-title { font-size: var(--qr-h2); }
+.qr-actionplan-title { font-size: var(--qr-h1); }
+.qr-final-headline, .qr-ring-num, .qr-metric-value { font-size: var(--qr-display); }
+.qr-hero-title, .qr-metric2-value { font-size: var(--qr-display-lg); }
+.qr-score { font-size: var(--qr-score); }
+
+/* Mobile keeps the existing step-down, one notch up from before */
+@media (max-width: 640px) {
+  .qr-actionplan-title, .qr-section2-title { font-size: var(--qr-h2); }
+  .qr-report table, .qr-qtext { font-size: var(--qr-body-sm); }
+  .qr-hero-title { font-size: var(--qr-display); }
+  .qr-final-headline { font-size: var(--qr-h1); }
+  .qr-metric2-value { font-size: var(--qr-display); }
+}
+
+@media print {
+  :root {
+    --qr-label: 8pt;
+    --qr-small: 9pt;
+    --qr-body-sm: 9.5pt;
+    --qr-body: 10.5pt;
+    --qr-body-lg: 11pt;
+    --qr-h4: 12pt;
+    --qr-h2: 14pt;
+    --qr-h1: 16pt;
+    --qr-display: 18pt;
+    --qr-display-lg: 22pt;
+    --qr-score: 26pt;
+  }
+}
