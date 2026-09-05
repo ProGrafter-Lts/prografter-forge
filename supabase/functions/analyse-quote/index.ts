@@ -601,7 +601,7 @@ Deno.serve(async (req) => {
     const results = mergedResults;
     const counts = mergedCounts;
     const questions = buildQuestions(results);
-    const builderMessage = buildBuilderMessage(questions);
+    const builderMessage = buildBuilderMessage(questions, results);
 
     const supportingDocsSummary = docExtractions.map((d) => ({
       file_name: d.file_name,
