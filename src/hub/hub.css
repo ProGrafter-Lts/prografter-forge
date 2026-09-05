@@ -1319,3 +1319,37 @@
 }
 .hub-card { padding: 26px; }
 .hub-stat-card { padding: 26px; }
+
+/* ---------- Global legibility pass (token-level, visual only) ---------- */
+.hub-shell { --hub-muted: #4d5c72; --hub-line: #e4e8ed; line-height: 1.6; }
+.hub-shell h1, .hub-shell h2, .hub-shell h3,
+.hub-shell h4, .hub-shell h5, .hub-shell h6 { letter-spacing: -0.015em; line-height: 1.2; }
+
+.hub-soon-badge, .hub-bottomnav-item, .hub-filter-group-count { font-size: 12px; }
+.hub-brand-sub, .hub-nav-label, .hub-profile-company, .hub-filter-count { font-size: 12px; }
+.hub-crm-followup { font-size: 12.5px; }
+.hub-badge, .hub-tag, .hub-table thead th, .hub-kanban-count, .hub-activity-when,
+.hub-filter-label, .hub-active-pill, .hub-active-pill-clear, .hub-opp-trade,
+.hub-score-row-label, .hub-score-row-val, .hub-kanban-empty, .hub-fact-label,
+.hub-crm-meta, .hub-today-row-meta, .hub-letter-label, .hub-letter-hint,
+.hub-letter-log-when { font-size: 12.5px; }
+.hub-analysis-note, .hub-today-empty { font-size: 13px; }
+.hub-avatar, .hub-profile-name, .hub-btn-sm, .hub-stat-label, .hub-field-label,
+.hub-kanban-col-head, .hub-action-sub, .hub-viewtoggle button, .hub-chip,
+.hub-filter-clear, .hub-opp-count, .hub-opp-meta, .hub-back, .hub-crm-menu button,
+.hub-potential-label, .hub-potential-count, .hub-today-count, .hub-today-row-main,
+.hub-letter-sub, .hub-letter-toggle button, .hub-letter-meta { font-size: 14px; }
+.hub-crm-project, .hub-letter-log-main { font-size: 14px; }
+.hub-nav-item, .hub-btn, .hub-input, .hub-select, .hub-textarea, .hub-menu-item,
+.hub-table, .hub-action-tile .hub-action-label, .hub-activity-text, .hub-doc-row,
+.hub-fact-value, .hub-brief-empty, .hub-today-title, .hub-letter-input,
+.hub-letter-textarea { font-size: 15px; }
+.hub-brand-name, .hub-page-sub, .hub-brief-text, .hub-btn-lg { font-size: 16px; }
+.hub-brand-mark, .hub-detail-heading { font-size: 17px; }
+.hub-action-label, .hub-opp-title { font-size: 18px; }
+.hub-section-title, .hub-letter-title { font-size: 20px; }
+.hub-letter-brand { font-size: 20px; }
+.hub-page-title { font-size: 32px; }
+.hub-potential-value { font-size: 32px; }
+.hub-stat-value { font-size: 34px; }
+.hub-card, .hub-stat-card { padding: 26px; }
