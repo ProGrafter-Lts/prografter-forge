@@ -115,12 +115,29 @@ export function buildQuestions(results: CheckResult[]) {
   return questions;
 }
 
+// Mirrors the on-screen "Key Questions" list exactly: same verdict priority
+// sort (MISSING first, then NEEDS CLARIFICATION) and the same cap of 10.
+export const MAX_BUILDER_QUESTIONS = 10;
+
 export function buildBuilderMessage(
   questions: { check_id: string; question: string }[],
+  results?: CheckResult[],
 ): string {
   if (questions.length === 0) {
     return "Thanks for the quote — it covers everything we needed, so no questions from us.";
   }
+  const verdictByCheck = new Map<string, string>();
+  for (const r of results ?? []) verdictByCheck.set(r.check_id, r.verdict || "");
+  const priority = (checkId: string) => {
+    const v = verdictByCheck.get(checkId);
+    if (v === "MISSING") return 0;
+    if (v === "NEEDS CLARIFICATION") return 1;
+    return 2;
+  };
+  const ordered = questions
+    .map((q, i) => ({ q, i }))
+    .sort((a, b) => priority(a.q.check_id) - priority(b.q.check_id) || a.i - b.i)
+    .map((x) => x.q);
   // Strip the internal "Regarding X: ... (why it matters)" scaffolding so each
   // line reads as a direct question a homeowner would actually send.
   const clean = (q: string) =>
@@ -128,13 +145,16 @@ export function buildBuilderMessage(
       .replace(/^Regarding\s+/i, "")
       .replace(/\s*\([^()]*\)\s*$/, "")
       .trim();
-  const lines = questions.slice(0, 12).map((q, i) => `${i + 1}. ${clean(q.question)}`);
+  const lines = ordered
+    .slice(0, MAX_BUILDER_QUESTIONS)
+    .map((q, i) => `${i + 1}. ${clean(q.question)}`);
   return [
     "Thanks for the quote. Before we decide, please confirm the following in writing:",
     "",
     ...lines,
   ].join("\n");
 }
+
 
 
 export function verdictSummary(counts: ReturnType<typeof scoreChecklist>): string {
