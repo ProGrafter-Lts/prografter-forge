@@ -1682,7 +1682,7 @@ const FixedStandardReport = ({ report, admin = false }: { report: ReportJson; ad
         )}
 
         {/* Builder message */}
-        {report.builder_message && <BuilderMessage message={report.builder_message} />}
+        {builderMessage && <BuilderMessage message={builderMessage} />}
 
         {/* Full checklist appendix — admin-only audit trail (Advanced Review Engine) */}
         {admin && (
