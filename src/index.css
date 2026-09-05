@@ -1690,3 +1690,82 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
   border-color: rgba(94, 234, 212, 0.5);
   color: #FFFFFF !important;
 }
+
+/* ============================================================
+   GLOBAL VISUAL PASS — token-level, dashboard surfaces only.
+   Scoped to .dashboard-dark so public/marketing pages, which use
+   raw Tailwind sizes, are unaffected.
+   ============================================================ */
+
+/* 1. Status pills: light tinted backgrounds that the dark theme did NOT
+   convert, while it DID lighten their text → light-on-light, legible
+   only on hover. Same recipe as the TradeVault `n` tones (bg/15 + border/30). */
+.dashboard-dark [class*="bg-amber-100"],
+.dashboard-dark [class*="bg-orange-100"] {
+  background-color: rgba(251, 191, 36, 0.15) !important;
+  border-color: rgba(251, 191, 36, 0.30) !important;
+}
+.dashboard-dark [class*="bg-red-100"],
+.dashboard-dark [class*="bg-rose-100"] {
+  background-color: rgba(248, 113, 113, 0.15) !important;
+  border-color: rgba(248, 113, 113, 0.30) !important;
+}
+.dashboard-dark [class*="bg-emerald-100"],
+.dashboard-dark [class*="bg-teal-100"] {
+  background-color: rgba(13, 148, 136, 0.15) !important;
+  border-color: rgba(13, 148, 136, 0.30) !important;
+}
+.dashboard-dark [class*="bg-blue-100"],
+.dashboard-dark [class*="bg-sky-100"],
+.dashboard-dark [class*="bg-indigo-100"],
+.dashboard-dark [class*="bg-violet-100"],
+.dashboard-dark [class*="bg-purple-100"] {
+  background-color: rgba(96, 165, 250, 0.15) !important;
+  border-color: rgba(96, 165, 250, 0.30) !important;
+}
+.dashboard-dark [class*="bg-slate-100"],
+.dashboard-dark [class*="bg-gray-100"],
+.dashboard-dark [class*="bg-zinc-100"],
+.dashboard-dark [class*="bg-neutral-100"],
+.dashboard-dark [class*="bg-stone-100"] {
+  background-color: rgba(255, 255, 255, 0.10) !important;
+  border-color: rgba(255, 255, 255, 0.22) !important;
+}
+.dashboard-dark [class*="text-slate-8"],
+.dashboard-dark [class*="text-slate-9"],
+.dashboard-dark [class*="text-gray-8"],
+.dashboard-dark [class*="text-gray-9"],
+.dashboard-dark [class*="text-zinc-8"],
+.dashboard-dark [class*="text-zinc-9"],
+.dashboard-dark [class*="text-indigo-7"],
+.dashboard-dark [class*="text-indigo-8"],
+.dashboard-dark [class*="text-indigo-9"],
+.dashboard-dark [class*="text-violet-7"],
+.dashboard-dark [class*="text-violet-8"],
+.dashboard-dark [class*="text-purple-7"],
+.dashboard-dark [class*="text-purple-8"],
+.dashboard-dark [class*="text-teal-7"],
+.dashboard-dark [class*="text-teal-8"],
+.dashboard-dark [class*="text-orange-7"],
+.dashboard-dark [class*="text-orange-8"] {
+  color: rgba(255, 255, 255, 0.92) !important;
+}
+
+/* 2. Legibility floor — nothing on a dashboard renders below 12px. */
+.dashboard-dark .text-\[10px\] { font-size: 11px !important; }
+.dashboard-dark .text-\[11px\] { font-size: 12px !important; }
+.dashboard-dark .text-xs      { font-size: 0.8125rem !important; line-height: 1.15rem !important; }
+.dashboard-dark .text-sm      { font-size: 0.9375rem !important; line-height: 1.4rem !important; }
+.dashboard-dark .text-base    { font-size: 1.0625rem !important; line-height: 1.6rem !important; }
+.dashboard-dark .text-lg      { font-size: 1.1875rem !important; line-height: 1.7rem !important; }
+.dashboard-dark .text-xl      { font-size: 1.375rem !important; line-height: 1.85rem !important; }
+.dashboard-dark .text-2xl     { font-size: 1.6875rem !important; line-height: 2.1rem !important; }
+
+/* 3. Muted text contrast floor on navy. */
+.dashboard-dark .text-muted-foreground { color: rgba(255, 255, 255, 0.72) !important; }
+
+/* 4. Breathing room + hierarchy. */
+.dashboard-dark h1,
+.dashboard-dark h2,
+.dashboard-dark h3 { letter-spacing: 0.03em; margin-bottom: 0.5rem; }
+.dashboard-dark p  { line-height: 1.6; }
