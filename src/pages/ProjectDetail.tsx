@@ -116,7 +116,8 @@ const ProjectDetail = () => {
   const [userId, setUserId] = useState<string | null>(null);
   const [tradeName, setTradeName] = useState("—");
   const [tradeVerified, setTradeVerified] = useState(false);
-  const [tradeRating] = useState(4.8);
+  const [tradeRating, setTradeRating] = useState(0);
+  const [tradeReviewCount, setTradeReviewCount] = useState(0);
   const [homeownerName, setHomeownerName] = useState("—");
   const [msgText, setMsgText] = useState("");
   const [subTradeStageId, setSubTradeStageId] = useState<string | null>(null);
