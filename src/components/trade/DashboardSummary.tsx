@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { computeVaultSummary, type VaultDocument } from "@/lib/tradeVault";
-import { isContractedActiveJob } from "@/lib/activeProjects";
+
 import { isTestRecord } from "@/lib/testData";
 
 
