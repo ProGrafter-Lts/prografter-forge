@@ -15,6 +15,8 @@ interface ProjectHeaderProps {
   tradeName: string;
   tradeVerified: boolean;
   tradeRating: number;
+  /** Number of published reviews backing the rating. Zero = not yet rated. */
+  tradeReviewCount?: number;
   homeownerName: string;
   contractValue: number;
   /** 0–100 — derived from completed stages on the parent page. */
