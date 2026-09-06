@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { computeVaultSummary, type VaultDocument } from "@/lib/tradeVault";
-import { isContractedActiveJob } from "@/lib/activeProjects";
+
 import { isTestRecord } from "@/lib/testData";
 
 
@@ -90,7 +90,7 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
       ]);
 
       const jobIds = (contractsRes.data || []).map((c: any) => c.job_id).filter(Boolean);
-      const [stagesRes, jobsRes] = await Promise.all([
+      const [stagesRes] = await Promise.all([
         jobIds.length
           ? supabase
               .from("project_stages")
@@ -100,10 +100,8 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
               .order("planned_start", { ascending: true })
               .limit(1)
           : { data: [] as any[] },
-        jobIds.length
-          ? supabase.from("jobs").select("id, stage").in("id", jobIds)
-          : { data: [] as any[] },
       ]);
+
 
       if (cancelled) return;
 
@@ -149,15 +147,27 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
         nextDate = { date: nextStage.planned_start, label: nextStage.stage_name || "Project stage" };
       }
 
+      // Must match the Projects list and Pipeline exactly: the shared
+      // active_projects_for_user RPC, not a locally re-derived stage rule.
       const contractsByJobId = new Map((contractsRes.data || []).map((c: any) => [c.job_id, c]));
-      const activeProjectRows = (jobsRes.data || []).filter(isContractedActiveJob);
-      const activeProjects = activeProjectRows.length;
-      const activeProjectsValue = activeProjectRows.reduce((sum: number, job: any) => {
-        const c = contractsByJobId.get(job.id);
+      const { data: authData } = await supabase.auth.getUser();
+      const userId = authData.user?.id;
+      const rpcRes = userId
+        ? await supabase.rpc("active_projects_for_user", { _user_id: userId })
+        : { data: [] as any[] };
+      const activeJobIds = new Set(
+        ((rpcRes.data || []) as any[])
+          .filter((r) => r.role === "trade" && r.trade_id === tradeId)
+          .map((r) => r.id),
+      );
+      const activeProjects = activeJobIds.size;
+      const activeProjectsValue = Array.from(activeJobIds).reduce((sum: number, jobId: any) => {
+        const c = contractsByJobId.get(jobId);
         if (!c) return sum;
         const pence = c.total_value_incl_vat_pence ?? c.total_value_excl_vat_pence;
         return sum + (pence ? Number(pence) / 100 : 0);
       }, 0);
+
 
       setData({
         pipelineActive: pipelineTodo + pipelineWaiting + pipelineQuoted,
