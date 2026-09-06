@@ -116,7 +116,8 @@ const ProjectDetail = () => {
   const [userId, setUserId] = useState<string | null>(null);
   const [tradeName, setTradeName] = useState("—");
   const [tradeVerified, setTradeVerified] = useState(false);
-  const [tradeRating] = useState(4.8);
+  const [tradeRating, setTradeRating] = useState(0);
+  const [tradeReviewCount, setTradeReviewCount] = useState(0);
   const [homeownerName, setHomeownerName] = useState("—");
   const [msgText, setMsgText] = useState("");
   const [subTradeStageId, setSubTradeStageId] = useState<string | null>(null);
@@ -208,6 +209,8 @@ const ProjectDetail = () => {
     if (t2) {
       setTradeName(t2.company_name || t2.name);
       setTradeVerified(!!t2.verified);
+      setTradeRating(t2.avg_rating != null ? Number(t2.avg_rating) : 0);
+      setTradeReviewCount(t2.review_count != null ? Number(t2.review_count) : 0);
     }
 
     const [stageRes, msgRes, quoteRes, contractRes] = await Promise.allSettled([
@@ -448,6 +451,7 @@ const ProjectDetail = () => {
           tradeName={tradeName}
           tradeVerified={tradeVerified}
           tradeRating={tradeRating}
+          tradeReviewCount={tradeReviewCount}
           homeownerName={homeownerName}
           contractValue={contractValue}
           progress={progress}
