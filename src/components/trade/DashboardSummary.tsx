@@ -90,7 +90,7 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
       ]);
 
       const jobIds = (contractsRes.data || []).map((c: any) => c.job_id).filter(Boolean);
-      const [stagesRes, jobsRes] = await Promise.all([
+      const [stagesRes] = await Promise.all([
         jobIds.length
           ? supabase
               .from("project_stages")
@@ -100,10 +100,8 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
               .order("planned_start", { ascending: true })
               .limit(1)
           : { data: [] as any[] },
-        jobIds.length
-          ? supabase.from("jobs").select("id, stage").in("id", jobIds)
-          : { data: [] as any[] },
       ]);
+
 
       if (cancelled) return;
 
