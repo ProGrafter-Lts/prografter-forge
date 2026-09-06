@@ -57,6 +57,7 @@ const ProjectHeader = ({
   tradeName,
   tradeVerified,
   tradeRating,
+  tradeReviewCount = 0,
   homeownerName,
   contractValue,
   progress,
@@ -78,10 +79,15 @@ const ProjectHeader = ({
             <span className="flex items-center gap-1">
               Trade: <span className="text-navy font-semibold">{tradeName}</span>
               {tradeVerified && <ShieldCheck className="w-3.5 h-3.5 text-teal" />}
-              {tradeRating > 0 && (
+              {tradeReviewCount > 0 && tradeRating > 0 ? (
                 <span className="flex items-center gap-0.5 text-amber-500">
                   <Star className="w-3 h-3 fill-amber-500" /> {tradeRating.toFixed(1)}
+                  <span className="text-secondary-text ml-1">
+                    ({tradeReviewCount} review{tradeReviewCount === 1 ? "" : "s"})
+                  </span>
                 </span>
+              ) : (
+                <span className="italic text-secondary-text">Awaiting first review</span>
               )}
             </span>
             <span>·</span>
