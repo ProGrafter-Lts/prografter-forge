@@ -22,7 +22,7 @@ const SignUpSection = () => {
             Live in Nottinghamshire.<br /><span className="text-teal">Growing outward.</span>
           </h2>
           <p className="font-body text-secondary-text text-base font-light max-w-sm">
-            ProGrafter is live and taking signups across Nottinghamshire and the East Midlands — and growing. Register free today: no monthly fees, no spam, just verified job leads.
+            ProGrafter is live across Nottinghamshire and the East Midlands — and growing. No subscription to join, quote, or get paid — ever. Matching is free; optional paid tools are separate add-ons.
           </p>
         </div>
 

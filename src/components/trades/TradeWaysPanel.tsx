@@ -36,9 +36,9 @@ const TradeWaysPanel = () => {
             </h2>
           </div>
           <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-cream/55 leading-relaxed craft:text-right">
-            No lead fees.
+            Core platform free.
             <br />
-            No subscriptions.
+            Paid tools optional.
           </p>
         </div>
 

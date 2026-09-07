@@ -220,14 +220,14 @@ const IsCheckatradeWorthIt = () => {
       <section className="px-6 py-24 border-t border-cream/10">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="font-heading text-cream text-[36px] craft:text-[72px] leading-[1] mb-6">
-            Register Free —<br /><span className="text-teal">No Monthly Fees.</span>
+            Register Free —<br /><span className="text-teal">No Platform Subscription.</span>
           </h2>
           <p className="font-body text-cream/70 max-w-xl mx-auto mb-10 text-lg">
-            7.5% on completion only. Capped at £900. No subscription, no credits, no lock-in.
+            No subscription to join, quote, or get paid — ever. Optional paid tools are separate add-ons. Commission is capped at £900.
           </p>
           <Button asChild variant="cta" size="lg">
             <Link to="/register/trade">
-              Register Free → No Monthly Fees <ArrowRight className="ml-1" />
+              Register Free <ArrowRight className="ml-1" />
             </Link>
           </Button>
         </div>

@@ -33,7 +33,7 @@ const PILLARS = [
   {
     icon: "£",
     title: "Fair, Transparent Pricing",
-    desc: "One capped commission when a job completes and the trade has been paid. No monthly fees, no lead fees, no pay-to-play rankings.",
+    desc: "No subscription to join, quote, or get paid — ever. Matching is free. Optional paid tools are separate, opt-in add-ons; commission is capped at £900.",
   },
   {
     icon: "✦",

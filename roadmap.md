@@ -17,3 +17,7 @@
 
 ## Homeowner landing page rebuild
 - [x] Rebuilt homepage to approved homeowner mock-up (hero, three ways, five checks, four steps, differentiation, final CTA)
+
+## Platform subscription messaging
+- [x] Clarify that joining, matching, quoting and getting paid never require a subscription
+- [x] Distinguish optional paid tools such as Planning Hub as separate opt-in add-ons

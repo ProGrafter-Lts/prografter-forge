@@ -28,7 +28,7 @@ const CalculatorsPage = () => (
     </ContentSection>
     <ContentCta
       title="Only pay when you get paid"
-      intro="No monthly fees. No lead fees. Register free and win genuine work."
+      intro="No subscription to join, quote, or get paid — ever. Matching is free; optional paid tools are separate add-ons."
       primary={{ label: "Join as a Trade", href: "/signup/trade" }}
       secondary={{ label: "How pricing works", href: "/pricing" }}
     />
