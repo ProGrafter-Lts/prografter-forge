@@ -11,7 +11,7 @@ import Footer from "@/components/Footer";
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-deep">
+    <div className="min-h-screen">
       <SEO
         title="ProGrafter — Home Building Work, Without The Guesswork"
         description="Check quotes, find verified trades and manage your project with clarity. ProGrafter gives UK homeowners the confidence to build, renovate and improve — the right way."
