@@ -111,8 +111,8 @@ const PhotoDiaryUploader = ({
           uploaded_by: uploadedBy,
           uploader_user_id: userId,
           batch_id: batchId,
-          taken_at: meta.takenAt ?? manualIso,
-          taken_at_source: meta.takenAt ? "exif" : "manual",
+          taken_at: meta.takenAt,
+          taken_at_source: "exif",
           gps_lat: meta.lat,
           gps_lng: meta.lng,
           camera_make_model: meta.cameraMakeModel,
@@ -122,17 +122,21 @@ const PhotoDiaryUploader = ({
           continue;
         }
         ok += 1;
-        if (meta.takenAt) withExif += 1;
-        if (meta.lat !== null) withGps += 1;
       }
 
+      setRejected(bad);
+
       if (ok > 0) {
-        const bits = [`${ok} photo${ok === 1 ? "" : "s"} added`];
-        if (withExif > 0) bits.push(`${withExif} with camera date/time`);
-        if (withGps > 0) bits.push(`${withGps} with location`);
-        toast.success(bits.join(" · "));
+        toast.success(
+          `${ok} photo${ok === 1 ? "" : "s"} added with camera date, time and location`,
+        );
         setCaption("");
         onUploaded();
+      }
+      if (bad.length > 0) {
+        toast.error(
+          `${bad.length} photo${bad.length === 1 ? "" : "s"} rejected — no camera date/time or location`,
+        );
       }
     } finally {
       setBusy(false);
