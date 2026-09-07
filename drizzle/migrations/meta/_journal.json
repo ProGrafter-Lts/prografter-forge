@@ -134,6 +134,13 @@
       "when": 1788520793240,
       "tag": "0018_fix_contract_dates_placeholder",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1788776728852,
+      "tag": "0019_job_photos_capture_metadata",
+      "breakpoints": true
     }
   ]
 }

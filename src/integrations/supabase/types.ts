@@ -2317,34 +2317,49 @@ export type Database = {
       job_photos: {
         Row: {
           batch_id: string | null
+          camera_make_model: string | null
           created_at: string
+          gps_lat: number | null
+          gps_lng: number | null
           id: string
           job_id: string
           label: string
           photo_url: string
           stage: number
+          taken_at: string | null
+          taken_at_source: string | null
           uploaded_by: string
           uploader_user_id: string | null
         }
         Insert: {
           batch_id?: string | null
+          camera_make_model?: string | null
           created_at?: string
+          gps_lat?: number | null
+          gps_lng?: number | null
           id?: string
           job_id: string
           label?: string
           photo_url: string
           stage?: number
+          taken_at?: string | null
+          taken_at_source?: string | null
           uploaded_by?: string
           uploader_user_id?: string | null
         }
         Update: {
           batch_id?: string | null
+          camera_make_model?: string | null
           created_at?: string
+          gps_lat?: number | null
+          gps_lng?: number | null
           id?: string
           job_id?: string
           label?: string
           photo_url?: string
           stage?: number
+          taken_at?: string | null
+          taken_at_source?: string | null
           uploaded_by?: string
           uploader_user_id?: string | null
         }
