@@ -34,6 +34,13 @@ const HomeownerNav = () => {
 
         <div className="hidden craft:flex items-center gap-3">
           <Link
+            to="/for-trades"
+            className="font-body text-xs uppercase tracking-[0.18em] text-cream/60 hover:text-teal transition-colors"
+          >
+            For Trades
+          </Link>
+          <Link
+
             to="/login"
             className="font-body text-sm text-cream border border-cream/25 rounded-xl px-5 py-2.5 hover:border-teal hover:text-teal transition-colors"
           >
