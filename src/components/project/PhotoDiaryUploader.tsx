@@ -183,16 +183,79 @@ const PhotoDiaryUploader = ({
         className="hidden"
         onChange={(e) => handleFiles(e.target.files)}
       />
-      <Button
-        variant="outline"
-        size="sm"
-        disabled={busy}
-        onClick={() => inputRef.current?.click()}
-        className="gap-2"
-      >
-        {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
-        {busy ? "Uploading…" : "Upload photos"}
-      </Button>
+      <div className="flex flex-wrap items-center gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={busy}
+          onClick={() => inputRef.current?.click()}
+          className="gap-2"
+        >
+          {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
+          {busy ? "Uploading…" : "Upload photos"}
+        </Button>
+
+        <input
+          ref={diagRef}
+          type="file"
+          accept="image/*"
+          multiple
+          className="hidden"
+          onChange={(e) => runDiagnostic(e.target.files)}
+        />
+        <Button
+          variant="ghost"
+          size="sm"
+          disabled={checking}
+          onClick={() => diagRef.current?.click()}
+          className="gap-2 font-mono text-[11px]"
+        >
+          {checking ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Info className="w-3.5 h-3.5" />}
+          {checking ? "Checking…" : "Check what a photo carries"}
+        </Button>
+      </div>
+
+      {diagnostics.length > 0 && (
+        <div className="rounded-xl border border-border bg-muted/30 p-3 space-y-3">
+          <div className="flex items-center justify-between">
+            <p className="font-mono text-[11px] uppercase tracking-wide text-muted-foreground">
+              Photo details found (nothing was uploaded)
+            </p>
+            <button
+              type="button"
+              onClick={() => setDiagnostics([])}
+              className="font-mono text-[10px] text-muted-foreground hover:text-foreground"
+            >
+              Clear
+            </button>
+          </div>
+          {diagnostics.map((d, i) => (
+            <div key={`${d.fileName}-${i}`} className="space-y-1 border-t border-border/60 pt-2 first:border-0 first:pt-0">
+              <p className="font-mono text-[11px] text-foreground break-all">
+                {d.fileName} · {d.fileType} · {d.fileSizeKb} KB
+              </p>
+              <p className="font-mono text-[10px] text-muted-foreground">
+                Camera date: {d.parsed.takenAt ? new Date(d.parsed.takenAt).toLocaleString("en-GB") : "none"}
+                {" · "}Location: {d.parsed.lat !== null ? `${d.parsed.lat.toFixed(5)}, ${d.parsed.lng?.toFixed(5)}` : "none"}
+                {" · "}Camera: {d.makeModel || "none"}
+              </p>
+              {Object.keys(d.rawDates).length > 0 && (
+                <p className="font-mono text-[10px] text-muted-foreground break-all">
+                  Raw dates: {Object.entries(d.rawDates).map(([k, v]) => `${k}=${v}`).join(" | ")}
+                </p>
+              )}
+              <p className="font-mono text-[10px] text-muted-foreground break-all">
+                {d.tagsFound.length > 0
+                  ? `Tags in file (${d.tagsFound.length}): ${d.tagsFound.slice(0, 30).join(", ")}`
+                  : "No camera data in this file at all."}
+              </p>
+              {d.error && (
+                <p className="font-mono text-[10px] text-amber-500">Reader said: {d.error}</p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
