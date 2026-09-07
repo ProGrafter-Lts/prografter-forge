@@ -158,24 +158,26 @@ const PhotoDiaryUploader = ({
         maxLength={200}
       />
 
-      <div className="space-y-1">
-        <Label className="font-mono text-[11px] text-muted-foreground">
-          If a photo has no camera date, use this date
-        </Label>
-        <Input
-          type="date"
-          value={fallbackDate}
-          max={todayValue()}
-          onChange={(e) => setFallbackDate(e.target.value)}
-          className="max-w-[200px]"
-        />
-      </div>
-
       <p className="font-mono text-[10px] text-muted-foreground flex items-start gap-1.5">
         <MapPin className="w-3 h-3 mt-0.5 shrink-0" />
-        Where the camera recorded a location, it is stored with the photo as evidence.
-        Screenshots and forwarded photos usually carry nothing, so they use the date above.
+        Only photos that carry the camera's own date, time and location are accepted —
+        this is a verified site record. Send photos straight from the phone's camera roll;
+        screenshots and photos forwarded through messaging apps are stripped of that data
+        and will be turned away.
       </p>
+
+      {rejected.length > 0 && (
+        <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-3 space-y-1">
+          <p className="font-mono text-[11px] uppercase tracking-wide text-destructive">
+            Not added ({rejected.length})
+          </p>
+          {rejected.map((r, i) => (
+            <p key={`${r.name}-${i}`} className="font-mono text-[10px] text-muted-foreground break-all">
+              {r.name} — {r.reason}
+            </p>
+          ))}
+        </div>
+      )}
 
       <input
         ref={inputRef}
