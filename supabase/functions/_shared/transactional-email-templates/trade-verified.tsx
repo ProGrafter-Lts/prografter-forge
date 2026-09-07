@@ -19,7 +19,8 @@ const TradeVerifiedEmail = ({ firstName, loginUrl }: TradeVerifiedProps) => (
       once you're in.
     </Para>
     <InfoCard title="Your terms">
-      • No subscription<br />
+      • No subscription to join, quote, or get paid — ever<br />
+      • Matching is free; optional paid tools are separate add-ons<br />
       • No lead fees<br />
       • 7.5% commission (capped at £900) only when you complete a project
     </InfoCard>

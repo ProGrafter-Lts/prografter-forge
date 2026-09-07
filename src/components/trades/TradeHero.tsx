@@ -3,7 +3,7 @@ import { ArrowRight, BadgeCheck, MapPin, Wallet } from "lucide-react";
 import heroImage from "@/assets/home/trades-hero.jpg";
 
 const INDICATORS = [
-  { icon: Wallet, title: "No Monthly Fees", desc: "You only pay when you win." },
+  { icon: Wallet, title: "No Platform Subscription", desc: "Join, match, quote and get paid free." },
   { icon: MapPin, title: "Local Work", desc: "Jobs near you, sent as they land." },
   { icon: BadgeCheck, title: "Real Homeowners", desc: "Every customer is verified." },
 ];
@@ -52,9 +52,9 @@ const TradeHero = () => {
           </h1>
 
           <p className="font-body text-cream/85 text-base craft:text-lg leading-relaxed max-w-xl mb-8">
-            No lead fees, no monthly subscription and no bidding wars. Get matched to genuine local
-            projects from verified homeowners, quote properly, and only pay commission when the job
-            is yours.
+            No subscription to join, quote, or get paid — ever. Matching is free too. Optional paid
+            tools, such as Planning Hub, are separate opt-in add-ons. You only pay commission when
+            the job is yours.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 mb-5">

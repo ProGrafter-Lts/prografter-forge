@@ -65,7 +65,7 @@ const TradeVerificationPage = () => (
     </ContentSection>
     <ContentCta
       title="Win genuine work as a verified trade"
-      intro="Free to join. Commission only. No monthly fees, no lead fees — you only pay when you get paid."
+      intro="No subscription to join, quote, or get paid — ever. Matching is free; optional paid tools are separate add-ons."
       primary={{ label: "Join as a Trade", href: "/signup/trade" }}
       secondary={{ label: "View pricing", href: "/pricing" }}
     />

@@ -125,7 +125,7 @@ const TradeRegister = () => {
     <div className="min-h-screen bg-deep flex flex-col">
       <SEO
         title="Join ProGrafter — Register as a Verified UK Trade"
-        description="Register your trade business with ProGrafter. No monthly fees, verified-only membership, and you pay only when a job completes."
+        description="Register your trade business with ProGrafter. No subscription to join, quote, or get paid—ever. Optional paid tools are separate add-ons."
         path="/register"
       />
       {/* Header */}

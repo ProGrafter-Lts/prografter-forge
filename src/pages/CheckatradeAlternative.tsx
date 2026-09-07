@@ -13,7 +13,7 @@ const ctTiers = [
 ];
 
 const comparisonRows = [
-  { feature: "Monthly fee", pg: "£0", ct: "£30 – £1,959" },
+  { feature: "Core platform subscription", pg: "£0", ct: "£30 – £1,959" },
   { feature: "Cost per lead", pg: "£0 — leads are free", ct: "Often shared with up to 5 trades; credits on top of the membership" },
   { feature: "Commission", pg: "7.5% on completed jobs only", ct: "None — but you've already paid the membership" },
   { feature: "Lead exclusivity", pg: "Homeowner-controlled — up to 5 quotes, homeowner selects who they work with", ct: "Shared with multiple trades" },
@@ -26,7 +26,7 @@ const comparisonRows = [
 ];
 
 const faqs = [
-  { q: "Is ProGrafter actually free?", a: "Yes. Registering, building your profile, getting verified and quoting are all free. There's no monthly fee, no credit packs and no lock-in. We only earn when you complete a job through the platform." },
+  { q: "Is ProGrafter actually free?", a: "There is no subscription to join, get matched, quote, or get paid — ever. We only earn commission when you complete a job through the platform. Optional paid tools such as Planning Hub are separate and opt-in." },
   { q: "How do I get verified?", a: "Upload photo ID, your public liability insurance certificate and any trade-specific qualifications (Gas Safe, NICEIC, etc.). Our team reviews submissions and you'll typically be live within 5–7 days." },
   { q: "What if I don't get any jobs?", a: "You pay nothing. There is no minimum spend, no \"visibility\" upgrade and no penalty for quiet months. Quoting is free, and 7.5% only applies to jobs that actually complete." },
   { q: "How is commission calculated?", a: "7.5% of the agreed job value, capped at £900 per job. So a £3,000 kitchen costs £225; a £20,000 extension is capped at £900 — never more, regardless of job size." },
@@ -37,7 +37,7 @@ const articleJsonLd = {
   "@context": "https://schema.org",
   "@type": "Article",
   headline: "The Checkatrade Alternative That Doesn't Charge You To Find Work",
-  description: "ProGrafter is the UK Checkatrade alternative — no monthly fees, 7.5% commission only when a job completes, capped at £900 per job.",
+  description: "ProGrafter is the UK Checkatrade alternative: no subscription to join, quote, or get paid—ever. Optional paid tools are separate add-ons.",
   author: { "@type": "Person", name: "Lee Palfreeman" },
   publisher: {
     "@type": "Organization",
@@ -64,7 +64,7 @@ const CheckatradeAlternative = () => {
     <div className="min-h-screen bg-deep">
       <SEO
         title="Checkatrade Alternative for UK Trades | Pay Only When You Win Work — ProGrafter"
-        description="Tired of paying £299–£1,959/month to Checkatrade before earning a penny? ProGrafter is the UK alternative — no monthly fees, 7.5% on completed jobs."
+        description="No subscription to join, match, quote, or get paid on ProGrafter—ever. Optional paid tools are separate add-ons; commission applies to completed jobs."
         path="/checkatrade-alternative"
         ogType="article"
         jsonLd={[articleJsonLd, faqJsonLd]}
@@ -137,7 +137,7 @@ const CheckatradeAlternative = () => {
             <div className="border border-cream/10 p-6 bg-cream/[0.02]">
               <p className="font-heading text-teal text-5xl mb-4">£0</p>
               <h3 className="font-heading text-cream text-xl mb-2">to join</h3>
-              <p className="font-mono text-cream/60 text-sm leading-relaxed">No subscription, no credit packs, no upfront spend. Register, get verified, start quoting.</p>
+              <p className="font-mono text-cream/60 text-sm leading-relaxed">No subscription to join, quote, or get paid — ever. Matching is free; optional paid tools are separate add-ons.</p>
             </div>
             <div className="border border-cream/10 p-6 bg-cream/[0.02]">
               <p className="font-heading text-teal text-5xl mb-4">7.5%</p>
@@ -237,7 +237,7 @@ const CheckatradeAlternative = () => {
               I'm Lee, an electrician 20 years in. Like a lot of trades, I tried Checkatrade, MyBuilder and Rated People — and watched the membership and credit fees stack up while the leads were sold to four other people in the group chat before I'd even read them.
             </p>
             <p>
-              ProGrafter is the platform I built for trades like me — no monthly fees, no ghost leads, no platform taking more than its fair share.
+              ProGrafter is the platform I built for trades like me — no subscription to join, quote, or get paid, no ghost leads, and no platform taking more than its fair share. Optional paid tools are separate add-ons.
             </p>
           </div>
           <Link to="/about" className="inline-flex items-center gap-2 mt-8 font-mono text-sm text-teal hover:text-teal-hover">

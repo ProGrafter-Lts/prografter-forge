@@ -249,7 +249,7 @@ const About = () => {
               <div className="border border-cream/10 p-6 bg-cream/[0.02]">
                 <p className="font-heading text-teal text-5xl mb-3">£0</p>
                 <p className="font-mono text-cream/60 text-sm leading-relaxed">
-                  No monthly fees. No credit packs. No paying for silence.
+                  No subscription to join, quote, or get paid — ever. Optional paid tools are separate add-ons.
                 </p>
               </div>
               <div className="border border-cream/10 p-6 bg-cream/[0.02]">

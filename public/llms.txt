@@ -1,6 +1,6 @@
 # ProGrafter
 
-> UK trades marketplace connecting verified tradespeople with homeowners. No monthly fees — trades pay 7.5% only when a job completes, capped at £900 per job.
+> UK construction trust platform connecting verified tradespeople with homeowners. No subscription to join, get matched, quote, or get paid — ever. Optional paid tools such as Planning Hub are separate, opt-in add-ons. Trades pay 7.5% only when a job completes, capped at £900 per job.
 
 ProGrafter is built by Lee Palfreeman, a qualified electrician of 20 years. The platform handles job posting, verified quoting, stage-based payments, variation sign-off, an AI quote checker, and matching with green-energy grant schemes (ECO4, Boiler Upgrade Scheme, Warm Homes Plan).
 

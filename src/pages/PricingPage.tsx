@@ -14,7 +14,7 @@ import TrustSignal from "@/components/TrustSignal";
 
 const TRADE_POINTS = [
   { title: "£0 to register", desc: "Join, get verified and build your profile for free. No card required.", icon: "£" },
-  { title: "£0 monthly fee", desc: "No subscriptions. No tiers. No paying to stay visible.", icon: "∅" },
+  { title: "£0 platform subscription", desc: "No subscription to join, quote, or get paid — ever. Matching is free too.", icon: "∅" },
   { title: "£0 lead fees", desc: "You never pay to see or respond to a job. No pay-per-lead, ever.", icon: "✓" },
   { title: "7.5% commission", desc: "Only when a job completes and you've been paid. We earn when you earn.", icon: "%" },
   { title: "£900 per-job cap", desc: "Commission is capped at £900 per job — big jobs stay fair.", icon: "◆" },
@@ -28,7 +28,7 @@ const HOME_POINTS = [
 ];
 
 const FAQ = [
-  { q: "How much does ProGrafter cost tradespeople?", a: "It's free to register and there are no monthly fees or lead fees. Trades pay a 7.5% commission only when a job completes and they've been paid, capped at £900 per job." },
+  { q: "How much does ProGrafter cost tradespeople?", a: "There is no subscription to join, get matched, quote, or get paid — ever. Trades pay a 7.5% commission only when a job completes and they've been paid, capped at £900. Optional paid tools such as Planning Hub are separate, opt-in add-ons." },
   { q: "How much does it cost homeowners?", a: "Homeowners post jobs for free and are matched with verified trades at no cost. ProGrafter offers the free Project Cost Guide, with a paid AI Quote Checker report for detailed reviews of a specific quote." },
   { q: "When exactly does commission apply?", a: "Only after a job is marked complete and the trade has been paid. There's nothing to pay up front and nothing to pay if a job doesn't go ahead." },
   { q: "Are there any hidden fees or rank-boosting charges?", a: "No. There's no pay-to-play, no boosted rankings and no surprise charges. One fair, capped commission — that's it." },
@@ -51,8 +51,8 @@ const PriceCard = ({
 const PricingPage = () => (
   <AppShell>
     <SEO
-      title="Pricing — Commission Only, No Monthly Fees | ProGrafter"
-      description="ProGrafter is free to join and free to post a job. Trades pay 7.5% only when a job completes — capped at £900. No monthly fees, no lead fees, no hidden costs."
+      title="Pricing — No Core Platform Subscription | ProGrafter"
+      description="No subscription to join, match, quote, or get paid—ever. Optional paid tools are separate add-ons. Commission is capped at £900."
       path="/pricing"
       jsonLd={buildFaqJsonLd(FAQ)}
     />
@@ -60,7 +60,7 @@ const PricingPage = () => (
       eyebrow="Pricing"
       title="Fair, transparent,"
       highlight="commission only."
-      intro="No monthly fees. No lead fees. No pay-to-play. ProGrafter only earns when a trade does — one fair, capped commission and nothing hidden."
+      intro="No subscription to join, quote, or get paid — ever. Matching is free. Optional paid tools are separate, opt-in add-ons; the core platform stays subscription-free."
       ghost="FAIR"
       primaryCta={{ label: "Join as a Trade", href: "/signup/trade" }}
       secondaryCta={{ label: "Post a job — free", href: "/post-job-brief" }}
@@ -89,7 +89,7 @@ const PricingPage = () => (
           </thead>
           <tbody className="font-body text-sm text-body-text">
             {[
-              ["Monthly fee", "None", "£30–£120+"],
+              ["Core platform subscription", "None", "£30–£120+"],
               ["Lead / contact fees", "None", "Per lead, win or lose"],
               ["Pay to rank higher", "No", "Often yes"],
               ["When you pay", "Only on completed, paid jobs", "Up front / ongoing"],
@@ -115,7 +115,7 @@ const PricingPage = () => (
     </ContentSection>
     <ContentCta
       title="Only pay when you get paid"
-      intro="Register free, get verified, and win genuine work — with no monthly fees hanging over you."
+      intro="No subscription to join, quote, or get paid — ever. Optional paid tools are separate and always opt-in."
       primary={{ label: "Join as a Trade", href: "/signup/trade" }}
       secondary={{ label: "Check a quote", href: "/quote-checker" }}
     />

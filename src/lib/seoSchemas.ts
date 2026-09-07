@@ -44,7 +44,7 @@ export const homepageFaqJsonLd = {
       name: "How much does ProGrafter cost?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "ProGrafter is free to register and free to post a job. Trades only pay 7.5% commission when a job completes, capped at £900 per job. There are no monthly fees.",
+        text: "There is no subscription to join, get matched, quote, or get paid on ProGrafter — ever. Optional paid tools such as Planning Hub are separate, opt-in add-ons. Trades pay 7.5% commission when a job completes, capped at £900 per job.",
       },
     },
     {

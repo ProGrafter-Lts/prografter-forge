@@ -301,7 +301,7 @@ const PostAJob = () => {
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: "hsl(var(--deep))" }}>
       <SEO
         title="Post a Job Free — ProGrafter | Up to Three Matched Trades"
-        description="Post your project free. We match you with up to three vetted, local, available trades — never broadcast to everyone. No deposit, no monthly fees."
+        description="Post your project free and get matched with up to three vetted, local, available trades. Optional paid tools are separate, opt-in add-ons."
         path="/post-a-job"
         jsonLd={buildServiceJsonLd({
           name: "Post a Job",

@@ -2,7 +2,9 @@ import { Link } from "react-router-dom";
 import { ArrowRight, Check } from "lucide-react";
 
 const POINTS = [
-  "No monthly subscription, ever",
+  "No subscription to join, quote, or get paid — ever",
+  "Free matching is part of the core platform",
+  "Paid tools such as Planning Hub are optional add-ons",
   "No paying for leads that go nowhere",
   "7.5% commission when a job is agreed",
   "Capped at £900, however big the job",
@@ -18,11 +20,11 @@ const TradeCommissionBand = () => {
             What It Costs
           </p>
           <h2 className="font-heading uppercase text-cream text-[34px] craft:text-[52px] leading-none mb-5">
-            £0 monthly fee. Ever.
+            No platform subscription. Ever.
           </h2>
           <p className="font-body text-cream/75 text-base leading-relaxed mb-8 max-w-lg">
-            Most platforms charge you for the phone to ring. We only earn when you do — a single
-            commission on work you have actually won and agreed.
+            Join, get matched, quote and get paid without a subscription. Optional paid tools are
+            separate and opt-in. We only earn commission when you win work.
           </p>
           <Link
             to="/pricing"

@@ -1,7 +1,7 @@
 const PILLARS = [
   {
-    title: "No monthly fees for trades",
-    desc: "Commission-only. We earn 7.5% when a job completes and you've been paid — capped at £900. No subscriptions, no lead fees.",
+    title: "No core platform subscription",
+    desc: "No subscription to join, quote, or get paid — ever. Matching is free; optional paid tools such as Planning Hub are separate add-ons. Commission is capped at £900.",
     icon: "£",
   },
   {

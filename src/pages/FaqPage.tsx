@@ -12,7 +12,7 @@ import TrustSignal from "@/components/TrustSignal";
 
 const GENERAL = [
   { q: "What is ProGrafter?", a: "ProGrafter is the UK's AI-powered construction trust platform. We connect verified tradespeople with homeowners and add intelligent tools — like the AI Quote Checker — to remove uncertainty from building work for both sides." },
-  { q: "How is ProGrafter different from Checkatrade, MyBuilder or Rated People?", a: "Those platforms largely sell leads. ProGrafter builds trust: five-step trade verification, homeowner verification, two-way reviews, manual brief review, AI quote checking and transparent commission-only pricing with no monthly fees." },
+  { q: "How is ProGrafter different from Checkatrade, MyBuilder or Rated People?", a: "Those platforms largely sell leads. ProGrafter builds trust through five-step trade verification, homeowner verification, two-way reviews, manual brief review and AI quote checking. There is no subscription to join, quote, or get paid — ever; optional paid tools are separate add-ons." },
   { q: "Where is ProGrafter available?", a: "ProGrafter operates across the United Kingdom, with initial coverage focused on Nottinghamshire and the East Midlands and expanding nationally." },
   { q: "Is ProGrafter free to use?", a: "It's free to register and free to post a job. Trades pay a 7.5% commission only on completed, paid jobs, capped at £900. Homeowners can use the free Project Cost Guide, with the paid AI Quote Checker available for detailed reviews of a builder's quote." },
 ];
@@ -25,7 +25,7 @@ const HOMEOWNERS = [
 ];
 
 const TRADES = [
-  { q: "What does it cost to join?", a: "Nothing to register and no monthly or lead fees. You pay 7.5% commission only when a job completes and you've been paid, capped at £900 per job." },
+  { q: "What does it cost to join?", a: "No subscription to join, quote, or get paid — ever. Getting matched is free too. You pay 7.5% commission only when a job completes and you've been paid, capped at £900. Optional paid tools such as Planning Hub are separate and opt-in." },
   { q: "How do I get verified?", a: "Submit your ID, public liability insurance and relevant qualifications. Most verifications are completed within a few working days after a manual review." },
   { q: "Are the leads real?", a: "Yes. Homeowners are verified and every job brief is manually reviewed, so you quote on genuine, described projects — not time-wasters." },
   { q: "What are Planning Alerts?", a: "Planning Alerts turn local planning applications into genuine opportunities, helping you reach homeowners with upcoming projects early." },

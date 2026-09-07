@@ -5,7 +5,7 @@ const comparisons = [
   },
   {
     others: '"Free trials" that start charging you a subscription',
-    prografter: "7.5% only on completion, capped at £900. No subscription, ever.",
+    prografter: "No subscription to join, quote, or get paid — ever. Optional paid tools are separate add-ons; commission is capped at £900.",
   },
   {
     others: "A directory — then they walk away",

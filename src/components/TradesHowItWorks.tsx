@@ -53,7 +53,7 @@ const TradesHowItWorks = () => {
 
         <div className="mt-16 text-center fade-up">
           <p className="font-heading text-teal text-[36px] craft:text-[48px] leading-none">
-            £0 monthly fee. Ever.
+            No subscription to join, quote, or get paid — ever.
           </p>
         </div>
       </div>

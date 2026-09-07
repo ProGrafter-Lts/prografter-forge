@@ -962,7 +962,7 @@ export default function Apply() {
           <FAQItem q="I've worked domestically for 20 years but don't have formal qualifications — can I still apply?" a="Yes, for unregulated trades (decorating, tiling, landscaping, groundworks, general building, bathroom fitting, carpentry, plastering, roofing). We assess experience through your portfolio, your trading history, and the two client references we call personally. A 20-year trade with demonstrable quality work is exactly who we want on ProGrafter." />
           <FAQItem q="I work on domestic properties only — do I need the same qualifications as someone who works commercially?" a="No. Commercial and industrial qualifications are irrelevant to the work ProGrafter covers. We verify what applies to residential work only." />
           <FAQItem q="What happens after I submit my application?" a="Applications are reviewed within 5–7 days. We'll contact your references by phone — not by form — and may book a short interview call. You'll receive an email the moment you're verified, and you can start quoting for jobs immediately after that." />
-          <FAQItem q="Is there any cost to join?" a="£0 to register. £0 to quote. We charge 7.5% commission on completed jobs only, capped at £900 regardless of contract size. No monthly fee — ever. You pay nothing until you earn." />
+          <FAQItem q="Is there any cost to join?" a="No subscription to join, quote, or get paid — ever. Getting matched is free too. We charge 7.5% commission on completed jobs only, capped at £900. Optional paid tools, such as Planning Hub, are separate and opt-in." />
         </div>
 
         <StepBar current={step} />

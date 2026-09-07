@@ -91,8 +91,9 @@ const HowItWorksPage = () => {
             </p>
             <p>
               Trades pay 7.5% commission on completed jobs only, capped at £900
-              per project — no monthly fees, no lead fees, nothing before the
-              work is finished. If we don&apos;t earn the trade work, the trade
+              per project. There is no subscription to join, quote, or get paid — ever,
+              and matching is free. Optional paid tools such as Planning Hub are separate,
+              opt-in add-ons. If we don&apos;t earn the trade work, the trade
               owes us nothing. The first 50 verified trades to join lock in a
               permanent 6% commission rate as Founding Members.
             </p>

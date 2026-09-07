@@ -20,7 +20,7 @@ const GROUPS: NavGroup[] = [
     label: "For Trades",
     items: [
       { label: "Join as a Trade", href: "/signup/trade", desc: "Free — commission only" },
-      { label: "Pricing", href: "/pricing", desc: "Commission only, no monthly fees" },
+      { label: "Pricing", href: "/pricing", desc: "No core platform subscription" },
       { label: "Planning Alerts", href: "/planning-alerts", desc: "Turn planning into work" },
       { label: "Calculators", href: "/calculators", desc: "Commission & savings tools" },
     ],
