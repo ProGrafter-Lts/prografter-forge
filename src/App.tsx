@@ -58,6 +58,7 @@ const Unsubscribe = lazyRetry(() => import("./pages/Unsubscribe.tsx"));
 const Contact = lazyRetry(() => import("./pages/Contact.tsx"));
 const About = lazyRetry(() => import("./pages/About.tsx"));
 const HowItWorksPage = lazyRetry(() => import("./pages/HowItWorksPage.tsx"));
+const ForTrades = lazyRetry(() => import("./pages/ForTrades.tsx"));
 const SignupHomeowner = lazyRetry(() => import("./pages/SignupHomeowner.tsx"));
 const SignupHomeownerNext = lazyRetry(() => import("./pages/SignupHomeownerNext.tsx"));
 const SignupCheckEmail = lazyRetry(() => import("./pages/SignupCheckEmail.tsx"));
