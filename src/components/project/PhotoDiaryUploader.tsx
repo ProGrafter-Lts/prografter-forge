@@ -25,8 +25,9 @@ const MAX_BATCH = 12;
  * the upload as a single entry.
  *
  * Capture metadata (date taken, GPS, camera) is read from the ORIGINAL file
- * before compression — canvas re-encoding strips EXIF. Photos without usable
- * EXIF fall back to the date the uploader states below (defaults to today).
+ * before compression — canvas re-encoding strips EXIF. This is a verification
+ * record, so a photo is REJECTED unless it carries both a camera capture
+ * time and GPS coordinates. No manual date fallback exists.
  */
 const PhotoDiaryUploader = ({
   jobId,
