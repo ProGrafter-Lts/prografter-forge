@@ -83,12 +83,20 @@ const HomeownerNav = () => {
             </Link>
           ))}
           <Link
+            to="/for-trades"
+            onClick={() => setOpen(false)}
+            className="py-3 font-body text-xs uppercase tracking-[0.18em] text-cream/60"
+          >
+            For Trades
+          </Link>
+          <Link
             to="/login"
             onClick={() => setOpen(false)}
-            className="mt-3 py-3 text-center font-body text-sm text-cream border border-cream/25 rounded-xl"
+            className="mt-1 py-3 text-center font-body text-sm text-cream border border-cream/25 rounded-xl"
           >
             Log In
           </Link>
+
           <Link
             to="/signup/homeowner"
             onClick={() => setOpen(false)}
