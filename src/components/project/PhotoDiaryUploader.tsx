@@ -37,7 +37,7 @@ const PhotoDiaryUploader = ({
   hint = "Photos keep the date, time and location the camera recorded, so the diary reflects when the work actually happened — not when it was uploaded.",
 }: Props) => {
   const [caption, setCaption] = useState("");
-  const [fallbackDate, setFallbackDate] = useState(todayValue());
+  const [rejected, setRejected] = useState<{ name: string; reason: string }[]>([]);
   const [busy, setBusy] = useState(false);
   const [diagnostics, setDiagnostics] = useState<CaptureDiagnostic[]>([]);
   const [checking, setChecking] = useState(false);
@@ -77,18 +77,22 @@ const PhotoDiaryUploader = ({
           ? crypto.randomUUID()
           : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
-      // Manual fallback: midday on the stated date, so timezone shifts can't
-      // push it onto the wrong day.
-      const manualIso = fallbackDate
-        ? new Date(`${fallbackDate}T12:00:00`).toISOString()
-        : new Date().toISOString();
-
       let ok = 0;
-      let withExif = 0;
-      let withGps = 0;
+      const bad: { name: string; reason: string }[] = [];
 
       for (const file of batch) {
         const meta = await readCaptureMeta(file);
+
+        // Verification record: a photo is only evidence if the camera
+        // recorded both when and where it was taken.
+        if (!meta.takenAt || meta.lat === null || meta.lng === null) {
+          const missing: string[] = [];
+          if (!meta.takenAt) missing.push("no camera date/time");
+          if (meta.lat === null || meta.lng === null) missing.push("no location");
+          bad.push({ name: file.name, reason: missing.join(" · ") });
+          continue;
+        }
+
         const compressed = await compressImage(file);
         const path = `diary/${jobId}/${Date.now()}-${Math.random()
           .toString(36)
