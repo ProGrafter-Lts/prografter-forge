@@ -18,13 +18,6 @@ interface Props {
 
 const MAX_BATCH = 12;
 
-const todayValue = () => {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
-    d.getDate(),
-  ).padStart(2, "0")}`;
-};
-
 /**
  * Site photo upload against the job itself. Writes to the existing job_photos
  * table (bucket path diary/<jobId>/...), tagging every file in one selection
