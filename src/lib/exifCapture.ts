@@ -64,6 +64,60 @@ export async function readCaptureMeta(file: File): Promise<CaptureMeta> {
   }
 }
 
+export interface CaptureDiagnostic {
+  fileName: string;
+  fileType: string;
+  fileSizeKb: number;
+  /** Every EXIF/TIFF/GPS tag name the parser could see in the file. */
+  tagsFound: string[];
+  /** Raw date-ish tags, as strings. */
+  rawDates: Record<string, string>;
+  hasGps: boolean;
+  makeModel: string | null;
+  parsed: CaptureMeta;
+  error: string | null;
+}
+
+/**
+ * Temporary diagnostic: reports exactly what (if anything) a chosen file
+ * carries, so we can tell "stripped by the sender" from "reader failing".
+ */
+export async function diagnoseCaptureMeta(file: File): Promise<CaptureDiagnostic> {
+  const base = {
+    fileName: file.name,
+    fileType: file.type || "unknown",
+    fileSizeKb: Math.round(file.size / 1024),
+  };
+  try {
+    const all = await exifr.parse(file, true);
+    const parsed = await readCaptureMeta(file);
+    const rawDates: Record<string, string> = {};
+    for (const k of ["DateTimeOriginal", "CreateDate", "ModifyDate", "GPSDateStamp", "GPSTimeStamp"]) {
+      const v = all?.[k];
+      if (v !== undefined && v !== null) rawDates[k] = String(v);
+    }
+    return {
+      ...base,
+      tagsFound: all ? Object.keys(all) : [],
+      rawDates,
+      hasGps: typeof all?.latitude === "number" && typeof all?.longitude === "number",
+      makeModel: [all?.Make, all?.Model].filter(Boolean).join(" ") || null,
+      parsed,
+      error: all ? null : "No metadata block found in file",
+    };
+  } catch (e) {
+    return {
+      ...base,
+      tagsFound: [],
+      rawDates: {},
+      hasGps: false,
+      makeModel: null,
+      parsed: EMPTY,
+      error: e instanceof Error ? e.message : String(e),
+    };
+  }
+}
+
 /** Short human label for a coordinate pair. */
 export const formatCoords = (lat: number, lng: number) =>
   `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
