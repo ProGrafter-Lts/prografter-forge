@@ -44,7 +44,7 @@ const SiteDiaryInbox = ({ jobs }: Props) => {
     const [{ data: ph }, { data: rep }] = await Promise.all([
       supabase
         .from("job_photos")
-        .select("id, job_id, photo_url, label, batch_id, uploaded_by, created_at")
+        .select("id, job_id, photo_url, label, batch_id, uploaded_by, created_at, taken_at, taken_at_source, gps_lat, gps_lng, camera_make_model")
         .in("job_id", jobIds)
         .order("created_at", { ascending: false }),
       supabase
@@ -103,6 +103,11 @@ const SiteDiaryInbox = ({ jobs }: Props) => {
           createdAt: p.created_at,
           batchId: p.batch_id ?? null,
           uploadedBy: p.uploaded_by || "trade",
+          takenAt: p.taken_at ?? null,
+          takenAtSource: p.taken_at_source ?? null,
+          gpsLat: p.gps_lat ?? null,
+          gpsLng: p.gps_lng ?? null,
+          cameraMakeModel: p.camera_make_model ?? null,
         }));
         const days = groupByDay(diaryPhotos);
 
