@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+
 import { compressImage } from "@/lib/imageCompress";
 import { readCaptureMeta, diagnoseCaptureMeta, type CaptureDiagnostic } from "@/lib/exifCapture";
 
@@ -18,13 +18,6 @@ interface Props {
 
 const MAX_BATCH = 12;
 
-const todayValue = () => {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
-    d.getDate(),
-  ).padStart(2, "0")}`;
-};
-
 /**
  * Site photo upload against the job itself. Writes to the existing job_photos
  * table (bucket path diary/<jobId>/...), tagging every file in one selection
@@ -32,8 +25,9 @@ const todayValue = () => {
  * the upload as a single entry.
  *
  * Capture metadata (date taken, GPS, camera) is read from the ORIGINAL file
- * before compression — canvas re-encoding strips EXIF. Photos without usable
- * EXIF fall back to the date the uploader states below (defaults to today).
+ * before compression — canvas re-encoding strips EXIF. This is a verification
+ * record, so a photo is REJECTED unless it carries both a camera capture
+ * time and GPS coordinates. No manual date fallback exists.
  */
 const PhotoDiaryUploader = ({
   jobId,
@@ -43,7 +37,7 @@ const PhotoDiaryUploader = ({
   hint = "Photos keep the date, time and location the camera recorded, so the diary reflects when the work actually happened — not when it was uploaded.",
 }: Props) => {
   const [caption, setCaption] = useState("");
-  const [fallbackDate, setFallbackDate] = useState(todayValue());
+  const [rejected, setRejected] = useState<{ name: string; reason: string }[]>([]);
   const [busy, setBusy] = useState(false);
   const [diagnostics, setDiagnostics] = useState<CaptureDiagnostic[]>([]);
   const [checking, setChecking] = useState(false);
@@ -83,18 +77,22 @@ const PhotoDiaryUploader = ({
           ? crypto.randomUUID()
           : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
-      // Manual fallback: midday on the stated date, so timezone shifts can't
-      // push it onto the wrong day.
-      const manualIso = fallbackDate
-        ? new Date(`${fallbackDate}T12:00:00`).toISOString()
-        : new Date().toISOString();
-
       let ok = 0;
-      let withExif = 0;
-      let withGps = 0;
+      const bad: { name: string; reason: string }[] = [];
 
       for (const file of batch) {
         const meta = await readCaptureMeta(file);
+
+        // Verification record: a photo is only evidence if the camera
+        // recorded both when and where it was taken.
+        if (!meta.takenAt || meta.lat === null || meta.lng === null) {
+          const missing: string[] = [];
+          if (!meta.takenAt) missing.push("no camera date/time");
+          if (meta.lat === null || meta.lng === null) missing.push("no location");
+          bad.push({ name: file.name, reason: missing.join(" · ") });
+          continue;
+        }
+
         const compressed = await compressImage(file);
         const path = `diary/${jobId}/${Date.now()}-${Math.random()
           .toString(36)
@@ -113,8 +111,8 @@ const PhotoDiaryUploader = ({
           uploaded_by: uploadedBy,
           uploader_user_id: userId,
           batch_id: batchId,
-          taken_at: meta.takenAt ?? manualIso,
-          taken_at_source: meta.takenAt ? "exif" : "manual",
+          taken_at: meta.takenAt,
+          taken_at_source: "exif",
           gps_lat: meta.lat,
           gps_lng: meta.lng,
           camera_make_model: meta.cameraMakeModel,
@@ -124,17 +122,21 @@ const PhotoDiaryUploader = ({
           continue;
         }
         ok += 1;
-        if (meta.takenAt) withExif += 1;
-        if (meta.lat !== null) withGps += 1;
       }
 
+      setRejected(bad);
+
       if (ok > 0) {
-        const bits = [`${ok} photo${ok === 1 ? "" : "s"} added`];
-        if (withExif > 0) bits.push(`${withExif} with camera date/time`);
-        if (withGps > 0) bits.push(`${withGps} with location`);
-        toast.success(bits.join(" · "));
+        toast.success(
+          `${ok} photo${ok === 1 ? "" : "s"} added with camera date, time and location`,
+        );
         setCaption("");
         onUploaded();
+      }
+      if (bad.length > 0) {
+        toast.error(
+          `${bad.length} photo${bad.length === 1 ? "" : "s"} rejected — no camera date/time or location`,
+        );
       }
     } finally {
       setBusy(false);
@@ -156,24 +158,26 @@ const PhotoDiaryUploader = ({
         maxLength={200}
       />
 
-      <div className="space-y-1">
-        <Label className="font-mono text-[11px] text-muted-foreground">
-          If a photo has no camera date, use this date
-        </Label>
-        <Input
-          type="date"
-          value={fallbackDate}
-          max={todayValue()}
-          onChange={(e) => setFallbackDate(e.target.value)}
-          className="max-w-[200px]"
-        />
-      </div>
-
       <p className="font-mono text-[10px] text-muted-foreground flex items-start gap-1.5">
         <MapPin className="w-3 h-3 mt-0.5 shrink-0" />
-        Where the camera recorded a location, it is stored with the photo as evidence.
-        Screenshots and forwarded photos usually carry nothing, so they use the date above.
+        Only photos that carry the camera's own date, time and location are accepted —
+        this is a verified site record. Send photos straight from the phone's camera roll;
+        screenshots and photos forwarded through messaging apps are stripped of that data
+        and will be turned away.
       </p>
+
+      {rejected.length > 0 && (
+        <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-3 space-y-1">
+          <p className="font-mono text-[11px] uppercase tracking-wide text-destructive">
+            Not added ({rejected.length})
+          </p>
+          {rejected.map((r, i) => (
+            <p key={`${r.name}-${i}`} className="font-mono text-[10px] text-muted-foreground break-all">
+              {r.name} — {r.reason}
+            </p>
+          ))}
+        </div>
+      )}
 
       <input
         ref={inputRef}
