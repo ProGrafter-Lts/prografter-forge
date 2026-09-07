@@ -2,7 +2,15 @@ export interface DiaryPhoto {
   url: string;
   caption: string;
   source: string;
+  /** When the photo was uploaded to ProGrafter. */
   createdAt: string;
+  /** When the camera says the photo was taken (EXIF) or the uploader stated. */
+  takenAt?: string | null;
+  /** 'exif' | 'manual' | null */
+  takenAtSource?: string | null;
+  gpsLat?: number | null;
+  gpsLng?: number | null;
+  cameraMakeModel?: string | null;
   /** Upload batch this photo belongs to (job_photos.batch_id). */
   batchId?: string | null;
   /** 'trade' | 'homeowner' */
