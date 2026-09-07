@@ -45,7 +45,26 @@ const PhotoDiaryUploader = ({
   const [caption, setCaption] = useState("");
   const [fallbackDate, setFallbackDate] = useState(todayValue());
   const [busy, setBusy] = useState(false);
+  const [diagnostics, setDiagnostics] = useState<CaptureDiagnostic[]>([]);
+  const [checking, setChecking] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const diagRef = useRef<HTMLInputElement>(null);
+
+  const runDiagnostic = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    setChecking(true);
+    try {
+      const out: CaptureDiagnostic[] = [];
+      for (const f of Array.from(files).slice(0, MAX_BATCH)) {
+        out.push(await diagnoseCaptureMeta(f));
+      }
+      setDiagnostics(out);
+    } finally {
+      setChecking(false);
+      if (diagRef.current) diagRef.current.value = "";
+    }
+  };
+
 
   const handleFiles = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
