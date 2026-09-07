@@ -14,3 +14,6 @@
 ## Open decisions (blocked on Lee)
 - Trade Stripe Connect onboarding flow (column added, no onboarding UI yet)
 - Partial approvals / disputed amounts / refund-after-release: intentionally unbuilt
+
+## Homeowner landing page rebuild
+- [x] Rebuilt homepage to approved homeowner mock-up (hero, three ways, five checks, four steps, differentiation, final CTA)
