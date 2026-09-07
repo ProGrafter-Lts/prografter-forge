@@ -58,6 +58,7 @@ const Unsubscribe = lazyRetry(() => import("./pages/Unsubscribe.tsx"));
 const Contact = lazyRetry(() => import("./pages/Contact.tsx"));
 const About = lazyRetry(() => import("./pages/About.tsx"));
 const HowItWorksPage = lazyRetry(() => import("./pages/HowItWorksPage.tsx"));
+const ForTrades = lazyRetry(() => import("./pages/ForTrades.tsx"));
 const SignupHomeowner = lazyRetry(() => import("./pages/SignupHomeowner.tsx"));
 const SignupHomeownerNext = lazyRetry(() => import("./pages/SignupHomeownerNext.tsx"));
 const SignupCheckEmail = lazyRetry(() => import("./pages/SignupCheckEmail.tsx"));
@@ -221,6 +222,8 @@ const AppRoutes = () => {
             <Route path="/contact" element={<Contact />} />
             <Route path="/about" element={<About />} />
            <Route path="/how-it-works" element={<HowItWorksPage />} />
+           <Route path="/for-trades" element={<ForTrades />} />
+
            <Route path="/trade-verification" element={<TradeVerificationPage />} />
            <Route path="/homeowner-verification" element={<HomeownerVerificationPage />} />
                         <Route path="/project-clarity" element={<ProjectClarity />} />

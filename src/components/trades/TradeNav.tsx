@@ -3,14 +3,14 @@ import { Link } from "react-router-dom";
 import Logo from "@/components/Logo";
 
 const LINKS = [
-  { label: "Homeowners", href: "/" },
+  { label: "Find Work", href: "/for-trades" },
   { label: "How It Works", href: "/how-it-works" },
-  { label: "Our Checks", href: "/trade-verification" },
-  { label: "Advice", href: "/resources" },
-  { label: "About", href: "/about" },
+  { label: "Pricing", href: "/pricing" },
+  { label: "About Us", href: "/about" },
+  { label: "Help", href: "/faq" },
 ];
 
-const HomeownerNav = () => {
+const TradeNav = () => {
   const [open, setOpen] = useState(false);
 
   return (
@@ -34,23 +34,22 @@ const HomeownerNav = () => {
 
         <div className="hidden craft:flex items-center gap-3">
           <Link
-            to="/for-trades"
+            to="/"
             className="font-body text-xs uppercase tracking-[0.18em] text-cream/60 hover:text-teal transition-colors"
           >
-            For Trades
+            For Homeowners
           </Link>
           <Link
-
             to="/login"
             className="font-body text-sm text-cream border border-cream/25 rounded-xl px-5 py-2.5 hover:border-teal hover:text-teal transition-colors"
           >
             Log In
           </Link>
           <Link
-            to="/signup/homeowner"
+            to="/signup/trade"
             className="font-body text-sm font-semibold text-cream bg-teal rounded-xl px-5 py-2.5 hover:bg-teal-hover transition-colors shadow-lg shadow-teal/25"
           >
-            Sign Up
+            Join Free
           </Link>
         </div>
 
@@ -83,11 +82,11 @@ const HomeownerNav = () => {
             </Link>
           ))}
           <Link
-            to="/for-trades"
+            to="/"
             onClick={() => setOpen(false)}
             className="py-3 font-body text-xs uppercase tracking-[0.18em] text-cream/60"
           >
-            For Trades
+            For Homeowners
           </Link>
           <Link
             to="/login"
@@ -96,13 +95,12 @@ const HomeownerNav = () => {
           >
             Log In
           </Link>
-
           <Link
-            to="/signup/homeowner"
+            to="/signup/trade"
             onClick={() => setOpen(false)}
             className="mt-2 py-3 text-center font-body text-sm font-semibold text-cream bg-teal rounded-xl"
           >
-            Sign Up
+            Join Free
           </Link>
         </div>
       )}
@@ -110,4 +108,4 @@ const HomeownerNav = () => {
   );
 };
 
-export default HomeownerNav;
+export default TradeNav;
