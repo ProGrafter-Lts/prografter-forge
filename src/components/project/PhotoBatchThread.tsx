@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { MessageSquare, Send, Loader2 } from "lucide-react";
+import { MessageSquare, Send, Loader2, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import JobPhoto from "@/components/JobPhoto";
 import { AccentCard, TonePill, type JobFileTone } from "@/components/project/jobFileUi";
 import type { DiaryBatch } from "@/lib/photoDiary";
+import { mapsLink } from "@/lib/exifCapture";
 
 export interface BatchReply {
   id: string;
@@ -25,6 +26,17 @@ interface Props {
 
 const timeOf = (iso: string) =>
   new Date(iso).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+
+const dateTimeOf = (iso: string) =>
+  new Date(iso).toLocaleString("en-GB", {
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+const sameDay = (a: string, b: string) =>
+  new Date(a).toDateString() === new Date(b).toDateString();
 
 const sourceTone = (source: string): JobFileTone =>
   source === "Photo log" ? "teal" : source === "Stage update" ? "sky" : "grey";
@@ -78,10 +90,21 @@ const PhotoBatchThread = ({
           </p>
           <p className="font-mono text-[10px] text-muted-foreground mt-0.5">
             {batch.photos.length} photo{batch.photos.length === 1 ? "" : "s"} ·{" "}
-            {timeOf(batch.createdAt)} · uploaded by the {batch.uploadedBy}
+            {batch.takenAt ? `Taken ${timeOf(batch.takenAt)}` : timeOf(batch.createdAt)} ·
+            uploaded by the {batch.uploadedBy}
+            {batch.takenAt && !sameDay(batch.takenAt, batch.createdAt)
+              ? ` on ${dateTimeOf(batch.createdAt)}`
+              : ""}
           </p>
         </div>
-        <TonePill tone={sourceTone(batch.photos[0].source)}>{batch.photos[0].source}</TonePill>
+        <div className="flex flex-col items-end gap-1">
+          <TonePill tone={sourceTone(batch.photos[0].source)}>{batch.photos[0].source}</TonePill>
+          {batch.takenAt && (
+            <TonePill tone={batch.hasExif ? "teal" : "grey"}>
+              {batch.hasExif ? "Camera date" : "Stated date"}
+            </TonePill>
+          )}
+        </div>
       </div>
 
       <div
@@ -100,6 +123,26 @@ const PhotoBatchThread = ({
               className={`w-full object-cover ${compact ? "h-24" : "h-32"}`}
               loading="lazy"
             />
+            {(photo.takenAt || photo.gpsLat != null) && (
+              <div className="px-2 py-1.5 space-y-0.5">
+                {photo.takenAt && (
+                  <p className="font-mono text-[10px] text-muted-foreground">
+                    {photo.takenAtSource === "exif" ? "Taken" : "Dated"}{" "}
+                    {dateTimeOf(photo.takenAt)}
+                  </p>
+                )}
+                {photo.gpsLat != null && photo.gpsLng != null && (
+                  <a
+                    href={mapsLink(photo.gpsLat, photo.gpsLng)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1 font-mono text-[10px] text-teal-400 hover:underline"
+                  >
+                    <MapPin className="w-3 h-3" /> Location
+                  </a>
+                )}
+              </div>
+            )}
           </div>
         ))}
       </div>

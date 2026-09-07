@@ -49,7 +49,7 @@ const ProjectPhotos = ({
     const [{ data: photos }, { data: reps }] = await Promise.all([
       supabase
         .from("job_photos")
-        .select("id, photo_url, label, stage, batch_id, uploaded_by, created_at")
+        .select("id, photo_url, label, stage, batch_id, uploaded_by, created_at, taken_at, taken_at_source, gps_lat, gps_lng, camera_make_model")
         .eq("job_id", jobId)
         .order("created_at", { ascending: false }),
       supabase
@@ -91,6 +91,11 @@ const ProjectPhotos = ({
       createdAt: jp.created_at,
       batchId: jp.batch_id ?? null,
       uploadedBy: jp.uploaded_by || "trade",
+      takenAt: jp.taken_at ?? null,
+      takenAtSource: jp.taken_at_source ?? null,
+      gpsLat: jp.gps_lat ?? null,
+      gpsLng: jp.gps_lng ?? null,
+      cameraMakeModel: jp.camera_make_model ?? null,
     });
   }
 
