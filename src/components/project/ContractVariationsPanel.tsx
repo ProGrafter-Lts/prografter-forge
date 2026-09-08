@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Plus, AlertTriangle, Check, HelpCircle } from "lucide-react";
+import { Plus, AlertTriangle, Check, HelpCircle, FileSignature } from "lucide-react";
+import variationsBg from "@/assets/home/blueprint-lines.jpg";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -176,22 +177,48 @@ const ContractVariationsPanel = ({ contractId, contractStatus, userRole }: Props
 
       <section>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-heading text-navy text-2xl">Contract Variations</h2>
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-teal-300">
+              Contract
+            </p>
+            <h2 className="font-heading text-foreground text-2xl uppercase tracking-wide mt-1">
+              Contract Variations
+            </h2>
+          </div>
           {canRaise && (
             <button onClick={() => setShowModal(true)}
-              className="flex items-center gap-1 font-mono text-xs text-teal hover:text-teal-hover transition-colors">
+              className="inline-flex items-center gap-1.5 rounded-xl border border-teal-400/40 bg-teal-500/10 px-3.5 py-2 font-mono text-xs text-teal-300 hover:bg-teal-500/20 transition-colors">
               <Plus className="w-4 h-4" /> Raise Variation
             </button>
           )}
         </div>
         {userRole === "trade" && contractStatus !== "active" && (
-          <p className="font-mono text-xs text-secondary-text mb-3">
+          <p className="font-mono text-xs text-muted-foreground mb-3">
             Variations can only be raised once the contract is active.
           </p>
         )}
         {variations.length === 0 ? (
-          <div className="bg-card rounded-2xl p-6 border border-navy/10 text-center">
-            <p className="font-mono text-sm text-secondary-text">No variations raised.</p>
+          <div className="td-surface">
+            <img
+              src={variationsBg}
+              alt=""
+              aria-hidden="true"
+              loading="lazy"
+              width={1600}
+              height={900}
+              className="td-img !opacity-[0.12]"
+            />
+            <div className="td-veil" />
+            <div className="td-content p-8 text-center">
+              <FileSignature className="w-6 h-6 mx-auto text-teal-300/80" />
+              <p className="font-heading text-foreground text-lg uppercase tracking-wide mt-3">
+                No variations raised
+              </p>
+              <p className="font-mono text-xs text-muted-foreground mt-2 max-w-sm mx-auto">
+                Any change to the agreed scope, cost or programme will be recorded here and
+                signed into the contract.
+              </p>
+            </div>
           </div>
         ) : (
           <div className="space-y-3">
