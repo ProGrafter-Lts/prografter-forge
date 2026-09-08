@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 
 import { compressImage } from "@/lib/imageCompress";
 import { readCaptureMeta, diagnoseCaptureMeta, type CaptureDiagnostic } from "@/lib/exifCapture";
+import sitePhotosBg from "@/assets/dashboard/card-sitephotos.jpg";
 
 interface Props {
   jobId: string;
@@ -282,6 +283,7 @@ const PhotoDiaryUploader = ({
           ))}
         </div>
       )}
+      </div>
     </div>
   );
 };
