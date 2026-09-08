@@ -20,7 +20,7 @@ const ControlCentreTabs = ({ tabs, active, onChange }: Props) => (
   <div
     role="tablist"
     aria-label="Project sections"
-    className="flex flex-wrap gap-2 bg-card rounded-2xl p-2 border border-border"
+    className="flex md:flex-wrap gap-2 overflow-x-auto md:overflow-visible rounded-2xl border border-white/10 bg-card/60 p-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
   >
     {tabs.map((tab) => {
       const Icon = tab.icon;
@@ -31,10 +31,10 @@ const ControlCentreTabs = ({ tabs, active, onChange }: Props) => (
           role="tab"
           aria-selected={isActive}
           onClick={() => onChange(tab.id)}
-          className={`inline-flex items-center gap-1.5 font-mono text-xs px-3.5 py-2 rounded-xl transition-colors ${
+          className={`inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap font-mono text-[11px] uppercase tracking-wide px-4 py-2.5 rounded-xl border transition-all ${
             isActive
-              ? "bg-secondary text-secondary-foreground shadow-sm"
-              : "text-muted-foreground hover:text-primary hover:bg-muted"
+              ? "bg-teal-500 text-[#08172a] border-teal-400 shadow-[0_0_22px_-6px_rgba(20,184,166,0.8)]"
+              : "border-white/10 bg-white/[0.03] text-muted-foreground hover:text-foreground hover:border-teal-400/40"
           }`}
         >
           <Icon className="w-3.5 h-3.5" aria-hidden="true" />
