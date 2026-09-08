@@ -293,9 +293,12 @@ const TradeDashboard = () => {
 
       {/* pt-16 on mobile keeps content clear of the fixed sidebar toggle (top-14 left-4) */}
       <main className="flex-1 p-4 pt-16 md:p-8 overflow-auto">
-        <div className="max-w-6xl mx-auto space-y-8">
-          <div className="flex justify-end">
-            <NotificationBell />
+        <div className="max-w-6xl mx-auto space-y-6 md:space-y-8 relative">
+          {/* Mobile: float the bell up next to the hamburger so it doesn't push the hero down */}
+          <div className="md:flex md:justify-end">
+            <div className="fixed top-14 right-4 z-50 md:static">
+              <NotificationBell />
+            </div>
           </div>
           {!isReady || tradeAccessLoading ? (
             <div className="min-h-[40vh] flex items-center justify-center font-mono text-sm text-muted-foreground">
