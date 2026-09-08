@@ -311,6 +311,11 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
     label: string;
     icon: typeof FolderKanban;
     accent: string;
+    /** "r g b" triple powering the card's accent CSS variable. */
+    rgb: string;
+    /** Faded site/blueprint imagery behind the card. */
+    image: string;
+    tagline: string;
     value: string;
     unit: string;
     sub: string;
