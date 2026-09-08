@@ -567,97 +567,146 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
 
       </section>
 
-      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <section className="grid gap-4 sm:grid-cols-2">
         {cards.map((card) => {
           const urgent = card.urgency >= 3;
-          const attention = card.urgency === 2;
-          const tone = urgent ? "#FCD34D" : attention ? card.accent : card.accent;
+          const rgb = urgent ? "252 211 77" : card.rgb;
+          const tone = urgent ? "#FCD34D" : card.accent;
           return (
-          <div
-            key={card.key}
-            className="rounded-2xl p-5 flex flex-col justify-between"
-            style={{
-              backgroundColor: urgent
-                ? "rgba(252,211,77,0.07)"
-                : `${card.accent}0F`,
-              border: `1px solid ${urgent ? "rgba(252,211,77,0.35)" : `${card.accent}3D`}`,
-              borderLeft: `4px solid ${urgent ? "#FCD34D" : card.accent}`,
-              boxShadow: urgent
-                ? "0 8px 24px -12px rgba(252,211,77,0.45)"
-                : `0 8px 22px -16px ${card.accent}`,
-            }}
-          >
+            <div
+              key={card.key}
+              className="td-surface td-card blueprint-grid flex flex-col"
+              style={{ ["--td-accent" as any]: rgb }}
+            >
+              <img
+                src={card.image}
+                alt=""
+                aria-hidden="true"
+                loading="lazy"
+                width={900}
+                height={600}
+                className="td-img"
+              />
+              <div className="td-veil" />
 
-            <div>
-              <div className="flex items-center gap-2">
-                <span
-                  className="inline-flex items-center justify-center rounded-lg w-7 h-7"
-                  style={{ backgroundColor: `${tone}2E`, border: `1px solid ${tone}59` }}
-                >
-                  <card.icon className="w-4 h-4" style={{ color: tone }} />
-                </span>
-                <span className="font-mono text-[11px] uppercase tracking-widest" style={{ color: tone }}>
-                  {card.label}
-                </span>
+              <div className="td-content flex flex-col justify-between flex-1 p-5 md:p-6">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="inline-flex items-center justify-center rounded-xl w-9 h-9"
+                      style={{ backgroundColor: `${tone}24`, border: `1px solid ${tone}59` }}
+                    >
+                      <card.icon className="w-4.5 h-4.5" style={{ color: tone }} strokeWidth={1.75} />
+                    </span>
+                    <span
+                      className="font-heading uppercase tracking-wide text-lg"
+                      style={{ color: tone }}
+                    >
+                      {card.label}
+                    </span>
 
-                {card.alert && (
-                  <span
-                    className="ml-auto inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-mono text-[10px]"
-                    style={{
-                      backgroundColor: urgent ? "rgba(252,211,77,0.18)" : `${card.accent}1F`,
-                      color: urgent ? "#FCD34D" : card.accent,
-                    }}
+                    {card.alert ? (
+                      <span
+                        className="ml-auto inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-mono text-[10px]"
+                        style={{ backgroundColor: `${tone}24`, color: tone }}
+                      >
+                        {urgent && <AlertCircle className="w-3 h-3" />}
+                        {card.alert}
+                      </span>
+                    ) : (
+                      <span className="ml-auto font-mono text-[9px] uppercase tracking-[0.2em] text-primary-foreground/35 hidden sm:block">
+                        {card.key === "projects"
+                          ? "Active work"
+                          : card.key === "pipeline"
+                            ? "New opportunities"
+                            : card.key === "quotes"
+                              ? "Win more work"
+                              : card.key === "find-work"
+                                ? "Matched to you"
+                                : card.key === "tradevault"
+                                  ? "Stay verified"
+                                  : "Your schedule"}
+                      </span>
+                    )}
+                  </div>
+
+                  <div
+                    className="mt-4 font-heading text-5xl leading-none"
+                    style={{ color: urgent ? "#FCD34D" : "hsl(var(--primary-foreground))" }}
                   >
-                    {urgent && <AlertCircle className="w-3 h-3" />}
-                    {card.alert}
-                  </span>
-                )}
-              </div>
-              <div
-                className="mt-3 font-heading text-4xl leading-none"
-                style={{ color: urgent ? "#FCD34D" : card.urgency === 0 ? "hsl(var(--primary-foreground))" : card.accent }}
-              >
-                {card.value}
-              </div>
-              <div className="mt-1 font-mono text-xs text-primary-foreground/70">{card.unit}</div>
-              <div className="mt-2 font-mono text-xs text-primary-foreground/50 leading-snug">
-                {card.sub}
-              </div>
-            </div>
-            <div className="mt-4 flex items-center gap-3 flex-wrap">
-              <button
-                onClick={card.onClick}
-                className="inline-flex items-center gap-1 font-mono text-xs px-3 py-2 rounded-xl transition-opacity hover:opacity-90"
-                style={
-                  urgent
-                    ? { backgroundColor: "#FCD34D", color: "#1A1A1A" }
-                    : card.urgency === 0
-                      ? {
-                          backgroundColor: `${card.accent}1F`,
-                          color: card.accent,
-                          border: `1px solid ${card.accent}59`,
-                        }
-                      : { backgroundColor: `${card.accent}E6`, color: "#FFFFFF" }
-                }
-              >
+                    {card.value}
+                  </div>
+                  <div className="mt-1.5 font-body text-sm text-primary-foreground/80">{card.unit}</div>
+                  <div className="mt-2 font-mono text-xs text-primary-foreground/55 leading-snug">
+                    {card.sub}
+                  </div>
+                </div>
 
-                {card.cta}
-                <ArrowRight className="w-3 h-3" />
-              </button>
-              {card.secondary && (
-                <button
-                  onClick={card.secondary.onClick}
-                  className="font-mono text-xs hover:underline"
-                  style={{ color: card.accent }}
-                >
-                  {card.secondary.label}
-                </button>
-              )}
+                <div className="mt-5 flex items-center gap-4 flex-wrap">
+                  <button
+                    onClick={card.onClick}
+                    className={`inline-flex items-center gap-2 font-mono text-xs px-4 py-2.5 rounded-xl ${
+                      urgent ? "td-cta-solid" : "td-cta"
+                    }`}
+                  >
+                    {card.cta}
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                  {card.secondary && (
+                    <button
+                      onClick={card.secondary.onClick}
+                      className="font-mono text-xs underline underline-offset-4 hover:opacity-80"
+                      style={{ color: tone }}
+                    >
+                      {card.secondary.label}
+                    </button>
+                  )}
+                  <p className="td-note ml-auto hidden md:block text-right text-base leading-tight max-w-[130px]">
+                    {card.tagline}
+                  </p>
+                </div>
+              </div>
             </div>
-          </div>
           );
         })}
+      </section>
 
+      {/* Branded closing band — mirrors the public site's CTA band */}
+      <section className="td-surface blueprint-contour">
+        <img
+          src={cardProjects}
+          alt=""
+          aria-hidden="true"
+          loading="lazy"
+          width={1600}
+          height={700}
+          className="td-img"
+          style={{ opacity: 0.3, objectPosition: "right center" }}
+        />
+        <div className="td-veil" />
+        <div className="td-content px-6 py-9 md:px-10 md:py-12 max-w-2xl">
+          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-teal">
+            Built for proper grafters
+          </p>
+          <h2 className="mt-3 font-heading uppercase text-primary-foreground text-[26px] md:text-[38px] leading-[0.98]">
+            Tools to build a stronger business.
+          </h2>
+          <p className="mt-3 font-body text-sm md:text-base text-primary-foreground/75">
+            From finding the right work to staying organised and compliant, ProGrafter gives you
+            everything you need in one place.
+          </p>
+          <button
+            onClick={() => navigate("/planning-alerts")}
+            className="mt-6 inline-flex items-center gap-2 bg-teal text-cream font-body text-sm font-semibold uppercase tracking-wide px-6 py-3.5 rounded-xl hover:bg-teal-hover transition-all shadow-lg shadow-teal/25 hover:-translate-y-0.5"
+          >
+            Find More Work
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+        <p className="td-note hidden lg:block absolute right-10 top-10 text-right text-lg">
+          Same standards.
+          <br />A brighter tomorrow.
+        </p>
       </section>
     </div>
   );
