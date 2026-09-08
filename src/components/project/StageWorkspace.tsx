@@ -83,6 +83,10 @@ const SUB_TABS: { id: SubTab; label: string; icon: typeof ClipboardList }[] = [
  * messages and payment / sign-off status. Uses the platform navy job-file kit
  * (JobFilePanel / AccentCard / TonePill) so it matches the dashboards.
  */
+/** Inspection outcomes get their own colour language, separate from works status. */
+const inspectionTone = (c: string) =>
+  c === "CLEAR" ? "emerald" : c === "HOLD" ? "rose" : "amber";
+
 const StageWorkspace = ({
   jobId,
   stages,
@@ -107,6 +111,7 @@ const StageWorkspace = ({
   const [posting, setPosting] = useState(false);
   const [stageMsg, setStageMsg] = useState("");
   const [busy, setBusy] = useState(false);
+  const escrow = useStageEscrow(jobId);
 
   const selected =
     ordered.find((s) => s.id === selectedId) ??
