@@ -295,6 +295,56 @@ const StageWorkspace = ({
               </div>
             </AccentCard>
 
+            {/* Building Control inspection outcome — separate from works status. */}
+            {(() => {
+              const info = escrow[selected.id];
+              if (!info?.inspectionStatus) return null;
+              return (
+                <AccentCard tone={inspectionTone(info.inspectionStatus)} className="space-y-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="font-heading text-base text-foreground">
+                      Building Control inspection
+                    </p>
+                    <TonePill tone={inspectionTone(info.inspectionStatus)}>
+                      {info.inspectionStatus}
+                    </TonePill>
+                  </div>
+                  {info.inspectionReportName && (
+                    <p className="font-mono text-[11px] text-muted-foreground">
+                      {info.inspectionReportName}
+                    </p>
+                  )}
+                  {info.inspectionReason && (
+                    <p className="font-mono text-[11px] text-muted-foreground">{info.inspectionReason}</p>
+                  )}
+                  {info.openItems.length > 0 && (
+                    <div>
+                      <p className="font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
+                        Open items
+                      </p>
+                      <ul className="list-disc list-inside font-mono text-[11px] text-foreground">
+                        {info.openItems.map((item, i) => (
+                          <li key={i}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {info.outstandingChecks.length > 0 && (
+                    <div>
+                      <p className="font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
+                        Outstanding checks
+                      </p>
+                      <ul className="list-disc list-inside font-mono text-[11px] text-foreground">
+                        {info.outstandingChecks.map((item, i) => (
+                          <li key={i}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </AccentCard>
+              );
+            })()}
+
             <div className="flex flex-wrap gap-2 bg-card border border-border rounded-2xl p-2">
               {SUB_TABS.map((t) => {
                 const Icon = t.icon;
