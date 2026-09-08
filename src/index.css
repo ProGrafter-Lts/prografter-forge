@@ -540,9 +540,22 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
 
 /* Dashboard sidebar (navy) */
 .dashboard-sidebar {
-  background-color: #27396A !important;
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, #12294a 0%, #0e2039 55%, #0b1a30 100%) !important;
+  border-right: 1px solid rgba(94, 234, 212, 0.12);
 }
+/* Fine blueprint grid, kept very faint so nav labels stay crisp. */
+.dashboard-sidebar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(94, 234, 212, 0.5) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(94, 234, 212, 0.5) 1px, transparent 1px);
+  background-size: 32px 32px;
+  opacity: 0.035;
+}
+.dashboard-sidebar > * { position: relative; z-index: 1; }
 .dashboard-sidebar a,
 .dashboard-sidebar button {
   color: rgba(255, 255, 255, 0.75);
