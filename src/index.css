@@ -368,6 +368,10 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
 .dashboard-dark .text-secondary-text {
   color: rgba(255, 255, 255, 0.75);
 }
+/* Hardcoded navy text is invisible on the dark dashboard background */
+.dashboard-dark .text-navy {
+  color: #F5F0E8;
+}
 .dashboard-dark .bg-card,
 .dashboard-dark .bg-background,
 .dashboard-dark .bg-white {
