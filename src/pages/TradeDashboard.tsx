@@ -293,7 +293,7 @@ const TradeDashboard = () => {
 
       {/* pt-16 on mobile keeps content clear of the fixed sidebar toggle (top-14 left-4) */}
       <main className="flex-1 p-4 pt-16 md:p-8 overflow-auto">
-        <div className="max-w-5xl mx-auto space-y-10">
+        <div className="max-w-6xl mx-auto space-y-8">
           <div className="flex justify-end">
             <NotificationBell />
           </div>
