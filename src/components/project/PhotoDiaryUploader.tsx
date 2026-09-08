@@ -210,7 +210,7 @@ const PhotoDiaryUploader = ({
         className="hidden"
         onChange={(e) => handleFiles(e.target.files)}
       />
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2 rounded-xl border-2 border-dashed border-teal-400/25 bg-white/[0.02] p-4">
         <Button
           variant="outline"
           size="sm"
