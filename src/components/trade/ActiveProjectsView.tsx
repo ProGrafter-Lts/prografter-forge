@@ -117,7 +117,7 @@ const ActiveProjectsView = ({ tradeId }: { tradeId: string }) => {
           <FolderKanban className="w-5 h-5" /> Active Projects
         </h2>
         <p className="font-mono text-xs text-muted-foreground mt-1">
-          Projects you've won. Track stage progress, message homeowners and log site updates.
+          Projects you've won. Track project status, message homeowners and log site updates.
         </p>
       </div>
 

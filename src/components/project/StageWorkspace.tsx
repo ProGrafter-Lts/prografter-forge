@@ -121,9 +121,9 @@ const StageWorkspace = ({
   if (ordered.length === 0) {
     return (
       <JobFilePanel>
-        <SectionHeading icon={<CalendarClock className="w-5 h-5 text-teal-400" />} title="Stage timeline" />
+        <SectionHeading icon={<CalendarClock className="w-5 h-5 text-teal-400" />} title="Payment milestones" />
         <JobFileEmpty icon={<CalendarClock className="w-8 h-8" />}>
-          No stages yet — stages are created from the agreed quote's payment schedule.
+          No payment milestones yet — they are created from the agreed quote's payment schedule.
         </JobFileEmpty>
       </JobFilePanel>
     );
@@ -218,7 +218,7 @@ const StageWorkspace = ({
     <JobFilePanel>
       <SectionHeading
         icon={<CalendarClock className="w-5 h-5 text-teal-400" />}
-        title="Stage timeline"
+        title="Payment milestones"
         count={ordered.length}
       />
 
@@ -237,7 +237,7 @@ const StageWorkspace = ({
                 <AccentCard tone={stageTone(s.status)} className={isSel ? "ring-1 ring-teal-400/40" : ""}>
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <p className="font-mono text-[10px] text-muted-foreground">Stage {s.stage_order}</p>
+                      <p className="font-mono text-[10px] text-muted-foreground">Milestone {s.stage_order}</p>
                       <p className="font-heading text-base text-foreground leading-tight">{s.stage_name}</p>
                     </div>
                     <TonePill tone={stageTone(s.status)}>{s.status.replace(/_/g, " ")}</TonePill>
@@ -449,7 +449,7 @@ const StageWorkspace = ({
               <AccentCard tone={paymentTone(selected.payment_status)} className="space-y-3">
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <p className="font-mono text-[10px] uppercase text-muted-foreground">Stage payment</p>
+                    <p className="font-mono text-[10px] uppercase text-muted-foreground">Milestone payment</p>
                     <p className="font-heading text-2xl text-foreground">{gbp(selected.payment_amount)}</p>
                     <p className="font-mono text-[11px] text-muted-foreground">
                       {stagePercent(selected.payment_amount, contractValue)}% of contract value

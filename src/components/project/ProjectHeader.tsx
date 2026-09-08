@@ -115,7 +115,7 @@ const ProjectHeader = ({
       </div>
       <div className="mt-4">
         <Progress value={progress} className="h-3 bg-navy/10" />
-        <p className="font-mono text-xs text-secondary-text mt-1 text-right">{progress}% complete</p>
+        <p className="font-mono text-xs text-secondary-text mt-1 text-right">{progress}% of payment milestones complete</p>
       </div>
     </div>
   );

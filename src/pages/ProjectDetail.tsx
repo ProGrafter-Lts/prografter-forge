@@ -423,7 +423,7 @@ const ProjectDetail = () => {
   const tabs: ControlCentreTab[] = [
     { id: "overview", label: "Overview", icon: LayoutDashboard },
     { id: "quotes", label: "Quote & contract", icon: ClipboardList },
-    { id: "timeline", label: "Stages", icon: CalendarClock },
+    { id: "timeline", label: "Payment milestones", icon: CalendarClock },
     { id: "payments", label: "Payments", icon: CreditCard },
     { id: "activity", label: "Activity", icon: Activity },
     { id: "documents", label: "Documents", icon: FolderArchive },
