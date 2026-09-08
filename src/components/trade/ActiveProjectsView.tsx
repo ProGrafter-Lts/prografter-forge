@@ -210,10 +210,12 @@ const ActiveProjectsView = ({ tradeId }: { tradeId: string }) => {
                 </span>
               </div>
 
-              <Progress value={stageProgress(project.stage)} className="h-2 bg-primary/10" />
+              <Progress value={milestoneProgress(project)} className="h-2 bg-primary/10" />
               <div className="flex items-center justify-between mt-3 gap-2 flex-wrap">
                 <p className="font-mono text-[10px] text-muted-foreground">
-                  {stageProgress(project.stage)}% complete
+                  {project.totalStages > 0
+                    ? `${milestoneProgress(project)}% — ${project.completedStages} of ${project.totalStages} payment milestones complete`
+                    : "No payment milestones set"}
                 </p>
                 <div className="flex items-center gap-2">
                   <button
