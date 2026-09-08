@@ -16,7 +16,7 @@ const TradeNav = () => {
   return (
     <header className="absolute top-0 left-0 right-0 z-50">
       <div className="max-w-[1400px] mx-auto px-6 h-20 flex items-center justify-between">
-        <Logo variant="light" className="h-10 w-auto" />
+        <Logo variant="light" className="h-12 w-auto" />
 
         <nav className="hidden craft:flex items-center gap-8">
           {LINKS.map((l, i) => (

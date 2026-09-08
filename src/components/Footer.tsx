@@ -16,7 +16,7 @@ const Footer = () => {
           </div>
         </div>
         <div className="flex flex-col craft:flex-row items-center justify-between gap-4">
-          <Logo variant="light" className="h-10 w-auto" />
+          <Logo variant="light" className="h-12 w-auto" />
 
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
             <Link to="/trust" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">Trust Centre</Link>
