@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Plus, AlertTriangle, Check, HelpCircle } from "lucide-react";
+import { Plus, AlertTriangle, Check, HelpCircle, FileSignature } from "lucide-react";
+import variationsBg from "@/assets/home/blueprint-lines.jpg";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
