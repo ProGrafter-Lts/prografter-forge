@@ -75,8 +75,27 @@ const ActiveProjectsView = ({ tradeId }: { tradeId: string }) => {
           stage: row.stage,
           status: row.status,
           agreed_price: null,
+          completedStages: 0,
+          totalStages: 0,
         });
       });
+
+      // Progress comes from real payment milestones — the same source the
+      // project Overview uses — not from the job's lifecycle stage label.
+      const jobIds = Array.from(seen.keys());
+      if (jobIds.length > 0) {
+        const { data: stageRows } = await supabase
+          .from("project_stages")
+          .select("job_id, status")
+          .in("job_id", jobIds);
+        (stageRows || []).forEach((s: any) => {
+          const project = seen.get(s.job_id);
+          if (!project) return;
+          project.totalStages += 1;
+          if (s.status === "complete" || s.status === "completed") project.completedStages += 1;
+        });
+      }
+
 
       // Contract values live in pence on the contracts table.
       if (contractIds.length > 0) {
