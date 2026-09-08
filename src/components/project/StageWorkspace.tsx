@@ -18,7 +18,9 @@ import {
   JobFilePanel,
   SectionHeading,
   TonePill,
+  type JobFileTone,
 } from "@/components/project/jobFileUi";
+import { useStageEscrow } from "@/components/project/useStageEscrow";
 import PhotoDiaryUploader from "@/components/project/PhotoDiaryUploader";
 import { formatStageDate, gbp, paymentTone, stagePercent, stageTone } from "@/lib/stageSchedule";
 
@@ -83,6 +85,10 @@ const SUB_TABS: { id: SubTab; label: string; icon: typeof ClipboardList }[] = [
  * messages and payment / sign-off status. Uses the platform navy job-file kit
  * (JobFilePanel / AccentCard / TonePill) so it matches the dashboards.
  */
+/** Inspection outcomes get their own colour language, separate from works status. */
+const inspectionTone = (c: string): JobFileTone =>
+  c === "CLEAR" ? "green" : c === "HOLD" ? "red" : "amber";
+
 const StageWorkspace = ({
   jobId,
   stages,
@@ -107,6 +113,7 @@ const StageWorkspace = ({
   const [posting, setPosting] = useState(false);
   const [stageMsg, setStageMsg] = useState("");
   const [busy, setBusy] = useState(false);
+  const escrow = useStageEscrow(jobId);
 
   const selected =
     ordered.find((s) => s.id === selectedId) ??
@@ -240,7 +247,14 @@ const StageWorkspace = ({
                       <p className="font-mono text-[10px] text-muted-foreground">Milestone {s.stage_order}</p>
                       <p className="font-heading text-base text-foreground leading-tight">{s.stage_name}</p>
                     </div>
-                    <TonePill tone={stageTone(s.status)}>{s.status.replace(/_/g, " ")}</TonePill>
+                    <div className="flex flex-col items-end gap-1">
+                      <TonePill tone={stageTone(s.status)}>{s.status.replace(/_/g, " ")}</TonePill>
+                      {escrow[s.id]?.inspectionStatus && (
+                        <TonePill tone={inspectionTone(escrow[s.id].inspectionStatus!)}>
+                          Inspection {escrow[s.id].inspectionStatus}
+                        </TonePill>
+                      )}
+                    </div>
                   </div>
                   <div className="flex items-center justify-between mt-2 font-mono text-[11px] text-muted-foreground">
                     <span>{formatStageDate(s.planned_start)}</span>
@@ -280,6 +294,56 @@ const StageWorkspace = ({
                 </div>
               </div>
             </AccentCard>
+
+            {/* Building Control inspection outcome — separate from works status. */}
+            {(() => {
+              const info = escrow[selected.id];
+              if (!info?.inspectionStatus) return null;
+              return (
+                <AccentCard tone={inspectionTone(info.inspectionStatus)} className="space-y-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="font-heading text-base text-foreground">
+                      Building Control inspection
+                    </p>
+                    <TonePill tone={inspectionTone(info.inspectionStatus)}>
+                      {info.inspectionStatus}
+                    </TonePill>
+                  </div>
+                  {info.inspectionReportName && (
+                    <p className="font-mono text-[11px] text-muted-foreground">
+                      {info.inspectionReportName}
+                    </p>
+                  )}
+                  {info.inspectionReason && (
+                    <p className="font-mono text-[11px] text-muted-foreground">{info.inspectionReason}</p>
+                  )}
+                  {info.openItems.length > 0 && (
+                    <div>
+                      <p className="font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
+                        Open items
+                      </p>
+                      <ul className="list-disc list-inside font-mono text-[11px] text-foreground">
+                        {info.openItems.map((item, i) => (
+                          <li key={i}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {info.outstandingChecks.length > 0 && (
+                    <div>
+                      <p className="font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
+                        Outstanding checks
+                      </p>
+                      <ul className="list-disc list-inside font-mono text-[11px] text-foreground">
+                        {info.outstandingChecks.map((item, i) => (
+                          <li key={i}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </AccentCard>
+              );
+            })()}
 
             <div className="flex flex-wrap gap-2 bg-card border border-border rounded-2xl p-2">
               {SUB_TABS.map((t) => {

@@ -13,14 +13,13 @@ interface ProjectRow {
   stage: string;
   status: string;
   agreed_price: number | null;
+  /** Completed / total payment milestones — same source the project Overview uses. */
+  completedStages: number;
+  totalStages: number;
 }
 
-const STAGES = ["enquiry", "quoting", "scheduled", "in_progress", "review", "completed"];
-
-const stageProgress = (stage: string) => {
-  const idx = STAGES.indexOf(stage);
-  return idx === -1 ? 0 : Math.round(((idx + 1) / STAGES.length) * 100);
-};
+const milestoneProgress = (p: ProjectRow) =>
+  p.totalStages > 0 ? Math.round((p.completedStages / p.totalStages) * 100) : 0;
 
 const formatStage = (stage: string) =>
   stage.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
@@ -76,8 +75,27 @@ const ActiveProjectsView = ({ tradeId }: { tradeId: string }) => {
           stage: row.stage,
           status: row.status,
           agreed_price: null,
+          completedStages: 0,
+          totalStages: 0,
         });
       });
+
+      // Progress comes from real payment milestones — the same source the
+      // project Overview uses — not from the job's lifecycle stage label.
+      const jobIds = Array.from(seen.keys());
+      if (jobIds.length > 0) {
+        const { data: stageRows } = await supabase
+          .from("project_stages")
+          .select("job_id, status")
+          .in("job_id", jobIds);
+        (stageRows || []).forEach((s: any) => {
+          const project = seen.get(s.job_id);
+          if (!project) return;
+          project.totalStages += 1;
+          if (s.status === "complete" || s.status === "completed") project.completedStages += 1;
+        });
+      }
+
 
       // Contract values live in pence on the contracts table.
       if (contractIds.length > 0) {
@@ -192,10 +210,12 @@ const ActiveProjectsView = ({ tradeId }: { tradeId: string }) => {
                 </span>
               </div>
 
-              <Progress value={stageProgress(project.stage)} className="h-2 bg-primary/10" />
+              <Progress value={milestoneProgress(project)} className="h-2 bg-primary/10" />
               <div className="flex items-center justify-between mt-3 gap-2 flex-wrap">
                 <p className="font-mono text-[10px] text-muted-foreground">
-                  {stageProgress(project.stage)}% complete
+                  {project.totalStages > 0
+                    ? `${milestoneProgress(project)}% — ${project.completedStages} of ${project.totalStages} payment milestones complete`
+                    : "No payment milestones set"}
                 </p>
                 <div className="flex items-center gap-2">
                   <button

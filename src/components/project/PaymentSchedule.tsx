@@ -11,6 +11,7 @@ import {
 } from "@/components/project/jobFileUi";
 import { deriveStagesFromSchedule, gbp, paymentTone, stagePercent } from "@/lib/stageSchedule";
 import { generatePaymentSchedulePdf } from "@/lib/paymentSchedulePdf";
+import { useStageEscrow } from "@/components/project/useStageEscrow";
 
 interface Stage {
   id: string;
@@ -54,6 +55,7 @@ const PaymentSchedule = ({
   onRefresh,
 }: PaymentScheduleProps) => {
   const [generating, setGenerating] = useState(false);
+  const escrow = useStageEscrow(jobId);
 
   const canGenerate =
     userRole === "trade" && !!jobId && stages.length === 0 && Array.isArray(agreedSchedule) && agreedSchedule.length > 0;
@@ -149,6 +151,31 @@ const PaymentSchedule = ({
                 </div>
                 <TonePill tone={paymentTone(s.payment_status)}>{s.payment_status}</TonePill>
               </div>
+
+              {(() => {
+                const info = escrow[s.id];
+                if (!info) return null;
+                const paid = info.drawdowns.filter((d) => d.status === "approved");
+                if (paid.length === 0) return null;
+                const total = paid.reduce((sum, d) => sum + d.amount_pence, 0) / 100;
+                return (
+                  <div className="mt-3 rounded-lg border border-emerald-400/30 bg-emerald-400/5 p-3">
+                    <p className="font-mono text-[11px] uppercase tracking-wide text-emerald-300">
+                      Drawdown paid · {gbp(total)}
+                    </p>
+                    <ul className="mt-1 space-y-1">
+                      {paid.map((d) => (
+                        <li key={d.id} className="font-mono text-[11px] text-muted-foreground">
+                          {gbp(d.amount_pence / 100)} — {d.description}
+                        </li>
+                      ))}
+                    </ul>
+                    <p className="font-mono text-[10px] text-muted-foreground mt-1">
+                      Recorded separately from milestone completion.
+                    </p>
+                  </div>
+                );
+              })()}
               {userRole === "homeowner" &&
                 (s.status === "complete" || s.status === "completed") &&
                 s.payment_status !== "paid" &&
