@@ -443,25 +443,63 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
 
   return (
     <div className="space-y-6">
+      {/* Hero — same navy / faded-site-imagery language as the public pages */}
+      <section className="td-surface blueprint-grid">
+        <img
+          src={heroDashboard}
+          alt=""
+          aria-hidden="true"
+          width={1600}
+          height={912}
+          className="td-img"
+          style={{ opacity: 0.45, objectPosition: "right center" }}
+        />
+        <div className="td-veil" />
+        <div className="td-content px-6 py-10 md:px-10 md:py-14">
+          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-teal">
+            Tradespeople Dashboard
+          </p>
+          <h1 className="mt-3 font-heading uppercase text-primary-foreground text-[34px] md:text-[54px] leading-[0.95] max-w-xl">
+            What needs doing today<span className="text-teal">.</span>
+          </h1>
+          <p className="mt-3 font-body text-sm md:text-base text-primary-foreground/75 max-w-md">
+            Your work. Your pipeline. All in one place.
+          </p>
+          <p className="td-note hidden lg:block absolute right-8 top-8 text-right text-xl max-w-[190px]">
+            Proper grafters build brighter futures.
+            <span className="block mt-2 ml-auto w-12 h-[2px] bg-teal/70" />
+          </p>
+        </div>
+      </section>
+
       <section className="space-y-3">
-        <div className="flex items-baseline justify-between gap-3 flex-wrap">
-          <h2 className="font-heading text-primary text-2xl">What needs doing today</h2>
-          {prompts.length > 0 && (
+        {prompts.length > 0 && (
+          <div className="flex items-baseline justify-between gap-3 flex-wrap">
+            <h2 className="font-heading uppercase text-primary-foreground text-2xl">Priorities</h2>
             <span className="font-mono text-[11px] uppercase tracking-widest text-primary-foreground/50">
               {prompts.length} {prompts.length === 1 ? "action" : "actions"} · top priority first
             </span>
-          )}
-        </div>
+          </div>
+        )}
         {prompts.length === 0 ? (
           <div
-            className="rounded-2xl px-5 py-6 text-center"
-            style={{ backgroundColor: "rgba(26,194,186,0.06)", border: "1px solid rgba(26,194,186,0.25)" }}
+            className="td-surface flex items-center gap-5 px-6 py-6"
+            style={{ borderColor: "rgba(26,194,186,0.35)" }}
           >
-            <p className="font-heading text-lg" style={{ color: "#1AC2BA" }}>
-              You're all clear
-            </p>
-            <p className="mt-1 font-mono text-xs text-primary-foreground/60">
-              No unactioned matches, quotes or documents right now.
+            <div className="td-veil" style={{ background: "linear-gradient(100deg,#0f2f45 0%,rgba(13,29,52,0.9) 70%)" }} />
+            <span className="td-content inline-flex items-center justify-center w-14 h-14 rounded-full shrink-0 border-2 border-teal/60">
+              <CheckCircle2 className="w-7 h-7 text-teal" strokeWidth={1.75} />
+            </span>
+            <div className="td-content min-w-0">
+              <p className="font-heading uppercase text-2xl text-teal leading-none">You're all clear</p>
+              <p className="mt-1.5 font-mono text-xs text-primary-foreground/65">
+                No unactioned matches, quotes or documents right now.
+              </p>
+            </div>
+            <p className="td-note td-content hidden md:block ml-auto text-right text-lg">
+              Good work.
+              <br />
+              Keep going.
             </p>
           </div>
         ) : (
