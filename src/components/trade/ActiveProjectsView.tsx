@@ -13,14 +13,13 @@ interface ProjectRow {
   stage: string;
   status: string;
   agreed_price: number | null;
+  /** Completed / total payment milestones — same source the project Overview uses. */
+  completedStages: number;
+  totalStages: number;
 }
 
-const STAGES = ["enquiry", "quoting", "scheduled", "in_progress", "review", "completed"];
-
-const stageProgress = (stage: string) => {
-  const idx = STAGES.indexOf(stage);
-  return idx === -1 ? 0 : Math.round(((idx + 1) / STAGES.length) * 100);
-};
+const milestoneProgress = (p: ProjectRow) =>
+  p.totalStages > 0 ? Math.round((p.completedStages / p.totalStages) * 100) : 0;
 
 const formatStage = (stage: string) =>
   stage.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
