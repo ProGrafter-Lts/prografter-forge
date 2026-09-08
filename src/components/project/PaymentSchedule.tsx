@@ -11,6 +11,7 @@ import {
 } from "@/components/project/jobFileUi";
 import { deriveStagesFromSchedule, gbp, paymentTone, stagePercent } from "@/lib/stageSchedule";
 import { generatePaymentSchedulePdf } from "@/lib/paymentSchedulePdf";
+import { useStageEscrow } from "@/components/project/useStageEscrow";
 
 interface Stage {
   id: string;
