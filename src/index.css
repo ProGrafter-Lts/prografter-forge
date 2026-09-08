@@ -540,9 +540,22 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
 
 /* Dashboard sidebar (navy) */
 .dashboard-sidebar {
-  background-color: #27396A !important;
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, #12294a 0%, #0e2039 55%, #0b1a30 100%) !important;
+  border-right: 1px solid rgba(94, 234, 212, 0.12);
 }
+/* Fine blueprint grid, kept very faint so nav labels stay crisp. */
+.dashboard-sidebar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(94, 234, 212, 0.5) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(94, 234, 212, 0.5) 1px, transparent 1px);
+  background-size: 32px 32px;
+  opacity: 0.035;
+}
+.dashboard-sidebar > * { position: relative; z-index: 1; }
 .dashboard-sidebar a,
 .dashboard-sidebar button {
   color: rgba(255, 255, 255, 0.75);
@@ -1845,4 +1858,103 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
     --qr-display-lg: 22pt;
     --qr-score: 26pt;
   }
+}
+
+/* =====================================================================
+   Trade dashboard — mirrors the public ProGrafter landing-page language
+   (deep navy base, teal accents, blueprint overlays, faded site imagery).
+   Presentation only: no layout component depends on these for behaviour.
+   ===================================================================== */
+.td-note {
+  font-family: 'Caveat', cursive;
+  color: rgba(240, 235, 225, 0.55);
+  line-height: 1.25;
+  transform: rotate(-3deg);
+  pointer-events: none;
+}
+
+.td-surface {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(150deg, #12294a 0%, #0d1d34 100%);
+}
+.td-surface > .td-img {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  opacity: 0.28;
+}
+.td-surface > .td-veil {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, #0d1d34 0%, rgba(13, 29, 52, 0.86) 45%, rgba(13, 29, 52, 0.55) 100%);
+}
+.td-surface > .td-content { position: relative; z-index: 2; }
+
+/* Per-module accent, driven by --td-accent (an "r g b" triple). */
+.td-card {
+  border-color: rgba(var(--td-accent), 0.3);
+  border-left: 3px solid rgb(var(--td-accent));
+  box-shadow: 0 18px 40px -28px rgba(0, 0, 0, 0.9);
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+.td-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(var(--td-accent), 0.55);
+  box-shadow: 0 24px 46px -26px rgba(0, 0, 0, 0.95);
+}
+.td-card > .td-img { opacity: 0.2; object-position: center; }
+.td-card > .td-veil {
+  background:
+    radial-gradient(120% 100% at 100% 0%, rgba(var(--td-accent), 0.14) 0%, transparent 60%),
+    linear-gradient(110deg, #0f2340 0%, rgba(15, 35, 64, 0.9) 55%, rgba(15, 35, 64, 0.6) 100%);
+}
+.td-cta {
+  background-color: rgba(var(--td-accent), 0.16);
+  color: rgb(var(--td-accent));
+  border: 1px solid rgba(var(--td-accent), 0.45);
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+.td-cta:hover {
+  background-color: rgba(var(--td-accent), 0.28);
+  box-shadow: 0 0 0 3px rgba(var(--td-accent), 0.12);
+}
+.td-cta-solid {
+  background-color: rgb(var(--td-accent));
+  color: #08172a;
+  border: 1px solid rgb(var(--td-accent));
+}
+.td-cta-solid:hover { box-shadow: 0 0 22px -4px rgba(var(--td-accent), 0.6); }
+
+@media (max-width: 640px) {
+  .td-surface > .td-img { opacity: 0.16; }
+  .td-note { display: none; }
+}
+
+/* --- Trade sidebar nav items (visual only — routing is unchanged) --- */
+.td-nav {
+  position: relative;
+  transition: background-color 0.18s ease, color 0.18s ease;
+  color: rgba(255, 255, 255, 0.72);
+}
+.td-nav:hover { background-color: rgba(255, 255, 255, 0.05); color: rgba(255, 255, 255, 0.95); }
+.td-nav.is-active {
+  color: #5EEAD4;
+  background: linear-gradient(90deg, rgba(26, 194, 186, 0.22), rgba(26, 194, 186, 0.04));
+  box-shadow: inset 0 0 0 1px rgba(94, 234, 212, 0.22);
+}
+.td-nav.is-active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.5rem;
+  bottom: 0.5rem;
+  width: 3px;
+  border-radius: 3px;
+  background: #5EEAD4;
 }

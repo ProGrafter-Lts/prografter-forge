@@ -6,12 +6,20 @@ import {
   ArrowRight,
   Briefcase,
   CalendarDays,
+  CheckCircle2,
   Clock,
   FileText,
   FolderKanban,
   Search,
   ShieldCheck,
 } from "lucide-react";
+import heroDashboard from "@/assets/dashboard/hero-dashboard.jpg";
+import cardTradeVault from "@/assets/dashboard/card-tradevault.jpg";
+import cardCalendar from "@/assets/dashboard/card-calendar.jpg";
+import cardProjects from "@/assets/home/hero-blueprint-build.jpg";
+import cardPipeline from "@/assets/home/cta-construction.jpg";
+import cardQuotes from "@/assets/home/blueprint-lines.jpg";
+import cardFindWork from "@/assets/home/trades-hero.jpg";
 import { Skeleton } from "@/components/ui/skeleton";
 import { computeVaultSummary, type VaultDocument } from "@/lib/tradeVault";
 
@@ -303,6 +311,11 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
     label: string;
     icon: typeof FolderKanban;
     accent: string;
+    /** "r g b" triple powering the card's accent CSS variable. */
+    rgb: string;
+    /** Faded site/blueprint imagery behind the card. */
+    image: string;
+    tagline: string;
     value: string;
     unit: string;
     sub: string;
@@ -319,6 +332,9 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
       label: "Pipeline",
       icon: FolderKanban,
       accent: "#8B5CF6",
+      rgb: "139 92 246",
+      image: cardPipeline,
+      tagline: "More right jobs. Less time wasted.",
       value: String(data.pipelineActive),
       unit: data.pipelineActive === 1 ? "active lead" : "active leads",
       sub: `${data.pipelineTodo} to contact · ${data.pipelineWaiting} waiting`,
@@ -337,6 +353,9 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
       label: "Quotes",
       icon: FileText,
       accent: "#F59E0B",
+      rgb: "245 158 11",
+      image: cardQuotes,
+      tagline: "Quote better. Win more.",
       value: String(data.quotesOutstanding),
       unit: data.quotesOutstanding === 1 ? "outstanding quote" : "outstanding quotes",
       sub: data.quotesOutstanding > 0 ? `${gbp(data.quotesValue)} awaiting decision` : "No quotes awaiting a decision",
@@ -354,6 +373,9 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
       label: "Find Work",
       icon: Search,
       accent: "#1AC2BA",
+      rgb: "26 194 186",
+      image: cardFindWork,
+      tagline: "Real trades. Real opportunities.",
       value: String(data.newMatches),
       unit: data.newMatches === 1 ? "new match" : "new matches",
       sub:
@@ -372,6 +394,9 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
       label: "TradeVault",
       icon: ShieldCheck,
       accent: "#3B82F6",
+      rgb: "59 130 246",
+      image: cardTradeVault,
+      tagline: "Verified trades. Bigger opportunities.",
       value: String(data.docsNeeded),
       unit: data.docsNeeded === 1 ? "document needed" : "documents needed",
       sub: data.docsLabel,
@@ -385,6 +410,9 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
       label: "Projects",
       icon: Briefcase,
       accent: "#22C55E",
+      rgb: "34 197 94",
+      image: cardProjects,
+      tagline: "Real projects. Real progress.",
       value: String(data.activeProjects),
       unit: data.activeProjects === 1 ? "active project" : "active projects",
       sub:
@@ -400,6 +428,9 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
       label: "Calendar",
       icon: CalendarDays,
       accent: "#94A3B8",
+      rgb: "148 163 184",
+      image: cardCalendar,
+      tagline: "Plan. Organise. Build progress.",
       value: data.nextDate ? formatDate(data.nextDate.date) : "—",
       unit: data.nextDate ? "next date" : "nothing scheduled",
       sub: data.nextDate ? data.nextDate.label : "No upcoming dates or deadlines",
@@ -412,25 +443,63 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
 
   return (
     <div className="space-y-6">
+      {/* Hero — same navy / faded-site-imagery language as the public pages */}
+      <section className="td-surface blueprint-grid">
+        <img
+          src={heroDashboard}
+          alt=""
+          aria-hidden="true"
+          width={1600}
+          height={912}
+          className="td-img"
+          style={{ opacity: 0.45, objectPosition: "right center" }}
+        />
+        <div className="td-veil" />
+        <div className="td-content px-6 py-10 md:px-10 md:py-14">
+          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-teal">
+            Tradespeople Dashboard
+          </p>
+          <h1 className="mt-3 font-heading uppercase text-primary-foreground text-[34px] md:text-[54px] leading-[0.95] max-w-xl">
+            What needs doing today<span className="text-teal">.</span>
+          </h1>
+          <p className="mt-3 font-body text-sm md:text-base text-primary-foreground/75 max-w-md">
+            Your work. Your pipeline. All in one place.
+          </p>
+          <p className="td-note hidden lg:block absolute right-8 top-8 text-right text-xl max-w-[190px]">
+            Proper grafters build brighter futures.
+            <span className="block mt-2 ml-auto w-12 h-[2px] bg-teal/70" />
+          </p>
+        </div>
+      </section>
+
       <section className="space-y-3">
-        <div className="flex items-baseline justify-between gap-3 flex-wrap">
-          <h2 className="font-heading text-primary text-2xl">What needs doing today</h2>
-          {prompts.length > 0 && (
+        {prompts.length > 0 && (
+          <div className="flex items-baseline justify-between gap-3 flex-wrap">
+            <h2 className="font-heading uppercase text-primary-foreground text-2xl">Priorities</h2>
             <span className="font-mono text-[11px] uppercase tracking-widest text-primary-foreground/50">
               {prompts.length} {prompts.length === 1 ? "action" : "actions"} · top priority first
             </span>
-          )}
-        </div>
+          </div>
+        )}
         {prompts.length === 0 ? (
           <div
-            className="rounded-2xl px-5 py-6 text-center"
-            style={{ backgroundColor: "rgba(26,194,186,0.06)", border: "1px solid rgba(26,194,186,0.25)" }}
+            className="td-surface flex items-center gap-5 px-6 py-6"
+            style={{ borderColor: "rgba(26,194,186,0.35)" }}
           >
-            <p className="font-heading text-lg" style={{ color: "#1AC2BA" }}>
-              You're all clear
-            </p>
-            <p className="mt-1 font-mono text-xs text-primary-foreground/60">
-              No unactioned matches, quotes or documents right now.
+            <div className="td-veil" style={{ background: "linear-gradient(100deg,#0f2f45 0%,rgba(13,29,52,0.9) 70%)" }} />
+            <span className="td-content inline-flex items-center justify-center w-14 h-14 rounded-full shrink-0 border-2 border-teal/60">
+              <CheckCircle2 className="w-7 h-7 text-teal" strokeWidth={1.75} />
+            </span>
+            <div className="td-content min-w-0">
+              <p className="font-heading uppercase text-2xl text-teal leading-none">You're all clear</p>
+              <p className="mt-1.5 font-mono text-xs text-primary-foreground/65">
+                No unactioned matches, quotes or documents right now.
+              </p>
+            </div>
+            <p className="td-note td-content hidden md:block ml-auto text-right text-lg">
+              Good work.
+              <br />
+              Keep going.
             </p>
           </div>
         ) : (
@@ -498,97 +567,146 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
 
       </section>
 
-      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <section className="grid gap-4 sm:grid-cols-2">
         {cards.map((card) => {
           const urgent = card.urgency >= 3;
-          const attention = card.urgency === 2;
-          const tone = urgent ? "#FCD34D" : attention ? card.accent : card.accent;
+          const rgb = urgent ? "252 211 77" : card.rgb;
+          const tone = urgent ? "#FCD34D" : card.accent;
           return (
-          <div
-            key={card.key}
-            className="rounded-2xl p-5 flex flex-col justify-between"
-            style={{
-              backgroundColor: urgent
-                ? "rgba(252,211,77,0.07)"
-                : `${card.accent}0F`,
-              border: `1px solid ${urgent ? "rgba(252,211,77,0.35)" : `${card.accent}3D`}`,
-              borderLeft: `4px solid ${urgent ? "#FCD34D" : card.accent}`,
-              boxShadow: urgent
-                ? "0 8px 24px -12px rgba(252,211,77,0.45)"
-                : `0 8px 22px -16px ${card.accent}`,
-            }}
-          >
+            <div
+              key={card.key}
+              className="td-surface td-card blueprint-grid flex flex-col"
+              style={{ ["--td-accent" as any]: rgb }}
+            >
+              <img
+                src={card.image}
+                alt=""
+                aria-hidden="true"
+                loading="lazy"
+                width={900}
+                height={600}
+                className="td-img"
+              />
+              <div className="td-veil" />
 
-            <div>
-              <div className="flex items-center gap-2">
-                <span
-                  className="inline-flex items-center justify-center rounded-lg w-7 h-7"
-                  style={{ backgroundColor: `${tone}2E`, border: `1px solid ${tone}59` }}
-                >
-                  <card.icon className="w-4 h-4" style={{ color: tone }} />
-                </span>
-                <span className="font-mono text-[11px] uppercase tracking-widest" style={{ color: tone }}>
-                  {card.label}
-                </span>
+              <div className="td-content flex flex-col justify-between flex-1 p-5 md:p-6">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="inline-flex items-center justify-center rounded-xl w-9 h-9"
+                      style={{ backgroundColor: `${tone}24`, border: `1px solid ${tone}59` }}
+                    >
+                      <card.icon className="w-4.5 h-4.5" style={{ color: tone }} strokeWidth={1.75} />
+                    </span>
+                    <span
+                      className="font-heading uppercase tracking-wide text-lg"
+                      style={{ color: tone }}
+                    >
+                      {card.label}
+                    </span>
 
-                {card.alert && (
-                  <span
-                    className="ml-auto inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-mono text-[10px]"
-                    style={{
-                      backgroundColor: urgent ? "rgba(252,211,77,0.18)" : `${card.accent}1F`,
-                      color: urgent ? "#FCD34D" : card.accent,
-                    }}
+                    {card.alert ? (
+                      <span
+                        className="ml-auto inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-mono text-[10px]"
+                        style={{ backgroundColor: `${tone}24`, color: tone }}
+                      >
+                        {urgent && <AlertCircle className="w-3 h-3" />}
+                        {card.alert}
+                      </span>
+                    ) : (
+                      <span className="ml-auto font-mono text-[9px] uppercase tracking-[0.2em] text-primary-foreground/35 hidden sm:block">
+                        {card.key === "projects"
+                          ? "Active work"
+                          : card.key === "pipeline"
+                            ? "New opportunities"
+                            : card.key === "quotes"
+                              ? "Win more work"
+                              : card.key === "find-work"
+                                ? "Matched to you"
+                                : card.key === "tradevault"
+                                  ? "Stay verified"
+                                  : "Your schedule"}
+                      </span>
+                    )}
+                  </div>
+
+                  <div
+                    className="mt-4 font-heading text-5xl leading-none"
+                    style={{ color: urgent ? "#FCD34D" : "hsl(var(--primary-foreground))" }}
                   >
-                    {urgent && <AlertCircle className="w-3 h-3" />}
-                    {card.alert}
-                  </span>
-                )}
-              </div>
-              <div
-                className="mt-3 font-heading text-4xl leading-none"
-                style={{ color: urgent ? "#FCD34D" : card.urgency === 0 ? "hsl(var(--primary-foreground))" : card.accent }}
-              >
-                {card.value}
-              </div>
-              <div className="mt-1 font-mono text-xs text-primary-foreground/70">{card.unit}</div>
-              <div className="mt-2 font-mono text-xs text-primary-foreground/50 leading-snug">
-                {card.sub}
-              </div>
-            </div>
-            <div className="mt-4 flex items-center gap-3 flex-wrap">
-              <button
-                onClick={card.onClick}
-                className="inline-flex items-center gap-1 font-mono text-xs px-3 py-2 rounded-xl transition-opacity hover:opacity-90"
-                style={
-                  urgent
-                    ? { backgroundColor: "#FCD34D", color: "#1A1A1A" }
-                    : card.urgency === 0
-                      ? {
-                          backgroundColor: `${card.accent}1F`,
-                          color: card.accent,
-                          border: `1px solid ${card.accent}59`,
-                        }
-                      : { backgroundColor: `${card.accent}E6`, color: "#FFFFFF" }
-                }
-              >
+                    {card.value}
+                  </div>
+                  <div className="mt-1.5 font-body text-sm text-primary-foreground/80">{card.unit}</div>
+                  <div className="mt-2 font-mono text-xs text-primary-foreground/55 leading-snug">
+                    {card.sub}
+                  </div>
+                </div>
 
-                {card.cta}
-                <ArrowRight className="w-3 h-3" />
-              </button>
-              {card.secondary && (
-                <button
-                  onClick={card.secondary.onClick}
-                  className="font-mono text-xs hover:underline"
-                  style={{ color: card.accent }}
-                >
-                  {card.secondary.label}
-                </button>
-              )}
+                <div className="mt-5 flex items-center gap-4 flex-wrap">
+                  <button
+                    onClick={card.onClick}
+                    className={`inline-flex items-center gap-2 font-mono text-xs px-4 py-2.5 rounded-xl ${
+                      urgent ? "td-cta-solid" : "td-cta"
+                    }`}
+                  >
+                    {card.cta}
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                  {card.secondary && (
+                    <button
+                      onClick={card.secondary.onClick}
+                      className="font-mono text-xs underline underline-offset-4 hover:opacity-80"
+                      style={{ color: tone }}
+                    >
+                      {card.secondary.label}
+                    </button>
+                  )}
+                  <p className="td-note ml-auto hidden md:block text-right text-base leading-tight max-w-[130px]">
+                    {card.tagline}
+                  </p>
+                </div>
+              </div>
             </div>
-          </div>
           );
         })}
+      </section>
 
+      {/* Branded closing band — mirrors the public site's CTA band */}
+      <section className="td-surface blueprint-contour">
+        <img
+          src={cardProjects}
+          alt=""
+          aria-hidden="true"
+          loading="lazy"
+          width={1600}
+          height={700}
+          className="td-img"
+          style={{ opacity: 0.3, objectPosition: "right center" }}
+        />
+        <div className="td-veil" />
+        <div className="td-content px-6 py-9 md:px-10 md:py-12 max-w-2xl">
+          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-teal">
+            Built for proper grafters
+          </p>
+          <h2 className="mt-3 font-heading uppercase text-primary-foreground text-[26px] md:text-[38px] leading-[0.98]">
+            Tools to build a stronger business.
+          </h2>
+          <p className="mt-3 font-body text-sm md:text-base text-primary-foreground/75">
+            From finding the right work to staying organised and compliant, ProGrafter gives you
+            everything you need in one place.
+          </p>
+          <button
+            onClick={() => navigate("/planning-alerts")}
+            className="mt-6 inline-flex items-center gap-2 bg-teal text-cream font-body text-sm font-semibold uppercase tracking-wide px-6 py-3.5 rounded-xl hover:bg-teal-hover transition-all shadow-lg shadow-teal/25 hover:-translate-y-0.5"
+          >
+            Find More Work
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+        <p className="td-note hidden lg:block absolute right-10 top-10 text-right text-lg">
+          Same standards.
+          <br />A brighter tomorrow.
+        </p>
       </section>
     </div>
   );
