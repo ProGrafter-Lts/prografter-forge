@@ -240,7 +240,14 @@ const StageWorkspace = ({
                       <p className="font-mono text-[10px] text-muted-foreground">Milestone {s.stage_order}</p>
                       <p className="font-heading text-base text-foreground leading-tight">{s.stage_name}</p>
                     </div>
-                    <TonePill tone={stageTone(s.status)}>{s.status.replace(/_/g, " ")}</TonePill>
+                    <div className="flex flex-col items-end gap-1">
+                      <TonePill tone={stageTone(s.status)}>{s.status.replace(/_/g, " ")}</TonePill>
+                      {escrow[s.id]?.inspectionStatus && (
+                        <TonePill tone={inspectionTone(escrow[s.id].inspectionStatus!)}>
+                          Inspection {escrow[s.id].inspectionStatus}
+                        </TonePill>
+                      )}
+                    </div>
                   </div>
                   <div className="flex items-center justify-between mt-2 font-mono text-[11px] text-muted-foreground">
                     <span>{formatStageDate(s.planned_start)}</span>
