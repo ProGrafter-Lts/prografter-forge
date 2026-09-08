@@ -145,10 +145,32 @@ const PhotoDiaryUploader = ({
   };
 
   return (
-    <div className="bg-card border border-border rounded-2xl p-5 space-y-3">
-      <div>
-        <h3 className="font-heading text-primary text-base">{title}</h3>
-        <p className="font-mono text-xs text-muted-foreground mt-1">{hint}</p>
+    <div className="td-surface p-5 space-y-3">
+      <img
+        src={sitePhotosBg}
+        alt=""
+        aria-hidden="true"
+        loading="lazy"
+        width={1200}
+        height={700}
+        className="td-img !opacity-[0.14] object-right"
+      />
+      <div className="td-veil" />
+      <div className="td-content space-y-3">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-teal-300">
+            Site photos
+          </p>
+          <h3 className="font-heading text-foreground text-xl uppercase tracking-wide mt-1">
+            Add site photos to this job
+          </h3>
+          <p className="font-mono text-xs text-muted-foreground mt-2">{title}</p>
+          <p className="font-mono text-xs text-muted-foreground mt-1">{hint}</p>
+        </div>
+        <p className="td-note hidden md:block text-sm shrink-0 max-w-[10rem] text-right">
+          Document progress. Build confidence.
+        </p>
       </div>
 
       <Input
