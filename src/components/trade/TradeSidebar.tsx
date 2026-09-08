@@ -149,11 +149,9 @@ const TradeSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen }: 
               <button
                 key={item.id}
                 onClick={() => handleNavClick(item.id)}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-mono text-sm transition-colors whitespace-nowrap"
-                style={{
-                  backgroundColor: isActive ? "rgba(13,148,136,0.18)" : "transparent",
-                  color: isActive ? "#1AC2BA" : "rgba(255,255,255,0.75)",
-                }}
+                className={`td-nav w-full flex items-center gap-3 px-4 py-3 rounded-xl font-mono text-sm whitespace-nowrap ${
+                  isActive ? "is-active" : ""
+                }`}
               >
                 <item.icon className="w-4 h-4 flex-shrink-0" />
                 {item.label}
@@ -175,11 +173,9 @@ const TradeSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen }: 
           {siteScout.allowed ? (
             <button
               onClick={() => handleNavClick("atlas")}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-mono text-sm transition-colors whitespace-nowrap"
-              style={{
-                backgroundColor: routeActiveNav === "atlas" ? "rgba(13,148,136,0.18)" : "transparent",
-                color: routeActiveNav === "atlas" ? "#1AC2BA" : "rgba(255,255,255,0.75)",
-              }}
+              className={`td-nav w-full flex items-center gap-3 px-4 py-3 rounded-xl font-mono text-sm whitespace-nowrap ${
+                routeActiveNav === "atlas" ? "is-active" : ""
+              }`}
             >
               <Map className="w-4 h-4 flex-shrink-0" />
               SiteScout
@@ -204,11 +200,9 @@ const TradeSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen }: 
           {/* Settings */}
           <button
             onClick={() => handleNavClick("settings")}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-mono text-sm transition-colors whitespace-nowrap"
-            style={{
-              backgroundColor: routeActiveNav === "settings" ? "rgba(13,148,136,0.18)" : "transparent",
-              color: routeActiveNav === "settings" ? "#1AC2BA" : "rgba(255,255,255,0.75)",
-            }}
+            className={`td-nav w-full flex items-center gap-3 px-4 py-3 rounded-xl font-mono text-sm whitespace-nowrap ${
+              routeActiveNav === "settings" ? "is-active" : ""
+            }`}
           >
             <Settings className="w-4 h-4 flex-shrink-0" />
             Settings
@@ -227,12 +221,9 @@ const TradeSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen }: 
               navigate("/sitescout-sandbox");
               setSidebarOpen(false);
             }}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-mono text-sm transition-colors whitespace-nowrap"
-            style={{
-              backgroundColor:
-                routeActiveNav === "sitescout-sandbox" ? "rgba(13,148,136,0.18)" : "transparent",
-              color: routeActiveNav === "sitescout-sandbox" ? "#1AC2BA" : "rgba(255,255,255,0.75)",
-            }}
+            className={`td-nav w-full flex items-center gap-3 px-4 py-3 rounded-xl font-mono text-sm whitespace-nowrap ${
+              routeActiveNav === "sitescout-sandbox" ? "is-active" : ""
+            }`}
           >
             <FlaskConical className="w-4 h-4 flex-shrink-0" />
             Agent Sandbox
