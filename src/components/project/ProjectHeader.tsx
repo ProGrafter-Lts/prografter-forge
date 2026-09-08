@@ -75,23 +75,27 @@ const ProjectHeader = ({
             {job.title || job.job_type}
             {job.is_green_job && <GreenLeafBadge />}
           </h1>
-          <div className="flex flex-wrap items-center gap-3 mt-2 font-mono text-xs text-secondary-text">
-            <span className="flex items-center gap-1">
-              Trade: <span className="text-navy font-semibold">{tradeName}</span>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mt-3 font-mono text-xs text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              <span className="uppercase tracking-wide opacity-70">Trade:</span>
+              <span className="text-sm font-semibold text-foreground">{tradeName}</span>
               {tradeVerified && <ShieldCheck className="w-3.5 h-3.5 text-teal" />}
               {tradeReviewCount > 0 && tradeRating > 0 ? (
                 <span className="flex items-center gap-0.5 text-amber-500">
                   <Star className="w-3 h-3 fill-amber-500" /> {tradeRating.toFixed(1)}
-                  <span className="text-secondary-text ml-1">
+                  <span className="text-muted-foreground ml-1">
                     ({tradeReviewCount} review{tradeReviewCount === 1 ? "" : "s"})
                   </span>
                 </span>
               ) : (
-                <span className="italic text-secondary-text">Awaiting first review</span>
+                <span className="italic text-muted-foreground">Awaiting first review</span>
               )}
             </span>
-            <span>·</span>
-            <span>Homeowner: <span className="text-navy font-semibold">{homeownerName}</span></span>
+            <span aria-hidden className="opacity-40">·</span>
+            <span className="flex items-center gap-1.5">
+              <span className="uppercase tracking-wide opacity-70">Homeowner:</span>
+              <span className="text-sm font-semibold text-foreground">{homeownerName}</span>
+            </span>
             {schedule && (
               <>
                 <span>·</span>
