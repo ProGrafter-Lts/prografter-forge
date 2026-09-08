@@ -6,12 +6,20 @@ import {
   ArrowRight,
   Briefcase,
   CalendarDays,
+  CheckCircle2,
   Clock,
   FileText,
   FolderKanban,
   Search,
   ShieldCheck,
 } from "lucide-react";
+import heroDashboard from "@/assets/dashboard/hero-dashboard.jpg";
+import cardTradeVault from "@/assets/dashboard/card-tradevault.jpg";
+import cardCalendar from "@/assets/dashboard/card-calendar.jpg";
+import cardProjects from "@/assets/home/hero-blueprint-build.jpg";
+import cardPipeline from "@/assets/home/cta-construction.jpg";
+import cardQuotes from "@/assets/home/blueprint-lines.jpg";
+import cardFindWork from "@/assets/home/trades-hero.jpg";
 import { Skeleton } from "@/components/ui/skeleton";
 import { computeVaultSummary, type VaultDocument } from "@/lib/tradeVault";
 
