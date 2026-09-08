@@ -18,7 +18,9 @@ import {
   JobFilePanel,
   SectionHeading,
   TonePill,
+  type JobFileTone,
 } from "@/components/project/jobFileUi";
+import { useStageEscrow } from "@/components/project/useStageEscrow";
 import PhotoDiaryUploader from "@/components/project/PhotoDiaryUploader";
 import { formatStageDate, gbp, paymentTone, stagePercent, stageTone } from "@/lib/stageSchedule";
 
