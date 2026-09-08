@@ -84,8 +84,8 @@ const SUB_TABS: { id: SubTab; label: string; icon: typeof ClipboardList }[] = [
  * (JobFilePanel / AccentCard / TonePill) so it matches the dashboards.
  */
 /** Inspection outcomes get their own colour language, separate from works status. */
-const inspectionTone = (c: string) =>
-  c === "CLEAR" ? "emerald" : c === "HOLD" ? "rose" : "amber";
+const inspectionTone = (c: string): JobFileTone =>
+  c === "CLEAR" ? "green" : c === "HOLD" ? "red" : "amber";
 
 const StageWorkspace = ({
   jobId,
