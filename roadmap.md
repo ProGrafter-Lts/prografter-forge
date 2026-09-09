@@ -23,4 +23,4 @@
 - [x] Distinguish optional paid tools such as Planning Hub as separate opt-in add-ons
 
 ## Planning Pipeline exact visual rebuild
-- [ ] Match the supplied Planning Pipeline mock-up exactly while preserving every existing workflow and data action
+- [x] Match the supplied Planning Pipeline mock-up exactly while preserving every existing workflow and data action

@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Link } from "react-router-dom";
+import planningHero from "@/assets/dashboard/hero-dashboard.jpg";
 import {
   C,
   CONTACT_METHODS,
@@ -86,6 +87,7 @@ const SectionHeading = ({ children, right }: { children: ReactNode; right?: Reac
 
 const Panel = ({ children, style }: { children: ReactNode; style?: CSSProperties }) => (
   <div
+    className="pp-panel"
     style={{
       background: "rgba(255,255,255,0.04)",
       borderRadius: 14,
@@ -139,6 +141,7 @@ const LeadCard = ({
   const days = daysSince(lead.submitted_date);
   return (
     <div
+      className={`pp-lead-card${selected ? " is-selected" : ""}`}
       onClick={() => onSelect(lead)}
       style={{
         display: "flex",
@@ -417,10 +420,10 @@ const LeadDetail = ({
     .join(" ");
 
   return (
-    <div style={{ height: "100%", overflowY: "auto", padding: "26px 32px 56px", color: C.cream }}>
+    <div className="pp-lead-detail" style={{ height: "100%", overflowY: "auto", padding: "26px 32px 56px", color: C.cream }}>
       <div style={{ maxWidth: 1080, margin: "0 auto", display: "grid", gap: 16 }}>
         {/* 1. PROJECT HEADER */}
-        <div>
+        <div className="pp-detail-header">
           <h2 style={{ fontSize: 30, fontWeight: 800, margin: 0, lineHeight: 1.2, letterSpacing: "-0.01em", color: C.cream, fontFamily: "inherit", textTransform: "none" }}>
             {lead.site_address}
           </h2>
@@ -460,7 +463,7 @@ const LeadDetail = ({
             {isHistoric(lead) && <Chip label="HISTORIC — UNPROCESSED" color={C.faint} />}
           </div>
 
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 14 }}>
+          <div className="pp-detail-actions" style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 14 }}>
             <a
               href={lead.council_application_url || undefined}
               target="_blank"
@@ -535,6 +538,7 @@ const LeadDetail = ({
 
         {/* 2. NEXT ACTION */}
         <div
+          className="pp-next-action"
           style={{
             display: "flex",
             alignItems: "center",
@@ -1253,12 +1257,13 @@ export default function PlanningPipeline() {
 
   return (
     <div
+      className="pp-workspace"
       style={{
         display: "flex",
         flexDirection: "column",
         minHeight: isMobile ? "100vh" : "auto",
         height: isMobile ? "auto" : "calc(100vh - 56px)",
-        fontFamily: "system-ui, -apple-system, sans-serif",
+        fontFamily: "var(--font-sans)",
         background: C.deep,
         width: "100%",
         overflowX: "hidden",
@@ -1269,7 +1274,11 @@ export default function PlanningPipeline() {
 
       {/* Masthead — single compact line */}
       <div
-        style={{
+        className="pp-masthead"
+        style={{ "--pp-hero": `url(${planningHero})` } as CSSProperties}
+      >
+        <div
+          style={{
           padding: isMobile ? "10px 14px" : "10px 20px",
           display: "flex",
           flexWrap: "wrap",
@@ -1277,20 +1286,27 @@ export default function PlanningPipeline() {
           justifyContent: "space-between",
           gap: 14,
           flexShrink: 0,
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 18, flexWrap: "wrap" }}>
-          <span style={{ fontSize: 12, color: C.dim, fontWeight: 700, letterSpacing: "0.12em" }}>PLANNING PIPELINE</span>
-          {kpi("LEADS", String(leads.length), newThisWeek ? `+${newThisWeek} wk` : null)}
+          }}
+        >
+        <div className="pp-title-block">
+          <h1>PLANNING PIPELINE</h1>
+          <p>Track, manage and submit planning applications.<br />From lead to decision.</p>
+        </div>
+        <div className="pp-summary-metrics">
+          {kpi("TOTAL LEADS", String(leads.length), newThisWeek ? `+${newThisWeek} wk` : null, C.tealBright)}
+          {kpi("QUALIFIED", String(funnel.qualified), null)}
+          {kpi("CONTACTED", String(funnel.contacted), null)}
+          {kpi("RESPONDED", String(funnel.responded), null)}
+          {kpi("REGISTERED", String(funnel.registered), null)}
+          {kpi("LIVE PROJECTS", String(funnel.projects), null)}
           {kpi(
             "VALUE",
             fmtCompact(totalValue),
             valueThisWeek ? `+${fmtCompact(valueThisWeek)} wk` : null,
             C.tealBright,
           )}
-          <span style={{ fontSize: 12, color: C.faint }}>{hotLeads} hot</span>
         </div>
-        <div style={{ display: "flex", gap: 8 }}>
+        <div className="pp-primary-actions" style={{ display: "flex", gap: 8 }}>
           <Link to="/admin/trade-scraper" style={{ ...btn("quiet"), textDecoration: "none", padding: "6px 12px", fontSize: 13 }}>
             Trade scraper
           </Link>
@@ -1302,10 +1318,12 @@ export default function PlanningPipeline() {
             {ingesting ? "Ingesting…" : "Ingest Notts planning"}
           </button>
         </div>
+        </div>
       </div>
 
       {/* Funnel + Today — one compact band */}
       <div
+        className="pp-funnel"
         style={{
           background: C.surface,
           padding: isMobile ? "8px 14px" : "8px 20px",
@@ -1338,6 +1356,7 @@ export default function PlanningPipeline() {
 
       {/* Today strip */}
       <div
+        className="pp-today"
         style={{
           padding: isMobile ? "8px 14px" : "8px 20px",
           display: "flex",
@@ -1388,6 +1407,7 @@ export default function PlanningPipeline() {
 
       {/* Tabs */}
       <div
+        className="pp-module-tabs"
         style={{
           display: "flex",
           gap: 4,
@@ -1409,9 +1429,10 @@ export default function PlanningPipeline() {
           Loading…
         </div>
       ) : tab === "leads" ? (
-        <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", flex: 1, overflow: isMobile ? "visible" : "hidden" }}>
+        <div className="pp-split" style={{ display: "flex", flexDirection: isMobile ? "column" : "row", flex: 1, overflow: isMobile ? "visible" : "hidden" }}>
           {(!isMobile || !selectedLeadId) && (
             <div
+              className="pp-lead-rail"
               style={{
                 width: isMobile ? "100%" : 400,
                 flexShrink: 0,
@@ -1421,8 +1442,8 @@ export default function PlanningPipeline() {
                 background: "rgba(0,0,0,0.14)",
               }}
             >
-              <div style={{ padding: "10px 12px 8px", display: "grid", gap: 7 }}>
-                <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+              <div className="pp-lead-controls" style={{ padding: "10px 12px 8px", display: "grid", gap: 7 }}>
+                <div className="pp-quick-views" style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
                   {QUICK_VIEWS.map((v) => (
                     <button
                       key={v.id}
@@ -1443,7 +1464,7 @@ export default function PlanningPipeline() {
                     </button>
                   ))}
                 </div>
-                <div style={{ display: "flex", gap: 6 }}>
+                <div className="pp-filter-row" style={{ display: "flex", gap: 6 }}>
                   <input
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
@@ -1462,7 +1483,7 @@ export default function PlanningPipeline() {
                     ))}
                   </select>
                 </div>
-                <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                <div className="pp-filter-row" style={{ display: "flex", gap: 6, alignItems: "center" }}>
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
@@ -1491,7 +1512,7 @@ export default function PlanningPipeline() {
                 </p>
               </div>
 
-              <div style={{ flex: 1, overflowY: "auto", padding: "0 12px 12px" }}>
+              <div className="pp-lead-list" style={{ flex: 1, overflowY: "auto", padding: "0 12px 12px" }}>
 
                 {pageLeads.map((lead) => (
                   <LeadCard key={lead.id} lead={lead} selected={selectedLeadId === lead.id} onSelect={(l) => setSelectedLeadId(l.id)} />
@@ -1520,7 +1541,7 @@ export default function PlanningPipeline() {
           )}
 
           {(!isMobile || selectedLeadId) && (
-            <div style={{ flex: 1, overflow: isMobile ? "visible" : "hidden", background: C.surface }}>
+            <div className="pp-detail-canvas" style={{ flex: 1, overflow: isMobile ? "visible" : "hidden", background: C.surface }}>
               {isMobile && selectedLeadId && (
                 <button onClick={() => setSelectedLeadId(null)} style={{ ...btn("quiet"), margin: "14px 0 0 16px" }}>
                   ← Back to leads
