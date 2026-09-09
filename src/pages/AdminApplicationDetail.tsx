@@ -278,6 +278,14 @@ export default function AdminApplicationDetail() {
             );
           })}
           {Object.values(docPaths).flat().length === 0 && <p style={{ fontSize: 13, color: C.secondary, margin: 0 }}>No documents uploaded.</p>}
+          {!hasPhotoId(docPaths) && (
+            <div style={{ marginTop: 12, border: `1px solid ${C.border}`, borderLeft: `4px solid ${predatesIdCapture(app.created_at) ? "#D97706" : "#DC2626"}`, borderRadius: 8, padding: 12, fontSize: 13, color: C.deep, lineHeight: 1.5 }}>
+              <strong style={{ display: "block", marginBottom: 4 }}>No photo ID on file</strong>
+              {predatesIdCapture(app.created_at)
+                ? "Submitted before ID capture was required on the public application form. Identity has not been evidenced here — request photo ID before ticking the identity check."
+                : "Photo ID is required on this form but none was stored. Do not tick the identity check without a file."}
+            </div>
+          )}
         </div>
 
         {/* Declarations */}
@@ -336,6 +344,13 @@ export default function AdminApplicationDetail() {
                 <input type="checkbox" checked={!!state?.checked} onChange={() => toggleCheck(c.id, c.label)} style={{ marginTop: 2 }} />
                 <span>
                   <span style={{ fontWeight: 600 }}>{c.label}</span>
+                  {c.id === "identity" && !hasPhotoId(docPaths) && (
+                    <span style={{ display: "block", fontSize: 11, color: "#B45309" }}>
+                      {predatesIdCapture(app.created_at)
+                        ? "Submitted before ID capture was required — no ID file behind this check."
+                        : "No photo ID file on this application."}
+                    </span>
+                  )}
                   {state?.checked && state.at && (
                     <span style={{ display: "block", fontSize: 11, color: C.secondary }}>
                       Ticked by {state.by_email || "admin"} on {format(new Date(state.at), "d MMM yyyy, HH:mm")}
