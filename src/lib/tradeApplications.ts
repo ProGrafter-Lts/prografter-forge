@@ -89,6 +89,17 @@ export const FIELD_LABELS: Record<string, string> = {
   id_document: "Photo ID",
 };
 
+// Photo ID became a required field on the public /apply form at this moment.
+// Applications submitted before it have no ID file and must not be presented
+// as though identity evidence was ever collected.
+export const ID_CAPTURE_REQUIRED_FROM = "2026-09-09T20:30:00.000Z";
+
+export const hasPhotoId = (docPaths: Record<string, DocMeta[]> | null | undefined): boolean =>
+  Boolean((docPaths?.photo_id?.length ?? 0) + (docPaths?.id_document?.length ?? 0));
+
+export const predatesIdCapture = (createdAt: string): boolean =>
+  new Date(createdAt).getTime() < new Date(ID_CAPTURE_REQUIRED_FROM).getTime();
+
 export const fmtSize = (b: number) =>
   b >= 1024 * 1024 ? `${(b / 1024 / 1024).toFixed(1)} MB` : `${Math.round(b / 1024)} KB`;
 
