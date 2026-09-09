@@ -1354,73 +1354,66 @@ export default function PlanningPipeline() {
         ))}
       </div>
 
-      {/* Today strip */}
+      {/* Today + module tabs — combined single strip to free vertical space */}
       <div
-        className="pp-today"
+        className="pp-today-tabs"
         style={{
           padding: isMobile ? "8px 14px" : "8px 20px",
           display: "flex",
           gap: 8,
           flexWrap: "wrap",
           alignItems: "center",
-          flexShrink: 0,
-        }}
-      >
-        <span style={{ fontSize: 11.5, color: C.dim, fontWeight: 800, letterSpacing: "0.08em", marginRight: 2 }}>
-          TODAY
-        </span>
-        {today.total === 0 ? (
-          <span style={{ fontSize: 13, fontWeight: 700, color: C.tealBright }}>Today's pipeline is clear ✓</span>
-        ) : (
-          <>
-            {today.toReview > 0 &&
-              todayChip(`${today.toReview} to review`, () => {
-                setTab("leads");
-                setView("review");
-              }, C.tealBright)}
-            {today.lettersReady > 0 && todayChip(`${today.lettersReady} letters ready`, () => setTab("batch"), C.amberBright)}
-            {today.responsesToAction > 0 &&
-              todayChip(`${today.responsesToAction} response${today.responsesToAction === 1 ? "" : "s"}`, () => {
-                setTab("leads");
-                setView("responses");
-              }, C.tealBright)}
-            {today.followUpsDue > 0 &&
-              todayChip(`${today.followUpsDue} follow-ups due`, () => {
-                setTab("leads");
-                setView("contacted");
-              }, C.amberBright)}
-          </>
-        )}
-        {today.historic > 0 && (
-          <button
-            onClick={() => {
-              setTab("leads");
-              setView("historic");
-            }}
-            style={btn("quiet", { fontSize: 12.5, padding: "5px 11px" })}
-            title="Older imported applications with no outreach history — not part of today's workload"
-          >
-            {today.historic} historic / unprocessed
-          </button>
-        )}
-      </div>
-
-      {/* Tabs */}
-      <div
-        className="pp-module-tabs"
-        style={{
-          display: "flex",
-          gap: 4,
-          padding: isMobile ? "0 10px" : "0 20px",
+          justifyContent: "space-between",
           borderBottom: `1px solid ${C.line}`,
-          overflowX: "auto",
           flexShrink: 0,
         }}
       >
-        {navTab("leads", `Leads (${leads.length})`)}
-        {navTab("batch", `Letter batch (${batchLeads.length})`)}
-        {navTab("agents", `Architects & agents (${agents.length})`)}
-        {navTab("insights", "Insights")}
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", minWidth: 0 }}>
+          <span style={{ fontSize: 11.5, color: C.dim, fontWeight: 800, letterSpacing: "0.08em", marginRight: 2 }}>
+            TODAY
+          </span>
+          {today.total === 0 ? (
+            <span style={{ fontSize: 13, fontWeight: 700, color: C.tealBright }}>Today's pipeline is clear ✓</span>
+          ) : (
+            <>
+              {today.toReview > 0 &&
+                todayChip(`${today.toReview} to review`, () => {
+                  setTab("leads");
+                  setView("review");
+                }, C.tealBright)}
+              {today.lettersReady > 0 && todayChip(`${today.lettersReady} letters ready`, () => setTab("batch"), C.amberBright)}
+              {today.responsesToAction > 0 &&
+                todayChip(`${today.responsesToAction} response${today.responsesToAction === 1 ? "" : "s"}`, () => {
+                  setTab("leads");
+                  setView("responses");
+                }, C.tealBright)}
+              {today.followUpsDue > 0 &&
+                todayChip(`${today.followUpsDue} follow-ups due`, () => {
+                  setTab("leads");
+                  setView("contacted");
+                }, C.amberBright)}
+            </>
+          )}
+          {today.historic > 0 && (
+            <button
+              onClick={() => {
+                setTab("leads");
+                setView("historic");
+              }}
+              style={btn("quiet", { fontSize: 12.5, padding: "5px 11px" })}
+              title="Older imported applications with no outreach history — not part of today's workload"
+            >
+              {today.historic} historic / unprocessed
+            </button>
+          )}
+        </div>
+
+        <div className="pp-module-tabs" style={{ display: "flex", gap: 4, overflowX: "auto", marginLeft: "auto" }}>
+          {navTab("leads", `Leads (${leads.length})`)}
+          {navTab("batch", `Letter batch (${batchLeads.length})`)}
+          {navTab("agents", `Architects & agents (${agents.length})`)}
+          {navTab("insights", "Insights")}
+        </div>
       </div>
 
       {tab === "leads" && !loading && (

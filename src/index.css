@@ -1627,8 +1627,8 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
 .pp-summary-metrics > div > span:nth-child(3) { grid-row: 3; font-size: 10px !important; }
 .pp-primary-actions { align-self: center; }
 .pp-funnel { border-bottom: 1px solid hsl(var(--teal) / .16); background: hsl(var(--pp-surface) / .92) !important; }
-.pp-today { border-bottom: 1px solid hsl(var(--teal) / .12); background: hsl(var(--pp-deep) / .92); }
-.pp-module-tabs { background: hsl(var(--pp-deep) / .96); }
+.pp-today-tabs { background: hsl(var(--pp-deep) / .92); }
+.pp-today-tabs .pp-module-tabs { background: transparent; }
 .pp-module-tabs button { padding-top: 6px !important; padding-bottom: 6px !important; font-size: 12px !important; }
 .pp-split {
   display: grid !important;
@@ -1690,7 +1690,10 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
   .pp-summary-metrics { width: 100%; overflow-x: auto; }
   .pp-summary-metrics > div { min-width: 92px; padding: 6px 12px; }
   .pp-primary-actions { justify-content: flex-start; overflow-x: auto; }
-  .pp-funnel, .pp-today { flex-wrap: nowrap !important; overflow-x: auto; }
+  .pp-funnel { flex-wrap: nowrap !important; overflow-x: auto; }
+  .pp-today-tabs { flex-wrap: nowrap !important; overflow-x: auto; align-items: center; }
+  .pp-today-tabs > div:first-child { flex-wrap: nowrap !important; }
+  .pp-today-tabs .pp-module-tabs { margin-left: 8px !important; flex-wrap: nowrap !important; }
   .pp-split { display: flex !important; padding: 0; }
   .pp-lead-rail { display: flex !important; }
   .pp-lead-controls { display: grid !important; }
