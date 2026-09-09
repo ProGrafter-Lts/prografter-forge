@@ -1442,75 +1442,27 @@ export default function PlanningPipeline() {
                 background: "rgba(0,0,0,0.14)",
               }}
             >
-              <div className="pp-lead-controls" style={{ padding: "10px 12px 8px", display: "grid", gap: 7 }}>
-                <div className="pp-quick-views" style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
-                  {QUICK_VIEWS.map((v) => (
-                    <button
-                      key={v.id}
-                      onClick={() => setView(v.id)}
-                      style={{
-                        background: view === v.id ? C.teal : "rgba(255,255,255,0.05)",
-                        color: view === v.id ? C.white : C.dim,
-                        border: "none",
-                        borderRadius: 7,
-                        padding: "5px 10px",
-                        fontSize: 12.5,
-                        fontWeight: 700,
-                        cursor: "pointer",
-                        fontFamily: "inherit",
-                      }}
-                    >
-                      {v.label} <span style={{ marginLeft: 5, opacity: 0.82 }}>{leads.filter((lead) => matchesView(lead, v.id)).length}</span>
-                    </button>
-                  ))}
-                </div>
-                <div className="pp-filter-row" style={{ display: "flex", gap: 6 }}>
-                  <input
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Search address, ref, applicant…"
-                    style={{ ...inp(), flex: 1.4, padding: "7px 10px", fontSize: 13 }}
-                  />
-                  <select
-                    value={valueBand}
-                    onChange={(e) => setValueBand(e.target.value)}
-                    style={{ ...inp(), flex: 1, padding: "7px 8px", fontSize: 13 }}
-                  >
-                    {VALUE_BANDS.map((b) => (
-                      <option key={b.id} value={b.id} style={{ color: "#1F2937" }}>
-                        {b.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="pp-filter-row" style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                  <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
-                    style={{ ...inp(), flex: 1, padding: "7px 8px", fontSize: 13 }}
-                  >
-                    {SORT_OPTIONS.map((s) => (
-                      <option key={s.id} value={s.id} style={{ color: "#1F2937" }}>
-                        {s.label}
-                      </option>
-                    ))}
-                  </select>
-                  <button
-                    onClick={() => setShowSkipped((v) => !v)}
-                    style={btn("quiet", {
-                      padding: "6px 10px",
-                      fontSize: 12.5,
-                      whiteSpace: "nowrap",
-                      color: showSkipped ? C.tealBright : C.dim,
-                    })}
-                  >
-                    {showSkipped ? "Hide skipped" : "Show skipped"}
-                  </button>
-                </div>
-                <p style={{ fontSize: 11.5, color: C.faint, margin: 0 }}>
-                  {filteredLeads.length} matching · page {page + 1} of {pageCount}
-                </p>
+              <div
+                className="pp-rail-header"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 10,
+                  padding: "12px 14px 8px",
+                }}
+              >
+                <h2 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: C.cream, letterSpacing: "0.01em" }}>
+                  Planning Applications{" "}
+                  <span style={{ color: C.tealBright, fontWeight: 700 }}>
+                    ({filteredLeads.length} {view === "review" ? "to review" : "matching"})
+                  </span>
+                </h2>
+                <span style={{ fontSize: 11.5, color: C.faint }}>
+                  page {page + 1} of {pageCount}
+                </span>
               </div>
+
 
               <div className="pp-lead-list" style={{ flex: 1, overflowY: "auto", padding: "0 12px 12px" }}>
 
