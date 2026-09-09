@@ -1423,6 +1423,85 @@ export default function PlanningPipeline() {
         {navTab("insights", "Insights")}
       </div>
 
+      {tab === "leads" && !loading && (
+        <div
+          className="pp-controlbar"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            flexWrap: "wrap",
+            padding: isMobile ? "10px 14px" : "10px 20px",
+            borderBottom: `1px solid ${C.line}`,
+            flexShrink: 0,
+          }}
+        >
+          <div style={{ display: "flex", gap: 6, flexWrap: "nowrap", overflowX: "auto" }}>
+            {QUICK_VIEWS.map((v) => (
+              <button
+                key={v.id}
+                onClick={() => setView(v.id)}
+                style={{
+                  background: view === v.id ? C.teal : "rgba(255,255,255,0.05)",
+                  color: view === v.id ? C.white : C.dim,
+                  border: `1px solid ${view === v.id ? "transparent" : C.line}`,
+                  borderRadius: 9,
+                  padding: "7px 13px",
+                  fontSize: 13,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  whiteSpace: "nowrap",
+                  fontFamily: "inherit",
+                }}
+              >
+                {v.label} <span style={{ marginLeft: 6, opacity: 0.82 }}>{leads.filter((lead) => matchesView(lead, v.id)).length}</span>
+              </button>
+            ))}
+          </div>
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search address, ref or applicant…"
+            style={{ ...inp(), flex: "1 1 220px", minWidth: 160, padding: "8px 12px", fontSize: 13 }}
+          />
+          <select
+            value={valueBand}
+            onChange={(e) => setValueBand(e.target.value)}
+            style={{ ...inp(), width: isMobile ? "48%" : 160, padding: "8px 10px", fontSize: 13 }}
+          >
+            {VALUE_BANDS.map((b) => (
+              <option key={b.id} value={b.id} style={{ color: "#1F2937" }}>
+                {b.label}
+              </option>
+            ))}
+          </select>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            style={{ ...inp(), width: isMobile ? "48%" : 160, padding: "8px 10px", fontSize: 13 }}
+          >
+            {SORT_OPTIONS.map((s) => (
+              <option key={s.id} value={s.id} style={{ color: "#1F2937" }}>
+                {s.label}
+              </option>
+            ))}
+          </select>
+          <button
+            onClick={() => setShowSkipped((v) => !v)}
+            style={btn("quiet", { padding: "8px 12px", fontSize: 12.5, whiteSpace: "nowrap", color: showSkipped ? C.tealBright : C.dim })}
+          >
+            {showSkipped ? "Hide skipped" : "Show skipped"}
+          </button>
+          <button
+            onClick={runIngest}
+            disabled={ingesting}
+            style={btn("primary", { opacity: ingesting ? 0.6 : 1, padding: "8px 16px", fontSize: 13, marginLeft: "auto", whiteSpace: "nowrap" })}
+          >
+            {ingesting ? "Ingesting…" : "+  Add planning leads"}
+          </button>
+        </div>
+      )}
+
 
       {loading ? (
         <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: C.dim, fontSize: 15, padding: 40 }}>
