@@ -272,6 +272,7 @@ export default function Apply() {
       if (!v("city")) e.city = "Required";
       if (!v("postcode")) e.postcode = "Required";
       if (form.business_type === "limited_company" && !v("companies_house_number")) e.companies_house_number = "Required for limited companies";
+      if (!(files.photo_id?.length)) e.photo_id = "Please upload photo ID (passport, driving licence or similar)";
     }
     if (n === 1) {
       if (!form.trade_category_id) e.trade_category_id = "Please select your trade";
@@ -634,6 +635,14 @@ export default function Apply() {
         <Field label="City / Town" req err={errors.city}><I f="city" placeholder="Nottingham" /></Field>
         <Field label="Postcode" req err={errors.postcode}><I f="postcode" placeholder="NG1 1AA" /></Field>
       </Grid>
+      <Field
+        label="Photo ID"
+        req
+        err={errors.photo_id}
+        hint="Passport, UK driving licence or other government-issued photo ID. PDF or photo, up to 10MB. Held securely and only used to confirm your identity."
+      >
+        <F f="photo_id" />
+      </Field>
     </div>,
 
     // 1 — Trade
