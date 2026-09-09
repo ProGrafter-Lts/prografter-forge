@@ -7,7 +7,7 @@ import SEO from "@/components/SEO";
 import {
   TradeApplication, ApplicationEvent, DocMeta, STATUS_OPTIONS, STATUS_LABEL, STATUS_COLOR,
   QUAL_LABEL, VERIFICATION_CHECKS, DOC_GROUPS, FIELD_LABELS, fmtSize, isImage,
-  signedUrlFor, logApplicationEvent,
+  signedUrlFor, logApplicationEvent, hasPhotoId, predatesIdCapture,
 } from "@/lib/tradeApplications";
 
 const C = {
