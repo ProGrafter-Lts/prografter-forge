@@ -21,3 +21,6 @@
 ## Platform subscription messaging
 - [x] Clarify that joining, matching, quoting and getting paid never require a subscription
 - [x] Distinguish optional paid tools such as Planning Hub as separate opt-in add-ons
+
+## Planning Pipeline exact visual rebuild
+- [x] Match the supplied Planning Pipeline mock-up exactly while preserving every existing workflow and data action
