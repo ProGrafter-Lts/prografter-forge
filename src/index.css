@@ -1627,8 +1627,8 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
 .pp-summary-metrics > div > span:nth-child(3) { grid-row: 3; font-size: 10px !important; }
 .pp-primary-actions { align-self: center; }
 .pp-funnel { border-bottom: 1px solid hsl(var(--teal) / .16); background: hsl(var(--pp-surface) / .92) !important; }
-.pp-today { border-bottom: 1px solid hsl(var(--teal) / .12); background: hsl(var(--pp-deep) / .92); }
-.pp-module-tabs { background: hsl(var(--pp-deep) / .96); }
+.pp-today-tabs { background: hsl(var(--pp-deep) / .92); }
+.pp-today-tabs .pp-module-tabs { background: transparent; }
 .pp-module-tabs button { padding-top: 6px !important; padding-bottom: 6px !important; font-size: 12px !important; }
 .pp-split {
   display: grid !important;
