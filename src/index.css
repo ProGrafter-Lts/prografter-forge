@@ -1690,7 +1690,10 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
   .pp-summary-metrics { width: 100%; overflow-x: auto; }
   .pp-summary-metrics > div { min-width: 92px; padding: 6px 12px; }
   .pp-primary-actions { justify-content: flex-start; overflow-x: auto; }
-  .pp-funnel, .pp-today { flex-wrap: nowrap !important; overflow-x: auto; }
+  .pp-funnel { flex-wrap: nowrap !important; overflow-x: auto; }
+  .pp-today-tabs { flex-wrap: nowrap !important; overflow-x: auto; align-items: center; }
+  .pp-today-tabs > div:first-child { flex-wrap: nowrap !important; }
+  .pp-today-tabs .pp-module-tabs { margin-left: 8px !important; flex-wrap: nowrap !important; }
   .pp-split { display: flex !important; padding: 0; }
   .pp-lead-rail { display: flex !important; }
   .pp-lead-controls { display: grid !important; }
