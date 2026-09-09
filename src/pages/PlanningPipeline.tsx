@@ -1460,7 +1460,7 @@ export default function PlanningPipeline() {
                         fontFamily: "inherit",
                       }}
                     >
-                      {v.label}
+                      {v.label} <span style={{ marginLeft: 5, opacity: 0.82 }}>{leads.filter((lead) => matchesView(lead, v.id)).length}</span>
                     </button>
                   ))}
                 </div>

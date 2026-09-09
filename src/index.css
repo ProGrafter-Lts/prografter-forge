@@ -1629,16 +1629,45 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
 .pp-funnel { border-bottom: 1px solid hsl(var(--teal) / .16); background: hsl(var(--pp-surface) / .92) !important; }
 .pp-today { border-bottom: 1px solid hsl(var(--teal) / .12); background: hsl(var(--pp-deep) / .92); }
 .pp-module-tabs { background: hsl(var(--pp-deep) / .96); }
-.pp-split { padding: 5px 16px 0; gap: 14px; }
+.pp-module-tabs button { padding-top: 6px !important; padding-bottom: 6px !important; font-size: 12px !important; }
+.pp-split {
+  display: grid !important;
+  grid-template-columns: 450px minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  padding: 5px 16px 0;
+  gap: 5px 14px;
+}
 .pp-lead-rail { width: 450px !important; border: 1px solid hsl(var(--teal) / .22); border-radius: 8px 8px 0 0; background: hsl(var(--pp-deep) / .72) !important; }
-.pp-lead-controls { border-bottom: 1px solid hsl(var(--teal) / .14); }
+.pp-lead-rail { display: contents !important; }
+.pp-lead-controls {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  display: flex !important;
+  align-items: center;
+  gap: 7px !important;
+  padding: 5px 0 !important;
+  border-bottom: 1px solid hsl(var(--teal) / .14);
+}
 .pp-quick-views { flex-wrap: nowrap !important; overflow-x: auto; scrollbar-width: none; }
 .pp-quick-views::-webkit-scrollbar { display: none; }
-.pp-filter-row input, .pp-filter-row select { min-width: 0; }
-.pp-lead-list { scrollbar-color: hsl(var(--teal) / .65) hsl(var(--pp-deep)); scrollbar-width: thin; }
+.pp-quick-views button { min-height: 36px; }
+.pp-filter-row { flex: 1; min-width: 0; }
+.pp-filter-row:last-of-type { flex: .65; }
+.pp-filter-row input, .pp-filter-row select { min-width: 0; min-height: 36px; }
+.pp-lead-controls > p { display: none; }
+.pp-lead-list {
+  grid-column: 1;
+  grid-row: 2;
+  min-height: 0;
+  border: 1px solid hsl(var(--teal) / .22);
+  border-radius: 8px 8px 0 0;
+  background: hsl(var(--pp-deep) / .72);
+  scrollbar-color: hsl(var(--teal) / .65) hsl(var(--pp-deep));
+  scrollbar-width: thin;
+}
 .pp-lead-card { border: 1px solid hsl(var(--teal) / .16); background: linear-gradient(145deg, hsl(var(--pp-raised) / .72), hsl(var(--pp-surface) / .78)) !important; }
 .pp-lead-card.is-selected { border-color: hsl(var(--teal)); box-shadow: inset 3px 0 0 hsl(var(--teal)), 0 0 18px hsl(var(--teal) / .08) !important; }
-.pp-detail-canvas { position: relative; border: 1px solid hsl(var(--teal) / .26); border-radius: 8px 8px 0 0; background: linear-gradient(145deg, hsl(var(--pp-surface)), hsl(var(--pp-deep))) !important; }
+.pp-detail-canvas { grid-column: 2; grid-row: 2; position: relative; min-width: 0; min-height: 0; border: 1px solid hsl(var(--teal) / .26); border-radius: 8px 8px 0 0; background: linear-gradient(145deg, hsl(var(--pp-surface)), hsl(var(--pp-deep))) !important; }
 .pp-detail-canvas > * { position: relative; z-index: 1; }
 .pp-lead-detail { scrollbar-color: hsl(var(--teal) / .65) hsl(var(--pp-deep)); }
 .pp-lead-detail > div { max-width: none !important; }
@@ -1651,7 +1680,9 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
 @media (max-width: 1100px) {
   .pp-summary-metrics > div:nth-last-child(-n+2) { display: none !important; }
   .pp-primary-actions { width: 100%; justify-content: flex-end; }
-  .pp-lead-rail { width: 370px !important; }
+  .pp-split { grid-template-columns: 370px minmax(0, 1fr); }
+  .pp-lead-controls { flex-wrap: wrap; }
+  .pp-quick-views { width: 100%; }
 }
 @media (max-width: 767px) {
   .pp-masthead > div { align-items: flex-start !important; padding: 16px !important; }
@@ -1660,7 +1691,9 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
   .pp-summary-metrics > div { min-width: 92px; padding: 6px 12px; }
   .pp-primary-actions { justify-content: flex-start; overflow-x: auto; }
   .pp-funnel, .pp-today { flex-wrap: nowrap !important; overflow-x: auto; }
-  .pp-split { padding: 0; }
+  .pp-split { display: flex !important; padding: 0; }
+  .pp-lead-rail { display: flex !important; }
+  .pp-lead-controls { display: grid !important; }
   .pp-lead-rail { width: 100% !important; border-left: 0; border-right: 0; }
   .pp-lead-detail { padding: 18px 14px 40px !important; }
   .pp-detail-header h2 { font-size: 22px !important; }
