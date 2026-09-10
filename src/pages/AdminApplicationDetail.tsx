@@ -8,6 +8,7 @@ import {
   TradeApplication, ApplicationEvent, DocMeta, STATUS_OPTIONS, STATUS_LABEL, STATUS_COLOR,
   QUAL_LABEL, VERIFICATION_CHECKS, DOC_GROUPS, FIELD_LABELS, fmtSize, isImage,
   signedUrlFor, logApplicationEvent, hasPhotoId, predatesIdCapture,
+  detectRequestableItems, RequestableItem,
 } from "@/lib/tradeApplications";
 
 const C = {
@@ -40,6 +41,9 @@ export default function AdminApplicationDetail() {
   const [notes, setNotes] = useState("");
   const [lightbox, setLightbox] = useState<string | null>(null);
   const [savingNotes, setSavingNotes] = useState(false);
+  const [requestIds, setRequestIds] = useState<string[]>([]);
+  const [requestNote, setRequestNote] = useState("");
+  const [sendingRequest, setSendingRequest] = useState(false);
 
   const refreshEvents = useCallback(async (appId: string) => {
     const { data } = await supabase
