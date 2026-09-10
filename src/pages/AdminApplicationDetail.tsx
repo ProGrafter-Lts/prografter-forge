@@ -134,6 +134,53 @@ export default function AdminApplicationDetail() {
     if (app) await logApplicationEvent(app.id, "reference_updated", { reference: merged.contact_name, status: merged.status });
   };
 
+  // Generic "request missing information": works for any evidence type listed
+  // in detectRequestableItems — emails the applicant, logs the request in the
+  // audit trail, and parks the application in "awaiting requested information".
+  const sendInfoRequest = async (items: RequestableItem[]) => {
+    if (!app) return;
+    const chosen = items.filter((i) => requestIds.includes(i.id));
+    if (!chosen.length) { toast.error("Select at least one item to request"); return; }
+    if (!app.applicant_email) { toast.error("No email address on this application"); return; }
+    setSendingRequest(true);
+    const firstName = (app.full_name || "").trim().split(/\s+/)[0] || "";
+    const labels = chosen.map((i) => i.emailLabel);
+    try {
+      const { error: emailError } = await supabase.functions.invoke("send-app-email", {
+        body: {
+          templateName: "application-info-request",
+          recipientEmail: app.applicant_email,
+          idempotencyKey: `application-info-request-${app.id}-${Date.now()}`,
+          templateData: { firstName, items: labels, note: requestNote.trim() || undefined },
+        },
+      });
+      if (emailError) throw emailError;
+      await logApplicationEvent(app.id, "info_requested", {
+        items: chosen.map((i) => i.label),
+        email: app.applicant_email,
+        note: requestNote.trim() || null,
+      });
+      const prev = app.verification_status;
+      if (prev !== "awaiting_info") {
+        const { error } = await supabase.from("trade_applications")
+          .update({ verification_status: "awaiting_info" }).eq("id", app.id);
+        if (error) throw error;
+        await logApplicationEvent(app.id, "status_changed", { from: prev, to: "awaiting_info" });
+        setApp({ ...app, verification_status: "awaiting_info" });
+      }
+      setRequestIds([]);
+      setRequestNote("");
+      toast.success(`Requested ${chosen.length} item${chosen.length === 1 ? "" : "s"} from ${app.applicant_email}`);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Could not send the request";
+      await logApplicationEvent(app.id, "info_request_failed", { items: chosen.map((i) => i.label) }).catch(() => {});
+      toast.error(msg);
+    } finally {
+      setSendingRequest(false);
+      await refreshEvents(app.id);
+    }
+  };
+
   const decide = async (decision: "approved" | "rejected" | "held") => {
     if (!app) return;
     const verb = decision === "approved" ? "approve" : decision === "rejected" ? "reject" : "hold";
