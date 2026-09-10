@@ -246,6 +246,7 @@ export default function AdminApplicationDetail() {
   const fd = app.form_data ?? {};
   const docPaths = app.document_paths ?? {};
   const isTimeServed = (app.qualification_path ?? "").includes("time");
+  const requestable = detectRequestableItems(app, refs.length);
 
   // Free-text declarations to surface as plain text
   const declarations: { label: string; value: string }[] = [
@@ -422,6 +423,45 @@ export default function AdminApplicationDetail() {
           </button>
         </div>
 
+        {/* Request missing information */}
+        <div style={card}>
+          <h2 style={h2}>Request missing information</h2>
+          <p style={{ fontSize: 12, color: C.secondary, margin: "0 0 12px" }}>
+            Emails {app.applicant_email || "the applicant"} naming exactly what's outstanding, logs the
+            request in the audit trail, and sets the status to "Awaiting requested information".
+          </p>
+          {requestable.map((i) => (
+            <label key={i.id} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "6px 0", fontSize: 13, color: C.deep, cursor: "pointer" }}>
+              <input
+                type="checkbox"
+                checked={requestIds.includes(i.id)}
+                onChange={(e) => setRequestIds((prev) => (e.target.checked ? [...prev, i.id] : prev.filter((x) => x !== i.id)))}
+                style={{ marginTop: 3 }}
+              />
+              <span>
+                <span style={{ fontWeight: 600 }}>{i.label}</span>
+                <span style={{ display: "block", fontSize: 11, color: i.missing ? "#B45309" : C.secondary }}>
+                  {i.missing ? "Nothing on file" : "On file — request again only if unusable"}
+                </span>
+              </span>
+            </label>
+          ))}
+          <textarea
+            value={requestNote}
+            onChange={(e) => setRequestNote(e.target.value)}
+            rows={2}
+            placeholder="Optional note to the applicant (e.g. why the current file can't be accepted)…"
+            style={{ ...inputStyle, resize: "vertical", marginTop: 10 }}
+          />
+          <button
+            onClick={() => sendInfoRequest(requestable)}
+            disabled={sendingRequest || requestIds.length === 0}
+            style={{ marginTop: 10, background: C.amber, color: C.white, border: "none", padding: "10px 18px", borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: sendingRequest || !requestIds.length ? "not-allowed" : "pointer", opacity: sendingRequest || !requestIds.length ? 0.55 : 1 }}
+          >
+            {sendingRequest ? "Sending…" : "Send request to applicant"}
+          </button>
+        </div>
+
         {/* Decision */}
         <div style={card}>
           <h2 style={h2}>Decision</h2>
@@ -481,6 +521,8 @@ function describeEvent(e: ApplicationEvent): string {
     case "decision_rejected": return `Rejected — "${d.reason}"`;
     case "decision_held": return `Held — "${d.reason}"`;
     case "email_queued": return `Email queued (${d.type})`;
+    case "info_requested": return `Information requested from applicant: ${(d.items as string[] ?? []).join(", ")}`;
+    case "info_request_failed": return `Information request failed to send: ${(d.items as string[] ?? []).join(", ")}`;
     default: return e.event_type;
   }
 }
