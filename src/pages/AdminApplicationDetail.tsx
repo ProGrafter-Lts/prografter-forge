@@ -8,6 +8,7 @@ import {
   TradeApplication, ApplicationEvent, DocMeta, STATUS_OPTIONS, STATUS_LABEL, STATUS_COLOR,
   QUAL_LABEL, VERIFICATION_CHECKS, DOC_GROUPS, FIELD_LABELS, fmtSize, isImage,
   signedUrlFor, logApplicationEvent, hasPhotoId, predatesIdCapture,
+  detectRequestableItems, RequestableItem,
 } from "@/lib/tradeApplications";
 
 const C = {
@@ -40,6 +41,9 @@ export default function AdminApplicationDetail() {
   const [notes, setNotes] = useState("");
   const [lightbox, setLightbox] = useState<string | null>(null);
   const [savingNotes, setSavingNotes] = useState(false);
+  const [requestIds, setRequestIds] = useState<string[]>([]);
+  const [requestNote, setRequestNote] = useState("");
+  const [sendingRequest, setSendingRequest] = useState(false);
 
   const refreshEvents = useCallback(async (appId: string) => {
     const { data } = await supabase
@@ -130,6 +134,53 @@ export default function AdminApplicationDetail() {
     if (app) await logApplicationEvent(app.id, "reference_updated", { reference: merged.contact_name, status: merged.status });
   };
 
+  // Generic "request missing information": works for any evidence type listed
+  // in detectRequestableItems — emails the applicant, logs the request in the
+  // audit trail, and parks the application in "awaiting requested information".
+  const sendInfoRequest = async (items: RequestableItem[]) => {
+    if (!app) return;
+    const chosen = items.filter((i) => requestIds.includes(i.id));
+    if (!chosen.length) { toast.error("Select at least one item to request"); return; }
+    if (!app.applicant_email) { toast.error("No email address on this application"); return; }
+    setSendingRequest(true);
+    const firstName = (app.full_name || "").trim().split(/\s+/)[0] || "";
+    const labels = chosen.map((i) => i.emailLabel);
+    try {
+      const { error: emailError } = await supabase.functions.invoke("send-app-email", {
+        body: {
+          templateName: "application-info-request",
+          recipientEmail: app.applicant_email,
+          idempotencyKey: `application-info-request-${app.id}-${Date.now()}`,
+          templateData: { firstName, items: labels, note: requestNote.trim() || undefined },
+        },
+      });
+      if (emailError) throw emailError;
+      await logApplicationEvent(app.id, "info_requested", {
+        items: chosen.map((i) => i.label),
+        email: app.applicant_email,
+        note: requestNote.trim() || null,
+      });
+      const prev = app.verification_status;
+      if (prev !== "awaiting_info") {
+        const { error } = await supabase.from("trade_applications")
+          .update({ verification_status: "awaiting_info" }).eq("id", app.id);
+        if (error) throw error;
+        await logApplicationEvent(app.id, "status_changed", { from: prev, to: "awaiting_info" });
+        setApp({ ...app, verification_status: "awaiting_info" });
+      }
+      setRequestIds([]);
+      setRequestNote("");
+      toast.success(`Requested ${chosen.length} item${chosen.length === 1 ? "" : "s"} from ${app.applicant_email}`);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Could not send the request";
+      await logApplicationEvent(app.id, "info_request_failed", { items: chosen.map((i) => i.label) }).catch(() => {});
+      toast.error(msg);
+    } finally {
+      setSendingRequest(false);
+      await refreshEvents(app.id);
+    }
+  };
+
   const decide = async (decision: "approved" | "rejected" | "held") => {
     if (!app) return;
     const verb = decision === "approved" ? "approve" : decision === "rejected" ? "reject" : "hold";
@@ -195,6 +246,7 @@ export default function AdminApplicationDetail() {
   const fd = app.form_data ?? {};
   const docPaths = app.document_paths ?? {};
   const isTimeServed = (app.qualification_path ?? "").includes("time");
+  const requestable = detectRequestableItems(app, refs.length);
 
   // Free-text declarations to surface as plain text
   const declarations: { label: string; value: string }[] = [
@@ -371,6 +423,45 @@ export default function AdminApplicationDetail() {
           </button>
         </div>
 
+        {/* Request missing information */}
+        <div style={card}>
+          <h2 style={h2}>Request missing information</h2>
+          <p style={{ fontSize: 12, color: C.secondary, margin: "0 0 12px" }}>
+            Emails {app.applicant_email || "the applicant"} naming exactly what's outstanding, logs the
+            request in the audit trail, and sets the status to "Awaiting requested information".
+          </p>
+          {requestable.map((i) => (
+            <label key={i.id} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "6px 0", fontSize: 13, color: C.deep, cursor: "pointer" }}>
+              <input
+                type="checkbox"
+                checked={requestIds.includes(i.id)}
+                onChange={(e) => setRequestIds((prev) => (e.target.checked ? [...prev, i.id] : prev.filter((x) => x !== i.id)))}
+                style={{ marginTop: 3 }}
+              />
+              <span>
+                <span style={{ fontWeight: 600 }}>{i.label}</span>
+                <span style={{ display: "block", fontSize: 11, color: i.missing ? "#B45309" : C.secondary }}>
+                  {i.missing ? "Nothing on file" : "On file — request again only if unusable"}
+                </span>
+              </span>
+            </label>
+          ))}
+          <textarea
+            value={requestNote}
+            onChange={(e) => setRequestNote(e.target.value)}
+            rows={2}
+            placeholder="Optional note to the applicant (e.g. why the current file can't be accepted)…"
+            style={{ ...inputStyle, resize: "vertical", marginTop: 10 }}
+          />
+          <button
+            onClick={() => sendInfoRequest(requestable)}
+            disabled={sendingRequest || requestIds.length === 0}
+            style={{ marginTop: 10, background: C.amber, color: C.white, border: "none", padding: "10px 18px", borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: sendingRequest || !requestIds.length ? "not-allowed" : "pointer", opacity: sendingRequest || !requestIds.length ? 0.55 : 1 }}
+          >
+            {sendingRequest ? "Sending…" : "Send request to applicant"}
+          </button>
+        </div>
+
         {/* Decision */}
         <div style={card}>
           <h2 style={h2}>Decision</h2>
@@ -430,6 +521,8 @@ function describeEvent(e: ApplicationEvent): string {
     case "decision_rejected": return `Rejected — "${d.reason}"`;
     case "decision_held": return `Held — "${d.reason}"`;
     case "email_queued": return `Email queued (${d.type})`;
+    case "info_requested": return `Information requested from applicant: ${(d.items as string[] ?? []).join(", ")}`;
+    case "info_request_failed": return `Information request failed to send: ${(d.items as string[] ?? []).join(", ")}`;
     default: return e.event_type;
   }
 }

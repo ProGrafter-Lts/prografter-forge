@@ -36,6 +36,7 @@ export const STATUS_OPTIONS = [
   { value: "new", label: "New" },
   { value: "in_review", label: "In review" },
   { value: "reference_checks", label: "Reference checks" },
+  { value: "awaiting_info", label: "Awaiting requested information" },
   { value: "approved", label: "Approved" },
   { value: "rejected", label: "Rejected" },
   { value: "held", label: "Held" },
@@ -50,6 +51,7 @@ export const STATUS_COLOR: Record<string, string> = {
   new: "#2563EB",
   in_review: "#7C3AED",
   reference_checks: "#D97706",
+  awaiting_info: "#B45309",
   approved: "#16A34A",
   rejected: "#DC2626",
   held: "#6B7280",
@@ -131,4 +133,73 @@ export async function logApplicationEvent(
     detail: detail as never,
   }]);
   if (error) throw error;
+}
+
+// ---------------------------------------------------------------------------
+// Missing-information requests
+//
+// Generic across every evidence type: each requestable item knows how to test
+// whether it is present on an application, so new document groups only need a
+// row adding here — no per-field UI or email work.
+// ---------------------------------------------------------------------------
+
+export interface RequestableItem {
+  id: string;
+  /** Short label for the admin screen. */
+  label: string;
+  /** Precise wording sent to the applicant. */
+  emailLabel: string;
+  /** Only offered when true (e.g. references are time-served only). */
+  applies: boolean;
+  missing: boolean;
+}
+
+const docCount = (
+  docPaths: Record<string, DocMeta[]> | null | undefined,
+  fields: string[],
+): number => fields.reduce((n, f) => n + (docPaths?.[f]?.length ?? 0), 0);
+
+export function detectRequestableItems(
+  app: Pick<TradeApplication, "document_paths" | "qualification_path">,
+  referenceCount: number,
+): RequestableItem[] {
+  const d = app.document_paths;
+  const isTimeServed = (app.qualification_path ?? "").includes("time");
+  return [
+    {
+      id: "photo_id",
+      label: "Photo ID",
+      emailLabel: "Photo ID — a clear photo or scan of your passport or driving licence",
+      applies: true,
+      missing: !hasPhotoId(d),
+    },
+    {
+      id: "insurance_certificate",
+      label: "Insurance certificate",
+      emailLabel: "Your current public liability insurance certificate, showing cover level and expiry date",
+      applies: true,
+      missing: docCount(d, ["insurance_certificate"]) === 0,
+    },
+    {
+      id: "qualifications",
+      label: "Qualifications / scheme card",
+      emailLabel: "Your qualification certificate or trade scheme registration card",
+      applies: true,
+      missing: docCount(d, ["qual_card_doc", "qual_cert_doc"]) === 0,
+    },
+    {
+      id: "portfolio_photos",
+      label: "Portfolio photos",
+      emailLabel: "Photos of recent completed work (at least three, showing finished jobs)",
+      applies: true,
+      missing: docCount(d, ["portfolio_photos"]) === 0,
+    },
+    {
+      id: "references",
+      label: "Trade references",
+      emailLabel: "Two trade references — name, relationship to you, phone number and email for each",
+      applies: isTimeServed,
+      missing: referenceCount < 2,
+    },
+  ].filter((i) => i.applies);
 }
