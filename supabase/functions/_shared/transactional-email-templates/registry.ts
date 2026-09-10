@@ -54,6 +54,7 @@ import { template as quoteHealthCheckReady } from './quote-health-check-ready.ts
 import { template as tradevaultDocExpiring } from './tradevault-doc-expiring.tsx'
 import { template as agreedQuoteOnFile } from './agreed-quote-on-file.tsx'
 import { template as deliveryConfirmation } from './delivery-confirmation.tsx'
+import { template as applicationInfoRequest } from './application-info-request.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'waitlist-admin-notification': waitlistAdminNotification,
@@ -105,4 +106,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'tradevault-doc-expiring': tradevaultDocExpiring,
   'agreed-quote-on-file': agreedQuoteOnFile,
   'delivery-confirmation': deliveryConfirmation,
+  'application-info-request': applicationInfoRequest,
 }
