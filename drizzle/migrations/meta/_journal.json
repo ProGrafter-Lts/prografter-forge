@@ -155,6 +155,13 @@
       "when": 1789123087150,
       "tag": "0021_project_spine_additive_fields",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1789153130644,
+      "tag": "0022_project_message_reads",
+      "breakpoints": true
     }
   ]
 }

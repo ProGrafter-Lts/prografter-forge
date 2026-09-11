@@ -159,7 +159,7 @@ const PipelineSection = ({ tradeId }: Props) => {
       return;
     }
     const rows = ((data || []) as any[]).filter(
-      (r) => r.role === "trade" && r.trade_id === tradeId && r.contract_id,
+      (r) => r.trade_id === tradeId && r.contract_id,
     );
     const byJob = new Map<string, ContractedProject>();
     const contractIds: string[] = [];

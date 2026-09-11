@@ -3679,6 +3679,32 @@ export type Database = {
         }
         Relationships: []
       }
+      project_message_reads: {
+        Row: {
+          job_id: string
+          last_read_at: string
+          user_id: string
+        }
+        Insert: {
+          job_id: string
+          last_read_at?: string
+          user_id: string
+        }
+        Update: {
+          job_id?: string
+          last_read_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_message_reads_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_messages: {
         Row: {
           created_at: string

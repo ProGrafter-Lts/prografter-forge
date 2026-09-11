@@ -58,9 +58,11 @@ const ActiveProjectsView = ({ tradeId }: { tradeId: string }) => {
         return;
       }
 
-      const rows = ((data || []) as any[]).filter(
-        (r) => r.role === "trade" && r.trade_id === tradeId
-      );
+      // Match on the trade link only. The RPC's `role` column resolves to
+      // "homeowner" when one account is both the homeowner and the matched
+      // trade on a project (admin/test accounts), which previously hid
+      // legitimate trade projects from this list.
+      const rows = ((data || []) as any[]).filter((r) => r.trade_id === tradeId);
 
       const seen = new Map<string, ProjectRow>();
       const contractIds: string[] = [];

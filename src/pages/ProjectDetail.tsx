@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 import { ArrowLeft, ShieldCheck, LayoutDashboard, ClipboardList, CalendarClock, CreditCard, FolderArchive, Image as ImageIcon, MessageSquare, Activity } from "lucide-react";
 import ControlCentreTabs, { type ControlCentreTab } from "@/components/project/ControlCentreTabs";
 
@@ -95,6 +96,12 @@ const ProjectDetail = () => {
   const tabParam = searchParams.get("tab");
   const hoTab = tabParam && TAB_IDS.includes(tabParam) ? tabParam : "overview";
   const openPanel = searchParams.get("panel");
+
+  // Viewing the conversation clears its unread badge for this user only.
+  const { markRead: markMessagesRead } = useUnreadMessages();
+  useEffect(() => {
+    if (hoTab === "messages" && id) void markMessagesRead(id);
+  }, [hoTab, id, markMessagesRead, messages.length]);
 
   /** Section switches and panel opens both live in the URL, so the browser back
    *  button closes a panel and returns to the exact section the user was on. */
