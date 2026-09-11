@@ -258,7 +258,7 @@ export function buildProjectActions(snap: ProjectSnapshot, role: ProjectRole): A
         id: `variation-${v.id}`,
         label: `Variation ${v.sequence ? `#${String(v.sequence).padStart(3, "0")}` : ""} requires approval`.trim(),
         detail: v.title ?? undefined,
-        to: `${base}?tab=variations`,
+        to: `${base}?panel=contract`,
         tone: "urgent",
       }),
     );
@@ -266,7 +266,7 @@ export function buildProjectActions(snap: ProjectSnapshot, role: ProjectRole): A
       items.push({
         id: `milestone-${s.id}`,
         label: `${s.stage_name} is ready for your sign-off`,
-        to: `${base}?tab=stages`,
+        to: `${base}?tab=payments`,
         tone: "urgent",
       }),
     );
@@ -286,7 +286,7 @@ export function buildProjectActions(snap: ProjectSnapshot, role: ProjectRole): A
         items.push({
           id: `variation-approved-${v.id}`,
           label: `Variation approved${v.title ? ` — ${v.title}` : ""}`,
-          to: `${base}?tab=variations`,
+          to: `${base}?panel=contract`,
           tone: "normal",
         }),
       );
@@ -294,7 +294,7 @@ export function buildProjectActions(snap: ProjectSnapshot, role: ProjectRole): A
       items.push({
         id: `awaiting-${s.id}`,
         label: `${s.stage_name} awaiting homeowner sign-off`,
-        to: `${base}?tab=stages`,
+        to: `${base}?tab=payments`,
         tone: "normal",
       }),
     );
