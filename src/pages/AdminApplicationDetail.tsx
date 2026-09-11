@@ -6,7 +6,7 @@ import { format } from "date-fns";
 import SEO from "@/components/SEO";
 import {
   TradeApplication, ApplicationEvent, DocMeta, STATUS_OPTIONS, STATUS_LABEL, STATUS_COLOR,
-  QUAL_LABEL, VERIFICATION_CHECKS, DOC_GROUPS, FIELD_LABELS, fmtSize, isImage,
+  QUAL_LABEL, verificationChecksFor, governingBodyFor, DOC_GROUPS, FIELD_LABELS, fmtSize, isImage,
   signedUrlFor, logApplicationEvent, hasPhotoId, predatesIdCapture,
   detectRequestableItems, RequestableItem,
 } from "@/lib/tradeApplications";
@@ -248,6 +248,7 @@ export default function AdminApplicationDetail() {
   const docPaths = app.document_paths ?? {};
   const isTimeServed = (app.qualification_path ?? "").includes("time");
   const requestable = detectRequestableItems(app, refs.length);
+  const governingBody = governingBodyFor(app.trade_category_id);
 
   // Free-text declarations to surface as plain text
   const declarations: { label: string; value: string }[] = [
