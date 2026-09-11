@@ -318,7 +318,7 @@ const HomeownerDashboard = () => {
 
 
   return (
-    <div className="min-h-screen dashboard-dark flex">
+    <div className="min-h-screen dashboard-dark ho-page flex">
       <HomeownerSidebar
         activeNav={activeNav}
         setActiveNav={setActiveNav}
@@ -327,7 +327,7 @@ const HomeownerDashboard = () => {
       />
 
       <main className="flex-1 p-4 md:p-8 overflow-auto">
-        <div className="max-w-5xl mx-auto space-y-8">
+        <div className="max-w-5xl mx-auto space-y-6 md:space-y-8">
           {loading && !homeownerName ? (
             <div className="min-h-[40vh] flex items-center justify-center font-mono text-sm text-muted-foreground">
               Loading dashboard…
@@ -338,14 +338,21 @@ const HomeownerDashboard = () => {
             </div>
           ) : (
           <>
-          <div className="pt-10 md:pt-0">
-            <h1 className="font-heading text-primary text-3xl md:text-4xl">
-              Welcome back, {homeownerName || "Homeowner"}
-            </h1>
-            <p className="font-mono text-sm text-muted-foreground mt-1">
-              Your home projects at a glance
-            </p>
-          </div>
+          <header className="ho-hero ho-blueprint mt-10 md:mt-0">
+            <img src={dashboardHero} alt="" aria-hidden="true" className="ho-img" />
+            <div className="ho-veil" />
+            <div className="ho-content p-6 md:p-8 flex items-end justify-between gap-6">
+              <div>
+                <h1 className="font-heading text-primary text-3xl md:text-4xl uppercase tracking-tight">
+                  Welcome back, {homeownerName || "Homeowner"}
+                </h1>
+                <p className="font-mono text-sm text-muted-foreground mt-2">
+                  Here's what's happening with your project today.
+                </p>
+              </div>
+              <p className="ho-note hidden md:block text-xl whitespace-nowrap">Your project. Clearly.</p>
+            </div>
+          </header>
 
           {showPasswordNudge && (
             <div className="flex items-start gap-4 bg-secondary/10 border border-secondary/30 rounded-2xl p-4">
