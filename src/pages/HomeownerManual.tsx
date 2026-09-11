@@ -10,6 +10,7 @@ import ManualPhotos from "@/components/manual/ManualPhotos";
 import ManualMaintenance from "@/components/manual/ManualMaintenance";
 import ManualContacts from "@/components/manual/ManualContacts";
 import ManualGreenSections from "@/components/manual/ManualGreenSections";
+import ManualHistory, { type ManualHistoryEvent, type PropertyProjectRow } from "@/components/manual/ManualHistory";
 import ManualProModal from "@/components/manual/ManualProModal";
 import Logo from "@/components/Logo";
 
@@ -31,6 +32,10 @@ interface ManualData {
   /** True when the job ran through ProGrafter to completion — all manual
    *  sections are free for these jobs (commission already paid). */
   isProGrafterCompleted: boolean;
+  /** Permanent completion record for this project, when it has been completed. */
+  completion: any | null;
+  historyEvents: ManualHistoryEvent[];
+  propertyProjects: PropertyProjectRow[];
 }
 
 const SECTIONS = [
@@ -41,6 +46,7 @@ const SECTIONS = [
   { id: "photos", label: "5. Photo Record", free: true },
   { id: "maintenance", label: "6. Maintenance Schedule", free: false },
   { id: "contacts", label: "7. Key Contacts", free: true },
+  { id: "history", label: "8. Project History", free: true },
 ];
 
 const GREEN_SECTIONS = [
@@ -121,7 +127,89 @@ const HomeownerManual = () => {
     const isProGrafterCompleted =
       !!contractRes.data && (job.stage === "completed" || job.status === "completed" || job.status === "complete");
 
+    // Permanent completion record + property-level project history.
+    const { data: completion } = await supabase
+      .from("project_completions")
+      .select("*")
+      .eq("job_id", projectId!)
+      .maybeSingle();
+
+    let variations: any[] = [];
+    if ((contractRes.data as any)?.id) {
+      const { data: varRows } = await supabase
+        .from("contract_variations")
+        .select("title, cost_change_pence, status, created_at, homeowner_signed_at")
+        .eq("contract_id", (contractRes.data as any).id)
+        .eq("status", "accepted");
+      variations = varRows || [];
+    }
+
+    let propertyProjects: PropertyProjectRow[] = [];
+    if (job.property_id) {
+      const { data: siblingJobs } = await supabase
+        .from("jobs")
+        .select("id, title, job_type")
+        .eq("property_id", job.property_id);
+      const ids = (siblingJobs || []).map((j: any) => j.id);
+      if (ids.length > 0) {
+        const { data: completions } = await supabase
+          .from("project_completions")
+          .select("job_id, completed_at, final_value_pence")
+          .in("job_id", ids);
+        propertyProjects = (completions || []).map((c: any) => {
+          const sibling = (siblingJobs || []).find((j: any) => j.id === c.job_id);
+          return {
+            id: c.job_id,
+            title: sibling?.title ?? null,
+            job_type: sibling?.job_type ?? "Project",
+            completed_at: c.completed_at,
+            final_value_pence: c.final_value_pence,
+          };
+        });
+      }
+    }
+
+    const historyEvents: ManualHistoryEvent[] = [];
+    if (contractRes.data) {
+      historyEvents.push({
+        date: (contractRes.data as any).created_at ?? null,
+        label: "Contract agreed",
+        detail: (contractRes.data as any).agreed_price
+          ? `£${Number((contractRes.data as any).agreed_price).toLocaleString("en-GB")}`
+          : undefined,
+      });
+    }
+    (stagesRes.data || [])
+      .filter((s: any) => s.actual_end)
+      .forEach((s: any) =>
+        historyEvents.push({ date: s.actual_end, label: `${s.stage_name} completed` }),
+      );
+    variations.forEach((v: any) =>
+      historyEvents.push({
+        date: v.homeowner_signed_at || v.created_at,
+        label: `Variation approved${v.title ? ` — ${v.title}` : ""}`,
+        detail:
+          v.cost_change_pence != null
+            ? `£${(Number(v.cost_change_pence) / 100).toLocaleString("en-GB")}`
+            : undefined,
+      }),
+    );
+    if (completion) {
+      historyEvents.push({
+        date: completion.completed_at,
+        label: "Project completed",
+        detail:
+          completion.final_value_pence != null
+            ? `Final project value £${(Number(completion.final_value_pence) / 100).toLocaleString("en-GB")}`
+            : undefined,
+      });
+    }
+    historyEvents.sort((a, b) => (a.date || "").localeCompare(b.date || ""));
+
     setData({
+      completion,
+      historyEvents,
+      propertyProjects,
       job,
       trade,
       homeowner,
@@ -280,6 +368,13 @@ const HomeownerManual = () => {
           warranties={data.warranties}
           jobType={data.job.job_type}
           postcode={data.job.postcode}
+        />
+
+        {/* Section 8 — Project history (permanent property record) */}
+        <ManualHistory
+          events={data.historyEvents}
+          propertyProjects={data.propertyProjects}
+          currentJobId={projectId!}
         />
 
         {/* Green Sections */}
