@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MessageSquare, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 
 export interface ConversationJob {
   id: string;
@@ -39,6 +40,7 @@ const timeAgo = (dateStr: string) => {
  */
 const ProjectConversations = ({ jobs, viewerRole, emptyMessage }: Props) => {
   const navigate = useNavigate();
+  const { byJob: unreadByJob, markRead } = useUnreadMessages();
   const [latest, setLatest] = useState<Record<string, LastMessage>>({});
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
@@ -111,11 +113,17 @@ const ProjectConversations = ({ jobs, viewerRole, emptyMessage }: Props) => {
     <div className="space-y-3">
       {sorted.map((job) => {
         const last = latest[job.id];
+        const unread = unreadByJob[job.id] || 0;
         return (
           <button
             key={job.id}
-            onClick={() => navigate(`/project/${job.id}?tab=messages`)}
-            className="w-full text-left bg-card border border-border rounded-2xl p-4 hover:border-secondary/50 transition-colors flex items-start gap-3"
+            onClick={() => {
+              void markRead(job.id);
+              navigate(`/project/${job.id}?tab=messages`);
+            }}
+            className={`w-full text-left bg-card border rounded-2xl p-4 hover:border-secondary/50 transition-colors flex items-start gap-3 ${
+              unread > 0 ? "border-secondary/60" : "border-border"
+            }`}
           >
             <div className="w-9 h-9 rounded-xl bg-secondary/10 flex items-center justify-center flex-shrink-0">
               <MessageSquare className="w-4 h-4 text-secondary" />
@@ -125,12 +133,21 @@ const ProjectConversations = ({ jobs, viewerRole, emptyMessage }: Props) => {
                 <span className="font-heading text-primary text-base truncate">
                   {job.title || job.job_type || "Project"}
                 </span>
+                {unread > 0 && (
+                  <span
+                    className="font-mono text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded font-semibold"
+                    style={{ backgroundColor: "#DC2626", color: "#FFFFFF" }}
+                  >
+                    {unread} unread
+                  </span>
+                )}
                 {counts[job.id] ? (
                   <span className="font-mono text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-secondary/10 text-secondary">
                     {counts[job.id]} message{counts[job.id] === 1 ? "" : "s"}
                   </span>
                 ) : null}
               </div>
+
               <p className="font-mono text-xs text-muted-foreground mt-1 truncate">
                 {last
                   ? `${last.sender_type === "trade" ? "Trade" : "Homeowner"}: ${last.message_text}`
