@@ -51,18 +51,18 @@ const HomeownerSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen
       )}
 
      <aside
-       className={`dashboard-sidebar fixed md:sticky md:top-0 inset-y-0 left-0 z-40 w-64 h-screen md:h-screen flex flex-col transition-transform duration-300 ${
+       className={`dashboard-sidebar ho-blueprint fixed md:sticky md:top-0 inset-y-0 left-0 z-40 w-64 h-screen md:h-screen flex flex-col transition-transform duration-300 ${
          sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
        }`}
       >
-        <div className="p-6 border-b border-white/10">
+        <div className="relative z-10 p-6 border-b border-white/10">
           <Logo variant="light" className="h-12 w-auto" />
           <p className="font-mono text-[10px] mt-1 tracking-wider uppercase" style={{ color: "rgba(255,255,255,0.65)" }}>
             Homeowner
           </p>
         </div>
 
-        <nav className="flex-1 p-4 space-y-1 overflow-y-auto no-scrollbar">
+        <nav className="relative z-10 flex-1 p-4 space-y-1 overflow-y-auto no-scrollbar">
           {NAV_ITEMS.map((item) => {
             const isActive = activeNav === item.id;
             const isGreen = item.id === "grants";
@@ -73,21 +73,25 @@ const HomeownerSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen
                   setActiveNav(item.id);
                   setSidebarOpen(false);
                 }}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-mono text-sm transition-colors"
-                style={{
-                  backgroundColor: isActive ? (isGreen ? "rgba(34,197,94,0.22)" : "rgba(13,148,136,0.18)") : (isGreen ? "rgba(34,197,94,0.10)" : "transparent"),
-                  color: isActive ? (isGreen ? "#4ADE80" : "#1AC2BA") : (isGreen ? "#22C55E" : "rgba(255,255,255,0.75)"),
-                  fontWeight: isActive || isGreen ? 600 : 400,
-                }}
+                className={`td-nav w-full flex items-center gap-3 px-4 py-3 rounded-xl font-mono text-sm ${isActive ? "is-active" : ""}`}
+                style={
+                  isGreen
+                    ? {
+                        color: isActive ? "#4ADE80" : "#22C55E",
+                        backgroundColor: isActive ? "rgba(34,197,94,0.22)" : "rgba(34,197,94,0.10)",
+                        fontWeight: 600,
+                      }
+                    : undefined
+                }
               >
-                <item.icon className="w-4 h-4" />
+                <item.icon className="w-4 h-4" strokeWidth={1.6} />
                 {item.label}
               </button>
             );
           })}
         </nav>
 
-        <div className="p-4 border-t border-primary/10">
+        <div className="relative z-10 p-4 border-t border-primary/10">
           <button
             onClick={handleLogout}
             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-mono text-sm text-primary/40 hover:text-destructive hover:bg-destructive/5 transition-colors"

@@ -13,6 +13,7 @@ import {
   HEALTH_LABEL,
   type ProjectSnapshot,
 } from "@/lib/projectSpine";
+import projectPlaceholder from "@/assets/dashboard/hero-project.jpg";
 
 const dateLabel = (iso: string | null | undefined) =>
   iso ? new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "To be confirmed";
@@ -41,68 +42,89 @@ const ProjectFocusCard = ({ snapshot }: { snapshot: ProjectSnapshot }) => {
     update?.tomorrow_plan ||
     (snapshot.nextStage ? `Next up: ${snapshot.nextStage.stage_name}.` : "Your trade will post the next step here.");
 
+  const thumb =
+    (Array.isArray(update?.photo_urls) && update?.photo_urls?.[0]) || projectPlaceholder;
+
   return (
     <section className="space-y-4">
-      {/* Project header */}
-      <div className="bg-card border border-border rounded-2xl p-6 space-y-5">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Your project</p>
-            <h2 className="font-heading text-primary text-2xl md:text-3xl mt-1">{snapshot.title}</h2>
-            {(snapshot.address || snapshot.postcode) && (
-              <p className="font-mono text-xs text-muted-foreground mt-1">
-                {[snapshot.address, snapshot.postcode].filter(Boolean).join(", ")}
+      {/* Project header — the dominant element on the dashboard */}
+      <div className="ho-hero">
+        <img src={projectPlaceholder} alt="" aria-hidden="true" className="ho-img" />
+        <div className="ho-veil" />
+        <div className="ho-content p-6 space-y-5">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="flex items-start gap-4 min-w-0">
+              <img
+                src={thumb}
+                alt=""
+                aria-hidden="true"
+                className="hidden sm:block w-28 h-24 object-cover rounded-xl border border-white/10 shrink-0"
+              />
+              <div className="min-w-0">
+                <p className="ho-metric-label font-mono">Active project</p>
+                <h2 className="font-heading text-primary text-2xl md:text-3xl mt-1 uppercase tracking-tight">
+                  {snapshot.title}
+                </h2>
+                {(snapshot.address || snapshot.postcode) && (
+                  <p className="font-mono text-xs text-muted-foreground mt-1">
+                    {[snapshot.address, snapshot.postcode].filter(Boolean).join(", ")}
+                  </p>
+                )}
+              </div>
+            </div>
+            <span className={`font-mono text-[11px] px-3 py-1.5 rounded-full border ${HEALTH_STYLE[snapshot.health]}`}>
+              {HEALTH_LABEL[snapshot.health]}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div>
+              <p className="ho-metric-label font-mono">Current stage</p>
+              <p className="font-heading text-primary text-lg mt-1">
+                {snapshot.currentStage?.stage_name ?? (snapshot.stages.length ? "All stages complete" : "Being set up")}
               </p>
-            )}
+            </div>
+            <div>
+              <p className="ho-metric-label font-mono">Expected completion</p>
+              <p className="font-heading text-primary text-lg mt-1">{dateLabel(snapshot.expectedCompletion)}</p>
+            </div>
+            <div>
+              <p className="ho-metric-label font-mono">Project value</p>
+              <p className="font-heading text-primary text-lg mt-1">{formatPence(snapshot.currentProjectValuePence)}</p>
+            </div>
+            <div>
+              <p className="ho-metric-label font-mono">Progress</p>
+              <p className="font-heading text-primary text-lg mt-1">{snapshot.progressPercent}%</p>
+            </div>
           </div>
-          <span className={`font-mono text-[11px] px-3 py-1.5 rounded-full border ${HEALTH_STYLE[snapshot.health]}`}>
-            {HEALTH_LABEL[snapshot.health]}
-          </span>
-        </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div>
-            <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Current stage</p>
-            <p className="font-heading text-primary text-lg mt-1">
-              {snapshot.currentStage?.stage_name ?? (snapshot.stages.length ? "All stages complete" : "Being set up")}
-            </p>
+          <div className="ho-progress">
+            <span style={{ width: `${Math.max(0, Math.min(100, snapshot.progressPercent))}%` }} />
           </div>
-          <div>
-            <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Progress</p>
-            <p className="font-heading text-primary text-lg mt-1">{snapshot.progressPercent}%</p>
-          </div>
-          <div>
-            <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Expected completion</p>
-            <p className="font-heading text-primary text-lg mt-1">{dateLabel(snapshot.expectedCompletion)}</p>
-          </div>
-          <div>
-            <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Project value</p>
-            <p className="font-heading text-primary text-lg mt-1">{formatPence(snapshot.currentProjectValuePence)}</p>
-          </div>
-        </div>
 
-        <div className="grid md:grid-cols-2 gap-3">
-          <div className="rounded-xl border border-border p-4">
-            <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Today</p>
-            <p className="font-mono text-sm text-primary mt-1 leading-relaxed">{todayLine}</p>
+          <div className="grid md:grid-cols-2 gap-3">
+            <div className="ho-panel ho-panel-quiet p-4">
+              <p className="ho-metric-label font-mono">Today</p>
+              <p className="font-mono text-sm text-primary mt-1 leading-relaxed">{todayLine}</p>
+            </div>
+            <div className="ho-panel ho-panel-quiet p-4">
+              <p className="ho-metric-label font-mono">Next</p>
+              <p className="font-mono text-sm text-primary mt-1 leading-relaxed">{nextLine}</p>
+            </div>
           </div>
-          <div className="rounded-xl border border-border p-4">
-            <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Next</p>
-            <p className="font-mono text-sm text-primary mt-1 leading-relaxed">{nextLine}</p>
-          </div>
-        </div>
 
-        <button
-          onClick={() => navigate(`/project/${snapshot.jobId}`)}
-          className="inline-flex items-center gap-1.5 bg-secondary text-secondary-foreground font-mono text-xs px-4 py-2 rounded-xl hover:opacity-90 transition-opacity"
-        >
-          Open project <ArrowRight className="w-3.5 h-3.5" />
-        </button>
+          <button
+            onClick={() => navigate(`/project/${snapshot.jobId}`)}
+            className="inline-flex items-center gap-1.5 bg-secondary text-secondary-foreground font-mono text-xs px-4 py-2 rounded-xl hover:opacity-90 transition-opacity"
+          >
+            Open project <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
       </div>
 
       {/* Action required — only when something is genuinely waiting */}
       {actions.length > 0 && (
-        <div className="bg-card border border-amber-500/30 rounded-2xl p-5">
+        <div className="ho-panel ho-panel-amber p-5">
           <p className="font-mono text-[10px] uppercase tracking-widest text-amber-400 flex items-center gap-2">
             <AlertTriangle className="w-3.5 h-3.5" /> Action required
           </p>
@@ -125,7 +147,7 @@ const ProjectFocusCard = ({ snapshot }: { snapshot: ProjectSnapshot }) => {
       )}
 
       {/* Latest site update */}
-      <div className="bg-card border border-border rounded-2xl p-5">
+      <div className="ho-panel p-5">
         <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground flex items-center gap-2">
           <Clock className="w-3.5 h-3.5" /> Latest site update
         </p>
@@ -163,7 +185,7 @@ const ProjectFocusCard = ({ snapshot }: { snapshot: ProjectSnapshot }) => {
 
       {/* Upcoming + financial position */}
       <div className="grid md:grid-cols-2 gap-4">
-        <div className="bg-card border border-border rounded-2xl p-5 space-y-3">
+        <div className="ho-panel p-5 space-y-3">
           <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground flex items-center gap-2">
             <CalendarClock className="w-3.5 h-3.5" /> Upcoming
           </p>
@@ -181,7 +203,7 @@ const ProjectFocusCard = ({ snapshot }: { snapshot: ProjectSnapshot }) => {
           />
         </div>
 
-        <div className="bg-card border border-border rounded-2xl p-5 space-y-3">
+        <div className="ho-panel p-5 space-y-3">
           <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground flex items-center gap-2">
             <PoundSterling className="w-3.5 h-3.5" /> Project financial position
           </p>
@@ -201,7 +223,7 @@ const ProjectFocusCard = ({ snapshot }: { snapshot: ProjectSnapshot }) => {
       </div>
 
       {snapshot.progressPercent === 100 && (
-        <div className="bg-card border border-secondary/30 rounded-2xl p-5 flex items-center gap-3">
+        <div className="ho-panel ho-panel-accent p-5 flex items-center gap-3">
           <CheckCircle2 className="w-5 h-5 text-secondary" />
           <p className="font-mono text-sm text-primary">
             Every stage is complete — your project documents stay available in your manual.

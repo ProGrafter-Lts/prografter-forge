@@ -51,7 +51,7 @@ const NextSteps = ({ steps, setActiveNav }: Props) => {
       </h2>
 
       {steps.length === 0 ? (
-        <div className="bg-card rounded-2xl p-6 border border-border shadow-sm flex items-center gap-3">
+        <div className="ho-panel ho-panel-accent p-6 flex items-center gap-3">
           <CheckCircle2 className="w-6 h-6 text-green-600 shrink-0" />
           <div>
             <p className="font-heading text-primary text-base">You're all caught up</p>
@@ -67,7 +67,7 @@ const NextSteps = ({ steps, setActiveNav }: Props) => {
             return (
               <div
                 key={step.id}
-                className="relative bg-card rounded-2xl p-5 border border-border shadow-sm overflow-hidden"
+                className="ho-panel p-5"
               >
                 <span
                   className={`absolute left-0 top-0 bottom-0 w-1.5 ${style.dot}`}
