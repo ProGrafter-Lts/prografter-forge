@@ -25,7 +25,7 @@ import heroImage from "@/assets/home/hero-blueprint-build.jpg";
 import homeownerPlanning from "@/assets/how-it-works/homeowner-planning.jpg";
 import tradeProject from "@/assets/how-it-works/trade-project.jpg";
 import ctaPlans from "@/assets/how-it-works/cta-plans.jpg";
-import homeownerManual from "@/assets/platform/homeowner-manual.png";
+import completedHome from "@/assets/how-it-works/completed-home.jpg";
 import compareQuotes from "@/assets/how-it-works/compare-quotes.jpg";
 import manageProject from "@/assets/how-it-works/manage-project.jpg";
 import payConfidence from "@/assets/how-it-works/pay-confidence.jpg";
@@ -90,8 +90,8 @@ const HOMEOWNER_STEPS: JourneyStep[] = [
     num: "06",
     title: "Complete & beyond",
     description: "Receive certificates, photos, warranties and project records together in your Homeowner Manual.",
-    image: homeownerManual,
-    alt: "ProGrafter digital Homeowner Manual",
+    image: completedHome,
+    alt: "Completed contemporary extension on a British home at dusk",
     icon: Home,
   },
 ];
