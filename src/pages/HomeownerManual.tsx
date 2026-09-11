@@ -322,7 +322,12 @@ const HomeownerManual = () => {
           isPro={data.isPro}
           onUpgrade={() => setShowProModal(true)}
         >
-          <ManualMaterials materials={data.materials} jobId={projectId!} />
+          <ManualMaterials
+            materials={data.materials}
+            jobId={projectId!}
+            tradeId={(data.contract as any)?.trade_id ?? null}
+            canAdd
+          />
         </LockedSection>
 
         {/* Section 3 — Certificates */}
