@@ -5,6 +5,7 @@ import { trackEvent } from "@/lib/analytics";
 import Logo from "@/components/Logo";
 import { validateBrief } from "@/lib/briefValidation";
 import SEO from "@/components/SEO";
+import { isInLiveArea, outcodeOf, normalisePostcode } from "@/lib/serviceArea";
 
 
 // ── ProGrafter Brand Palette ──────────────────────────────────────────────────
@@ -459,6 +460,11 @@ export default function PostJobBrief() {
   // postcode area right now. Drives honest messaging instead of a blanket
   // "we'll match you" promise we cannot always keep.
   const [coverage, setCoverage] = useState<{ area_trades: number; trade_matches: number } | null>(null);
+  // Soft launch: briefs are only accepted where ProGrafter can actually deliver.
+  // Outside the live area homeowners join the waitlist instead of being promised a match.
+  const [waitlistSaving, setWaitlistSaving] = useState(false);
+  const [waitlistDone, setWaitlistDone] = useState(false);
+  const [waitlistError, setWaitlistError] = useState("");
 
 
   // Staged progress shown during the ~15–20s submission (account creation +
@@ -518,6 +524,7 @@ export default function PostJobBrief() {
       if (!form.address_line1.trim()) e.address_line1 = "Required";
       if (!form.city.trim()) e.city = "Required";
       if (!form.postcode.trim()) e.postcode = "Required";
+      else if (!isInLiveArea(form.postcode)) e.postcode = "We're not live in this area yet — join the waitlist below";
       if (!form.property_type) e.property_type = "Required";
     }
     if (n === 1) {
@@ -720,6 +727,50 @@ export default function PostJobBrief() {
         <F label="Town / City" req err={errors.city}><I f="city" placeholder="Nottingham" /></F>
         <F label="Postcode" req err={errors.postcode}><I f="postcode" placeholder="NG3 5AA" /></F>
       </G2>
+      {form.postcode.trim().length >= 3 && !isInLiveArea(form.postcode) && (
+        <InfoBox variant="amber">
+          <strong>We're not live in {outcodeOf(form.postcode) || "your area"} yet.</strong> ProGrafter is
+          currently running in the East Midlands and South Yorkshire while we verify trades area by area.
+          Rather than promise a match we can't deliver, leave your details and we'll email you the moment
+          we open in your area.
+          {waitlistDone ? (
+            <div style={{ marginTop: 10, fontWeight: 700 }}>
+              You're on the list — we'll be in touch as soon as we're live near you.
+            </div>
+          ) : (
+            <div style={{ marginTop: 10 }}>
+              <button
+                type="button"
+                disabled={waitlistSaving}
+                onClick={async () => {
+                  if (!/\S+@\S+\.\S+/.test(form.email)) {
+                    setWaitlistError("Please add your email address above first.");
+                    return;
+                  }
+                  setWaitlistError("");
+                  setWaitlistSaving(true);
+                  const { error } = await supabase.from("cost_guide_area_waitlist").insert({
+                    email: form.email.trim(),
+                    postcode: normalisePostcode(form.postcode).slice(0, 12),
+                    outcode: outcodeOf(form.postcode) || null,
+                    project_type: form.job_title?.trim() || null,
+                  });
+                  setWaitlistSaving(false);
+                  if (error) { setWaitlistError("Something went wrong — please try again."); return; }
+                  setWaitlistDone(true);
+                }}
+                style={{ background: C.amber, color: C.white, border: "none", borderRadius: 8,
+                  padding: "9px 16px", fontSize: 13, fontWeight: 700, cursor: "pointer" }}
+              >
+                {waitlistSaving ? "Saving…" : "Notify me when you're live here"}
+              </button>
+              {waitlistError && (
+                <div style={{ marginTop: 8, color: C.error, fontWeight: 600 }}>{waitlistError}</div>
+              )}
+            </div>
+          )}
+        </InfoBox>
+      )}
       <F label="Property type" req err={errors.property_type}>
         <S f="property_type">
           <option value="">Select...</option>
