@@ -66,6 +66,7 @@ const formatDate = (iso: string) =>
 
 const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
   const navigate = useNavigate();
+  const { total: unreadMessages, byJob: unreadByJob } = useUnreadMessages();
   const [data, setData] = useState<SummaryData | null>(null);
   const [loading, setLoading] = useState(true);
 
