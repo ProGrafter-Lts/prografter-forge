@@ -25,6 +25,7 @@ import HomeownerProfileSection from "@/components/homeowner/HomeownerProfileSect
 import NextSteps from "@/components/homeowner/NextSteps";
 import { buildNextSteps } from "@/lib/homeownerNextSteps";
 import { useAuthReady } from "@/hooks/useAuthReady";
+import dashboardHero from "@/assets/dashboard/hero-dashboard.jpg";
 
 const HomeownerDashboard = () => {
   const navigate = useNavigate();
