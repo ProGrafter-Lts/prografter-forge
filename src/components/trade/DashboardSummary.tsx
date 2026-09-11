@@ -165,7 +165,7 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
         : { data: [] as any[] };
       const activeJobIds = new Set(
         ((rpcRes.data || []) as any[])
-          .filter((r) => r.role === "trade" && r.trade_id === tradeId)
+          .filter((r) => r.trade_id === tradeId)
           .map((r) => r.id),
       );
       const activeProjects = activeJobIds.size;
