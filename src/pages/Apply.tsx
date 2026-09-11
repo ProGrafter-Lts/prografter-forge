@@ -261,6 +261,10 @@ export default function Apply() {
 
   const cat = TRADES.find(t => t.id === form.trade_category_id);
   const reg = cat?.lane === "regulated";
+  // Plumbers who are Gas Safe registered are independently assessed by the
+  // register, so trade references are not collected from them.
+  const isPlumber = cat?.id === "plumber";
+  const gasSafeBypass = isPlumber && form.gas_safe_held === "yes" && String(form.gas_safe_number ?? "").trim() !== "";
 
   const validate = (n: number): Record<string, string> => {
     const e: Record<string, string> = {};
