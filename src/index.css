@@ -1883,6 +1883,7 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
   color: hsl(var(--cream));
 }
 .hiw-selector-button:first-child { border-right: 1px solid hsl(var(--cream) / .14); }
+.hiw-selector-button.is-trade { padding-left: 100px; }
 .hiw-selector-button:hover, .hiw-selector-button:focus-visible { background: hsl(var(--teal) / .12); color: hsl(var(--cream)); }
 .hiw-selector-button > svg:first-child { width: 34px; height: 34px; margin-right: 16px; color: hsl(var(--teal)); }
 .hiw-selector-button > svg:last-child { width: 22px; height: 22px; margin-left: auto; color: hsl(var(--teal)); }
