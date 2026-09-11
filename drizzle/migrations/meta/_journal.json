@@ -169,6 +169,13 @@
       "when": 1789154638954,
       "tag": "0023_properties_and_project_commercials",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1789154666352,
+      "tag": "0024_jobs_link_property_trigger",
+      "breakpoints": true
     }
   ]
 }
