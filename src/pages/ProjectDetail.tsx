@@ -81,6 +81,8 @@ const ProjectDetail = () => {
   const [messages, setMessages] = useState<ProjectMessage[]>([]);
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [contract, setContract] = useState<Contract | null>(null);
+  // Approved (signed) variations only — pending ones must never move the value.
+  const [approvedVariationsValue, setApprovedVariationsValue] = useState(0);
   const [subAssignments, setSubAssignments] = useState<SubAssignment[]>([]);
   const [viewerContextReady, setViewerContextReady] = useState(false);
   const TAB_IDS = [
