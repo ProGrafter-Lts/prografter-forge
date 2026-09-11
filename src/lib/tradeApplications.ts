@@ -65,7 +65,31 @@ export const QUAL_LABEL: Record<string, string> = {
   time_served: "Time-served",
 };
 
-// The five published verification checks
+// Trades governed by an independent registration body. For these, registration
+// with that body IS the independent assessment — references add nothing, so the
+// "References checked" item is removed and references cannot be requested.
+export const SCHEME_REGULATED_TRADES: Record<string, string> = {
+  electrician: "Competent Person Scheme (NICEIC / NAPIT / ELECSA)",
+  gas_engineer: "Gas Safe Register",
+  solar_pv: "MCS",
+  heat_pump: "MCS",
+  ev_charger: "OZEV-authorised installer",
+  oil_boiler: "OFTEC",
+};
+
+/** Independent body name for a trade category, or null when there is none. */
+export const governingBodyFor = (tradeCategoryId?: string | null): string | null =>
+  SCHEME_REGULATED_TRADES[(tradeCategoryId ?? "").trim().toLowerCase()] ?? null;
+
+/**
+ * References only apply where no independent assessing body exists
+ * (builders, plasterers, joiners, roofers, landscapers, plumbers, tilers,
+ * decorators, kitchen/bathroom fitters, "other", and anything unrecognised).
+ */
+export const tradeRequiresReferences = (tradeCategoryId?: string | null): boolean =>
+  governingBodyFor(tradeCategoryId) === null;
+
+// The published verification checks
 export const VERIFICATION_CHECKS = [
   { id: "identity", label: "Identity & photo ID confirmed" },
   { id: "qualifications", label: "Qualifications / scheme registration verified" },
@@ -73,6 +97,10 @@ export const VERIFICATION_CHECKS = [
   { id: "references", label: "References checked" },
   { id: "portfolio", label: "Portfolio of work reviewed" },
 ] as const;
+
+/** Checklist for a specific application — drops references for scheme-regulated trades. */
+export const verificationChecksFor = (tradeCategoryId?: string | null) =>
+  VERIFICATION_CHECKS.filter((c) => c.id !== "references" || tradeRequiresReferences(tradeCategoryId));
 
 // Document groups shown in the detail view, in display order.
 export const DOC_GROUPS: { heading: string; fields: string[] }[] = [
