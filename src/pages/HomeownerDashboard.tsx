@@ -470,6 +470,7 @@ const HomeownerDashboard = () => {
                 siteUpdates={siteUpdates}
                 briefs={briefs}
               />
+              <CompletedProjectsSection jobs={jobs} />
               <MyJobs jobs={jobs} />
             </section>
           )}
