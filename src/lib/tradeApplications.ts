@@ -139,6 +139,7 @@ export const DOC_GROUPS: { heading: string; fields: string[] }[] = [
   { heading: "Portfolio Photos", fields: ["portfolio_photos"] },
   { heading: "Insurance Certificate", fields: ["insurance_certificate"] },
   { heading: "Photo ID", fields: ["photo_id", "id_document"] },
+  { heading: "Gas Safe Card", fields: ["gas_safe_doc"] },
 ];
 
 export const FIELD_LABELS: Record<string, string> = {
@@ -148,6 +149,7 @@ export const FIELD_LABELS: Record<string, string> = {
   portfolio_photos: "Portfolio photo",
   photo_id: "Photo ID",
   id_document: "Photo ID",
+  gas_safe_doc: "Gas Safe card",
 };
 
 // Photo ID became a required field on the public /apply form at this moment.
