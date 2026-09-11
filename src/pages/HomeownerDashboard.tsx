@@ -15,6 +15,8 @@ import VariationAlert from "@/components/homeowner/VariationAlert";
 import GreenCertificatePack from "@/components/GreenCertificatePack";
 import GreenSchemesBreakdown from "@/components/GreenSchemesBreakdown";
 import { isGreenTrade } from "@/lib/greenTrades";
+import ProjectFocusCard from "@/components/project/ProjectFocusCard";
+import { useProjectSnapshot } from "@/hooks/useProjectSnapshot";
 import { isActiveJob } from "@/lib/activeProjects";
 import { BookOpen, Leaf, FolderKanban, SearchCheck, ArrowRight, MessageSquare, Camera } from "lucide-react";
 import SiteDiaryInbox from "@/components/homeowner/SiteDiaryInbox";
@@ -276,6 +278,10 @@ const HomeownerDashboard = () => {
     }
     return jobs.filter(isActiveJob);
   }, [jobs, activeJobIds]);
+
+  /** Project-first overview: the same shared spine the trade dashboard reads. */
+  const focusProjectId = activeJobs[0]?.id ?? null;
+  const { snapshot: focusSnapshot } = useProjectSnapshot(focusProjectId);
 
   // Quote Checker prompt: surface when a brief says they already have outside quotes.
   const TRADE_TO_PROJECT_TYPE: Record<string, string> = {
@@ -552,6 +558,8 @@ const HomeownerDashboard = () => {
           {/* Main overview content */}
           {activeNav === "overview" && (
             <>
+              {focusSnapshot && <ProjectFocusCard snapshot={focusSnapshot} />}
+
               <NextSteps steps={nextSteps} setActiveNav={setActiveNav} />
 
               <VariationAlert variations={variations} />
