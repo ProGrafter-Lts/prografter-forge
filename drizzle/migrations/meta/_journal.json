@@ -162,6 +162,13 @@
       "when": 1789153130644,
       "tag": "0022_project_message_reads",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1789154638954,
+      "tag": "0023_properties_and_project_commercials",
+      "breakpoints": true
     }
   ]
 }

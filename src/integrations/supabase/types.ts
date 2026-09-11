@@ -2530,6 +2530,7 @@ export type Database = {
           job_type: string
           photo_urls: string[] | null
           postcode: string
+          property_id: string | null
           ref: string
           specialism_id: string | null
           stage: string
@@ -2553,6 +2554,7 @@ export type Database = {
           job_type: string
           photo_urls?: string[] | null
           postcode: string
+          property_id?: string | null
           ref?: string
           specialism_id?: string | null
           stage?: string
@@ -2576,6 +2578,7 @@ export type Database = {
           job_type?: string
           photo_urls?: string[] | null
           postcode?: string
+          property_id?: string | null
           ref?: string
           specialism_id?: string | null
           stage?: string
@@ -2589,6 +2592,13 @@ export type Database = {
             columns: ["homeowner_id"]
             isOneToOne: false
             referencedRelation: "homeowners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "jobs_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
             referencedColumns: ["id"]
           },
           {
@@ -3616,6 +3626,70 @@ export type Database = {
           },
         ]
       }
+      project_commercials: {
+        Row: {
+          actual_cost_pence: number | null
+          created_at: string
+          estimated_cost_pence: number | null
+          id: string
+          job_id: string
+          labour_cost_pence: number | null
+          materials_cost_pence: number | null
+          notes: string | null
+          subcontractor_cost_pence: number | null
+          trade_id: string
+          updated_at: string
+        }
+        Insert: {
+          actual_cost_pence?: number | null
+          created_at?: string
+          estimated_cost_pence?: number | null
+          id?: string
+          job_id: string
+          labour_cost_pence?: number | null
+          materials_cost_pence?: number | null
+          notes?: string | null
+          subcontractor_cost_pence?: number | null
+          trade_id: string
+          updated_at?: string
+        }
+        Update: {
+          actual_cost_pence?: number | null
+          created_at?: string
+          estimated_cost_pence?: number | null
+          id?: string
+          job_id?: string
+          labour_cost_pence?: number | null
+          materials_cost_pence?: number | null
+          notes?: string | null
+          subcontractor_cost_pence?: number | null
+          trade_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_commercials_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_commercials_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "trades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_commercials_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "trades_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_intelligence_records: {
         Row: {
           address: Json | null
@@ -4080,6 +4154,44 @@ export type Database = {
             columns: ["job_id"]
             isOneToOne: false
             referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      properties: {
+        Row: {
+          address: string | null
+          created_at: string
+          homeowner_id: string
+          id: string
+          label: string | null
+          postcode: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          homeowner_id: string
+          id?: string
+          label?: string | null
+          postcode?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          homeowner_id?: string
+          id?: string
+          label?: string | null
+          postcode?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "properties_homeowner_id_fkey"
+            columns: ["homeowner_id"]
+            isOneToOne: false
+            referencedRelation: "homeowners"
             referencedColumns: ["id"]
           },
         ]
