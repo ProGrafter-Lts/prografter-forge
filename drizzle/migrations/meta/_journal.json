@@ -190,6 +190,13 @@
       "when": 1789157767217,
       "tag": "0026_project_completion_and_review",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1789159698205,
+      "tag": "0027_mark_project_completed_rpc",
+      "breakpoints": true
     }
   ]
 }

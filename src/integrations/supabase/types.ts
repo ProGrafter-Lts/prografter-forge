@@ -7110,6 +7110,7 @@ export type Database = {
         Args: { _contract_id: string }
         Returns: undefined
       }
+      mark_project_completed: { Args: { _job_id: string }; Returns: boolean }
       owns_trade: {
         Args: { _trade_id: string; _user_id: string }
         Returns: boolean
