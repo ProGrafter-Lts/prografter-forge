@@ -13,6 +13,7 @@ import {
   HEALTH_LABEL,
   type ProjectSnapshot,
 } from "@/lib/projectSpine";
+import projectPlaceholder from "@/assets/dashboard/hero-project.jpg";
 
 const dateLabel = (iso: string | null | undefined) =>
   iso ? new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "To be confirmed";
