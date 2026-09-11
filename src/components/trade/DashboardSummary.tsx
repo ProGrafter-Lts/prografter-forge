@@ -418,7 +418,10 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
       sub:
         data.activeProjectsValue > 0
           ? `${gbp(data.activeProjectsValue)} contracted value`
-          : "No active projects yet",
+          : data.activeProjects > 0
+            ? "Contracted value pending"
+            : "No active projects yet",
+
       cta: "Open Projects",
       onClick: () => onOpenView("projects"),
       urgency: data.activeProjects > 0 ? 1 : 0,
