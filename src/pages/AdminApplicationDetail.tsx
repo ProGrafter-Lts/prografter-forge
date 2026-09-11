@@ -10,6 +10,7 @@ import {
   signedUrlFor, logApplicationEvent, hasPhotoId, predatesIdCapture,
   detectRequestableItems, RequestableItem,
 } from "@/lib/tradeApplications";
+import { isInLiveArea, outcodeOf } from "@/lib/serviceArea";
 
 const C = {
   cream: "#F5F0E8", deep: "#0F2238", teal: "#14A8A1", white: "#FFFFFF",
