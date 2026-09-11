@@ -116,7 +116,7 @@ const ProjectFocusCard = ({ snapshot }: { snapshot: ProjectSnapshot }) => {
           </div>
 
           <button
-            onClick={() => navigate(`/project/${snapshot.jobId}`)}
+            onClick={() => openProject(snapshot.jobId)}
             className="inline-flex items-center gap-1.5 bg-secondary text-secondary-foreground font-mono text-xs px-4 py-2 rounded-xl hover:opacity-90 transition-opacity"
           >
             Open project <ArrowRight className="w-3.5 h-3.5" />
@@ -134,7 +134,7 @@ const ProjectFocusCard = ({ snapshot }: { snapshot: ProjectSnapshot }) => {
             {actions.map((a) => (
               <button
                 key={a.id}
-                onClick={() => navigate(a.to)}
+                onClick={() => openDrawer(a.to)}
                 className="w-full flex items-center justify-between gap-3 text-left rounded-xl border border-border px-4 py-3 hover:border-secondary/40 transition-colors"
               >
                 <span>
