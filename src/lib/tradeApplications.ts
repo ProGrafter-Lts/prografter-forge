@@ -188,7 +188,7 @@ const docCount = (
 ): number => fields.reduce((n, f) => n + (docPaths?.[f]?.length ?? 0), 0);
 
 export function detectRequestableItems(
-  app: Pick<TradeApplication, "document_paths" | "qualification_path">,
+  app: Pick<TradeApplication, "document_paths" | "qualification_path" | "trade_category_id">,
   referenceCount: number,
 ): RequestableItem[] {
   const d = app.document_paths;
