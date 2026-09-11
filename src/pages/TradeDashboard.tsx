@@ -138,8 +138,9 @@ const TradeDashboard = () => {
           .order("created_at", { ascending: false }),
         supabase
           .from("contracts")
-          .select("job_id, jobs(id, title, job_type, postcode, stage)")
+          .select("job_id")
           .eq("trade_id", tradeData.id),
+
       ]);
 
       if (matchRes.error) console.error("Failed to load job matches", matchRes.error);
@@ -163,15 +164,20 @@ const TradeDashboard = () => {
       );
 
       const allQuotes = quoteRes.data || [];
-      const contractJobs = Array.from(
-        new Map(
-          (contractRes.data || [])
-            .map((contract: any) => contract.jobs)
-            .filter((job: any) => job && isContractedActiveJob(job))
-            .map((job: any) => [job.id, job]),
-        ).values(),
-      ).slice(0, 10);
-      const projectJobIds = Array.from(new Set((contractRes.data || []).map((contract: any) => contract.job_id)));
+      // Contracts have no direct FK to jobs — load the job rows separately, then
+      // apply the shared contracted-active rule.
+      const projectJobIds = Array.from(new Set((contractRes.data || []).map((contract: any) => contract.job_id).filter(Boolean)));
+      const contractJobsRes = projectJobIds.length
+        ? await supabase
+            .from("jobs")
+            .select("id, title, job_type, postcode, stage, status")
+            .in("id", projectJobIds)
+        : { data: [], error: null };
+      if (contractJobsRes.error) console.error("Failed to load contracted jobs", contractJobsRes.error);
+      const contractJobs = ((contractJobsRes.data || []) as any[])
+        .filter((job: any) => job && isContractedActiveJob(job))
+        .slice(0, 10);
+
 
       const stagePaymentRes = projectJobIds.length
         ? await supabase
