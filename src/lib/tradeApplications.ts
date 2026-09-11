@@ -225,7 +225,7 @@ export function detectRequestableItems(
       id: "references",
       label: "Trade references",
       emailLabel: "Two trade references — name, relationship to you, phone number and email for each",
-      applies: true,
+      applies: tradeRequiresReferences(app.trade_category_id),
       missing: referenceCount < 2,
     },
   ].filter((i) => i.applies);
