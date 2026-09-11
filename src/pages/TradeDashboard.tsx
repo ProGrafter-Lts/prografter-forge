@@ -465,7 +465,15 @@ const TradeDashboard = () => {
                 <h1 className="font-heading text-primary text-3xl">Calendar</h1>
                 <p className="font-mono text-sm text-muted-foreground mt-1">Sync your jobs and site visits to your calendar.</p>
               </div>
-              <CalendarConnect variant="full" />
+              {/* Calendar connection is set up once in Settings — shown here read-only
+                  so there is only one place to manage the integration. */}
+              <CalendarConnect variant="compact" />
+              <button
+                onClick={() => navigate("/trade/settings")}
+                className="inline-flex items-center gap-2 rounded-xl border border-primary/15 px-4 py-2.5 font-mono text-xs text-foreground hover:border-secondary/40 transition-colors"
+              >
+                Manage calendar connection in Settings
+              </button>
             </div>
           )}
 
