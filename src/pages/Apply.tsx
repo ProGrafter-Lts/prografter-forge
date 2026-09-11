@@ -118,6 +118,8 @@ const BLANK: FormState = {
   ts_ref1_name: "", ts_ref1_role: "", ts_ref1_phone: "", ts_ref1_email: "",
   ts_ref2_name: "", ts_ref2_role: "", ts_ref2_phone: "", ts_ref2_email: "",
   ts_consent: false,
+  // Plumbers only: Gas Safe registration replaces trade references.
+  gas_safe_held: "", gas_safe_number: "", gas_safe_expiry: "",
   declaration_accepted: false,
 };
 
@@ -293,12 +295,20 @@ export default function Apply() {
         if (!v("qual_awarding_body")) e.qual_awarding_body = "Required";
         if (!v("qual_year")) e.qual_year = "Required";
         if (!(files.qual_cert_doc?.length)) e.qual_cert_doc = "Please upload your certificate";
-      } else if (path === "time_served") {
+      }
+      if (isPlumber) {
+        if (!form.gas_safe_held) e.gas_safe_held = "Please tell us whether you hold Gas Safe registration";
+        if (form.gas_safe_held === "yes") {
+          if (!v("gas_safe_number")) e.gas_safe_number = "Required";
+          if (!(files.gas_safe_doc?.length)) e.gas_safe_doc = "Please upload your Gas Safe card";
+        }
+      }
+      if (path === "time_served") {
         const years = Number(form.ts_years);
         if (form.ts_years === "" || Number.isNaN(years)) e.ts_years = "Required";
         else if (years < 5) e.ts_years = "You need at least 5 years on the tools to apply via this route";
         if (!v("ts_specialism")) e.ts_specialism = "Required";
-        ([1, 2] as const).forEach((rn) => {
+        if (!gasSafeBypass) ([1, 2] as const).forEach((rn) => {
           if (!v(`ts_ref${rn}_name`)) e[`ts_ref${rn}_name`] = "Required";
           if (!v(`ts_ref${rn}_role`)) e[`ts_ref${rn}_role`] = "Required";
           if (!v(`ts_ref${rn}_phone`)) e[`ts_ref${rn}_phone`] = "Required";
@@ -306,7 +316,7 @@ export default function Apply() {
           if (!email) e[`ts_ref${rn}_email`] = "Required";
           else if (!/\S+@\S+\.\S+/.test(email)) e[`ts_ref${rn}_email`] = "Invalid email";
         });
-        if (!form.ts_consent) e.ts_consent = "You must confirm this to proceed";
+        if (!gasSafeBypass && !form.ts_consent) e.ts_consent = "You must confirm this to proceed";
       }
     }
     if (n === 3) {
@@ -337,6 +347,7 @@ export default function Apply() {
   const persistReferences = async (applicantEmail: string) => {
     if (!applicantEmail) return;
     if (form.qualification_path !== "time_served") return;
+    if (gasSafeBypass) return;
     const str = (k: string) => String(form[k] ?? "").trim();
     const rows = ([1, 2] as const).map((rn) => ({
       applicant_email: applicantEmail,
@@ -767,6 +778,34 @@ export default function Apply() {
         </>
       )}
 
+      {isPlumber && (
+        <div style={{ marginTop: 20, padding: 16, border: `1.5px solid ${C.border}`, borderRadius: 10, background: C.white }}>
+          <h3 style={{ fontSize: 15, fontWeight: 700, color: C.deep, margin: "0 0 4px" }}>Gas Safe registration</h3>
+          <p style={{ fontSize: 13, color: C.secondary, margin: "0 0 12px" }}>
+            Plumbing and heating often overlap. If you're on the Gas Safe Register we verify you directly
+            with the register, so you won't need to provide trade references.
+          </p>
+          <Field label="Do you hold current Gas Safe registration?" req err={errors.gas_safe_held}>
+            <S f="gas_safe_held">
+              <option value="">Select...</option>
+              <option value="yes">Yes — I have a current Gas Safe card</option>
+              <option value="no">No — plumbing only</option>
+            </S>
+          </Field>
+          {form.gas_safe_held === "yes" && (
+            <>
+              <Grid>
+                <Field label="Gas Safe registration number" req err={errors.gas_safe_number} hint="Your 7-digit Gas Safe registration number."><I f="gas_safe_number" placeholder="1234567" /></Field>
+                <Field label="Card expiry date" err={errors.gas_safe_expiry}><I f="gas_safe_expiry" type="date" /></Field>
+              </Grid>
+              <Field label="Upload your Gas Safe card" req err={errors.gas_safe_doc} hint="A photo or PDF of your current card (front).">
+                <F f="gas_safe_doc" />
+              </Field>
+            </>
+          )}
+        </div>
+      )}
+
       {form.qualification_path === "time_served" && (
         <>
           <Field label="Years on the tools" req err={errors.ts_years} hint="Minimum 5 years to apply via this route.">
@@ -776,6 +815,13 @@ export default function Apply() {
             <T f="ts_specialism" rows={3} placeholder="Domestic plastering and rendering — mostly Victorian terraces and period restoration." />
           </Field>
 
+          {gasSafeBypass ? (
+            <InfoBox variant="teal">
+              Your Gas Safe registration replaces trade references — we verify you against the public
+              Gas Safe Register instead.
+            </InfoBox>
+          ) : (
+          <>
           <h3 style={{ fontSize: 15, fontWeight: 700, color: C.deep, margin: "20px 0 6px" }}>Two trade references</h3>
           <p style={{ fontSize: 13, color: C.secondary, margin: "0 0 14px" }}>Both references are required. We contact each one by phone.</p>
 
@@ -800,6 +846,8 @@ export default function Apply() {
             </span>
           </label>
           {errors.ts_consent && <p style={{ fontSize: 12, color: C.error, margin: "-4px 0 12px" }}>{errors.ts_consent}</p>}
+          </>
+          )}
 
           <InfoBox variant="amber">
             We verify time-served applications by phone call to your references and we may request a site visit on your first booked job. Verification typically takes 5–7 days.
