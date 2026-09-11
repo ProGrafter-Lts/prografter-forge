@@ -1,4 +1,5 @@
-import { useNavigate } from "react-router-dom";
+import { useOpenProject } from "@/lib/projectNav";
+import { useDrawerNavigate } from "@/hooks/useDrawerNavigate";
 import {
   AlertTriangle,
   ArrowRight,
