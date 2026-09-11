@@ -3690,6 +3690,77 @@ export type Database = {
           },
         ]
       }
+      project_completions: {
+        Row: {
+          actual_end: string | null
+          actual_start: string | null
+          approved_variations_pence: number
+          completed_at: string
+          completed_by: string
+          completed_by_role: string
+          completion_notes: string | null
+          completion_status: string
+          created_at: string
+          final_value_pence: number | null
+          id: string
+          job_id: string
+          original_contract_pence: number | null
+          outstanding_pence: number
+          paid_pence: number
+          planned_end: string | null
+          planned_start: string | null
+          readiness_snapshot: Json | null
+        }
+        Insert: {
+          actual_end?: string | null
+          actual_start?: string | null
+          approved_variations_pence?: number
+          completed_at?: string
+          completed_by: string
+          completed_by_role?: string
+          completion_notes?: string | null
+          completion_status?: string
+          created_at?: string
+          final_value_pence?: number | null
+          id?: string
+          job_id: string
+          original_contract_pence?: number | null
+          outstanding_pence?: number
+          paid_pence?: number
+          planned_end?: string | null
+          planned_start?: string | null
+          readiness_snapshot?: Json | null
+        }
+        Update: {
+          actual_end?: string | null
+          actual_start?: string | null
+          approved_variations_pence?: number
+          completed_at?: string
+          completed_by?: string
+          completed_by_role?: string
+          completion_notes?: string | null
+          completion_status?: string
+          created_at?: string
+          final_value_pence?: number | null
+          id?: string
+          job_id?: string
+          original_contract_pence?: number | null
+          outstanding_pence?: number
+          paid_pence?: number
+          planned_end?: string | null
+          planned_start?: string | null
+          readiness_snapshot?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_completions_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: true
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_intelligence_records: {
         Row: {
           address: Json | null
@@ -3840,6 +3911,82 @@ export type Database = {
             columns: ["variation_id"]
             isOneToOne: false
             referencedRelation: "contract_variations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_reviews: {
+        Row: {
+          client_payment_lessons: string | null
+          cost_more: string | null
+          created_at: string
+          id: string
+          job_id: string
+          lost_time: string | null
+          payment_outcome: string | null
+          price_differently: string | null
+          programme_differently: string | null
+          programme_outcome: string | null
+          repeat_next_time: string | null
+          supplier_lessons: string | null
+          trade_id: string
+          updated_at: string
+          went_well: string | null
+        }
+        Insert: {
+          client_payment_lessons?: string | null
+          cost_more?: string | null
+          created_at?: string
+          id?: string
+          job_id: string
+          lost_time?: string | null
+          payment_outcome?: string | null
+          price_differently?: string | null
+          programme_differently?: string | null
+          programme_outcome?: string | null
+          repeat_next_time?: string | null
+          supplier_lessons?: string | null
+          trade_id: string
+          updated_at?: string
+          went_well?: string | null
+        }
+        Update: {
+          client_payment_lessons?: string | null
+          cost_more?: string | null
+          created_at?: string
+          id?: string
+          job_id?: string
+          lost_time?: string | null
+          payment_outcome?: string | null
+          price_differently?: string | null
+          programme_differently?: string | null
+          programme_outcome?: string | null
+          repeat_next_time?: string | null
+          supplier_lessons?: string | null
+          trade_id?: string
+          updated_at?: string
+          went_well?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_reviews_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_reviews_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "trades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_reviews_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "trades_public"
             referencedColumns: ["id"]
           },
         ]
