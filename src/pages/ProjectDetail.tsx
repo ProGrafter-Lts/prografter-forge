@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
-import { ArrowLeft, ShieldCheck, LayoutDashboard, ClipboardList, CalendarClock, CreditCard, FolderArchive, Image as ImageIcon, MessageSquare, Activity } from "lucide-react";
+import { ArrowLeft, CheckCircle2, ShieldCheck, LayoutDashboard, ClipboardList, CalendarClock, CreditCard, FolderArchive, Image as ImageIcon, MessageSquare, Activity } from "lucide-react";
 import ControlCentreTabs, { type ControlCentreTab } from "@/components/project/ControlCentreTabs";
 
 import ProjectDocuments from "@/components/project/ProjectDocuments";
@@ -18,6 +18,7 @@ import ContractVariationsPanel from "@/components/project/ContractVariationsPane
 import ContractPanel from "@/components/project/ContractPanel";
 import ContractWorkspace from "@/components/project/ContractWorkspace";
 import SubTradeModal from "@/components/project/SubTradeModal";
+import CompleteProjectDialog from "@/components/project/CompleteProjectDialog";
 import GenerateQuotePdfButton from "@/components/trade/GenerateQuotePdfButton";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { isFeatureEnabled } from "@/lib/featureFlags";
@@ -130,6 +131,7 @@ const ProjectDetail = () => {
   const [homeownerName, setHomeownerName] = useState("—");
   const [msgText, setMsgText] = useState("");
   const [subTradeStageId, setSubTradeStageId] = useState<string | null>(null);
+  const [completeOpen, setCompleteOpen] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -462,6 +464,8 @@ const ProjectDetail = () => {
   ];
 
   const isTrade = userRole === "trade";
+  const isProjectCompleted =
+    job.stage === "completed" || job.status === "completed" || job.status === "complete";
 
   return (
     <div className="dashboard-dark min-h-screen bg-background">
@@ -713,6 +717,16 @@ const ProjectDetail = () => {
         </SheetContent>
       </Sheet>
 
+
+      {id && (userRole === "trade" || userRole === "homeowner") && (
+        <CompleteProjectDialog
+          jobId={id}
+          role={userRole}
+          open={completeOpen}
+          onClose={() => setCompleteOpen(false)}
+          onCompleted={refreshProject}
+        />
+      )}
 
       {subTradeStageId && userId && (
         <SubTradeModal
