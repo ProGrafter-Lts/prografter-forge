@@ -39,7 +39,7 @@ const timeAgo = (dateStr: string) => {
  * Read-only index — sending still happens in MessagingPanel on the project page.
  */
 const ProjectConversations = ({ jobs, viewerRole, emptyMessage }: Props) => {
-  const navigate = useNavigate();
+  const openProject = useOpenProject();
   const { byJob: unreadByJob, markRead } = useUnreadMessages();
   const [latest, setLatest] = useState<Record<string, LastMessage>>({});
   const [counts, setCounts] = useState<Record<string, number>>({});

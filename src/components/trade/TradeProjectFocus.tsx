@@ -1,5 +1,6 @@
 import { ArrowRight, Hammer, PoundSterling, UserCheck } from "lucide-react";
 import { useOpenProject } from "@/lib/projectNav";
+import { useDrawerNavigate } from "@/hooks/useDrawerNavigate";
 import {
   buildProjectActions,
   formatPence,
