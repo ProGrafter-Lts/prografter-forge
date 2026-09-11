@@ -129,7 +129,7 @@ export const verificationChecksFor = (
   const needsRefs =
     typeof tradeOrApp === "object" && tradeOrApp !== null
       ? applicationRequiresReferences(tradeOrApp)
-      : tradeRequiresReferences(tradeOrApp);
+      : tradeRequiresReferences(tradeOrApp ?? null);
   return VERIFICATION_CHECKS.filter((c) => c.id !== "references" || needsRefs);
 };
 
