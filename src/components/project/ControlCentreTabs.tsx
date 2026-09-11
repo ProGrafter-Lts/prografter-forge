@@ -34,7 +34,7 @@ const ControlCentreTabs = ({ tabs, active, onChange }: Props) => (
           className={`inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap font-mono text-[11px] uppercase tracking-wide px-4 py-2.5 rounded-xl border transition-all ${
             isActive
               ? "bg-teal-500 text-[#08172a] border-teal-400 shadow-[0_0_22px_-6px_rgba(20,184,166,0.8)]"
-              : "border-white/10 bg-white/[0.03] text-muted-foreground hover:text-foreground hover:border-teal-400/40"
+              : "border-white/20 bg-white/[0.07] text-foreground/85 hover:text-foreground hover:bg-white/[0.12] hover:border-teal-400/50"
           }`}
         >
           <Icon className="w-3.5 h-3.5" aria-hidden="true" />
