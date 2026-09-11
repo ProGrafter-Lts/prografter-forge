@@ -101,7 +101,7 @@ const TRADE_STEPS: JourneyStep[] = [
     num: "01",
     title: "Get verified",
     description: "Complete the five verification checks to join. Early qualifying members can access the current Founding Member offer.",
-    image: tradeProject.url,
+    image: tradeProject,
     alt: "Verified ProGrafter trade on a UK residential building project",
     icon: ShieldCheck,
   },
