@@ -63,14 +63,19 @@ const TradeVaultBanners = ({ tradeId, onOpenVault }: Props) => {
       button: "Update Document",
     });
   } else if (summary.missingRequired.length > 0) {
+    // Name exactly what's outstanding — a generic "upload your documents"
+    // prompt gives the trade no idea what to actually go and find.
+    const names = summary.missingRequired.map((c: any) => c.label);
+    const listed = names.slice(0, 3).join(", ");
+    const more = names.length > 3 ? ` and ${names.length - 3} more` : "";
     banners.push({
       key: "missing",
       tone: "amber",
       icon: AlertTriangle,
       text: legacyVerified
-        ? "You're verified — but some documents were approved before TradeVault existed. Please upload copies so your record stays complete and renewal reminders can work."
-        : "Action required: Upload your required documents so ProGrafter can verify your profile.",
-      button: "Open TradeVault",
+        ? `You're verified — but ${listed}${more} ${names.length === 1 ? "is" : "are"} not in TradeVault yet. Upload ${names.length === 1 ? "a copy" : "copies"} so your record stays complete and renewal reminders can work.`
+        : `Action required: ${summary.requiredUploaded} of ${summary.requiredTotal} required documents in place. Still needed: ${listed}${more}.`,
+      button: names.length === 1 ? `Upload ${names[0]}` : "Upload documents",
     });
   }
 
