@@ -1956,7 +1956,7 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
 @media (max-width: 1100px) {
   .hiw-hero-copy { width: 62%; }
   .hiw-journey-grid { grid-template-columns: repeat(3, 1fr); gap: 42px 16px; }
-  .hiw-journey-grid::before { display: none; }
+  .hiw-step-marker i { display: none; }
   .hiw-step-image { aspect-ratio: 16 / 10; }
   .hiw-step-copy { min-height: 175px; }
   .hiw-checks-grid { grid-template-columns: repeat(3, 1fr); border-bottom: 0; }
@@ -1988,12 +1988,13 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
   .hiw-section-heading h2 { font-size: 48px; }
   .hiw-section-heading > p, .hiw-trust-intro > p { font-size: 15px; }
   .hiw-journey-grid { grid-template-columns: 1fr; gap: 0; padding-left: 24px; }
-  .hiw-journey-grid::before { display: block; top: 0; bottom: 0; left: 5px; right: auto; width: 1px; height: auto; }
+  .hiw-journey-grid::before { content: ""; position: absolute; display: block; top: 0; bottom: 0; left: 5px; width: 1px; background: hsl(var(--teal) / .4); }
   .hiw-step { display: grid; grid-template-columns: 42% minmax(0, 1fr); gap: 16px; padding-bottom: 28px; }
   .hiw-step::before { content: ""; position: absolute; left: -23px; top: 18px; width: 9px; height: 9px; border: 2px solid hsl(var(--teal)); background: hsl(var(--deep)); transform: rotate(45deg); }
   .hiw-journey--trade .hiw-step::before { background: hsl(var(--navy)); }
   .hiw-step-image { aspect-ratio: 1 / 1; }
-  .hiw-step-number { font-size: 33px; }
+  .hiw-step-marker { grid-column: 1 / -1; margin-bottom: 6px; }
+  .hiw-step-marker span { width: 28px; height: 28px; font-size: 13px; }
   .hiw-step-icon { width: 17px; height: 17px; padding: 4px; }
   .hiw-step-copy { min-height: 0; padding: 4px 0 0; }
   .hiw-step-copy h3 { min-height: 0; margin-bottom: 9px; font-size: 22px; }
