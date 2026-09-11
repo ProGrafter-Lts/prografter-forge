@@ -8,6 +8,7 @@ import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import {
   TradeApplication, STATUS_OPTIONS, STATUS_LABEL, STATUS_COLOR, QUAL_LABEL,
 } from "@/lib/tradeApplications";
+import { isInLiveArea, outcodeOf } from "@/lib/serviceArea";
 
 const C = {
   cream: "#F5F0E8", deep: "#0F2238", teal: "#14A8A1",
