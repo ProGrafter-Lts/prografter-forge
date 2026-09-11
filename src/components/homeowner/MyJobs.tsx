@@ -11,8 +11,8 @@ const STATUS_COLORS: Record<string, string> = {
   active: "border-transparent bg-amber-200 text-amber-900 hover:bg-amber-200",
   in_progress: "border-transparent bg-secondary/20 text-secondary hover:bg-secondary/20",
   review: "border-transparent bg-purple-200 text-purple-900 hover:bg-purple-200",
-  complete: "border-transparent bg-green-200 text-green-900 hover:bg-green-200",
-  completed: "border-transparent bg-green-200 text-green-900 hover:bg-green-200",
+  complete: "border-transparent bg-green-200 !text-green-900 hover:bg-green-200",
+  completed: "border-transparent bg-green-200 !text-green-900 hover:bg-green-200",
 };
 
 const timeAgo = (dateStr: string) => {
