@@ -253,21 +253,24 @@ const ContractVariationsPanel = ({ contractId, contractStatus, userRole }: Props
       </section>
 
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowModal(false)}>
-          <div className="bg-card rounded-2xl p-6 w-full max-w-md shadow-xl" onClick={(e) => e.stopPropagation()}>
-            <h2 className="font-heading text-navy text-2xl mb-4">Raise Variation</h2>
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowModal(false)}>
+          <div
+            className="bg-background text-foreground border border-border rounded-2xl p-6 w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="font-heading text-foreground text-2xl mb-4">Raise Variation</h2>
             <div className="space-y-3">
               <input value={varForm.title} onChange={(e) => setVarForm({ ...varForm, title: e.target.value })}
-                placeholder="Variation title" className="w-full border border-navy/10 rounded-xl px-4 py-2.5 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-teal/30" />
+                placeholder="Variation title" className="w-full bg-background text-foreground placeholder:text-muted-foreground border border-border rounded-xl px-4 py-2.5 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-teal/40" />
               <textarea value={varForm.description} onChange={(e) => setVarForm({ ...varForm, description: e.target.value })}
-                placeholder="Description…" className="w-full border border-navy/10 rounded-xl px-4 py-2.5 font-mono text-sm resize-none h-20 focus:outline-none focus:ring-2 focus:ring-teal/30" />
+                placeholder="Description…" className="w-full bg-background text-foreground placeholder:text-muted-foreground border border-border rounded-xl px-4 py-2.5 font-mono text-sm resize-none h-20 focus:outline-none focus:ring-2 focus:ring-teal/40" />
 
               <div>
-                <label className="font-mono text-[10px] text-secondary-text uppercase">Reason for Variation</label>
+                <label className="font-mono text-[10px] text-muted-foreground uppercase">Reason for Variation</label>
                 <select
                   value={varForm.reason}
                   onChange={(e) => setVarForm({ ...varForm, reason: e.target.value })}
-                  className="w-full border border-navy/10 rounded-xl px-4 py-2.5 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-teal/30 bg-white"
+                  className="w-full bg-background text-foreground border border-border rounded-xl px-4 py-2.5 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-teal/40"
                 >
                   <option value="">Select reason…</option>
                   {REASON_OPTIONS.map((r) => (
@@ -278,19 +281,19 @@ const ContractVariationsPanel = ({ contractId, contractStatus, userRole }: Props
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="font-mono text-[10px] text-secondary-text uppercase">Materials (£)</label>
+                  <label className="font-mono text-[10px] text-muted-foreground uppercase">Materials (£)</label>
                   <input type="number" value={varForm.materials_cost} onChange={(e) => setVarForm({ ...varForm, materials_cost: e.target.value })}
-                    className="w-full border border-navy/10 rounded-xl px-4 py-2 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-teal/30" />
+                    className="w-full bg-background text-foreground border border-border rounded-xl px-4 py-2 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-teal/40" />
                 </div>
                 <div>
-                  <label className="font-mono text-[10px] text-secondary-text uppercase">Labour (£)</label>
+                  <label className="font-mono text-[10px] text-muted-foreground uppercase">Labour (£)</label>
                   <input type="number" value={varForm.labour_cost} onChange={(e) => setVarForm({ ...varForm, labour_cost: e.target.value })}
-                    className="w-full border border-navy/10 rounded-xl px-4 py-2 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-teal/30" />
+                    className="w-full bg-background text-foreground border border-border rounded-xl px-4 py-2 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-teal/40" />
                 </div>
               </div>
 
               {(varForm.materials_cost || varForm.labour_cost) && (
-                <div className="bg-cream/60 rounded-xl px-4 py-2 font-mono text-xs text-navy space-y-1">
+                <div className="bg-muted rounded-xl px-4 py-2 font-mono text-xs text-foreground space-y-1">
                   <div>Total: {gbp(previewCostPence)}</div>
                   {preview && (
                     <>
@@ -298,7 +301,7 @@ const ContractVariationsPanel = ({ contractId, contractStatus, userRole }: Props
                         Added platform commission: {gbp(preview.variation_commission_pence)}
                         {preview.variation_commission_pence === 0 && " — £900 cap already reached"}
                       </div>
-                      <div className="text-secondary-text">
+                      <div className="text-muted-foreground">
                         Job commission {gbp(preview.commission_before_pence)} → {gbp(preview.commission_after_pence)} (7.5%, capped at £900)
                       </div>
                     </>
@@ -307,12 +310,12 @@ const ContractVariationsPanel = ({ contractId, contractStatus, userRole }: Props
               )}
 
               <div>
-                <label className="font-mono text-[10px] text-secondary-text uppercase">Programme Impact (days)</label>
+                <label className="font-mono text-[10px] text-muted-foreground uppercase">Programme Impact (days)</label>
                 <input type="number" value={varForm.programme_impact_days} onChange={(e) => setVarForm({ ...varForm, programme_impact_days: e.target.value })}
-                  className="w-full border border-navy/10 rounded-xl px-4 py-2 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-teal/30" />
+                  className="w-full bg-background text-foreground border border-border rounded-xl px-4 py-2 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-teal/40" />
               </div>
               <div className="flex gap-3 pt-2">
-                <button onClick={() => setShowModal(false)} className="flex-1 border border-navy/10 font-mono text-sm py-2.5 rounded-xl hover:bg-navy/5 transition-colors">Cancel</button>
+                <button onClick={() => setShowModal(false)} className="flex-1 border border-border text-foreground font-mono text-sm py-2.5 rounded-xl hover:bg-muted transition-colors">Cancel</button>
                 <button onClick={submitVariation} disabled={submitting || !varForm.title.trim()}
                   className="flex-1 bg-teal text-white font-mono text-sm py-2.5 rounded-xl hover:bg-teal-hover transition-colors disabled:opacity-50">Submit</button>
               </div>
