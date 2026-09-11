@@ -119,9 +119,19 @@ export const VERIFICATION_CHECKS = [
   { id: "portfolio", label: "Portfolio of work reviewed" },
 ] as const;
 
-/** Checklist for a specific application — drops references for scheme-regulated trades. */
-export const verificationChecksFor = (tradeCategoryId?: string | null) =>
-  VERIFICATION_CHECKS.filter((c) => c.id !== "references" || tradeRequiresReferences(tradeCategoryId));
+/**
+ * Checklist for a specific application — drops references for scheme-regulated
+ * trades, and for a plumber who has supplied Gas Safe registration.
+ */
+export const verificationChecksFor = (
+  tradeOrApp?: string | null | Pick<TradeApplication, "form_data" | "document_paths" | "trade_category_id">,
+) => {
+  const needsRefs =
+    typeof tradeOrApp === "object" && tradeOrApp !== null
+      ? applicationRequiresReferences(tradeOrApp)
+      : tradeRequiresReferences(tradeOrApp);
+  return VERIFICATION_CHECKS.filter((c) => c.id !== "references" || needsRefs);
+};
 
 // Document groups shown in the detail view, in display order.
 export const DOC_GROUPS: { heading: string; fields: string[] }[] = [
