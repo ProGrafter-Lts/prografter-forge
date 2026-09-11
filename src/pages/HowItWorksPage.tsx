@@ -22,10 +22,10 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { localBusinessJsonLd } from "@/lib/seoSchemas";
 import heroImage from "@/assets/home/hero-blueprint-build.jpg";
-import homeownerPlanning from "@/assets/how-it-works/homeowner-planning.jpg.asset.json";
-import tradeProject from "@/assets/how-it-works/trade-project.jpg.asset.json";
-import completedHome from "@/assets/how-it-works/completed-home.jpg.asset.json";
-import ctaPlans from "@/assets/how-it-works/cta-plans.jpg.asset.json";
+import homeownerPlanning from "@/assets/how-it-works/homeowner-planning.jpg";
+import tradeProject from "@/assets/how-it-works/trade-project.jpg";
+import completedHome from "@/assets/how-it-works/completed-home.jpg";
+import ctaPlans from "@/assets/how-it-works/cta-plans.jpg";
 import homeownerQuotes from "@/assets/platform/homeowner-quotes.png";
 import homeownerOverview from "@/assets/platform/homeowner-overview.png";
 import homeownerManual from "@/assets/platform/homeowner-manual.png";
@@ -49,7 +49,7 @@ const HOMEOWNER_STEPS: JourneyStep[] = [
     num: "01",
     title: "Post your project",
     description: "Tell us what you’re planning — big or small. It’s free and takes just a few minutes.",
-    image: homeownerPlanning.url,
+    image: homeownerPlanning,
     alt: "UK homeowners discussing extension plans with a ProGrafter trade",
     icon: FileText,
   },
@@ -57,7 +57,7 @@ const HOMEOWNER_STEPS: JourneyStep[] = [
     num: "02",
     title: "Get matched",
     description: "We manually review your brief and match you with up to three vetted, insured trades.",
-    image: tradeProject.url,
+    image: tradeProject,
     alt: "Homeowner and verified trade reviewing an active UK extension",
     icon: Users,
     note: "Three, not thirty.",
@@ -142,7 +142,7 @@ const TRADE_STEPS: JourneyStep[] = [
     num: "06",
     title: "Build your reputation",
     description: "Receive honest project reviews and build a trusted ProGrafter record from completed work.",
-    image: completedHome.url,
+    image: completedHome,
     alt: "Completed contemporary extension on a British home",
     icon: Star,
   },
@@ -319,7 +319,7 @@ const HowItWorksPage = () => {
         </section>
 
         <section className="hiw-final-cta">
-          <img src={ctaPlans.url} alt="Architectural plans, tools and ProGrafter site equipment on a UK construction project" loading="lazy" width={1600} height={700} />
+          <img src={ctaPlans} alt="Architectural plans, tools and ProGrafter site equipment on a UK construction project" loading="lazy" width={1600} height={704} />
           <div className="hiw-final-shade" />
           <div className="hiw-container hiw-final-inner">
             <div>
