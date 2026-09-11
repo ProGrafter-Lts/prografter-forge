@@ -1,4 +1,5 @@
-import { useNavigate } from "react-router-dom";
+import { useOpenProject } from "@/lib/projectNav";
+import { useDrawerNavigate } from "@/hooks/useDrawerNavigate";
 import {
   AlertTriangle,
   ArrowRight,
@@ -30,7 +31,8 @@ const HEALTH_STYLE: Record<ProjectSnapshot["health"], string> = {
  * always agrees with the trade's operational view of the same project.
  */
 const ProjectFocusCard = ({ snapshot }: { snapshot: ProjectSnapshot }) => {
-  const navigate = useNavigate();
+  const openProject = useOpenProject();
+  const openDrawer = useDrawerNavigate();
   const actions = buildProjectActions(snapshot, "homeowner");
   const update = snapshot.latestUpdate;
 
@@ -114,7 +116,7 @@ const ProjectFocusCard = ({ snapshot }: { snapshot: ProjectSnapshot }) => {
           </div>
 
           <button
-            onClick={() => navigate(`/project/${snapshot.jobId}`)}
+            onClick={() => openProject(snapshot.jobId)}
             className="inline-flex items-center gap-1.5 bg-secondary text-secondary-foreground font-mono text-xs px-4 py-2 rounded-xl hover:opacity-90 transition-opacity"
           >
             Open project <ArrowRight className="w-3.5 h-3.5" />
@@ -132,7 +134,7 @@ const ProjectFocusCard = ({ snapshot }: { snapshot: ProjectSnapshot }) => {
             {actions.map((a) => (
               <button
                 key={a.id}
-                onClick={() => navigate(a.to)}
+                onClick={() => openDrawer(a.to)}
                 className="w-full flex items-center justify-between gap-3 text-left rounded-xl border border-border px-4 py-3 hover:border-secondary/40 transition-colors"
               >
                 <span>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useOpenProject } from "@/lib/projectNav";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -103,6 +104,7 @@ const greeting = () => {
 
 const MorningBriefing = ({ tradeId, quotes, name }: Props) => {
   const navigate = useNavigate();
+  const openProject = useOpenProject();
   const [followUps, setFollowUps] = useState<FollowUp[]>([]);
   const [jobsSoon, setJobsSoon] = useState<JobStarting[]>([]);
   const [planningNew, setPlanningNew] = useState(0);
@@ -442,7 +444,7 @@ const MorningBriefing = ({ tradeId, quotes, name }: Props) => {
                     </p>
                   </div>
                   <button
-                    onClick={() => navigate(`/project/${j.job_id}`)}
+                    onClick={() => openProject(j.job_id)}
                     className="inline-flex items-center gap-1.5 bg-secondary text-secondary-foreground font-sans font-semibold text-sm px-4 min-h-[44px] rounded-xl hover:opacity-90 transition-opacity"
                   >
                     View Job
@@ -492,13 +494,13 @@ const MorningBriefing = ({ tradeId, quotes, name }: Props) => {
                   <p className="font-heading text-white text-2xl">£{Number(q.amount).toLocaleString()}</p>
                   <div className="flex flex-col gap-2">
                     <button
-                      onClick={() => navigate(q.job_id ? `/project/${q.job_id}` : "/dashboard/trade?view=jobs")}
+                      onClick={() => (q.job_id ? openProject(q.job_id) : navigate("/dashboard/trade?view=jobs"))}
                       className="inline-flex items-center justify-center gap-1.5 bg-secondary text-secondary-foreground font-sans font-semibold text-sm px-4 py-2 rounded-xl hover:opacity-90 transition-opacity"
                     >
                       Follow Up
                     </button>
                     <button
-                      onClick={() => navigate(q.job_id ? `/project/${q.job_id}` : "/dashboard/trade?view=jobs")}
+                      onClick={() => (q.job_id ? openProject(q.job_id) : navigate("/dashboard/trade?view=jobs"))}
                       className="inline-flex items-center justify-center gap-1.5 border border-white/12 font-sans text-sm px-4 py-2 rounded-xl text-white/85 hover:border-secondary/50 transition-colors"
                     >
                       View Quote

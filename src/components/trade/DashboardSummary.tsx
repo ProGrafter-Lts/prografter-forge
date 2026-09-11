@@ -24,6 +24,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { computeVaultSummary, type VaultDocument } from "@/lib/tradeVault";
 
 import { isTestRecord } from "@/lib/testData";
+import { useUnreadMessages } from "@/hooks/useUnreadMessages";
+import { MessageSquare } from "lucide-react";
 
 
 interface Props {
@@ -64,6 +66,7 @@ const formatDate = (iso: string) =>
 
 const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
   const navigate = useNavigate();
+  const { total: unreadMessages, byJob: unreadByJob } = useUnreadMessages();
   const [data, setData] = useState<SummaryData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -232,6 +235,23 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
 
   const prompts: Prompt[] = [];
   const overdueQuotes = data.staleQuotes.filter((q) => q.days >= 5);
+
+  // A homeowner waiting on a reply is the most time-critical thing on the day.
+  const unreadProjects = Object.keys(unreadByJob).length;
+  if (unreadMessages > 0)
+    prompts.push({
+      key: "unread-messages",
+      icon: MessageSquare,
+      tone: "#F87171",
+      tag: "Reply needed",
+      headline: `${unreadMessages} unread ${unreadMessages === 1 ? "message" : "messages"} from ${
+        unreadProjects === 1 ? "a homeowner" : `${unreadProjects} projects`
+      }`,
+      detail: "Homeowners are waiting on your reply",
+      metric: String(unreadMessages),
+      cta: "Open messages",
+      onClick: () => onOpenView("messages"),
+    });
 
   data.staleQuotes.slice(0, 2).forEach((q) => {
     const overdue = q.days >= 5;

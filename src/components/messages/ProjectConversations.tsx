@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { MessageSquare, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
+import { useOpenProject } from "@/lib/projectNav";
 
 export interface ConversationJob {
   id: string;
@@ -39,7 +39,7 @@ const timeAgo = (dateStr: string) => {
  * Read-only index — sending still happens in MessagingPanel on the project page.
  */
 const ProjectConversations = ({ jobs, viewerRole, emptyMessage }: Props) => {
-  const navigate = useNavigate();
+  const openProject = useOpenProject();
   const { byJob: unreadByJob, markRead } = useUnreadMessages();
   const [latest, setLatest] = useState<Record<string, LastMessage>>({});
   const [counts, setCounts] = useState<Record<string, number>>({});
@@ -119,7 +119,7 @@ const ProjectConversations = ({ jobs, viewerRole, emptyMessage }: Props) => {
             key={job.id}
             onClick={() => {
               void markRead(job.id);
-              navigate(`/project/${job.id}?tab=messages`);
+              openProject(job.id, "messages");
             }}
             className={`w-full text-left bg-card border rounded-2xl p-4 hover:border-secondary/50 transition-colors flex items-start gap-3 ${
               unread > 0 ? "border-secondary/60" : "border-border"
