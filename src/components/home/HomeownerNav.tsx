@@ -10,7 +10,11 @@ const LINKS = [
   { label: "About", href: "/about" },
 ];
 
-const HomeownerNav = () => {
+interface HomeownerNavProps {
+  activeLabel?: string;
+}
+
+const HomeownerNav = ({ activeLabel = "Homeowners" }: HomeownerNavProps) => {
   const [open, setOpen] = useState(false);
 
   return (
@@ -19,12 +23,12 @@ const HomeownerNav = () => {
         <Logo variant="light" className="h-14 w-auto" />
 
         <nav className="hidden craft:flex items-center gap-8">
-          {LINKS.map((l, i) => (
+          {LINKS.map((l) => (
             <Link
               key={l.label}
               to={l.href}
               className={`font-body text-sm text-cream/80 hover:text-teal transition-colors pb-1 ${
-                i === 0 ? "border-b-2 border-teal text-cream" : ""
+                l.label === activeLabel ? "border-b-2 border-teal text-cream" : ""
               }`}
             >
               {l.label}

@@ -24,3 +24,6 @@
 
 ## Planning Pipeline exact visual rebuild
 - [x] Match the supplied Planning Pipeline mock-up exactly while preserving every existing workflow and data action
+
+## How It Works approved visual rebuild
+- [x] Rebuild `/how-it-works` with mirrored homeowner/trade journeys, approved visual language, accurate platform claims, responsive navigation, and existing routes
