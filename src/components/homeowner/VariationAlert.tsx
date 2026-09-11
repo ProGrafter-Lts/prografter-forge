@@ -27,7 +27,7 @@ const VariationAlert = ({ variations }: { variations: PendingContractVariation[]
       {pending.map((v) => (
         <div
           key={v.id}
-          className="bg-amber-50 border border-amber-300 rounded-2xl p-5 flex items-start gap-4"
+          className="ho-panel ho-panel-amber p-5 flex items-start gap-4"
         >
           <AlertTriangle className="w-6 h-6 text-amber-500 flex-shrink-0 mt-0.5" />
           <div className="flex-1">
@@ -55,7 +55,7 @@ const VariationAlert = ({ variations }: { variations: PendingContractVariation[]
             {v.job_id && (
               <Link
                 to={`/project/${v.job_id}`}
-                className="inline-block mt-3 bg-amber-500 text-white font-mono text-xs px-4 py-2 rounded-xl hover:bg-amber-600 transition-colors"
+                className="inline-block mt-3 bg-amber-500 text-amber-950 font-mono text-xs px-4 py-2 rounded-xl hover:bg-amber-400 transition-colors"
               >
                 Review & Sign
               </Link>

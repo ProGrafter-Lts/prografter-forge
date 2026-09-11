@@ -23,14 +23,14 @@ const RecentSiteUpdates = ({ updates }: { updates: StageUpdate[] }) => {
     <section>
       <h2 className="font-heading text-primary text-2xl mb-4">Recent Site Updates</h2>
       {updates.length === 0 ? (
-        <div className="bg-card rounded-2xl p-8 border border-border text-center">
+        <div className="ho-panel ho-panel-quiet p-8 text-center">
           <Clock className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
           <p className="font-mono text-sm text-muted-foreground">No site updates yet.</p>
         </div>
       ) : (
         <div className="space-y-3">
           {updates.map((u) => (
-            <div key={u.id} className="bg-card rounded-2xl p-5 border border-border shadow-sm">
+            <div key={u.id} className="ho-panel p-5">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
