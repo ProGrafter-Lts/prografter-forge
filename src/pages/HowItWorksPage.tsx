@@ -1,4 +1,3 @@
-import type { ComponentType } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
@@ -15,6 +14,7 @@ import {
   UserCheck,
   Users,
   WalletCards,
+  type LucideIcon,
 } from "lucide-react";
 import SEO from "@/components/SEO";
 import HomeownerNav from "@/components/home/HomeownerNav";
@@ -40,7 +40,7 @@ type JourneyStep = {
   description: string;
   image: string;
   alt: string;
-  icon: ComponentType<{ className?: string; strokeWidth?: number }>;
+  icon: LucideIcon;
   note?: string;
 };
 
@@ -224,7 +224,7 @@ const HowItWorksPage = () => {
         path="/how-it-works"
         jsonLd={localBusinessJsonLd}
       />
-      <HomeownerNav />
+      <HomeownerNav activeLabel="How It Works" />
 
       <main>
         <section className="hiw-hero">
