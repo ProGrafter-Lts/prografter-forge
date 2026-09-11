@@ -236,6 +236,14 @@ const ActiveProjectsView = ({ tradeId }: { tradeId: string }) => {
                     : "No payment milestones set"}
                 </p>
                 <div className="flex items-center gap-2">
+                  {project.stage === "completed" && (
+                    <button
+                      onClick={() => navigate(`/project/${project.id}/review`)}
+                      className="inline-flex items-center gap-1 border border-primary/20 text-primary font-mono text-xs px-4 py-2 rounded-xl hover:border-primary/40 transition-colors"
+                    >
+                      Project Review
+                    </button>
+                  )}
                   <button
                     onClick={() => openDrawer(projectPath(project.id))}
                     className="inline-flex items-center gap-1 bg-secondary text-secondary-foreground font-mono text-xs px-4 py-2 rounded-xl hover:opacity-90 transition-opacity shadow-sm"
