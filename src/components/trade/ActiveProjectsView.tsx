@@ -112,6 +112,21 @@ const ActiveProjectsView = ({ tradeId }: { tradeId: string }) => {
           const pence = c.total_value_incl_vat_pence ?? c.total_value_excl_vat_pence;
           if (pence != null) project.agreed_price = Number(pence) / 100;
         });
+
+        // Signed variations move the project value; pending ones do not.
+        const { data: variationRows } = await supabase
+          .from("contract_variations")
+          .select("contract_id, cost_change_pence, status")
+          .in("contract_id", contractIds)
+          .eq("status", "accepted");
+        const jobByContract = new Map<string, string>();
+        (contracts || []).forEach((c: any) => jobByContract.set(c.id, c.job_id));
+        (variationRows || []).forEach((v: any) => {
+          const jobId = jobByContract.get(v.contract_id);
+          const project = jobId ? seen.get(jobId) : undefined;
+          if (!project || project.agreed_price == null) return;
+          project.agreed_price += Number(v.cost_change_pence || 0) / 100;
+        });
       }
 
       if (!cancelled) {

@@ -69,7 +69,13 @@ const MessagingPanel = ({ messages, userId, msgText, onMsgTextChange, onSendMess
             placeholder="Type a message…"
             className="flex-1 border border-navy/10 rounded-xl px-4 py-2 font-mono text-sm text-body-text placeholder:text-secondary-text/50 focus:outline-none focus:ring-2 focus:ring-teal/30"
           />
-          <button onClick={onSendMessage} className="bg-teal text-white p-2.5 rounded-xl hover:bg-teal-hover transition-colors">
+          <button
+            type="button"
+            aria-label="Send message"
+            title="Send message"
+            onClick={onSendMessage}
+            className="bg-teal text-white p-2.5 rounded-xl hover:bg-teal-hover transition-colors"
+          >
             <Send className="w-4 h-4" />
           </button>
         </div>

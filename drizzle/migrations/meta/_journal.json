@@ -176,6 +176,13 @@
       "when": 1789154666352,
       "tag": "0024_jobs_link_property_trigger",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1789156937117,
+      "tag": "0025_fix_variation_signing_guard",
+      "breakpoints": true
     }
   ]
 }

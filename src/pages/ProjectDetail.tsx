@@ -81,6 +81,8 @@ const ProjectDetail = () => {
   const [messages, setMessages] = useState<ProjectMessage[]>([]);
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [contract, setContract] = useState<Contract | null>(null);
+  // Approved (signed) variations only — pending ones must never move the value.
+  const [approvedVariationsValue, setApprovedVariationsValue] = useState(0);
   const [subAssignments, setSubAssignments] = useState<SubAssignment[]>([]);
   const [viewerContextReady, setViewerContextReady] = useState(false);
   const TAB_IDS = [
@@ -249,6 +251,24 @@ const ProjectDetail = () => {
 
     const contractData = contractRes.status === "fulfilled" ? contractRes.value.data : null;
     if (contractData) setContract(contractData as unknown as Contract);
+
+    // Keep the headline value in step with the dashboards: base contract plus
+    // signed variations only.
+    const contractId = (contractData as any)?.id;
+    if (contractId) {
+      const { data: varRows } = await supabase
+        .from("contract_variations")
+        .select("cost_change_pence, status")
+        .eq("contract_id", contractId)
+        .eq("status", "accepted");
+      const total = (varRows || []).reduce(
+        (sum: number, v: any) => sum + Number(v.cost_change_pence || 0) / 100,
+        0,
+      );
+      setApprovedVariationsValue(total);
+    } else {
+      setApprovedVariationsValue(0);
+    }
   };
 
   const loadViewerContext = async (nextAuthUserId: string) => {
@@ -278,7 +298,10 @@ const ProjectDetail = () => {
     (s) => s.status === "completed" || s.status === "complete",
   ).length;
   const progress = totalStages > 0 ? Math.round((completedStages / totalStages) * 100) : 0;
-  const contractValue = contract ? Number(contract.agreed_price) : stages.reduce((sum, s) => sum + Number(s.payment_amount || 0), 0);
+  const baseContractValue = contract
+    ? Number(contract.agreed_price)
+    : stages.reduce((sum, s) => sum + Number(s.payment_amount || 0), 0);
+  const contractValue = baseContractValue + approvedVariationsValue;
 
   // Project schedule — earliest planned_start, latest planned_end across all stages.
   const projectStart = (() => {
