@@ -469,7 +469,7 @@ const TradeDashboard = () => {
                   so there is only one place to manage the integration. */}
               <CalendarConnect variant="compact" />
               <button
-                onClick={() => navigate("/trade/settings")}
+                onClick={() => navigate("/dashboard/trade/settings")}
                 className="inline-flex items-center gap-2 rounded-xl border border-primary/15 px-4 py-2.5 font-mono text-xs text-foreground hover:border-secondary/40 transition-colors"
               >
                 Manage calendar connection in Settings
