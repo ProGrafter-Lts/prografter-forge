@@ -138,8 +138,9 @@ const TradeDashboard = () => {
           .order("created_at", { ascending: false }),
         supabase
           .from("contracts")
-          .select("job_id, jobs(id, title, job_type, postcode, stage)")
+          .select("job_id")
           .eq("trade_id", tradeData.id),
+
       ]);
 
       if (matchRes.error) console.error("Failed to load job matches", matchRes.error);
