@@ -71,7 +71,7 @@ const TradeProjectFocus = ({
             actions.map((a) => (
               <button
                 key={a.id}
-                onClick={() => navigate(a.to)}
+                onClick={() => openProject(snapshot.jobId)}
                 className="w-full flex items-center justify-between gap-3 text-left rounded-xl border border-border px-4 py-3 hover:border-secondary/40"
               >
                 <span className="font-mono text-sm text-primary">{a.label}</span>
