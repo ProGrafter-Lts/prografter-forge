@@ -24,6 +24,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { computeVaultSummary, type VaultDocument } from "@/lib/tradeVault";
 
 import { isTestRecord } from "@/lib/testData";
+import { useUnreadMessages } from "@/hooks/useUnreadMessages";
+import { MessageSquare } from "lucide-react";
 
 
 interface Props {

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDrawerNavigate } from "@/hooks/useDrawerNavigate";
+import { projectPath } from "@/lib/projectNav";
 import { supabase } from "@/integrations/supabase/client";
 import { FolderKanban, MapPin, ChevronRight, MessageSquare } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
@@ -221,7 +222,7 @@ const ActiveProjectsView = ({ tradeId }: { tradeId: string }) => {
                 </p>
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => openDrawer(`/project/${project.id}`)}
+                    onClick={() => openDrawer(projectPath(project.id))}
                     className="inline-flex items-center gap-1 bg-secondary text-secondary-foreground font-mono text-xs px-4 py-2 rounded-xl hover:opacity-90 transition-opacity shadow-sm"
                   >
                     <MessageSquare className="w-3.5 h-3.5" />
