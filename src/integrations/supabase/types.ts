@@ -6595,6 +6595,10 @@ export type Database = {
           trade_verified: boolean
         }[]
       }
+      area_coverage: {
+        Args: { _postcode: string; _trade_type?: string }
+        Returns: Json
+      }
       compute_contract_hash: { Args: { _contract_id: string }; Returns: string }
       count_verified_trades: { Args: never; Returns: number }
       create_contract_for_quote_internal: {

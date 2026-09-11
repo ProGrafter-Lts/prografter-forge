@@ -455,6 +455,10 @@ export default function PostJobBrief() {
   const [marketing, setMarketing] = useState(false);
   const [progressStep, setProgressStep] = useState(0);
   const [uploads, setUploads] = useState<{ file: File; category: string }[]>([]);
+  // Live coverage: how many verified, non-test trades actually cover this
+  // postcode area right now. Drives honest messaging instead of a blanket
+  // "we'll match you" promise we cannot always keep.
+  const [coverage, setCoverage] = useState<{ area_trades: number; trade_matches: number } | null>(null);
 
 
   // Staged progress shown during the ~15–20s submission (account creation +
@@ -568,6 +572,29 @@ export default function PostJobBrief() {
       } catch (e) { console.warn("file save failed", e); }
     }
   };
+
+  const postcodeKey = form.postcode.trim().toUpperCase();
+  const coverageTrade = selectedTradeIds.length === 1
+    ? (TRADES.find(t => t.id === selectedTradeIds[0])?.name ?? null)
+    : null;
+
+  useEffect(() => {
+    if (postcodeKey.replace(/\s/g, "").length < 4) { setCoverage(null); return; }
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      const { data, error } = await supabase.rpc("area_coverage", {
+        _postcode: postcodeKey,
+        _trade_type: coverageTrade,
+      });
+      if (cancelled || error || !data) return;
+      const d = data as { area_trades?: number; trade_matches?: number };
+      setCoverage({ area_trades: Number(d.area_trades ?? 0), trade_matches: Number(d.trade_matches ?? 0) });
+    }, 400);
+    return () => { cancelled = true; clearTimeout(timer); };
+  }, [postcodeKey, coverageTrade]);
+
+  const noCoverage = coverage !== null && coverage.area_trades === 0;
+  const noTradeMatch = coverage !== null && coverage.area_trades > 0 && coverage.trade_matches === 0;
 
   const submit = async () => {
 
@@ -962,6 +989,22 @@ export default function PostJobBrief() {
         </InfoBox>
       </div>
 
+      {noCoverage && (
+        <InfoBox variant="amber">
+          <strong>No verified trades in your area yet.</strong> We won't pretend otherwise: we don't
+          currently have a verified trade covering {postcodeKey}. We're actively recruiting in your
+          area — post your brief and we'll notify you the moment a verified trade joins. Your brief
+          is also reviewed by our team, who will look for a suitable trade nearby.
+        </InfoBox>
+      )}
+      {noTradeMatch && (
+        <InfoBox variant="amber">
+          <strong>Limited cover for this trade.</strong> We have verified trades near {postcodeKey},
+          but none currently listed for this exact trade. Our team reviews every brief by hand and
+          will come back to you either way — we'll never leave you waiting on a match that isn't there.
+        </InfoBox>
+      )}
+
       {needsScoping && (
         <InfoBox variant="teal">
           <strong>Scoping requested.</strong> You've asked ProGrafter to help scope this job.
@@ -1015,8 +1058,9 @@ export default function PostJobBrief() {
           </div>
           <h2 style={{ fontSize: 20, fontWeight: 700, color: C.deep, marginBottom: 8 }}>Received — under review</h2>
           <p style={{ fontSize: 14, color: C.secondary, lineHeight: 1.65, marginBottom: 16 }}>
-            Your brief is in and your free homeowner account is ready. We're reviewing it now
-            and will match you with up to three vetted, local, available trades — not thirty.
+            {noCoverage
+              ? "Your brief is in and your free homeowner account is ready. We don't yet have a verified trade covering your postcode — we're actively recruiting in your area and will notify you the moment one joins. Our team also reviews every brief by hand and will come back to you either way."
+              : "Your brief is in and your free homeowner account is ready. We're reviewing it now and will match you with up to three vetted, local, available trades — not thirty."}
           </p>
           <div style={{ background: C.cream, borderRadius: 10, padding: "12px 16px", marginBottom: 16 }}>
             <p style={{ fontSize: 11, color: C.secondary, margin: "0 0 4px" }}>Your reference number</p>
@@ -1028,7 +1072,9 @@ export default function PostJobBrief() {
           </p>
           <div style={{ marginTop: 20, padding: "12px 16px", background: C.tealLight,
             borderRadius: 10, fontSize: 12, color: "#0F766E", lineHeight: 1.6 }}>
-            <strong>What to expect:</strong> Trades have 48 hours to respond to your brief.
+            <strong>What to expect:</strong> {noCoverage
+              ? "We'll email you as soon as a verified trade covers your area, and our team will be in touch about your brief in the meantime."
+              : "Trades have 48 hours to respond to your brief."}
             You'll be notified for each quote received. Every trade is verified before they go
             live on the platform — trades who pass our five-check verification.
           </div>
