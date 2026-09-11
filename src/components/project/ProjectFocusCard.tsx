@@ -31,7 +31,8 @@ const HEALTH_STYLE: Record<ProjectSnapshot["health"], string> = {
  * always agrees with the trade's operational view of the same project.
  */
 const ProjectFocusCard = ({ snapshot }: { snapshot: ProjectSnapshot }) => {
-  const navigate = useNavigate();
+  const openProject = useOpenProject();
+  const openDrawer = useDrawerNavigate();
   const actions = buildProjectActions(snapshot, "homeowner");
   const update = snapshot.latestUpdate;
 
