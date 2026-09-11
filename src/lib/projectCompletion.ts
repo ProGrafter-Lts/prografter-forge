@@ -394,9 +394,11 @@ export async function completeProject(
     .upsert(payload as any, { onConflict: "job_id" });
   if (completionError) throw completionError;
 
-  const { error: jobError } = await supabase
-    .from("jobs")
-    .update({ stage: "completed", status: "completed" })
-    .eq("id", report.job.id);
+  // The job row itself is not directly writable by either party under RLS, so
+  // the lifecycle flip runs through a participant-checked database function.
+  // It throws if the caller isn't on the project or the record didn't save.
+  const { error: jobError } = await supabase.rpc("mark_project_completed", {
+    _job_id: report.job.id,
+  });
   if (jobError) throw jobError;
 }
