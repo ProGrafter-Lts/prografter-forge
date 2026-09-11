@@ -164,7 +164,6 @@ export function detectRequestableItems(
   referenceCount: number,
 ): RequestableItem[] {
   const d = app.document_paths;
-  const isTimeServed = (app.qualification_path ?? "").includes("time");
   return [
     {
       id: "photo_id",
