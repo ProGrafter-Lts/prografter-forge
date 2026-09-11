@@ -219,7 +219,7 @@ const docCount = (
 ): number => fields.reduce((n, f) => n + (docPaths?.[f]?.length ?? 0), 0);
 
 export function detectRequestableItems(
-  app: Pick<TradeApplication, "document_paths" | "qualification_path" | "trade_category_id">,
+  app: Pick<TradeApplication, "document_paths" | "qualification_path" | "trade_category_id" | "form_data">,
   referenceCount: number,
 ): RequestableItem[] {
   const d = app.document_paths;
@@ -256,7 +256,7 @@ export function detectRequestableItems(
       id: "references",
       label: "Trade references",
       emailLabel: "Two trade references — name, relationship to you, phone number and email for each",
-      applies: tradeRequiresReferences(app.trade_category_id),
+      applies: applicationRequiresReferences(app),
       missing: referenceCount < 2,
     },
   ].filter((i) => i.applies);
