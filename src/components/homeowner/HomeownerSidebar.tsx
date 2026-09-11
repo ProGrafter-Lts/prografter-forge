@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import Logo from "@/components/Logo";
 import { supabase } from "@/integrations/supabase/client";
+import { useUnreadMessageCount } from "@/hooks/useUnreadMessages";
 import {
   LayoutDashboard,
   FolderKanban,
@@ -33,6 +34,7 @@ interface HomeownerSidebarProps {
 
 const HomeownerSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen }: HomeownerSidebarProps) => {
   const navigate = useNavigate();
+  const unreadMessages = useUnreadMessageCount();
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -66,6 +68,7 @@ const HomeownerSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen
           {NAV_ITEMS.map((item) => {
             const isActive = activeNav === item.id;
             const isGreen = item.id === "grants";
+            const showBadge = item.id === "messages" && unreadMessages > 0;
             return (
               <button
                 key={item.id}
@@ -86,6 +89,15 @@ const HomeownerSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen
               >
                 <item.icon className="w-4 h-4" strokeWidth={1.6} />
                 {item.label}
+                {showBadge && (
+                  <span
+                    className="ml-auto min-w-[20px] h-5 px-1.5 inline-flex items-center justify-center rounded-full font-mono text-[11px] font-semibold"
+                    style={{ backgroundColor: "#DC2626", color: "#FFFFFF" }}
+                    aria-label={`${unreadMessages} unread messages`}
+                  >
+                    {unreadMessages > 99 ? "99+" : unreadMessages}
+                  </span>
+                )}
               </button>
             );
           })}
