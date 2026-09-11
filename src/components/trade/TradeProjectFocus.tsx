@@ -1,5 +1,5 @@
-import { useNavigate } from "react-router-dom";
 import { ArrowRight, Hammer, PoundSterling, UserCheck } from "lucide-react";
+import { useOpenProject } from "@/lib/projectNav";
 import {
   buildProjectActions,
   formatPence,
@@ -24,7 +24,7 @@ const TradeProjectFocus = ({
   tradeId: string;
   onChanged?: () => void;
 }) => {
-  const navigate = useNavigate();
+  const openProject = useOpenProject();
   const actions = buildProjectActions(snapshot, "trade");
 
   return (
@@ -53,7 +53,7 @@ const TradeProjectFocus = ({
         </div>
 
         <button
-          onClick={() => navigate(`/project/${snapshot.jobId}`)}
+          onClick={() => openProject(snapshot.jobId)}
           className="inline-flex items-center gap-1.5 bg-secondary text-secondary-foreground font-mono text-xs px-4 py-2 rounded-xl hover:opacity-90"
         >
           Open project <ArrowRight className="w-3.5 h-3.5" />

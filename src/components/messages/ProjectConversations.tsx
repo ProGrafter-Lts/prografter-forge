@@ -119,7 +119,7 @@ const ProjectConversations = ({ jobs, viewerRole, emptyMessage }: Props) => {
             key={job.id}
             onClick={() => {
               void markRead(job.id);
-              navigate(`/project/${job.id}?tab=messages`);
+              openProject(job.id, "messages");
             }}
             className={`w-full text-left bg-card border rounded-2xl p-4 hover:border-secondary/50 transition-colors flex items-start gap-3 ${
               unread > 0 ? "border-secondary/60" : "border-border"
