@@ -96,6 +96,12 @@ const ProjectDetail = () => {
   const hoTab = tabParam && TAB_IDS.includes(tabParam) ? tabParam : "overview";
   const openPanel = searchParams.get("panel");
 
+  // Viewing the conversation clears its unread badge for this user only.
+  const { markRead: markMessagesRead } = useUnreadMessages();
+  useEffect(() => {
+    if (hoTab === "messages" && id) void markMessagesRead(id);
+  }, [hoTab, id, markMessagesRead, messages.length]);
+
   /** Section switches and panel opens both live in the URL, so the browser back
    *  button closes a panel and returns to the exact section the user was on. */
   const setHoTab = (tab: string) => {
