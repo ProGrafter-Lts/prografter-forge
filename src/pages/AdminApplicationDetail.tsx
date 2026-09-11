@@ -6,7 +6,7 @@ import { format } from "date-fns";
 import SEO from "@/components/SEO";
 import {
   TradeApplication, ApplicationEvent, DocMeta, STATUS_OPTIONS, STATUS_LABEL, STATUS_COLOR,
-  QUAL_LABEL, verificationChecksFor, governingBodyFor, DOC_GROUPS, FIELD_LABELS, fmtSize, isImage,
+  QUAL_LABEL, verificationChecksFor, governingBodyFor, hasGasSafeRegistration, DOC_GROUPS, FIELD_LABELS, fmtSize, isImage,
   signedUrlFor, logApplicationEvent, hasPhotoId, predatesIdCapture,
   detectRequestableItems, RequestableItem,
 } from "@/lib/tradeApplications";
@@ -249,6 +249,7 @@ export default function AdminApplicationDetail() {
   const isTimeServed = (app.qualification_path ?? "").includes("time");
   const requestable = detectRequestableItems(app, refs.length);
   const governingBody = governingBodyFor(app.trade_category_id);
+  const gasSafeBypass = !governingBody && hasGasSafeRegistration(app);
 
   // Free-text declarations to surface as plain text
   const declarations: { label: string; value: string }[] = [
@@ -396,13 +397,19 @@ export default function AdminApplicationDetail() {
         {/* Verification checklist */}
         <div style={card}>
           <h2 style={h2}>Verification checklist</h2>
+          {gasSafeBypass && (
+            <p style={{ fontSize: 12, color: C.secondary, margin: "0 0 8px" }}>
+              References are not required — this applicant supplied Gas Safe registration, and the
+              Gas Safe Register is the independent assessing body.
+            </p>
+          )}
           {governingBody && (
             <p style={{ fontSize: 12, color: C.secondary, margin: "0 0 8px" }}>
               References are not part of this trade's checks — {governingBody} is the independent
               assessing body, covered by the scheme registration check below.
             </p>
           )}
-          {verificationChecksFor(app.trade_category_id).map((c) => {
+          {verificationChecksFor(app).map((c) => {
             const state = app.verification_checks?.[c.id];
             return (
               <label key={c.id} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "7px 0", fontSize: 13, color: C.deep, cursor: "pointer" }}>
