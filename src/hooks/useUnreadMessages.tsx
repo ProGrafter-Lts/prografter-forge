@@ -45,8 +45,11 @@ export function useUnreadMessages() {
   }, [load]);
 
   useEffect(() => {
+    // Unique channel name per subscription: a shared name is reused by the
+    // realtime client, and re-binding callbacks to an already-subscribed
+    // channel throws and blanks the whole dashboard.
     const channel = supabase
-      .channel("unread-project-messages")
+      .channel(`unread-project-messages-${Math.random().toString(36).slice(2)}`)
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "project_messages" }, () => {
         void load();
       })

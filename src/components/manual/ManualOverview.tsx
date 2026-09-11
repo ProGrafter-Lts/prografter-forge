@@ -44,7 +44,12 @@ const ManualOverview = ({ job, trade, homeowner, contract, stages, acceptedQuote
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <InfoRow icon={Briefcase} label="Project Name" value={job.title || titleCase(job.job_type)} />
-        <InfoRow icon={FileText} label="Reference" value={job.id?.slice(0, 8).toUpperCase()} />
+        {/* Canonical job reference (e.g. PG-5TZDCR), not a slice of the row id. */}
+        <InfoRow
+          icon={FileText}
+          label="ProGrafter Ref"
+          value={job.ref || `PG-${job.id?.slice(0, 8).toUpperCase()}`}
+        />
         <InfoRow icon={MapPin} label="Property Address" value={`${job.address}, ${job.postcode}`} />
         <InfoRow icon={Briefcase} label="Project Type" value={titleCase(job.job_type)} />
         <InfoRow
@@ -64,7 +69,7 @@ const ManualOverview = ({ job, trade, homeowner, contract, stages, acceptedQuote
             value={`£${contractValuePounds.toLocaleString("en-GB", { maximumFractionDigits: 2 })}`}
           />
         )}
-        <InfoRow icon={FileText} label="ProGrafter Ref" value={`PG-${job.id?.slice(0, 8).toUpperCase()}`} />
+        
       </div>
 
       {trade && (

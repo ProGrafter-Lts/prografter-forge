@@ -137,9 +137,8 @@ const CookieConsent = () => {
 
   return (
     <>
+      {/* z-40 keeps the banner below dialogs/modals (z-50) so it can never obscure a modal's controls. */}
       {visible && !managing && (
-      {/* z-40 keeps the banner below dialogs/modals (z-50) so it can never
-          obscure a modal's controls. */}
       <div className="fixed inset-x-0 bottom-0 z-40 px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
         <div className="mx-auto max-w-4xl rounded-2xl border border-cream/10 bg-deep p-5 shadow-2xl">
           <div className="flex flex-col gap-4 craft:flex-row craft:items-center craft:justify-between">
