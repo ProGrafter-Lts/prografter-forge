@@ -89,6 +89,27 @@ export const governingBodyFor = (tradeCategoryId?: string | null): string | null
 export const tradeRequiresReferences = (tradeCategoryId?: string | null): boolean =>
   governingBodyFor(tradeCategoryId) === null;
 
+/**
+ * A plumber who is also a Gas Safe registered heating engineer is independently
+ * assessed by the Gas Safe Register, so references add nothing. Detected from
+ * the Gas Safe answer on the application form (number + card upload).
+ */
+export const hasGasSafeRegistration = (
+  app: Pick<TradeApplication, "form_data" | "document_paths">,
+): boolean => {
+  const f = (app.form_data ?? {}) as Record<string, unknown>;
+  const s = (k: string) => String(f[k] ?? "").trim();
+  const scheme = `${s("qual_scheme_name")} ${s("cps_scheme")}`.toLowerCase();
+  const number = s("gas_safe_number") || (/gas\s*safe/.test(scheme) ? s("qual_reg_number") : "");
+  const hasCard = Boolean(app.document_paths?.gas_safe_doc?.length);
+  return Boolean(number) && (hasCard || /gas\s*safe/.test(scheme));
+};
+
+/** Whether this specific application still needs trade references. */
+export const applicationRequiresReferences = (
+  app: Pick<TradeApplication, "form_data" | "document_paths" | "trade_category_id">,
+): boolean => tradeRequiresReferences(app.trade_category_id) && !hasGasSafeRegistration(app);
+
 // The published verification checks
 export const VERIFICATION_CHECKS = [
   { id: "identity", label: "Identity & photo ID confirmed" },
@@ -98,9 +119,19 @@ export const VERIFICATION_CHECKS = [
   { id: "portfolio", label: "Portfolio of work reviewed" },
 ] as const;
 
-/** Checklist for a specific application — drops references for scheme-regulated trades. */
-export const verificationChecksFor = (tradeCategoryId?: string | null) =>
-  VERIFICATION_CHECKS.filter((c) => c.id !== "references" || tradeRequiresReferences(tradeCategoryId));
+/**
+ * Checklist for a specific application — drops references for scheme-regulated
+ * trades, and for a plumber who has supplied Gas Safe registration.
+ */
+export const verificationChecksFor = (
+  tradeOrApp?: string | null | Pick<TradeApplication, "form_data" | "document_paths" | "trade_category_id">,
+) => {
+  const needsRefs =
+    tradeOrApp && typeof tradeOrApp === "object"
+      ? applicationRequiresReferences(tradeOrApp)
+      : tradeRequiresReferences(typeof tradeOrApp === "string" ? tradeOrApp : null);
+  return VERIFICATION_CHECKS.filter((c) => c.id !== "references" || needsRefs);
+};
 
 // Document groups shown in the detail view, in display order.
 export const DOC_GROUPS: { heading: string; fields: string[] }[] = [
@@ -108,6 +139,7 @@ export const DOC_GROUPS: { heading: string; fields: string[] }[] = [
   { heading: "Portfolio Photos", fields: ["portfolio_photos"] },
   { heading: "Insurance Certificate", fields: ["insurance_certificate"] },
   { heading: "Photo ID", fields: ["photo_id", "id_document"] },
+  { heading: "Gas Safe Card", fields: ["gas_safe_doc"] },
 ];
 
 export const FIELD_LABELS: Record<string, string> = {
@@ -117,6 +149,7 @@ export const FIELD_LABELS: Record<string, string> = {
   portfolio_photos: "Portfolio photo",
   photo_id: "Photo ID",
   id_document: "Photo ID",
+  gas_safe_doc: "Gas Safe card",
 };
 
 // Photo ID became a required field on the public /apply form at this moment.
@@ -188,7 +221,7 @@ const docCount = (
 ): number => fields.reduce((n, f) => n + (docPaths?.[f]?.length ?? 0), 0);
 
 export function detectRequestableItems(
-  app: Pick<TradeApplication, "document_paths" | "qualification_path" | "trade_category_id">,
+  app: Pick<TradeApplication, "document_paths" | "qualification_path" | "trade_category_id" | "form_data">,
   referenceCount: number,
 ): RequestableItem[] {
   const d = app.document_paths;
@@ -225,7 +258,7 @@ export function detectRequestableItems(
       id: "references",
       label: "Trade references",
       emailLabel: "Two trade references — name, relationship to you, phone number and email for each",
-      applies: tradeRequiresReferences(app.trade_category_id),
+      applies: applicationRequiresReferences(app),
       missing: referenceCount < 2,
     },
   ].filter((i) => i.applies);
