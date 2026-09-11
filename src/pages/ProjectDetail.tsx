@@ -520,6 +520,52 @@ const ProjectDetail = () => {
                 {job.description || "No description provided."}
               </p>
             </div>
+
+            {/* Completion — the natural final stage of the shared project. */}
+            {isProjectCompleted ? (
+              <div className="bg-card rounded-2xl p-6 border border-emerald-500/30 space-y-3">
+                <h3 className="font-heading text-foreground text-lg flex items-center gap-2">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-400" /> Project completed
+                </h3>
+                <p className="font-mono text-xs text-muted-foreground">
+                  Every message, photo, document, site update, variation and payment stays available here.
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {isTrade ? (
+                    <button
+                      onClick={() => navigate(`/project/${id}/review`)}
+                      className="rounded-xl bg-teal-500 px-4 py-2 font-mono text-xs text-[#08172a]"
+                    >
+                      Open Project Review
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => navigate(`/manual/${id}`)}
+                      className="rounded-xl bg-teal-500 px-4 py-2 font-mono text-xs text-[#08172a]"
+                    >
+                      Open Homeowner Manual
+                    </button>
+                  )}
+                </div>
+              </div>
+            ) : (
+              isTrade && (
+                <div className="bg-card rounded-2xl p-6 border border-border space-y-3">
+                  <h3 className="font-heading text-foreground text-lg">Finishing up?</h3>
+                  <p className="font-mono text-xs text-muted-foreground">
+                    Run the completion readiness check before closing this project. Nothing is deleted —
+                    the homeowner keeps a permanent property record and you keep a private project review.
+                  </p>
+                  <button
+                    onClick={() => setCompleteOpen(true)}
+                    className="rounded-xl bg-teal-500 px-4 py-2 font-mono text-xs text-[#08172a]"
+                  >
+                    Complete project
+                  </button>
+                </div>
+              )
+            )}
+
             {job.is_green_job && (
               <GreenCertificatePack jobType={job.job_type} isComplete={job.status === "complete" || job.stage === "completed"} />
             )}
