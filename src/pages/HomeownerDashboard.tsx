@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import HomeownerSidebar from "@/components/homeowner/HomeownerSidebar";
 import ActiveProjectsSection from "@/components/homeowner/ActiveProjectsSection";
+import CompletedProjectsSection from "@/components/homeowner/CompletedProjectsSection";
 import WelcomeBanner from "@/components/homeowner/WelcomeBanner";
 import LegalReviewBanner from "@/components/LegalReviewBanner";
 import QuotesReceived from "@/components/homeowner/QuotesReceived";
@@ -470,6 +471,7 @@ const HomeownerDashboard = () => {
                 siteUpdates={siteUpdates}
                 briefs={briefs}
               />
+              <CompletedProjectsSection jobs={jobs} />
               <MyJobs jobs={jobs} />
             </section>
           )}

@@ -76,6 +76,7 @@ const SubmitTestimonial = lazyRetry(() => import("./pages/SubmitTestimonial.tsx"
 const CheckatradeAlternative = lazyRetry(() => import("./pages/CheckatradeAlternative.tsx"));
 const IsCheckatradeWorthIt = lazyRetry(() => import("./pages/IsCheckatradeWorthIt.tsx"));
 const ContractPage = lazyRetry(() => import("./pages/ContractPage.tsx"));
+const ProjectReview = lazyRetry(() => import("./pages/ProjectReview.tsx"));
 const LegalReview = lazyRetry(() => import("./pages/LegalReview.tsx"));
 const QuickBuildPage = lazyRetry(() => import("./pages/QuickBuildPage.tsx"));
 const QuoteBuilder = lazyRetry(() => import("./pages/QuoteBuilder.tsx"));
@@ -269,6 +270,7 @@ const AppRoutes = () => {
               <Route path="/project/:id" element={<ProjectDetail />} />
               <Route path="/project/:id/compare" element={<CompareQuotes />} />
               <Route path="/project/:id/contract" element={<ContractPage />} />
+              <Route path="/project/:id/review" element={<ProjectReview />} />
               <Route path="/project/:id/wallet" element={<ProjectWallet />} />
               <Route path="/manual/:id" element={<HomeownerManual />} />
               <Route path="/quote-builder/quickbuild" element={<QuickBuildPage />} />
@@ -352,6 +354,7 @@ const AppRoutes = () => {
           >
             <Route path="/project/:id" element={<ProjectDetail />} />
             <Route path="/project/:id/compare" element={<CompareQuotes />} />
+            <Route path="/project/:id/review" element={<ProjectReview />} />
             <Route path="/dashboard/quote-checks/:id" element={<QuoteCheckDetail />} />
           </Route>
         </Routes>

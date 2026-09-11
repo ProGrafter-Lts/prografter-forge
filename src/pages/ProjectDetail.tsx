@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
-import { ArrowLeft, ShieldCheck, LayoutDashboard, ClipboardList, CalendarClock, CreditCard, FolderArchive, Image as ImageIcon, MessageSquare, Activity } from "lucide-react";
+import { ArrowLeft, CheckCircle2, ShieldCheck, LayoutDashboard, ClipboardList, CalendarClock, CreditCard, FolderArchive, Image as ImageIcon, MessageSquare, Activity } from "lucide-react";
 import ControlCentreTabs, { type ControlCentreTab } from "@/components/project/ControlCentreTabs";
 
 import ProjectDocuments from "@/components/project/ProjectDocuments";
@@ -18,6 +18,7 @@ import ContractVariationsPanel from "@/components/project/ContractVariationsPane
 import ContractPanel from "@/components/project/ContractPanel";
 import ContractWorkspace from "@/components/project/ContractWorkspace";
 import SubTradeModal from "@/components/project/SubTradeModal";
+import CompleteProjectDialog from "@/components/project/CompleteProjectDialog";
 import GenerateQuotePdfButton from "@/components/trade/GenerateQuotePdfButton";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { isFeatureEnabled } from "@/lib/featureFlags";
@@ -130,6 +131,7 @@ const ProjectDetail = () => {
   const [homeownerName, setHomeownerName] = useState("—");
   const [msgText, setMsgText] = useState("");
   const [subTradeStageId, setSubTradeStageId] = useState<string | null>(null);
+  const [completeOpen, setCompleteOpen] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -462,6 +464,8 @@ const ProjectDetail = () => {
   ];
 
   const isTrade = userRole === "trade";
+  const isProjectCompleted =
+    job.stage === "completed" || job.status === "completed" || job.status === "complete";
 
   return (
     <div className="dashboard-dark min-h-screen bg-background">
@@ -520,6 +524,52 @@ const ProjectDetail = () => {
                 {job.description || "No description provided."}
               </p>
             </div>
+
+            {/* Completion — the natural final stage of the shared project. */}
+            {isProjectCompleted ? (
+              <div className="bg-card rounded-2xl p-6 border border-emerald-500/30 space-y-3">
+                <h3 className="font-heading text-foreground text-lg flex items-center gap-2">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-400" /> Project completed
+                </h3>
+                <p className="font-mono text-xs text-muted-foreground">
+                  Every message, photo, document, site update, variation and payment stays available here.
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {isTrade ? (
+                    <button
+                      onClick={() => navigate(`/project/${id}/review`)}
+                      className="rounded-xl bg-teal-500 px-4 py-2 font-mono text-xs text-[#08172a]"
+                    >
+                      Open Project Review
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => navigate(`/manual/${id}`)}
+                      className="rounded-xl bg-teal-500 px-4 py-2 font-mono text-xs text-[#08172a]"
+                    >
+                      Open Homeowner Manual
+                    </button>
+                  )}
+                </div>
+              </div>
+            ) : (
+              isTrade && (
+                <div className="bg-card rounded-2xl p-6 border border-border space-y-3">
+                  <h3 className="font-heading text-foreground text-lg">Finishing up?</h3>
+                  <p className="font-mono text-xs text-muted-foreground">
+                    Run the completion readiness check before closing this project. Nothing is deleted —
+                    the homeowner keeps a permanent property record and you keep a private project review.
+                  </p>
+                  <button
+                    onClick={() => setCompleteOpen(true)}
+                    className="rounded-xl bg-teal-500 px-4 py-2 font-mono text-xs text-[#08172a]"
+                  >
+                    Complete project
+                  </button>
+                </div>
+              )
+            )}
+
             {job.is_green_job && (
               <GreenCertificatePack jobType={job.job_type} isComplete={job.status === "complete" || job.stage === "completed"} />
             )}
@@ -667,6 +717,16 @@ const ProjectDetail = () => {
         </SheetContent>
       </Sheet>
 
+
+      {id && (userRole === "trade" || userRole === "homeowner") && (
+        <CompleteProjectDialog
+          jobId={id}
+          role={userRole}
+          open={completeOpen}
+          onClose={() => setCompleteOpen(false)}
+          onCompleted={refreshProject}
+        />
+      )}
 
       {subTradeStageId && userId && (
         <SubTradeModal
