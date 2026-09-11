@@ -127,9 +127,9 @@ export const verificationChecksFor = (
   tradeOrApp?: string | null | Pick<TradeApplication, "form_data" | "document_paths" | "trade_category_id">,
 ) => {
   const needsRefs =
-    typeof tradeOrApp === "object" && tradeOrApp !== null
+    tradeOrApp && typeof tradeOrApp === "object"
       ? applicationRequiresReferences(tradeOrApp)
-      : tradeRequiresReferences(tradeOrApp ?? null);
+      : tradeRequiresReferences(typeof tradeOrApp === "string" ? tradeOrApp : null);
   return VERIFICATION_CHECKS.filter((c) => c.id !== "references" || needsRefs);
 };
 
