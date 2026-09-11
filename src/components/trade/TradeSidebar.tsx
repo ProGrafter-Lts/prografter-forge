@@ -146,7 +146,9 @@ const TradeSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen }: 
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto no-scrollbar">
           {NAV_ITEMS.map((item) => {
             const isActive = routeActiveNav === item.id;
-            const showBadge = item.id === "find-work" && newMatchCount > 0;
+            const badgeCount =
+              item.id === "find-work" ? newMatchCount : item.id === "messages" ? unreadMessages : 0;
+            const showBadge = badgeCount > 0;
             return (
               <button
                 key={item.id}
@@ -161,9 +163,13 @@ const TradeSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen }: 
                   <span
                     className="ml-auto min-w-[20px] h-5 px-1.5 inline-flex items-center justify-center rounded-full font-mono text-[11px] font-semibold"
                     style={{ backgroundColor: "#DC2626", color: "#FFFFFF" }}
-                    aria-label={`${newMatchCount} new job matches`}
+                    aria-label={
+                      item.id === "messages"
+                        ? `${badgeCount} unread messages`
+                        : `${badgeCount} new job matches`
+                    }
                   >
-                    {newMatchCount > 99 ? "99+" : newMatchCount}
+                    {badgeCount > 99 ? "99+" : badgeCount}
                   </span>
                 )}
               </button>
