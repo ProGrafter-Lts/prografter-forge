@@ -164,7 +164,6 @@ export function detectRequestableItems(
   referenceCount: number,
 ): RequestableItem[] {
   const d = app.document_paths;
-  const isTimeServed = (app.qualification_path ?? "").includes("time");
   return [
     {
       id: "photo_id",
@@ -198,7 +197,7 @@ export function detectRequestableItems(
       id: "references",
       label: "Trade references",
       emailLabel: "Two trade references — name, relationship to you, phone number and email for each",
-      applies: isTimeServed,
+      applies: true,
       missing: referenceCount < 2,
     },
   ].filter((i) => i.applies);
