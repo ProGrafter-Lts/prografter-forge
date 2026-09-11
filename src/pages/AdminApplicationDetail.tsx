@@ -395,7 +395,13 @@ export default function AdminApplicationDetail() {
         {/* Verification checklist */}
         <div style={card}>
           <h2 style={h2}>Verification checklist</h2>
-          {VERIFICATION_CHECKS.map((c) => {
+          {governingBody && (
+            <p style={{ fontSize: 12, color: C.secondary, margin: "0 0 8px" }}>
+              References are not part of this trade's checks — {governingBody} is the independent
+              assessing body, covered by the scheme registration check below.
+            </p>
+          )}
+          {verificationChecksFor(app.trade_category_id).map((c) => {
             const state = app.verification_checks?.[c.id];
             return (
               <label key={c.id} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "7px 0", fontSize: 13, color: C.deep, cursor: "pointer" }}>
