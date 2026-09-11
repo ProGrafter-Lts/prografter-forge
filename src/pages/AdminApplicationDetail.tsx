@@ -10,6 +10,7 @@ import {
   signedUrlFor, logApplicationEvent, hasPhotoId, predatesIdCapture,
   detectRequestableItems, RequestableItem,
 } from "@/lib/tradeApplications";
+import { isInLiveArea, outcodeOf } from "@/lib/serviceArea";
 
 const C = {
   cream: "#F5F0E8", deep: "#0F2238", teal: "#14A8A1", white: "#FFFFFF",
@@ -274,6 +275,11 @@ export default function AdminApplicationDetail() {
             <div>
               <h1 style={{ fontSize: 20, fontWeight: 800, color: C.deep, margin: "0 0 2px" }}>{app.full_name || "—"}</h1>
               <div style={{ fontSize: 13, color: C.secondary }}>Submitted {format(new Date(app.created_at), "d MMM yyyy, HH:mm")}</div>
+              {!isInLiveArea(String(fd.postcode ?? "")) && String(fd.postcode ?? "").trim() && (
+                <div style={{ marginTop: 6, display: "inline-block", fontSize: 11, fontWeight: 700, color: C.white, background: "#0F766E", padding: "3px 9px", borderRadius: 999 }}>
+                  Out of area — {outcodeOf(String(fd.postcode ?? ""))} (coming soon)
+                </div>
+              )}
             </div>
             <div style={{ textAlign: "right" }}>
               <div style={{ fontSize: 11, color: C.secondary, marginBottom: 4 }}>Verification status</div>

@@ -8,6 +8,7 @@ import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import {
   TradeApplication, STATUS_OPTIONS, STATUS_LABEL, STATUS_COLOR, QUAL_LABEL,
 } from "@/lib/tradeApplications";
+import { isInLiveArea, outcodeOf } from "@/lib/serviceArea";
 
 const C = {
   cream: "#F5F0E8", deep: "#0F2238", teal: "#14A8A1",
@@ -142,6 +143,11 @@ export default function AdminApplications() {
                     <span style={{ fontSize: 11, fontWeight: 700, color: C.white, background: STATUS_COLOR[a.verification_status] || C.secondary, padding: "3px 9px", borderRadius: 999, whiteSpace: "nowrap" }}>
                       {STATUS_LABEL[a.verification_status] || a.verification_status}
                     </span>
+                    {String(a.form_data?.postcode ?? "").trim() && !isInLiveArea(String(a.form_data?.postcode ?? "")) && (
+                      <div style={{ marginTop: 4, fontSize: 10, fontWeight: 700, color: "#0F766E", whiteSpace: "nowrap" }}>
+                        Out of area · {outcodeOf(String(a.form_data?.postcode ?? ""))}
+                      </div>
+                    )}
                   </td>
                 </tr>
               ))}
