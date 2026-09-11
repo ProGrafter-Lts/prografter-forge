@@ -124,7 +124,7 @@ const ProjectFocusCard = ({ snapshot }: { snapshot: ProjectSnapshot }) => {
 
       {/* Action required — only when something is genuinely waiting */}
       {actions.length > 0 && (
-        <div className="bg-card border border-amber-500/30 rounded-2xl p-5">
+        <div className="ho-panel ho-panel-amber p-5">
           <p className="font-mono text-[10px] uppercase tracking-widest text-amber-400 flex items-center gap-2">
             <AlertTriangle className="w-3.5 h-3.5" /> Action required
           </p>
@@ -147,7 +147,7 @@ const ProjectFocusCard = ({ snapshot }: { snapshot: ProjectSnapshot }) => {
       )}
 
       {/* Latest site update */}
-      <div className="bg-card border border-border rounded-2xl p-5">
+      <div className="ho-panel p-5">
         <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground flex items-center gap-2">
           <Clock className="w-3.5 h-3.5" /> Latest site update
         </p>
@@ -185,7 +185,7 @@ const ProjectFocusCard = ({ snapshot }: { snapshot: ProjectSnapshot }) => {
 
       {/* Upcoming + financial position */}
       <div className="grid md:grid-cols-2 gap-4">
-        <div className="bg-card border border-border rounded-2xl p-5 space-y-3">
+        <div className="ho-panel p-5 space-y-3">
           <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground flex items-center gap-2">
             <CalendarClock className="w-3.5 h-3.5" /> Upcoming
           </p>
@@ -203,7 +203,7 @@ const ProjectFocusCard = ({ snapshot }: { snapshot: ProjectSnapshot }) => {
           />
         </div>
 
-        <div className="bg-card border border-border rounded-2xl p-5 space-y-3">
+        <div className="ho-panel p-5 space-y-3">
           <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground flex items-center gap-2">
             <PoundSterling className="w-3.5 h-3.5" /> Project financial position
           </p>
@@ -223,7 +223,7 @@ const ProjectFocusCard = ({ snapshot }: { snapshot: ProjectSnapshot }) => {
       </div>
 
       {snapshot.progressPercent === 100 && (
-        <div className="bg-card border border-secondary/30 rounded-2xl p-5 flex items-center gap-3">
+        <div className="ho-panel ho-panel-accent p-5 flex items-center gap-3">
           <CheckCircle2 className="w-5 h-5 text-secondary" />
           <p className="font-mono text-sm text-primary">
             Every stage is complete — your project documents stay available in your manual.
