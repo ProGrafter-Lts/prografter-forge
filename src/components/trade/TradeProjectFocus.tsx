@@ -26,6 +26,7 @@ const TradeProjectFocus = ({
   onChanged?: () => void;
 }) => {
   const openProject = useOpenProject();
+  const openDrawer = useDrawerNavigate();
   const actions = buildProjectActions(snapshot, "trade");
 
   return (
