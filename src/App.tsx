@@ -24,7 +24,6 @@ const SignupTrade = lazyRetry(() => import("./pages/SignupTrade.tsx"));
 const SignupTradeUnderReview = lazyRetry(() => import("./pages/SignupTradeUnderReview.tsx"));
 const SignupTradeAssessmentPending = lazyRetry(() => import("./pages/SignupTradeAssessmentPending.tsx"));
 const Verification = lazyRetry(() => import("./pages/Verification.tsx"));
-const PostAJob = lazyRetry(() => import("./pages/PostAJob.tsx"));
 const ResetPassword = lazyRetry(() => import("./pages/ResetPassword.tsx"));
 const TradeDashboard = lazyRetry(() => import("./pages/TradeDashboard.tsx"));
 import SiteScoutGate from "./atlas/SiteScoutGate";
