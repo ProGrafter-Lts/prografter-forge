@@ -165,7 +165,7 @@ export async function loadProjectSnapshot(jobId: string): Promise<ProjectSnapsho
     (v) => (v.status || "").toLowerCase() === "pending" && !v.homeowner_signed_at,
   );
   const approvedVariationsPence = variations
-    .filter((v) => ["approved", "active", "signed"].includes((v.status || "").toLowerCase()))
+    .filter((v) => ["accepted", "approved", "active", "signed"].includes((v.status || "").toLowerCase()))
     .reduce((sum, v) => sum + (v.cost_change_pence ?? 0), 0);
 
   const quotes = asArray<any>(quoteRes.data);
@@ -280,7 +280,7 @@ export function buildProjectActions(snap: ProjectSnapshot, role: ProjectRole): A
     }
   } else {
     snap.variations
-      .filter((v) => ["approved", "active"].includes((v.status || "").toLowerCase()))
+      .filter((v) => ["accepted", "approved", "active"].includes((v.status || "").toLowerCase()))
       .slice(0, 3)
       .forEach((v) =>
         items.push({
