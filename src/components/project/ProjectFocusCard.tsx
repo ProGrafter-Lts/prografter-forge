@@ -41,63 +41,84 @@ const ProjectFocusCard = ({ snapshot }: { snapshot: ProjectSnapshot }) => {
     update?.tomorrow_plan ||
     (snapshot.nextStage ? `Next up: ${snapshot.nextStage.stage_name}.` : "Your trade will post the next step here.");
 
+  const thumb =
+    (Array.isArray(update?.photo_urls) && update?.photo_urls?.[0]) || projectPlaceholder;
+
   return (
     <section className="space-y-4">
-      {/* Project header */}
-      <div className="bg-card border border-border rounded-2xl p-6 space-y-5">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Your project</p>
-            <h2 className="font-heading text-primary text-2xl md:text-3xl mt-1">{snapshot.title}</h2>
-            {(snapshot.address || snapshot.postcode) && (
-              <p className="font-mono text-xs text-muted-foreground mt-1">
-                {[snapshot.address, snapshot.postcode].filter(Boolean).join(", ")}
+      {/* Project header — the dominant element on the dashboard */}
+      <div className="ho-hero">
+        <img src={projectPlaceholder} alt="" aria-hidden="true" className="ho-img" />
+        <div className="ho-veil" />
+        <div className="ho-content p-6 space-y-5">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="flex items-start gap-4 min-w-0">
+              <img
+                src={thumb}
+                alt=""
+                aria-hidden="true"
+                className="hidden sm:block w-28 h-24 object-cover rounded-xl border border-white/10 shrink-0"
+              />
+              <div className="min-w-0">
+                <p className="ho-metric-label font-mono">Active project</p>
+                <h2 className="font-heading text-primary text-2xl md:text-3xl mt-1 uppercase tracking-tight">
+                  {snapshot.title}
+                </h2>
+                {(snapshot.address || snapshot.postcode) && (
+                  <p className="font-mono text-xs text-muted-foreground mt-1">
+                    {[snapshot.address, snapshot.postcode].filter(Boolean).join(", ")}
+                  </p>
+                )}
+              </div>
+            </div>
+            <span className={`font-mono text-[11px] px-3 py-1.5 rounded-full border ${HEALTH_STYLE[snapshot.health]}`}>
+              {HEALTH_LABEL[snapshot.health]}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div>
+              <p className="ho-metric-label font-mono">Current stage</p>
+              <p className="font-heading text-primary text-lg mt-1">
+                {snapshot.currentStage?.stage_name ?? (snapshot.stages.length ? "All stages complete" : "Being set up")}
               </p>
-            )}
+            </div>
+            <div>
+              <p className="ho-metric-label font-mono">Expected completion</p>
+              <p className="font-heading text-primary text-lg mt-1">{dateLabel(snapshot.expectedCompletion)}</p>
+            </div>
+            <div>
+              <p className="ho-metric-label font-mono">Project value</p>
+              <p className="font-heading text-primary text-lg mt-1">{formatPence(snapshot.currentProjectValuePence)}</p>
+            </div>
+            <div>
+              <p className="ho-metric-label font-mono">Progress</p>
+              <p className="font-heading text-primary text-lg mt-1">{snapshot.progressPercent}%</p>
+            </div>
           </div>
-          <span className={`font-mono text-[11px] px-3 py-1.5 rounded-full border ${HEALTH_STYLE[snapshot.health]}`}>
-            {HEALTH_LABEL[snapshot.health]}
-          </span>
-        </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div>
-            <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Current stage</p>
-            <p className="font-heading text-primary text-lg mt-1">
-              {snapshot.currentStage?.stage_name ?? (snapshot.stages.length ? "All stages complete" : "Being set up")}
-            </p>
+          <div className="ho-progress">
+            <span style={{ width: `${Math.max(0, Math.min(100, snapshot.progressPercent))}%` }} />
           </div>
-          <div>
-            <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Progress</p>
-            <p className="font-heading text-primary text-lg mt-1">{snapshot.progressPercent}%</p>
-          </div>
-          <div>
-            <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Expected completion</p>
-            <p className="font-heading text-primary text-lg mt-1">{dateLabel(snapshot.expectedCompletion)}</p>
-          </div>
-          <div>
-            <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Project value</p>
-            <p className="font-heading text-primary text-lg mt-1">{formatPence(snapshot.currentProjectValuePence)}</p>
-          </div>
-        </div>
 
-        <div className="grid md:grid-cols-2 gap-3">
-          <div className="rounded-xl border border-border p-4">
-            <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Today</p>
-            <p className="font-mono text-sm text-primary mt-1 leading-relaxed">{todayLine}</p>
+          <div className="grid md:grid-cols-2 gap-3">
+            <div className="ho-panel ho-panel-quiet p-4">
+              <p className="ho-metric-label font-mono">Today</p>
+              <p className="font-mono text-sm text-primary mt-1 leading-relaxed">{todayLine}</p>
+            </div>
+            <div className="ho-panel ho-panel-quiet p-4">
+              <p className="ho-metric-label font-mono">Next</p>
+              <p className="font-mono text-sm text-primary mt-1 leading-relaxed">{nextLine}</p>
+            </div>
           </div>
-          <div className="rounded-xl border border-border p-4">
-            <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Next</p>
-            <p className="font-mono text-sm text-primary mt-1 leading-relaxed">{nextLine}</p>
-          </div>
-        </div>
 
-        <button
-          onClick={() => navigate(`/project/${snapshot.jobId}`)}
-          className="inline-flex items-center gap-1.5 bg-secondary text-secondary-foreground font-mono text-xs px-4 py-2 rounded-xl hover:opacity-90 transition-opacity"
-        >
-          Open project <ArrowRight className="w-3.5 h-3.5" />
-        </button>
+          <button
+            onClick={() => navigate(`/project/${snapshot.jobId}`)}
+            className="inline-flex items-center gap-1.5 bg-secondary text-secondary-foreground font-mono text-xs px-4 py-2 rounded-xl hover:opacity-90 transition-opacity"
+          >
+            Open project <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
       </div>
 
       {/* Action required — only when something is genuinely waiting */}

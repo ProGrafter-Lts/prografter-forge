@@ -91,7 +91,7 @@ const HomeownerSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen
           })}
         </nav>
 
-        <div className="p-4 border-t border-primary/10">
+        <div className="relative z-10 p-4 border-t border-primary/10">
           <button
             onClick={handleLogout}
             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-mono text-sm text-primary/40 hover:text-destructive hover:bg-destructive/5 transition-colors"
