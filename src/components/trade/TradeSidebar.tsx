@@ -3,6 +3,7 @@ import Logo from "@/components/Logo";
 import { supabase } from "@/integrations/supabase/client";
 import { useVerificationStatus } from "@/hooks/useVerificationStatus";
 import { useNewJobMatchCount } from "@/hooks/useNewJobMatches";
+import { useUnreadMessageCount } from "@/hooks/useUnreadMessages";
 import { useSiteScoutAccess } from "@/lib/siteScoutAccess";
 import {
   LayoutDashboard,
@@ -44,6 +45,7 @@ const TradeSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen }: 
   const location = useLocation();
   const verification = useVerificationStatus();
   const newMatchCount = useNewJobMatchCount();
+  const unreadMessages = useUnreadMessageCount();
   const siteScout = useSiteScoutAccess();
 
 
