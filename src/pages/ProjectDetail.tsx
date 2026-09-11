@@ -298,7 +298,10 @@ const ProjectDetail = () => {
     (s) => s.status === "completed" || s.status === "complete",
   ).length;
   const progress = totalStages > 0 ? Math.round((completedStages / totalStages) * 100) : 0;
-  const contractValue = contract ? Number(contract.agreed_price) : stages.reduce((sum, s) => sum + Number(s.payment_amount || 0), 0);
+  const baseContractValue = contract
+    ? Number(contract.agreed_price)
+    : stages.reduce((sum, s) => sum + Number(s.payment_amount || 0), 0);
+  const contractValue = baseContractValue + approvedVariationsValue;
 
   // Project schedule — earliest planned_start, latest planned_end across all stages.
   const projectStart = (() => {
