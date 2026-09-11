@@ -1904,13 +1904,19 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
 .hiw-section-heading h2 { font-size: clamp(48px, 5.3vw, 78px); line-height: .9; }
 .hiw-section-heading > p, .hiw-trust-intro > p { margin: 0; font-size: 17px; line-height: 1.7; color: hsl(var(--cream) / .76) !important; }
 .hiw-journey-grid { position: relative; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px; }
-.hiw-journey-grid::before { content: ""; position: absolute; top: 151px; left: 5%; right: 5%; height: 1px; background: hsl(var(--teal) / .5); }
 .hiw-step { position: relative; min-width: 0; }
+.hiw-step-marker { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+.hiw-step-marker span {
+  flex: none; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 999px;
+  background: hsl(var(--teal)); color: hsl(var(--deep)); font: 15px/1 var(--font-mono); font-weight: 600;
+  box-shadow: 0 0 0 5px hsl(var(--teal) / .13);
+}
+.hiw-step-marker i { flex: 1; height: 1px; background: linear-gradient(90deg, hsl(var(--teal) / .55), hsl(var(--teal) / .18)); }
+.hiw-step:last-child .hiw-step-marker i { display: none; }
 .hiw-step-image { position: relative; aspect-ratio: 4 / 5; overflow: hidden; border: 1px solid hsl(var(--cream) / .12); background: hsl(var(--navy)); }
 .hiw-step-image img { width: 100%; height: 100%; object-fit: cover; transition: transform .55s ease; }
 .hiw-step:hover .hiw-step-image img { transform: scale(1.035); }
-.hiw-step-image-shade { position: absolute; inset: 0; background: linear-gradient(0deg, hsl(var(--deep) / .86), transparent 62%), linear-gradient(135deg, hsl(var(--teal) / .1), transparent 45%); }
-.hiw-step-number { position: absolute; left: 14px; bottom: 12px; z-index: 2; font: 45px/.85 var(--font-heading); color: hsl(var(--cream)); }
+.hiw-step-image-shade { position: absolute; inset: 0; background: linear-gradient(0deg, hsl(var(--deep) / .55), transparent 55%), linear-gradient(135deg, hsl(var(--teal) / .08), transparent 45%); }
 .hiw-step-icon { position: absolute; right: 12px; top: 12px; z-index: 2; width: 22px; height: 22px; padding: 6px; box-sizing: content-box; border: 1px solid hsl(var(--teal) / .5); background: hsl(var(--deep) / .72); color: hsl(var(--teal)); }
 .hiw-step-copy { min-height: 215px; padding: 24px 5px 0 4px; }
 .hiw-step-copy h3 { min-height: 50px; margin: 0 0 12px; font: 25px/1 var(--font-heading); letter-spacing: .02em; text-transform: uppercase; color: hsl(var(--cream)); }
