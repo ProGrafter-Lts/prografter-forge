@@ -24,15 +24,15 @@ import { localBusinessJsonLd } from "@/lib/seoSchemas";
 import heroImage from "@/assets/home/hero-blueprint-build.jpg";
 import homeownerPlanning from "@/assets/how-it-works/homeowner-planning.jpg";
 import tradeProject from "@/assets/how-it-works/trade-project.jpg";
-import completedHome from "@/assets/how-it-works/completed-home.jpg";
 import ctaPlans from "@/assets/how-it-works/cta-plans.jpg";
-import homeownerQuotes from "@/assets/platform/homeowner-quotes.png";
-import homeownerOverview from "@/assets/platform/homeowner-overview.png";
-import homeownerManual from "@/assets/platform/homeowner-manual.png";
-import quoteChecker from "@/assets/platform/quote-checker.png";
-import tradeDashboard from "@/assets/platform/trade-dashboard.png";
-import tradeEarnings from "@/assets/platform/trade-earnings.png";
-import tradeJobs from "@/assets/platform/trade-jobs.png";
+import completedHome from "@/assets/how-it-works/completed-home.jpg";
+import compareQuotes from "@/assets/how-it-works/compare-quotes.jpg";
+import manageProject from "@/assets/how-it-works/manage-project.jpg";
+import payConfidence from "@/assets/how-it-works/pay-confidence.jpg";
+import getVerified from "@/assets/how-it-works/get-verified.jpg";
+import findWork from "@/assets/how-it-works/find-work.jpg";
+import submitQuote from "@/assets/how-it-works/submit-quote.jpg";
+import tradeReputation from "@/assets/how-it-works/trade-reputation.jpg";
 
 type JourneyStep = {
   num: string;
@@ -66,32 +66,32 @@ const HOMEOWNER_STEPS: JourneyStep[] = [
     num: "03",
     title: "Compare quotes",
     description: "Receive structured quotes to compare like for like, or upload an existing quote to the Quote Checker.",
-    image: homeownerQuotes,
-    alt: "ProGrafter homeowner quote comparison screen",
+    image: compareQuotes,
+    alt: "Homeowner comparing builder quotes side by side at a kitchen table",
     icon: ClipboardCheck,
   },
   {
     num: "04",
     title: "Manage your project",
     description: "Track progress with daily updates, photos and a clear programme. Communication stays in one place.",
-    image: homeownerOverview,
-    alt: "ProGrafter homeowner project overview",
+    image: manageProject,
+    alt: "Homeowner checking project progress on a phone at the build site",
     icon: MessageSquareText,
   },
   {
     num: "05",
     title: "Pay with confidence",
     description: "Fund work in agreed stages. You stay informed and approve each completed milestone before payment moves on.",
-    image: tradeEarnings,
-    alt: "ProGrafter stage payment overview",
+    image: payConfidence,
+    alt: "Homeowner approving a stage payment beside project plans",
     icon: WalletCards,
   },
   {
     num: "06",
     title: "Complete & beyond",
     description: "Receive certificates, photos, warranties and project records together in your Homeowner Manual.",
-    image: homeownerManual,
-    alt: "ProGrafter digital Homeowner Manual",
+    image: completedHome,
+    alt: "Completed contemporary extension on a British home at dusk",
     icon: Home,
   },
 ];
@@ -101,16 +101,16 @@ const TRADE_STEPS: JourneyStep[] = [
     num: "01",
     title: "Get verified",
     description: "Complete the five verification checks to join. Early qualifying members can access the current Founding Member offer.",
-    image: tradeProject,
-    alt: "Verified ProGrafter trade on a UK residential building project",
+    image: getVerified,
+    alt: "Verified UK tradesperson wearing an identity lanyard outside a residential build",
     icon: ShieldCheck,
   },
   {
     num: "02",
     title: "Find suitable work",
     description: "Receive relevant local opportunities matched to your skills and working area — without a crowded open marketplace.",
-    image: tradeJobs,
-    alt: "ProGrafter local work opportunities screen",
+    image: findWork,
+    alt: "Builder checking local work opportunities on a phone in his van",
     icon: BriefcaseBusiness,
     note: "Three, not thirty.",
   },
@@ -118,32 +118,32 @@ const TRADE_STEPS: JourneyStep[] = [
     num: "03",
     title: "Submit your quote",
     description: "Use the structured ProGrafter quote format so homeowners can understand and compare your offer fairly.",
-    image: quoteChecker,
-    alt: "Structured ProGrafter quote screen",
+    image: submitQuote,
+    alt: "Builder preparing a structured written quote on a laptop",
     icon: FileCheck2,
   },
   {
     num: "04",
     title: "Deliver the project",
     description: "Keep the site diary, messages, variations, photos and programme together around one project record.",
-    image: tradeDashboard,
-    alt: "ProGrafter trade project dashboard",
+    image: tradeProject,
+    alt: "Trade managing an active UK extension project on site",
     icon: HardHat,
   },
   {
     num: "05",
     title: "Get paid",
     description: "Work to agreed stages, keep progress visible and request payment against the approved project schedule.",
-    image: tradeEarnings,
-    alt: "ProGrafter trade stage payment screen",
+    image: payConfidence,
+    alt: "Stage payment being approved against an agreed project schedule",
     icon: WalletCards,
   },
   {
     num: "06",
     title: "Build your reputation",
     description: "Receive honest project reviews and build a trusted ProGrafter record from completed work.",
-    image: completedHome,
-    alt: "Completed contemporary extension on a British home",
+    image: tradeReputation,
+    alt: "Homeowner and trade shaking hands in front of a completed project",
     icon: Star,
   },
 ];
@@ -191,10 +191,13 @@ const Journey = ({
       <div className="hiw-journey-grid">
         {steps.map(({ num, title: stepTitle, description: stepDescription, image, alt, icon: Icon, note }) => (
           <article key={num} className="hiw-step">
+            <div className="hiw-step-marker">
+              <span>{num}</span>
+              <i aria-hidden="true" />
+            </div>
             <div className="hiw-step-image">
-              <img src={image} alt={alt} loading="lazy" width={1366} height={768} />
+              <img src={image} alt={alt} loading="lazy" width={1024} height={1280} />
               <div className="hiw-step-image-shade" />
-              <span className="hiw-step-number">{num}</span>
               <Icon className="hiw-step-icon" strokeWidth={1.5} />
             </div>
             <div className="hiw-step-copy">
