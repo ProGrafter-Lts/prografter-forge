@@ -23,6 +23,8 @@ import { isTestRecord } from "@/lib/testData";
 import DashboardSummary from "@/components/trade/DashboardSummary";
 import ConfirmTradeTypeModal from "@/components/trade/ConfirmTradeTypeModal";
 import TradeMessagesSection from "@/components/trade/TradeMessagesSection";
+import TradeProjectFocus from "@/components/trade/TradeProjectFocus";
+import { useProjectSnapshot } from "@/hooks/useProjectSnapshot";
 import type { PriorityTarget } from "@/lib/tradeProfileStrength";
 
 
@@ -203,6 +205,10 @@ const TradeDashboard = () => {
       setLoading(false);
     }
   };
+
+  /** Shared project spine: the trade sees the same project record the homeowner sees. */
+  const focusProjectId = activeProjects[0]?.id ?? null;
+  const { snapshot: focusSnapshot, reload: reloadFocus } = useProjectSnapshot(focusProjectId);
 
   const completedCount = trade?.completed_jobs_count ?? 0;
   const rating = trade?.avg_rating ? Number(trade.avg_rating) : 0;
@@ -477,6 +483,10 @@ const TradeDashboard = () => {
 
           {/* Summary / triage: one compact card per sidebar section, real numbers only */}
           {trade && <DashboardSummary tradeId={trade.id} onOpenView={goToView} />}
+
+          {trade && focusSnapshot && (
+            <TradeProjectFocus snapshot={focusSnapshot} tradeId={trade.id} onChanged={reloadFocus} />
+          )}
 
           {trade && (
             <AddSpecialismsBanner

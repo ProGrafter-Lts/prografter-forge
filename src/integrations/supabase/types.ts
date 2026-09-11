@@ -3687,7 +3687,9 @@ export type Database = {
           message_text: string
           sender_id: string
           sender_type: string
+          site_update_id: string | null
           stage_id: string | null
+          variation_id: string | null
         }
         Insert: {
           created_at?: string
@@ -3696,7 +3698,9 @@ export type Database = {
           message_text: string
           sender_id: string
           sender_type?: string
+          site_update_id?: string | null
           stage_id?: string | null
+          variation_id?: string | null
         }
         Update: {
           created_at?: string
@@ -3705,7 +3709,9 @@ export type Database = {
           message_text?: string
           sender_id?: string
           sender_type?: string
+          site_update_id?: string | null
           stage_id?: string | null
+          variation_id?: string | null
         }
         Relationships: [
           {
@@ -3716,10 +3722,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "project_messages_site_update_id_fkey"
+            columns: ["site_update_id"]
+            isOneToOne: false
+            referencedRelation: "stage_updates"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "project_messages_stage_id_fkey"
             columns: ["stage_id"]
             isOneToOne: false
             referencedRelation: "project_stages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_messages_variation_id_fkey"
+            columns: ["variation_id"]
+            isOneToOne: false
+            referencedRelation: "contract_variations"
             referencedColumns: ["id"]
           },
         ]
@@ -5323,27 +5343,48 @@ export type Database = {
       stage_updates: {
         Row: {
           created_at: string
+          delay_reason: string | null
+          entry_date: string | null
           id: string
+          issues_found: string | null
           photo_urls: string[] | null
+          programme_impact_days: number | null
           stage_id: string
+          supersedes_id: string | null
+          tomorrow_plan: string | null
           trade_id: string
           update_text: string
+          work_completed: string | null
         }
         Insert: {
           created_at?: string
+          delay_reason?: string | null
+          entry_date?: string | null
           id?: string
+          issues_found?: string | null
           photo_urls?: string[] | null
+          programme_impact_days?: number | null
           stage_id: string
+          supersedes_id?: string | null
+          tomorrow_plan?: string | null
           trade_id: string
           update_text: string
+          work_completed?: string | null
         }
         Update: {
           created_at?: string
+          delay_reason?: string | null
+          entry_date?: string | null
           id?: string
+          issues_found?: string | null
           photo_urls?: string[] | null
+          programme_impact_days?: number | null
           stage_id?: string
+          supersedes_id?: string | null
+          tomorrow_plan?: string | null
           trade_id?: string
           update_text?: string
+          work_completed?: string | null
         }
         Relationships: [
           {
@@ -5351,6 +5392,13 @@ export type Database = {
             columns: ["stage_id"]
             isOneToOne: false
             referencedRelation: "project_stages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stage_updates_supersedes_id_fkey"
+            columns: ["supersedes_id"]
+            isOneToOne: false
+            referencedRelation: "stage_updates"
             referencedColumns: ["id"]
           },
           {
