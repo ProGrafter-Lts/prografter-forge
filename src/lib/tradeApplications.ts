@@ -89,6 +89,27 @@ export const governingBodyFor = (tradeCategoryId?: string | null): string | null
 export const tradeRequiresReferences = (tradeCategoryId?: string | null): boolean =>
   governingBodyFor(tradeCategoryId) === null;
 
+/**
+ * A plumber who is also a Gas Safe registered heating engineer is independently
+ * assessed by the Gas Safe Register, so references add nothing. Detected from
+ * the Gas Safe answer on the application form (number + card upload).
+ */
+export const hasGasSafeRegistration = (
+  app: Pick<TradeApplication, "form_data" | "document_paths">,
+): boolean => {
+  const f = (app.form_data ?? {}) as Record<string, unknown>;
+  const s = (k: string) => String(f[k] ?? "").trim();
+  const scheme = `${s("qual_scheme_name")} ${s("cps_scheme")}`.toLowerCase();
+  const number = s("gas_safe_number") || (/gas\s*safe/.test(scheme) ? s("qual_reg_number") : "");
+  const hasCard = Boolean(app.document_paths?.gas_safe_doc?.length);
+  return Boolean(number) && (hasCard || /gas\s*safe/.test(scheme));
+};
+
+/** Whether this specific application still needs trade references. */
+export const applicationRequiresReferences = (
+  app: Pick<TradeApplication, "form_data" | "document_paths" | "trade_category_id">,
+): boolean => tradeRequiresReferences(app.trade_category_id) && !hasGasSafeRegistration(app);
+
 // The published verification checks
 export const VERIFICATION_CHECKS = [
   { id: "identity", label: "Identity & photo ID confirmed" },
