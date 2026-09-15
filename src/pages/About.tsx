@@ -4,7 +4,7 @@ import AppShell from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { localBusinessJsonLd } from "@/lib/seoSchemas";
-import { EditorialStatement } from "@/components/public/PublicBits";
+import { EditorialStatement, ShowcaseHero } from "@/components/public/PublicBits";
 import founderImage from "@/assets/home/trades-hero.jpg";
 import receiptsImage from "@/assets/how-it-works/cta-plans.jpg";
 
