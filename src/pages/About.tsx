@@ -160,10 +160,17 @@ const About = () => {
             <h2 className="type-h2 mb-10 mt-3 text-cream">
               Ten of the eighteen.
             </h2>
-            <div className="mb-7 grid gap-4 sm:grid-cols-3">
-              <div className="border border-cream/10 bg-cream/[0.02] p-5"><p className="font-heading text-3xl text-teal">18</p><p className="text-sm text-cream/70">qualified leads pursued</p></div>
-              <div className="border border-cream/10 bg-cream/[0.02] p-5"><p className="font-heading text-3xl text-teal">£625.32</p><p className="text-sm text-cream/70">spent including VAT</p></div>
-              <div className="border border-cream/10 bg-cream/[0.02] p-5"><p className="font-heading text-3xl text-teal">0</p><p className="text-sm text-cream/70">jobs won</p></div>
+            <div className="mb-7 grid divide-y divide-cream/10 border border-cream/10 bg-cream/[0.02] sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+              {[
+                { figure: "18", label: "Qualified leads" },
+                { figure: "£625.32", label: "Spent inc. VAT" },
+                { figure: "0", label: "Jobs won" },
+              ].map(({ figure, label }) => (
+                <div key={label} className="relative overflow-hidden px-6 py-9">
+                  <p className="font-heading text-5xl leading-none text-teal craft:text-6xl">{figure}</p>
+                  <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.22em] text-cream/55">{label}</p>
+                </div>
+              ))}
             </div>
             <details className="group border border-cream/10 bg-cream/[0.02] p-5">
               <summary className="flex cursor-pointer list-none items-center justify-between font-body font-semibold text-cream">
