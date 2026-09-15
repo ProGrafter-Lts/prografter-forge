@@ -105,6 +105,11 @@ const CookieConsent = () => {
     return () => window.removeEventListener(OPEN_PREFS_EVENT, onOpen);
   }, []);
 
+  useEffect(() => {
+    document.documentElement.classList.toggle("cookie-banner-visible", visible && !managing);
+    return () => document.documentElement.classList.remove("cookie-banner-visible");
+  }, [visible, managing]);
+
   const persist = useCallback(async (chosen: CookiePrefs) => {
     try {
       localStorage.setItem(
