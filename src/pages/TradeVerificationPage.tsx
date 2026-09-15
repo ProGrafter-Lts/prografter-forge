@@ -23,7 +23,7 @@ const STEPS = [
   { icon: ShieldCheck, image: policyEvidence, evidence: "Policy schedule", status: "Cover confirmed", title: "Public liability insurance", desc: "We confirm valid public liability cover before a trade can quote, so homeowners are protected if something goes wrong on site." },
   { icon: ScrollText, image: qualificationEvidence, evidence: "Certificates & scheme membership", status: "Accreditations checked", title: "Qualifications & accreditations", desc: "Relevant trade qualifications, competent-person scheme membership and industry accreditations are checked against the work a trade offers." },
   { icon: HardHat, image: workEvidence, evidence: "Referees & completed work", status: "History verified", title: "References & work history", desc: "We review past projects and speak to recent customers where needed, so a track record — not marketing — earns a place." },
-  { icon: FileCheck2, image: accountabilityEvidence, evidence: "Reviews & expiry reminders", status: "Monitoring ongoing", title: "Ongoing monitoring", desc: "Profiles are regularly checked to keep standards high — two-way reviews, document expiry reminders and manual oversight after approval, not just at sign-up." },
+  { icon: FileCheck2, image: accountabilityEvidence, evidence: "Reviews & expiry reminders", status: "Kept current", title: "Ongoing monitoring", desc: "Profiles are regularly checked to keep standards high — two-way reviews, document expiry reminders and manual oversight after approval, not just at sign-up." },
 ];
 
 

@@ -121,7 +121,7 @@ const About = () => {
         {/* Hero */}
         <ShowcaseHero
           label="Why I built ProGrafter"
-          lines={[{ text: "I spent £625 on 18 leads" }, { text: "and won nothing." }]}
+          lines={[{ text: "I spent £625" }, { text: "on 18 leads" }, { text: "and won nothing." }]}
           intro={<span className="font-body text-xl text-teal">So I built something better.</span>}
           image={founderImage}
           imageAlt="Construction site in Nottinghamshire"
