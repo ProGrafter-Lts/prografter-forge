@@ -59,7 +59,7 @@ const TradeVerificationPage = () => (
       secondaryCta={{ label: "See how it works", href: "/how-it-works" }}
     />
 
-    <section className="verification-record bg-cream px-6 py-16 craft:py-20">
+    <section className="verification-record public-dark-surface bg-cream px-6 py-16 craft:py-20">
       <div className="mx-auto max-w-5xl">
         <SectionLabel tone="light">The record we build</SectionLabel>
         <h2 className="type-h2 mt-3 max-w-3xl text-navy">Our 5-step verification process</h2>
