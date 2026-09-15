@@ -284,7 +284,7 @@ const Chatbot = () => {
       {/* Chat panel */}
       {open && (
         <div
-          className="fixed inset-x-0 bottom-0 top-auto z-[70] flex max-h-[calc(100dvh-env(safe-area-inset-top))] min-h-0 flex-col overflow-hidden border border-border bg-card pb-[env(safe-area-inset-bottom)] shadow-2xl sm:inset-auto sm:bottom-5 sm:right-5 sm:h-[520px] sm:w-[340px] sm:rounded-lg sm:pb-0"
+          className="fixed inset-0 z-[70] flex h-[100dvh] min-h-0 flex-col overflow-hidden border border-border bg-card pb-[env(safe-area-inset-bottom)] shadow-2xl sm:inset-auto sm:bottom-5 sm:right-5 sm:h-[520px] sm:w-[340px] sm:rounded-lg sm:pb-0"
           role="dialog"
           aria-label="ProGrafter chat assistant"
         >
