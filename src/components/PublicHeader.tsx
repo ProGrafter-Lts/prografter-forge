@@ -4,6 +4,8 @@ import { Link, useLocation } from "react-router-dom";
 import Logo from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useAuthReady } from "@/hooks/useAuthReady";
+import { supabase } from "@/integrations/supabase/client";
 
 const PRIMARY_LINKS = [
   { label: "Homeowners", href: "/" },
@@ -30,12 +32,23 @@ const PublicHeader = () => {
   const [moreOpen, setMoreOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [darkHero, setDarkHero] = useState(true);
+  const [dashboardHref, setDashboardHref] = useState("/dashboard/homeowner");
+  const { user } = useAuthReady();
   const moreRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMenuOpen(false);
     setMoreOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    void supabase.from("trades").select("id").eq("user_id", user.id).maybeSingle().then(({ data }) => {
+      if (!cancelled) setDashboardHref(data ? "/dashboard/trade" : "/dashboard/homeowner");
+    });
+    return () => { cancelled = true; };
+  }, [user]);
 
   useEffect(() => {
     const close = (event: MouseEvent) => {
@@ -109,8 +122,14 @@ const PublicHeader = () => {
         </nav>
         <div className="hidden shrink-0 items-center gap-2 craft:flex">
           <Button asChild variant="outline" size="sm" className={cn("border-cream/25 bg-transparent text-cream hover:border-teal hover:bg-transparent hover:text-teal", tradesActive && "border-teal text-teal")}><Link to="/for-trades" aria-current={tradesActive ? "page" : undefined}>For Trades</Link></Button>
-          <Button asChild variant="ghost" size="sm" className="text-cream hover:bg-cream/10 hover:text-cream"><Link to="/login">Log In</Link></Button>
-          <Button asChild variant="cta" size="sm"><Link to="/signup/homeowner">Sign Up</Link></Button>
+          {user ? (
+            <Button asChild variant="cta" size="sm"><Link to={dashboardHref}>Return to Dashboard</Link></Button>
+          ) : (
+            <>
+              <Button asChild variant="ghost" size="sm" className="text-cream hover:bg-cream/10 hover:text-cream"><Link to="/login">Log In</Link></Button>
+              <Button asChild variant="cta" size="sm"><Link to="/signup/homeowner">Sign Up</Link></Button>
+            </>
+          )}
         </div>
         <button type="button" aria-label={menuOpen ? "Close menu" : "Open menu"} aria-expanded={menuOpen} onClick={() => setMenuOpen((open) => !open)} className="flex h-11 w-11 items-center justify-center text-cream craft:hidden">
           {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -130,8 +149,14 @@ const PublicHeader = () => {
           </div>
           <div className="mt-6 grid grid-cols-2 gap-3">
             <Button asChild variant="outline" className="border-cream/25 bg-transparent text-cream hover:border-teal hover:bg-transparent hover:text-teal"><Link to="/for-trades">For Trades</Link></Button>
-            <Button asChild variant="outline" className="border-cream/25 bg-transparent text-cream hover:border-teal hover:bg-transparent hover:text-teal"><Link to="/login">Log In</Link></Button>
-            <Button asChild variant="cta" className="col-span-2"><Link to="/signup/homeowner">Sign Up</Link></Button>
+            {user ? (
+              <Button asChild variant="cta"><Link to={dashboardHref}>Dashboard</Link></Button>
+            ) : (
+              <>
+                <Button asChild variant="outline" className="border-cream/25 bg-transparent text-cream hover:border-teal hover:bg-transparent hover:text-teal"><Link to="/login">Log In</Link></Button>
+                <Button asChild variant="cta" className="col-span-2"><Link to="/signup/homeowner">Sign Up</Link></Button>
+              </>
+            )}
           </div>
         </nav>
       )}
