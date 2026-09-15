@@ -12,6 +12,7 @@ import homeownerQuotes from "@/assets/platform/homeowner-quotes.png";
 import tradeJobs from "@/assets/platform/trade-jobs.png";
 import tradeEarnings from "@/assets/platform/trade-earnings.png";
 import homeownerManual from "@/assets/platform/homeowner-manual.png";
+import tourHero from "@/assets/dashboard/hero-project.jpg";
 
 const SHARED_STEPS = [
   { icon: ClipboardCheck, title: "Agree the plan", text: "A shared project record keeps the scope, programme and stages aligned." },
@@ -41,8 +42,8 @@ const PlatformTour = () => (
       path="/platform-tour"
     />
 
-    <section className="public-blueprint relative overflow-hidden bg-deep px-6 pb-24 pt-36">
-      <GhostMark className="absolute -bottom-6 right-4 text-[90px] craft:text-[170px]">TOUR</GhostMark>
+    <section className="platform-tour-hero public-blueprint relative overflow-hidden bg-deep px-6 pb-24 pt-36">
+      <div className="platform-tour-hero__image" aria-hidden><img src={tourHero} alt="" /></div>
       <div className="relative z-10 mx-auto max-w-5xl">
         <SectionLabel className="mb-6">Platform tour</SectionLabel>
         <h1 className="type-h1 max-w-4xl text-cream">
@@ -58,7 +59,7 @@ const PlatformTour = () => (
       </div>
     </section>
 
-    <section className="bg-cream px-6 py-16 craft:py-20">
+    <section className="platform-shared-record bg-cream px-6 py-16 craft:py-20">
       <div className="mx-auto max-w-5xl">
         <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
           <div>
@@ -67,7 +68,7 @@ const PlatformTour = () => (
           </div>
           <p className="max-w-md text-sm leading-relaxed text-secondary-text">The homeowner and trade work from the same project record, with information and actions suited to each role.</p>
         </div>
-        <div className="grid gap-5 craft:grid-cols-2">
+        <div className="platform-shared-record__views grid gap-5 craft:grid-cols-2">
           <DeviceFrame
             src={projectView}
             label="Homeowner view"
@@ -81,7 +82,7 @@ const PlatformTour = () => (
             caption={<><strong className="text-navy">Trade view:</strong> today’s work, quoting and project delivery.</>}
           />
         </div>
-        <div className="mt-8 grid gap-5 sm:grid-cols-2 craft:grid-cols-4">
+        <div className="platform-shared-record__steps mt-8 grid gap-5 sm:grid-cols-2 craft:grid-cols-4">
           {SHARED_STEPS.map(({ icon: Icon, title, text }) => <article key={title} className="border-t-2 border-teal pt-4"><Icon className="h-5 w-5 text-teal" /><h3 className="mt-3 font-body text-base font-bold text-navy">{title}</h3><p className="mt-2 text-sm leading-relaxed text-secondary-text">{text}</p></article>)}
         </div>
       </div>
@@ -92,11 +93,11 @@ const PlatformTour = () => (
       note="The same record, read from both ends of the job."
     />
 
-    <section className="bg-cream px-6 py-16 craft:py-20">
+    <section className="platform-evidence bg-cream px-6 py-16 craft:py-20">
       <div className="mx-auto max-w-5xl">
         <SectionLabel tone="light">Inside the project</SectionLabel>
         <h2 className="mt-3 max-w-2xl font-heading text-4xl uppercase text-navy">Quotes, work, payments and evidence.</h2>
-        <div className="mt-9 grid gap-5 craft:grid-cols-2">
+        <div className="platform-evidence__grid mt-9 grid gap-5 craft:grid-cols-2">
           {IN_THE_PROJECT.map((item) => (
             <DeviceFrame key={item.label} src={item.src} alt={item.alt} label={item.label} caption={item.caption} />
           ))}

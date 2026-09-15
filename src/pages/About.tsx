@@ -4,7 +4,9 @@ import AppShell from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { localBusinessJsonLd } from "@/lib/seoSchemas";
-import { EditorialStatement, GhostMark } from "@/components/public/PublicBits";
+import { EditorialStatement } from "@/components/public/PublicBits";
+import founderImage from "@/assets/home/trades-hero.jpg";
+import receiptsImage from "@/assets/how-it-works/cta-plans.jpg";
 
 const leads = [
   {
@@ -117,8 +119,8 @@ const About = () => {
 
       <div className="bg-deep">
         {/* Hero */}
-        <section className="public-blueprint relative overflow-hidden px-6 pb-14 pt-36">
-          <GhostMark className="absolute -bottom-4 right-4 text-[70px] craft:text-[120px]">£625</GhostMark>
+        <section className="about-founder-hero public-blueprint relative overflow-hidden px-6 pb-14 pt-36">
+          <div className="about-founder-hero__image" aria-hidden><img src={founderImage} alt="" /></div>
           <div className="max-w-5xl mx-auto relative z-10">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-8 h-[2px] bg-teal" />
@@ -154,7 +156,8 @@ const About = () => {
         </section>
 
         {/* Lead breakdown table */}
-        <section className="px-6 py-16 border-t border-cream/10">
+        <section className="about-receipts px-6 py-16 border-t border-cream/10">
+          <div className="about-receipts__image" aria-hidden><img src={receiptsImage} alt="" /></div>
           <div className="max-w-6xl mx-auto">
             <span className="font-mono text-xs text-teal uppercase tracking-widest">
               The Receipts
