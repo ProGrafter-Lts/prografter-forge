@@ -2742,6 +2742,7 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
 .public-site .pg-receipt dt,
 .public-site .pg-receipt dd,
 .public-site .pg-receipt span {
-  color: hsl(var(--navy));
+  color: hsl(var(--navy)) !important;
 }
-.public-site .pg-receipt .pg-note { color: hsl(var(--navy) / 0.7); }
+.public-site .pg-receipt [class*="text-navy/"] { color: hsl(var(--navy) / 0.7) !important; }
+.public-site .pg-receipt .pg-note { color: hsl(var(--navy) / 0.7) !important; }
