@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Check, Minus } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 type Quote = {
   name: string;
@@ -54,13 +56,13 @@ const QuoteComparisonDemo = () => {
   const [active, setActive] = useState(0);
 
   return (
-    <section className="bg-navy-deep py-24 px-6" style={{ background: "linear-gradient(135deg, #27396A 0%, #0F1F38 100%)" }}>
+    <section className="public-blueprint bg-navy-deep px-6 py-24">
       <div className="max-w-5xl mx-auto">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-8 h-[2px] bg-teal" />
           <span className="font-mono text-xs text-teal uppercase tracking-widest">Compare Quotes</span>
         </div>
-        <h2 className="font-heading text-cream text-[40px] craft:text-[60px] leading-none mb-4">
+        <h2 className="type-h2 mb-4 text-cream">
           Not just the cheapest. The clearest.
         </h2>
         <p className="font-body text-cream/70 text-base craft:text-lg max-w-2xl mb-12">
@@ -134,12 +136,9 @@ const QuoteComparisonDemo = () => {
         </div>
 
         <div className="mt-10">
-          <a
-            href="/how-it-works"
-            className="inline-flex items-center justify-center gap-2 border border-cream/30 text-cream font-mono text-sm px-7 py-3.5 rounded-xl hover:border-teal hover:text-teal transition-colors"
-          >
-            See how matching works
-          </a>
+          <Button asChild variant="outline" size="lg" className="border-cream/30 bg-transparent text-cream hover:border-teal hover:bg-transparent hover:text-teal">
+            <Link to="/how-it-works">See how matching works</Link>
+          </Button>
         </div>
       </div>
     </section>

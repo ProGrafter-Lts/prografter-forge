@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { ShieldCheck, FileCheck, Award, Users, RefreshCw, ChevronRight } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 const STEPS = [
   {
@@ -53,7 +55,7 @@ const VerificationExplainerInteractive = () => {
             5-Step Verification
           </span>
         </div>
-        <h2 className="font-heading text-deep text-[40px] craft:text-[60px] leading-none mb-4">
+        <h2 className="type-h2 mb-4 text-deep">
           Verification is earned, never bought.
         </h2>
         <p className="font-body text-secondary-text text-base craft:text-lg max-w-2xl mb-12">
@@ -117,18 +119,8 @@ const VerificationExplainerInteractive = () => {
         </div>
 
         <div className="mt-10 flex flex-col craft:flex-row gap-4">
-          <a
-            href="/trade-verification"
-            className="inline-flex items-center justify-center gap-2 bg-teal text-cream font-mono text-sm px-7 py-3.5 rounded-xl hover:bg-teal-hover transition-all shadow-lg shadow-teal/20 hover:-translate-y-0.5"
-          >
-            How verification works
-          </a>
-          <a
-            href="/signup/trade"
-            className="inline-flex items-center justify-center gap-2 border border-deep/20 text-deep font-mono text-sm px-7 py-3.5 rounded-xl hover:border-teal hover:text-teal-deep transition-colors"
-          >
-            Join as a verified trade
-          </a>
+          <Button asChild variant="cta" size="lg"><Link to="/trade-verification">How verification works</Link></Button>
+          <Button asChild variant="outline" size="lg"><Link to="/signup/trade">Join as a verified trade</Link></Button>
         </div>
       </div>
     </section>

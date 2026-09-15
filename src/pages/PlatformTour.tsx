@@ -29,10 +29,10 @@ const PlatformTour = () => (
       path="/platform-tour"
     />
 
-    <section className="bg-deep px-6 pb-16 pt-32">
+    <section className="public-blueprint bg-deep px-6 pb-20 pt-32">
       <div className="mx-auto max-w-5xl">
         <p className="mb-4 font-mono text-xs uppercase tracking-[0.28em] text-teal">Platform tour</p>
-        <h1 className="max-w-4xl font-heading text-[42px] uppercase leading-[0.95] text-cream craft:text-[72px]">
+        <h1 className="type-h1 max-w-4xl text-cream">
           See how the work stays clear.
         </h1>
         <p className="mt-6 max-w-2xl font-body text-lg leading-relaxed text-cream/80">
@@ -67,7 +67,7 @@ const PlatformTour = () => (
     <section className="bg-deep px-6 py-16 craft:py-20">
       <div className="mx-auto max-w-5xl">
         <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-teal">Trade tools roadmap</p>
-        <h2 className="mt-3 max-w-3xl font-heading text-4xl uppercase text-cream craft:text-5xl">From site visit to a smarter next quote.</h2>
+        <h2 className="type-h2 mt-3 max-w-3xl text-cream">From site visit to a smarter next quote.</h2>
         <p className="mt-4 max-w-2xl text-base leading-relaxed text-cream/80">This is the direction of travel, not a claim that every tool is publicly available today.</p>
         <div className="mt-10 grid gap-5 craft:grid-cols-3">
           {ROADMAP.map(({ icon: Icon, status, title, text }) => <article key={title} className="rounded-lg border border-cream/10 bg-cream/[0.04] p-6"><span className="font-mono text-[10px] uppercase tracking-[0.16em] text-teal">{status}</span><Icon className="mt-6 h-7 w-7 text-teal" /><h3 className="mt-4 font-body text-xl font-bold text-cream">{title}</h3><p className="mt-3 text-sm leading-relaxed text-cream/75">{text}</p></article>)}

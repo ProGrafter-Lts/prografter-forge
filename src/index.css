@@ -1570,6 +1570,27 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
   mask-image: radial-gradient(ellipse at top left, #000 0%, transparent 75%);
 }
 
+/* Shared public-page architectural drafting treatment. */
+.public-blueprint {
+  position: relative;
+  isolation: isolate;
+  background-image:
+    linear-gradient(hsl(var(--teal) / 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--teal) / 0.045) 1px, transparent 1px),
+    linear-gradient(135deg, hsl(var(--navy-deep)), hsl(var(--deep)));
+  background-size: 34px 34px, 34px 34px, auto;
+}
+
+.public-blueprint::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent 58%, hsl(var(--teal) / 0.08));
+  mask-image: linear-gradient(to bottom, transparent, #000 30%, #000 70%, transparent);
+}
+
 /* --- Survey cross / datum markers overlay --- */
 .blueprint-crosses::after {
   content: "";

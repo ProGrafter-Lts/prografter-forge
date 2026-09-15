@@ -116,7 +116,7 @@ const About = () => {
 
       <div className="bg-deep">
         {/* Hero */}
-        <section className="relative pt-32 pb-14 px-6 overflow-hidden">
+        <section className="public-blueprint relative overflow-hidden px-6 pb-14 pt-32">
           <div className="max-w-5xl mx-auto relative z-10">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-8 h-[2px] bg-teal" />
@@ -124,7 +124,7 @@ const About = () => {
                 Why I Built ProGrafter
               </span>
             </div>
-            <h1 className="font-heading text-cream text-[36px] craft:text-[72px] leading-[0.98] max-w-4xl">
+            <h1 className="type-h1 max-w-4xl text-cream">
               I Spent £625 on 18 Leads and Won Nothing. So I Built Something Better.
             </h1>
           </div>
@@ -157,7 +157,7 @@ const About = () => {
             <span className="font-mono text-xs text-teal uppercase tracking-widest">
               The Receipts
             </span>
-            <h2 className="font-heading text-cream text-[32px] craft:text-[56px] leading-[1] mt-3 mb-10">
+            <h2 className="type-h2 mb-10 mt-3 text-cream">
               Ten of the eighteen.
             </h2>
             <div className="mb-7 grid gap-4 sm:grid-cols-3">
@@ -216,7 +216,7 @@ const About = () => {
         {/* The moment it clicked */}
         <section className="px-6 py-16 border-t border-cream/10">
           <div className="max-w-[700px] mx-auto">
-            <h2 className="font-heading text-teal text-[32px] craft:text-[48px] leading-[1] mb-8">
+            <h2 className="type-h2 mb-8 text-teal">
               The Moment It Clicked
             </h2>
             <div className="space-y-6 font-body text-cream/80 text-lg leading-relaxed font-light">
@@ -253,7 +253,7 @@ const About = () => {
             <span className="font-mono text-xs text-teal uppercase tracking-widest">
               The Alternative
             </span>
-            <h2 className="font-heading text-cream text-[32px] craft:text-[56px] leading-[1] mt-3 mb-10">
+            <h2 className="type-h2 mb-10 mt-3 text-cream">
               What ProGrafter Is
             </h2>
             <div className="grid md:grid-cols-2 gap-4 mb-12">
