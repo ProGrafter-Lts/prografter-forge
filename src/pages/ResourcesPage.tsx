@@ -30,8 +30,8 @@ const GUIDES: Resource[] = [
 
 const ResourceCard = ({ r }: { r: Resource }) => {
   const inner = (
-    <div className="h-full rounded-2xl bg-white border border-border/60 p-6 shadow-sm hover:shadow-md hover:border-teal/40 transition-all flex flex-col">
-      <span className="self-start font-mono text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-full bg-teal/10 text-teal border border-teal/25 mb-4">
+    <div className="flex h-full flex-col rounded-[4px] border border-border/60 bg-card p-6 shadow-sm transition-all hover:border-teal/40 hover:shadow-md">
+      <span className="mb-4 self-start border border-teal/25 bg-teal/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-teal">
         {r.tag}
       </span>
       <h3 className="font-heading text-navy text-xl leading-tight mb-2">{r.title}</h3>

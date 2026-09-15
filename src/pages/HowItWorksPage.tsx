@@ -226,7 +226,7 @@ const HowItWorksPage = () => {
         path="/how-it-works"
         jsonLd={localBusinessJsonLd}
       />
-      <HomeownerNav activeLabel="How It Works" />
+      <HomeownerNav />
 
       <main>
         <section className="hiw-hero">
