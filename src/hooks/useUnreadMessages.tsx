@@ -21,17 +21,25 @@ export function useUnreadMessages() {
       return;
     }
 
-    const [{ data: messages }, { data: reads }] = await Promise.all([
+    // Messages store the sender's *entity* id (trades.id / homeowners.id), not the
+    // auth user id — resolve both so a viewer's own messages never count as unread.
+    const [{ data: messages }, { data: reads }, { data: trade }, { data: homeowner }] = await Promise.all([
       supabase.from("project_messages").select("job_id, created_at, sender_id"),
       supabase.from("project_message_reads").select("job_id, last_read_at").eq("user_id", uid),
+      supabase.from("trades").select("id").eq("user_id", uid).maybeSingle(),
+      supabase.from("homeowners").select("id").eq("user_id", uid).maybeSingle(),
     ]);
+
+    const selfIds = new Set<string>([uid]);
+    if (trade?.id) selfIds.add(trade.id);
+    if (homeowner?.id) selfIds.add(homeowner.id);
 
     const readAt: Record<string, number> = {};
     for (const r of reads || []) readAt[r.job_id] = new Date(r.last_read_at).getTime();
 
     const counts: Record<string, number> = {};
     for (const m of messages || []) {
-      if (m.sender_id === uid) continue;
+      if (m.sender_id && selfIds.has(m.sender_id)) continue;
       const seenAt = readAt[m.job_id] ?? 0;
       if (new Date(m.created_at).getTime() > seenAt) {
         counts[m.job_id] = (counts[m.job_id] || 0) + 1;
