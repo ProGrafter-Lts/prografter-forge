@@ -317,7 +317,7 @@ const About = () => {
                 Join ProGrafter <ArrowRight className="ml-1" />
               </Link>
             </Button>
-            <p className="font-mono text-xs text-secondary-text uppercase tracking-widest mt-10">
+            <p className="font-mono text-xs text-cream/55 uppercase tracking-widest mt-10">
               ProGrafter Ltd · Company 17124130 · ICO ZC114018
             </p>
           </div>
