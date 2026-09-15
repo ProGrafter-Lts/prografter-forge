@@ -8,6 +8,8 @@ export const ContentHero = ({
   highlight,
   intro,
   ghost,
+  image,
+  imageAlt = "",
   primaryCta,
   secondaryCta,
   tone = "dark",
@@ -17,6 +19,8 @@ export const ContentHero = ({
   highlight?: string;
   intro: string;
   ghost?: string;
+  image?: string;
+  imageAlt?: string;
   primaryCta?: { label: string; href: string };
   secondaryCta?: { label: string; href: string };
   /** "light" gives content-led pages a cream, drafting-paper hero. */
@@ -29,6 +33,7 @@ export const ContentHero = ({
         : "public-blueprint relative overflow-hidden bg-deep px-6 pb-20 pt-36"
     }
   >
+    {image && <div className="content-hero-image"><img src={image} alt={imageAlt} width={1280} height={1024} /></div>}
     {ghost && (
       <span
         className={`absolute -bottom-8 right-0 font-heading text-[140px] craft:text-[260px] select-none pointer-events-none leading-none ${tone === "light" ? "text-navy" : "text-cream"}`}
