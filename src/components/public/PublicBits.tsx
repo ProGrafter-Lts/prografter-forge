@@ -1,5 +1,8 @@
 import { type ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { Link } from "react-router-dom";
+import { ArrowRight, type LucideIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 /** Small technical label with a teal rule — the ProGrafter section marker. */
 export const SectionLabel = ({
@@ -137,4 +140,78 @@ export const GhostMark = ({ children, className }: { children: ReactNode; classN
   >
     {children}
   </span>
+);
+
+export const PublicSceneHero = ({
+  image,
+  imageAlt,
+  eyebrow,
+  title,
+  highlight,
+  intro,
+  primaryCta,
+  secondaryCta,
+  annotation,
+  phases,
+}: {
+  image: string;
+  imageAlt: string;
+  eyebrow: string;
+  title: string;
+  highlight?: string;
+  intro: string;
+  primaryCta?: { label: string; href: string };
+  secondaryCta?: { label: string; href: string };
+  annotation?: string[];
+  phases?: string[];
+}) => (
+  <section className="public-scene-hero">
+    <div className="public-scene-hero__image">
+      <img src={image} alt={imageAlt} width={1280} height={1024} />
+    </div>
+    <div className="public-scene-hero__grid" aria-hidden />
+    <div className="public-scene-container public-scene-hero__inner">
+      <div className="public-scene-hero__copy">
+        <p className="public-scene-eyebrow">{eyebrow}</p>
+        <h1>{title}{highlight && <span>{highlight}</span>}</h1>
+        <p className="public-scene-hero__intro">{intro}</p>
+        {(primaryCta || secondaryCta) && <div className="public-scene-actions">
+          {primaryCta && <Button asChild variant="cta" size="lg"><Link to={primaryCta.href}>{primaryCta.label}<ArrowRight /></Link></Button>}
+          {secondaryCta && <Button asChild variant="outline" size="lg"><Link to={secondaryCta.href}>{secondaryCta.label}</Link></Button>}
+        </div>}
+      </div>
+      {annotation && <p className="public-scene-annotation">{annotation.map((line, index) => <span key={line} className={index === annotation.length - 1 ? "is-accent" : undefined}>{line}</span>)}</p>}
+      {phases && <div className="public-scene-phases" aria-hidden>{phases.map((phase) => <span key={phase}>{phase}</span>)}</div>}
+    </div>
+  </section>
+);
+
+export type VisualSequenceItem = {
+  num: string;
+  title: string;
+  description: string;
+  evidence: string;
+  image: string;
+  alt: string;
+  icon: LucideIcon;
+};
+
+export const VisualSequence = ({ items, className }: { items: VisualSequenceItem[]; className?: string }) => (
+  <div className={cn("public-visual-sequence", className)}>
+    {items.map(({ num, title, description, evidence, image, alt, icon: Icon }) => (
+      <article key={num} className="public-visual-step">
+        <div className="public-visual-step__marker"><span>{num}</span><i aria-hidden /></div>
+        <div className="public-visual-step__image">
+          <img src={image} alt={alt} loading="lazy" />
+          <div className="public-visual-step__shade" />
+          <Icon aria-hidden />
+          <p>{evidence}</p>
+        </div>
+        <div className="public-visual-step__copy">
+          <h3>{title}</h3>
+          <p>{description}</p>
+        </div>
+      </article>
+    ))}
+  </div>
 );

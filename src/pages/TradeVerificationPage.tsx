@@ -1,22 +1,26 @@
 import SEO from "@/components/SEO";
 import AppShell from "@/components/AppShell";
 import { BadgeCheck, FileCheck2, HardHat, ScrollText, ShieldCheck } from "lucide-react";
-import { EditorialStatement, SectionLabel } from "@/components/public/PublicBits";
+import { EditorialStatement, PublicSceneHero, SectionLabel, VisualSequence } from "@/components/public/PublicBits";
 import {
-  ContentHero,
   ContentSection,
   FeatureGrid,
   FaqBlock,
   ContentCta,
   buildFaqJsonLd,
 } from "@/components/content/ContentBlocks";
+import verifiedTrade from "@/assets/how-it-works/get-verified.jpg";
+import policyEvidence from "@/assets/dashboard/card-tradevault.jpg";
+import qualificationEvidence from "@/assets/how-it-works/submit-quote.jpg";
+import workEvidence from "@/assets/how-it-works/trade-project.jpg";
+import accountabilityEvidence from "@/assets/dashboard/card-sitephotos.jpg";
 
 const STEPS = [
-  { icon: BadgeCheck, evidence: "Government-issued ID", title: "Identity verification", desc: "Government-issued ID is checked to confirm the person behind the business is who they say they are — no anonymous listings." },
-  { icon: ShieldCheck, evidence: "Policy schedule", title: "Public liability insurance", desc: "We confirm valid public liability cover so homeowners are protected if something goes wrong on site." },
-  { icon: ScrollText, evidence: "Certificates & scheme membership", title: "Trade qualifications & accreditations", desc: "Relevant qualifications, competent-person scheme membership and trade accreditations are checked against the work a trade offers." },
-  { icon: HardHat, evidence: "Referees & completed work", title: "References & work history", desc: "We review references and past work so a trade's track record — not just their marketing — earns them a place." },
-  { icon: FileCheck2, evidence: "Reviews & expiry reminders", title: "Ongoing accountability", desc: "Two-way reviews, document expiry reminders and manual oversight keep standards high after approval, not just at sign-up." },
+  { num: "01", icon: BadgeCheck, image: verifiedTrade, alt: "Verified tradesperson on a residential building project", evidence: "Government-issued ID", title: "Identity verification", description: "Government-issued ID is checked to confirm the person behind the business is who they say they are — no anonymous listings." },
+  { num: "02", icon: ShieldCheck, image: policyEvidence, alt: "Trade document records and expiry information", evidence: "Policy schedule", title: "Public liability insurance", description: "We confirm valid public liability cover so homeowners are protected if something goes wrong on site." },
+  { num: "03", icon: ScrollText, image: qualificationEvidence, alt: "Trade preparing structured documents on a laptop", evidence: "Certificates & scheme membership", title: "Trade qualifications & accreditations", description: "Relevant qualifications, competent-person scheme membership and trade accreditations are checked against the work a trade offers." },
+  { num: "04", icon: HardHat, image: workEvidence, alt: "Builder reviewing completed construction work", evidence: "Referees & completed work", title: "References & work history", description: "We review references and past work so a trade's track record — not just their marketing — earns them a place." },
+  { num: "05", icon: FileCheck2, image: accountabilityEvidence, alt: "Dated construction site records and photographs", evidence: "Reviews & expiry reminders", title: "Ongoing accountability", description: "Two-way reviews, document expiry reminders and manual oversight keep standards high after approval, not just at sign-up." },
 ];
 
 const WHY = [
@@ -43,43 +47,29 @@ const TradeVerificationPage = () => (
       path="/trade-verification"
       jsonLd={buildFaqJsonLd(FAQ)}
     />
-    <ContentHero
+    <PublicSceneHero
+      image={verifiedTrade}
+      imageAlt="Verified tradesperson working on a residential construction project"
       eyebrow="Trade Verification"
-      title="Every trade, verified"
+      title="Every trade, verified "
       highlight="five ways."
       intro="Trust starts before the first quote. ProGrafter checks identity, insurance, qualifications, references and history — so homeowners meet genuine professionals, not paid listings."
-      ghost="VERIFY"
       primaryCta={{ label: "Join as a verified trade", href: "/signup/trade" }}
       secondaryCta={{ label: "See how it works", href: "/how-it-works" }}
+      annotation={["Checked first.", "Trusted after."]}
+      phases={["Identity", "Insurance", "Skills", "History", "Accountability"]}
     />
 
-    <section className="bg-cream px-6 py-16 craft:py-20">
-      <div className="mx-auto max-w-5xl">
-        <SectionLabel tone="light">The record we build</SectionLabel>
-        <h2 className="type-h2 mt-3 max-w-3xl text-navy">Our 5-step verification process</h2>
-        <p className="mt-4 max-w-2xl font-body text-lg text-secondary-text">
+    <section className="public-evidence-section">
+      <div className="public-scene-container">
+        <SectionLabel>The record we build</SectionLabel>
+        <div className="public-section-heading">
+          <h2>Our 5-step<br /><span>verification process.</span></h2>
+          <p>
           Each trade passes every stage before their profile goes live to homeowners.
-        </p>
-        <ol className="mt-10 space-y-4">
-          {STEPS.map(({ icon: Icon, evidence, title, desc }, i) => (
-            <li
-              key={title}
-              className="relative grid gap-4 rounded-[4px] border border-border/60 border-l-2 border-l-teal bg-card p-6 shadow-sm craft:grid-cols-[auto_1fr_auto] craft:items-start"
-            >
-              <span className="flex h-11 w-11 items-center justify-center rounded-[4px] border border-teal/25 bg-teal/10 font-mono text-sm text-teal">
-                {String(i + 1).padStart(2, "0")}
-              </span>
-              <div>
-                <h3 className="font-heading text-xl leading-tight text-navy">{title}</h3>
-                <p className="mt-2 font-body text-sm leading-relaxed text-body-text">{desc}</p>
-              </div>
-              <span className="flex items-center gap-2 self-center whitespace-nowrap border border-border/60 bg-cream px-3 py-2 font-mono text-[10px] uppercase tracking-[0.16em] text-secondary-text">
-                <Icon className="h-4 w-4 shrink-0 text-teal" aria-hidden />
-                {evidence}
-              </span>
-            </li>
-          ))}
-        </ol>
+          </p>
+        </div>
+        <VisualSequence items={STEPS} />
       </div>
     </section>
 
