@@ -524,7 +524,6 @@ export default function PostJobBrief() {
       if (!form.address_line1.trim()) e.address_line1 = "Required";
       if (!form.city.trim()) e.city = "Required";
       if (!form.postcode.trim()) e.postcode = "Required";
-      else if (!isInLiveArea(form.postcode)) e.postcode = "We're not live in this area yet — join the waitlist below";
       if (!form.property_type) e.property_type = "Required";
     }
     if (n === 1) {
@@ -640,6 +639,18 @@ export default function PostJobBrief() {
         marketing_opt_in: marketing,
         user_agent: typeof navigator !== "undefined" ? navigator.userAgent : "",
       };
+      // Outside the live areas the brief is still accepted, and the postcode is
+      // registered as a request to open that area so demand is tracked honestly.
+      if (!isInLiveArea(form.postcode) && !waitlistDone) {
+        const { error: areaError } = await supabase.from("cost_guide_area_waitlist").insert({
+          email: form.email.trim(),
+          postcode: normalisePostcode(form.postcode).slice(0, 12),
+          outcode: outcodeOf(form.postcode) || null,
+          project_type: form.job_title?.trim() || null,
+        });
+        if (!areaError) setWaitlistDone(true);
+      }
+
       const { data, error } = await supabase.functions.invoke("submit-job-brief", { body: payload });
       if (error || !data?.ref) throw error || new Error("No reference returned");
       setRef(data.ref);
@@ -731,11 +742,11 @@ export default function PostJobBrief() {
         <InfoBox variant="amber">
           <strong>We're not live in {outcodeOf(form.postcode) || "your area"} yet.</strong> ProGrafter is
           currently running in the East Midlands and South Yorkshire while we verify trades area by area.
-          Rather than promise a match we can't deliver, leave your details and we'll email you the moment
-          we open in your area.
+          You can still complete your brief — it will be treated as a request to open your area, reviewed
+          by our team, and matched only once verified trades cover you. We'll keep you posted either way.
           {waitlistDone ? (
             <div style={{ marginTop: 10, fontWeight: 700 }}>
-              You're on the list — we'll be in touch as soon as we're live near you.
+              Your area is on our list — we'll be in touch as soon as we're live near you.
             </div>
           ) : (
             <div style={{ marginTop: 10 }}>
@@ -762,7 +773,7 @@ export default function PostJobBrief() {
                 style={{ background: C.amber, color: C.white, border: "none", borderRadius: 8,
                   padding: "9px 16px", fontSize: 13, fontWeight: 700, cursor: "pointer" }}
               >
-                {waitlistSaving ? "Saving…" : "Notify me when you're live here"}
+                {waitlistSaving ? "Saving…" : "Ask us to open my area"}
               </button>
               {waitlistError && (
                 <div style={{ marginTop: 8, color: C.error, fontWeight: 600 }}>{waitlistError}</div>
