@@ -275,7 +275,7 @@ const Chatbot = () => {
           aria-label="Open ProGrafter chat assistant"
           variant="cta"
           size="icon"
-          className="fixed bottom-[max(4.75rem,calc(env(safe-area-inset-bottom)+1rem))] right-4 z-[70] h-12 w-12 rounded-full shadow-lg sm:bottom-5 sm:right-5 sm:h-[55px] sm:w-[55px]"
+          className="fixed bottom-[max(4.75rem,calc(env(safe-area-inset-bottom)+1rem))] right-4 z-30 h-12 w-12 rounded-full shadow-lg sm:bottom-5 sm:right-5 sm:h-[55px] sm:w-[55px]"
         >
           <MessageCircle className="h-6 w-6" strokeWidth={2.2} />
         </Button>
