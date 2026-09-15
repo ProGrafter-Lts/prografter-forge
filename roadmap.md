@@ -36,7 +36,7 @@
 - [x] Streamline Pricing and About detail with expandable breakdowns
 
 ## Final public brand and navigation consolidation
-- [ ] Consolidate all public pages onto one canonical header and footer
-- [ ] Extend the homeowner homepage typography, CTA, card and blueprint language across core public pages
-- [ ] Preserve Platform Tour, verification, advice, founder story and pricing content while aligning presentation
-- [ ] Validate the complete public journey, menus, links, responsiveness and console health
+- [x] Consolidate all public pages onto one canonical header and footer
+- [x] Extend the homeowner homepage typography, CTA, card and blueprint language across core public pages
+- [x] Preserve Platform Tour, verification, advice, founder story and pricing content while aligning presentation
+- [x] Validate the complete public journey, menus, links, responsiveness and console health
