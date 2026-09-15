@@ -59,7 +59,7 @@ const PlatformTour = () => (
       </div>
     </section>
 
-    <section className="platform-shared-record bg-cream px-6 py-16 craft:py-20">
+    <section className="platform-shared-record public-dark-surface bg-cream px-6 py-16 craft:py-20">
       <div className="mx-auto max-w-5xl">
         <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
           <div>
@@ -73,12 +73,14 @@ const PlatformTour = () => (
             src={projectView}
             label="Homeowner view"
             alt="Homeowner project overview showing progress, quotes and actions"
+            mobileFocus="left"
             caption={<><strong className="text-navy">Homeowner view:</strong> progress, updates, decisions and payments.</>}
           />
           <DeviceFrame
             src={tradeView}
             label="Trade view"
             alt="Trade dashboard showing projects, tasks and earnings"
+            mobileFocus="left"
             caption={<><strong className="text-navy">Trade view:</strong> today’s work, quoting and project delivery.</>}
           />
         </div>
@@ -99,7 +101,7 @@ const PlatformTour = () => (
         <h2 className="mt-3 max-w-2xl font-heading text-4xl uppercase text-navy">Quotes, work, payments and evidence.</h2>
         <div className="platform-evidence__grid mt-9 grid gap-5 craft:grid-cols-2">
           {IN_THE_PROJECT.map((item) => (
-            <DeviceFrame key={item.label} src={item.src} alt={item.alt} label={item.label} caption={item.caption} />
+            <DeviceFrame key={item.label} src={item.src} alt={item.alt} label={item.label} caption={item.caption} mobileFocus="left" />
           ))}
         </div>
       </div>

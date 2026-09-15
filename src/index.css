@@ -19,6 +19,7 @@
     --teal: 177 78% 37%;        /* #14A8A1 primary accent */
     --teal-deep: 173 84% 32%;   /* #0D9488 hover / active accent */
     --teal-hover: 173 84% 32%;  /* alias → teal-deep */
+    --teal-ink: 176 84% 25%;    /* accessible technical text on cream */
     --cream: 37 39% 94%;        /* #F5F0E8 light bg / light text on dark */
 
     --background: 37 39% 94%;
@@ -113,7 +114,40 @@ body::before {
 }
 
 /* === Section background contrast overrides === */
-/* On dark sections (deep / navy), enforce WCAG AA contrast for all text */
+/* Public sections opt into a semantic surface so utility order cannot create
+   dark-on-dark or light-on-light copy. Cream is 14.17:1 on deep navy. */
+.public-site :is(.bg-deep, .bg-navy, .public-blueprint, .public-dark-surface) :is(h1, h2, h3, h4, h5, h6),
+.public-site :is(.bg-deep, .bg-navy, .public-blueprint, .public-dark-surface) .text-navy,
+.public-site :is(.bg-deep, .bg-navy, .public-blueprint, .public-dark-surface) .text-body-text {
+  color: hsl(var(--cream));
+}
+.public-site :is(.bg-deep, .bg-navy, .public-blueprint, .public-dark-surface) :is(p, li, .text-secondary-text, .text-muted-foreground) {
+  color: hsl(var(--cream) / .82);
+}
+.public-site :is(.bg-deep, .bg-navy, .public-blueprint, .public-dark-surface) :is(.text-teal, .text-teal-ink) {
+  color: hsl(var(--teal));
+}
+.public-site :is(.bg-cream, .bg-card, .bg-background, .public-drafting):not(.public-dark-surface) :is(h1, h2, h3, h4, h5, h6) {
+  color: hsl(var(--navy));
+}
+.public-site :is(.bg-cream, .bg-card, .bg-background, .public-drafting):not(.public-dark-surface) :is(p, li, .text-body-text) {
+  color: hsl(var(--body-text));
+}
+.public-site :is(.bg-cream, .bg-card, .bg-background, .public-drafting):not(.public-dark-surface) :is(.text-secondary-text, .text-muted-foreground) {
+  color: hsl(var(--secondary-text));
+}
+.public-site :is(.bg-cream, .bg-card, .bg-background, .public-drafting):not(.public-dark-surface) .text-teal {
+  color: hsl(var(--teal-ink));
+}
+/* Explicit dark cards remain dark when nested in a light public section. */
+.public-site :is(.bg-cream, .bg-card, .bg-background, .public-drafting):not(.public-dark-surface) :is(.bg-deep, .bg-navy, .public-blueprint, .public-dark-surface) :is(h1, h2, h3, h4, h5, h6, .text-navy, .text-body-text) {
+  color: hsl(var(--cream));
+}
+.public-site :is(.bg-cream, .bg-card, .bg-background, .public-drafting):not(.public-dark-surface) :is(.bg-deep, .bg-navy, .public-blueprint, .public-dark-surface) :is(p, li, .text-secondary-text, .text-muted-foreground) {
+  color: hsl(var(--cream) / .82);
+}
+
+/* Legacy safety net for non-public pages. */
 .bg-deep .text-secondary-text,
 .bg-navy .text-secondary-text,
 section[class*="bg-deep"] .text-secondary-text,
@@ -2115,6 +2149,8 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
 .platform-evidence__grid { counter-reset: evidence; }
 .platform-evidence__grid figure { counter-increment: evidence; position: relative; border-radius: 0; border-top: 2px solid hsl(var(--teal)); box-shadow: none; }
 .platform-evidence__grid figure::before { content: "0" counter(evidence); position: absolute; z-index: 2; top: 13px; right: 16px; font: 18px var(--font-mono); color: hsl(var(--teal)); }
+.device-frame__screen { overflow: hidden; }
+.device-frame__image { display: block; width: 100%; height: auto; }
 
 .verification-record { position: relative; overflow: hidden; background: hsl(var(--deep)); }
 .verification-record h2 { color: hsl(var(--cream)); }
@@ -2154,6 +2190,10 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
   .platform-shared-record__views { padding-left: 24px; }
   .platform-shared-record__views::before { left: 0; top: 0; transform: rotate(-2deg); }
   .platform-shared-record__views::after { left: 8px; }
+  .device-frame__screen { aspect-ratio: 4 / 3; background: hsl(var(--deep)); }
+  .device-frame__image { width: 100%; height: 100%; object-fit: cover; object-position: center top; }
+  .device-frame__image--left { object-position: left top; }
+  .device-frame__image--right { object-position: right top; }
   .verification-record__list { padding-left: 24px; border-left: 1px solid hsl(var(--teal) / .5); }
   .verification-record__list > li { display: grid; min-height: 0; padding: 0 0 36px; grid-template-columns: 42% minmax(0, 1fr); gap: 14px; border-top: 0; }
   .verification-record__image { position: relative; width: 100%; height: auto; aspect-ratio: 1 / 1; grid-row: 1 / 3; }

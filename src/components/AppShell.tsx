@@ -14,7 +14,7 @@ interface AppShellProps {
  */
 const AppShell = ({ children }: AppShellProps) => {
   return (
-    <div className="min-h-screen bg-cream">
+    <div className="public-site min-h-screen bg-cream">
       <Navbar />
       {children}
       <Footer />

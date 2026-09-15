@@ -36,6 +36,7 @@ export default {
           DEFAULT: "hsl(var(--teal))",
           deep: "hsl(var(--teal-deep))",
           hover: "hsl(var(--teal-hover))",
+          ink: "hsl(var(--teal-ink))",
         },
         "body-text": "hsl(var(--body-text))",
         "secondary-text": "hsl(var(--secondary-text))",

@@ -71,7 +71,7 @@ export const EditorialStatement = ({
         <p
           className={cn(
             "max-w-xs font-mono text-[11px] uppercase leading-relaxed tracking-[0.18em]",
-            tone === "dark" ? "text-cream/45" : "text-secondary-text",
+            tone === "dark" ? "text-cream/70" : "text-secondary-text",
           )}
         >
           {note}
@@ -94,12 +94,14 @@ export const DeviceFrame = ({
   alt,
   caption,
   label,
+  mobileFocus = "center",
   className,
 }: {
   src: string;
   alt: string;
   caption?: ReactNode;
   label?: string;
+  mobileFocus?: "left" | "center" | "right";
   className?: string;
 }) => (
   <figure
@@ -118,7 +120,18 @@ export const DeviceFrame = ({
         </span>
       )}
     </div>
-    <img src={src} alt={alt} loading="lazy" className="w-full" />
+    <div className="device-frame__screen">
+      <img
+        src={src}
+        alt={alt}
+        loading="lazy"
+        className={cn(
+          "device-frame__image",
+          mobileFocus === "left" && "device-frame__image--left",
+          mobileFocus === "right" && "device-frame__image--right",
+        )}
+      />
+    </div>
     {caption && (
       <figcaption className="border-t border-navy/10 p-4 font-body text-sm leading-relaxed text-secondary-text">
         {caption}

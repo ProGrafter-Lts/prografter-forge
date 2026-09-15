@@ -61,9 +61,9 @@ const PublicHeader = () => {
   const secondaryActive = SECONDARY_LINKS.some(({ href }) => matchesPath(pathname, href));
   const tradesActive = matchesPath(pathname, "/for-trades");
 
-  // Merge into the hero at the top of the page, then settle into a solid bar.
+  // Merge into the hero at the top, then compact the fixed mobile bar after a meaningful scroll.
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
+    const onScroll = () => setScrolled(window.scrollY > 64);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -87,14 +87,14 @@ const PublicHeader = () => {
   return (
     <header
       className={cn(
-        "fixed inset-x-0 top-0 z-50 transition-[background-color,border-color,box-shadow] duration-300",
+        "fixed inset-x-0 top-0 z-50 transition-[background-color,border-color,box-shadow] duration-300 motion-reduce:transition-none",
         solid
           ? "border-b border-cream/10 bg-deep/95 shadow-[0_10px_30px_-24px_rgba(0,0,0,0.9)] backdrop-blur-md"
           : "border-b border-transparent bg-gradient-to-b from-deep/90 via-deep/40 to-transparent",
       )}
     >
-      <div className="mx-auto flex h-[72px] max-w-[1400px] items-center justify-between gap-5 px-5 craft:px-6">
-        <Logo variant="light" className="h-12 w-auto shrink-0" />
+      <div className={cn("mx-auto flex max-w-[1400px] items-center justify-between gap-5 px-5 transition-[height] duration-300 motion-reduce:transition-none craft:h-[72px] craft:px-6", scrolled && !menuOpen ? "h-14" : "h-[72px]")}>
+        <Logo variant="light" className={cn("w-auto shrink-0 transition-[height] duration-300 motion-reduce:transition-none craft:h-12", scrolled && !menuOpen ? "h-9" : "h-12")} />
         <nav aria-label="Primary navigation" className="hidden min-w-0 flex-1 items-center justify-center gap-0.5 craft:flex">
           {PRIMARY_LINKS.map(({ label, href }) => {
             const active = matchesPath(pathname, href);
@@ -136,7 +136,7 @@ const PublicHeader = () => {
         </button>
       </div>
       {menuOpen && (
-        <nav aria-label="Mobile navigation" className="max-h-[calc(100vh-72px)] overflow-y-auto border-t border-cream/10 bg-deep px-5 pb-6 craft:hidden">
+        <nav aria-label="Mobile navigation" className="max-h-[calc(100dvh-72px)] overflow-y-auto border-t border-cream/10 bg-deep px-5 pb-[max(1.5rem,env(safe-area-inset-bottom))] craft:hidden">
           <div className="divide-y divide-cream/10">
             {PRIMARY_LINKS.map(({ label, href }) => {
               const active = matchesPath(pathname, href);
