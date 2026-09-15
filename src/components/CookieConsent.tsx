@@ -105,6 +105,11 @@ const CookieConsent = () => {
     return () => window.removeEventListener(OPEN_PREFS_EVENT, onOpen);
   }, []);
 
+  useEffect(() => {
+    document.documentElement.classList.toggle("cookie-banner-visible", visible && !managing);
+    return () => document.documentElement.classList.remove("cookie-banner-visible");
+  }, [visible, managing]);
+
   const persist = useCallback(async (chosen: CookiePrefs) => {
     try {
       localStorage.setItem(
@@ -140,28 +145,29 @@ const CookieConsent = () => {
     <>
       {/* z-40 keeps the banner below dialogs/modals (z-50) so it can never obscure a modal's controls. */}
       {visible && !managing && (
-      <div className="fixed inset-x-0 bottom-0 z-40 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-4 sm:pb-[max(1rem,env(safe-area-inset-bottom))]">
-        <div className="mx-auto max-w-4xl rounded-lg border border-cream/10 bg-deep p-4 shadow-2xl sm:p-5">
-          <div className="flex flex-col gap-3 craft:flex-row craft:items-center craft:justify-between">
-            <p className="font-body text-sm text-cream/90">
-              We use cookies to make ProGrafter work. Read our{" "}
+      <div data-cookie-banner className="fixed inset-x-0 bottom-0 z-40 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] sm:px-4 sm:pb-[max(1rem,env(safe-area-inset-bottom))]">
+        <div className="mx-auto max-w-4xl rounded-md border border-cream/10 bg-deep px-3 py-2.5 shadow-2xl sm:rounded-lg sm:p-5">
+          <div className="flex items-center gap-2.5 craft:justify-between">
+            <p className="min-w-0 flex-1 font-body text-[11px] leading-snug text-cream/90 sm:text-sm">
+              We use cookies to make ProGrafter work. {" "}
               <Link to="/cookies" className="text-teal underline underline-offset-2">
                 Cookie Policy
               </Link>
-              .
             </p>
-            <div className="grid grid-cols-2 gap-2 sm:flex sm:justify-end">
+            <div className="flex shrink-0 gap-1.5 sm:gap-2">
               <Button
                 onClick={() => setManaging(true)}
                 variant="marketingOutline"
-                className="min-w-0 px-3 sm:px-5"
+                size="sm"
+                className="h-9 min-w-0 px-2.5 text-[10px] sm:h-10 sm:px-5 sm:text-xs"
               >
                 Manage
               </Button>
               <Button
                 onClick={() => persist({ functional: true, analytics: true, marketing: false })}
                 variant="cta"
-                className="min-w-0 px-3 sm:px-5"
+                size="sm"
+                className="h-9 min-w-0 px-3 text-[10px] sm:h-10 sm:px-5 sm:text-xs"
               >
                 Accept
               </Button>

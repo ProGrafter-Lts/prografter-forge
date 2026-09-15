@@ -8,3 +8,4 @@
 - [x] Verify Platform Tour and Verification at 360/390/412/430px plus desktop
 
 - [x] Approved mockups pass: Platform Tour, Our Checks, Advice, About restyled (presentation only)
+- [x] Final surgical QA: branded worker image, editorial receipt, compact mobile cookies, product/brand truth and responsive audit

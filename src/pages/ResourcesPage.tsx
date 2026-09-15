@@ -10,7 +10,7 @@ import {
 import { EditorialStatement, ShowcaseHero } from "@/components/public/PublicBits";
 import adviceHero from "@/assets/how-it-works/cta-plans.jpg";
 import quoteDetail from "@/assets/how-it-works/compare-quotes.jpg";
-import verificationDetail from "@/assets/how-it-works/get-verified.jpg";
+import verificationDetail from "@/assets/how-it-works/get-verified-prografter.jpg";
 import projectDetail from "@/assets/home/blueprint-lines.jpg";
 
 /** Featured entry points — each maps to a real existing route. */

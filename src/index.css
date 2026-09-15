@@ -2746,3 +2746,13 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
 }
 .public-site .pg-receipt [class*="text-navy/"] { color: hsl(var(--navy) / 0.7) !important; }
 .public-site .pg-receipt .pg-note { color: hsl(var(--navy) / 0.7) !important; }
+
+/* Keep chat reachable while the compact consent bar is present. */
+.cookie-banner-visible [aria-label="Open ProGrafter chat assistant"] {
+  bottom: max(7.75rem, calc(env(safe-area-inset-bottom) + 7.75rem));
+}
+@media (max-width: 639px) {
+  .cookie-banner-visible [aria-label="Open ProGrafter chat assistant"] {
+    bottom: max(5rem, calc(env(safe-area-inset-bottom) + 5rem));
+  }
+}
