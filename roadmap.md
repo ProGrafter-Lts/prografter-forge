@@ -1,4 +1,4 @@
-- [ ] Pass 1: audit canonical public visual patterns and shared foundations
-- [ ] Consolidate public header/footer/navigation and safe application menu grouping
-- [ ] Standardise shared visual primitives and CTA usage without redesigning content pages
+- [x] Pass 1: audit canonical public visual patterns and shared foundations
+- [x] Consolidate public header/footer/navigation and safe application menu grouping
+- [x] Standardise shared visual primitives and CTA usage without redesigning content pages
 - [ ] Fix mobile chat/cookie presentation and verify protected pages across viewports

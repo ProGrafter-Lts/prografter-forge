@@ -344,18 +344,22 @@ const Chatbot = () => {
             {/* Type picker */}
             {showTypePicker && !loading && (
               <div className="flex flex-wrap gap-2 pt-1">
-                <button
+                <Button
                   onClick={() => handleTypePick("trade")}
-                  className="px-3 py-1.5 text-xs font-medium rounded-full border border-[#14A8A1] text-[#14A8A1] hover:bg-[#14A8A1] hover:text-white transition-colors"
+                  variant="outline"
+                  size="sm"
+                  className="rounded-full border-teal text-xs text-teal hover:bg-teal hover:text-cream"
                 >
                   I'm a Tradesperson
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={() => handleTypePick("homeowner")}
-                  className="px-3 py-1.5 text-xs font-medium rounded-full border border-[#14A8A1] text-[#14A8A1] hover:bg-[#14A8A1] hover:text-white transition-colors"
+                  variant="outline"
+                  size="sm"
+                  className="rounded-full border-teal text-xs text-teal hover:bg-teal hover:text-cream"
                 >
                   I'm a Homeowner
-                </button>
+                </Button>
               </div>
             )}
 
@@ -363,13 +367,15 @@ const Chatbot = () => {
             {!loading && suggested.length > 0 && !showTypePicker && (
               <div className="flex flex-wrap gap-2 pt-1">
                 {suggested.map((q) => (
-                  <button
+                  <Button
                     key={q}
                     onClick={() => sendMessage(q)}
-                    className="px-3 py-1.5 text-xs rounded-full border border-[#14A8A1] text-[#14A8A1] hover:bg-[#14A8A1] hover:text-white transition-colors text-left"
+                    variant="outline"
+                    size="sm"
+                    className="h-auto whitespace-normal rounded-full border-teal py-1.5 text-left text-xs text-teal hover:bg-teal hover:text-cream"
                   >
                     {q}
-                  </button>
+                  </Button>
                 ))}
               </div>
             )}
