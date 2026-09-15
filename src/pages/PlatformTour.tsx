@@ -42,7 +42,7 @@ const PlatformTour = () => (
     />
 
     <section className="public-blueprint relative overflow-hidden bg-deep px-6 pb-24 pt-36">
-      <GhostMark className="absolute -bottom-10 right-0 text-[150px] craft:text-[280px]">TOUR</GhostMark>
+      <GhostMark className="absolute -bottom-6 right-4 text-[90px] craft:text-[170px]">TOUR</GhostMark>
       <div className="relative z-10 mx-auto max-w-5xl">
         <SectionLabel className="mb-6">Platform tour</SectionLabel>
         <h1 className="type-h1 max-w-4xl text-cream">

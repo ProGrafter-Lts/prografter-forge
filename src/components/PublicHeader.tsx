@@ -29,6 +29,7 @@ const PublicHeader = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [darkHero, setDarkHero] = useState(true);
   const moreRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -55,7 +56,20 @@ const PublicHeader = () => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const solid = scrolled || menuOpen;
+  // Only merge into the hero when that hero is dark; light heroes keep a solid bar.
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      const hero = document.querySelector("main section, section");
+      if (!hero) return setDarkHero(true);
+      const match = getComputedStyle(hero).backgroundColor.match(/\d+(\.\d+)?/g);
+      if (!match || Number(match[3] ?? 1) === 0) return setDarkHero(true);
+      const [r, g, b] = match.map(Number);
+      setDarkHero(0.299 * r + 0.587 * g + 0.114 * b < 140);
+    }, 60);
+    return () => window.clearTimeout(id);
+  }, [pathname]);
+
+  const solid = scrolled || menuOpen || !darkHero;
 
   return (
     <header
