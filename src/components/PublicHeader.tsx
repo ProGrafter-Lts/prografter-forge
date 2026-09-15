@@ -28,6 +28,7 @@ const PublicHeader = () => {
   const { pathname } = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const moreRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -46,8 +47,25 @@ const PublicHeader = () => {
   const secondaryActive = SECONDARY_LINKS.some(({ href }) => matchesPath(pathname, href));
   const tradesActive = matchesPath(pathname, "/for-trades");
 
+  // Merge into the hero at the top of the page, then settle into a solid bar.
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const solid = scrolled || menuOpen;
+
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-cream/10 bg-deep/95 backdrop-blur-md">
+    <header
+      className={cn(
+        "fixed inset-x-0 top-0 z-50 transition-[background-color,border-color,box-shadow] duration-300",
+        solid
+          ? "border-b border-cream/10 bg-deep/95 shadow-[0_10px_30px_-24px_rgba(0,0,0,0.9)] backdrop-blur-md"
+          : "border-b border-transparent bg-gradient-to-b from-deep/90 via-deep/40 to-transparent",
+      )}
+    >
       <div className="mx-auto flex h-[72px] max-w-[1400px] items-center justify-between gap-5 px-5 craft:px-6">
         <Logo variant="light" className="h-12 w-auto shrink-0" />
         <nav aria-label="Primary navigation" className="hidden min-w-0 flex-1 items-center justify-center gap-0.5 craft:flex">
