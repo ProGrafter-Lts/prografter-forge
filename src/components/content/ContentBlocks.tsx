@@ -90,7 +90,7 @@ export const StepList = ({
 }) => (
   <div className="space-y-4">
     {items.map((it, i) => (
-      <div key={it.title} className="flex gap-5 rounded-[4px] bg-white border border-border/60 p-6 shadow-sm">
+      <div key={it.title} className="flex gap-5 rounded-[4px] bg-card border border-border/60 p-6 shadow-sm">
         <div className="flex-shrink-0 h-10 w-10 rounded-full bg-teal text-cream font-mono text-sm flex items-center justify-center">
           {i + 1}
         </div>

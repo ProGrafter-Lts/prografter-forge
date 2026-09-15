@@ -44,6 +44,7 @@ const PublicHeader = () => {
   }, []);
 
   const secondaryActive = SECONDARY_LINKS.some(({ href }) => matchesPath(pathname, href));
+  const tradesActive = matchesPath(pathname, "/for-trades");
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-cream/10 bg-deep/95 backdrop-blur-md">
@@ -75,7 +76,7 @@ const PublicHeader = () => {
           </div>
         </nav>
         <div className="hidden shrink-0 items-center gap-2 craft:flex">
-          <Button asChild variant="outline" size="sm" className="border-cream/25 bg-transparent text-cream hover:border-teal hover:bg-transparent hover:text-teal"><Link to="/for-trades">For Trades</Link></Button>
+          <Button asChild variant="outline" size="sm" className={cn("border-cream/25 bg-transparent text-cream hover:border-teal hover:bg-transparent hover:text-teal", tradesActive && "border-teal text-teal")}><Link to="/for-trades" aria-current={tradesActive ? "page" : undefined}>For Trades</Link></Button>
           <Button asChild variant="ghost" size="sm" className="text-cream hover:bg-cream/10 hover:text-cream"><Link to="/login">Log In</Link></Button>
           <Button asChild variant="cta" size="sm"><Link to="/signup/homeowner">Sign Up</Link></Button>
         </div>
