@@ -47,7 +47,7 @@ export const homepageFaqJsonLd = {
       name: "How much does ProGrafter cost?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "There is no subscription to join, get matched, quote, or get paid on ProGrafter — ever. Optional paid tools such as Planning Hub are separate, opt-in add-ons. Trades pay 7.5% commission when a job completes, capped at £900 per job.",
+        text: "The core platform is free for trades to join, get matched and quote. Trades pay 7.5% after a completed job has been paid, capped at £900. Optional paid tools are separate.",
       },
     },
     {
