@@ -2598,3 +2598,141 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
   .ho-hero > .ho-img { opacity: 0.16; }
   .ho-note { display: none; }
 }
+
+/* ============================================================
+   Approved public art direction — showcase hero + annotations
+   (presentation only; used by Platform Tour, Our Checks,
+   Advice and About)
+   ============================================================ */
+.pg-hero {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  min-height: 560px;
+  padding: 9rem 1.5rem 4rem;
+}
+.pg-hero__image { position: absolute; inset: 0; z-index: 0; }
+.pg-hero__image img {
+  width: 100%; height: 100%; object-fit: cover;
+  object-position: center;
+  filter: saturate(.7) contrast(1.06) brightness(.82);
+}
+.pg-hero__image::after {
+  content: "";
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(90deg, hsl(var(--deep)) 0%, hsl(var(--deep) / .92) 42%, hsl(var(--deep) / .45) 72%, hsl(var(--deep) / .55) 100%),
+    linear-gradient(0deg, hsl(var(--deep)) 2%, transparent 45%);
+}
+.pg-hero__inner {
+  position: relative; z-index: 2;
+  width: min(100%, 1180px);
+  margin: 0 auto;
+}
+.pg-hero__copy { max-width: 42rem; }
+.pg-hero__title {
+  font-family: var(--font-heading);
+  color: hsl(var(--cream));
+  text-transform: uppercase;
+  line-height: .9;
+  letter-spacing: .01em;
+  font-size: clamp(2.6rem, 9vw, 5.2rem);
+}
+.pg-hero__intro {
+  margin-top: 1.5rem;
+  max-width: 34rem;
+  font-family: var(--font-sans);
+  font-weight: 300;
+  font-size: 1.0625rem;
+  line-height: 1.7;
+  color: hsl(var(--cream) / .82);
+}
+.pg-hero__actions { margin-top: 2rem; display: flex; flex-wrap: wrap; gap: .75rem; }
+
+.pg-note {
+  font-family: 'Caveat', cursive;
+  font-weight: 600;
+  font-size: clamp(1.15rem, 2.2vw, 1.6rem);
+  line-height: 1.25;
+  color: hsl(var(--teal));
+}
+.pg-note--right { text-align: right; }
+.pg-hero__note { margin-top: 2.5rem; text-align: left; }
+
+@media (min-width: 900px) {
+  .pg-hero { padding: 10rem 2rem 5rem; min-height: 640px; }
+  .pg-hero__note {
+    position: absolute;
+    top: 0; right: 0;
+    max-width: 14rem;
+    margin-top: 0;
+    text-align: right;
+  }
+}
+
+/* Dark numbered evidence rows (Our Checks) */
+.pg-check-row {
+  position: relative;
+  display: grid;
+  gap: 1rem;
+  align-items: center;
+  border: 1px solid hsl(var(--cream) / .12);
+  background: hsl(var(--navy) / .5);
+  border-radius: 6px;
+  padding: 1.25rem 1.25rem;
+}
+.pg-check-row__num {
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  line-height: 1;
+  color: hsl(var(--teal));
+  border-bottom: 2px solid hsl(var(--teal));
+  padding-bottom: .15rem;
+}
+.pg-check-row__status {
+  display: inline-flex; align-items: center; gap: .4rem;
+  border: 1px solid hsl(var(--teal) / .5);
+  background: hsl(var(--teal) / .14);
+  color: hsl(var(--teal));
+  font-family: var(--font-mono);
+  font-size: .625rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  padding: .4rem .6rem;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+.pg-check-row__media {
+  overflow: hidden;
+  border-radius: 4px;
+  border: 1px solid hsl(var(--cream) / .12);
+  background: hsl(var(--deep));
+}
+.pg-check-row__media img {
+  display: block; width: 100%; height: 100%;
+  aspect-ratio: 16 / 9; object-fit: cover;
+  filter: saturate(.8) contrast(1.05);
+}
+@media (min-width: 900px) {
+  .pg-check-row { grid-template-columns: auto 1fr 15rem auto; gap: 1.75rem; padding: 1.25rem 1.5rem; }
+}
+
+/* Receipt-style editorial summary (About) */
+.pg-receipt {
+  position: relative;
+  background: hsl(48 40% 96%);
+  color: hsl(var(--navy));
+  padding: 1.75rem 1.5rem 2rem;
+  box-shadow: 0 24px 50px -28px rgba(0,0,0,.7);
+  transform: rotate(1.6deg);
+}
+.pg-receipt::before,
+.pg-receipt::after {
+  content: "";
+  position: absolute; left: 0; right: 0; height: 10px;
+  background:
+    repeating-linear-gradient(-45deg, hsl(48 40% 96%) 0 8px, transparent 8px 16px);
+}
+.pg-receipt::before { top: -9px; transform: scaleY(-1); }
+.pg-receipt::after { bottom: -9px; }
