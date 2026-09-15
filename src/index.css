@@ -1591,6 +1591,25 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
   mask-image: linear-gradient(to bottom, transparent, #000 30%, #000 70%, transparent);
 }
 
+/* Light counterpart — drafting paper for content-led public pages. */
+.public-drafting {
+  position: relative;
+  isolation: isolate;
+  background-image:
+    linear-gradient(hsl(var(--navy) / 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--navy) / 0.05) 1px, transparent 1px);
+  background-size: 30px 30px;
+}
+
+.public-drafting::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(180deg, hsl(var(--teal) / 0.07), transparent 55%);
+}
+
 /* --- Survey cross / datum markers overlay --- */
 .blueprint-crosses::after {
   content: "";
