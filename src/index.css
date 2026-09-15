@@ -149,13 +149,13 @@ body::before {
 /* Dark-surface intent wins over presentational bg-card utilities used by
    transparent evidence rows and frames. Keep this after light-surface rules. */
 .public-site .public-dark-surface :is(h1, h2, h3, h4, h5, h6, .text-navy, .text-body-text) {
-  color: hsl(var(--cream));
+  color: hsl(var(--cream)) !important;
 }
 .public-site .public-dark-surface :is(p, li, .text-secondary-text, .text-muted-foreground) {
-  color: hsl(var(--cream) / .82);
+  color: hsl(var(--cream) / .82) !important;
 }
 .public-site .public-dark-surface :is(.text-teal, .text-teal-ink) {
-  color: hsl(var(--teal));
+  color: hsl(var(--teal)) !important;
 }
 
 /* Legacy safety net for non-public pages. */
