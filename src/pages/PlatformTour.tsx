@@ -42,22 +42,25 @@ const PlatformTour = () => (
       path="/platform-tour"
     />
 
-    <section className="platform-tour-hero public-blueprint relative overflow-hidden bg-deep px-6 pb-24 pt-36">
-      <div className="platform-tour-hero__image" aria-hidden><img src={tourHero} alt="" /></div>
-      <div className="relative z-10 mx-auto max-w-5xl">
-        <SectionLabel className="mb-6">Platform tour</SectionLabel>
-        <h1 className="type-h1 max-w-4xl text-cream">
-          See how the work stays clear.
-        </h1>
-        <p className="mt-6 max-w-2xl font-body text-lg leading-relaxed text-cream/80">
-          Explore the live homeowner tools and the shared project experience, then see what we are building next for trades.
-        </p>
-        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+    <ShowcaseHero
+      label="Platform tour"
+      lines={[
+        { text: "One project." },
+        { text: "Two sides." },
+        { text: "One source", teal: true },
+        { text: "of truth.", teal: true },
+      ]}
+      intro="The homeowner and trade work from the same project record, with the right information and actions suited to each role."
+      image={tourHero}
+      note={<>Real projects.<br />Real people.<br />One place.</>}
+      actions={
+        <>
           <Button asChild variant="cta" size="lg"><Link to="/quote-checker">Try the Quote Checker <ArrowRight /></Link></Button>
           <Button asChild variant="outline" size="lg" className="border-cream/30 bg-transparent text-cream hover:border-teal hover:bg-transparent hover:text-teal"><Link to="/how-it-works">Follow both journeys</Link></Button>
-        </div>
-      </div>
-    </section>
+        </>
+      }
+    />
+
 
     <section className="platform-shared-record public-dark-surface bg-cream px-6 py-16 craft:py-20">
       <div className="mx-auto max-w-5xl">
