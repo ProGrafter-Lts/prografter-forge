@@ -146,6 +146,17 @@ body::before {
 .public-site :is(.bg-cream, .bg-card, .bg-background, .public-drafting):not(.public-dark-surface) :is(.bg-deep, .bg-navy, .public-blueprint, .public-dark-surface) :is(p, li, .text-secondary-text, .text-muted-foreground) {
   color: hsl(var(--cream) / .82);
 }
+/* Dark-surface intent wins over presentational bg-card utilities used by
+   transparent evidence rows and frames. Keep this after light-surface rules. */
+.public-site .public-dark-surface :is(h1, h2, h3, h4, h5, h6, .text-navy, .text-body-text) {
+  color: hsl(var(--cream));
+}
+.public-site .public-dark-surface :is(p, li, .text-secondary-text, .text-muted-foreground) {
+  color: hsl(var(--cream) / .82);
+}
+.public-site .public-dark-surface :is(.text-teal, .text-teal-ink) {
+  color: hsl(var(--teal));
+}
 
 /* Legacy safety net for non-public pages. */
 .bg-deep .text-secondary-text,
