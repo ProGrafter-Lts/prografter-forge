@@ -2062,6 +2062,112 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
   .hiw-step-image img, .hiw-page * { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
 }
 
+/* ============================================================
+   PUBLIC VISUAL STYLING — extends the existing photographed mobile grammar
+   without changing target-page content or information architecture.
+   ============================================================ */
+.content-hero-image,
+.platform-tour-hero__image,
+.about-founder-hero__image {
+  position: absolute;
+  inset: 0 0 0 42%;
+  pointer-events: none;
+}
+.content-hero-image img,
+.platform-tour-hero__image img,
+.about-founder-hero__image img {
+  width: 100%; height: 100%; object-fit: cover;
+}
+.content-hero-image::after,
+.platform-tour-hero__image::after,
+.about-founder-hero__image::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(90deg, hsl(var(--deep)) 0%, hsl(var(--deep) / .92) 22%, hsl(var(--deep) / .35) 72%, hsl(var(--deep) / .72) 100%), linear-gradient(0deg, hsl(var(--deep) / .9), transparent 55%, hsl(var(--deep) / .35));
+}
+.content-hero-image + span { display: none; }
+.platform-tour-hero { min-height: 520px; display: flex; align-items: center; }
+.platform-tour-hero > div:last-child { width: min(100%, 1280px); }
+
+.platform-shared-record { position: relative; overflow: hidden; background: hsl(var(--deep)); color: hsl(var(--cream)); }
+.platform-shared-record::before,
+.verification-record::before,
+.advice-guides::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .18;
+  background-image: linear-gradient(hsl(var(--teal) / .12) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--teal) / .12) 1px, transparent 1px);
+  background-size: 40px 40px; mask-image: linear-gradient(120deg, transparent 25%, #000 100%);
+}
+.platform-shared-record > div, .verification-record > div, .advice-guides > section { position: relative; z-index: 1; }
+.platform-shared-record h2, .platform-shared-record strong { color: hsl(var(--cream)); }
+.platform-shared-record p { color: hsl(var(--cream) / .75); }
+.platform-shared-record__views { position: relative; padding-block: 32px; }
+.platform-shared-record__views::before {
+  content: "ONE SHARED PROJECT RECORD"; position: absolute; z-index: 3; left: 50%; top: 4px; transform: translateX(-50%) rotate(-2deg);
+  padding: 8px 12px; background: hsl(var(--deep)); border: 1px solid hsl(var(--teal) / .45); color: hsl(var(--teal));
+  font: 10px/1 var(--font-mono); letter-spacing: .16em; white-space: nowrap;
+}
+.platform-shared-record__views::after { content: ""; position: absolute; left: 50%; top: 26px; bottom: 0; width: 1px; background: hsl(var(--teal) / .45); }
+.platform-shared-record .bg-card { position: relative; z-index: 1; border-color: hsl(var(--cream) / .14); background: hsl(var(--navy)); box-shadow: 0 24px 60px -34px hsl(var(--deep)); }
+.platform-shared-record .bg-card figcaption { border-color: hsl(var(--cream) / .12); color: hsl(var(--cream) / .72); }
+.platform-shared-record__steps article { border-color: hsl(var(--teal)); }
+.platform-shared-record__steps h3 { color: hsl(var(--cream)); }
+.platform-evidence { position: relative; overflow: hidden; }
+.platform-evidence::after { content: "PROJECT EVIDENCE"; position: absolute; right: -30px; top: 80px; transform: rotate(90deg); font: 10px var(--font-mono); letter-spacing: .28em; color: hsl(var(--teal)); }
+.platform-evidence__grid { counter-reset: evidence; }
+.platform-evidence__grid figure { counter-increment: evidence; position: relative; border-radius: 0; border-top: 2px solid hsl(var(--teal)); box-shadow: none; }
+.platform-evidence__grid figure::before { content: "0" counter(evidence); position: absolute; z-index: 2; top: 13px; right: 16px; font: 18px var(--font-mono); color: hsl(var(--teal)); }
+
+.verification-record { position: relative; overflow: hidden; background: hsl(var(--deep)); }
+.verification-record h2 { color: hsl(var(--cream)); }
+.verification-record > div > p { color: hsl(var(--cream) / .75); }
+.verification-record__list { counter-reset: checks; }
+.verification-record__list > li {
+  counter-increment: checks; min-height: 210px; overflow: hidden; padding-left: calc(34% + 32px); border: 0; border-top: 1px solid hsl(var(--cream) / .14); background: transparent; box-shadow: none;
+}
+.verification-record__image { position: absolute; inset: 0 auto 0 0; width: 32%; height: 100%; object-fit: cover; filter: saturate(.72) contrast(1.08); }
+.verification-record__list > li::after { content: ""; position: absolute; inset: 0 auto 0 0; width: 34%; background: linear-gradient(90deg, transparent, hsl(var(--deep))); pointer-events: none; }
+.verification-record__list > li > span:first-of-type { position: relative; z-index: 2; }
+.verification-record__list h3 { color: hsl(var(--cream)); }
+.verification-record__list p { color: hsl(var(--cream) / .72); }
+.verification-record__list > li > span:last-child { border-color: hsl(var(--teal) / .35); background: hsl(var(--deep) / .7); color: hsl(var(--cream) / .72); }
+
+.advice-guides { position: relative; overflow: hidden; }
+.advice-resource-card { overflow: hidden; }
+.advice-resource-card__image { position: relative; aspect-ratio: 16 / 8; overflow: hidden; background: hsl(var(--deep)); }
+.advice-resource-card__image::after { content: ""; position: absolute; inset: 0; background: linear-gradient(0deg, hsl(var(--deep) / .55), transparent 65%), linear-gradient(135deg, hsl(var(--teal) / .12), transparent); }
+.advice-resource-card__image img { width: 100%; height: 100%; object-fit: cover; filter: saturate(.72) contrast(1.08); transition: transform .5s ease; }
+.advice-resource-card--visual:hover img { transform: scale(1.035); }
+.advice-guides .grid { align-items: stretch; }
+.advice-guides .grid > a:nth-child(n+4) .advice-resource-card { border: 0; border-bottom: 1px solid hsl(var(--navy) / .18); background: transparent; box-shadow: none; }
+
+.about-founder-hero { min-height: 560px; display: flex; align-items: center; }
+.about-founder-hero > div:last-child { width: min(100%, 1280px); }
+.about-receipts { position: relative; overflow: hidden; }
+.about-receipts__image { position: absolute; inset: 0 0 0 52%; opacity: .32; }
+.about-receipts__image img { width: 100%; height: 100%; object-fit: cover; filter: saturate(.55) contrast(1.1); }
+.about-receipts__image::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, hsl(var(--deep)), transparent 62%), linear-gradient(0deg, hsl(var(--deep) / .8), transparent, hsl(var(--deep) / .65)); }
+.about-receipts > div:last-child { position: relative; z-index: 1; }
+
+@media (max-width: 899px) {
+  .content-hero-image, .platform-tour-hero__image, .about-founder-hero__image { inset: 0; }
+  .content-hero-image::after, .platform-tour-hero__image::after, .about-founder-hero__image::after { background: linear-gradient(0deg, hsl(var(--deep)) 8%, hsl(var(--deep) / .88) 62%, hsl(var(--deep) / .5)); }
+  .platform-tour-hero, .about-founder-hero { min-height: 720px; align-items: flex-end; }
+  .platform-shared-record__views { padding-left: 24px; }
+  .platform-shared-record__views::before { left: 0; top: 0; transform: rotate(-2deg); }
+  .platform-shared-record__views::after { left: 8px; }
+  .verification-record__list { padding-left: 24px; border-left: 1px solid hsl(var(--teal) / .5); }
+  .verification-record__list > li { display: grid; min-height: 0; padding: 0 0 36px; grid-template-columns: 42% minmax(0, 1fr); gap: 14px; border-top: 0; }
+  .verification-record__image { position: relative; width: 100%; height: auto; aspect-ratio: 1 / 1; grid-row: 1 / 3; }
+  .verification-record__list > li::after { inset: 0 auto auto 0; width: 42%; height: 45%; background: linear-gradient(0deg, hsl(var(--deep) / .62), transparent); }
+  .verification-record__list > li > span:first-of-type { position: absolute; left: -42px; top: 10px; width: 32px; height: 32px; }
+  .verification-record__list > li > div { align-self: end; }
+  .verification-record__list > li > span:last-child { grid-column: 2; white-space: normal; }
+  .about-receipts__image { inset: 0; opacity: .16; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .advice-resource-card__image img { transition: none; }
+}
+
 
 /* --- Dark dashboards: buttons must be visible at rest, not only on hover --- */
 /* shadcn `outline` variant */

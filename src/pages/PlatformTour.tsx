@@ -5,7 +5,7 @@ import AppShell from "@/components/AppShell";
 import QuoteComparisonDemo from "@/components/demos/QuoteComparisonDemo";
 import VerificationExplainerInteractive from "@/components/demos/VerificationExplainerInteractive";
 import { Button } from "@/components/ui/button";
-import { DeviceFrame, EditorialStatement, GhostMark, SectionLabel } from "@/components/public/PublicBits";
+import { DeviceFrame, EditorialStatement, SectionLabel } from "@/components/public/PublicBits";
 import projectView from "@/assets/platform/homeowner-overview.png";
 import tradeView from "@/assets/platform/trade-dashboard.png";
 import homeownerQuotes from "@/assets/platform/homeowner-quotes.png";
