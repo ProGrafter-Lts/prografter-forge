@@ -1,16 +1,25 @@
 import { Link } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
 import SEO from "@/components/SEO";
 import AppShell from "@/components/AppShell";
+import { Button } from "@/components/ui/button";
 import {
-  ContentHero,
   ContentSection,
   ContentCta,
 } from "@/components/content/ContentBlocks";
-import { EditorialStatement } from "@/components/public/PublicBits";
+import { EditorialStatement, ShowcaseHero } from "@/components/public/PublicBits";
 import adviceHero from "@/assets/how-it-works/cta-plans.jpg";
 import quoteDetail from "@/assets/how-it-works/compare-quotes.jpg";
 import verificationDetail from "@/assets/how-it-works/get-verified.jpg";
 import projectDetail from "@/assets/home/blueprint-lines.jpg";
+
+/** Featured entry points — each maps to a real existing route. */
+const FEATURED = [
+  { tag: "Guides", title: "How to read a building quote", desc: "Spot what’s included, what’s missing and how to compare like for like.", href: "/compare-quotes", cta: "Read the guide" },
+  { tag: "Explainers", title: "What to look for in a verified trade", desc: "Understand our 5-step checks and why they matter.", href: "/trade-verification", cta: "Read the explainer" },
+  { tag: "Planning", title: "From idea to build", desc: "A step-by-step guide to planning a smoother project.", href: "/how-it-works", cta: "Read the guide" },
+];
+
 
 type Resource = {
   title: string;
