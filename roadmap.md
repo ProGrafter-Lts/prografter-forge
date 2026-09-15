@@ -45,3 +45,4 @@
 - [ ] Rework Platform Tour, Our Checks, Advice, and About without changing functionality
 - [ ] Keep public navigation on public routes and add signed-in dashboard return action
 - [ ] Verify seven public pages across desktop and mobile
+- [ ] Keep corrective pass styling-only: preserve existing page structures and content; apply uploaded mobile visual grammar without redesigning layouts
