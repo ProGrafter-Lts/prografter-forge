@@ -118,7 +118,7 @@ const About = () => {
       <div className="bg-deep">
         {/* Hero */}
         <section className="public-blueprint relative overflow-hidden px-6 pb-14 pt-36">
-          <GhostMark className="absolute -bottom-8 right-0 text-[120px] craft:text-[230px]">£625</GhostMark>
+          <GhostMark className="absolute -bottom-4 right-4 text-[70px] craft:text-[120px]">£625</GhostMark>
           <div className="max-w-5xl mx-auto relative z-10">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-8 h-[2px] bg-teal" />
