@@ -14,6 +14,10 @@ import tradeEarnings from "@/assets/platform/trade-earnings.png";
 import homeownerManual from "@/assets/platform/homeowner-manual.png";
 import tourHero from "@/assets/dashboard/hero-project.jpg";
 
+/** Real V1 navigation — kept in step with HomeownerSidebar / TradeSidebar. */
+const HOMEOWNER_MENU = ["Overview", "My Projects", "Messages", "Site Diary", "Quotes & Checks", "Green Grants", "Homeowner Manual", "My Profile"];
+const TRADE_MENU = ["Dashboard", "Projects", "Find Work", "Pipeline", "Quotes", "Calendar", "Messages", "TradeVault", "Profile"];
+
 const SHARED_STEPS = [
   { icon: ClipboardCheck, title: "Agree the plan", text: "A shared project record keeps the scope, programme and stages aligned." },
   { icon: Camera, title: "See real progress", text: "Dated site updates and photos show homeowners what is happening." },
