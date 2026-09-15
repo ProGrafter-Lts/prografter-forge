@@ -14,25 +14,23 @@ import TrustSignal from "@/components/TrustSignal";
 
 const TRADE_POINTS = [
   { title: "£0 to register", desc: "Join, get verified and build your profile for free. No card required.", icon: "£" },
-  { title: "£0 platform subscription", desc: "No subscription to join, quote, or get paid — ever. Matching is free too.", icon: "∅" },
-  { title: "£0 lead fees", desc: "You never pay to see or respond to a job. No pay-per-lead, ever.", icon: "✓" },
-  { title: "7.5% commission", desc: "Only when a job completes and you've been paid. We earn when you earn.", icon: "%" },
-  { title: "£900 per-job cap", desc: "Commission is capped at £900 per job — big jobs stay fair.", icon: "◆" },
-  { title: "Founding Member perks", desc: "First 50 trades: first 5 jobs at 6%, a permanent badge, and a welcome call from Lee.", icon: "★" },
+  { title: "No lead fees", desc: "See and respond to suitable opportunities without paying for each introduction.", icon: "✓" },
+  { title: "7.5% when work completes", desc: "Commission applies after the completed job has been paid.", icon: "%" },
+  { title: "£900 per-job cap", desc: "The commission stops at £900, however large the job.", icon: "◆" },
 ];
 
 const HOME_POINTS = [
-  { title: "Free to post a job", desc: "Posting a project and getting matched with verified trades costs nothing.", icon: "✓" },
+  { title: "Free project matching", desc: "Post a project and receive up to three carefully selected verified matches where coverage allows.", icon: "✓" },
   { title: "Project Cost Guide", desc: "Early budget guidance before you have any quotes — at no cost.", icon: "◎" },
   { title: "AI Quote Checker", desc: "A detailed AI review of a specific builder's quote for a one-off fee.", icon: "✦" },
 ];
 
 const FAQ = [
-  { q: "How much does ProGrafter cost tradespeople?", a: "There is no subscription to join, get matched, quote, or get paid — ever. Trades pay a 7.5% commission only when a job completes and they've been paid, capped at £900. Optional paid tools such as Planning Hub are separate, opt-in add-ons." },
+  { q: "How much does ProGrafter cost tradespeople?", a: "The core platform is free to join, get matched and quote. Trades pay a 7.5% commission after a completed job has been paid, capped at £900. Optional paid tools are separate and opt-in." },
   { q: "How much does it cost homeowners?", a: "Homeowners post jobs for free and are matched with verified trades at no cost. ProGrafter offers the free Project Cost Guide, with a paid AI Quote Checker report for detailed reviews of a specific quote." },
   { q: "When exactly does commission apply?", a: "Only after a job is marked complete and the trade has been paid. There's nothing to pay up front and nothing to pay if a job doesn't go ahead." },
   { q: "Are there any hidden fees or rank-boosting charges?", a: "No. There's no pay-to-play, no boosted rankings and no surprise charges. One fair, capped commission — that's it." },
-  { q: "What is the Founding Member offer?", a: "The first 50 verified trades get their first 5 jobs at a reduced 6% commission, a permanent Founding Member badge, and a personal welcome call from founder Lee Palfreeman." },
+  { q: "Are optional tools included?", a: "Core matching and project delivery do not require a subscription. Optional tools, including Planning Hub, are separate and clearly priced before you opt in." },
 ];
 
 const PriceCard = ({
@@ -51,8 +49,8 @@ const PriceCard = ({
 const PricingPage = () => (
   <AppShell>
     <SEO
-      title="Pricing — No Core Platform Subscription | ProGrafter"
-      description="No subscription to join, match, quote, or get paid—ever. Optional paid tools are separate add-ons. Commission is capped at £900."
+      title="ProGrafter Pricing — 7.5%, Capped at £900"
+      description="Join and quote without lead fees. Trades pay 7.5% after a completed paid job, capped at £900; optional tools are separate."
       path="/pricing"
       jsonLd={buildFaqJsonLd(FAQ)}
     />
@@ -60,7 +58,7 @@ const PricingPage = () => (
       eyebrow="Pricing"
       title="Fair, transparent,"
       highlight="commission only."
-      intro="No subscription to join, quote, or get paid — ever. Matching is free. Optional paid tools are separate, opt-in add-ons; the core platform stays subscription-free."
+      intro="Join, get verified, receive suitable matches and quote without lead fees. Pay 7.5% after a completed job has been paid, capped at £900. Optional tools are separate."
       ghost="FAIR"
       primaryCta={{ label: "Join as a Trade", href: "/signup/trade" }}
       secondaryCta={{ label: "Post a job — free", href: "/post-job-brief" }}
@@ -77,9 +75,14 @@ const PricingPage = () => (
         <SavingsCalculator />
       </div>
     </ContentSection>
-    <ContentSection title="How our pricing compares" intro="Most platforms charge whether you win work or not. We don't.">
-      <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse min-w-[560px]">
+    <ContentSection title="How our pricing compares" intro="The key difference is when you pay: after completed, paid work rather than before you know the outcome.">
+      <details className="group rounded-[4px] border border-border/60 bg-white p-5 shadow-sm">
+        <summary className="flex cursor-pointer list-none items-center justify-between font-heading text-xl text-navy">
+          Compare with common lead-site pricing
+          <span className="ml-4 text-2xl leading-none text-teal transition-transform group-open:rotate-45">+</span>
+        </summary>
+        <div className="mt-5 overflow-x-auto">
+          <table className="w-full text-left border-collapse min-w-[560px]">
           <thead>
             <tr className="border-b border-border">
               <th className="py-3 pr-4 font-mono text-xs uppercase tracking-wide text-secondary-text">&nbsp;</th>
@@ -102,22 +105,20 @@ const PricingPage = () => (
               </tr>
             ))}
           </tbody>
-        </table>
-      </div>
-      <p className="font-body text-xs text-secondary-text mt-4">
-        Comparison is illustrative of common industry pricing models and not a statement about any
-        specific named competitor.
-      </p>
+          </table>
+          <p className="font-body text-xs text-secondary-text mt-4">Comparison is illustrative of common industry pricing models and not a statement about any specific named competitor.</p>
+        </div>
+      </details>
     </ContentSection>
     <ContentSection title="Frequently asked questions">
       <FaqBlock items={FAQ} />
-      <TrustSignal className="mt-10" text="No lead fees, no pay-to-play rankings. One capped commission, only when the job completes." />
+      <TrustSignal className="mt-10" text="One published rate, one per-job cap, and no paid ranking boosts." />
     </ContentSection>
     <ContentCta
       title="Only pay when you get paid"
-      intro="No subscription to join, quote, or get paid — ever. Optional paid tools are separate and always opt-in."
+      intro="Join without lead fees and see your exact commission before you take on a project."
       primary={{ label: "Join as a Trade", href: "/signup/trade" }}
-      secondary={{ label: "Check a quote", href: "/quote-checker" }}
+      secondary={{ label: "Explore the tools", href: "/platform-tour" }}
     />
   </AppShell>
 );

@@ -29,7 +29,7 @@ const WHY = [
 
 const FAQ = [
   { q: "How long does trade verification take?", a: "Most verifications are completed within a few working days once a trade has submitted their ID, insurance and qualification documents. Manual review means we prioritise accuracy over speed." },
-  { q: "Does verification cost the trade anything?", a: "No. ProGrafter is free to join and verification is included. Trades only ever pay a 7.5% commission when a completed job has been paid, capped at £900 per job." },
+  { q: "Does verification cost the trade anything?", a: "No. Joining and verification are part of the free core platform. See the pricing page for the commission applied after completed paid work." },
   { q: "What happens if a trade's insurance expires?", a: "TradeVault tracks document expiry and sends reminders in advance. Cover must be kept current to remain verified on the platform." },
   { q: "Is a verified badge a guarantee of quality?", a: "Verification confirms identity, insurance, qualifications and history — a strong foundation of trust. Ongoing two-way reviews then reflect real-world performance on every job." },
 ];
@@ -65,7 +65,7 @@ const TradeVerificationPage = () => (
     </ContentSection>
     <ContentCta
       title="Win genuine work as a verified trade"
-      intro="No subscription to join, quote, or get paid — ever. Matching is free; optional paid tools are separate add-ons."
+      intro="Build a trusted profile, receive suitable opportunities and keep your documents current in one place."
       primary={{ label: "Join as a Trade", href: "/signup/trade" }}
       secondary={{ label: "View pricing", href: "/pricing" }}
     />
