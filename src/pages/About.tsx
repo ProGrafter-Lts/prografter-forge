@@ -128,7 +128,10 @@ const About = () => {
         >
           <div className="pg-receipt mt-10 max-w-sm craft:absolute craft:right-0 craft:top-4 craft:mt-0 craft:w-[19rem]">
             <p className="pg-note text-navy/70">Actual experience.<br />A better solution.</p>
-            <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.2em] text-navy/55">Ad spend — editorial summary</p>
+            <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.2em] text-navy/55">
+              <span className="block">Lead spend</span>
+              <span className="block">Editorial summary</span>
+            </p>
             <dl className="mt-4 space-y-3">
               {[
                 { figure: "18", label: "qualified leads" },
@@ -144,7 +147,6 @@ const About = () => {
             <p className="mt-5 flex items-baseline justify-between border-t border-navy/20 pt-3 font-mono text-xs uppercase tracking-[0.16em] text-navy/70">
               <span>Total</span><span className="font-heading text-xl tracking-normal text-navy">£625.32</span>
             </p>
-            <p className="mt-3 font-heading text-xl uppercase tracking-wide text-navy/80">MyBuilder</p>
             <p className="mt-2 font-mono text-[9px] uppercase tracking-[0.14em] text-navy/45">Illustrative summary of real spend — not a reproduction of an original receipt.</p>
           </div>
         </ShowcaseHero>
