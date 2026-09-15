@@ -639,6 +639,18 @@ export default function PostJobBrief() {
         marketing_opt_in: marketing,
         user_agent: typeof navigator !== "undefined" ? navigator.userAgent : "",
       };
+      // Outside the live areas the brief is still accepted, and the postcode is
+      // registered as a request to open that area so demand is tracked honestly.
+      if (!isInLiveArea(form.postcode) && !waitlistDone) {
+        const { error: areaError } = await supabase.from("cost_guide_area_waitlist").insert({
+          email: form.email.trim(),
+          postcode: normalisePostcode(form.postcode).slice(0, 12),
+          outcode: outcodeOf(form.postcode) || null,
+          project_type: form.job_title?.trim() || null,
+        });
+        if (!areaError) setWaitlistDone(true);
+      }
+
       const { data, error } = await supabase.functions.invoke("submit-job-brief", { body: payload });
       if (error || !data?.ref) throw error || new Error("No reference returned");
       setRef(data.ref);
@@ -761,7 +773,7 @@ export default function PostJobBrief() {
                 style={{ background: C.amber, color: C.white, border: "none", borderRadius: 8,
                   padding: "9px 16px", fontSize: 13, fontWeight: 700, cursor: "pointer" }}
               >
-                {waitlistSaving ? "Saving…" : "Notify me when you're live here"}
+                {waitlistSaving ? "Saving…" : "Ask us to open my area"}
               </button>
               {waitlistError && (
                 <div style={{ marginTop: 8, color: C.error, fontWeight: 600 }}>{waitlistError}</div>
