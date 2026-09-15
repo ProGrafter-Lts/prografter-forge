@@ -1,4 +1,5 @@
 import { type ReactNode } from "react";
+import { type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /** Small technical label with a teal rule — the ProGrafter section marker. */
@@ -137,4 +138,68 @@ export const GhostMark = ({ children, className }: { children: ReactNode; classN
   >
     {children}
   </span>
+);
+
+export type PublicJourneyStep = {
+  num: string;
+  title: string;
+  description: string;
+  image: string;
+  alt: string;
+  icon: LucideIcon;
+  note?: string;
+};
+
+/** The connected numbered journey established by How It Works. */
+export const PublicJourney = ({
+  id,
+  label,
+  title,
+  description,
+  steps,
+  tone,
+}: {
+  id: string;
+  label: string;
+  title: ReactNode;
+  description: string;
+  steps: PublicJourneyStep[];
+  tone: "homeowner" | "trade";
+}) => (
+  <section id={id} className={`hiw-journey hiw-journey--${tone}`}>
+    <div className="hiw-container">
+      <div className="hiw-section-heading">
+        <div>
+          <p className="hiw-eyebrow">{label}</p>
+          <h2>{title}</h2>
+        </div>
+        <p>{description}</p>
+      </div>
+      <div className="hiw-journey-grid">
+        {steps.map(({ num, title: stepTitle, description: stepDescription, image, alt, icon: Icon, note }) => (
+          <article key={num} className="hiw-step">
+            <div className="hiw-step-marker">
+              <span>{num}</span>
+              <i aria-hidden="true" />
+            </div>
+            <div className="hiw-step-image">
+              <img src={image} alt={alt} loading="lazy" width={1024} height={1280} />
+              <div className="hiw-step-image-shade" aria-hidden="true" />
+              <Icon className="hiw-step-icon" strokeWidth={1.5} aria-hidden="true" />
+            </div>
+            <div className="hiw-step-copy">
+              <h3>{stepTitle}</h3>
+              <p>{stepDescription}</p>
+              {note && <span className="hiw-step-note">{note}</span>}
+            </div>
+          </article>
+        ))}
+      </div>
+      <div className="hiw-shared-truth" aria-label="One shared project principle">
+        <span>One project record.</span>
+        <span>Two views.</span>
+        <strong>Same truth.</strong>
+      </div>
+    </div>
+  </section>
 );

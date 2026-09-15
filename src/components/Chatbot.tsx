@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { MessageCircle, X, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthReady } from "@/hooks/useAuthReady";
+import { Button } from "@/components/ui/button";
 
 type Role = "user" | "assistant";
 interface ChatMsg {
@@ -269,46 +270,48 @@ const Chatbot = () => {
     <>
       {/* Floating button */}
       {!open && (
-        <button
+        <Button
           onClick={() => setOpen(true)}
           aria-label="Open ProGrafter chat assistant"
-          className="fixed bottom-[calc(80px+env(safe-area-inset-bottom))] right-5 sm:bottom-5 z-[70] h-[55px] w-[55px] rounded-full bg-[#14A8A1] text-white shadow-lg hover:bg-[#0B7F74] transition-colors flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-[#14A8A1] focus:ring-offset-2"
+          variant="cta"
+          size="icon"
+          className="fixed bottom-[max(4.75rem,calc(env(safe-area-inset-bottom)+1rem))] right-4 z-[70] h-12 w-12 rounded-full shadow-lg sm:bottom-5 sm:right-5 sm:h-[55px] sm:w-[55px]"
         >
           <MessageCircle className="h-6 w-6" strokeWidth={2.2} />
-        </button>
+        </Button>
       )}
 
       {/* Chat panel */}
       {open && (
         <div
-          className="fixed z-[70] bg-white shadow-2xl border border-black/10 flex flex-col
-                     inset-0 pb-[env(safe-area-inset-bottom)] sm:inset-auto sm:bottom-5 sm:right-5
-                     sm:w-[340px] sm:h-[520px] sm:rounded-lg overflow-hidden"
+          className="fixed inset-0 z-[70] flex h-[100dvh] min-h-0 flex-col overflow-hidden border border-border bg-card pb-[env(safe-area-inset-bottom)] shadow-2xl sm:inset-auto sm:bottom-5 sm:right-5 sm:h-[520px] sm:w-[340px] sm:rounded-lg sm:pb-0"
           role="dialog"
           aria-label="ProGrafter chat assistant"
         >
           {/* Header */}
-          <div className="bg-[#27396A] text-white px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center justify-between bg-navy-deep px-4 py-3 text-cream">
             <div className="flex items-center gap-3">
-              <div className="h-9 w-9 rounded-full bg-[#14A8A1] flex items-center justify-center font-heading text-base">
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-teal font-heading text-base">
                 PG
               </div>
               <div className="leading-tight">
                 <div className="font-heading text-base tracking-wide">Ask ProGrafter</div>
-                <div className="text-[11px] text-white/70 font-mono">Usually answers in seconds</div>
+                <div className="font-mono text-[11px] text-cream/70">Usually answers in seconds</div>
               </div>
             </div>
-            <button
+            <Button
               onClick={() => setOpen(false)}
               aria-label="Close chat"
-              className="text-white/80 hover:text-white p-1"
+              variant="ghost"
+              size="icon"
+              className="text-cream/80 hover:bg-cream/10 hover:text-cream"
             >
               <X className="h-5 w-5" />
-            </button>
+            </Button>
           </div>
 
           {/* Messages */}
-          <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-3 bg-[#FAFAF7]">
+          <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto bg-background px-4 py-4">
             {messages.map((m, i) => (
               <div
                 key={i}
@@ -317,8 +320,8 @@ const Chatbot = () => {
                 <div
                   className={`max-w-[85%] px-3 py-2 text-sm rounded-2xl whitespace-pre-wrap leading-snug ${
                     m.role === "user"
-                      ? "bg-[#14A8A1] text-white rounded-br-sm"
-                      : "bg-white border border-black/5 text-[#27396A] rounded-bl-sm"
+                      ? "bg-teal text-cream rounded-br-sm"
+                      : "bg-card border border-border text-navy-deep rounded-bl-sm"
                   }`}
                 >
                   {m.content}
@@ -328,11 +331,11 @@ const Chatbot = () => {
 
             {loading && (
               <div className="flex justify-start">
-                <div className="bg-white border border-black/5 px-3 py-2 rounded-2xl rounded-bl-sm">
+                <div className="rounded-2xl rounded-bl-sm border border-border bg-card px-3 py-2">
                   <div className="flex gap-1">
-                    <span className="h-2 w-2 rounded-full bg-[#14A8A1] animate-bounce" style={{ animationDelay: "0ms" }} />
-                    <span className="h-2 w-2 rounded-full bg-[#14A8A1] animate-bounce" style={{ animationDelay: "150ms" }} />
-                    <span className="h-2 w-2 rounded-full bg-[#14A8A1] animate-bounce" style={{ animationDelay: "300ms" }} />
+                    <span className="h-2 w-2 animate-bounce rounded-full bg-teal" style={{ animationDelay: "0ms" }} />
+                    <span className="h-2 w-2 animate-bounce rounded-full bg-teal" style={{ animationDelay: "150ms" }} />
+                    <span className="h-2 w-2 animate-bounce rounded-full bg-teal" style={{ animationDelay: "300ms" }} />
                   </div>
                 </div>
               </div>
@@ -341,18 +344,22 @@ const Chatbot = () => {
             {/* Type picker */}
             {showTypePicker && !loading && (
               <div className="flex flex-wrap gap-2 pt-1">
-                <button
+                <Button
                   onClick={() => handleTypePick("trade")}
-                  className="px-3 py-1.5 text-xs font-medium rounded-full border border-[#14A8A1] text-[#14A8A1] hover:bg-[#14A8A1] hover:text-white transition-colors"
+                  variant="outline"
+                  size="sm"
+                  className="rounded-full border-teal text-xs text-teal hover:bg-teal hover:text-cream"
                 >
                   I'm a Tradesperson
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={() => handleTypePick("homeowner")}
-                  className="px-3 py-1.5 text-xs font-medium rounded-full border border-[#14A8A1] text-[#14A8A1] hover:bg-[#14A8A1] hover:text-white transition-colors"
+                  variant="outline"
+                  size="sm"
+                  className="rounded-full border-teal text-xs text-teal hover:bg-teal hover:text-cream"
                 >
                   I'm a Homeowner
-                </button>
+                </Button>
               </div>
             )}
 
@@ -360,13 +367,15 @@ const Chatbot = () => {
             {!loading && suggested.length > 0 && !showTypePicker && (
               <div className="flex flex-wrap gap-2 pt-1">
                 {suggested.map((q) => (
-                  <button
+                  <Button
                     key={q}
                     onClick={() => sendMessage(q)}
-                    className="px-3 py-1.5 text-xs rounded-full border border-[#14A8A1] text-[#14A8A1] hover:bg-[#14A8A1] hover:text-white transition-colors text-left"
+                    variant="outline"
+                    size="sm"
+                    className="h-auto whitespace-normal rounded-full border-teal py-1.5 text-left text-xs text-teal hover:bg-teal hover:text-cream"
                   >
                     {q}
-                  </button>
+                  </Button>
                 ))}
               </div>
             )}
@@ -378,23 +387,25 @@ const Chatbot = () => {
               e.preventDefault();
               sendMessage(input);
             }}
-            className="border-t border-black/10 bg-white p-2 flex items-center gap-2"
+            className="flex items-center gap-2 border-t border-border bg-card p-2"
           >
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Type your question…"
               disabled={loading}
-              className="flex-1 px-3 py-2 text-sm rounded-md border border-black/10 focus:outline-none focus:border-[#14A8A1] focus:ring-1 focus:ring-[#14A8A1] bg-white"
+              className="min-w-0 flex-1 rounded-md border border-input bg-card px-3 py-2 text-sm focus:border-teal focus:outline-none focus:ring-1 focus:ring-teal"
             />
-            <button
+            <Button
               type="submit"
               disabled={loading || !input.trim()}
               aria-label="Send message"
-              className="h-9 w-9 rounded-md bg-[#14A8A1] text-white flex items-center justify-center disabled:opacity-50 hover:bg-[#0B7F74] transition-colors"
+              variant="cta"
+              size="icon"
+              className="h-9 w-9"
             >
               <Send className="h-4 w-4" />
-            </button>
+            </Button>
           </form>
         </div>
       )}

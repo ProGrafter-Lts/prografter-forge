@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -139,9 +140,9 @@ const CookieConsent = () => {
     <>
       {/* z-40 keeps the banner below dialogs/modals (z-50) so it can never obscure a modal's controls. */}
       {visible && !managing && (
-      <div className="fixed inset-x-0 bottom-0 z-40 px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-        <div className="mx-auto max-w-4xl rounded-2xl border border-cream/10 bg-deep p-5 shadow-2xl">
-          <div className="flex flex-col gap-4 craft:flex-row craft:items-center craft:justify-between">
+      <div className="fixed inset-x-0 bottom-0 z-40 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-4 sm:pb-[max(1rem,env(safe-area-inset-bottom))]">
+        <div className="mx-auto max-w-4xl rounded-lg border border-cream/10 bg-deep p-4 shadow-2xl sm:p-5">
+          <div className="flex flex-col gap-3 craft:flex-row craft:items-center craft:justify-between">
             <p className="font-body text-sm text-cream/90">
               We use cookies to make ProGrafter work. Read our{" "}
               <Link to="/cookies" className="text-teal underline underline-offset-2">
@@ -149,19 +150,21 @@ const CookieConsent = () => {
               </Link>
               .
             </p>
-            <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
-              <button
+            <div className="grid grid-cols-2 gap-2 sm:flex sm:justify-end">
+              <Button
                 onClick={() => setManaging(true)}
-                className="rounded-xl border border-cream/25 px-5 py-2.5 font-mono text-sm text-cream hover:border-teal hover:text-teal transition-colors"
+                variant="marketingOutline"
+                className="min-w-0 px-3 sm:px-5"
               >
-                Manage preferences
-              </button>
-              <button
+                Manage
+              </Button>
+              <Button
                 onClick={() => persist({ functional: true, analytics: true, marketing: false })}
-                className="rounded-xl bg-teal px-5 py-2.5 font-mono text-sm text-cream hover:bg-teal-hover transition-colors"
+                variant="cta"
+                className="min-w-0 px-3 sm:px-5"
               >
                 Accept
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -208,18 +211,18 @@ const CookieConsent = () => {
           </div>
 
           <DialogFooter className="gap-2 sm:gap-2">
-            <button
+            <Button
               onClick={() => persist({ functional: false, analytics: false, marketing: false })}
-              className="rounded-xl border border-navy/20 px-5 py-2.5 font-mono text-sm text-navy hover:border-teal hover:text-teal transition-colors"
+              variant="outline"
             >
               Reject all
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => persist(prefs)}
-              className="rounded-xl bg-teal px-5 py-2.5 font-mono text-sm text-cream hover:bg-teal-hover transition-colors"
+              variant="cta"
             >
               Save preferences
-            </button>
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
