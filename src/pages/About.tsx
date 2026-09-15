@@ -108,7 +108,7 @@ const About = () => {
     <AppShell>
       <SEO
         title="I Spent £625 on 18 Leads and Won Nothing. So I Built Something Better. — ProGrafter"
-        description="ProGrafter was built by a working builder who spent £625 on 18 MyBuilder leads and won nothing. Find out why he built a better way."
+        description="Why working builder Lee Palfreeman created ProGrafter after spending £625 on 18 leads without winning a job."
         path="/about"
         ogType="article"
         jsonLd={[localBusinessJsonLd, articleJsonLd]}
@@ -160,8 +160,18 @@ const About = () => {
             <h2 className="font-heading text-cream text-[32px] craft:text-[56px] leading-[1] mt-3 mb-10">
               Ten of the eighteen.
             </h2>
-            <div className="overflow-x-auto border border-cream/10">
-              <table className="w-full font-mono text-sm min-w-[820px]">
+            <div className="mb-7 grid gap-4 sm:grid-cols-3">
+              <div className="border border-cream/10 bg-cream/[0.02] p-5"><p className="font-heading text-3xl text-teal">18</p><p className="text-sm text-cream/70">qualified leads pursued</p></div>
+              <div className="border border-cream/10 bg-cream/[0.02] p-5"><p className="font-heading text-3xl text-teal">£625.32</p><p className="text-sm text-cream/70">spent including VAT</p></div>
+              <div className="border border-cream/10 bg-cream/[0.02] p-5"><p className="font-heading text-3xl text-teal">0</p><p className="text-sm text-cream/70">jobs won</p></div>
+            </div>
+            <details className="group border border-cream/10 bg-cream/[0.02] p-5">
+              <summary className="flex cursor-pointer list-none items-center justify-between font-body font-semibold text-cream">
+                See the detailed lead breakdown
+                <span className="ml-4 text-2xl leading-none text-teal transition-transform group-open:rotate-45">+</span>
+              </summary>
+              <div className="mt-5 overflow-x-auto border border-cream/10">
+                <table className="w-full font-mono text-sm min-w-[820px]">
                 <thead>
                   <tr className="bg-cream/[0.04] text-cream uppercase tracking-wider text-xs">
                     <th className="text-left p-4">Job</th>
@@ -188,9 +198,9 @@ const About = () => {
                     );
                   })}
                 </tbody>
-              </table>
-            </div>
-            <p className="font-body text-cream/70 mt-8 max-w-3xl leading-relaxed">
+                </table>
+              </div>
+              <p className="font-body text-cream/70 mt-6 max-w-3xl leading-relaxed">
               Ten leads shown here, £379.92 of the total spent (inc. VAT) — the full picture across
               all 18 leads came to £625.32. Zero jobs won. In several cases, zero conversations even
               started. On one job alone, eight builders collectively handed MyBuilder around £344+VAT
@@ -198,7 +208,8 @@ const About = () => {
               months after paying and there was no reply. There is no refund for that. MyBuilder's
               refund policy only covers wrong contact details or duplicate charges — 'homeowner did
               not respond' is explicitly not a valid reason. You just lose the money.
-            </p>
+              </p>
+            </details>
           </div>
         </section>
 
@@ -210,9 +221,9 @@ const About = () => {
             </h2>
             <div className="space-y-6 font-body text-cream/80 text-lg leading-relaxed font-light">
               <p>
-                That's when it clicked. The platform wasn't built for builders. It wasn't even
-                really built for homeowners. It was built to sell leads — and once that fee clears,
-                nobody cares what happens next.
+                That&apos;s when it clicked. The lead model rewarded introductions, not good outcomes.
+                Builders carried the cost before a real conversation began, while homeowners still
+                faced uncertainty about scope, quality and what happened next.
               </p>
               <p>
                 I thought: there has to be a better way. So I stopped complaining about it and built
@@ -249,7 +260,7 @@ const About = () => {
               <div className="border border-cream/10 p-6 bg-cream/[0.02]">
                 <p className="font-heading text-teal text-5xl mb-3">£0</p>
                 <p className="font-mono text-cream/60 text-sm leading-relaxed">
-                  No subscription to join, quote, or get paid — ever. Optional paid tools are separate add-ons.
+                  Join, get matched and quote without paying for leads. Optional tools are separate.
                 </p>
               </div>
               <div className="border border-cream/10 p-6 bg-cream/[0.02]">
@@ -289,7 +300,7 @@ const About = () => {
               size="lg"
             >
               <Link to="/register/trade">
-                Register Free — Pay Nothing Until You Earn <ArrowRight className="ml-1" />
+                Join ProGrafter <ArrowRight className="ml-1" />
               </Link>
             </Button>
             <p className="font-mono text-xs text-secondary-text uppercase tracking-widest mt-10">

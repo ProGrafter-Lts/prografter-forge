@@ -3,8 +3,8 @@ import { ArrowRight, BadgeCheck, MapPin, Wallet } from "lucide-react";
 import heroImage from "@/assets/home/trades-hero.jpg";
 
 const INDICATORS = [
-  { icon: Wallet, title: "No Platform Subscription", desc: "Join, match, quote and get paid free." },
-  { icon: MapPin, title: "Local Work", desc: "Jobs near you, sent as they land." },
+  { icon: Wallet, title: "Commission Only", desc: "7.5% on completed paid work, capped at £900." },
+  { icon: MapPin, title: "Focused Locally", desc: "East Midlands density first." },
   { icon: BadgeCheck, title: "Real Homeowners", desc: "Every customer is verified." },
 ];
 
@@ -52,9 +52,8 @@ const TradeHero = () => {
           </h1>
 
           <p className="font-body text-cream/85 text-base craft:text-lg leading-relaxed max-w-xl mb-8">
-            No subscription to join, quote, or get paid — ever. Matching is free too. Optional paid
-            tools, such as Planning Hub, are separate opt-in add-ons. You only pay commission when
-            the job is yours.
+            Spend less time paying for unsuitable leads. Join and match for free, then pay 7.5% only
+            when a completed job has been paid, capped at £900.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 mb-5">
@@ -75,10 +74,10 @@ const TradeHero = () => {
           </div>
 
           <Link
-            to="/planning-alerts"
+            to="/platform-tour"
             className="inline-flex items-center gap-2 font-body text-xs font-semibold uppercase tracking-[0.18em] text-cream underline underline-offset-4 decoration-teal hover:text-teal transition-colors"
           >
-            Planning Alerts
+            Explore The Tools
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
 

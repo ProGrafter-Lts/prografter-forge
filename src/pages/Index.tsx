@@ -7,6 +7,7 @@ import FiveChecksBand from "@/components/home/FiveChecksBand";
 import FourStepsSection from "@/components/home/FourStepsSection";
 import DifferentApproach from "@/components/home/DifferentApproach";
 import FinalCtaBand from "@/components/home/FinalCtaBand";
+import LaunchFocusBand from "@/components/LaunchFocusBand";
 import Footer from "@/components/Footer";
 
 const Index = () => {
@@ -14,7 +15,7 @@ const Index = () => {
     <div className="min-h-screen">
       <SEO
         title="ProGrafter — Home Building Work, Without The Guesswork"
-        description="Check quotes, find verified trades and manage your project with clarity. ProGrafter gives UK homeowners the confidence to build, renovate and improve — the right way."
+        description="Compare clearer quotes, meet up to three verified trades and manage your home project in one shared place. Focused first on the East Midlands."
         path="/"
         jsonLd={[localBusinessJsonLd, homepageFaqJsonLd]}
       />
@@ -24,6 +25,7 @@ const Index = () => {
         <ThreeWaysPanel />
         <FiveChecksBand />
         <FourStepsSection />
+        <LaunchFocusBand />
         <DifferentApproach />
         <FinalCtaBand />
       </main>

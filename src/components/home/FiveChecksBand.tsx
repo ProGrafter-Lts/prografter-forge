@@ -19,7 +19,7 @@ const FiveChecksBand = () => {
               Trusted From The Ground Up
             </p>
             <h2 className="font-heading uppercase text-cream text-[34px] craft:text-[48px] leading-none">
-              Five checks. Every trade. No exceptions.
+              Every trade checked before matching.
             </h2>
           </div>
           <Link

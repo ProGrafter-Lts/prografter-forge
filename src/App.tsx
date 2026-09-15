@@ -86,6 +86,7 @@ const PostJobBrief = lazyRetry(() => import("./pages/PostJobBrief.tsx"));
 const ProjectClarity = lazyRetry(() => import("./pages/ProjectClarity.tsx"));
 const ProjectBuilder = lazyRetry(() => import("./pages/ProjectBuilder.tsx"));
 const ProGrafterIntelligence = lazyRetry(() => import("./pages/ProGrafterIntelligence.tsx"));
+const PlatformTour = lazyRetry(() => import("./pages/PlatformTour.tsx"));
 const JobOS = lazyRetry(() => import("./pages/JobOS.tsx"));
 const ReviewSubmit = lazyRetry(() => import("./pages/ReviewSubmit.tsx"));
 const TraderReviews = lazyRetry(() => import("./pages/TraderReviews.tsx"));
@@ -221,6 +222,7 @@ const AppRoutes = () => {
             <Route path="/unsubscribe" element={<Unsubscribe />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/about" element={<About />} />
+            <Route path="/platform-tour" element={<PlatformTour />} />
            <Route path="/how-it-works" element={<HowItWorksPage />} />
            <Route path="/for-trades" element={<ForTrades />} />
 

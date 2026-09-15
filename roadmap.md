@@ -27,3 +27,10 @@
 
 ## How It Works approved visual rebuild
 - [x] Rebuild `/how-it-works` with mirrored homeowner/trade journeys, approved visual language, accurate platform claims, responsive navigation, and existing routes
+
+## Targeted public website clarity pass
+- [x] Clarify first-screen homeowner and trade value propositions
+- [x] Reduce repeated subscription, matching, verification, and “clearer way” claims
+- [x] Add honest focused-launch and early-traction messaging
+- [x] Add a public Platform Tour with live/development/planned labels
+- [x] Streamline Pricing and About detail with expandable breakdowns

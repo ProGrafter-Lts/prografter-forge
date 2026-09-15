@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Hammer, FileSignature, Radar, ChevronRight } from "lucide-react";
+import { Hammer, FileSignature, Radar, ChevronRight, PanelsTopLeft } from "lucide-react";
 
 const CARDS = [
   {
@@ -20,6 +20,12 @@ const CARDS = [
     desc: "See approved planning applications in your area before the calls start.",
     href: "/planning-alerts",
   },
+  {
+    icon: PanelsTopLeft,
+    title: "Explore The Tools",
+    desc: "See today’s platform and the clearly labelled development roadmap.",
+    href: "/platform-tour",
+  },
 ];
 
 const TradeWaysPanel = () => {
@@ -32,17 +38,17 @@ const TradeWaysPanel = () => {
               Built Around Your Day
             </p>
             <h2 className="font-heading uppercase text-cream text-[32px] craft:text-[44px] leading-none">
-              Three ways we bring you work.
+               Built for the whole job.
             </h2>
           </div>
           <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-cream/55 leading-relaxed craft:text-right">
-            Core platform free.
+            Local density first.
             <br />
-            Paid tools optional.
+            Better-fit opportunities.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 craft:grid-cols-3 gap-5">
+         <div className="grid grid-cols-1 sm:grid-cols-2 craft:grid-cols-4 gap-5">
           {CARDS.map(({ icon: Icon, title, desc, href }) => (
             <Link
               key={title}

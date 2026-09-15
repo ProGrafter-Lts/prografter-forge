@@ -2,13 +2,11 @@ import { Link } from "react-router-dom";
 import { ArrowRight, Check } from "lucide-react";
 
 const POINTS = [
-  "No subscription to join, quote, or get paid — ever",
-  "Free matching is part of the core platform",
-  "Paid tools such as Planning Hub are optional add-ons",
-  "No paying for leads that go nowhere",
-  "7.5% commission when a job is agreed",
-  "Capped at £900, however big the job",
-  "Homeowners verified before they reach you",
+  "Join, verify, match and quote without lead fees",
+  "7.5% commission after a completed job has been paid",
+  "£900 maximum commission per job",
+  "Optional tools remain separate and opt-in",
+  "Homeowner briefs are reviewed before matching",
 ];
 
 const TradeCommissionBand = () => {
@@ -20,11 +18,11 @@ const TradeCommissionBand = () => {
             What It Costs
           </p>
           <h2 className="font-heading uppercase text-cream text-[34px] craft:text-[52px] leading-none mb-5">
-            No platform subscription. Ever.
+            Simple costs. No wasted lead fees.
           </h2>
           <p className="font-body text-cream/75 text-base leading-relaxed mb-8 max-w-lg">
-            Join, get matched, quote and get paid without a subscription. Optional paid tools are
-            separate and opt-in. We only earn commission when you win work.
+            The core platform is free to join and use. ProGrafter earns only after completed work is paid;
+            optional tools remain separate.
           </p>
           <Link
             to="/pricing"

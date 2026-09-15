@@ -33,7 +33,7 @@ const PILLARS = [
   {
     icon: "£",
     title: "Fair, Transparent Pricing",
-    desc: "No subscription to join, quote, or get paid — ever. Matching is free. Optional paid tools are separate, opt-in add-ons; commission is capped at £900.",
+    desc: "Rates, caps and optional costs are published clearly, with no paid ranking boosts.",
   },
   {
     icon: "✦",
@@ -84,7 +84,7 @@ const TrustCentre = () => {
         eyebrow="Trust Centre"
         title="Trust you can"
         highlight="actually verify."
-        intro="ProGrafter isn't a directory that sells leads. We restore trust to domestic construction through genuine verification, transparent pricing and intelligent guidance. Here's exactly how — and how you can check it."
+        intro="ProGrafter combines human verification, reviewed project briefs, transparent pricing and shared project records to reduce uncertainty before and during building work."
         primaryCta={{ label: "Check a Quote", href: "/quote-checker" }}
         secondaryCta={{ label: "How It Works", href: "/how-it-works" }}
         ghost="TRUST"
@@ -92,7 +92,7 @@ const TrustCentre = () => {
 
       <ContentSection
         title="The nine pillars of ProGrafter trust"
-        intro="Every pillar is a working part of the platform — not marketing. Each one is designed to be transparent and, wherever possible, verifiable."
+        intro="Each layer answers a different risk: who is involved, what was agreed, what changed and what evidence exists."
       >
         <FeatureGrid items={PILLARS} cols={3} />
       </ContentSection>
@@ -124,9 +124,9 @@ const TrustCentre = () => {
 
       <ContentCta
         title="See trust in action"
-        intro="Upload a builder's quote for a detailed, construction-aware AI review. One-off fee from £19 to £59 depending on the project type."
+        intro="Explore the live quote and verification tools, plus a clearly labelled view of what is being developed next."
         primary={{ label: "Check a Quote", href: "/quote-checker" }}
-        secondary={{ label: "Read the FAQ", href: "/faq" }}
+        secondary={{ label: "Explore the tools", href: "/platform-tour" }}
       />
       <Footer />
     </div>

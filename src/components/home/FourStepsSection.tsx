@@ -43,7 +43,7 @@ const FourStepsSection = () => {
           <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-secondary-text leading-relaxed craft:text-right">
             From plan to progress.
             <br />
-            It&apos;s a clearer process.
+            One managed process.
           </p>
         </div>
 

@@ -42,7 +42,7 @@ const DifferentApproach = () => {
             A Different Approach
           </p>
           <h2 className="font-heading uppercase text-cream text-[30px] craft:text-[44px] leading-[1.02] mb-5">
-            Not Checkatrade. Not MyBuilder. Not Rated People.
+            More than a list of names.
           </h2>
           <p className="font-body text-cream/80 text-base leading-relaxed max-w-lg mb-8">
             ProGrafter is built for homeowners who want more than just a list of names. We focus on clear

@@ -46,6 +46,7 @@ const GROUPS: NavGroup[] = [
 ];
 
 const SINGLES: NavItem[] = [
+  { label: "Platform Tour", href: "/platform-tour" },
   { label: "Pricing", href: "/pricing" },
 ];
 
@@ -83,9 +84,9 @@ const Navbar = () => {
             </div>
           ))}
           {SINGLES.map((s) => (
-            <a key={s.label} href={s.href} className="font-mono text-sm text-body-text hover:text-teal transition-colors px-3 py-2">
+            <Link key={s.label} to={s.href} className="font-mono text-sm text-body-text hover:text-teal transition-colors px-3 py-2">
               {s.label}
-            </a>
+            </Link>
           ))}
 
           <a href="/login" className="font-mono text-sm text-body-text hover:text-teal transition-colors px-3 py-2">Login</a>
@@ -133,9 +134,9 @@ const Navbar = () => {
             </div>
           ))}
           {SINGLES.map((s) => (
-            <a key={s.label} href={s.href} className="py-3 font-mono text-sm text-navy border-b border-border/40" onClick={() => setMenuOpen(false)}>
+            <Link key={s.label} to={s.href} className="py-3 font-mono text-sm text-navy border-b border-border/40" onClick={() => setMenuOpen(false)}>
               {s.label}
-            </a>
+            </Link>
           ))}
           <a href="/login" className="py-3 font-mono text-sm text-navy" onClick={() => setMenuOpen(false)}>Login</a>
           <a href="/quote-checker" className="mt-2 bg-teal text-cream font-mono text-sm px-5 py-3 rounded-xl text-center shadow-lg shadow-teal/20" onClick={() => setMenuOpen(false)}>✦ Upload Quote</a>

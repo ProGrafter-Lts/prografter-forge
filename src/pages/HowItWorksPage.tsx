@@ -60,7 +60,7 @@ const HOMEOWNER_STEPS: JourneyStep[] = [
     image: tradeProject,
     alt: "Homeowner and verified trade reviewing an active UK extension",
     icon: Users,
-    note: "Three, not thirty.",
+    note: "Up to three carefully selected matches.",
   },
   {
     num: "03",
@@ -100,7 +100,7 @@ const TRADE_STEPS: JourneyStep[] = [
   {
     num: "01",
     title: "Get verified",
-    description: "Complete the five verification checks to join. Early qualifying members can access the current Founding Member offer.",
+    description: "Complete identity, insurance, qualification, business and conduct checks before your profile goes live.",
     image: getVerified,
     alt: "Verified UK tradesperson wearing an identity lanyard outside a residential build",
     icon: ShieldCheck,
@@ -112,7 +112,6 @@ const TRADE_STEPS: JourneyStep[] = [
     image: findWork,
     alt: "Builder checking local work opportunities on a phone in his van",
     icon: BriefcaseBusiness,
-    note: "Three, not thirty.",
   },
   {
     num: "03",
@@ -239,14 +238,14 @@ const HowItWorksPage = () => {
             <div className="hiw-hero-copy">
               <p className="hiw-eyebrow">How it works</p>
               <h1>
-                A clearer way
-                <span>to build.</span>
+                One project.
+                <span>Everyone aligned.</span>
               </h1>
               <p className="hiw-hero-intro">
-                From first idea to final handover, ProGrafter keeps homeowners and trades aligned, informed and protected.
+                 See how matching, quotes, updates, decisions and staged payments connect from first brief to final handover.
               </p>
               <div className="hiw-trust-points">
-                <div><ShieldCheck /><span><strong>Verified trades</strong>Five checks. No exceptions.</span></div>
+                 <div><ShieldCheck /><span><strong>Verified trades</strong>Checked before they quote.</span></div>
                 <div><ClipboardCheck /><span><strong>Clear process</strong>No guesswork. No surprises.</span></div>
                 <div><Home /><span><strong>Better builds</strong>Real people. Real progress.</span></div>
               </div>
@@ -300,11 +299,12 @@ const HowItWorksPage = () => {
             <div className="hiw-section-heading">
               <div>
                 <p className="hiw-eyebrow">The trust layer</p>
-                <h2>Five checks.<br />Every trade.<br /><span>No exceptions.</span></h2>
+                <h2>The checks behind<br />every verified<br /><span>trade.</span></h2>
               </div>
               <div className="hiw-trust-intro">
                 <p>Every trade on ProGrafter is verified before they can work through the platform.</p>
                 <Link to="/trust">Visit the Trust Centre <ArrowRight /></Link>
+                <Link to="/platform-tour">Explore the tools <ArrowRight /></Link>
               </div>
             </div>
             <div className="hiw-checks-grid">

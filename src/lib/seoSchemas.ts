@@ -12,7 +12,10 @@ export const localBusinessJsonLd = {
     addressCountry: "GB",
   },
   identifier: { "@type": "PropertyValue", propertyID: "Companies House", value: "17124130" },
-  areaServed: { "@type": "Country", name: "United Kingdom" },
+  areaServed: [
+    { "@type": "AdministrativeArea", name: "Nottinghamshire" },
+    { "@type": "AdministrativeArea", name: "East Midlands" },
+  ],
 };
 
 export const buildServiceJsonLd = (opts: {
@@ -44,7 +47,7 @@ export const homepageFaqJsonLd = {
       name: "How much does ProGrafter cost?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "There is no subscription to join, get matched, quote, or get paid on ProGrafter — ever. Optional paid tools such as Planning Hub are separate, opt-in add-ons. Trades pay 7.5% commission when a job completes, capped at £900 per job.",
+        text: "The core platform is free for trades to join, get matched and quote. Trades pay 7.5% after a completed job has been paid, capped at £900. Optional paid tools are separate.",
       },
     },
     {
@@ -60,7 +63,7 @@ export const homepageFaqJsonLd = {
       name: "Where is ProGrafter available?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "ProGrafter operates across the United Kingdom, with initial coverage focused around Nottinghamshire and expanding nationally.",
+        text: "ProGrafter is currently prioritising Nottinghamshire and the East Midlands, expanding county by county as verified trade coverage grows. Homeowner demand elsewhere is retained for future matching.",
       },
     },
     {
