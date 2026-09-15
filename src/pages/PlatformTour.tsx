@@ -71,22 +71,39 @@ const PlatformTour = () => (
           </div>
           <p className="max-w-md text-sm leading-relaxed text-secondary-text">The homeowner and trade work from the same project record, with information and actions suited to each role.</p>
         </div>
-        <div className="platform-shared-record__views grid gap-5 craft:grid-cols-2">
-          <DeviceFrame
-            src={projectView}
-            label="Homeowner view"
-            alt="Homeowner project overview showing progress, quotes and actions"
-            mobileFocus="left"
-            caption={<><strong className="text-navy">Homeowner view:</strong> progress, updates, decisions and payments.</>}
-          />
-          <DeviceFrame
-            src={tradeView}
-            label="Trade view"
-            alt="Trade dashboard showing projects, tasks and earnings"
-            mobileFocus="left"
-            caption={<><strong className="text-navy">Trade view:</strong> today’s work, quoting and project delivery.</>}
-          />
+        <div className="platform-shared-record__views grid gap-8 craft:grid-cols-2">
+          <div>
+            <DeviceFrame
+              src={projectView}
+              label="Homeowner view"
+              alt="Homeowner project overview showing progress, quotes and actions"
+              mobileFocus="left"
+              caption={<><strong className="text-navy">Homeowner view:</strong> progress, updates, decisions and payments.</>}
+            />
+            <HandNote className="mt-4">Homeowner view. Track progress, photos, decisions and payments.</HandNote>
+            <ul className="mt-4 flex flex-wrap gap-2">
+              {HOMEOWNER_MENU.map((item) => (
+                <li key={item} className="border border-navy/15 bg-navy/[0.04] px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-secondary-text">{item}</li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <DeviceFrame
+              src={tradeView}
+              label="Trade view"
+              alt="Trade dashboard showing projects, tasks and earnings"
+              mobileFocus="left"
+              caption={<><strong className="text-navy">Trade view:</strong> today’s work, quoting and project delivery.</>}
+            />
+            <HandNote className="mt-4">Trade view. Today’s work, quoting and project delivery.</HandNote>
+            <ul className="mt-4 flex flex-wrap gap-2">
+              {TRADE_MENU.map((item) => (
+                <li key={item} className="border border-navy/15 bg-navy/[0.04] px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-secondary-text">{item}</li>
+              ))}
+            </ul>
+          </div>
         </div>
+
         <div className="platform-shared-record__steps mt-8 grid gap-5 sm:grid-cols-2 craft:grid-cols-4">
           {SHARED_STEPS.map(({ icon: Icon, title, text }) => <article key={title} className="border-t-2 border-teal pt-4"><Icon className="h-5 w-5 text-teal" /><h3 className="mt-3 font-body text-base font-bold text-navy">{title}</h3><p className="mt-2 text-sm leading-relaxed text-secondary-text">{text}</p></article>)}
         </div>
