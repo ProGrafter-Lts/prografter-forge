@@ -15,7 +15,7 @@ import projectDetail from "@/assets/home/blueprint-lines.jpg";
 
 /** Featured entry points — each maps to a real existing route. */
 const FEATURED = [
-  { tag: "Guides", title: "How to read a building quote", desc: "Spot what’s included, what’s missing and how to compare like for like.", href: "/compare-quotes", cta: "Read the guide" },
+  { tag: "Guides", title: "How to read a building quote", desc: "Spot what’s included, what’s missing and how to compare like for like.", href: "/ai-quote-checker", cta: "Read the guide" },
   { tag: "Explainers", title: "What to look for in a verified trade", desc: "Understand our 5-step checks and why they matter.", href: "/trade-verification", cta: "Read the explainer" },
   { tag: "Planning", title: "From idea to build", desc: "A step-by-step guide to planning a smoother project.", href: "/how-it-works", cta: "Read the guide" },
 ];
@@ -80,7 +80,7 @@ const ResourcesPage = () => (
       note={<>Better questions.<br />Better builds.</>}
       actions={
         <Button asChild variant="cta" size="lg">
-          <Link to="#advice-guides">Explore the advice centre <ArrowRight /></Link>
+          <a href="#advice-guides">Explore the advice centre <ArrowRight /></a>
         </Button>
       }
     />
@@ -103,7 +103,7 @@ const ResourcesPage = () => (
       note="Plain guidance on drawings, costs, regulations and specifications."
     />
 
-    <div className="advice-guides">
+    <div className="advice-guides" id="advice-guides">
     <ContentSection title="Guides & tools">
       <div className="grid grid-cols-1 craft:grid-cols-3 gap-4 craft:gap-5">
         {GUIDES.map((r) => (
