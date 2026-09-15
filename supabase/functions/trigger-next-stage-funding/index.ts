@@ -30,14 +30,34 @@ Deno.serve(async (req) => {
     })
 
   try {
-    const parsed = BodySchema.safeParse(await req.json().catch(() => null))
-    if (!parsed.success) return json({ error: parsed.error.flatten().fieldErrors }, 400)
-    const input = parsed.data
-
     const admin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
     )
+
+    // Internal payment-workflow hook: only the escrow engine (service role) or
+    // a ProGrafter admin may drive stage funding. Never open to the public.
+    const token = (req.headers.get('Authorization') ?? '').replace('Bearer ', '').trim()
+    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    let authorised = token.length > 0 && serviceKey.length > 0 && token === serviceKey
+
+    if (!authorised) {
+      const anon = createClient(
+        Deno.env.get('SUPABASE_URL') ?? '',
+        Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      )
+      const { data: userData } = await anon.auth.getUser(token)
+      const user = userData?.user
+      if (!user) return json({ error: 'Not authenticated' }, 401)
+      const { data: isAdmin } = await admin.rpc('has_role', { _user_id: user.id, _role: 'admin' })
+      authorised = Boolean(isAdmin)
+    }
+    if (!authorised) return json({ error: 'Admin only' }, 403)
+
+    const parsed = BodySchema.safeParse(await req.json().catch(() => null))
+    if (!parsed.success) return json({ error: parsed.error.flatten().fieldErrors }, 400)
+    const input = parsed.data
+
 
     const { data: wallet } = await admin
       .from('project_wallets').select('*').eq('job_id', input.job_id).maybeSingle()
