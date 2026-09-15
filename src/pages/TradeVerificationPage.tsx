@@ -17,12 +17,13 @@ import workEvidence from "@/assets/how-it-works/trade-project.jpg";
 import accountabilityEvidence from "@/assets/dashboard/card-sitephotos.jpg";
 
 const STEPS = [
-  { icon: BadgeCheck, image: verifiedTrade, evidence: "Government-issued ID", title: "Identity verification", desc: "Government-issued ID is checked to confirm the person behind the business is who they say they are — no anonymous listings." },
-  { icon: ShieldCheck, image: policyEvidence, evidence: "Policy schedule", title: "Public liability insurance", desc: "We confirm valid public liability cover so homeowners are protected if something goes wrong on site." },
-  { icon: ScrollText, image: qualificationEvidence, evidence: "Certificates & scheme membership", title: "Trade qualifications & accreditations", desc: "Relevant qualifications, competent-person scheme membership and trade accreditations are checked against the work a trade offers." },
-  { icon: HardHat, image: workEvidence, evidence: "Referees & completed work", title: "References & work history", desc: "We review references and past work so a trade's track record — not just their marketing — earns them a place." },
-  { icon: FileCheck2, image: accountabilityEvidence, evidence: "Reviews & expiry reminders", title: "Ongoing accountability", desc: "Two-way reviews, document expiry reminders and manual oversight keep standards high after approval, not just at sign-up." },
+  { icon: BadgeCheck, image: verifiedTrade, evidence: "Government-issued ID", status: "Identity verified", title: "Identity verification", desc: "Government-issued ID is checked to confirm the person behind the business is who they say they are — no anonymous listings." },
+  { icon: ShieldCheck, image: policyEvidence, evidence: "Policy schedule", status: "Cover confirmed", title: "Public liability insurance", desc: "We confirm valid public liability cover before a trade can quote, so homeowners are protected if something goes wrong on site." },
+  { icon: ScrollText, image: qualificationEvidence, evidence: "Certificates & scheme membership", status: "Accreditations checked", title: "Qualifications & accreditations", desc: "Relevant trade qualifications, competent-person scheme membership and industry accreditations are checked against the work a trade offers." },
+  { icon: HardHat, image: workEvidence, evidence: "Referees & completed work", status: "History verified", title: "References & work history", desc: "We review past projects and speak to recent customers where needed, so a track record — not marketing — earns a place." },
+  { icon: FileCheck2, image: accountabilityEvidence, evidence: "Reviews & expiry reminders", status: "Monitoring ongoing", title: "Ongoing monitoring", desc: "Profiles are regularly checked to keep standards high — two-way reviews, document expiry reminders and manual oversight after approval, not just at sign-up." },
 ];
+
 
 const WHY = [
   { title: "Not pay-to-list", desc: "Trades can't buy their way onto ProGrafter. Verification is earned, so a badge actually means something.", icon: "✓" },
