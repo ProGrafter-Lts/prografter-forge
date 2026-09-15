@@ -53,8 +53,9 @@ const AppShell = ({ children, authenticatedContent }: AppShellProps) => {
     };
   }, [isReady, user]);
 
-  // Anonymous: public marketing layout
-  if (isReady && !user) {
+  // Public-first rendering keeps informational pages available even if auth
+  // recovery is slow or unavailable. A confirmed session swaps to app chrome.
+  if (!user) {
     return (
       <div className="min-h-screen bg-cream">
         <Navbar />
@@ -64,7 +65,7 @@ const AppShell = ({ children, authenticatedContent }: AppShellProps) => {
     );
   }
 
-  // Resolving session/role — minimal chrome to avoid flash
+  // Resolving the role for a confirmed session — minimal chrome to avoid flash
   if (!isReady || !roleResolved) {
     return <div className="min-h-screen bg-deep" />;
   }
