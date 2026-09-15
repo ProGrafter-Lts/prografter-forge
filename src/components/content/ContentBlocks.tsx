@@ -10,6 +10,7 @@ export const ContentHero = ({
   ghost,
   primaryCta,
   secondaryCta,
+  tone = "dark",
 }: {
   eyebrow: string;
   title: string;
@@ -18,12 +19,20 @@ export const ContentHero = ({
   ghost?: string;
   primaryCta?: { label: string; href: string };
   secondaryCta?: { label: string; href: string };
+  /** "light" gives content-led pages a cream, drafting-paper hero. */
+  tone?: "dark" | "light";
 }) => (
-  <section className="public-blueprint relative overflow-hidden bg-deep px-6 pb-20 pt-32">
+  <section
+    className={
+      tone === "light"
+        ? "public-drafting relative overflow-hidden bg-cream px-6 pb-20 pt-36"
+        : "public-blueprint relative overflow-hidden bg-deep px-6 pb-20 pt-36"
+    }
+  >
     {ghost && (
       <span
-        className="absolute -bottom-8 right-0 font-heading text-[140px] craft:text-[260px] text-cream select-none pointer-events-none leading-none"
-        style={{ opacity: 0.03 }}
+        className={`absolute -bottom-8 right-0 font-heading text-[140px] craft:text-[260px] select-none pointer-events-none leading-none ${tone === "light" ? "text-navy" : "text-cream"}`}
+        style={{ opacity: tone === "light" ? 0.05 : 0.03 }}
       >
         {ghost}
       </span>
@@ -33,7 +42,7 @@ export const ContentHero = ({
         <div className="w-8 h-[2px] bg-teal" />
         <span className="font-mono text-xs text-teal uppercase tracking-widest">{eyebrow}</span>
       </div>
-      <h1 className="type-h1 mb-6 text-cream">
+      <h1 className={`type-h1 mb-6 ${tone === "light" ? "text-navy" : "text-cream"}`}>
         {title}
         {highlight && (
           <>
@@ -42,7 +51,9 @@ export const ContentHero = ({
           </>
         )}
       </h1>
-      <p className="font-body text-cream/80 text-lg craft:text-xl font-light max-w-2xl leading-relaxed">
+      <p
+        className={`font-body text-lg craft:text-xl font-light max-w-2xl leading-relaxed ${tone === "light" ? "text-secondary-text" : "text-cream/80"}`}
+      >
         {intro}
       </p>
       {(primaryCta || secondaryCta) && (
@@ -51,7 +62,18 @@ export const ContentHero = ({
             <Button asChild variant="cta" size="lg"><Link to={primaryCta.href}>{primaryCta.label}</Link></Button>
           )}
           {secondaryCta && (
-            <Button asChild variant="outline" size="lg" className="border-cream/30 bg-transparent text-cream hover:border-teal hover:bg-transparent hover:text-teal"><Link to={secondaryCta.href}>{secondaryCta.label}</Link></Button>
+            <Button
+              asChild
+              variant="outline"
+              size="lg"
+              className={
+                tone === "light"
+                  ? "border-navy/25 bg-transparent text-navy hover:border-teal hover:bg-transparent hover:text-teal"
+                  : "border-cream/30 bg-transparent text-cream hover:border-teal hover:bg-transparent hover:text-teal"
+              }
+            >
+              <Link to={secondaryCta.href}>{secondaryCta.label}</Link>
+            </Button>
           )}
         </div>
       )}

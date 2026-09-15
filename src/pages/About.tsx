@@ -4,6 +4,7 @@ import AppShell from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { localBusinessJsonLd } from "@/lib/seoSchemas";
+import { EditorialStatement, GhostMark } from "@/components/public/PublicBits";
 
 const leads = [
   {
@@ -116,7 +117,8 @@ const About = () => {
 
       <div className="bg-deep">
         {/* Hero */}
-        <section className="public-blueprint relative overflow-hidden px-6 pb-14 pt-32">
+        <section className="public-blueprint relative overflow-hidden px-6 pb-14 pt-36">
+          <GhostMark className="absolute -bottom-4 right-4 text-[70px] craft:text-[120px]">£625</GhostMark>
           <div className="max-w-5xl mx-auto relative z-10">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-8 h-[2px] bg-teal" />
@@ -160,10 +162,17 @@ const About = () => {
             <h2 className="type-h2 mb-10 mt-3 text-cream">
               Ten of the eighteen.
             </h2>
-            <div className="mb-7 grid gap-4 sm:grid-cols-3">
-              <div className="border border-cream/10 bg-cream/[0.02] p-5"><p className="font-heading text-3xl text-teal">18</p><p className="text-sm text-cream/70">qualified leads pursued</p></div>
-              <div className="border border-cream/10 bg-cream/[0.02] p-5"><p className="font-heading text-3xl text-teal">£625.32</p><p className="text-sm text-cream/70">spent including VAT</p></div>
-              <div className="border border-cream/10 bg-cream/[0.02] p-5"><p className="font-heading text-3xl text-teal">0</p><p className="text-sm text-cream/70">jobs won</p></div>
+            <div className="mb-7 grid divide-y divide-cream/10 border border-cream/10 bg-cream/[0.02] sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+              {[
+                { figure: "18", label: "Qualified leads" },
+                { figure: "£625.32", label: "Spent inc. VAT" },
+                { figure: "0", label: "Jobs won" },
+              ].map(({ figure, label }) => (
+                <div key={label} className="relative overflow-hidden px-6 py-9">
+                  <p className="font-heading text-5xl leading-none text-teal craft:text-6xl">{figure}</p>
+                  <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.22em] text-cream/55">{label}</p>
+                </div>
+              ))}
             </div>
             <details className="group border border-cream/10 bg-cream/[0.02] p-5">
               <summary className="flex cursor-pointer list-none items-center justify-between font-body font-semibold text-cream">
@@ -241,11 +250,16 @@ const About = () => {
               platform took my money the moment contact details were shared. What happened after was
               my problem. ProGrafter exists because that is not how it should work."
             </p>
-            <p className="font-mono text-xs text-secondary-text uppercase tracking-widest mt-6">
+            <p className="font-mono text-xs text-cream/55 uppercase tracking-widest mt-6">
               — Founder, ProGrafter
             </p>
           </div>
         </section>
+
+        <EditorialStatement
+          lines={["Proper work.", "Proper people."]}
+          note="Built by a working builder, for working builders and the people who hire them."
+        />
 
         {/* What ProGrafter is */}
         <section className="px-6 py-16 border-t border-cream/10">
@@ -303,7 +317,7 @@ const About = () => {
                 Join ProGrafter <ArrowRight className="ml-1" />
               </Link>
             </Button>
-            <p className="font-mono text-xs text-secondary-text uppercase tracking-widest mt-10">
+            <p className="font-mono text-xs text-cream/55 uppercase tracking-widest mt-10">
               ProGrafter Ltd · Company 17124130 · ICO ZC114018
             </p>
           </div>

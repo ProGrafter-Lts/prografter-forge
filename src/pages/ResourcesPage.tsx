@@ -6,6 +6,7 @@ import {
   ContentSection,
   ContentCta,
 } from "@/components/content/ContentBlocks";
+import { EditorialStatement } from "@/components/public/PublicBits";
 
 type Resource = {
   title: string;
@@ -30,7 +31,7 @@ const GUIDES: Resource[] = [
 
 const ResourceCard = ({ r }: { r: Resource }) => {
   const inner = (
-    <div className="flex h-full flex-col rounded-[4px] border border-border/60 bg-card p-6 shadow-sm transition-all hover:border-teal/40 hover:shadow-md">
+    <div className="flex h-full flex-col rounded-[4px] border border-border/60 border-t-2 border-t-teal/70 bg-card p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:border-teal/40 hover:shadow-md">
       <span className="mb-4 self-start border border-teal/25 bg-teal/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-teal">
         {r.tag}
       </span>
@@ -59,8 +60,14 @@ const ResourcesPage = () => (
       highlight="confidence."
       intro="Practical, honest guidance for homeowners and tradespeople — how to check a quote, understand verification, compare pricing, and make better construction decisions."
       ghost="LEARN"
+      tone="light"
       primaryCta={{ label: "Upload a quote", href: "/quote-checker" }}
       secondaryCta={{ label: "Read the FAQ", href: "/faq" }}
+    />
+    <EditorialStatement
+      lines={["Know more.", "Build better."]}
+      note="Plain guidance on drawings, costs, regulations and specifications."
+      tone="light"
     />
     <ContentSection title="Guides & tools">
       <div className="grid grid-cols-1 craft:grid-cols-3 gap-4 craft:gap-5">
