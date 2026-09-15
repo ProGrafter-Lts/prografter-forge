@@ -216,3 +216,72 @@ export const PublicJourney = ({
     </div>
   </section>
 );
+
+/** Restrained handwritten teal annotation, as used across the approved designs. */
+export const HandNote = ({
+  children,
+  className,
+  align = "left",
+}: {
+  children: ReactNode;
+  className?: string;
+  align?: "left" | "right";
+}) => (
+  <p
+    className={cn("pg-note", align === "right" && "pg-note--right", className)}
+    aria-hidden={false}
+  >
+    {children}
+  </p>
+);
+
+export type ShowcaseHeroLine = { text: string; teal?: boolean };
+
+/**
+ * The approved public hero: atmospheric construction photography blended into
+ * navy, blueprint overlay, technical label, condensed display headline and a
+ * restrained handwritten annotation.
+ */
+export const ShowcaseHero = ({
+  label,
+  lines,
+  intro,
+  image,
+  imageAlt = "",
+  note,
+  actions,
+  children,
+  className,
+}: {
+  label: string;
+  lines: ShowcaseHeroLine[];
+  intro?: ReactNode;
+  image: string;
+  imageAlt?: string;
+  note?: ReactNode;
+  actions?: ReactNode;
+  children?: ReactNode;
+  className?: string;
+}) => (
+  <section className={cn("pg-hero public-blueprint bg-deep", className)}>
+    <div className="pg-hero__image" aria-hidden={imageAlt === ""}>
+      <img src={image} alt={imageAlt} />
+    </div>
+    <div className="pg-hero__inner">
+      <div className="pg-hero__copy">
+        <SectionLabel className="mb-6">{label}</SectionLabel>
+        <h1 className="pg-hero__title">
+          {lines.map((line) => (
+            <span key={line.text} className={cn("block", line.teal && "text-teal")}>
+              {line.text}
+            </span>
+          ))}
+        </h1>
+        {intro && <p className="pg-hero__intro">{intro}</p>}
+        {actions && <div className="pg-hero__actions">{actions}</div>}
+      </div>
+      {note && <HandNote className="pg-hero__note" align="right">{note}</HandNote>}
+      {children}
+    </div>
+  </section>
+);
