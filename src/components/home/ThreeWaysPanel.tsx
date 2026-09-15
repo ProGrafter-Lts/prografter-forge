@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { FileText, Search, Home, ChevronRight } from "lucide-react";
+import { FileText, Search, Home, ChevronRight, PanelsTopLeft } from "lucide-react";
 
 const CARDS = [
   {
@@ -20,6 +20,12 @@ const CARDS = [
     desc: "Keep quotes, messages and milestones in one place.",
     href: "/dashboard/homeowner",
   },
+  {
+    icon: PanelsTopLeft,
+    title: "Explore The Tools",
+    desc: "Preview quote comparison, project tracking and what is coming next.",
+    href: "/platform-tour",
+  },
 ];
 
 const ThreeWaysPanel = () => {
@@ -32,7 +38,7 @@ const ThreeWaysPanel = () => {
               Get Started Today
             </p>
             <h2 className="font-heading uppercase text-cream text-[32px] craft:text-[44px] leading-none">
-              Three ways to move forward.
+               Choose where to begin.
             </h2>
           </div>
           <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-cream/55 leading-relaxed craft:text-right">
@@ -42,7 +48,7 @@ const ThreeWaysPanel = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 craft:grid-cols-3 gap-5">
+         <div className="grid grid-cols-1 sm:grid-cols-2 craft:grid-cols-4 gap-5">
           {CARDS.map(({ icon: Icon, title, desc, href }) => (
             <Link
               key={title}

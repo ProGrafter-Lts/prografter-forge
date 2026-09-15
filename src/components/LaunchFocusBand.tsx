@@ -41,7 +41,7 @@ const LaunchFocusBand = () => (
           ))}
         </div>
         <p className="mt-5 text-sm leading-relaxed text-secondary-text">
-          Some applicants are outside the current core area. They can stay ready on the platform while local demand develops.
+          Additional trades have applied, including some outside the current core area. Early members can stay ready on the free core platform while local demand develops.
         </p>
         <div className="mt-5 border-t border-border pt-5">
           <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-secondary-text">Evidence as the network grows</p>

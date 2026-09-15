@@ -5,7 +5,7 @@ const STEPS = [
     num: "01",
     icon: UserCheck,
     title: "Create your free profile",
-    desc: "Add your trade, postcode and insurance. Most accounts are verified within 24 hours.",
+    desc: "Add your trade, postcode and documents. Every application is reviewed before approval.",
   },
   {
     num: "02",
@@ -41,9 +41,9 @@ const TradeStepsSection = () => {
             </h2>
           </div>
           <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-secondary-text leading-relaxed craft:text-right">
-            Free to join.
-            <br />
-            Pay only when you win.
+             Four stages.
+             <br />
+             One connected workflow.
           </p>
         </div>
 

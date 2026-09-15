@@ -36,7 +36,7 @@ const TradeCtaBand = () => {
           Join free and start quoting.
         </h2>
         <p className="font-body text-cream/85 text-base craft:text-lg mb-8">
-          Set up your profile in minutes and get matched to real projects near you.
+          Set up your profile and be ready as verified coverage and homeowner demand grow in your area.
         </p>
         <Link
           to="/signup/trade"

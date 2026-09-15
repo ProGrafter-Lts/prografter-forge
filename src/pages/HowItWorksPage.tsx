@@ -299,7 +299,7 @@ const HowItWorksPage = () => {
             <div className="hiw-section-heading">
               <div>
                 <p className="hiw-eyebrow">The trust layer</p>
-                <h2>Five checks.<br />Every trade.<br /><span>No exceptions.</span></h2>
+                <h2>The checks behind<br />every verified<br /><span>trade.</span></h2>
               </div>
               <div className="hiw-trust-intro">
                 <p>Every trade on ProGrafter is verified before they can work through the platform.</p>
