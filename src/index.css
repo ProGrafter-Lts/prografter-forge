@@ -2736,3 +2736,12 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
 }
 .pg-receipt::before { top: -9px; transform: scaleY(-1); }
 .pg-receipt::after { bottom: -9px; }
+/* Receipt is a light surface inside a dark section — keep its own ink colours. */
+.public-site .pg-receipt,
+.public-site .pg-receipt p,
+.public-site .pg-receipt dt,
+.public-site .pg-receipt dd,
+.public-site .pg-receipt span {
+  color: hsl(var(--navy));
+}
+.public-site .pg-receipt .pg-note { color: hsl(var(--navy) / 0.7); }
