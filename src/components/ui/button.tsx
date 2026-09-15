@@ -15,8 +15,10 @@ const buttonVariants = cva(
         secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
-        /* Site-wide marketing CTA — matches the .btn-p primary button used across the marketing pages */
-        cta: "bg-teal text-cream hover:bg-teal/90 font-mono font-bold uppercase tracking-[1px] text-[11px] rounded-[5px]",
+        /* Public-site actions follow the established Homeowner / Trades / How It Works treatment. */
+        cta: "bg-teal text-cream hover:bg-teal-hover font-mono font-bold uppercase tracking-[0.12em] text-[11px] rounded",
+        marketingOutline: "border border-cream/35 bg-deep/45 text-cream hover:border-teal hover:bg-teal/10 hover:text-cream font-mono font-bold uppercase tracking-[0.12em] text-[11px] rounded",
+        textAction: "h-auto rounded-none border-b border-teal px-0 py-1 text-teal hover:text-teal-hover font-mono font-bold uppercase tracking-[0.12em] text-[11px]",
       },
       size: {
         default: "h-10 px-4 py-2",

@@ -121,12 +121,12 @@ const PublicHeader = () => {
           </div>
         </nav>
         <div className="hidden shrink-0 items-center gap-2 craft:flex">
-          <Button asChild variant="outline" size="sm" className={cn("border-cream/25 bg-transparent text-cream hover:border-teal hover:bg-transparent hover:text-teal", tradesActive && "border-teal text-teal")}><Link to="/for-trades" aria-current={tradesActive ? "page" : undefined}>For Trades</Link></Button>
+          <Button asChild variant="marketingOutline" size="sm" className={cn(tradesActive && "border-teal text-teal")}><Link to="/for-trades" aria-current={tradesActive ? "page" : undefined}>For Trades</Link></Button>
           {user ? (
             <Button asChild variant="cta" size="sm"><Link to={dashboardHref}>Return to Dashboard</Link></Button>
           ) : (
             <>
-              <Button asChild variant="ghost" size="sm" className="text-cream hover:bg-cream/10 hover:text-cream"><Link to="/login">Log In</Link></Button>
+            <Button asChild variant="ghost" size="sm" className="font-mono text-[11px] font-bold uppercase tracking-[0.12em] text-cream hover:bg-cream/10 hover:text-cream"><Link to="/login">Log In</Link></Button>
               <Button asChild variant="cta" size="sm"><Link to="/signup/homeowner">Sign Up</Link></Button>
             </>
           )}
@@ -148,12 +148,12 @@ const PublicHeader = () => {
             {SECONDARY_LINKS.map(({ label, href }) => <Link key={href} to={href} className="border-b border-cream/10 py-3 font-body text-sm text-cream/70">{label}</Link>)}
           </div>
           <div className="mt-6 grid grid-cols-2 gap-3">
-            <Button asChild variant="outline" className="border-cream/25 bg-transparent text-cream hover:border-teal hover:bg-transparent hover:text-teal"><Link to="/for-trades">For Trades</Link></Button>
+            <Button asChild variant="marketingOutline"><Link to="/for-trades">For Trades</Link></Button>
             {user ? (
               <Button asChild variant="cta"><Link to={dashboardHref}>Dashboard</Link></Button>
             ) : (
               <>
-                <Button asChild variant="outline" className="border-cream/25 bg-transparent text-cream hover:border-teal hover:bg-transparent hover:text-teal"><Link to="/login">Log In</Link></Button>
+                <Button asChild variant="marketingOutline"><Link to="/login">Log In</Link></Button>
                 <Button asChild variant="cta" className="col-span-2"><Link to="/signup/homeowner">Sign Up</Link></Button>
               </>
             )}

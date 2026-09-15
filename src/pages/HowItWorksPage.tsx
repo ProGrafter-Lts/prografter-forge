@@ -14,12 +14,12 @@ import {
   UserCheck,
   Users,
   WalletCards,
-  type LucideIcon,
 } from "lucide-react";
 import SEO from "@/components/SEO";
 import HomeownerNav from "@/components/home/HomeownerNav";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
+import { PublicJourney, type PublicJourneyStep } from "@/components/public/PublicBits";
 import { localBusinessJsonLd } from "@/lib/seoSchemas";
 import heroImage from "@/assets/home/hero-blueprint-build.jpg";
 import homeownerPlanning from "@/assets/how-it-works/homeowner-planning.jpg";
@@ -34,17 +34,7 @@ import findWork from "@/assets/how-it-works/find-work.jpg";
 import submitQuote from "@/assets/how-it-works/submit-quote.jpg";
 import tradeReputation from "@/assets/how-it-works/trade-reputation.jpg";
 
-type JourneyStep = {
-  num: string;
-  title: string;
-  description: string;
-  image: string;
-  alt: string;
-  icon: LucideIcon;
-  note?: string;
-};
-
-const HOMEOWNER_STEPS: JourneyStep[] = [
+const HOMEOWNER_STEPS: PublicJourneyStep[] = [
   {
     num: "01",
     title: "Post your project",
@@ -96,7 +86,7 @@ const HOMEOWNER_STEPS: JourneyStep[] = [
   },
 ];
 
-const TRADE_STEPS: JourneyStep[] = [
+const TRADE_STEPS: PublicJourneyStep[] = [
   {
     num: "01",
     title: "Get verified",
@@ -162,61 +152,6 @@ const scrollToJourney = (id: "homeowner-journey" | "trade-journey") => {
   target.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
 };
 
-const Journey = ({
-  id,
-  label,
-  title,
-  description,
-  steps,
-  tone,
-}: {
-  id: string;
-  label: string;
-  title: React.ReactNode;
-  description: string;
-  steps: JourneyStep[];
-  tone: "homeowner" | "trade";
-}) => (
-  <section id={id} className={`hiw-journey hiw-journey--${tone}`}>
-    <div className="hiw-container">
-      <div className="hiw-section-heading">
-        <div>
-          <p className="hiw-eyebrow">{label}</p>
-          <h2>{title}</h2>
-        </div>
-        <p>{description}</p>
-      </div>
-
-      <div className="hiw-journey-grid">
-        {steps.map(({ num, title: stepTitle, description: stepDescription, image, alt, icon: Icon, note }) => (
-          <article key={num} className="hiw-step">
-            <div className="hiw-step-marker">
-              <span>{num}</span>
-              <i aria-hidden="true" />
-            </div>
-            <div className="hiw-step-image">
-              <img src={image} alt={alt} loading="lazy" width={1024} height={1280} />
-              <div className="hiw-step-image-shade" />
-              <Icon className="hiw-step-icon" strokeWidth={1.5} />
-            </div>
-            <div className="hiw-step-copy">
-              <h3>{stepTitle}</h3>
-              <p>{stepDescription}</p>
-              {note && <span className="hiw-step-note">{note}</span>}
-            </div>
-          </article>
-        ))}
-      </div>
-
-      <div className="hiw-shared-truth" aria-label="One shared project principle">
-        <span>One project record.</span>
-        <span>Two views.</span>
-        <strong>Same truth.</strong>
-      </div>
-    </div>
-  </section>
-);
-
 const HowItWorksPage = () => {
   return (
     <div className="hiw-page">
@@ -276,7 +211,7 @@ const HowItWorksPage = () => {
           </div>
         </section>
 
-        <Journey
+        <PublicJourney
           id="homeowner-journey"
           label="The homeowner journey"
           title={<>From idea to completion.<br /><span>All in one place.</span></>}
@@ -285,7 +220,7 @@ const HowItWorksPage = () => {
           tone="homeowner"
         />
 
-        <Journey
+        <PublicJourney
           id="trade-journey"
           label="The trade journey"
           title={<>Real work.<br /><span>Serious customers.</span></>}
