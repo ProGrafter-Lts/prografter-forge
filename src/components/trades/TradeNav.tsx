@@ -5,6 +5,7 @@ import Logo from "@/components/Logo";
 const LINKS = [
   { label: "Find Work", href: "/for-trades" },
   { label: "How It Works", href: "/how-it-works" },
+  { label: "Platform Tour", href: "/platform-tour" },
   { label: "Pricing", href: "/pricing" },
   { label: "About Us", href: "/about" },
   { label: "Help", href: "/faq" },
@@ -18,7 +19,7 @@ const TradeNav = () => {
       <div className="max-w-[1400px] mx-auto px-6 h-20 flex items-center justify-between">
         <Logo variant="light" className="h-14 w-auto" />
 
-        <nav className="hidden craft:flex items-center gap-8">
+        <nav className="hidden craft:flex items-center gap-6">
           {LINKS.map((l, i) => (
             <Link
               key={l.label}
@@ -35,7 +36,7 @@ const TradeNav = () => {
         <div className="hidden craft:flex items-center gap-3">
           <Link
             to="/"
-            className="font-body text-xs uppercase tracking-[0.18em] text-cream/60 hover:text-teal transition-colors"
+            className="font-body text-xs font-semibold uppercase tracking-[0.14em] text-cream border border-cream/25 rounded-lg px-3 py-2 hover:border-teal hover:text-teal transition-colors"
           >
             For Homeowners
           </Link>
@@ -84,7 +85,7 @@ const TradeNav = () => {
           <Link
             to="/"
             onClick={() => setOpen(false)}
-            className="py-3 font-body text-xs uppercase tracking-[0.18em] text-cream/60"
+            className="my-2 rounded-lg border border-teal/40 bg-teal/10 py-3 text-center font-body text-xs font-semibold uppercase tracking-[0.18em] text-cream"
           >
             For Homeowners
           </Link>

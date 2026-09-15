@@ -12,7 +12,10 @@ export const localBusinessJsonLd = {
     addressCountry: "GB",
   },
   identifier: { "@type": "PropertyValue", propertyID: "Companies House", value: "17124130" },
-  areaServed: { "@type": "Country", name: "United Kingdom" },
+  areaServed: [
+    { "@type": "AdministrativeArea", name: "Nottinghamshire" },
+    { "@type": "AdministrativeArea", name: "East Midlands" },
+  ],
 };
 
 export const buildServiceJsonLd = (opts: {
@@ -60,7 +63,7 @@ export const homepageFaqJsonLd = {
       name: "Where is ProGrafter available?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "ProGrafter operates across the United Kingdom, with initial coverage focused around Nottinghamshire and expanding nationally.",
+        text: "ProGrafter is currently prioritising Nottinghamshire and the East Midlands, expanding county by county as verified trade coverage grows. Homeowner demand elsewhere is retained for future matching.",
       },
     },
     {

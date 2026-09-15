@@ -33,10 +33,10 @@ const FinalCtaBand = () => {
           Ready To Get Started?
         </p>
         <h2 className="font-heading uppercase text-cream text-[32px] craft:text-[48px] leading-none mb-4">
-          Start your project the clearer way.
+          Start with the right information.
         </h2>
         <p className="font-body text-cream/85 text-base craft:text-lg mb-8">
-          Check your quote, find verified trades and take control of your project today.
+          Check a quote, request up to three verified matches, or explore the platform before you begin.
         </p>
         <Link
           to="/quote-checker"

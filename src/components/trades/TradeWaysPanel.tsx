@@ -36,9 +36,9 @@ const TradeWaysPanel = () => {
             </h2>
           </div>
           <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-cream/55 leading-relaxed craft:text-right">
-            Core platform free.
+            Local density first.
             <br />
-            Paid tools optional.
+            Better-fit opportunities.
           </p>
         </div>
 

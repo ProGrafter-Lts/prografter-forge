@@ -11,6 +11,7 @@ const Footer = () => {
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
             <a href="/project-cost-guide" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">Project Cost Guide</a>
             <a href="/quote-checker" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">Quote Checker</a>
+            <Link to="/platform-tour" className="font-mono text-xs text-secondary-text hover:text-teal transition-colors">Platform Tour</Link>
             <span className="font-mono text-xs text-secondary-text/60">Quote Comparison — Coming Soon</span>
             <span className="font-mono text-xs text-secondary-text/60">Project Confidence Report — Future</span>
           </div>

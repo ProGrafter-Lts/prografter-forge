@@ -3,7 +3,7 @@ import { ArrowRight, ShieldCheck, Users, Home } from "lucide-react";
 import heroImage from "@/assets/home/hero-blueprint-build.jpg";
 
 const INDICATORS = [
-  { icon: ShieldCheck, title: "Verified Trades", desc: "Five checks. No exceptions." },
+  { icon: ShieldCheck, title: "Verified Trades", desc: "Checked before they can quote." },
   { icon: Users, title: "Clearer Quotes", desc: "Like-for-like and easy to compare." },
   { icon: Home, title: "Project Control", desc: "Keep everything in one place." },
 ];
@@ -51,7 +51,7 @@ const HomeownerHero = () => {
       <div className="relative z-10 max-w-[1400px] mx-auto px-6 pt-32 craft:pt-36 pb-16">
         <div className="max-w-2xl">
           <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-cream/70 mb-5">
-            A Clearer Way To Build
+            Managed Home Improvement
           </p>
 
           <h1 className="font-heading uppercase text-cream text-[42px] craft:text-[76px] leading-[0.92] mb-6">
@@ -61,8 +61,8 @@ const HomeownerHero = () => {
           </h1>
 
           <p className="font-body text-cream/85 text-base craft:text-lg leading-relaxed max-w-xl mb-8">
-            Check quotes, find verified trades, and manage your project with clarity. ProGrafter gives
-            homeowners the confidence to build, renovate and improve — the right way.
+            Compare transparent quotes, meet up to three verified trades and keep progress, photos,
+            decisions and staged payments together. Not an open directory.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 mb-5">
@@ -87,6 +87,13 @@ const HomeownerHero = () => {
             className="inline-flex items-center gap-2 font-body text-xs font-semibold uppercase tracking-[0.18em] text-cream underline underline-offset-4 decoration-teal hover:text-teal transition-colors"
           >
             How It Works
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+          <Link
+            to="/platform-tour"
+            className="ml-6 inline-flex items-center gap-2 font-body text-xs font-semibold uppercase tracking-[0.18em] text-cream underline underline-offset-4 decoration-teal hover:text-teal transition-colors"
+          >
+            Explore The Tools
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
 
