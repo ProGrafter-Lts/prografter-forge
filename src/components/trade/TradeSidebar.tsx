@@ -21,16 +21,26 @@ import {
   Briefcase,
 } from "lucide-react";
 
-const NAV_ITEMS = [
-  { label: "Dashboard", icon: LayoutDashboard, id: "dashboard" },
-  { label: "Projects", icon: Briefcase, id: "projects" },
-  { label: "Find Work", icon: Search, id: "find-work" },
-  { label: "Pipeline", icon: FolderKanban, id: "pipeline" },
-  { label: "Quotes", icon: FileText, id: "quotes" },
-  { label: "Calendar", icon: CalendarDays, id: "calendar" },
-  { label: "Messages", icon: MessageSquare, id: "messages" },
-  { label: "TradeVault", icon: ShieldCheck, id: "tradevault" },
-  { label: "Profile", icon: UserCircle, id: "profile" },
+const NAV_GROUPS = [
+  {
+    label: "Work",
+    items: [
+      { label: "Dashboard", icon: LayoutDashboard, id: "dashboard" },
+      { label: "Projects", icon: Briefcase, id: "projects" },
+      { label: "Find Work", icon: Search, id: "find-work" },
+      { label: "Pipeline", icon: FolderKanban, id: "pipeline" },
+      { label: "Quotes", icon: FileText, id: "quotes" },
+    ],
+  },
+  {
+    label: "Organise",
+    items: [
+      { label: "Calendar", icon: CalendarDays, id: "calendar" },
+      { label: "Messages", icon: MessageSquare, id: "messages" },
+      { label: "TradeVault", icon: ShieldCheck, id: "tradevault" },
+      { label: "Profile", icon: UserCircle, id: "profile" },
+    ],
+  },
 ];
 
 interface TradeSidebarProps {
@@ -144,37 +154,39 @@ const TradeSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen }: 
         </div>
 
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto no-scrollbar">
-          {NAV_ITEMS.map((item) => {
-            const isActive = routeActiveNav === item.id;
-            const badgeCount =
-              item.id === "find-work" ? newMatchCount : item.id === "messages" ? unreadMessages : 0;
-            const showBadge = badgeCount > 0;
-            return (
-              <button
-                key={item.id}
-                onClick={() => handleNavClick(item.id)}
-                className={`td-nav w-full flex items-center gap-3 px-4 py-3 rounded-xl font-mono text-sm whitespace-nowrap ${
-                  isActive ? "is-active" : ""
-                }`}
-              >
-                <item.icon className="w-4 h-4 flex-shrink-0" />
-                {item.label}
-                {showBadge && (
-                  <span
-                    className="ml-auto min-w-[20px] h-5 px-1.5 inline-flex items-center justify-center rounded-full font-mono text-[11px] font-semibold"
-                    style={{ backgroundColor: "#DC2626", color: "#FFFFFF" }}
-                    aria-label={
-                      item.id === "messages"
-                        ? `${badgeCount} unread messages`
-                        : `${badgeCount} new job matches`
-                    }
-                  >
-                    {badgeCount > 99 ? "99+" : badgeCount}
-                  </span>
-                )}
-              </button>
-            );
-          })}
+          {NAV_GROUPS.map((group) => (
+            <div key={group.label} className="pb-3 last:pb-0">
+              <p className="px-4 pb-1 pt-2 font-mono text-[10px] uppercase tracking-[0.15em] text-primary-foreground/35">
+                {group.label}
+              </p>
+              <div className="space-y-1">
+                {group.items.map((item) => {
+                  const isActive = routeActiveNav === item.id;
+                  const badgeCount = item.id === "find-work" ? newMatchCount : item.id === "messages" ? unreadMessages : 0;
+                  const showBadge = badgeCount > 0;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => handleNavClick(item.id)}
+                      className={`td-nav w-full flex items-center gap-3 px-4 py-3 rounded-xl font-mono text-sm whitespace-nowrap ${isActive ? "is-active" : ""}`}
+                    >
+                      <item.icon className="w-4 h-4 flex-shrink-0" />
+                      {item.label}
+                      {showBadge && (
+                        <span
+                          className="ml-auto min-w-[20px] h-5 px-1.5 inline-flex items-center justify-center rounded-full font-mono text-[11px] font-semibold"
+                          style={{ backgroundColor: "#DC2626", color: "#FFFFFF" }}
+                          aria-label={item.id === "messages" ? `${badgeCount} unread messages` : `${badgeCount} new job matches`}
+                        >
+                          {badgeCount > 99 ? "99+" : badgeCount}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
 
 
           {/* SiteScout — live for the closed-testing account only, otherwise "Soon" */}
@@ -217,10 +229,7 @@ const TradeSidebar = ({ activeNav, setActiveNav, sidebarOpen, setSidebarOpen }: 
           </button>
 
           {/* Internal Beta / Admin — temporary */}
-          <div
-            className="px-4 pt-5 pb-1 font-mono text-[10px] uppercase tracking-[0.15em]"
-            style={{ color: "rgba(255,255,255,0.35)" }}
-          >
+          <div className="px-4 pt-5 pb-1 font-mono text-[10px] uppercase tracking-[0.15em] text-primary-foreground/35">
             Internal Beta / Admin
           </div>
           <button

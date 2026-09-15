@@ -1,4 +1,5 @@
-import { type ComponentType, type ReactNode } from "react";
+import { type ReactNode } from "react";
+import { type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /** Small technical label with a teal rule — the ProGrafter section marker. */
@@ -145,7 +146,7 @@ export type PublicJourneyStep = {
   description: string;
   image: string;
   alt: string;
-  icon: ComponentType<{ className?: string; strokeWidth?: number }>;
+  icon: LucideIcon;
   note?: string;
 };
 
