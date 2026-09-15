@@ -6,3 +6,5 @@
 - [x] Add compact-on-scroll mobile public header and safer chat placement
 - [x] Improve real Platform Tour screenshot readability on mobile
 - [x] Verify Platform Tour and Verification at 360/390/412/430px plus desktop
+
+- [x] Approved mockups pass: Platform Tour, Our Checks, Advice, About restyled (presentation only)

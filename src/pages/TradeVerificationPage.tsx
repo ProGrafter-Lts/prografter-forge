@@ -1,9 +1,11 @@
+import { Link } from "react-router-dom";
 import SEO from "@/components/SEO";
 import AppShell from "@/components/AppShell";
-import { BadgeCheck, FileCheck2, HardHat, ScrollText, ShieldCheck } from "lucide-react";
-import { EditorialStatement, SectionLabel } from "@/components/public/PublicBits";
+import { ArrowRight, BadgeCheck, FileCheck2, HardHat, ScrollText, ShieldCheck } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { EditorialStatement, SectionLabel, ShowcaseHero } from "@/components/public/PublicBits";
 import {
-  ContentHero,
+  
   ContentSection,
   FeatureGrid,
   FaqBlock,
@@ -17,12 +19,13 @@ import workEvidence from "@/assets/how-it-works/trade-project.jpg";
 import accountabilityEvidence from "@/assets/dashboard/card-sitephotos.jpg";
 
 const STEPS = [
-  { icon: BadgeCheck, image: verifiedTrade, evidence: "Government-issued ID", title: "Identity verification", desc: "Government-issued ID is checked to confirm the person behind the business is who they say they are — no anonymous listings." },
-  { icon: ShieldCheck, image: policyEvidence, evidence: "Policy schedule", title: "Public liability insurance", desc: "We confirm valid public liability cover so homeowners are protected if something goes wrong on site." },
-  { icon: ScrollText, image: qualificationEvidence, evidence: "Certificates & scheme membership", title: "Trade qualifications & accreditations", desc: "Relevant qualifications, competent-person scheme membership and trade accreditations are checked against the work a trade offers." },
-  { icon: HardHat, image: workEvidence, evidence: "Referees & completed work", title: "References & work history", desc: "We review references and past work so a trade's track record — not just their marketing — earns them a place." },
-  { icon: FileCheck2, image: accountabilityEvidence, evidence: "Reviews & expiry reminders", title: "Ongoing accountability", desc: "Two-way reviews, document expiry reminders and manual oversight keep standards high after approval, not just at sign-up." },
+  { icon: BadgeCheck, image: verifiedTrade, evidence: "Government-issued ID", status: "Identity verified", title: "Identity verification", desc: "Government-issued ID is checked to confirm the person behind the business is who they say they are — no anonymous listings." },
+  { icon: ShieldCheck, image: policyEvidence, evidence: "Policy schedule", status: "Cover confirmed", title: "Public liability insurance", desc: "We confirm valid public liability cover before a trade can quote, so homeowners are protected if something goes wrong on site." },
+  { icon: ScrollText, image: qualificationEvidence, evidence: "Certificates & scheme membership", status: "Accreditations checked", title: "Qualifications & accreditations", desc: "Relevant trade qualifications, competent-person scheme membership and industry accreditations are checked against the work a trade offers." },
+  { icon: HardHat, image: workEvidence, evidence: "Referees & completed work", status: "History verified", title: "References & work history", desc: "We review past projects and speak to recent customers where needed, so a track record — not marketing — earns a place." },
+  { icon: FileCheck2, image: accountabilityEvidence, evidence: "Reviews & expiry reminders", status: "Kept current", title: "Ongoing monitoring", desc: "Profiles are regularly checked to keep standards high — two-way reviews, document expiry reminders and manual oversight after approval, not just at sign-up." },
 ];
+
 
 const WHY = [
   { title: "Not pay-to-list", desc: "Trades can't buy their way onto ProGrafter. Verification is earned, so a badge actually means something.", icon: "✓" },
@@ -48,36 +51,51 @@ const TradeVerificationPage = () => (
       path="/trade-verification"
       jsonLd={buildFaqJsonLd(FAQ)}
     />
-    <ContentHero
-      eyebrow="Trade Verification"
-      title="Every trade, verified"
-      highlight="five ways."
-      intro="Trust starts before the first quote. ProGrafter checks identity, insurance, qualifications, references and history — so homeowners meet genuine professionals, not paid listings."
+    <ShowcaseHero
+      label="Our checks"
+      lines={[{ text: "Five checks." }, { text: "Not five stars." }]}
+      intro="We verify every trade before they join ProGrafter — because trust on a building project isn’t a rating, it’s evidence."
       image={verifiedTrade}
-      imageAlt="Verified tradesperson working on a residential construction project"
-      primaryCta={{ label: "Join as a verified trade", href: "/signup/trade" }}
-      secondaryCta={{ label: "See how it works", href: "/how-it-works" }}
+      imageAlt="Tradesperson on a residential construction site"
+      note={<>Proper checks<br />for proper grafters.</>}
+      actions={
+        <>
+          <Button asChild variant="cta" size="lg"><Link to="/how-it-works">See how it works <ArrowRight /></Link></Button>
+          <Button asChild variant="outline" size="lg" className="border-cream/30 bg-transparent text-cream hover:border-teal hover:bg-transparent hover:text-teal"><Link to="/signup/trade">Join as a verified trade</Link></Button>
+        </>
+      }
     />
 
-    <section className="verification-record public-dark-surface bg-cream px-6 py-16 craft:py-20">
+    <section className="bg-deep px-6 py-16 craft:py-20">
       <div className="mx-auto max-w-5xl">
-        <SectionLabel tone="light">The record we build</SectionLabel>
-        <h2 className="type-h2 mt-3 max-w-3xl text-navy">Our 5-step verification process</h2>
-        <p className="mt-4 max-w-2xl font-body text-lg text-secondary-text">
+        <SectionLabel>The record we build</SectionLabel>
+        <h2 className="type-h2 mt-3 max-w-3xl text-cream">Our 5-step verification process</h2>
+        <p className="mt-4 max-w-2xl font-body text-lg text-cream/80">
           Each trade passes every stage before their profile goes live to homeowners.
         </p>
-        <ol className="verification-record__list mt-10 space-y-4">
-          {STEPS.map(({ icon: Icon, image, evidence, title, desc }, i) => (
-            <li key={title} className="relative grid gap-4 rounded-[4px] border border-border/60 border-l-2 border-l-teal bg-card p-6 shadow-sm craft:grid-cols-[auto_1fr_auto] craft:items-start">
-              <img src={image} alt="" loading="lazy" className="verification-record__image" />
-              <span className="flex h-11 w-11 items-center justify-center rounded-[4px] border border-teal/25 bg-teal/10 font-mono text-sm text-teal">{String(i + 1).padStart(2, "0")}</span>
-              <div><h3 className="font-heading text-xl leading-tight text-navy">{title}</h3><p className="mt-2 font-body text-sm leading-relaxed text-body-text">{desc}</p></div>
-              <span className="flex items-center gap-2 self-center whitespace-nowrap border border-border/60 bg-cream px-3 py-2 font-mono text-[10px] uppercase tracking-[0.16em] text-secondary-text"><Icon className="h-4 w-4 shrink-0 text-teal" aria-hidden />{evidence}</span>
+        <ol className="mt-10 space-y-4">
+          {STEPS.map(({ icon: Icon, image, evidence, status, title, desc }, i) => (
+            <li key={title} className="pg-check-row">
+              <span className="pg-check-row__num">{String(i + 1).padStart(2, "0")}</span>
+              <div>
+                <h3 className="font-body text-lg font-bold leading-tight text-cream">{title}</h3>
+                <p className="mt-2 font-body text-sm leading-relaxed text-cream/75">{desc}</p>
+                <span className="mt-3 inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.16em] text-cream/55">
+                  <Icon className="h-4 w-4 shrink-0 text-teal" aria-hidden />
+                  {evidence}
+                </span>
+              </div>
+              <div className="pg-check-row__media"><img src={image} alt="" loading="lazy" /></div>
+              <span className="pg-check-row__status"><BadgeCheck className="h-3.5 w-3.5" aria-hidden />{status}</span>
             </li>
           ))}
         </ol>
+        <p className="mt-6 font-mono text-[11px] uppercase tracking-[0.16em] text-cream/50">
+          Images are illustrative. Verification status shown here describes what we check, not any individual trade.
+        </p>
       </div>
     </section>
+
 
     <EditorialStatement
       lines={["Five checks.", "Not five stars."]}

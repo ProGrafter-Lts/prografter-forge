@@ -5,7 +5,7 @@ import AppShell from "@/components/AppShell";
 import QuoteComparisonDemo from "@/components/demos/QuoteComparisonDemo";
 import VerificationExplainerInteractive from "@/components/demos/VerificationExplainerInteractive";
 import { Button } from "@/components/ui/button";
-import { DeviceFrame, EditorialStatement, SectionLabel } from "@/components/public/PublicBits";
+import { DeviceFrame, EditorialStatement, HandNote, SectionLabel, ShowcaseHero } from "@/components/public/PublicBits";
 import projectView from "@/assets/platform/homeowner-overview.png";
 import tradeView from "@/assets/platform/trade-dashboard.png";
 import homeownerQuotes from "@/assets/platform/homeowner-quotes.png";
@@ -13,6 +13,10 @@ import tradeJobs from "@/assets/platform/trade-jobs.png";
 import tradeEarnings from "@/assets/platform/trade-earnings.png";
 import homeownerManual from "@/assets/platform/homeowner-manual.png";
 import tourHero from "@/assets/dashboard/hero-project.jpg";
+
+/** Real V1 navigation — kept in step with HomeownerSidebar / TradeSidebar. */
+const HOMEOWNER_MENU = ["Overview", "My Projects", "Messages", "Site Diary", "Quotes & Checks", "Green Grants", "Homeowner Manual", "My Profile"];
+const TRADE_MENU = ["Dashboard", "Projects", "Find Work", "Pipeline", "Quotes", "Calendar", "Messages", "TradeVault", "Profile"];
 
 const SHARED_STEPS = [
   { icon: ClipboardCheck, title: "Agree the plan", text: "A shared project record keeps the scope, programme and stages aligned." },
@@ -42,22 +46,25 @@ const PlatformTour = () => (
       path="/platform-tour"
     />
 
-    <section className="platform-tour-hero public-blueprint relative overflow-hidden bg-deep px-6 pb-24 pt-36">
-      <div className="platform-tour-hero__image" aria-hidden><img src={tourHero} alt="" /></div>
-      <div className="relative z-10 mx-auto max-w-5xl">
-        <SectionLabel className="mb-6">Platform tour</SectionLabel>
-        <h1 className="type-h1 max-w-4xl text-cream">
-          See how the work stays clear.
-        </h1>
-        <p className="mt-6 max-w-2xl font-body text-lg leading-relaxed text-cream/80">
-          Explore the live homeowner tools and the shared project experience, then see what we are building next for trades.
-        </p>
-        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+    <ShowcaseHero
+      label="Platform tour"
+      lines={[
+        { text: "One project." },
+        { text: "Two sides." },
+        { text: "One source", teal: true },
+        { text: "of truth.", teal: true },
+      ]}
+      intro="The homeowner and trade work from the same project record, with the right information and actions suited to each role."
+      image={tourHero}
+      note={<>Real projects.<br />Real people.<br />One place.</>}
+      actions={
+        <>
           <Button asChild variant="cta" size="lg"><Link to="/quote-checker">Try the Quote Checker <ArrowRight /></Link></Button>
           <Button asChild variant="outline" size="lg" className="border-cream/30 bg-transparent text-cream hover:border-teal hover:bg-transparent hover:text-teal"><Link to="/how-it-works">Follow both journeys</Link></Button>
-        </div>
-      </div>
-    </section>
+        </>
+      }
+    />
+
 
     <section className="platform-shared-record public-dark-surface bg-cream px-6 py-16 craft:py-20">
       <div className="mx-auto max-w-5xl">
@@ -68,22 +75,39 @@ const PlatformTour = () => (
           </div>
           <p className="max-w-md text-sm leading-relaxed text-secondary-text">The homeowner and trade work from the same project record, with information and actions suited to each role.</p>
         </div>
-        <div className="platform-shared-record__views grid gap-5 craft:grid-cols-2">
-          <DeviceFrame
-            src={projectView}
-            label="Homeowner view"
-            alt="Homeowner project overview showing progress, quotes and actions"
-            mobileFocus="left"
-            caption={<><strong className="text-navy">Homeowner view:</strong> progress, updates, decisions and payments.</>}
-          />
-          <DeviceFrame
-            src={tradeView}
-            label="Trade view"
-            alt="Trade dashboard showing projects, tasks and earnings"
-            mobileFocus="left"
-            caption={<><strong className="text-navy">Trade view:</strong> today’s work, quoting and project delivery.</>}
-          />
+        <div className="platform-shared-record__views grid gap-8 craft:grid-cols-2">
+          <div>
+            <DeviceFrame
+              src={projectView}
+              label="Homeowner view"
+              alt="Homeowner project overview showing progress, quotes and actions"
+              mobileFocus="left"
+              caption={<><strong className="text-navy">Homeowner view:</strong> progress, updates, decisions and payments.</>}
+            />
+            <HandNote className="mt-4">Homeowner view. Track progress, photos, decisions and payments.</HandNote>
+            <ul className="mt-4 flex flex-wrap gap-2">
+              {HOMEOWNER_MENU.map((item) => (
+                <li key={item} className="border border-navy/15 bg-navy/[0.04] px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-secondary-text">{item}</li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <DeviceFrame
+              src={tradeView}
+              label="Trade view"
+              alt="Trade dashboard showing projects, tasks and earnings"
+              mobileFocus="left"
+              caption={<><strong className="text-navy">Trade view:</strong> today’s work, quoting and project delivery.</>}
+            />
+            <HandNote className="mt-4">Trade view. Today’s work, quoting and project delivery.</HandNote>
+            <ul className="mt-4 flex flex-wrap gap-2">
+              {TRADE_MENU.map((item) => (
+                <li key={item} className="border border-navy/15 bg-navy/[0.04] px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-secondary-text">{item}</li>
+              ))}
+            </ul>
+          </div>
         </div>
+
         <div className="platform-shared-record__steps mt-8 grid gap-5 sm:grid-cols-2 craft:grid-cols-4">
           {SHARED_STEPS.map(({ icon: Icon, title, text }) => <article key={title} className="border-t-2 border-teal pt-4"><Icon className="h-5 w-5 text-teal" /><h3 className="mt-3 font-body text-base font-bold text-navy">{title}</h3><p className="mt-2 text-sm leading-relaxed text-secondary-text">{text}</p></article>)}
         </div>

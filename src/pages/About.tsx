@@ -4,7 +4,7 @@ import AppShell from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { localBusinessJsonLd } from "@/lib/seoSchemas";
-import { EditorialStatement } from "@/components/public/PublicBits";
+import { EditorialStatement, ShowcaseHero } from "@/components/public/PublicBits";
 import founderImage from "@/assets/home/trades-hero.jpg";
 import receiptsImage from "@/assets/how-it-works/cta-plans.jpg";
 
@@ -119,23 +119,38 @@ const About = () => {
 
       <div className="bg-deep">
         {/* Hero */}
-        <section className="about-founder-hero public-blueprint relative overflow-hidden px-6 pb-14 pt-36">
-          <div className="about-founder-hero__image" aria-hidden><img src={founderImage} alt="" /></div>
-          <div className="max-w-5xl mx-auto relative z-10">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-8 h-[2px] bg-teal" />
-              <span className="font-mono text-xs text-teal uppercase tracking-widest">
-                Why I Built ProGrafter
-              </span>
-            </div>
-            <h1 className="type-h1 max-w-4xl text-cream">
-              I Spent £625 on 18 Leads and Won Nothing. So I Built Something Better.
-            </h1>
+        <ShowcaseHero
+          label="Why I built ProGrafter"
+          lines={[{ text: "I spent £625" }, { text: "on 18 leads" }, { text: "and won nothing." }]}
+          intro={<span className="font-body text-xl text-teal">So I built something better.</span>}
+          image={founderImage}
+          imageAlt="Construction site in Nottinghamshire"
+        >
+          <div className="pg-receipt mt-10 max-w-sm craft:absolute craft:right-0 craft:top-4 craft:mt-0 craft:w-[19rem]">
+            <p className="pg-note text-navy/70">Actual experience.<br />A better solution.</p>
+            <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.2em] text-navy/55">Ad spend — editorial summary</p>
+            <dl className="mt-4 space-y-3">
+              {[
+                { figure: "18", label: "qualified leads" },
+                { figure: "£625.32", label: "spent inc. VAT" },
+                { figure: "0", label: "jobs won" },
+              ].map(({ figure, label }) => (
+                <div key={label}>
+                  <dt className="font-heading text-3xl leading-none text-navy">{figure}</dt>
+                  <dd className="font-mono text-[11px] uppercase tracking-[0.16em] text-navy/60">{label}</dd>
+                </div>
+              ))}
+            </dl>
+            <p className="mt-5 flex items-baseline justify-between border-t border-navy/20 pt-3 font-mono text-xs uppercase tracking-[0.16em] text-navy/70">
+              <span>Total</span><span className="font-heading text-xl tracking-normal text-navy">£625.32</span>
+            </p>
+            <p className="mt-3 font-heading text-xl uppercase tracking-wide text-navy/80">MyBuilder</p>
+            <p className="mt-2 font-mono text-[9px] uppercase tracking-[0.14em] text-navy/45">Illustrative summary of real spend — not a reproduction of an original receipt.</p>
           </div>
-        </section>
+        </ShowcaseHero>
 
         {/* Opening prose */}
-        <section className="px-6 pb-16">
+        <section className="px-6 py-16">
           <div className="max-w-[700px] mx-auto space-y-6 font-body text-cream/80 text-lg leading-relaxed font-light">
             <p>
               I run my own construction business in Nottinghamshire. I've been in the trade for
@@ -154,6 +169,7 @@ const About = () => {
             </p>
           </div>
         </section>
+
 
         {/* Lead breakdown table */}
         <section className="about-receipts px-6 py-16 border-t border-cream/10">
