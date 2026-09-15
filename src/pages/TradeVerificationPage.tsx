@@ -1,7 +1,9 @@
+import { Link } from "react-router-dom";
 import SEO from "@/components/SEO";
 import AppShell from "@/components/AppShell";
-import { BadgeCheck, FileCheck2, HardHat, ScrollText, ShieldCheck } from "lucide-react";
-import { EditorialStatement, SectionLabel } from "@/components/public/PublicBits";
+import { ArrowRight, BadgeCheck, FileCheck2, HardHat, ScrollText, ShieldCheck } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { EditorialStatement, SectionLabel, ShowcaseHero } from "@/components/public/PublicBits";
 import {
   ContentHero,
   ContentSection,
