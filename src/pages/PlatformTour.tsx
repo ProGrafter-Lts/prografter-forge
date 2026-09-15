@@ -5,14 +5,26 @@ import AppShell from "@/components/AppShell";
 import QuoteComparisonDemo from "@/components/demos/QuoteComparisonDemo";
 import VerificationExplainerInteractive from "@/components/demos/VerificationExplainerInteractive";
 import { Button } from "@/components/ui/button";
+import { DeviceFrame, EditorialStatement, GhostMark, SectionLabel } from "@/components/public/PublicBits";
 import projectView from "@/assets/platform/homeowner-overview.png";
 import tradeView from "@/assets/platform/trade-dashboard.png";
+import homeownerQuotes from "@/assets/platform/homeowner-quotes.png";
+import tradeJobs from "@/assets/platform/trade-jobs.png";
+import tradeEarnings from "@/assets/platform/trade-earnings.png";
+import homeownerManual from "@/assets/platform/homeowner-manual.png";
 
 const SHARED_STEPS = [
   { icon: ClipboardCheck, title: "Agree the plan", text: "A shared project record keeps the scope, programme and stages aligned." },
   { icon: Camera, title: "See real progress", text: "Dated site updates and photos show homeowners what is happening." },
   { icon: MessageSquareText, title: "Keep decisions together", text: "Messages, documents and variations stay connected to the job." },
   { icon: WalletCards, title: "Pay by stage", text: "Agreed milestones make progress and payment status easier to follow." },
+];
+
+const IN_THE_PROJECT = [
+  { src: homeownerQuotes, label: "Homeowner · Quotes", alt: "Homeowner quotes view comparing submitted prices", caption: "Quotes side by side, with what each one actually includes." },
+  { src: tradeJobs, label: "Trade · Work", alt: "Trade jobs view listing current work and actions", caption: "The trade sees today's jobs, actions and what needs answering." },
+  { src: tradeEarnings, label: "Trade · Payments", alt: "Trade earnings view showing staged payments", caption: "Staged payments tracked against the agreed programme." },
+  { src: homeownerManual, label: "Homeowner · Record", alt: "Homeowner manual showing project records and documents", caption: "Documents, evidence and decisions kept as a lasting record." },
 ];
 
 const ROADMAP = [
@@ -29,9 +41,10 @@ const PlatformTour = () => (
       path="/platform-tour"
     />
 
-    <section className="public-blueprint bg-deep px-6 pb-20 pt-32">
-      <div className="mx-auto max-w-5xl">
-        <p className="mb-4 font-mono text-xs uppercase tracking-[0.28em] text-teal">Platform tour</p>
+    <section className="public-blueprint relative overflow-hidden bg-deep px-6 pb-24 pt-36">
+      <GhostMark className="absolute -bottom-10 right-0 text-[150px] craft:text-[280px]">TOUR</GhostMark>
+      <div className="relative z-10 mx-auto max-w-5xl">
+        <SectionLabel className="mb-6">Platform tour</SectionLabel>
         <h1 className="type-h1 max-w-4xl text-cream">
           See how the work stays clear.
         </h1>
@@ -48,15 +61,45 @@ const PlatformTour = () => (
     <section className="bg-cream px-6 py-16 craft:py-20">
       <div className="mx-auto max-w-5xl">
         <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
-          <div><p className="font-mono text-[11px] uppercase tracking-[0.22em] text-teal">Live now</p><h2 className="mt-2 font-heading text-4xl uppercase text-navy">One project. Two useful views.</h2></div>
+          <div>
+            <SectionLabel tone="light">Live now</SectionLabel>
+            <h2 className="mt-3 font-heading text-4xl uppercase text-navy">One project. Two useful views.</h2>
+          </div>
           <p className="max-w-md text-sm leading-relaxed text-secondary-text">The homeowner and trade work from the same project record, with information and actions suited to each role.</p>
         </div>
         <div className="grid gap-5 craft:grid-cols-2">
-          <figure className="overflow-hidden rounded-lg border border-border bg-white shadow-sm"><img src={projectView} alt="Homeowner project overview showing progress, quotes and actions" className="w-full" /><figcaption className="p-4 text-sm text-secondary-text"><strong className="text-navy">Homeowner view:</strong> progress, updates, decisions and payments.</figcaption></figure>
-          <figure className="overflow-hidden rounded-lg border border-border bg-white shadow-sm"><img src={tradeView} alt="Trade dashboard showing projects, tasks and earnings" className="w-full" /><figcaption className="p-4 text-sm text-secondary-text"><strong className="text-navy">Trade view:</strong> today’s work, quoting and project delivery.</figcaption></figure>
+          <DeviceFrame
+            src={projectView}
+            label="Homeowner view"
+            alt="Homeowner project overview showing progress, quotes and actions"
+            caption={<><strong className="text-navy">Homeowner view:</strong> progress, updates, decisions and payments.</>}
+          />
+          <DeviceFrame
+            src={tradeView}
+            label="Trade view"
+            alt="Trade dashboard showing projects, tasks and earnings"
+            caption={<><strong className="text-navy">Trade view:</strong> today’s work, quoting and project delivery.</>}
+          />
         </div>
         <div className="mt-8 grid gap-5 sm:grid-cols-2 craft:grid-cols-4">
           {SHARED_STEPS.map(({ icon: Icon, title, text }) => <article key={title} className="border-t-2 border-teal pt-4"><Icon className="h-5 w-5 text-teal" /><h3 className="mt-3 font-body text-base font-bold text-navy">{title}</h3><p className="mt-2 text-sm leading-relaxed text-secondary-text">{text}</p></article>)}
+        </div>
+      </div>
+    </section>
+
+    <EditorialStatement
+      lines={["One project.", "Two sides.", "One truth."]}
+      note="The same record, read from both ends of the job."
+    />
+
+    <section className="bg-cream px-6 py-16 craft:py-20">
+      <div className="mx-auto max-w-5xl">
+        <SectionLabel tone="light">Inside the project</SectionLabel>
+        <h2 className="mt-3 max-w-2xl font-heading text-4xl uppercase text-navy">Quotes, work, payments and evidence.</h2>
+        <div className="mt-9 grid gap-5 craft:grid-cols-2">
+          {IN_THE_PROJECT.map((item) => (
+            <DeviceFrame key={item.label} src={item.src} alt={item.alt} label={item.label} caption={item.caption} />
+          ))}
         </div>
       </div>
     </section>
@@ -66,7 +109,7 @@ const PlatformTour = () => (
 
     <section className="bg-deep px-6 py-16 craft:py-20">
       <div className="mx-auto max-w-5xl">
-        <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-teal">Trade tools roadmap</p>
+        <SectionLabel>Trade tools roadmap</SectionLabel>
         <h2 className="type-h2 mt-3 max-w-3xl text-cream">From site visit to a smarter next quote.</h2>
         <p className="mt-4 max-w-2xl text-base leading-relaxed text-cream/80">This is the direction of travel, not a claim that every tool is publicly available today.</p>
         <div className="mt-10 grid gap-5 craft:grid-cols-3">
