@@ -40,3 +40,8 @@
 - [x] Extend the homeowner homepage typography, CTA, card and blueprint language across core public pages
 - [x] Preserve Platform Tour, verification, advice, founder story and pricing content while aligning presentation
 - [x] Validate the complete public journey, menus, links, responsiveness and console health
+- [ ] Corrective public visual pass: audit canonical Homeowner/Trades/How It Works compositions
+- [ ] Establish shared composition primitives from existing implementation
+- [ ] Rework Platform Tour, Our Checks, Advice, and About without changing functionality
+- [ ] Keep public navigation on public routes and add signed-in dashboard return action
+- [ ] Verify seven public pages across desktop and mobile
