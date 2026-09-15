@@ -272,7 +272,7 @@ const Chatbot = () => {
         <button
           onClick={() => setOpen(true)}
           aria-label="Open ProGrafter chat assistant"
-          className="fixed bottom-20 right-5 sm:bottom-5 z-[70] h-[55px] w-[55px] rounded-full bg-[#14A8A1] text-white shadow-lg hover:bg-[#0B7F74] transition-colors flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-[#14A8A1] focus:ring-offset-2"
+          className="fixed bottom-[calc(80px+env(safe-area-inset-bottom))] right-5 sm:bottom-5 z-[70] h-[55px] w-[55px] rounded-full bg-[#14A8A1] text-white shadow-lg hover:bg-[#0B7F74] transition-colors flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-[#14A8A1] focus:ring-offset-2"
         >
           <MessageCircle className="h-6 w-6" strokeWidth={2.2} />
         </button>
@@ -282,7 +282,7 @@ const Chatbot = () => {
       {open && (
         <div
           className="fixed z-[70] bg-white shadow-2xl border border-black/10 flex flex-col
-                     inset-0 sm:inset-auto sm:bottom-5 sm:right-5
+                     inset-0 pb-[env(safe-area-inset-bottom)] sm:inset-auto sm:bottom-5 sm:right-5
                      sm:w-[340px] sm:h-[520px] sm:rounded-lg overflow-hidden"
           role="dialog"
           aria-label="ProGrafter chat assistant"
