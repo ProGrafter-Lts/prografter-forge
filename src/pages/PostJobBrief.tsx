@@ -524,7 +524,6 @@ export default function PostJobBrief() {
       if (!form.address_line1.trim()) e.address_line1 = "Required";
       if (!form.city.trim()) e.city = "Required";
       if (!form.postcode.trim()) e.postcode = "Required";
-      else if (!isInLiveArea(form.postcode)) e.postcode = "We're not live in this area yet — join the waitlist below";
       if (!form.property_type) e.property_type = "Required";
     }
     if (n === 1) {
@@ -731,11 +730,11 @@ export default function PostJobBrief() {
         <InfoBox variant="amber">
           <strong>We're not live in {outcodeOf(form.postcode) || "your area"} yet.</strong> ProGrafter is
           currently running in the East Midlands and South Yorkshire while we verify trades area by area.
-          Rather than promise a match we can't deliver, leave your details and we'll email you the moment
-          we open in your area.
+          You can still complete your brief — it will be treated as a request to open your area, reviewed
+          by our team, and matched only once verified trades cover you. We'll keep you posted either way.
           {waitlistDone ? (
             <div style={{ marginTop: 10, fontWeight: 700 }}>
-              You're on the list — we'll be in touch as soon as we're live near you.
+              Your area is on our list — we'll be in touch as soon as we're live near you.
             </div>
           ) : (
             <div style={{ marginTop: 10 }}>
