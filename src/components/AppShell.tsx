@@ -8,6 +8,22 @@ import HomeownerSidebar from "@/components/homeowner/HomeownerSidebar";
 
 type Role = "trade" | "homeowner" | null;
 
+/**
+ * A signed-in visitor almost always has a persisted auth token in localStorage.
+ * Checking it synchronously lets us avoid rendering the public marketing layout
+ * first (and then tearing it down) while the session is recovered async.
+ */
+const hasStoredSession = () => {
+  if (typeof window === "undefined") return false;
+  try {
+    return Object.keys(window.localStorage).some(
+      (key) => key === "supabase.auth.token" || /^sb-[^-]+-auth-token$/.test(key),
+    );
+  } catch {
+    return false;
+  }
+};
+
 interface AppShellProps {
   /** Page content. Rendered as-is inside whichever layout matches the session. */
   children: ReactNode;
@@ -52,6 +68,12 @@ const AppShell = ({ children, authenticatedContent }: AppShellProps) => {
       cancelled = true;
     };
   }, [isReady, user]);
+
+  // Likely signed-in (token on disk) but session not recovered yet — hold a
+  // neutral shell instead of flashing the public layout and remounting content.
+  if (!isReady && !user && hasStoredSession()) {
+    return <div className="min-h-screen bg-deep" />;
+  }
 
   // Public-first rendering keeps informational pages available even if auth
   // recovery is slow or unavailable. A confirmed session swaps to app chrome.
