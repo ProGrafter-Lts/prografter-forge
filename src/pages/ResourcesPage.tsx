@@ -62,21 +62,38 @@ const ResourcesPage = () => (
       description="Guides for UK homeowners and tradespeople: how verification works, checking builders' quotes, understanding pricing, finding green grants and winning genuine work."
       path="/resources"
     />
-    <ContentHero
-      eyebrow="Construction Advice Centre"
-      title="Build with"
-      highlight="confidence."
+    <ShowcaseHero
+      label="Construction advice centre"
+      lines={[{ text: "Know more." }, { text: "Build better.", teal: true }]}
       intro="Practical, honest guidance for homeowners and tradespeople — how to check a quote, understand verification, compare pricing, and make better construction decisions."
       image={adviceHero}
-      imageAlt="Architectural plans, measurements and construction tools"
-      primaryCta={{ label: "Upload a quote", href: "/quote-checker" }}
-      secondaryCta={{ label: "Read the FAQ", href: "/faq" }}
+      imageAlt="Architectural drawings, a tape measure and pencils on a workbench"
+      note={<>Better questions.<br />Better builds.</>}
+      actions={
+        <Button asChild variant="cta" size="lg">
+          <Link to="#advice-guides">Explore the advice centre <ArrowRight /></Link>
+        </Button>
+      }
     />
+
+    <section className="bg-deep px-6 pb-16 pt-4 craft:pb-20">
+      <div className="mx-auto grid max-w-5xl gap-5 craft:grid-cols-3">
+        {FEATURED.map((f) => (
+          <Link key={f.title} to={f.href} className="group block border border-cream/12 bg-cream p-6 transition-transform hover:-translate-y-0.5">
+            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-teal-ink">{f.tag}</span>
+            <h3 className="mt-3 font-body text-xl font-bold leading-tight text-navy">{f.title}</h3>
+            <p className="mt-3 font-body text-sm leading-relaxed text-body-text">{f.desc}</p>
+            <span className="mt-5 inline-flex items-center gap-2 font-mono text-xs text-teal-ink">{f.cta} <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" /></span>
+          </Link>
+        ))}
+      </div>
+    </section>
+
     <EditorialStatement
-      lines={["Know more.", "Build better."]}
+      lines={["Practical knowledge.", "Better builds."]}
       note="Plain guidance on drawings, costs, regulations and specifications."
-      tone="light"
     />
+
     <div className="advice-guides">
     <ContentSection title="Guides & tools">
       <div className="grid grid-cols-1 craft:grid-cols-3 gap-4 craft:gap-5">
