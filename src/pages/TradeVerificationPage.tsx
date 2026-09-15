@@ -5,7 +5,7 @@ import { ArrowRight, BadgeCheck, FileCheck2, HardHat, ScrollText, ShieldCheck } 
 import { Button } from "@/components/ui/button";
 import { EditorialStatement, SectionLabel, ShowcaseHero } from "@/components/public/PublicBits";
 import {
-  ContentHero,
+  
   ContentSection,
   FeatureGrid,
   FaqBlock,
