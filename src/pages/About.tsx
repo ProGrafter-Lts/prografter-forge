@@ -4,6 +4,7 @@ import AppShell from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { localBusinessJsonLd } from "@/lib/seoSchemas";
+import { EditorialStatement, GhostMark } from "@/components/public/PublicBits";
 
 const leads = [
   {
@@ -253,6 +254,11 @@ const About = () => {
             </p>
           </div>
         </section>
+
+        <EditorialStatement
+          lines={["Proper work.", "Proper people."]}
+          note="Built by a working builder, for working builders and the people who hire them."
+        />
 
         {/* What ProGrafter is */}
         <section className="px-6 py-16 border-t border-cream/10">
