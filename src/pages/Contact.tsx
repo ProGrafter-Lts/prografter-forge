@@ -93,7 +93,7 @@ const Contact = () => {
         },
       });
       if (error) throw error;
-      toast.success("Message sent — we aim to reply within 5–7 days.");
+      toast.success("Message sent — we aim to reply within 2 working days.");
       trackEvent("contact_submit", { subject: parsed.data.subject });
       setForm({ name: "", email: "", subject: "", message: "" });
     } catch (err) {
@@ -108,7 +108,7 @@ const Contact = () => {
     <AppShell>
       <SEO
         title="Contact ProGrafter | Get in Touch"
-        description="Get in touch with the ProGrafter team. We respond to every enquiry within 5–7 days."
+        description="Get in touch with the ProGrafter team. We respond to every enquiry within 2 working days."
         path="/contact"
         jsonLd={{
           "@context": "https://schema.org",
@@ -140,7 +140,7 @@ const Contact = () => {
             <span className="text-teal">TOUCH.</span>
           </h1>
           <p className="font-body text-body-text text-lg max-w-xl font-light">
-            We aim to respond to all enquiries within 5–7 days.
+            We aim to respond to all enquiries within 2 working days.
           </p>
         </section>
 
