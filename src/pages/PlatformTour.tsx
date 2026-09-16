@@ -168,6 +168,7 @@ const PlatformTour = () => {
       </div>
     </section>
   </AppShell>
-);
+  );
+};
 
 export default PlatformTour;
