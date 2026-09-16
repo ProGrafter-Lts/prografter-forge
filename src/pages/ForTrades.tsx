@@ -12,7 +12,7 @@ const ForTrades = () => {
     <div className="min-h-screen">
       <SEO
         title="ProGrafter For Trades — More Right Jobs, Less Time Wasted"
-        description="Get matched to suitable local projects without paying for leads. Join free; pay 7.5% only on completed paid jobs, capped at £900."
+        description={`Get matched to suitable local projects without paying for leads. Join free; pay ${COMMISSION_RATE_LABEL} only on completed paid jobs, ${COMMISSION_CAP_SENTENCE}.`}
         path="/for-trades"
       />
       <TradeNav />
