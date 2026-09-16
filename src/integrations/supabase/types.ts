@@ -505,6 +505,36 @@ export type Database = {
           },
         ]
       }
+      attention_resolutions: {
+        Row: {
+          id: string
+          note: string | null
+          resolved_at: string
+          resolved_by: string
+          resolved_by_email: string | null
+          source_id: string
+          source_type: string
+        }
+        Insert: {
+          id?: string
+          note?: string | null
+          resolved_at?: string
+          resolved_by: string
+          resolved_by_email?: string | null
+          source_id: string
+          source_type: string
+        }
+        Update: {
+          id?: string
+          note?: string | null
+          resolved_at?: string
+          resolved_by?: string
+          resolved_by_email?: string | null
+          source_id?: string
+          source_type?: string
+        }
+        Relationships: []
+      }
       chatbot_usage: {
         Row: {
           created_at: string
@@ -558,6 +588,54 @@ export type Database = {
           id?: string
           ip_address?: unknown
           user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      contact_enquiries: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+          responded_at: string | null
+          responded_by: string | null
+          source: string
+          status: string
+          subject: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          message: string
+          name: string
+          responded_at?: string | null
+          responded_by?: string | null
+          source?: string
+          status?: string
+          subject: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          responded_at?: string | null
+          responded_by?: string | null
+          source?: string
+          status?: string
+          subject?: string
+          updated_at?: string
           user_id?: string | null
         }
         Relationships: []

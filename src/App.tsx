@@ -109,6 +109,7 @@ const GuideReadingAQuote = lazyRetry(() => import("./pages/GuideReadingAQuote.ts
 const CalculatorsPage = lazyRetry(() => import("./pages/CalculatorsPage.tsx"));
 const AdminJobBriefs = lazyRetry(() => import("./pages/AdminJobBriefs.tsx"));
 const AdminAnalytics = lazyRetry(() => import("./pages/AdminAnalytics.tsx"));
+const AdminAttention = lazyRetry(() => import("./pages/AdminAttention.tsx"));
 const AdminLeadDistribution = lazyRetry(() => import("./pages/AdminLeadDistribution.tsx"));
 const AdminCustomerDiscovery = lazyRetry(() => import("./pages/AdminCustomerDiscovery.tsx"));
 const AdminCallNote = lazyRetry(() => import("./pages/AdminCallNote.tsx"));
@@ -322,6 +323,7 @@ const AppRoutes = () => {
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="/admin" element={<AdminRoute><AdminHome /></AdminRoute>} />
             <Route path="/admin/analytics" element={<AdminRoute><AdminAnalytics /></AdminRoute>} />
+            <Route path="/admin/attention" element={<AdminRoute><AdminAttention /></AdminRoute>} />
             <Route path="/admin/lead-distribution" element={<AdminRoute><AdminLeadDistribution /></AdminRoute>} />
             <Route path="/admin/scoping-calls" element={<AdminRoute><AdminCustomerDiscovery /></AdminRoute>} />
             <Route path="/admin/scoping-calls/:id" element={<AdminRoute><AdminCallNote /></AdminRoute>} />

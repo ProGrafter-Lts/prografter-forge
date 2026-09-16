@@ -1,7 +1,9 @@
 import { Link } from "react-router-dom";
 import SEO from "@/components/SEO";
+import AttentionPanel from "@/components/admin/AttentionPanel";
 
 const SECTIONS: { to: string; label: string; desc: string }[] = [
+  { to: "/admin/attention", label: "Attention", desc: "Everything waiting on an administrator, in one prioritised queue" },
   { to: "/admin/waitlist", label: "Waitlist signups", desc: "Early-access signups; dismiss out-of-area" },
   { to: "/admin/applications", label: "Trade Applications", desc: "Single review queue: all trade applications, documents and references" },
   { to: "/admin/verifications", label: "Legacy signups (archive)", desc: "Read-only: 13 pre-submission signups from the old flow. Being retired — do not use for new applications" },
@@ -35,6 +37,8 @@ export default function AdminHome() {
           <h1 className="font-heading text-3xl sm:text-4xl text-navy">Admin dashboard</h1>
           <p className="font-body text-secondary-text mt-1">Choose a section to manage.</p>
         </header>
+
+        <AttentionPanel />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {SECTIONS.map((s) => (
