@@ -29,7 +29,7 @@ import completedHome from "@/assets/how-it-works/completed-home.jpg";
 import compareQuotes from "@/assets/how-it-works/compare-quotes.jpg";
 import manageProjectAsset from "@/assets/platform/current/project-workspace.jpg.asset.json";
 import payConfidence from "@/assets/how-it-works/pay-confidence.jpg";
-import getVerified from "@/assets/how-it-works/get-verified.jpg";
+import getVerified from "@/assets/how-it-works/get-verified-prografter.jpg";
 import findWork from "@/assets/how-it-works/find-work.jpg";
 import submitQuote from "@/assets/how-it-works/submit-quote.jpg";
 import tradeReputation from "@/assets/how-it-works/trade-reputation.jpg";
