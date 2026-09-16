@@ -152,7 +152,11 @@ export const FeatureGrid = ({
   </div>
 );
 
-export const FaqBlock = ({ items }: { items: { q: string; a: string }[] }) => (
+export const FaqBlock = ({
+  items,
+}: {
+  items: { q: string; a: string; link?: { label: string; href: string } }[];
+}) => (
   <div className="space-y-3 max-w-3xl">
     {items.map((it) => (
       <details key={it.q} className="group rounded-[4px] bg-card border border-border/60 p-5 shadow-sm">
@@ -161,6 +165,11 @@ export const FaqBlock = ({ items }: { items: { q: string; a: string }[] }) => (
           <span className="ml-4 text-teal transition-transform group-open:rotate-45 text-2xl leading-none">+</span>
         </summary>
         <p className="font-body text-sm text-body-text leading-relaxed mt-3">{it.a}</p>
+        {it.link && (
+          <Link to={it.link.href} className="mt-3 inline-flex font-mono text-xs uppercase tracking-[0.14em] text-teal-ink">
+            {it.link.label} →
+          </Link>
+        )}
       </details>
     ))}
   </div>
