@@ -1,9 +1,10 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, BadgeCheck, MapPin, Wallet } from "lucide-react";
 import heroImage from "@/assets/home/trades-hero.jpg";
+import { COMMISSION_CAP_SENTENCE, COMMISSION_RATE_LABEL } from "@/lib/pricingTerms";
 
 const INDICATORS = [
-  { icon: Wallet, title: "Commission Only", desc: "7.5% on completed paid work, capped at £900." },
+  { icon: Wallet, title: "Commission Only", desc: `${COMMISSION_RATE_LABEL} on completed paid work, ${COMMISSION_CAP_SENTENCE}.` },
   { icon: MapPin, title: "Focused Locally", desc: "East Midlands density first." },
   { icon: BadgeCheck, title: "Real Homeowners", desc: "Every customer is verified." },
 ];
