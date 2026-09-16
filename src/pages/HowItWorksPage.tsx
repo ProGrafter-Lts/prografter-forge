@@ -141,10 +141,10 @@ const TRADE_STEPS: PublicJourneyStep[] = [
 
 const TRUST_CHECKS = [
   { icon: UserCheck, title: "Identity", description: "We verify who they are." },
-  { icon: ShieldCheck, title: "Insurance", description: "We check they’re covered." },
-  { icon: FileCheck2, title: "Qualifications", description: "We confirm their skills." },
-  { icon: BriefcaseBusiness, title: "Business details", description: "We verify they’re genuine." },
-  { icon: Star, title: "References & conduct", description: "We monitor their track record." },
+  { icon: ShieldCheck, title: "Insurance", description: "We confirm public liability cover." },
+  { icon: FileCheck2, title: "Qualifications", description: "We check accreditations against the work offered." },
+  { icon: BriefcaseBusiness, title: "References & work history", description: "We review past projects." },
+  { icon: Star, title: "Ongoing monitoring", description: "Checks continue after approval." },
 ];
 
 const scrollToJourney = (id: "homeowner-journey" | "trade-journey") => {
