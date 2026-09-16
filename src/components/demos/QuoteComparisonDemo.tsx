@@ -7,7 +7,6 @@ type Quote = {
   name: string;
   price: string;
   clarity: number;
-  fairness: number;
   verified: boolean;
   breakdown: boolean;
   timescale: string;
@@ -17,10 +16,9 @@ type Quote = {
 
 const QUOTES: Quote[] = [
   {
-    name: "Trade A",
+    name: "Quote A",
     price: "£42,600",
     clarity: 88,
-    fairness: 92,
     verified: true,
     breakdown: true,
     timescale: "10 weeks",
@@ -28,20 +26,18 @@ const QUOTES: Quote[] = [
     recommended: true,
   },
   {
-    name: "Trade B",
+    name: "Quote B",
     price: "£38,900",
     clarity: 61,
-    fairness: 74,
     verified: true,
     breakdown: false,
     timescale: "Not stated",
     warranty: "2-year workmanship",
   },
   {
-    name: "Trade C",
+    name: "Quote C",
     price: "£47,200",
     clarity: 79,
-    fairness: 68,
     verified: false,
     breakdown: true,
     timescale: "8 weeks",
@@ -58,16 +54,23 @@ const QuoteComparisonDemo = () => {
   return (
     <section className="public-blueprint bg-navy-deep px-6 py-24">
       <div className="max-w-5xl mx-auto">
-        <div className="flex items-center gap-3 mb-4">
+        <div className="mb-4 flex flex-wrap items-center gap-3">
           <div className="w-8 h-[2px] bg-teal" />
           <span className="font-mono text-xs text-teal uppercase tracking-widest">Compare Quotes</span>
+          <span className="border border-cream/25 px-2 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-cream/70">
+            Illustrative example · sample figures
+          </span>
         </div>
         <h2 className="type-h2 mb-4 text-cream">
           Not just the cheapest. The clearest.
         </h2>
-        <p className="font-body text-cream/70 text-base craft:text-lg max-w-2xl mb-12">
-          ProGrafter scores every matched quote for clarity and fairness — so you can weigh price against
-          what you actually get. The lowest number isn&apos;t always the best value.
+        <p className="font-body text-cream/70 text-base craft:text-lg max-w-2xl mb-3">
+          Quotes for the same job rarely cover the same work. Your project record lists the quotes you
+          receive side by side, so you can see what each one actually includes before you judge the price.
+        </p>
+        <p className="font-body text-cream/60 text-sm max-w-2xl mb-12">
+          A Clarity Score comes from the Quote Checker when you upload a quote for review. The figures shown
+          here are a worked example, not live platform data.
         </p>
 
         {/* Selector */}
@@ -109,7 +112,6 @@ const QuoteComparisonDemo = () => {
 
               {[
                 { label: "Clarity Score", val: q.clarity },
-                { label: "Fairness Score", val: q.fairness },
               ].map((m) => (
                 <div key={m.label} className="mb-4">
                   <div className="flex justify-between font-mono text-[11px] text-cream/60 mb-1.5">

@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import SEO from "@/components/SEO";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -13,7 +14,7 @@ const PILLARS = [
   {
     icon: "✓",
     title: "5-Step Trade Verification",
-    desc: "ID, insurance, qualifications, references and work history — every trade is checked by a human before approval. Verification, not a paid listing.",
+    desc: "Every trade is checked by a person before approval — verification, not a paid listing. Our Checks explains each stage in full.",
   },
   {
     icon: "◎",
@@ -33,7 +34,7 @@ const PILLARS = [
   {
     icon: "£",
     title: "Fair, Transparent Pricing",
-    desc: "Rates, caps and optional costs are published clearly, with no paid ranking boosts.",
+    desc: "One published rate, one per-job cap and no paid ranking boosts. The Pricing page is the definitive source for our commercial terms.",
   },
   {
     icon: "✦",
@@ -99,10 +100,21 @@ const TrustCentre = () => {
 
       <ContentSection
         tone="white"
-        title="Our 5-Step Trade Verification"
-        intro="No trade appears on ProGrafter until they've passed every step. This is verification, not a paid placement."
+        title="Trade verification, in one line"
+        intro="Identity, insurance, qualifications, references and ongoing monitoring — checked by a person before a trade reaches a homeowner. Our Checks is the full explanation."
       >
-        <StepList items={VERIFICATION_STEPS} />
+        <div className="max-w-3xl">
+          <ul className="flex flex-wrap gap-2">
+            {VERIFICATION_STEPS.map((step) => (
+              <li key={step.title} className="border border-navy/15 bg-navy/[0.04] px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.14em] text-secondary-text">
+                {step.title}
+              </li>
+            ))}
+          </ul>
+          <Link to="/trade-verification" className="mt-6 inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.16em] text-teal-ink">
+            Read Our Checks in full →
+          </Link>
+        </div>
       </ContentSection>
 
       <ContentSection

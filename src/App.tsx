@@ -104,6 +104,7 @@ const TrustCentre = lazyRetry(() => import("./pages/TrustCentre.tsx"));
 const PricingPage = lazyRetry(() => import("./pages/PricingPage.tsx"));
 const FaqPage = lazyRetry(() => import("./pages/FaqPage.tsx"));
 const ResourcesPage = lazyRetry(() => import("./pages/ResourcesPage.tsx"));
+const GuideReadingAQuote = lazyRetry(() => import("./pages/GuideReadingAQuote.tsx"));
 const CalculatorsPage = lazyRetry(() => import("./pages/CalculatorsPage.tsx"));
 const AdminJobBriefs = lazyRetry(() => import("./pages/AdminJobBriefs.tsx"));
 const AdminAnalytics = lazyRetry(() => import("./pages/AdminAnalytics.tsx"));
@@ -241,6 +242,7 @@ const AppRoutes = () => {
            <Route path="/faq" element={<FaqPage />} />
            <Route path="/resources" element={<ResourcesPage />} />
            <Route path="/calculators" element={<CalculatorsPage />} />
+           <Route path="/advice/reading-a-building-quote" element={<GuideReadingAQuote />} />
             <Route path="/checkatrade-alternative" element={<CheckatradeAlternative />} />
             <Route path="/is-checkatrade-worth-it" element={<IsCheckatradeWorthIt />} />
             <Route path="/planning-alerts" element={<PlanningAlertsPage />} />

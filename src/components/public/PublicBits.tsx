@@ -248,6 +248,7 @@ export const ShowcaseHero = ({
   intro,
   image,
   imageAlt = "",
+  imageFocus,
   note,
   actions,
   children,
@@ -258,6 +259,8 @@ export const ShowcaseHero = ({
   intro?: ReactNode;
   image: string;
   imageAlt?: string;
+  /** CSS object-position for the hero photograph, e.g. "70% 20%". */
+  imageFocus?: string;
   note?: ReactNode;
   actions?: ReactNode;
   children?: ReactNode;
@@ -265,7 +268,7 @@ export const ShowcaseHero = ({
 }) => (
   <section className={cn("pg-hero public-blueprint bg-deep", className)}>
     <div className="pg-hero__image" aria-hidden={imageAlt === ""}>
-      <img src={image} alt={imageAlt} />
+      <img src={image} alt={imageAlt} style={imageFocus ? { objectPosition: imageFocus } : undefined} />
     </div>
     <div className="pg-hero__inner">
       <div className="pg-hero__copy">
