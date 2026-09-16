@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import SEO from "@/components/SEO";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -13,7 +14,7 @@ const PILLARS = [
   {
     icon: "✓",
     title: "5-Step Trade Verification",
-    desc: "ID, insurance, qualifications, references and work history — every trade is checked by a human before approval. Verification, not a paid listing.",
+    desc: "Every trade is checked by a person before approval — verification, not a paid listing. Our Checks explains each stage in full.",
   },
   {
     icon: "◎",
@@ -33,7 +34,7 @@ const PILLARS = [
   {
     icon: "£",
     title: "Fair, Transparent Pricing",
-    desc: "Rates, caps and optional costs are published clearly, with no paid ranking boosts.",
+    desc: "One published rate, one per-job cap and no paid ranking boosts. The Pricing page is the definitive source for our commercial terms.",
   },
   {
     icon: "✦",

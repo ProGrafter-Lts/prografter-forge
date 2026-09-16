@@ -93,7 +93,7 @@ const Contact = () => {
         },
       });
       if (error) throw error;
-      toast.success("Message sent — we'll be in touch within 24 hours.");
+      toast.success("Message sent — we aim to reply within 5–7 days.");
       trackEvent("contact_submit", { subject: parsed.data.subject });
       setForm({ name: "", email: "", subject: "", message: "" });
     } catch (err) {
