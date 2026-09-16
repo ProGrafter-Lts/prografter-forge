@@ -59,7 +59,7 @@ const PricingPage = () => (
       eyebrow="Pricing"
       title="Fair, transparent,"
       highlight="commission only."
-      intro="Join, get verified, receive suitable matches and quote without lead fees. Pay 7.5% after a completed job has been paid, capped at £900. Optional tools are separate."
+      intro={`Join, get verified, receive suitable matches and quote without lead fees. Pay ${COMMISSION_RATE_LABEL} after a completed job has been paid, ${COMMISSION_CAP_SENTENCE}. Optional tools are separate.`}
       ghost="FAIR"
       primaryCta={{ label: "Join as a Trade", href: "/signup/trade" }}
       secondaryCta={{ label: "Post a job — free", href: "/post-job-brief" }}
