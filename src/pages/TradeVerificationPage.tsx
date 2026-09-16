@@ -13,8 +13,8 @@ import {
   buildFaqJsonLd,
 } from "@/components/content/ContentBlocks";
 import verifiedTrade from "@/assets/how-it-works/get-verified-prografter.jpg";
-import policyEvidence from "@/assets/dashboard/card-tradevault.jpg";
-import qualificationEvidence from "@/assets/how-it-works/submit-quote.jpg";
+import policyEvidence from "@/assets/verification/insurance-evidence.jpg";
+import qualificationEvidence from "@/assets/verification/qualifications-evidence.jpg";
 import workEvidence from "@/assets/how-it-works/trade-project.jpg";
 import accountabilityEvidence from "@/assets/dashboard/card-sitephotos.jpg";
 
