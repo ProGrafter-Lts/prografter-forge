@@ -15,7 +15,7 @@ import projectDetail from "@/assets/home/blueprint-lines.jpg";
 
 /** Featured entry points — each maps to a real existing route. */
 const FEATURED = [
-  { tag: "Guides", title: "How to read a building quote", desc: "Spot what’s included, what’s missing and how to compare like for like.", href: "/ai-quote-checker", cta: "Read the guide" },
+  { tag: "Guides", title: "How to read a building quote", desc: "Spot what’s included, what’s missing and how to compare like for like.", href: "/advice/reading-a-building-quote", cta: "Read the guide" },
   { tag: "Explainers", title: "What to look for in a verified trade", desc: "Understand our 5-step checks and why they matter.", href: "/trade-verification", cta: "Read the explainer" },
   { tag: "Planning", title: "From idea to build", desc: "A step-by-step guide to planning a smoother project.", href: "/how-it-works", cta: "Read the guide" },
 ];
@@ -32,7 +32,8 @@ type Resource = {
 
 const GUIDES: Resource[] = [
   { title: "How ProGrafter Works", desc: "Verification, contracts, staged payments and the Homeowner Manual — the whole journey explained.", href: "/how-it-works", tag: "Guide", image: projectDetail },
-  { title: "AI Quote Checker", desc: "What it checks, how the score bands work, and how to read your results before committing to a builder.", href: "/ai-quote-checker", tag: "AI Tools", image: quoteDetail },
+  { title: "How to read a building quote", desc: "A free guide to scope, specification, exclusions, provisional sums, payment stages and the questions to ask.", href: "/advice/reading-a-building-quote", tag: "Guide", image: quoteDetail },
+  { title: "Quote Checker (paid tool)", desc: "Upload a builder's quote for a detailed AI review and Clarity Score. Optional, one-off fee — read the free guide first.", href: "/quote-checker", tag: "Tool" },
   { title: "Trade Verification Explained", desc: "The five checks every trade passes before they reach homeowners.", href: "/trade-verification", tag: "Trust", image: verificationDetail },
   { title: "Homeowner Verification", desc: "Why we verify homeowners and manually review every brief.", href: "/homeowner-verification", tag: "Trust" },
   { title: "Pricing & Commission", desc: "Exactly what ProGrafter costs — and why there are no monthly or lead fees.", href: "/pricing", tag: "Pricing" },

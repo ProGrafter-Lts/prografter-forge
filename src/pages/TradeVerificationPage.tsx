@@ -56,7 +56,8 @@ const TradeVerificationPage = () => (
       lines={[{ text: "Five checks." }, { text: "Not five stars." }]}
       intro="We verify every trade before they join ProGrafter — because trust on a building project isn’t a rating, it’s evidence."
       image={verifiedTrade}
-      imageAlt="Tradesperson on a residential construction site"
+      imageAlt="Verified tradesperson in ProGrafter workwear on a residential construction site"
+      imageFocus="66% 18%"
       note={<>Proper checks<br />for proper grafters.</>}
       actions={
         <>

@@ -99,10 +99,21 @@ const TrustCentre = () => {
 
       <ContentSection
         tone="white"
-        title="Our 5-Step Trade Verification"
-        intro="No trade appears on ProGrafter until they've passed every step. This is verification, not a paid placement."
+        title="Trade verification, in one line"
+        intro="Identity, insurance, qualifications, references and ongoing monitoring — checked by a person before a trade reaches a homeowner. Our Checks is the full explanation."
       >
-        <StepList items={VERIFICATION_STEPS} />
+        <div className="max-w-3xl">
+          <ul className="flex flex-wrap gap-2">
+            {VERIFICATION_STEPS.map((step) => (
+              <li key={step.title} className="border border-navy/15 bg-navy/[0.04] px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.14em] text-secondary-text">
+                {step.title}
+              </li>
+            ))}
+          </ul>
+          <Link to="/trade-verification" className="mt-6 inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.16em] text-teal-ink">
+            Read Our Checks in full →
+          </Link>
+        </div>
       </ContentSection>
 
       <ContentSection
