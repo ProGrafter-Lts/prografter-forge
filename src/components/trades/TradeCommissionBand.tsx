@@ -1,10 +1,11 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, Check } from "lucide-react";
+import { COMMISSION_CAP_LABEL, COMMISSION_SENTENCE } from "@/lib/pricingTerms";
 
 const POINTS = [
   "Join, verify, match and quote without lead fees",
-  "7.5% commission after a completed job has been paid",
-  "£900 maximum commission per job",
+  COMMISSION_SENTENCE.charAt(0).toUpperCase() + COMMISSION_SENTENCE.slice(1),
+  `${COMMISSION_CAP_LABEL} maximum commission per job`,
   "Optional tools remain separate and opt-in",
   "Homeowner briefs are reviewed before matching",
 ];
