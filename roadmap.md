@@ -13,3 +13,11 @@
 - [x] Audit every public-facing ProGrafter product screenshot/mock-up against current V1
 - [x] Replace obsolete visuals with equivalent current V1 screens without changing section purpose
 - [x] Verify all public demonstrations across mobile and desktop
+
+## Public journey truth & consolidation pass (Sep 2026)
+- [x] Advice card destinations verified; real guide created at /advice/reading-a-building-quote
+- [x] Quote comparison demo relabelled as illustrative; invented "Fairness Score" removed
+- [x] Our Checks hero crop + off-brand / gibberish-text evidence imagery replaced
+- [x] Trust Centre / FAQ de-duplicated against Our Checks and Pricing
+- [x] Desktop + mobile QA across all 11 public pages
+- [ ] Founder confirmation needed: contact response time (5–7 days vs 24 hours) and commission rate review
