@@ -200,6 +200,18 @@ section[class*="bg-navy"] .font-mono {
 .bg-navy .bg-white .font-mono.text-teal {
   color: #14A8A1;
 }
+/* Light cards nested in dark sections keep dark labels, inputs and placeholders */
+:is(.bg-deep, .bg-navy, section[class*="bg-deep"], section[class*="bg-navy"])
+  :is(.bg-white, .bg-card, .bg-cream)
+  :is(label, .font-mono, input, select, textarea) {
+  color: hsl(var(--navy));
+}
+:is(.bg-deep, .bg-navy, section[class*="bg-deep"], section[class*="bg-navy"])
+  :is(.bg-white, .bg-card, .bg-cream)
+  :is(input, textarea)::placeholder {
+  color: #6B7280;
+}
+
 /* Floor low-opacity white/cream text on dark backgrounds at 0.85 */
 .bg-deep [class*="text-cream/"],
 .bg-navy [class*="text-cream/"],
