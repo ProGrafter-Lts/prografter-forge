@@ -245,6 +245,7 @@ const AppRoutes = () => {
            <Route path="/advice/reading-a-building-quote" element={<GuideReadingAQuote />} />
             <Route path="/checkatrade-alternative" element={<CheckatradeAlternative />} />
             <Route path="/is-checkatrade-worth-it" element={<IsCheckatradeWorthIt />} />
+            <Route path="/planning-intelligence" element={<PlanningIntelligencePublicPage />} />
             <Route path="/planning-alerts" element={<PlanningAlertsPage />} />
             <Route path="/planning-invite/:token" element={<PlanningInvitePage />} />
             {/* All authenticated (non-admin) routes share ONE layout shell via <Outlet>. */}
