@@ -84,6 +84,17 @@ const Contact = () => {
     }
     setSubmitting(true);
     try {
+      // Canonical record so the enquiry appears in the admin Attention Centre
+      // and is tracked against the 2-working-day response target.
+      const { error: recordError } = await supabase.from("contact_enquiries").insert([{
+        name: parsed.data.name,
+        email: parsed.data.email,
+        subject: parsed.data.subject,
+        message: parsed.data.message,
+        source: "contact_form",
+      }]);
+      if (recordError) console.error("Could not record enquiry:", recordError);
+
       const { error } = await supabase.functions.invoke("send-app-email", {
         body: {
           template: "contact-message",
