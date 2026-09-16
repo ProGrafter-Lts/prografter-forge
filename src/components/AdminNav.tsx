@@ -11,6 +11,7 @@ const AdminNav = () => {
   const isHome = pathname === "/admin";
   const [hasTrade, setHasTrade] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
+  const { total, counts } = useAttention();
 
   useEffect(() => {
     let mounted = true;
