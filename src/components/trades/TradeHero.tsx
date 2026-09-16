@@ -53,8 +53,8 @@ const TradeHero = () => {
           </h1>
 
           <p className="font-body text-cream/85 text-base craft:text-lg leading-relaxed max-w-xl mb-8">
-            Spend less time paying for unsuitable leads. Join and match for free, then pay 7.5% only
-            when a completed job has been paid, capped at £900.
+            Spend less time paying for unsuitable leads. Join and match for free, then pay{" "}
+            {COMMISSION_RATE_LABEL} only when a completed job has been paid, {COMMISSION_CAP_SENTENCE}.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 mb-5">
