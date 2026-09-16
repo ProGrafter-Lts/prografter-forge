@@ -6,13 +6,20 @@ import QuoteComparisonDemo from "@/components/demos/QuoteComparisonDemo";
 import VerificationExplainerInteractive from "@/components/demos/VerificationExplainerInteractive";
 import { Button } from "@/components/ui/button";
 import { DeviceFrame, EditorialStatement, HandNote, SectionLabel, ShowcaseHero } from "@/components/public/PublicBits";
-import projectView from "@/assets/platform/homeowner-overview.png";
-import tradeView from "@/assets/platform/trade-dashboard.png";
-import homeownerQuotes from "@/assets/platform/homeowner-quotes.png";
-import tradeJobs from "@/assets/platform/trade-jobs.png";
-import tradeEarnings from "@/assets/platform/trade-earnings.png";
-import homeownerManual from "@/assets/platform/homeowner-manual.png";
+import projectViewAsset from "@/assets/platform/current/project-workspace.jpg.asset.json";
+import tradeViewAsset from "@/assets/platform/current/trade-dashboard.jpg.asset.json";
+import homeownerQuotesAsset from "@/assets/platform/current/homeowner-quotes.jpg.asset.json";
+import tradeJobsAsset from "@/assets/platform/current/trade-jobs.jpg.asset.json";
+import tradeEarningsAsset from "@/assets/platform/current/trade-earnings.jpg.asset.json";
+import homeownerManualAsset from "@/assets/platform/current/homeowner-manual.jpg.asset.json";
 import tourHero from "@/assets/dashboard/hero-project.jpg";
+
+const projectView = projectViewAsset.url;
+const tradeView = tradeViewAsset.url;
+const homeownerQuotes = homeownerQuotesAsset.url;
+const tradeJobs = tradeJobsAsset.url;
+const tradeEarnings = tradeEarningsAsset.url;
+const homeownerManual = homeownerManualAsset.url;
 
 /** Real V1 navigation — kept in step with HomeownerSidebar / TradeSidebar. */
 const HOMEOWNER_MENU = ["Overview", "My Projects", "Messages", "Site Diary", "Quotes & Checks", "Green Grants", "Homeowner Manual", "My Profile"];
@@ -27,7 +34,7 @@ const SHARED_STEPS = [
 
 const IN_THE_PROJECT = [
   { src: homeownerQuotes, label: "Homeowner · Quotes", alt: "Homeowner quotes view comparing submitted prices", caption: "Quotes side by side, with what each one actually includes." },
-  { src: tradeJobs, label: "Trade · Work", alt: "Trade jobs view listing current work and actions", caption: "The trade sees today's jobs, actions and what needs answering." },
+  { src: tradeJobs, label: "Trade · Work", alt: "Current trade jobs view listing matched work and actions", caption: "The trade sees matched jobs, key details and the next quoting action." },
   { src: tradeEarnings, label: "Trade · Payments", alt: "Trade earnings view showing staged payments", caption: "Staged payments tracked against the agreed programme." },
   { src: homeownerManual, label: "Homeowner · Record", alt: "Homeowner manual showing project records and documents", caption: "Documents, evidence and decisions kept as a lasting record." },
 ];
@@ -80,9 +87,9 @@ const PlatformTour = () => (
             <DeviceFrame
               src={projectView}
               label="Homeowner view"
-              alt="Homeowner project overview showing progress, quotes and actions"
+               alt="Current shared ProGrafter project showing progress and contract actions"
               mobileFocus="left"
-              caption={<><strong className="text-navy">Homeowner view:</strong> progress, updates, decisions and payments.</>}
+               caption={<><strong className="text-navy">Shared project:</strong> progress, updates, decisions and payment milestones.</>}
             />
             <HandNote className="mt-4">Homeowner view. Track progress, photos, decisions and payments.</HandNote>
             <ul className="mt-4 flex flex-wrap gap-2">

@@ -1,13 +1,21 @@
 import { useState } from "react";
 import "./SeeHowItWorks.css";
 
-import tradeDashboard from "@/assets/platform/trade-dashboard.png";
-import tradeJobs from "@/assets/platform/trade-jobs.png";
-import tradeEarnings from "@/assets/platform/trade-earnings.png";
-import homeownerOverview from "@/assets/platform/homeowner-overview.png";
-import homeownerQuotes from "@/assets/platform/homeowner-quotes.png";
-import homeownerManual from "@/assets/platform/homeowner-manual.png";
-import quoteChecker from "@/assets/platform/quote-checker.png";
+import tradeDashboardAsset from "@/assets/platform/current/trade-dashboard.jpg.asset.json";
+import tradeJobsAsset from "@/assets/platform/current/trade-jobs.jpg.asset.json";
+import tradeEarningsAsset from "@/assets/platform/current/trade-earnings.jpg.asset.json";
+import homeownerOverviewAsset from "@/assets/platform/current/homeowner-overview.jpg.asset.json";
+import homeownerQuotesAsset from "@/assets/platform/current/homeowner-quotes.jpg.asset.json";
+import homeownerManualAsset from "@/assets/platform/current/homeowner-manual.jpg.asset.json";
+import quoteCheckerAsset from "@/assets/platform/current/quote-checker.jpg.asset.json";
+
+const tradeDashboard = tradeDashboardAsset.url;
+const tradeJobs = tradeJobsAsset.url;
+const tradeEarnings = tradeEarningsAsset.url;
+const homeownerOverview = homeownerOverviewAsset.url;
+const homeownerQuotes = homeownerQuotesAsset.url;
+const homeownerManual = homeownerManualAsset.url;
+const quoteChecker = quoteCheckerAsset.url;
 
 const ChromeBar = ({ url }: { url: string }) => (
   <div className="chrome">
@@ -22,7 +30,7 @@ const ChromeBar = ({ url }: { url: string }) => (
 
 const Disclaimer = () => (
   <p className="font-mono text-[11px] text-white/[0.55] text-center mb-2">
-    Illustrative preview — your dashboard fills in as real work flows through.
+    Current V1 screen — sample account details are obscured for privacy.
   </p>
 );
 
@@ -66,11 +74,11 @@ const TradesPanel = () => (
         <Disclaimer />
         <div className="hiw-screen">
           <ChromeBar url="prografter.co.uk/dashboard/trade" />
-          <ScreenShot src={tradeDashboard} alt="Trade dashboard with stats and job matches" />
+          <ScreenShot src={tradeDashboard} alt="Current ProGrafter trade dashboard" />
         </div>
         <div className="screen-label">
           <div className="sl-title">Your Trade Dashboard</div>
-          <div className="sl-sub">Jobs · Earnings · Active projects — all in one place</div>
+            <div className="sl-sub">Priorities · Projects · Verification — all in one place</div>
         </div>
       </div>
 
@@ -80,7 +88,7 @@ const TradesPanel = () => (
           <Disclaimer />
           <div className="hiw-screen">
             <ChromeBar url="prografter.co.uk/dashboard/trade" />
-            <ScreenShot src={tradeJobs} alt="Available jobs view for trades" />
+            <ScreenShot src={tradeJobs} alt="Current ProGrafter available jobs view for trades" />
           </div>
           <div className="screen-label">
             <div className="sl-title">Available Jobs</div>
@@ -92,11 +100,11 @@ const TradesPanel = () => (
           <Disclaimer />
           <div className="hiw-screen">
             <ChromeBar url="prografter.co.uk/dashboard/trade" />
-            <ScreenShot src={tradeEarnings} alt="Trade earnings view" />
+            <ScreenShot src={tradeEarnings} alt="Current ProGrafter trade earnings view" />
           </div>
           <div className="screen-label">
             <div className="sl-title">Earnings & Payments</div>
-            <div className="sl-sub">Stage payments · Commission breakdown · Paid status</div>
+            <div className="sl-sub">Stage payments · Upcoming amounts · Payment history</div>
           </div>
         </div>
       </div>
@@ -135,11 +143,11 @@ const HomeownersPanel = () => (
         <Disclaimer />
         <div className="hiw-screen">
           <ChromeBar url="prografter.co.uk/dashboard/homeowner" />
-          <ScreenShot src={homeownerOverview} alt="Homeowner overview with active project and quotes" />
+          <ScreenShot src={homeownerOverview} alt="Current ProGrafter homeowner overview" />
         </div>
         <div className="screen-label">
           <div className="sl-title">Your Project Dashboard</div>
-          <div className="sl-sub">Active project · Quotes received · Live status</div>
+            <div className="sl-sub">Project actions · Quotes · Homeowner tools</div>
         </div>
 
         <div style={{ marginTop: 20 }}>
@@ -161,11 +169,11 @@ const HomeownersPanel = () => (
           <Disclaimer />
           <div className="hiw-screen">
             <ChromeBar url="prografter.co.uk/quote-checker" />
-            <ScreenShot src={quoteChecker} alt="AI Quote Checker tool" />
+            <ScreenShot src={quoteChecker} alt="Current ProGrafter Quote Checker trade selection screen" />
           </div>
           <div className="screen-label">
-            <div className="sl-title">AI Quote Checker</div>
-            <div className="sl-sub">43-point checklist · Know before you sign · £49</div>
+            <div className="sl-title">Quote Checker</div>
+            <div className="sl-sub">Trade-specific checks · Know before you sign · Clear module pricing</div>
           </div>
         </div>
 
@@ -206,7 +214,7 @@ const SeeHowItWorks = () => {
           <span className="text-secondary">BEFORE YOU SIGN UP.</span>
         </h2>
         <p className="text-[14px] text-white/40 leading-[1.6] max-w-[520px] mb-11">
-          Actual screenshots from the live platform. Real screens. Real flows. Nothing hidden.
+          Current V1 screens. Real product flows, with sample account details obscured for privacy.
         </p>
 
         {/* Tabs */}
