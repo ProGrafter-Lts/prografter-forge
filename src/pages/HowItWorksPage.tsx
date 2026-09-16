@@ -239,9 +239,9 @@ const HowItWorksPage = () => {
                 <h2>The checks behind<br />every verified<br /><span>trade.</span></h2>
               </div>
               <div className="hiw-trust-intro">
-                <p>Every trade on ProGrafter is verified before they can work through the platform.</p>
+                <p>Every trade on ProGrafter is verified before they can work through the platform. Our Checks explains each stage in full.</p>
+                <Link to="/trade-verification">Read Our Checks <ArrowRight /></Link>
                 <Link to="/trust">Visit the Trust Centre <ArrowRight /></Link>
-                <Link to="/platform-tour">Explore the tools <ArrowRight /></Link>
               </div>
             </div>
             <div className="hiw-checks-grid">
