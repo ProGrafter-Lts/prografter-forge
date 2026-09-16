@@ -126,7 +126,7 @@ const PlatformTour = () => (
       note="The same record, read from both ends of the job."
     />
 
-    <section className="platform-evidence bg-cream px-6 py-16 craft:py-20">
+    <section id="quoting" className="platform-evidence scroll-mt-24 bg-cream px-6 py-16 craft:py-20">
       <div className="mx-auto max-w-5xl">
         <SectionLabel tone="light">Inside the project</SectionLabel>
         <h2 className="mt-3 max-w-2xl font-heading text-4xl uppercase text-navy">Quotes, work, payments and evidence.</h2>
