@@ -1,21 +1,13 @@
 import { useState } from "react";
 import "./SeeHowItWorks.css";
 
-import tradeDashboardAsset from "@/assets/platform/current/trade-dashboard.jpg.asset.json";
-import tradeJobsAsset from "@/assets/platform/current/trade-jobs.jpg.asset.json";
-import tradeEarningsAsset from "@/assets/platform/current/trade-earnings.jpg.asset.json";
-import homeownerOverviewAsset from "@/assets/platform/current/homeowner-overview.jpg.asset.json";
-import homeownerQuotesAsset from "@/assets/platform/current/homeowner-quotes.jpg.asset.json";
-import homeownerManualAsset from "@/assets/platform/current/homeowner-manual.jpg.asset.json";
-import quoteCheckerAsset from "@/assets/platform/current/quote-checker.jpg.asset.json";
-
-const tradeDashboard = tradeDashboardAsset.url;
-const tradeJobs = tradeJobsAsset.url;
-const tradeEarnings = tradeEarningsAsset.url;
-const homeownerOverview = homeownerOverviewAsset.url;
-const homeownerQuotes = homeownerQuotesAsset.url;
-const homeownerManual = homeownerManualAsset.url;
-const quoteChecker = quoteCheckerAsset.url;
+import tradeDashboard from "@/assets/platform/trade-dashboard.png";
+import tradeJobs from "@/assets/platform/trade-jobs.png";
+import tradeEarnings from "@/assets/platform/trade-earnings.png";
+import homeownerOverview from "@/assets/platform/homeowner-overview.png";
+import homeownerQuotes from "@/assets/platform/homeowner-quotes.png";
+import homeownerManual from "@/assets/platform/homeowner-manual.png";
+import quoteChecker from "@/assets/platform/quote-checker.png";
 
 const ChromeBar = ({ url }: { url: string }) => (
   <div className="chrome">

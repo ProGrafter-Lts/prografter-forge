@@ -23,11 +23,11 @@
 - [ ] Founder confirmation needed: contact response time (5–7 days vs 24 hours) and commission rate review
 
 ## Final public-site acceptance pass (Sep 2026)
-- [ ] Correct Trust Centre, Pricing, FAQ and Contact within the approved visual system
-- [ ] Remove only verified purposeless mobile whitespace across public routes
-- [ ] Standardise primary architectural statements and secondary handwritten annotations
-- [ ] Verify chat/cookie clearance, routes, pricing consistency and public/application boundaries
-- [ ] Complete desktop, tablet and mobile acceptance review of every public destination
+- [x] Correct Trust Centre, Pricing, FAQ and Contact within the approved visual system
+- [x] Remove only verified purposeless mobile whitespace across public routes
+- [x] Standardise primary architectural statements and secondary handwritten annotations
+- [x] Verify chat/cookie clearance, routes, pricing consistency and public/application boundaries
+- [x] Complete desktop, tablet and mobile acceptance review of every public destination
 
 ## Trade public journey pass (Sep 2026)
 - [x] For Trades CTA routes audited; Quote Properly → /platform-tour#quoting

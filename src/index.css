@@ -2051,12 +2051,12 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
 
 @media (max-width: 767px) {
   .hiw-container { width: min(100% - 32px, 1400px); }
-  .hiw-hero { min-height: 760px; }
+  .hiw-hero { min-height: 680px; }
   .hiw-hero-image { inset: 0; }
   .hiw-hero-image img { object-position: 61% center; }
   .hiw-hero-image::after { background: linear-gradient(0deg, hsl(var(--deep)) 10%, hsl(var(--deep) / .88) 58%, hsl(var(--deep) / .42) 100%); }
   .hiw-hero-grid { inset: 0; opacity: .11; }
-  .hiw-hero-inner { min-height: 760px; align-items: flex-end; padding: 110px 0 42px; }
+  .hiw-hero-inner { min-height: 680px; align-items: flex-end; padding: 104px 0 36px; }
   .hiw-hero-copy { width: 100%; }
   .hiw-hero h1 { font-size: 58px; }
   .hiw-hero-intro { margin: 22px 0 25px; font-size: 15px; line-height: 1.6; }
@@ -2093,7 +2093,7 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
   .hiw-check-card svg { grid-row: 1 / 3; margin: 0; align-self: center; }
   .hiw-check-card h3, .hiw-check-card p { grid-column: 2; }
   .hiw-check-card > span { top: 18px; }
-  .hiw-final-cta { min-height: 650px; align-items: flex-end; }
+  .hiw-final-cta { min-height: 560px; align-items: flex-end; }
   .hiw-final-cta > img { object-position: 62% center; }
   .hiw-final-shade { background: linear-gradient(0deg, hsl(var(--deep)) 12%, hsl(var(--deep) / .86) 65%, hsl(var(--deep) / .3)); }
   .hiw-final-inner { grid-template-columns: 1fr; gap: 24px; padding-block: 64px 48px; }
@@ -2758,10 +2758,36 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
 
 /* Keep chat reachable while the compact consent bar is present. */
 .cookie-banner-visible [aria-label="Open ProGrafter chat assistant"] {
-  bottom: max(7.75rem, calc(env(safe-area-inset-bottom) + 7.75rem));
+  bottom: calc(var(--cookie-banner-height, 6rem) + 0.75rem);
 }
+
+/* Final public acceptance: architectural evidence, not generic marketing cards. */
+.trust-centre-page .trust-pillar-grid > .grid > div {
+  box-shadow: none;
+  border-top: 2px solid hsl(var(--teal));
+}
+.trust-centre-page .trust-pillar-grid > .grid { counter-reset: trust-pillar; }
+.trust-centre-page .trust-pillar-grid > .grid > div { counter-increment: trust-pillar; position: relative; }
+.trust-centre-page .trust-pillar-grid > .grid > div::after {
+  content: "0" counter(trust-pillar);
+  position: absolute;
+  right: 1rem;
+  top: 1rem;
+  font: 10px/1 var(--font-mono);
+  letter-spacing: .14em;
+  color: hsl(var(--navy) / .35);
+}
+.faq-group details { box-shadow: none; border-inline: 0; border-radius: 0; }
+.pricing-sequence li:not(:last-child) { border-right: 1px solid hsl(var(--cream) / .1); }
+.contact-message-section {
+  position: relative;
+  overflow: hidden;
+  background-image: linear-gradient(hsl(var(--teal) / .05) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--teal) / .05) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+.contact-message-section > div { position: relative; z-index: 1; }
+
 @media (max-width: 639px) {
-  .cookie-banner-visible [aria-label="Open ProGrafter chat assistant"] {
-    bottom: max(5rem, calc(env(safe-area-inset-bottom) + 5rem));
-  }
+  .pricing-sequence li:nth-child(2) { border-right: 0; }
+  .pricing-sequence li:nth-child(-n+2) { border-bottom: 1px solid hsl(var(--cream) / .1); }
 }

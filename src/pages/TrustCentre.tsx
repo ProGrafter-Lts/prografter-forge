@@ -6,7 +6,6 @@ import {
   ContentHero,
   ContentSection,
   FeatureGrid,
-  StepList,
   ContentCta,
 } from "@/components/content/ContentBlocks";
 
@@ -74,7 +73,7 @@ const FAQ = [
 
 const TrustCentre = () => {
   return (
-    <div className="min-h-screen">
+    <div className="trust-centre-page min-h-screen">
       <SEO
         title="Trust Centre — How ProGrafter Keeps Construction Honest"
         description="See exactly how ProGrafter builds trust: 5-step trade verification, verified homeowners, two-way reviews, human-reviewed briefs, fair pricing, AI transparency, privacy and dispute resolution."
@@ -91,11 +90,22 @@ const TrustCentre = () => {
         ghost="TRUST"
       />
 
+      <section className="trust-principle bg-navy px-6 py-8 craft:py-10" aria-label="ProGrafter trust principle">
+        <div className="mx-auto grid max-w-5xl gap-5 craft:grid-cols-[1fr_auto] craft:items-center">
+          <p className="font-heading text-3xl uppercase leading-none text-cream craft:text-5xl">
+            Prove it. <span className="text-teal">Record it.</span> Share it.
+          </p>
+          <p className="max-w-sm border-l border-teal/50 pl-4 font-mono text-[10px] uppercase leading-relaxed tracking-[0.16em] text-cream/65">
+            Identity · scope · decisions · progress · completion
+          </p>
+        </div>
+      </section>
+
       <ContentSection
         title="The nine pillars of ProGrafter trust"
         intro="Each layer answers a different risk: who is involved, what was agreed, what changed and what evidence exists."
       >
-        <FeatureGrid items={PILLARS} cols={3} />
+        <div className="trust-pillar-grid"><FeatureGrid items={PILLARS} cols={3} /></div>
       </ContentSection>
 
       <ContentSection

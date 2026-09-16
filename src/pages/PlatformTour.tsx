@@ -7,20 +7,13 @@ import QuoteComparisonDemo from "@/components/demos/QuoteComparisonDemo";
 import VerificationExplainerInteractive from "@/components/demos/VerificationExplainerInteractive";
 import { Button } from "@/components/ui/button";
 import { DeviceFrame, EditorialStatement, HandNote, SectionLabel, ShowcaseHero } from "@/components/public/PublicBits";
-import projectViewAsset from "@/assets/platform/current/project-workspace.jpg.asset.json";
-import tradeViewAsset from "@/assets/platform/current/trade-dashboard.jpg.asset.json";
-import homeownerQuotesAsset from "@/assets/platform/current/homeowner-quotes.jpg.asset.json";
-import tradeJobsAsset from "@/assets/platform/current/trade-jobs.jpg.asset.json";
-import tradeEarningsAsset from "@/assets/platform/current/trade-earnings.jpg.asset.json";
-import homeownerManualAsset from "@/assets/platform/current/homeowner-manual.jpg.asset.json";
+import projectView from "@/assets/platform/homeowner-overview.png";
+import tradeView from "@/assets/platform/trade-dashboard.png";
+import homeownerQuotes from "@/assets/platform/homeowner-quotes.png";
+import tradeJobs from "@/assets/platform/trade-jobs.png";
+import tradeEarnings from "@/assets/platform/trade-earnings.png";
+import homeownerManual from "@/assets/platform/homeowner-manual.png";
 import tourHero from "@/assets/dashboard/hero-project.jpg";
-
-const projectView = projectViewAsset.url;
-const tradeView = tradeViewAsset.url;
-const homeownerQuotes = homeownerQuotesAsset.url;
-const tradeJobs = tradeJobsAsset.url;
-const tradeEarnings = tradeEarningsAsset.url;
-const homeownerManual = homeownerManualAsset.url;
 
 /** Real V1 navigation — kept in step with HomeownerSidebar / TradeSidebar. */
 const HOMEOWNER_MENU = ["Overview", "My Projects", "Messages", "Site Diary", "Quotes & Checks", "Green Grants", "Homeowner Manual", "My Profile"];

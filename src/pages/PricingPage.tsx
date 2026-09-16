@@ -64,9 +64,23 @@ const PricingPage = () => (
       primaryCta={{ label: "Join as a Trade", href: "/signup/trade" }}
       secondaryCta={{ label: "Post a job — free", href: "/post-job-brief" }}
     />
+    <section className="pricing-sequence border-y border-teal/25 bg-navy px-6 py-6" aria-label="How trade pricing works">
+      <ol className="mx-auto grid max-w-5xl grid-cols-2 gap-px overflow-hidden border border-cream/10 bg-cream/10 craft:grid-cols-4">
+        {["Join", "Verify", "Match", "Quote"].map((step, index) => (
+          <li key={step} className="bg-navy px-4 py-4">
+            <span className="block font-mono text-[10px] tracking-[0.18em] text-teal">0{index + 1}</span>
+            <strong className="mt-1 block font-heading text-xl uppercase text-cream">{step}</strong>
+            <span className="font-mono text-[9px] uppercase tracking-[0.12em] text-cream/55">No lead fee</span>
+          </li>
+        ))}
+      </ol>
+      <p className="mx-auto mt-4 max-w-5xl font-mono text-[10px] uppercase tracking-[0.14em] text-cream/65">
+        Commission applies only after completed, paid work.
+      </p>
+    </section>
     <ContentSection>
       <div className="space-y-16">
-        <PriceCard title="For tradespeople" points={TRADE_POINTS} />
+        <PriceCard title="For tradespeople — one clear model" points={TRADE_POINTS} />
         <PriceCard title="For homeowners" points={HOME_POINTS} />
       </div>
     </ContentSection>

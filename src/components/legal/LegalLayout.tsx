@@ -17,8 +17,8 @@ interface LegalLayoutProps {
 const LegalLayout = ({ title, seoTitle, description, path, intro, children }: LegalLayoutProps) => (
   <AppShell>
     <SEO title={seoTitle} description={description} path={path} />
-    <main className="px-6 pt-28 pb-16">
-      <article className="mx-auto max-w-4xl rounded-2xl border border-navy/10 bg-white p-6 shadow-sm craft:p-10">
+    <main className="px-6 pt-24 pb-12 craft:pt-28 craft:pb-16">
+      <article className="mx-auto max-w-4xl rounded-[4px] border border-navy/10 bg-white p-6 shadow-sm craft:p-10">
         <h1 className="font-heading text-3xl text-navy craft:text-4xl">{title}</h1>
         <p className="font-mono text-xs uppercase tracking-widest text-secondary-text mt-3">
           Last updated: {LEGAL_LAST_UPDATED}

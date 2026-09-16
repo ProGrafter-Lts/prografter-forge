@@ -29,8 +29,8 @@ export const ContentHero = ({
   <section
     className={
       tone === "light"
-        ? "public-drafting relative overflow-hidden bg-cream px-6 pb-20 pt-36"
-        : "public-blueprint relative overflow-hidden bg-deep px-6 pb-20 pt-36"
+        ? "public-drafting content-hero relative overflow-hidden bg-cream px-6 pb-14 pt-28 craft:pb-20 craft:pt-36"
+        : "public-blueprint content-hero relative overflow-hidden bg-deep px-6 pb-14 pt-28 craft:pb-20 craft:pt-36"
     }
   >
     {image && <div className="content-hero-image"><img src={image} alt={imageAlt} width={1280} height={1024} /></div>}
@@ -97,14 +97,14 @@ export const ContentSection = ({
   children: ReactNode;
   tone?: "cream" | "white";
 }) => (
-  <section className={`px-6 py-16 craft:py-20 ${tone === "white" ? "bg-card" : "bg-cream"}`}>
+  <section className={`content-section px-6 py-12 craft:py-20 ${tone === "white" ? "bg-card" : "bg-cream"}`}>
     <div className="max-w-5xl mx-auto">
       {title && (
         <h2 className="type-h2 mb-4 max-w-3xl text-navy">
           {title}
         </h2>
       )}
-      {intro && <p className="font-body text-secondary-text text-lg max-w-2xl mb-10">{intro}</p>}
+      {intro && <p className="font-body text-secondary-text text-lg max-w-2xl mb-8 craft:mb-10">{intro}</p>}
       {children}
     </div>
   </section>
@@ -186,7 +186,7 @@ export const ContentCta = ({
   primary: { label: string; href: string };
   secondary?: { label: string; href: string };
 }) => (
-  <section className="public-blueprint bg-navy px-6 py-20 craft:py-24">
+  <section className="public-blueprint bg-navy px-6 py-16 craft:py-24">
     <div className="max-w-3xl mx-auto text-center">
       <h2 className="type-h2 mb-4 text-cream">{title}</h2>
       <p className="font-body text-cream/80 text-lg font-light mb-9 max-w-xl mx-auto">{intro}</p>

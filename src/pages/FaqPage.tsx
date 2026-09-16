@@ -33,11 +33,14 @@ const TRADES: Faq[] = [
   { q: "What are Planning Alerts?", a: "Planning Alerts turn local planning applications into genuine opportunities, helping you reach homeowners with upcoming projects early.", link: { label: "About Planning Alerts", href: "/planning-intelligence" } },
 ];
 
-const Group = ({ title, items }: { title: string; items: Faq[] }) => (
-  <div className="mb-12">
-    <h2 className="font-heading text-navy text-[26px] craft:text-[34px] mb-5">{title}</h2>
+const Group = ({ number, title, items }: { number: string; title: string; items: Faq[] }) => (
+  <section className="faq-group mb-10 border-t border-navy/15 pt-5 craft:mb-14">
+    <div className="mb-5 flex items-baseline gap-4">
+      <span className="font-mono text-[10px] tracking-[0.18em] text-teal">{number}</span>
+      <h2 className="font-heading text-3xl uppercase leading-none text-navy craft:text-4xl">{title}</h2>
+    </div>
     <FaqBlock items={items} />
-  </div>
+  </section>
 );
 
 const FaqPage = () => (
@@ -58,9 +61,9 @@ const FaqPage = () => (
       secondaryCta={{ label: "Contact us", href: "/contact" }}
     />
     <ContentSection>
-      <Group title="About ProGrafter" items={GENERAL} />
-      <Group title="For homeowners" items={HOMEOWNERS} />
-      <Group title="For tradespeople" items={TRADES} />
+      <Group number="01 / GENERAL" title="About ProGrafter" items={GENERAL} />
+      <Group number="02 / HOMEOWNER" title="For homeowners" items={HOMEOWNERS} />
+      <Group number="03 / TRADE" title="For tradespeople" items={TRADES} />
       <TrustSignal className="mt-10" />
     </ContentSection>
     <ContentCta
