@@ -33,7 +33,7 @@ const TRADES: Faq[] = [
   { q: "What are Planning Alerts?", a: "Planning Alerts turn local planning applications into genuine opportunities, helping you reach homeowners with upcoming projects early.", link: { label: "About Planning Alerts", href: "/planning-alerts" } },
 ];
 
-const Group = ({ title, items }: { title: string; items: { q: string; a: string }[] }) => (
+const Group = ({ title, items }: { title: string; items: Faq[] }) => (
   <div className="mb-12">
     <h2 className="font-heading text-navy text-[26px] craft:text-[34px] mb-5">{title}</h2>
     <FaqBlock items={items} />
