@@ -1,4 +1,5 @@
-import { Link } from "react-router-dom";
+import { useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, Camera, ClipboardCheck, FileText, Map, MessageSquareText, PackageCheck, WalletCards } from "lucide-react";
 import SEO from "@/components/SEO";
 import AppShell from "@/components/AppShell";
