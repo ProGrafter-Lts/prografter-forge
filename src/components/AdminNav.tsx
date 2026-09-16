@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Logo from "@/components/Logo";
 import { supabase } from "@/integrations/supabase/client";
+import { useAttention } from "@/hooks/useAttention";
 
 const AdminNav = () => {
   const { pathname } = useLocation();
@@ -43,6 +44,24 @@ const AdminNav = () => {
         </span>
 
         <div className="flex-1" />
+
+        <Link
+          to="/admin/attention"
+          className="shrink-0 inline-flex items-center gap-1.5 font-mono text-xs text-cream/90 hover:text-teal transition-colors border border-cream/20 rounded px-2.5 py-1"
+          aria-label={`Attention — ${total} items need action`}
+        >
+          <Bell className="w-3.5 h-3.5" />
+          <span className="hidden sm:inline uppercase tracking-wide">Attention</span>
+          {total > 0 && (
+            <span
+              className={`min-w-[18px] text-center rounded-full px-1.5 py-[1px] text-[10px] ${
+                counts.urgent > 0 ? "bg-red-600 text-white" : "bg-teal text-cream"
+              }`}
+            >
+              {total}
+            </span>
+          )}
+        </Link>
 
         {!isHome && (
           <Link
