@@ -11,12 +11,13 @@ import {
 import CommissionCalculator from "@/components/calculators/CommissionCalculator";
 import SavingsCalculator from "@/components/calculators/SavingsCalculator";
 import TrustSignal from "@/components/TrustSignal";
+import { COMMISSION_CAP_LABEL, COMMISSION_CAP_SENTENCE, COMMISSION_RATE_LABEL } from "@/lib/pricingTerms";
 
 const TRADE_POINTS = [
   { title: "£0 to register", desc: "Join, get verified and build your profile for free. No card required.", icon: "£" },
   { title: "No lead fees", desc: "See and respond to suitable opportunities without paying for each introduction.", icon: "✓" },
-  { title: "7.5% when work completes", desc: "Commission applies after the completed job has been paid.", icon: "%" },
-  { title: "£900 per-job cap", desc: "The commission stops at £900, however large the job.", icon: "◆" },
+  { title: `${COMMISSION_RATE_LABEL} when work completes`, desc: "Commission applies after the completed job has been paid.", icon: "%" },
+  { title: `${COMMISSION_CAP_LABEL} per-job cap`, desc: `The commission stops at ${COMMISSION_CAP_LABEL}, however large the job.`, icon: "◆" },
 ];
 
 const HOME_POINTS = [
