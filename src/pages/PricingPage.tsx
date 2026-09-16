@@ -50,8 +50,8 @@ const PriceCard = ({
 const PricingPage = () => (
   <AppShell>
     <SEO
-      title="ProGrafter Pricing — 7.5%, Capped at £900"
-      description="Join and quote without lead fees. Trades pay 7.5% after a completed paid job, capped at £900; optional tools are separate."
+      title={`ProGrafter Pricing — ${COMMISSION_RATE_LABEL}, Capped at ${COMMISSION_CAP_LABEL}`}
+      description={`Join and quote without lead fees. Trades pay ${COMMISSION_RATE_LABEL} after a completed paid job, ${COMMISSION_CAP_SENTENCE}; optional tools are separate.`}
       path="/pricing"
       jsonLd={buildFaqJsonLd(FAQ)}
     />
