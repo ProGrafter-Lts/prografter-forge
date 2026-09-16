@@ -21,3 +21,9 @@
 - [x] Trust Centre / FAQ de-duplicated against Our Checks and Pricing
 - [x] Desktop + mobile QA across all 11 public pages
 - [ ] Founder confirmation needed: contact response time (5–7 days vs 24 hours) and commission rate review
+
+## Trade public journey pass (Sep 2026)
+- [x] For Trades CTA routes audited; Quote Properly → /platform-tour#quoting
+- [x] Public Planning Intelligence explainer at /planning-intelligence; app entry is explicit
+- [x] Canonical commercial terms in src/lib/pricingTerms.ts (rate/cap unchanged)
+- [ ] Founder confirmation needed: contact response time (5–7 days vs 24 hours) and commission rate review
