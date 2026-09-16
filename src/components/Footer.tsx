@@ -5,7 +5,7 @@ import { openCookiePreferences } from "@/components/CookieConsent";
 const FOOTER_GROUPS = [
   { title: "Homeowners", links: [["Project Cost Guide", "/project-cost-guide"], ["Quote Checker", "/quote-checker"], ["How It Works", "/how-it-works"], ["Our Checks", "/trade-verification"]] },
   { title: "ProGrafter", links: [["Platform Tour", "/platform-tour"], ["Trust Centre", "/trust"], ["Advice", "/resources"], ["About", "/about"]] },
-  { title: "For Trades", links: [["Join as a Trade", "/signup/trade"], ["Pricing", "/pricing"], ["Planning Alerts", "/planning-alerts"], ["Calculators", "/calculators"]] },
+  { title: "For Trades", links: [["Join as a Trade", "/signup/trade"], ["Pricing", "/pricing"], ["Planning Alerts", "/planning-intelligence"], ["Calculators", "/calculators"]] },
 ];
 
 const Footer = () => {

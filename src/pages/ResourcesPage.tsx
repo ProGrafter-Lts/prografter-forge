@@ -40,7 +40,7 @@ const GUIDES: Resource[] = [
   { title: "Is Checkatrade Worth It?", desc: "An honest look at lead-based platforms and how a commission-only model compares.", href: "/is-checkatrade-worth-it", tag: "Comparison" },
   { title: "A Better Checkatrade Alternative", desc: "Why verified, commission-only matching beats paying per lead.", href: "/checkatrade-alternative", tag: "Comparison" },
   { title: "Green Grants & Funding", desc: "Find funding for energy-efficiency upgrades and green home improvements.", href: "/green", tag: "Green" },
-  { title: "Planning Alerts", desc: "How local planning applications become genuine opportunities for trades.", href: "/planning-alerts", tag: "Trades" },
+  { title: "Planning Alerts", desc: "How local planning applications become genuine opportunities for trades.", href: "/planning-intelligence", tag: "Trades" },
   { title: "Frequently Asked Questions", desc: "Quick answers for homeowners and tradespeople.", href: "/faq", tag: "Help" },
 ];
 
