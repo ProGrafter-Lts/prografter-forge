@@ -12,4 +12,4 @@
 ## Product screenshot accuracy
 - [x] Audit every public-facing ProGrafter product screenshot/mock-up against current V1
 - [x] Replace obsolete visuals with equivalent current V1 screens without changing section purpose
-- [ ] Verify all public demonstrations across mobile and desktop
+- [x] Verify all public demonstrations across mobile and desktop
