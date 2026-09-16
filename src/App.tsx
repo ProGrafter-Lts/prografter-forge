@@ -51,6 +51,7 @@ const MyQuoteChecks = lazyRetry(() => import("./pages/MyQuoteChecks.tsx"));
 const QuoteCheckDetail = lazyRetry(() => import("./pages/QuoteCheckDetail.tsx"));
 const GreenGrants = lazyRetry(() => import("./pages/GreenGrants.tsx"));
 const PlanningAlertsPage = lazyRetry(() => import("./pages/PlanningAlerts.tsx"));
+const PlanningIntelligencePublicPage = lazyRetry(() => import("./pages/PlanningIntelligencePublic.tsx"));
 const PlanningInvitePage = lazyRetry(() => import("./pages/PlanningInvite.tsx"));
 const HomeownerManual = lazyRetry(() => import("./pages/HomeownerManual.tsx"));
 const Unsubscribe = lazyRetry(() => import("./pages/Unsubscribe.tsx"));
