@@ -1,4 +1,5 @@
-import { Link } from "react-router-dom";
+import { useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, Camera, ClipboardCheck, FileText, Map, MessageSquareText, PackageCheck, WalletCards } from "lucide-react";
 import SEO from "@/components/SEO";
 import AppShell from "@/components/AppShell";
@@ -45,7 +46,19 @@ const ROADMAP = [
   { icon: PackageCheck, status: "Planned", title: "One trade operating system", text: "Procurement, project management, homeowner communication, variations, invoices and end-of-job cost and time review — helping trades learn from actual versus quoted labour and materials." },
 ];
 
-const PlatformTour = () => (
+/** Scrolls to #quoting (and similar anchors) when the tour is opened via a hash link. */
+const useHashScroll = () => {
+  const { hash } = useLocation();
+  useEffect(() => {
+    if (!hash) return;
+    const el = document.getElementById(hash.slice(1));
+    if (el) requestAnimationFrame(() => el.scrollIntoView({ behavior: "smooth", block: "start" }));
+  }, [hash]);
+};
+
+const PlatformTour = () => {
+  useHashScroll();
+  return (
   <AppShell>
     <SEO
       title="Platform Tour — See ProGrafter in Action"
@@ -126,7 +139,7 @@ const PlatformTour = () => (
       note="The same record, read from both ends of the job."
     />
 
-    <section className="platform-evidence bg-cream px-6 py-16 craft:py-20">
+    <section id="quoting" className="platform-evidence scroll-mt-24 bg-cream px-6 py-16 craft:py-20">
       <div className="mx-auto max-w-5xl">
         <SectionLabel tone="light">Inside the project</SectionLabel>
         <h2 className="mt-3 max-w-2xl font-heading text-4xl uppercase text-navy">Quotes, work, payments and evidence.</h2>
@@ -156,6 +169,7 @@ const PlatformTour = () => (
       </div>
     </section>
   </AppShell>
-);
+  );
+};
 
 export default PlatformTour;

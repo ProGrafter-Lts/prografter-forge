@@ -11,12 +11,13 @@ import {
 import CommissionCalculator from "@/components/calculators/CommissionCalculator";
 import SavingsCalculator from "@/components/calculators/SavingsCalculator";
 import TrustSignal from "@/components/TrustSignal";
+import { COMMISSION_CAP_LABEL, COMMISSION_CAP_SENTENCE, COMMISSION_RATE_LABEL } from "@/lib/pricingTerms";
 
 const TRADE_POINTS = [
   { title: "£0 to register", desc: "Join, get verified and build your profile for free. No card required.", icon: "£" },
   { title: "No lead fees", desc: "See and respond to suitable opportunities without paying for each introduction.", icon: "✓" },
-  { title: "7.5% when work completes", desc: "Commission applies after the completed job has been paid.", icon: "%" },
-  { title: "£900 per-job cap", desc: "The commission stops at £900, however large the job.", icon: "◆" },
+  { title: `${COMMISSION_RATE_LABEL} when work completes`, desc: "Commission applies after the completed job has been paid.", icon: "%" },
+  { title: `${COMMISSION_CAP_LABEL} per-job cap`, desc: `The commission stops at ${COMMISSION_CAP_LABEL}, however large the job.`, icon: "◆" },
 ];
 
 const HOME_POINTS = [
@@ -26,7 +27,7 @@ const HOME_POINTS = [
 ];
 
 const FAQ = [
-  { q: "How much does ProGrafter cost tradespeople?", a: "The core platform is free to join, get matched and quote. Trades pay a 7.5% commission after a completed job has been paid, capped at £900. Optional paid tools are separate and opt-in." },
+  { q: "How much does ProGrafter cost tradespeople?", a: `The core platform is free to join, get matched and quote. Trades pay a ${COMMISSION_RATE_LABEL} commission after a completed job has been paid, ${COMMISSION_CAP_SENTENCE}. Optional paid tools are separate and opt-in.` },
   { q: "How much does it cost homeowners?", a: "Homeowners post jobs for free and are matched with verified trades at no cost. ProGrafter offers the free Project Cost Guide, with a paid AI Quote Checker report for detailed reviews of a specific quote." },
   { q: "When exactly does commission apply?", a: "Only after a job is marked complete and the trade has been paid. There's nothing to pay up front and nothing to pay if a job doesn't go ahead." },
   { q: "Are there any hidden fees or rank-boosting charges?", a: "No. There's no pay-to-play, no boosted rankings and no surprise charges. One fair, capped commission — that's it." },
@@ -49,8 +50,8 @@ const PriceCard = ({
 const PricingPage = () => (
   <AppShell>
     <SEO
-      title="ProGrafter Pricing — 7.5%, Capped at £900"
-      description="Join and quote without lead fees. Trades pay 7.5% after a completed paid job, capped at £900; optional tools are separate."
+      title={`ProGrafter Pricing — ${COMMISSION_RATE_LABEL}, Capped at ${COMMISSION_CAP_LABEL}`}
+      description={`Join and quote without lead fees. Trades pay ${COMMISSION_RATE_LABEL} after a completed paid job, ${COMMISSION_CAP_SENTENCE}; optional tools are separate.`}
       path="/pricing"
       jsonLd={buildFaqJsonLd(FAQ)}
     />
@@ -58,7 +59,7 @@ const PricingPage = () => (
       eyebrow="Pricing"
       title="Fair, transparent,"
       highlight="commission only."
-      intro="Join, get verified, receive suitable matches and quote without lead fees. Pay 7.5% after a completed job has been paid, capped at £900. Optional tools are separate."
+      intro={`Join, get verified, receive suitable matches and quote without lead fees. Pay ${COMMISSION_RATE_LABEL} after a completed job has been paid, ${COMMISSION_CAP_SENTENCE}. Optional tools are separate.`}
       ghost="FAIR"
       primaryCta={{ label: "Join as a Trade", href: "/signup/trade" }}
       secondaryCta={{ label: "Post a job — free", href: "/post-job-brief" }}
@@ -96,7 +97,7 @@ const PricingPage = () => (
               ["Lead / contact fees", "None", "Per lead, win or lose"],
               ["Pay to rank higher", "No", "Often yes"],
               ["When you pay", "Only on completed, paid jobs", "Up front / ongoing"],
-              ["Per-job cap", "£900", "Uncapped"],
+              ["Per-job cap", COMMISSION_CAP_LABEL, "Uncapped"],
             ].map((row) => (
               <tr key={row[0]} className="border-b border-border/50">
                 <td className="py-3 pr-4 font-medium text-navy">{row[0]}</td>

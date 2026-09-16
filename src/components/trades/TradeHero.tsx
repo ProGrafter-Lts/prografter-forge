@@ -1,9 +1,10 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, BadgeCheck, MapPin, Wallet } from "lucide-react";
 import heroImage from "@/assets/home/trades-hero.jpg";
+import { COMMISSION_CAP_SENTENCE, COMMISSION_RATE_LABEL } from "@/lib/pricingTerms";
 
 const INDICATORS = [
-  { icon: Wallet, title: "Commission Only", desc: "7.5% on completed paid work, capped at £900." },
+  { icon: Wallet, title: "Commission Only", desc: `${COMMISSION_RATE_LABEL} on completed paid work, ${COMMISSION_CAP_SENTENCE}.` },
   { icon: MapPin, title: "Focused Locally", desc: "East Midlands density first." },
   { icon: BadgeCheck, title: "Real Homeowners", desc: "Every customer is verified." },
 ];
@@ -52,8 +53,8 @@ const TradeHero = () => {
           </h1>
 
           <p className="font-body text-cream/85 text-base craft:text-lg leading-relaxed max-w-xl mb-8">
-            Spend less time paying for unsuitable leads. Join and match for free, then pay 7.5% only
-            when a completed job has been paid, capped at £900.
+            Spend less time paying for unsuitable leads. Join and match for free, then pay{" "}
+            {COMMISSION_RATE_LABEL} only when a completed job has been paid, {COMMISSION_CAP_SENTENCE}.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 mb-5">

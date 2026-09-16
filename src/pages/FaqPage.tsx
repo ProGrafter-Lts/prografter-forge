@@ -30,7 +30,7 @@ const TRADES: Faq[] = [
   { q: "What does it cost to join?", a: "Joining, getting verified, being matched and quoting are free. Commission applies only after a completed job has been paid, and it is capped.", link: { label: "See the exact rate and cap", href: "/pricing" } },
   { q: "How do I get verified?", a: "Submit your ID, public liability insurance and relevant qualifications. Most verifications are completed within a few working days after a manual review.", link: { label: "How verification works", href: "/trade-verification" } },
   { q: "Are the leads real?", a: "Yes. Homeowners are verified and every job brief is manually reviewed, so you quote on genuine, described projects — not time-wasters." },
-  { q: "What are Planning Alerts?", a: "Planning Alerts turn local planning applications into genuine opportunities, helping you reach homeowners with upcoming projects early.", link: { label: "About Planning Alerts", href: "/planning-alerts" } },
+  { q: "What are Planning Alerts?", a: "Planning Alerts turn local planning applications into genuine opportunities, helping you reach homeowners with upcoming projects early.", link: { label: "About Planning Alerts", href: "/planning-intelligence" } },
 ];
 
 const Group = ({ title, items }: { title: string; items: Faq[] }) => (
