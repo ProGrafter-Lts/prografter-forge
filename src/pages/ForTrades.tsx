@@ -6,6 +6,7 @@ import TradeStepsSection from "@/components/trades/TradeStepsSection";
 import TradeCommissionBand from "@/components/trades/TradeCommissionBand";
 import TradeCtaBand from "@/components/trades/TradeCtaBand";
 import Footer from "@/components/Footer";
+import { COMMISSION_CAP_SENTENCE, COMMISSION_RATE_LABEL } from "@/lib/pricingTerms";
 
 const ForTrades = () => {
   return (
