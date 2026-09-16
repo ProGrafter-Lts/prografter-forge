@@ -1,7 +1,9 @@
 import { Link } from "react-router-dom";
 import SEO from "@/components/SEO";
+import AttentionPanel from "@/components/admin/AttentionPanel";
 
 const SECTIONS: { to: string; label: string; desc: string }[] = [
+  { to: "/admin/attention", label: "Attention", desc: "Everything waiting on an administrator, in one prioritised queue" },
   { to: "/admin/waitlist", label: "Waitlist signups", desc: "Early-access signups; dismiss out-of-area" },
   { to: "/admin/applications", label: "Trade Applications", desc: "Single review queue: all trade applications, documents and references" },
   { to: "/admin/verifications", label: "Legacy signups (archive)", desc: "Read-only: 13 pre-submission signups from the old flow. Being retired — do not use for new applications" },
