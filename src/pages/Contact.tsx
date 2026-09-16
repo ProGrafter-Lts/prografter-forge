@@ -137,16 +137,16 @@ const Contact = () => {
         }}
       />
 
-      <main className="pt-24 pb-16">
+      <main className="contact-page pt-20 pb-12 craft:pt-24 craft:pb-16">
         {/* Hero */}
-        <section className="max-w-7xl mx-auto px-6 pt-12 pb-16 relative">
+        <section className="max-w-7xl mx-auto px-6 pt-10 pb-12 craft:pt-12 craft:pb-16 relative">
           <div className="flex items-center gap-3 mb-8">
             <div className="w-8 h-[2px] bg-teal" />
             <span className="font-mono text-xs text-teal uppercase tracking-widest">
               Contact
             </span>
           </div>
-          <h1 className="font-heading text-navy text-[56px] craft:text-[88px] leading-[0.95] mb-6">
+          <h1 className="font-heading text-navy text-5xl craft:text-[88px] uppercase leading-[0.95] mb-6">
             GET IN<br />
             <span className="text-teal">TOUCH.</span>
           </h1>
@@ -156,12 +156,12 @@ const Contact = () => {
         </section>
 
         {/* Contact Cards */}
-        <section className="max-w-7xl mx-auto px-6 mb-20">
+        <section className="max-w-7xl mx-auto px-6 mb-14 craft:mb-20">
           <div className="grid craft:grid-cols-2 gap-6">
             {CONTACT_CARDS.map((card, idx) => (
               <div
                 key={card.title}
-                className="bg-card border-2 border-navy/10 rounded-2xl p-6 flex flex-col hover:border-teal/40 transition-colors"
+                className="bg-card border border-navy/15 rounded-[4px] p-6 flex flex-col hover:border-teal/40 transition-colors"
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="w-10 h-10 rounded-lg bg-teal/10 flex items-center justify-center">
@@ -188,7 +188,7 @@ const Contact = () => {
                 <button
                   onClick={() => handleCopy(card.email, idx)}
                   title={card.subjectLine ? `Subject: ${card.subjectLine}` : undefined}
-                  className="mt-auto flex items-center justify-center gap-2 border border-teal text-teal font-mono text-xs px-4 py-2.5 rounded-xl hover:bg-teal hover:text-cream transition-colors"
+                    className="mt-auto flex items-center justify-center gap-2 border border-teal text-teal font-mono text-xs px-4 py-2.5 rounded-[4px] hover:bg-teal hover:text-cream transition-colors"
                 >
                   {copiedIdx === idx ? (
                     <>
@@ -208,18 +208,19 @@ const Contact = () => {
         </section>
 
         {/* Contact Form */}
-        <section className="max-w-3xl mx-auto px-6 mb-20">
+        <section className="contact-message-section bg-deep px-6 py-14 craft:py-20 mb-14 craft:mb-20">
+          <div className="max-w-3xl mx-auto">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-8 h-[2px] bg-teal" />
             <span className="font-mono text-xs text-teal uppercase tracking-widest">
               Send a Message
             </span>
           </div>
-          <h2 className="font-body font-bold text-navy text-3xl craft:text-4xl mb-8">
-            Drop us a line.
+          <h2 className="font-heading uppercase text-cream text-4xl craft:text-5xl mb-8">
+            Send us a message.
           </h2>
 
-          <form onSubmit={handleSubmit} className="bg-card border-2 border-navy/10 rounded-2xl p-6 craft:p-8 space-y-5">
+          <form onSubmit={handleSubmit} className="bg-card border border-cream/15 rounded-[4px] p-6 craft:p-8 space-y-5">
             <div className="grid craft:grid-cols-2 gap-5">
               <div>
                 <label htmlFor="name" className="block font-mono text-xs text-navy uppercase tracking-wider mb-2">
@@ -300,11 +301,15 @@ const Contact = () => {
               {submitting ? "Sending…" : "Send Message"}
             </button>
           </form>
+          <p className="mt-5 font-mono text-[10px] uppercase tracking-[0.16em] text-cream/60">
+            Received · reviewed by a person · response within 2 working days
+          </p>
+          </div>
         </section>
 
         {/* Company Details */}
         <section className="max-w-7xl mx-auto px-6">
-          <div className="bg-navy text-cream rounded-2xl p-8 craft:p-12 relative overflow-hidden">
+          <div className="bg-navy text-cream rounded-[4px] p-8 craft:p-12 relative overflow-hidden">
             <span className="absolute -bottom-6 -right-2 font-heading text-[140px] craft:text-[200px] text-cream/[0.04] select-none pointer-events-none leading-none">
               CO.
             </span>

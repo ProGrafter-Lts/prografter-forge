@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Switch } from "@/components/ui/switch";
@@ -90,6 +90,7 @@ const CookieConsent = () => {
   const [visible, setVisible] = useState(false);
   const [managing, setManaging] = useState(false);
   const [prefs, setPrefs] = useState<CookiePrefs>(DEFAULT_PREFS);
+  const bannerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const stored = getStoredCookiePrefs();
@@ -107,7 +108,22 @@ const CookieConsent = () => {
 
   useEffect(() => {
     document.documentElement.classList.toggle("cookie-banner-visible", visible && !managing);
-    return () => document.documentElement.classList.remove("cookie-banner-visible");
+    const banner = bannerRef.current;
+    if (!visible || managing || !banner) {
+      document.documentElement.style.removeProperty("--cookie-banner-height");
+      return () => document.documentElement.classList.remove("cookie-banner-visible");
+    }
+    const updateHeight = () => {
+      document.documentElement.style.setProperty("--cookie-banner-height", `${banner.getBoundingClientRect().height}px`);
+    };
+    updateHeight();
+    const observer = new ResizeObserver(updateHeight);
+    observer.observe(banner);
+    return () => {
+      observer.disconnect();
+      document.documentElement.classList.remove("cookie-banner-visible");
+      document.documentElement.style.removeProperty("--cookie-banner-height");
+    };
   }, [visible, managing]);
 
   const persist = useCallback(async (chosen: CookiePrefs) => {
@@ -145,7 +161,7 @@ const CookieConsent = () => {
     <>
       {/* z-40 keeps the banner below dialogs/modals (z-50) so it can never obscure a modal's controls. */}
       {visible && !managing && (
-      <div data-cookie-banner className="fixed inset-x-0 bottom-0 z-40 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] sm:px-4 sm:pb-[max(1rem,env(safe-area-inset-bottom))]">
+      <div ref={bannerRef} data-cookie-banner className="fixed inset-x-0 bottom-0 z-40 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] sm:px-4 sm:pb-[max(1rem,env(safe-area-inset-bottom))]">
         <div className="mx-auto max-w-4xl rounded-md border border-cream/10 bg-deep px-3 py-2.5 shadow-2xl sm:rounded-lg sm:p-5">
           <div className="flex items-center gap-2.5 craft:justify-between">
             <p className="min-w-0 flex-1 font-body text-[11px] leading-snug text-cream/90 sm:text-sm">
