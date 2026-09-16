@@ -11,14 +11,14 @@ const CARDS = [
   {
     icon: FileSignature,
     title: "Quote Properly",
-    desc: "Build clear, branded quotes that stand up next to anyone else's.",
-    href: "/pricing",
+    desc: "See how quotes, work and payments are handled inside a live project.",
+    href: "/platform-tour#quoting",
   },
   {
     icon: Radar,
     title: "Planning Alerts",
     desc: "See approved planning applications in your area before the calls start.",
-    href: "/planning-alerts",
+    href: "/planning-intelligence",
   },
   {
     icon: PanelsTopLeft,
