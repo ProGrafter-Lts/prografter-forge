@@ -1,12 +1,19 @@
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ArrowRight } from "lucide-react";
 
-import tradeDashboard from "@/assets/platform/trade-dashboard.png";
-import tradeJobs from "@/assets/platform/trade-jobs.png";
-import tradeEarnings from "@/assets/platform/trade-earnings.png";
-import homeownerOverview from "@/assets/platform/homeowner-overview.png";
-import homeownerQuotes from "@/assets/platform/homeowner-quotes.png";
-import homeownerManual from "@/assets/platform/homeowner-manual.png";
+import tradeDashboardAsset from "@/assets/platform/current/trade-dashboard.jpg.asset.json";
+import tradeJobsAsset from "@/assets/platform/current/trade-jobs.jpg.asset.json";
+import tradeEarningsAsset from "@/assets/platform/current/trade-earnings.jpg.asset.json";
+import homeownerOverviewAsset from "@/assets/platform/current/homeowner-overview.jpg.asset.json";
+import homeownerQuotesAsset from "@/assets/platform/current/homeowner-quotes.jpg.asset.json";
+import homeownerManualAsset from "@/assets/platform/current/homeowner-manual.jpg.asset.json";
+
+const tradeDashboard = tradeDashboardAsset.url;
+const tradeJobs = tradeJobsAsset.url;
+const tradeEarnings = tradeEarningsAsset.url;
+const homeownerOverview = homeownerOverviewAsset.url;
+const homeownerQuotes = homeownerQuotesAsset.url;
+const homeownerManual = homeownerManualAsset.url;
 
 const BrowserFrame = ({
   src,
@@ -21,7 +28,7 @@ const BrowserFrame = ({
 }) => (
   <div className="flex flex-col gap-3">
     <p className="font-mono text-[11px] text-cream/[0.55] text-center">
-      Illustrative preview — your dashboard fills in as real work flows through.
+      Current V1 screen — sample account details are obscured for privacy.
     </p>
     <div
       className="rounded-xl overflow-hidden border shadow-2xl"
@@ -97,28 +104,28 @@ const PlatformPreview = () => {
           </TabsList>
 
           <p className="font-body italic text-[12px] text-cream/70 mb-8 -mt-4">
-            Actual screenshots of the live platform. Dashboards populate as your jobs and quotes flow through.
+            Current V1 screens. Dashboards populate as your jobs and quotes flow through.
           </p>
 
           <TabsContent value="trades">
             <div className="grid grid-cols-1 craft:grid-cols-3 gap-8">
               <BrowserFrame
                 src={tradeDashboard}
-                alt="Trade dashboard with stats, earnings, and job matches"
+                alt="Current ProGrafter trade dashboard showing priorities and project actions"
                 url="prografter.co.uk/dashboard/trade"
-                caption="Your dashboard — stats, earnings, and new job matches at a glance."
+                caption="Your dashboard — priorities, project actions and verification records at a glance."
               />
               <BrowserFrame
                 src={tradeJobs}
-                alt="Available jobs view for trades"
+                alt="Current ProGrafter available jobs view for trades"
                 url="prografter.co.uk/dashboard/trade"
                 caption="Browse matched jobs near you and submit quotes directly."
               />
               <BrowserFrame
                 src={tradeEarnings}
-                alt="Trade earnings view"
+                alt="Current ProGrafter trade earnings and stage payments view"
                 url="prografter.co.uk/dashboard/trade"
-                caption="Track every payment — commission, what you keep, paid status."
+                caption="Track stage payments, upcoming amounts and payment history."
               />
             </div>
           </TabsContent>
@@ -127,9 +134,9 @@ const PlatformPreview = () => {
             <div className="grid grid-cols-1 craft:grid-cols-3 gap-8">
               <BrowserFrame
                 src={homeownerOverview}
-                alt="Homeowner overview with active projects and quotes"
+                alt="Current ProGrafter homeowner overview"
                 url="prografter.co.uk/dashboard/homeowner"
-                caption="See your active project status, quotes received, and quick links."
+                caption="See current project actions, quotes and the tools available to you."
               />
               <BrowserFrame
                 src={homeownerQuotes}

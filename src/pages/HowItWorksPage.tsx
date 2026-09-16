@@ -27,12 +27,14 @@ import tradeProject from "@/assets/how-it-works/trade-project.jpg";
 import ctaPlans from "@/assets/how-it-works/cta-plans.jpg";
 import completedHome from "@/assets/how-it-works/completed-home.jpg";
 import compareQuotes from "@/assets/how-it-works/compare-quotes.jpg";
-import manageProject from "@/assets/how-it-works/manage-project.jpg";
+import manageProjectAsset from "@/assets/platform/current/project-workspace.jpg.asset.json";
 import payConfidence from "@/assets/how-it-works/pay-confidence.jpg";
 import getVerified from "@/assets/how-it-works/get-verified.jpg";
 import findWork from "@/assets/how-it-works/find-work.jpg";
 import submitQuote from "@/assets/how-it-works/submit-quote.jpg";
 import tradeReputation from "@/assets/how-it-works/trade-reputation.jpg";
+
+const manageProject = manageProjectAsset.url;
 
 const HOMEOWNER_STEPS: PublicJourneyStep[] = [
   {
@@ -65,7 +67,7 @@ const HOMEOWNER_STEPS: PublicJourneyStep[] = [
     title: "Manage your project",
     description: "Track progress with daily updates, photos and a clear programme. Communication stays in one place.",
     image: manageProject,
-    alt: "Homeowner checking project progress on a phone at the build site",
+    alt: "Current ProGrafter shared project workspace showing progress and project actions",
     icon: MessageSquareText,
   },
   {

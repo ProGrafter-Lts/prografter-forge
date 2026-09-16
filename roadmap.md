@@ -10,6 +10,6 @@
 - [x] Approved mockups pass: Platform Tour, Our Checks, Advice, About restyled (presentation only)
 - [x] Final surgical QA: branded worker image, editorial receipt, compact mobile cookies, product/brand truth and responsive audit
 ## Product screenshot accuracy
-- [ ] Audit every public-facing ProGrafter product screenshot/mock-up against current V1
-- [ ] Replace obsolete visuals with equivalent current V1 screens without changing section purpose
-- [ ] Verify all public demonstrations across mobile and desktop
+- [x] Audit every public-facing ProGrafter product screenshot/mock-up against current V1
+- [x] Replace obsolete visuals with equivalent current V1 screens without changing section purpose
+- [x] Verify all public demonstrations across mobile and desktop
