@@ -2625,6 +2625,15 @@ section[class*="bg-deep"] h1, section[class*="bg-deep"] h2, section[class*="bg-d
     linear-gradient(90deg, hsl(var(--deep)) 0%, hsl(var(--deep) / .92) 42%, hsl(var(--deep) / .45) 72%, hsl(var(--deep) / .55) 100%),
     linear-gradient(0deg, hsl(var(--deep)) 2%, transparent 45%);
 }
+/* Narrow screens: the photograph sits behind the copy, so it reads as
+   atmosphere rather than competing with the headline. */
+@media (max-width: 899px) {
+  .pg-hero__image img { filter: saturate(.6) contrast(1.05) brightness(.6); }
+  .pg-hero__image::after {
+    background:
+      linear-gradient(0deg, hsl(var(--deep)) 6%, hsl(var(--deep) / .86) 45%, hsl(var(--deep) / .72) 100%);
+  }
+}
 .pg-hero__inner {
   position: relative; z-index: 2;
   width: min(100%, 1180px);
