@@ -97,7 +97,7 @@ const PricingPage = () => (
               ["Lead / contact fees", "None", "Per lead, win or lose"],
               ["Pay to rank higher", "No", "Often yes"],
               ["When you pay", "Only on completed, paid jobs", "Up front / ongoing"],
-              ["Per-job cap", "£900", "Uncapped"],
+              ["Per-job cap", COMMISSION_CAP_LABEL, "Uncapped"],
             ].map((row) => (
               <tr key={row[0]} className="border-b border-border/50">
                 <td className="py-3 pr-4 font-medium text-navy">{row[0]}</td>
