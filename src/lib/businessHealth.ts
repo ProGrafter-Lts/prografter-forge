@@ -164,9 +164,10 @@ const scoreMessages = (m: BusinessHealthInput["messages"]): number => {
 };
 
 export const computeBusinessHealth = (input: BusinessHealthInput): BusinessHealth => {
+  const verificationApproved = input.verificationStatus === "approved";
   const raw: Record<ModuleKey, number> = {
     pipeline: scorePipeline(input.pipeline),
-    tradevault: scoreTradeVault(input.vaultDocs, input.tradeType),
+    tradevault: verificationApproved ? 100 : scoreTradeVault(input.vaultDocs, input.tradeType),
     profile: clamp(input.profileStrength.percent),
     quotes: scoreQuotes(input.quotes),
     availability: scoreAvailability(input.availability),
@@ -227,7 +228,8 @@ export const computeTasks = (input: BusinessHealthInput): HealthTask[] => {
   }
 
   const vault = computeVaultSummary(input.vaultDocs, input.tradeType);
-  if (vault.missingRequired.length > 0) {
+  const verificationApproved = input.verificationStatus === "approved";
+  if (!verificationApproved && vault.missingRequired.length > 0) {
     tasks.push({
       dot: "red",
       label: `Complete TradeVault — ${vault.missingRequired.length} document${vault.missingRequired.length > 1 ? "s" : ""} outstanding`,
@@ -283,8 +285,9 @@ export interface ScoreBooster {
 export const computeBoosters = (input: BusinessHealthInput): ScoreBooster[] => {
   const boosters: ScoreBooster[] = [];
   const vault = computeVaultSummary(input.vaultDocs, input.tradeType);
+  const verificationApproved = input.verificationStatus === "approved";
 
-  if (vault.missingRequired.length > 0) {
+  if (!verificationApproved && vault.missingRequired.length > 0) {
     boosters.push({ points: 4, label: "Complete TradeVault documents", target: "tradevault" });
   }
   input.profileStrength.items.forEach((item) => {
@@ -321,7 +324,8 @@ export const buildSummarySentence = (health: BusinessHealth, input: BusinessHeal
 
   const actions: string[] = [];
   const vault = computeVaultSummary(input.vaultDocs, input.tradeType);
-  if (vault.missingRequired.length > 0) actions.push("completing your TradeVault");
+  const verificationApproved = input.verificationStatus === "approved";
+  if (!verificationApproved && vault.missingRequired.length > 0) actions.push("completing your TradeVault");
   if (input.pipeline.toContact > 0) actions.push(`following up ${input.pipeline.toContact} homeowner${input.pipeline.toContact > 1 ? "s" : ""}`);
   if (input.profileStrength.percent < 80) actions.push("finishing your profile");
   if (actions.length === 0 && weakest) actions.push(`strengthening ${weakest.label.toLowerCase()}`);
@@ -350,10 +354,11 @@ export const buildBriefing = (
 ): BriefingContent => {
   const focus: string[] = [];
   const vault = computeVaultSummary(input.vaultDocs, input.tradeType);
+  const verificationApproved = input.verificationStatus === "approved";
 
   if (input.pipeline.toContact > 0)
     focus.push(`Contact ${input.pipeline.toContact} warm homeowner lead${input.pipeline.toContact > 1 ? "s" : ""}.`);
-  if (vault.missingRequired.length > 0)
+  if (!verificationApproved && vault.missingRequired.length > 0)
     focus.push(`Complete your TradeVault — ${vault.missingRequired.length} document${vault.missingRequired.length > 1 ? "s" : ""} outstanding.`);
   if (input.profileStrength.percent < 80)
     focus.push(`Finish your profile (currently ${input.profileStrength.percent}%).`);
@@ -368,7 +373,7 @@ export const buildBriefing = (
   let singleAction = "Chase a new opportunity in Find Work.";
   if (input.pipeline.toContact > 0)
     singleAction = "Contact your warmest homeowner lead — a fast reply is the single biggest driver of won work.";
-  else if (vault.missingRequired.length > 0)
+  else if (!verificationApproved && vault.missingRequired.length > 0)
     singleAction = "Complete your TradeVault to unlock full verification and renewal reminders.";
   else if (input.profileStrength.percent < 80)
     singleAction = "Finish your profile — complete profiles receive noticeably more homeowner engagement.";

@@ -116,8 +116,7 @@ const CommandCentre = ({ tradeId, jobMatchCount, onNavigate }: Props) => {
       });
 
       const verification = computeDashboardVerification(vaultDocs, {
-        manuallyVerified:
-          t.verified || t.verification_status === "approved" || t.verification_status === "verified",
+        manuallyVerified: t.verification_status === "approved",
         verifiedAt: t.verified_on_prografter_at,
       }, t.trade_type);
 

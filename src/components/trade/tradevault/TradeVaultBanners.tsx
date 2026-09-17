@@ -14,6 +14,7 @@ const TradeVaultBanners = ({ tradeId, onOpenVault }: Props) => {
   const [docs, setDocs] = useState<VaultDocument[] | null>(null);
   const [legacyVerified, setLegacyVerified] = useState(false);
   const [tradeType, setTradeType] = useState<string | null>(null);
+  const [verificationStatus, setVerificationStatus] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -33,13 +34,15 @@ const TradeVaultBanners = ({ tradeId, onOpenVault }: Props) => {
       if (cancelled) return;
       setDocs((docRes.data as VaultDocument[]) ?? []);
       const t = tradeRes.data as any;
-      setLegacyVerified(!!(t && (t.verified || t.verification_status === "approved")));
+      setLegacyVerified(!!(t && t.verification_status === "approved"));
       setTradeType(t?.trade_type ?? null);
+      setVerificationStatus(t?.verification_status ?? null);
     })();
     return () => { cancelled = true; };
   }, [tradeId]);
 
   if (!docs) return null;
+  if (verificationStatus === "approved") return null;
   const summary = computeVaultSummary(docs, tradeType);
 
   const banners: { key: string; tone: "red" | "amber"; icon: any; text: string; button: string }[] = [];
@@ -59,7 +62,9 @@ const TradeVaultBanners = ({ tradeId, onOpenVault }: Props) => {
       key: "expiring",
       tone: "amber",
       icon: Clock,
-      text: `Action required: Your ${config.label} expires in ${days} days. Upload your renewal to keep your profile verified.`,
+      text: config.required
+        ? `Action required: Your ${config.label} expires in ${days} days. Upload your renewal to keep your profile verified.`
+        : `TradeVault reminder: Your ${config.label} expires in ${days} days.`,
       button: "Update Document",
     });
   } else if (summary.missingRequired.length > 0) {
@@ -74,7 +79,7 @@ const TradeVaultBanners = ({ tradeId, onOpenVault }: Props) => {
       icon: AlertTriangle,
       text: legacyVerified
         ? `You're verified — but ${listed}${more} ${names.length === 1 ? "is" : "are"} not in TradeVault yet. Upload ${names.length === 1 ? "a copy" : "copies"} so your record stays complete and renewal reminders can work.`
-        : `Action required: ${summary.requiredUploaded} of ${summary.requiredTotal} required documents in place. Still needed: ${listed}${more}.`,
+        : `Action required: ${summary.requiredUploaded} of ${summary.requiredTotal} required uploaded. Still needed: ${listed}${more}.`,
       button: names.length === 1 ? `Upload ${names[0]}` : "Upload documents",
     });
   }

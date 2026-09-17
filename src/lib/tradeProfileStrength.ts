@@ -158,10 +158,11 @@ export interface PriorityInput {
 export const computePriorities = (input: PriorityInput): Priority[] => {
   const priorities: Priority[] = [];
   const summary = computeVaultSummary(input.vaultDocs, input.tradeType);
-  const hasVaultDocs = input.vaultDocs.some((d) => d.is_current && d.file_url);
 
   // 1. Legacy manual verified with no TradeVault docs → migration.
-  if (input.verification.migrationRequired) {
+  if (input.verification.status === "Verified" || input.verification.tradeVaultStatus === "Verified") {
+    // Admin-approved trades should not see missing-document verification prompts.
+  } else if (input.verification.migrationRequired) {
     priorities.push({
       key: "vault-migrate",
       title: "Move your documents into TradeVault",
