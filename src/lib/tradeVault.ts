@@ -33,6 +33,25 @@ export interface VaultDocTypeConfig {
   applicableTradeTypes?: string[];
 }
 
+export const REQUIRED_VAULT_DOC_KEYS = [
+  "public_liability",
+  "proof_of_identity",
+  "trade_qualifications",
+  "company_details",
+] as const;
+
+export const ADDITIONAL_VAULT_DOC_KEYS = [
+  "employers_liability",
+  "professional_indemnity",
+  "tool_insurance",
+  "van_insurance",
+  "cscs_card",
+  "mcs",
+  "trustmark",
+  "pas_accreditation",
+  "other_accreditation",
+] as const;
+
 // Normalise trade-type strings so "Painter & Decorator" and "painterdecorator" match.
 export const normalizeTradeType = (tradeType?: string | null): string =>
   (tradeType ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -77,8 +96,8 @@ export const VAULT_DOC_TYPES: VaultDocTypeConfig[] = [
   { key: "trade_qualifications", label: "Trade qualifications / certificates", required: true, hasProvider: true, hasPolicy: true, hasExpiry: true },
   { key: "company_details", label: "Company or sole trader details", required: true, hasPolicy: true },
   // Optional but important — most trades
+  { key: "employers_liability", label: "Employers' liability insurance", required: false, hasProvider: true, hasCover: true, hasPolicy: true, hasExpiry: true },
   { key: "professional_indemnity", label: "Professional indemnity insurance", required: false, hasProvider: true, hasCover: true, hasPolicy: true, hasExpiry: true },
-  { key: "employers_liability", label: "Employer's liability insurance", required: false, hasProvider: true, hasCover: true, hasPolicy: true, hasExpiry: true },
   { key: "tool_insurance", label: "Tool insurance", required: false, hasProvider: true, hasCover: true, hasPolicy: true, hasExpiry: true },
   { key: "van_insurance", label: "Van insurance", required: false, hasProvider: true, hasCover: true, hasPolicy: true, hasExpiry: true },
   // Trade-specific optional credentials
@@ -116,6 +135,11 @@ export const VAULT_DOC_TYPES: VaultDocTypeConfig[] = [
 
 export const getDocTypeConfig = (key: string): VaultDocTypeConfig | undefined =>
   VAULT_DOC_TYPES.find((d) => d.key === key);
+
+export const getVaultDocTypesByKeys = (keys: readonly string[]): VaultDocTypeConfig[] =>
+  keys
+    .map((key) => getDocTypeConfig(key))
+    .filter((cfg): cfg is VaultDocTypeConfig => Boolean(cfg));
 
 export const getDocLabel = (key: string): string =>
   getDocTypeConfig(key)?.label ?? key;
@@ -367,6 +391,15 @@ export const computeDashboardVerification = (
   const summary = computeVaultSummary(docs, tradeType);
   const hasAnyDocs = docs.some((d) => d.is_current && d.file_url);
   const requiredComplete = summary.missingRequired.length === 0;
+
+  if (ctx.manuallyVerified) {
+    return {
+      status: "Verified",
+      tradeVaultStatus: "Verified",
+      inGrace: false,
+      migrationRequired: false,
+    };
+  }
 
   // Legacy manual verification with nothing in TradeVault yet → migration path.
   if (ctx.manuallyVerified && !hasAnyDocs) {

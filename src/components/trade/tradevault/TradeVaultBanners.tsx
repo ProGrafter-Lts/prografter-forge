@@ -14,6 +14,7 @@ const TradeVaultBanners = ({ tradeId, onOpenVault }: Props) => {
   const [docs, setDocs] = useState<VaultDocument[] | null>(null);
   const [legacyVerified, setLegacyVerified] = useState(false);
   const [tradeType, setTradeType] = useState<string | null>(null);
+  const [verificationStatus, setVerificationStatus] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -33,13 +34,15 @@ const TradeVaultBanners = ({ tradeId, onOpenVault }: Props) => {
       if (cancelled) return;
       setDocs((docRes.data as VaultDocument[]) ?? []);
       const t = tradeRes.data as any;
-      setLegacyVerified(!!(t && (t.verified || t.verification_status === "approved")));
+      setLegacyVerified(!!(t && t.verification_status === "approved"));
       setTradeType(t?.trade_type ?? null);
+      setVerificationStatus(t?.verification_status ?? null);
     })();
     return () => { cancelled = true; };
   }, [tradeId]);
 
   if (!docs) return null;
+  if (verificationStatus === "approved") return null;
   const summary = computeVaultSummary(docs, tradeType);
 
   const banners: { key: string; tone: "red" | "amber"; icon: any; text: string; button: string }[] = [];

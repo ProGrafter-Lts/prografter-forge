@@ -97,7 +97,7 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
           .from("contracts")
           .select("job_id, total_value_incl_vat_pence, total_value_excl_vat_pence")
           .eq("trade_id", tradeId),
-        supabase.from("trades").select("trade_type").eq("id", tradeId).maybeSingle(),
+        supabase.from("trades").select("trade_type, verification_status").eq("id", tradeId).maybeSingle(),
       ]);
 
       const jobIds = (contractsRes.data || []).map((c: any) => c.job_id).filter(Boolean);
@@ -143,7 +143,8 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
       );
 
       const vault = computeVaultSummary((vaultRes.data as VaultDocument[]) || [], tradeRes.data?.trade_type);
-      const docsNeeded = vault.missingRequired.length + vault.expiredRequiredDocs.length;
+      const verificationApproved = tradeRes.data?.verification_status === "approved";
+      const docsNeeded = verificationApproved ? 0 : vault.missingRequired.length + vault.expiredRequiredDocs.length;
 
       const nextShortlist = shortlist
         .map((r: any) => r.next_action_date)
@@ -190,7 +191,9 @@ const DashboardSummary = ({ tradeId, onOpenView }: Props) => {
         newMatches: unactioned.length,
         matchesValue,
         docsNeeded,
-        docsLabel: `${vault.requiredUploaded} of ${vault.requiredTotal} required documents in place`,
+        docsLabel: verificationApproved
+          ? "Verification approved"
+          : `${vault.requiredUploaded} of ${vault.requiredTotal} required uploaded`,
         nextDate,
         overdueFollowUps,
         activeProjects,

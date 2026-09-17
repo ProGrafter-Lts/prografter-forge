@@ -8,7 +8,8 @@ import {
 import {
   VAULT_DOC_TYPES, VaultDocument, VaultDocTypeConfig, VAULT_DEFAULT_BUCKET,
   computeDisplayStatus, computeVaultSummary, STATUS_META, TONE_CLASSES,
-  daysUntil, getDocLabel, computeDashboardVerification, isDocTypeApplicableToTrade,
+  daysUntil, computeDashboardVerification, getVaultDocTypesByKeys,
+  REQUIRED_VAULT_DOC_KEYS, ADDITIONAL_VAULT_DOC_KEYS,
 } from "@/lib/tradeVault";
 
 import VaultDocumentDialog from "./VaultDocumentDialog";
@@ -73,7 +74,7 @@ const TradeVaultSection = ({ tradeId }: Props) => {
     setDocs((docRes.data as VaultDocument[]) ?? []);
     const t = tradeRes.data as any;
     setManualCtx({
-      manuallyVerified: !!(t && (t.verified || t.verification_status === "approved" || t.verification_status === "verified")),
+      manuallyVerified: !!(t && t.verification_status === "approved"),
       verifiedAt: t?.verified_on_prografter_at ?? null,
       tradeType: t?.trade_type ?? null,
     });
@@ -114,14 +115,13 @@ const TradeVaultSection = ({ tradeId }: Props) => {
         <div className="min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="font-medium text-foreground">{cfg.label}</span>
-            {cfg.required && <span className="text-[10px] font-mono uppercase text-muted-foreground border border-border rounded px-1.5 py-0.5">Required</span>}
             <StatusBadge status={status} required={cfg.required} />
           </div>
           <div className="text-xs text-muted-foreground mt-1 space-x-3">
-            {doc?.legacy_source && (
+            {cfg.required && doc?.legacy_source && (
               <span className="text-amber-600">Carried over from your original verification</span>
             )}
-            {status === "legacy_verified" && (
+            {cfg.required && status === "legacy_verified" && (
               <span>Approved during your manual verification — please upload a copy so renewal reminders can work.</span>
             )}
             {doc?.provider_name && <span>{doc.provider_name}</span>}
@@ -158,14 +158,8 @@ const TradeVaultSection = ({ tradeId }: Props) => {
   }
 
   const applicableTypes = VAULT_DOC_TYPES.filter((d) => isDocTypeApplicableToTrade(d, manualCtx.tradeType));
-  const isCompleted = (cfg: VaultDocTypeConfig) => {
-    const s = computeDisplayStatus(currentByType.get(cfg.key), cfg.required, manualCtx.manuallyVerified);
-    return s === "approved" || s === "expiring_soon";
-  };
-  const completedTypes = applicableTypes.filter(isCompleted);
-  const outstandingTypes = applicableTypes.filter((d) => !isCompleted(d));
-  const requiredTypes = outstandingTypes.filter((d) => d.required);
-  const optionalTypes = outstandingTypes.filter((d) => !d.required);
+  const requiredTypes = getVaultDocTypesByKeys(REQUIRED_VAULT_DOC_KEYS);
+  const additionalTypes = getVaultDocTypesByKeys(ADDITIONAL_VAULT_DOC_KEYS);
 
   return (
     <div className="space-y-6">
@@ -197,7 +191,7 @@ const TradeVaultSection = ({ tradeId }: Props) => {
       {/* Summary cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <SummaryCard icon={ShieldCheck} label="Verification Status" value={dashVerification.status} tone={verificationTone} />
-        <SummaryCard icon={FileText} label="Required Documents" value={dashVerification.migrationRequired ? "Migration required" : `${summary.requiredUploaded} of ${summary.requiredTotal} uploaded`} tone={dashVerification.migrationRequired ? "amber" : summary.requiredUploaded === summary.requiredTotal ? "green" : "amber"} />
+        <SummaryCard icon={FileText} label="Required Documents" value={dashVerification.migrationRequired ? "Migration required" : `${summary.requiredUploaded} of ${summary.requiredTotal} required uploaded`} tone={dashVerification.migrationRequired ? "amber" : summary.requiredUploaded === summary.requiredTotal ? "green" : "amber"} />
         <SummaryCard icon={Clock} label="Expiring Soon" value={`${summary.expiringSoon} within 30 days`} tone={summary.expiringSoon > 0 ? "amber" : "grey"} />
         <SummaryCard icon={AlertTriangle} label="Expired Documents" value={`${summary.expired} expired`} tone={summary.expired > 0 ? "red" : "grey"} />
       </div>
@@ -218,43 +212,21 @@ const TradeVaultSection = ({ tradeId }: Props) => {
         </div>
       )}
 
-      {/* Completed documents — surfaced first so progress is obvious */}
-      {completedTypes.length > 0 && (
-        <div className="rounded-2xl border-2 border-emerald-500/40 bg-emerald-500/5 p-4 space-y-3">
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-emerald-600" />
-            <h3 className="font-mono text-sm uppercase tracking-wide text-emerald-700">
-              Completed · {completedTypes.length} approved
-            </h3>
-          </div>
-          {completedTypes.map(renderDocRow)}
+      <section className="space-y-3">
+        <div>
+          <h3 className="font-mono text-sm uppercase tracking-wide text-muted-foreground">REQUIRED FOR VERIFICATION</h3>
+          <p className="text-sm text-muted-foreground mt-1">Every trade on ProGrafter must have these.</p>
         </div>
-      )}
+        {requiredTypes.map(renderDocRow)}
+      </section>
 
-      {/* Required documents */}
-      {requiredTypes.length > 0 && (
-        <div className="space-y-3">
-          <h3 className="font-mono text-sm uppercase tracking-wide text-muted-foreground">Still required for verification</h3>
-          {requiredTypes.map(renderDocRow)}
+      <section className="space-y-3">
+        <div>
+          <h3 className="font-mono text-sm uppercase tracking-wide text-muted-foreground">ADDITIONAL DOCUMENTS</h3>
+          <p className="text-sm text-muted-foreground mt-1">Store anything else here. We'll remind you 30 days before it expires.</p>
         </div>
-      )}
-
-      {/* Optional documents */}
-      {optionalTypes.length > 0 && (
-        <div className="space-y-3">
-          <h3 className="font-mono text-sm uppercase tracking-wide text-muted-foreground">Optional but important</h3>
-          {optionalTypes.map(renderDocRow)}
-        </div>
-      )}
-
-      {/* Future-proofing placeholders */}
-      <div className="space-y-3">
-        <h3 className="font-mono text-sm uppercase tracking-wide text-muted-foreground">Coming soon</h3>
-        <ComingSoon label="Request renewal quotes from selected trade insurance providers" />
-        <ComingSoon label="Receipt storage" />
-        <ComingSoon label="Accounting export" />
-        <ComingSoon label="Warranty documents" />
-      </div>
+        {additionalTypes.map(renderDocRow)}
+      </section>
 
       {dialogConfig && (
         <VaultDocumentDialog
