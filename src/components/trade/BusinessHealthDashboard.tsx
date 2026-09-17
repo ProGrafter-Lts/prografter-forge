@@ -313,13 +313,18 @@ const BusinessHealthDashboard = ({
   const toneHex = TONE_HEX[health.tone];
 
   const vault = computeVaultSummary(input.vaultDocs, input.tradeType);
+  const verificationApproved = input.verificationStatus === "approved";
   const pendingAmount = allQuotes
     .filter((q) => q.status === "pending")
     .reduce((s, q) => s + Number(q.amount || 0), 0);
   const avgQuote = input.quotes.submitted ? input.quotes.totalValue / input.quotes.submitted : 0;
   const profileImprovements = input.profileStrength.items.filter((i) => i.state !== "complete").length;
   const vaultPercent =
-    vault.requiredTotal > 0 ? Math.round((vault.requiredUploaded / vault.requiredTotal) * 100) : 100;
+    verificationApproved
+      ? 100
+      : vault.requiredTotal > 0
+        ? Math.round((vault.requiredUploaded / vault.requiredTotal) * 100)
+        : 100;
 
   // ── Business Snapshot cards ──────────────────────────────────────────
   const snapshot = [
@@ -620,9 +625,9 @@ const BusinessHealthDashboard = ({
           ) : (
             <>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
-                <Metric label="Status" value={vault.verificationStatus} />
+                <Metric label="Status" value={verificationApproved ? "Verified" : vault.verificationStatus} />
                 <Metric label="Complete" value={`${vaultPercent}%`} />
-                <Metric label="Docs remaining" value={vault.missingRequired.length} />
+                <Metric label="Docs remaining" value={verificationApproved ? 0 : vault.missingRequired.length} />
                 <Metric label="Expiring soon" value={vault.expiringSoon} />
               </div>
               <div className="h-2 rounded-full bg-white/10 overflow-hidden mb-4">

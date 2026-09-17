@@ -77,7 +77,7 @@ const TradeVaultBanners = ({ tradeId, onOpenVault }: Props) => {
       icon: AlertTriangle,
       text: legacyVerified
         ? `You're verified — but ${listed}${more} ${names.length === 1 ? "is" : "are"} not in TradeVault yet. Upload ${names.length === 1 ? "a copy" : "copies"} so your record stays complete and renewal reminders can work.`
-        : `Action required: ${summary.requiredUploaded} of ${summary.requiredTotal} required documents in place. Still needed: ${listed}${more}.`,
+        : `Action required: ${summary.requiredUploaded} of ${summary.requiredTotal} required uploaded. Still needed: ${listed}${more}.`,
       button: names.length === 1 ? `Upload ${names[0]}` : "Upload documents",
     });
   }
