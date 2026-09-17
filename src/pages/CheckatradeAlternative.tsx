@@ -19,7 +19,7 @@ const comparisonRows = [
   { feature: "Commission", pg: `${COMMISSION_RATE_LABEL} on completed jobs only`, ct: "None — but you've already paid the membership" },
   { feature: "Lead exclusivity", pg: "Up to three suitable trades are invited where coverage allows", ct: "Shared with multiple trades" },
   { feature: "Variation sign-off", pg: "Built-in homeowner approval flow", ct: "No tooling — handled off-platform" },
-  { feature: "Project agreement", pg: "Written contract and documented variation approvals for accepted platform work", ct: "No contract tooling provided", ctBad: true },
+  { feature: "Project agreement", pg: "Accepted quote details and documented variation approvals; contract signing is not yet live", ct: "No contract tooling provided", ctBad: true },
   { feature: "Milestone records", pg: "Stage amounts, evidence, approvals and payment status kept with the project", ct: "Payment handled off-platform", ctBad: true },
   { feature: "Dispute mediation", pg: "ProGrafter mediates with full documented evidence trail", ct: "Disputes handled between trade and homeowner directly", ctBad: true },
   { feature: "Verification process", pg: "Identity, insurance, competence, business details and references or regulated registration, as applicable", ct: "ID and document checks, paid tier" },
@@ -93,7 +93,7 @@ const CheckatradeAlternative = () => {
               </Link>
             </Button>
             <Button asChild size="lg" variant="outline" className="bg-transparent border-2 border-cream text-cream hover:bg-cream hover:text-navy font-mono uppercase tracking-wider">
-              <Link to="/#pricing">See the numbers</Link>
+              <Link to="/pricing">See the numbers</Link>
             </Button>
           </div>
         </div>
@@ -152,7 +152,7 @@ const CheckatradeAlternative = () => {
             </div>
           </div>
           <p className="font-body text-cream/70 mt-10 max-w-3xl text-lg leading-relaxed">
-            Want to see how that maps to a real job? <Link to="/quote-checker" className="text-teal underline">Try the Quote Checker →</Link> or read the <Link to="/#pricing" className="text-teal underline">Honest Numbers section</Link>.
+            Want to see how that maps to a real job? <Link to="/quote-checker" className="text-teal underline">Try the Quote Checker →</Link> or read the <Link to="/pricing" className="text-teal underline">Pricing page</Link>.
           </p>
         </div>
       </section>

@@ -335,7 +335,7 @@ const About = () => {
               size="lg"
             >
               <Link to="/register/trade">
-                Join ProGrafter <ArrowRight className="ml-1" />
+                Apply to Join ProGrafter <ArrowRight className="ml-1" />
               </Link>
             </Button>
             <p className="font-mono text-xs text-cream/55 uppercase tracking-widest mt-10">

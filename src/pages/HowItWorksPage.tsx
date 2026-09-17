@@ -263,13 +263,13 @@ const HowItWorksPage = () => {
             <div>
               <p className="hiw-eyebrow">Ready to get started?</p>
               <h2>Let’s build<br /><span>a better way.</span></h2>
-              <p>Whether you’re a homeowner planning a project or a trade looking for quality work, ProGrafter gives you the tools, trust and support to make it happen.</p>
+              <p>Whether you’re a homeowner planning a project or a trade applying for suitable work, ProGrafter provides reviewed briefs, verified trade profiles and shared project records.</p>
               <div className="hiw-final-actions">
                 <Button asChild size="lg" className="hiw-primary-cta">
                   <Link to="/post-job-brief">Post a project <ArrowRight /></Link>
                 </Button>
                 <Button asChild variant="outline" size="lg" className="hiw-secondary-cta">
-                  <Link to="/signup/trade">Join as a trade <ArrowRight /></Link>
+                  <Link to="/signup/trade">Apply to join <ArrowRight /></Link>
                 </Button>
               </div>
             </div>
