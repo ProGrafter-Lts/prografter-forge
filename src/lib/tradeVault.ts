@@ -316,7 +316,10 @@ export const computeVaultSummary = (
 
   // Overall verification status
   let verificationStatus: VaultSummary["verificationStatus"] = "Not Started";
-  const anyUploaded = docs.some((d) => d.is_current && d.file_url);
+  const anyRequiredUploaded = requiredTypes.some((cfg) => {
+    const doc = currentByType.get(cfg.key);
+    return Boolean(doc?.file_url);
+  });
 
   const requiredApprovedAndValid = requiredTypes.every((cfg) => {
     const doc = currentByType.get(cfg.key);
@@ -326,9 +329,9 @@ export const computeVaultSummary = (
 
   if (expiredRequiredDocs.length > 0) {
     verificationStatus = "Verification Paused";
-  } else if (missingRequired.length > 0 && anyUploaded) {
+  } else if (missingRequired.length > 0 && anyRequiredUploaded) {
     verificationStatus = "Action Required";
-  } else if (!anyUploaded) {
+  } else if (!anyRequiredUploaded) {
     verificationStatus = "Not Started";
   } else if (requiredApprovedAndValid) {
     verificationStatus = "Verified";
