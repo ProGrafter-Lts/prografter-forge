@@ -27,8 +27,8 @@ const comparisonRows = [
 ];
 
 const faqs = [
-  { q: "Is ProGrafter actually free?", a: "There is no subscription to join, get matched, quote, or get paid — ever. We only earn commission when you complete a job through the platform. Optional paid tools such as Planning Hub are separate and opt-in." },
-  { q: "How do I get verified?", a: "Upload photo ID, your public liability insurance certificate and any trade-specific qualifications (Gas Safe, NICEIC, etc.). Our team reviews submissions and you'll typically be live within 5–7 days." },
+  { q: "Is ProGrafter actually free?", a: "There is no subscription to apply, get matched, quote, or get paid — ever. We only earn commission when you complete a job through the platform. Optional paid tools are separate and opt-in." },
+  { q: "How do I get verified?", a: "Submit photo ID, public liability insurance details and the evidence relevant to your trade route, such as qualifications, regulated registration, references or portfolio work. Our team reviews each application before approval." },
   { q: "What if I don't get any jobs?", a: `You pay nothing. There is no minimum spend, no \"visibility\" upgrade and no penalty for quiet months. Quoting is free, and ${COMMISSION_RATE_LABEL} only applies to jobs that actually complete.` },
   { q: "How is commission calculated?", a: `${COMMISSION_RATE_LABEL} of the agreed job value, capped at ${COMMISSION_CAP_LABEL} per job. See the Pricing page for the definitive commercial terms.` },
   { q: "What happens with variations?", a: "Variations go through an in-platform approval flow: you log the change, the homeowner approves, and the agreed value updates. Commission is calculated on the final, signed-off value — no awkward conversations after the fact." },
