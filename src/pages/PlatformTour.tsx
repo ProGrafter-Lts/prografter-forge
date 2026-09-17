@@ -157,8 +157,11 @@ const PlatformTour = () => {
         </div>
         <div className="mt-9 flex flex-col gap-3 sm:flex-row">
           <Button asChild variant="cta" size="lg"><Link to="/signup/trade">Apply to join <ArrowRight /></Link></Button>
-          <Button asChild variant="outline" size="lg" className="border-cream/30 bg-transparent text-cream hover:border-teal hover:bg-transparent hover:text-teal"><Link to="/pricing">See transparent pricing</Link></Button>
+          <Button asChild variant="outline" size="lg" className="border-cream/30 bg-transparent text-cream hover:border-teal hover:bg-transparent hover:text-teal"><Link to="/pricing">See marketplace pricing</Link></Button>
         </div>
+        <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.14em] text-cream/55">
+          Pricing covers the core marketplace terms. Optional tools are not priced yet.
+        </p>
       </div>
     </section>
   </AppShell>

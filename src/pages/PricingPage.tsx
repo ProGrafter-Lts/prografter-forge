@@ -31,7 +31,7 @@ const FAQ = [
   { q: "How much does it cost homeowners?", a: "Homeowners post jobs for free and are matched with verified trades at no cost. ProGrafter offers the free Project Cost Guide, with a paid AI Quote Checker report for detailed reviews of a specific quote." },
   { q: "When exactly does commission apply?", a: "Only after a job is marked complete and the trade has been paid. There's nothing to pay up front and nothing to pay if a job doesn't go ahead." },
   { q: "Are there any hidden fees or rank-boosting charges?", a: "No. There's no pay-to-play, no boosted rankings and no surprise charges. One fair, capped commission — that's it." },
-  { q: "Are optional tools included?", a: "Core matching and project delivery do not require a subscription. Optional tools, including Planning Hub, are separate and clearly priced before you opt in." },
+  { q: "Are optional tools included?", a: "Core matching and project delivery do not require a subscription. Optional tools are separate and opt-in. No optional tool or subscription prices are published yet — this page covers the core marketplace terms only, and any tool price will be shown before you opt in." },
 ];
 
 const PriceCard = ({
