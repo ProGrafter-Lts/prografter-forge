@@ -33,8 +33,8 @@ async def main():
             plan = [("My Projects", "ho-overview", 240), ("Quotes & Checks", "ho-quotes", 820),
                     ("Site Diary", "ho-diary", 240), ("Homeowner Manual", "ho-manual", 240)]
         else:
-            plan = [("Dashboard", "tr-dashboard", 240), ("Available Jobs", "tr-jobs", 240),
-                    ("Active Projects", "tr-projects", 240), ("Earnings", "tr-earnings", 240)]
+            plan = [("Find Work", "tr-jobs", 420), ("Projects", "tr-projects", 420),
+                    ("Quotes", "tr-quotes", 420)]
         for label, name, y in plan:
             try:
                 await page.get_by_role("button", name=label, exact=True).first.click(timeout=5000)
