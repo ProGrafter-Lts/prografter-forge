@@ -33,7 +33,7 @@ async def main():
             plan = [("My Projects", "ho-overview", 240), ("Quotes & Checks", "ho-quotes", 820),
                     ("Site Diary", "ho-diary", 240), ("Homeowner Manual", "ho-manual", 240)]
         else:
-            plan = [("Find Work", "tr-jobs", 420), ("Projects", "tr-projects", 420),
+            plan = [("Find Work", "tr-jobs", 420), ("Projects", "tr-projects", 780),
                     ("Quotes", "tr-quotes", 420)]
         for label, name, y in plan:
             try:
