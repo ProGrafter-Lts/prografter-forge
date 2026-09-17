@@ -17,8 +17,8 @@ const PILLARS = [
   },
   {
     icon: "◎",
-    title: "Homeowner Verification",
-    desc: "Real, verified homeowners with genuine projects. Trades quote on real work, never tyre-kickers or recycled leads.",
+    title: "Homeowner Project Checks",
+    desc: "Contact and project details are recorded, and each brief is reviewed before suitable trades are invited.",
   },
   {
     icon: "⇄",
@@ -76,7 +76,7 @@ const TrustCentre = () => {
     <div className="trust-centre-page min-h-screen">
       <SEO
         title="Trust Centre — How ProGrafter Keeps Construction Honest"
-        description="See exactly how ProGrafter builds trust: 5-step trade verification, verified homeowners, two-way reviews, human-reviewed briefs, fair pricing, AI transparency, privacy and dispute resolution."
+        description="See how ProGrafter builds trust through trade verification, reviewed homeowner briefs, two-way reviews, fair pricing, privacy and documented dispute handling."
         path="/trust"
       />
       <Navbar />

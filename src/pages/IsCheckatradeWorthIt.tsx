@@ -4,6 +4,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Check, X } from "lucide-react";
+import { COMMISSION_CAP_LABEL, COMMISSION_RATE_LABEL } from "@/lib/pricingTerms";
 
 const tiers = [
   { tier: "Approved", price: "£30/mo", annual: "£360/yr", note: "Listing only — leads still cost extra." },
@@ -208,7 +209,7 @@ const IsCheckatradeWorthIt = () => {
             ProGrafter, in one paragraph.
           </h2>
           <p className="font-body text-cream/70 text-lg leading-relaxed mb-6">
-            Free to register. Free to quote. <strong className="text-cream">7.5% commission on completion only, capped at £900 per job.</strong> Built by an electrician of 20 years for trades who'd rather pay when the work lands than pay every month either way.
+             Free to apply and quote once verified. <strong className="text-cream">{COMMISSION_RATE_LABEL} commission on completion only, capped at {COMMISSION_CAP_LABEL} per job.</strong> Built by an electrician of 20 years for trades who'd rather pay when the work lands than pay every month either way.
           </p>
           <p className="font-body text-cream/70 text-lg leading-relaxed">
             See it laid out in <Link to="/#pricing" className="text-teal underline">Honest Numbers</Link>, sense-check a real quote with the <Link to="/quote-checker" className="text-teal underline">Quote Checker</Link>, or read the <Link to="/checkatrade-alternative" className="text-teal underline">side-by-side comparison</Link>.
@@ -220,14 +221,14 @@ const IsCheckatradeWorthIt = () => {
       <section className="px-6 py-24 border-t border-cream/10">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="font-heading text-cream text-[36px] craft:text-[72px] leading-[1] mb-6">
-            Register Free —<br /><span className="text-teal">No Platform Subscription.</span>
+            Apply Free —<br /><span className="text-teal">No Platform Subscription.</span>
           </h2>
           <p className="font-body text-cream/70 max-w-xl mx-auto mb-10 text-lg">
-            No subscription to join, quote, or get paid — ever. Optional paid tools are separate add-ons. Commission is capped at £900.
+            No subscription to join, quote, or get paid — ever. Optional paid tools are separate add-ons. Commission is capped at {COMMISSION_CAP_LABEL}.
           </p>
           <Button asChild variant="cta" size="lg">
             <Link to="/register/trade">
-              Register Free <ArrowRight className="ml-1" />
+              Apply to Join <ArrowRight className="ml-1" />
             </Link>
           </Button>
         </div>

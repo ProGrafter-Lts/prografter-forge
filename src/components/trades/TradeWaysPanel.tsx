@@ -5,7 +5,7 @@ const CARDS = [
   {
     icon: Hammer,
     title: "Win Local Work",
-    desc: "Genuine projects from verified homeowners near you, sent as they land.",
+    desc: "Reviewed project briefs near you, released to suitable trades as coverage allows.",
     href: "/signup/trade",
   },
   {

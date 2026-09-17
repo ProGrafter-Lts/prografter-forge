@@ -51,7 +51,7 @@ const VerificationStandards = () => {
 
         {/* Heading */}
         <h2 className="font-heading text-cream text-[42px] craft:text-[56px] leading-none mb-12 fade-up">
-          Five checks. Every trade. No exceptions.
+          Five areas checked. Applied to each trade.
         </h2>
 
         {/* Five-check grid */}
