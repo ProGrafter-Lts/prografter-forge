@@ -9,7 +9,7 @@ const comparisons = [
   },
   {
     others: "A directory — then they walk away",
-    prografter: "A written contract, staged payments held safe, and a Homeowner Manual at the end.",
+    prografter: "A written contract, documented milestones, and a Homeowner Manual at the end.",
   },
   {
     others: "Price promises, with nothing protecting the customer behind them",

@@ -6,7 +6,7 @@ import { COMMISSION_CAP_SENTENCE, COMMISSION_RATE_LABEL } from "@/lib/pricingTer
 const INDICATORS = [
   { icon: Wallet, title: "Commission Only", desc: `${COMMISSION_RATE_LABEL} on completed paid work, ${COMMISSION_CAP_SENTENCE}.` },
   { icon: MapPin, title: "Focused Locally", desc: "East Midlands density first." },
-  { icon: BadgeCheck, title: "Real Homeowners", desc: "Every customer is verified." },
+  { icon: BadgeCheck, title: "Recorded Enquiries", desc: "Every brief is tied to contact details and reviewed before release." },
 ];
 
 const TradeHero = () => {
@@ -53,7 +53,7 @@ const TradeHero = () => {
           </h1>
 
           <p className="font-body text-cream/85 text-base craft:text-lg leading-relaxed max-w-xl mb-8">
-            Spend less time paying for unsuitable leads. Join and match for free, then pay{" "}
+            Spend less time paying for unsuitable leads. Apply and get matched without a subscription, then pay{" "}
             {COMMISSION_RATE_LABEL} only when a completed job has been paid, {COMMISSION_CAP_SENTENCE}.
           </p>
 
@@ -62,7 +62,7 @@ const TradeHero = () => {
               to="/signup/trade"
               className="inline-flex items-center justify-center gap-3 bg-teal text-cream font-body text-sm font-semibold uppercase tracking-wide px-7 py-4 rounded-xl hover:bg-teal-hover transition-all shadow-lg shadow-teal/30 hover:-translate-y-0.5"
             >
-              Join Free
+              Apply To Join
               <ArrowRight className="w-4 h-4" />
             </Link>
             <Link

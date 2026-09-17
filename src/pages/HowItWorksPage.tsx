@@ -70,8 +70,8 @@ const HOMEOWNER_STEPS: PublicJourneyStep[] = [
   },
   {
     num: "05",
-    title: "Pay with confidence",
-    description: "Fund work in agreed stages. You stay informed and approve each completed milestone before payment moves on.",
+    title: "Track agreed stages",
+    description: "Keep milestone amounts, progress evidence and your completion decisions together in the project record.",
     image: payConfidence,
     alt: "Homeowner approving a stage payment beside project plans",
     icon: WalletCards,

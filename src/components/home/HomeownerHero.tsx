@@ -61,8 +61,8 @@ const HomeownerHero = () => {
           </h1>
 
           <p className="font-body text-cream/85 text-base craft:text-lg leading-relaxed max-w-xl mb-8">
-            Compare transparent quotes, meet up to three verified trades and keep progress, photos,
-            decisions and staged payments together. Not an open directory.
+            Compare transparent quotes, request up to three verified trade matches and keep progress,
+            photos, decisions and milestones together. Not an open directory.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 mb-5">
@@ -77,7 +77,7 @@ const HomeownerHero = () => {
               to="/post-job-brief"
               className="inline-flex items-center justify-center gap-3 border border-cream/30 bg-navy/40 text-cream font-body text-sm font-semibold uppercase tracking-wide px-7 py-4 rounded-xl hover:border-teal hover:text-teal transition-colors backdrop-blur-sm"
             >
-              Find A Trade
+              Start My Project
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>

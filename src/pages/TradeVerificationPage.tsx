@@ -62,7 +62,7 @@ const TradeVerificationPage = () => (
       actions={
         <>
           <Button asChild variant="cta" size="lg"><Link to="/how-it-works">See how it works <ArrowRight /></Link></Button>
-          <Button asChild variant="outline" size="lg" className="border-cream/30 bg-transparent text-cream hover:border-teal hover:bg-transparent hover:text-teal"><Link to="/signup/trade">Join as a verified trade</Link></Button>
+          <Button asChild variant="outline" size="lg" className="border-cream/30 bg-transparent text-cream hover:border-teal hover:bg-transparent hover:text-teal"><Link to="/signup/trade">Apply for verification</Link></Button>
         </>
       }
     />
@@ -112,7 +112,7 @@ const TradeVerificationPage = () => (
     <ContentCta
       title="Win genuine work as a verified trade"
       intro="Build a trusted profile, receive suitable opportunities and keep your documents current in one place."
-      primary={{ label: "Join as a Trade", href: "/signup/trade" }}
+      primary={{ label: "Apply to Join", href: "/signup/trade" }}
       secondary={{ label: "View pricing", href: "/pricing" }}
     />
   </AppShell>

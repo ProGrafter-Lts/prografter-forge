@@ -11,8 +11,8 @@ const steps = [
   },
   {
     num: "03",
-    title: "Money protected",
-    desc: "Staged payments held safe until each milestone is signed off. The trade gets paid; you stay protected.",
+    title: "Milestones recorded",
+    desc: "Agreed stages, completion decisions and payment status stay together in the project record.",
   },
   {
     num: "04",
@@ -30,7 +30,7 @@ const HomeownersHowItWorks = () => {
           <span className="font-mono text-xs text-teal uppercase tracking-widest">Trust</span>
         </div>
         <h2 className="font-heading text-navy text-[48px] craft:text-[64px] leading-none mb-16">
-          Your Project. Fully Visible. Fully Protected.
+          Your Project. Clearly Agreed. Fully Recorded.
         </h2>
 
         <div className="grid craft:grid-cols-4 gap-[2px]">
