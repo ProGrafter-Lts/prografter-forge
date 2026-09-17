@@ -62,7 +62,9 @@ const TradeVaultBanners = ({ tradeId, onOpenVault }: Props) => {
       key: "expiring",
       tone: "amber",
       icon: Clock,
-      text: `Action required: Your ${config.label} expires in ${days} days. Upload your renewal to keep your profile verified.`,
+      text: config.required
+        ? `Action required: Your ${config.label} expires in ${days} days. Upload your renewal to keep your profile verified.`
+        : `TradeVault reminder: Your ${config.label} expires in ${days} days.`,
       button: "Update Document",
     });
   } else if (summary.missingRequired.length > 0) {
