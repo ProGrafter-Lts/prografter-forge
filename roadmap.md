@@ -34,3 +34,9 @@
 - [x] Public Planning Intelligence explainer at /planning-intelligence; app entry is explicit
 - [x] Canonical commercial terms in src/lib/pricingTerms.ts (rate/cap unchanged)
 - [ ] Founder confirmation needed: contact response time (5–7 days vs 24 hours) and commission rate review
+## Public claims and journey integrity audit
+- [ ] Audit payment/protection claims across public pages and intake
+- [ ] Audit credibility, samples, verification, coverage, and future claims
+- [ ] Audit CTA promise-to-destination journeys
+- [ ] Apply factual copy/routing corrections only
+- [ ] Verify public routes and report findings
