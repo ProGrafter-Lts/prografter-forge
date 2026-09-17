@@ -16,7 +16,7 @@ const SignUpSection = () => {
         <div className="fade-up">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-8 h-[2px] bg-teal" />
-            <span className="font-mono text-xs text-teal uppercase tracking-widest">Register Free</span>
+            <span className="font-mono text-xs text-teal uppercase tracking-widest">Start Free</span>
           </div>
           <h2 className="font-heading text-cream text-[48px] craft:text-[64px] leading-none mb-4">
             Live in Nottinghamshire.<br /><span className="text-teal">Growing outward.</span>
@@ -30,8 +30,8 @@ const SignUpSection = () => {
         <div className="fade-up">
           <div className="bg-cream/5 border border-cream/10 rounded-2xl p-8 craft:p-10 space-y-6">
             <div>
-              <h3 className="font-heading text-cream text-2xl craft:text-3xl mb-2">Create your free account</h3>
-              <p className="font-body text-secondary-text text-sm">Choose how you'd like to use ProGrafter.</p>
+              <h3 className="font-heading text-cream text-2xl craft:text-3xl mb-2">Choose how to begin</h3>
+              <p className="font-body text-secondary-text text-sm">Homeowners submit a brief; trades complete an application.</p>
             </div>
 
             <div className="grid gap-4">

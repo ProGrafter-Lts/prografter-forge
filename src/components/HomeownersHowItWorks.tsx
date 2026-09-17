@@ -6,8 +6,8 @@ const steps = [
   },
   {
     num: "02",
-    title: "A real contract",
-    desc: "Every job has a written contract. Variations agreed in writing before work starts.",
+    title: "A structured agreement",
+    desc: "Accepted quote details and written variation decisions stay in the project record. Contract signing is not yet live.",
   },
   {
     num: "03",

@@ -44,8 +44,8 @@ const TradesPanel = () => (
     <div className="steps-flow">
       <div className="hiw-step">
         <div className="step-num">1</div>
-        <div className="step-title">Register Free</div>
-        <div className="step-desc">Upload your details, trade type, and insurance certificate. Verified within 24hrs.</div>
+        <div className="step-title">Apply For Verification</div>
+        <div className="step-desc">Submit your details, trade type and supporting documents for review.</div>
       </div>
       <div className="hiw-step">
         <div className="step-num">2</div>
@@ -119,7 +119,7 @@ const HomeownersPanel = () => (
       <div className="hiw-step">
         <div className="step-num">2</div>
         <div className="step-title">Your Matched Shortlist</div>
-        <div className="step-desc">Up to three matched trades. Not thirty. Vetted, local, and actually available — they quote within 24 hours. You choose on the work, not just the lowest price.</div>
+        <div className="step-desc">Up to three suitable verified trades where coverage allows. Invited trades have 48 hours to accept or decline the opportunity.</div>
       </div>
       <div className="hiw-step">
         <div className="step-num">3</div>

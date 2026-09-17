@@ -1,8 +1,8 @@
 # ProGrafter
 
-> UK construction trust platform connecting verified tradespeople with homeowners. No subscription to join, get matched, quote, or get paid — ever. Optional paid tools such as Planning Hub are separate, opt-in add-ons. Trades pay 7.5% only when a job completes, capped at £900 per job.
+> UK construction trust platform matching reviewed homeowner project briefs with verified tradespeople. No subscription to join, get matched, quote, or get paid — ever. Optional paid tools are separate, opt-in add-ons. Trades pay 7.5% only after completed paid work, capped at £900 per job.
 
-ProGrafter is built by Lee Palfreeman, a qualified electrician of 20 years. The platform handles job posting, verified quoting, stage-based payments, variation sign-off, an AI quote checker, and matching with green-energy grant schemes (ECO4, Boiler Upgrade Scheme, Warm Homes Plan).
+ProGrafter is built by Lee Palfreeman, an electrician of 20 years. The platform handles job briefs, trade verification, quote review, milestone records, variation sign-off, shared project records and guidance about green-energy grant schemes. Automated homeowner payment collection and contract signing are not yet live.
 
 ## Pages
 
@@ -10,12 +10,12 @@ ProGrafter is built by Lee Palfreeman, a qualified electrician of 20 years. The 
 - [About](/about): Founding story, beliefs, why ProGrafter exists.
 - [Contact](/contact): Email contacts, contact form, company details.
 - [Post a Job](/post-a-job): Free job posting flow for homeowners.
-- [Quote Checker](/quote-checker): £9 AI-powered 43-point review of any building quote.
+- [Quote Checker](/quote-checker): Optional paid, trade-specific review modules with prices shown before checkout.
 - [Green Grants](/green): Eligibility checker for UK green-energy grant schemes.
 - [Checkatrade Alternative](/checkatrade-alternative): Side-by-side comparison vs Checkatrade pricing.
 - [Is Checkatrade Worth It?](/is-checkatrade-worth-it): Editorial analysis of Checkatrade pricing.
-- [Planning Alerts](/planning-alerts): Local planning application alerts for trades.
-- [Legal Review](/legal-review): Independent solicitor review of building contracts.
+- [Planning Intelligence](/planning-intelligence): Public explanation of local planning information tools for verified trades.
+- [Legal Review](/legal-review): Current status of ProGrafter's contract templates and disabled signing function.
 - [Share Your Experience](/share-your-experience): Submit a testimonial.
 
 ## Optional

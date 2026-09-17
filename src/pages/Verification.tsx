@@ -22,7 +22,7 @@ const Verification = () => {
           How we verify
         </p>
         <h1 className="font-heading text-cream text-[44px] leading-[1.05] mb-5">
-          Five checks. <span className="text-teal">Every trade.</span>
+          Five areas. <span className="text-teal">One evidence-led standard.</span>
         </h1>
         <p className="font-body text-cream/75 text-base mb-10 leading-relaxed">
           Where the law requires registration — gas, electrical self-certification — we

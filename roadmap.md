@@ -20,7 +20,7 @@
 - [x] Our Checks hero crop + off-brand / gibberish-text evidence imagery replaced
 - [x] Trust Centre / FAQ de-duplicated against Our Checks and Pricing
 - [x] Desktop + mobile QA across all 11 public pages
-- [ ] Founder confirmation needed: contact response time (5–7 days vs 24 hours) and commission rate review
+- [x] Contact response confirmed at 2 working days; public commission rate preserved at 7.5%, capped at £900
 
 ## Final public-site acceptance pass (Sep 2026)
 - [x] Correct Trust Centre, Pricing, FAQ and Contact within the approved visual system
@@ -33,10 +33,10 @@
 - [x] For Trades CTA routes audited; Quote Properly → /platform-tour#quoting
 - [x] Public Planning Intelligence explainer at /planning-intelligence; app entry is explicit
 - [x] Canonical commercial terms in src/lib/pricingTerms.ts (rate/cap unchanged)
-- [ ] Founder confirmation needed: contact response time (5–7 days vs 24 hours) and commission rate review
+- [x] Contact response confirmed at 2 working days; public commission rate preserved at 7.5%, capped at £900
 ## Public claims and journey integrity audit
-- [ ] Audit payment/protection claims across public pages and intake
-- [ ] Audit credibility, samples, verification, coverage, and future claims
-- [ ] Audit CTA promise-to-destination journeys
-- [ ] Apply factual copy/routing corrections only
-- [ ] Verify public routes and report findings
+- [x] Audit payment/protection claims across public pages and intake
+- [x] Audit credibility, samples, verification, coverage, and future claims
+- [x] Audit CTA promise-to-destination journeys
+- [x] Apply factual copy/routing corrections only
+- [x] Verify public routes and report findings

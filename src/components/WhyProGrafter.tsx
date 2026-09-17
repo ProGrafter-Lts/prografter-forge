@@ -10,8 +10,8 @@ const PILLARS = [
     icon: "✓",
   },
   {
-    title: "Homeowner verification",
-    desc: "Real, verified homeowners with genuine projects. Trades bid on real work, not tyre-kickers.",
+    title: "Homeowner project checks",
+    desc: "Contact and project details are recorded, then each brief is reviewed before release.",
     icon: "◎",
   },
   {

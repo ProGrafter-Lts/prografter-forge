@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 const SIGNALS = [
   { label: "5-Step Trade Verification", icon: "✓" },
-  { label: "Verified Homeowners", icon: "◎" },
+  { label: "Reviewed Project Briefs", icon: "◎" },
   { label: "Two-Way Reviews", icon: "⇄" },
   { label: "Human-Reviewed Briefs", icon: "❏" },
   { label: "Transparent, Capped Fees", icon: "£" },

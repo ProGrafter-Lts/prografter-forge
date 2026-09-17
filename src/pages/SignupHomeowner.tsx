@@ -171,7 +171,7 @@ const SignupHomeowner = () => {
             </p>
           </div>
 
-          <TrustSignal tone="dark" className="mb-6" text="Verified homeowners. Human-reviewed briefs. Up to 3 matched trades." />
+          <TrustSignal tone="dark" className="mb-6" text="Contact details recorded. Human-reviewed briefs. Up to 3 matched trades where coverage allows." />
 
 
           <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-navy/10 p-6 craft:p-8 shadow-sm space-y-5">
