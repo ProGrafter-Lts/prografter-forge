@@ -93,7 +93,7 @@ const CheckatradeAlternative = () => {
               </Link>
             </Button>
             <Button asChild size="lg" variant="outline" className="bg-transparent border-2 border-cream text-cream hover:bg-cream hover:text-navy font-mono uppercase tracking-wider">
-              <Link to="/pricing">See the numbers</Link>
+              <Link to="/pricing#marketplace-pricing">See the numbers</Link>
             </Button>
           </div>
         </div>
@@ -152,7 +152,7 @@ const CheckatradeAlternative = () => {
             </div>
           </div>
           <p className="font-body text-cream/70 mt-10 max-w-3xl text-lg leading-relaxed">
-            Want to see how that maps to a real job? <Link to="/quote-checker" className="text-teal underline">Try the Quote Checker →</Link> or read the <Link to="/pricing" className="text-teal underline">Pricing page</Link>.
+            Want to see how that maps to a real job? <Link to="/quote-checker" className="text-teal underline">Try the Quote Checker →</Link> or read the <Link to="/pricing#marketplace-pricing" className="text-teal underline">Pricing page</Link>.
           </p>
         </div>
       </section>

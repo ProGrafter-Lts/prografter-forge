@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import SEO from "@/components/SEO";
 import AppShell from "@/components/AppShell";
 import {
@@ -47,7 +49,34 @@ const PriceCard = ({
   </div>
 );
 
-const PricingPage = () => (
+const useHashScroll = () => {
+  const { hash } = useLocation();
+
+  useEffect(() => {
+    if (!hash) return;
+    const targetId = hash.slice(1);
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    const scrollToTarget = () => {
+      const target = document.getElementById(targetId);
+      if (!target) return;
+      target.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+    };
+
+    const frame = window.requestAnimationFrame(scrollToTarget);
+    const fallback = window.setTimeout(scrollToTarget, 250);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.clearTimeout(fallback);
+    };
+  }, [hash]);
+};
+
+const PricingPage = () => {
+  useHashScroll();
+
+  return (
   <AppShell>
     <SEO
       title={`ProGrafter Pricing — ${COMMISSION_RATE_LABEL}, Capped at ${COMMISSION_CAP_LABEL}`}
@@ -64,7 +93,7 @@ const PricingPage = () => (
       primaryCta={{ label: "Join as a Trade", href: "/signup/trade" }}
       secondaryCta={{ label: "Post a job — free", href: "/post-job-brief" }}
     />
-    <section className="pricing-sequence border-y border-teal/25 bg-navy px-6 py-6" aria-label="How trade pricing works">
+    <section id="marketplace-pricing" className="pricing-sequence scroll-mt-24 border-y border-teal/25 bg-navy px-6 py-6 craft:scroll-mt-28" aria-label="How trade pricing works">
       <ol className="mx-auto grid max-w-5xl grid-cols-2 gap-px overflow-hidden border border-cream/10 bg-cream/10 craft:grid-cols-4">
         {["Join", "Verify", "Match", "Quote"].map((step, index) => (
           <li key={step} className="bg-navy px-4 py-4">
@@ -137,9 +166,10 @@ const PricingPage = () => (
       title="Only pay when you get paid"
       intro="Join without lead fees and see your exact commission before you take on a project."
       primary={{ label: "Join as a Trade", href: "/signup/trade" }}
-      secondary={{ label: "Explore the tools", href: "/platform-tour" }}
+      secondary={{ label: "Explore the tools", href: "/platform-tour#live-now" }}
     />
   </AppShell>
-);
+  );
+};
 
 export default PricingPage;

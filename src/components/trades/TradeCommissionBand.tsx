@@ -26,7 +26,7 @@ const TradeCommissionBand = () => {
             optional tools remain separate.
           </p>
           <Link
-            to="/pricing"
+            to="/pricing#marketplace-pricing"
             className="inline-flex items-center gap-3 bg-teal text-cream font-body text-sm font-semibold uppercase tracking-wide px-7 py-4 rounded-xl hover:bg-teal-hover transition-all shadow-lg shadow-teal/30 hover:-translate-y-0.5"
           >
             See Full Pricing

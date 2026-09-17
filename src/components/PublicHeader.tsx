@@ -10,24 +10,26 @@ import { supabase } from "@/integrations/supabase/client";
 const PRIMARY_LINKS = [
   { label: "Homeowners", href: "/" },
   { label: "How It Works", href: "/how-it-works" },
-  { label: "Platform Tour", href: "/platform-tour" },
-  { label: "Our Checks", href: "/trade-verification" },
+  { label: "Platform Tour", href: "/platform-tour#live-now" },
+  { label: "Our Checks", href: "/trade-verification#our-checks" },
   { label: "Advice", href: "/resources" },
   { label: "About", href: "/about" },
 ];
 
 const SECONDARY_LINKS = [
   { label: "Trust Centre", href: "/trust", description: "How ProGrafter keeps construction accountable" },
-  { label: "Pricing", href: "/pricing", description: "Clear costs for homeowners and trades" },
+  { label: "Pricing", href: "/pricing#marketplace-pricing", description: "Clear costs for homeowners and trades" },
   { label: "FAQs", href: "/faq", description: "Answers for homeowners and trades" },
   { label: "Contact", href: "/contact", description: "Speak to the ProGrafter team" },
 ];
 
-const matchesPath = (pathname: string, href: string) =>
-  href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
+const matchesPath = (pathname: string, href: string) => {
+  const path = href.split(/[?#]/)[0] || "/";
+  return path === "/" ? pathname === "/" : pathname === path || pathname.startsWith(`${path}/`);
+};
 
 const PublicHeader = () => {
-  const { pathname } = useLocation();
+  const { pathname, hash } = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -39,7 +41,7 @@ const PublicHeader = () => {
   useEffect(() => {
     setMenuOpen(false);
     setMoreOpen(false);
-  }, [pathname]);
+  }, [pathname, hash]);
 
   useEffect(() => {
     if (!user) return;

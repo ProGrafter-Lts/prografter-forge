@@ -24,7 +24,7 @@ const CARDS = [
     icon: PanelsTopLeft,
     title: "Explore The Tools",
     desc: "Preview quote comparison, project tracking and what is coming next.",
-    href: "/platform-tour",
+    href: "/platform-tour#live-now",
   },
 ];
 

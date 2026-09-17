@@ -90,7 +90,7 @@ const HomeownerHero = () => {
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
           <Link
-            to="/platform-tour"
+            to="/platform-tour#live-now"
             className="ml-6 inline-flex items-center gap-2 font-body text-xs font-semibold uppercase tracking-[0.18em] text-cream underline underline-offset-4 decoration-teal hover:text-teal transition-colors"
           >
             Explore The Tools
