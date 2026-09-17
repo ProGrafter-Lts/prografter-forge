@@ -136,7 +136,7 @@ const PlanningIntelligencePublic = () => {
               <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
-              to="/platform-tour"
+              to="/platform-tour#live-now"
               className="inline-flex items-center justify-center gap-3 rounded-xl border border-cream/30 bg-transparent px-7 py-4 font-body text-sm font-semibold uppercase tracking-wide text-cream transition-colors hover:border-teal hover:text-teal"
             >
               Explore the tools

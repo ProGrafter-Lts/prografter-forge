@@ -119,7 +119,7 @@ const VerificationExplainerInteractive = () => {
         </div>
 
         <div className="mt-10 flex flex-col craft:flex-row gap-4">
-          <Button asChild variant="cta" size="lg"><Link to="/trade-verification">How verification works</Link></Button>
+          <Button asChild variant="cta" size="lg"><Link to="/trade-verification#our-checks">How verification works</Link></Button>
           <Button asChild variant="outline" size="lg"><Link to="/signup/trade">Apply for verification</Link></Button>
         </div>
       </div>

@@ -44,8 +44,22 @@ const useHashScroll = () => {
   const { hash } = useLocation();
   useEffect(() => {
     if (!hash) return;
-    const el = document.getElementById(hash.slice(1));
-    if (el) requestAnimationFrame(() => el.scrollIntoView({ behavior: "smooth", block: "start" }));
+    const targetId = hash.slice(1);
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    const scrollToTarget = () => {
+      const target = document.getElementById(targetId);
+      if (!target) return;
+      target.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+    };
+
+    const frame = window.requestAnimationFrame(scrollToTarget);
+    const fallback = window.setTimeout(scrollToTarget, 250);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.clearTimeout(fallback);
+    };
   }, [hash]);
 };
 
@@ -79,7 +93,7 @@ const PlatformTour = () => {
     />
 
 
-    <section className="platform-shared-record public-dark-surface bg-cream px-6 py-16 craft:py-20">
+    <section id="live-now" className="platform-shared-record public-dark-surface scroll-mt-24 bg-cream px-6 py-16 craft:scroll-mt-28 craft:py-20">
       <div className="mx-auto max-w-5xl">
         <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
           <div>
@@ -157,7 +171,7 @@ const PlatformTour = () => {
         </div>
         <div className="mt-9 flex flex-col gap-3 sm:flex-row">
           <Button asChild variant="cta" size="lg"><Link to="/signup/trade">Apply to join <ArrowRight /></Link></Button>
-          <Button asChild variant="outline" size="lg" className="border-cream/30 bg-transparent text-cream hover:border-teal hover:bg-transparent hover:text-teal"><Link to="/pricing">See marketplace pricing</Link></Button>
+          <Button asChild variant="outline" size="lg" className="border-cream/30 bg-transparent text-cream hover:border-teal hover:bg-transparent hover:text-teal"><Link to="/pricing#marketplace-pricing">See marketplace pricing</Link></Button>
         </div>
         <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.14em] text-cream/55">
           Pricing covers the core marketplace terms. Optional tools are not priced yet.

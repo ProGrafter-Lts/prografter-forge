@@ -54,7 +54,7 @@ const FinalCtaBand = () => {
             <ArrowRight className="w-4 h-4" />
           </Link>
           <Link
-            to="/platform-tour"
+            to="/platform-tour#live-now"
             className="font-body text-xs font-semibold uppercase tracking-[0.18em] text-cream underline decoration-teal underline-offset-4 transition-colors hover:text-teal"
           >
             Explore The Platform

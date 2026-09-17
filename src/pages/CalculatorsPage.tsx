@@ -18,7 +18,7 @@ const CalculatorsPage = () => (
       intro="Commission-only, capped and transparent. Use these calculators to see exactly what a job costs on ProGrafter — and what you'd save compared with paying monthly fees and per-lead charges."
       ghost="MATHS"
       primaryCta={{ label: "Join as a Trade", href: "/signup/trade" }}
-      secondaryCta={{ label: "View pricing", href: "/pricing" }}
+      secondaryCta={{ label: "View pricing", href: "/pricing#marketplace-pricing" }}
     />
     <ContentSection>
       <div className="grid grid-cols-1 craft:grid-cols-2 gap-6 items-start">
@@ -30,7 +30,7 @@ const CalculatorsPage = () => (
       title="Only pay when you get paid"
       intro="No subscription to join, quote, or get paid — ever. Matching is free; optional paid tools are separate add-ons."
       primary={{ label: "Join as a Trade", href: "/signup/trade" }}
-      secondary={{ label: "How pricing works", href: "/pricing" }}
+      secondary={{ label: "How pricing works", href: "/pricing#marketplace-pricing" }}
     />
   </AppShell>
 );

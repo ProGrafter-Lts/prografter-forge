@@ -212,7 +212,7 @@ const IsCheckatradeWorthIt = () => {
              Free to apply and quote once verified. <strong className="text-cream">{COMMISSION_RATE_LABEL} commission on completion only, capped at {COMMISSION_CAP_LABEL} per job.</strong> Built by an electrician of 20 years for trades who'd rather pay when the work lands than pay every month either way.
           </p>
           <p className="font-body text-cream/70 text-lg leading-relaxed">
-            See it laid out on the <Link to="/pricing" className="text-teal underline">Pricing page</Link>, sense-check a real quote with the <Link to="/quote-checker" className="text-teal underline">Quote Checker</Link>, or read the <Link to="/checkatrade-alternative" className="text-teal underline">side-by-side comparison</Link>.
+            See it laid out on the <Link to="/pricing#marketplace-pricing" className="text-teal underline">Pricing page</Link>, sense-check a real quote with the <Link to="/quote-checker" className="text-teal underline">Quote Checker</Link>, or read the <Link to="/checkatrade-alternative" className="text-teal underline">side-by-side comparison</Link>.
           </p>
         </div>
       </section>

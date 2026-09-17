@@ -121,7 +121,7 @@ const TrustCentre = () => {
               </li>
             ))}
           </ul>
-          <Link to="/trade-verification" className="mt-6 inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.16em] text-teal-ink">
+          <Link to="/trade-verification#our-checks" className="mt-6 inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.16em] text-teal-ink">
             Read Our Checks in full →
           </Link>
         </div>
@@ -148,7 +148,7 @@ const TrustCentre = () => {
         title="See trust in action"
         intro="Explore the live quote and verification tools, plus a clearly labelled view of what is being developed next."
         primary={{ label: "Check a Quote", href: "/quote-checker" }}
-        secondary={{ label: "Explore the tools", href: "/platform-tour" }}
+        secondary={{ label: "Explore the tools", href: "/platform-tour#live-now" }}
       />
       <Footer />
     </div>

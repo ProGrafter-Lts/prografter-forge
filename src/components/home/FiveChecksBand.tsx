@@ -23,7 +23,7 @@ const FiveChecksBand = () => {
             </h2>
           </div>
           <Link
-            to="/trade-verification"
+            to="/trade-verification#our-checks"
             className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.22em] text-cream/70 hover:text-teal transition-colors craft:text-right leading-relaxed"
           >
             A higher standard

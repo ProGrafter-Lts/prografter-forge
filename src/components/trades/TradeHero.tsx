@@ -66,7 +66,7 @@ const TradeHero = () => {
               <ArrowRight className="w-4 h-4" />
             </Link>
             <Link
-              to="/pricing"
+              to="/pricing#marketplace-pricing"
               className="inline-flex items-center justify-center gap-3 border border-cream/30 bg-navy/40 text-cream font-body text-sm font-semibold uppercase tracking-wide px-7 py-4 rounded-xl hover:border-teal hover:text-teal transition-colors backdrop-blur-sm"
             >
               See The Costs
@@ -75,7 +75,7 @@ const TradeHero = () => {
           </div>
 
           <Link
-            to="/platform-tour"
+            to="/platform-tour#live-now"
             className="inline-flex items-center gap-2 font-body text-xs font-semibold uppercase tracking-[0.18em] text-cream underline underline-offset-4 decoration-teal hover:text-teal transition-colors"
           >
             Explore The Tools

@@ -199,7 +199,7 @@ const GuideReadingAQuote = () => (
     <div className="bg-deep px-6 pb-16">
       <p className="mx-auto max-w-3xl font-body text-sm leading-relaxed text-cream/60">
         This guide is general information about UK domestic building quotes, not legal or financial advice.{" "}
-        <Link to="/trade-verification" className="text-teal underline underline-offset-4">See how we verify trades</Link>.
+        <Link to="/trade-verification#our-checks" className="text-teal underline underline-offset-4">See how we verify trades</Link>.
       </p>
     </div>
   </AppShell>

@@ -1,4 +1,6 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import SEO from "@/components/SEO";
 import AppShell from "@/components/AppShell";
 import { ArrowRight, BadgeCheck, FileCheck2, HardHat, ScrollText, ShieldCheck } from "lucide-react";
@@ -43,7 +45,34 @@ const FAQ = [
   { q: "Is a verified badge a guarantee of quality?", a: "Verification confirms identity, insurance, qualifications and history — a strong foundation of trust. Ongoing two-way reviews then reflect real-world performance on every job." },
 ];
 
-const TradeVerificationPage = () => (
+const useHashScroll = () => {
+  const { hash } = useLocation();
+
+  useEffect(() => {
+    if (!hash) return;
+    const targetId = hash.slice(1);
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    const scrollToTarget = () => {
+      const target = document.getElementById(targetId);
+      if (!target) return;
+      target.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+    };
+
+    const frame = window.requestAnimationFrame(scrollToTarget);
+    const fallback = window.setTimeout(scrollToTarget, 250);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.clearTimeout(fallback);
+    };
+  }, [hash]);
+};
+
+const TradeVerificationPage = () => {
+  useHashScroll();
+
+  return (
   <AppShell>
     <SEO
       title="Trade Verification — ProGrafter's 5-Step Check for UK Tradespeople"
@@ -67,7 +96,7 @@ const TradeVerificationPage = () => (
       }
     />
 
-    <section className="bg-deep px-6 py-16 craft:py-20">
+    <section id="our-checks" className="scroll-mt-24 bg-deep px-6 py-16 craft:scroll-mt-28 craft:py-20">
       <div className="mx-auto max-w-5xl">
         <SectionLabel>The record we build</SectionLabel>
         <h2 className="type-h2 mt-3 max-w-3xl text-cream">Our 5-step verification process</h2>
@@ -113,9 +142,10 @@ const TradeVerificationPage = () => (
       title="Win genuine work as a verified trade"
       intro="Build a trusted profile, receive suitable opportunities and keep your documents current in one place."
       primary={{ label: "Apply to Join", href: "/signup/trade" }}
-      secondary={{ label: "View pricing", href: "/pricing" }}
+      secondary={{ label: "View pricing", href: "/pricing#marketplace-pricing" }}
     />
   </AppShell>
-);
+  );
+};
 
 export default TradeVerificationPage;
