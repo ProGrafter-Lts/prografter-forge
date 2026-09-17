@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  ShieldCheck, FileText, Clock, AlertTriangle, Upload, Eye, Loader2, Lock,
+  ShieldCheck, FileText, Clock, AlertTriangle, Upload, Eye, Loader2,
 } from "lucide-react";
 import {
-  VAULT_DOC_TYPES, VaultDocument, VaultDocTypeConfig, VAULT_DEFAULT_BUCKET,
+  VaultDocument, VaultDocTypeConfig, VAULT_DEFAULT_BUCKET,
   computeDisplayStatus, computeVaultSummary, STATUS_META, TONE_CLASSES,
   daysUntil, computeDashboardVerification, getVaultDocTypesByKeys,
   REQUIRED_VAULT_DOC_KEYS, ADDITIONAL_VAULT_DOC_KEYS,
@@ -30,15 +29,6 @@ const SummaryCard = ({ icon: Icon, label, value, tone }: { icon: any; label: str
       <Icon className="w-4 h-4" /> {label}
     </div>
     <div className="text-lg font-semibold">{value}</div>
-  </div>
-);
-
-const ComingSoon = ({ label }: { label: string }) => (
-  <div className="rounded-xl border border-border bg-muted/40 p-4 flex items-center justify-between opacity-70">
-    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-      <Lock className="w-4 h-4" /> {label}
-    </div>
-    <Badge variant="outline" className="text-muted-foreground">Coming Soon</Badge>
   </div>
 );
 
@@ -157,7 +147,6 @@ const TradeVaultSection = ({ tradeId }: Props) => {
     );
   }
 
-  const applicableTypes = VAULT_DOC_TYPES.filter((d) => isDocTypeApplicableToTrade(d, manualCtx.tradeType));
   const requiredTypes = getVaultDocTypesByKeys(REQUIRED_VAULT_DOC_KEYS);
   const additionalTypes = getVaultDocTypesByKeys(ADDITIONAL_VAULT_DOC_KEYS);
 
