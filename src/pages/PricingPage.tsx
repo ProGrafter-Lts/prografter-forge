@@ -82,6 +82,10 @@ const PricingPage = () => (
       <div className="space-y-16">
         <PriceCard title="For tradespeople — one clear model" points={TRADE_POINTS} />
         <PriceCard title="For homeowners" points={HOME_POINTS} />
+        <p className="font-body text-sm text-secondary-text max-w-2xl">
+          This page covers the core marketplace terms: joining, matching, quoting and commission on completed paid work.
+          Optional ProGrafter tools are separate and opt-in. No tool or subscription prices are published yet.
+        </p>
       </div>
     </ContentSection>
     <ContentSection title="Work out your numbers" tone="white" intro="See exactly what a job costs and how much you could save versus a typical lead-based platform.">
