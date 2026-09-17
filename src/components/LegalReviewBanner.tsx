@@ -7,7 +7,7 @@ const STORAGE_KEY = "pg_legal_review_banner_dismissed";
 // Contract templates are with our construction solicitor for final legal
 // review. We deliberately don't commit to a public date here — when signing
 // goes live we'll update the in-app banner and notify trades directly.
-export const LEGAL_REVIEW_ETA = "within the next few weeks — we'll notify you by email the moment signing goes live";
+export const LEGAL_REVIEW_ETA = "has not been published — signing will remain disabled until the final wording is approved";
 
 const LegalReviewBanner = () => {
   const [dismissed, setDismissed] = useState(true);

@@ -70,10 +70,9 @@ const LegalReview = () => {
             <div>
               <h2 className="font-heading text-primary text-lg mb-2">Timeline</h2>
               <p>
-                We're targeting delivery {LEGAL_REVIEW_ETA}. When the final template is
-                approved we'll flip signing on automatically — no action needed from you. Contracts
-                you generate now will continue to reference the placeholder version; new contracts
-                after that date will use the approved version.
+                 The current timeline {LEGAL_REVIEW_ETA}. Contracts you generate now will continue
+                 to reference the placeholder version. Any future activation will be communicated
+                 after approval rather than treated as currently available.
               </p>
             </div>
           </div>
