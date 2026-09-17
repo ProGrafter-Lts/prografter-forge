@@ -65,7 +65,7 @@ const PlanningIntelligencePublic = () => {
               to="/signup/trade"
               className="inline-flex items-center justify-center gap-3 rounded-xl bg-teal px-7 py-4 font-body text-sm font-semibold uppercase tracking-wide text-cream shadow-lg shadow-teal/30 transition-all hover:-translate-y-0.5 hover:bg-teal-hover"
             >
-              Join free
+              Apply to join
               <ArrowRight className="h-4 w-4" />
             </Link>
             <Link

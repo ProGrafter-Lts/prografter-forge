@@ -434,7 +434,7 @@ const BriefPreview = ({ form, briefRef, uploadCount = 0 }: { form: typeof BLANK;
           fontSize: 11, color: C.secondary, lineHeight: 1.6, marginTop: 12 }}>
           <strong style={{ color: C.navy }}>ProGrafter Job Brief</strong> — This document forms part of the job record.
           Both parties are required to agree the scope of works before any payment is made.
-          All payments are held in escrow and released on signed milestone completion.
+          Agreed milestones, completion decisions and payment status are recorded in the project.
           Reference: <span style={{ fontFamily: "'DM Mono', monospace", color: C.teal }}>{ref}</span>
         </div>
       </div>
@@ -722,8 +722,8 @@ export default function PostJobBrief() {
         These stay private — only shared with a trade once you've accepted their quote.
       </p>
       <InfoBox variant="navy">
-        <strong>Identity verified</strong> — ProGrafter verifies email and mobile before your brief is published.
-        This keeps the platform genuine for the trades who respond to you.
+        <strong>Contact details collected</strong> — your email and mobile are attached to your brief and account.
+        This gives the team and invited trades a clear contact record.
       </InfoBox>
       <G2>
         <F label="Full name" req err={errors.full_name}><I f="full_name" placeholder="Sarah Thompson" /></F>
@@ -1046,7 +1046,7 @@ export default function PostJobBrief() {
             <li>You will respond to trades who request to quote within 48 hours.</li>
             <li>You will not use ProGrafter quotes as price leverage with off-platform trades.</li>
             <li>If you accept a quote and cancel without valid reason, a cancellation fee may apply.</li>
-            <li>All payments must go through ProGrafter escrow — no cash arrangements.</li>
+            <li>If a quote is accepted, agreed milestones and payment status will be recorded in your project.</li>
           </ul>
         </InfoBox>
       </div>
@@ -1221,9 +1221,9 @@ export default function PostJobBrief() {
         <div style={{ display: "flex", justifyContent: "center", gap: 24,
           marginTop: 20, flexWrap: "wrap" }}>
           {[
-            "🔒 Identity verified",
+            "🔒 Contact details recorded",
             "✅ Vetted trades only",
-            "💷 Payment protected",
+            "💷 Milestones documented",
             "📄 Full documentation",
           ].map(item => (
             <span key={item} style={{ fontSize: 12, color: C.secondary }}>{item}</span>

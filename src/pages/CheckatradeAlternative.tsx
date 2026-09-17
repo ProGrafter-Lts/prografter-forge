@@ -4,6 +4,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Check, X, ArrowRight } from "lucide-react";
+import { COMMISSION_CAP_LABEL, COMMISSION_RATE_LABEL } from "@/lib/pricingTerms";
 
 const ctTiers = [
   { tier: "Approved", price: "£30/mo", note: "Listing only — leads still cost extra." },
@@ -15,21 +16,21 @@ const ctTiers = [
 const comparisonRows = [
   { feature: "Core platform subscription", pg: "£0", ct: "£30 – £1,959" },
   { feature: "Cost per lead", pg: "£0 — leads are free", ct: "Often shared with up to 5 trades; credits on top of the membership" },
-  { feature: "Commission", pg: "7.5% on completed jobs only", ct: "None — but you've already paid the membership" },
-  { feature: "Lead exclusivity", pg: "Homeowner-controlled — up to 5 quotes, homeowner selects who they work with", ct: "Shared with multiple trades" },
+  { feature: "Commission", pg: `${COMMISSION_RATE_LABEL} on completed jobs only`, ct: "None — but you've already paid the membership" },
+  { feature: "Lead exclusivity", pg: "Up to three suitable trades are invited where coverage allows", ct: "Shared with multiple trades" },
   { feature: "Variation sign-off", pg: "Built-in homeowner approval flow", ct: "No tooling — handled off-platform" },
-  { feature: "Standardised contract", pg: "Built-in, solicitor-reviewed contract on every job", ct: "No contract tooling provided", ctBad: true },
-  { feature: "Escrow payment protection", pg: "Stripe milestone payments — funds held until stage complete", ct: "Payment handled off-platform", ctBad: true },
+  { feature: "Project agreement", pg: "Written contract and documented variation approvals for accepted platform work", ct: "No contract tooling provided", ctBad: true },
+  { feature: "Milestone records", pg: "Stage amounts, evidence, approvals and payment status kept with the project", ct: "Payment handled off-platform", ctBad: true },
   { feature: "Dispute mediation", pg: "ProGrafter mediates with full documented evidence trail", ct: "Disputes handled between trade and homeowner directly", ctBad: true },
-  { feature: "Verification process", pg: "5-point verification: ID, insurance, qualification, Companies House, reference — all checked before going live", ct: "ID and document checks, paid tier" },
-  { feature: "Cap on charges", pg: "£900 maximum per job, ever", ct: "No cap — fees scale with tier and lead spend" },
+  { feature: "Verification process", pg: "Identity, insurance, competence, business details and references or regulated registration, as applicable", ct: "ID and document checks, paid tier" },
+  { feature: "Cap on charges", pg: `${COMMISSION_CAP_LABEL} maximum per job`, ct: "No cap — fees scale with tier and lead spend" },
 ];
 
 const faqs = [
   { q: "Is ProGrafter actually free?", a: "There is no subscription to join, get matched, quote, or get paid — ever. We only earn commission when you complete a job through the platform. Optional paid tools such as Planning Hub are separate and opt-in." },
   { q: "How do I get verified?", a: "Upload photo ID, your public liability insurance certificate and any trade-specific qualifications (Gas Safe, NICEIC, etc.). Our team reviews submissions and you'll typically be live within 5–7 days." },
-  { q: "What if I don't get any jobs?", a: "You pay nothing. There is no minimum spend, no \"visibility\" upgrade and no penalty for quiet months. Quoting is free, and 7.5% only applies to jobs that actually complete." },
-  { q: "How is commission calculated?", a: "7.5% of the agreed job value, capped at £900 per job. So a £3,000 kitchen costs £225; a £20,000 extension is capped at £900 — never more, regardless of job size." },
+  { q: "What if I don't get any jobs?", a: `You pay nothing. There is no minimum spend, no \"visibility\" upgrade and no penalty for quiet months. Quoting is free, and ${COMMISSION_RATE_LABEL} only applies to jobs that actually complete.` },
+  { q: "How is commission calculated?", a: `${COMMISSION_RATE_LABEL} of the agreed job value, capped at ${COMMISSION_CAP_LABEL} per job. See the Pricing page for the definitive commercial terms.` },
   { q: "What happens with variations?", a: "Variations go through an in-platform approval flow: you log the change, the homeowner approves, and the agreed value updates. Commission is calculated on the final, signed-off value — no awkward conversations after the fact." },
 ];
 
@@ -83,12 +84,12 @@ const CheckatradeAlternative = () => {
             <span className="text-teal">doesn't charge you to find work.</span>
           </h1>
           <p className="font-body text-cream/70 mt-8 max-w-2xl text-lg font-light">
-            Checkatrade can cost up to <strong className="text-cream">£1,959 a month</strong> before a single homeowner picks up the phone. ProGrafter is £0 to join, and 7.5% only when a job completes — capped at £900.
+             Checkatrade can cost up to <strong className="text-cream">£1,959 a month</strong> before a single homeowner picks up the phone. ProGrafter is £0 to join, and {COMMISSION_RATE_LABEL} only when a job completes — capped at {COMMISSION_CAP_LABEL}.
           </p>
           <div className="mt-10 flex flex-wrap gap-4">
             <Button asChild variant="cta" size="lg">
               <Link to="/register/trade">
-                Register as a Trade Free <ArrowRight className="ml-1" />
+                Apply to Join <ArrowRight className="ml-1" />
               </Link>
             </Button>
             <Button asChild size="lg" variant="outline" className="bg-transparent border-2 border-cream text-cream hover:bg-cream hover:text-navy font-mono uppercase tracking-wider">
@@ -140,12 +141,12 @@ const CheckatradeAlternative = () => {
               <p className="font-mono text-cream/60 text-sm leading-relaxed">No subscription to join, quote, or get paid — ever. Matching is free; optional paid tools are separate add-ons.</p>
             </div>
             <div className="border border-cream/10 p-6 bg-cream/[0.02]">
-              <p className="font-heading text-teal text-5xl mb-4">7.5%</p>
+              <p className="font-heading text-teal text-5xl mb-4">{COMMISSION_RATE_LABEL}</p>
               <h3 className="font-heading text-cream text-xl mb-2">on completion only</h3>
               <p className="font-mono text-cream/60 text-sm leading-relaxed">A single, transparent commission charged only when the homeowner signs the job off as complete.</p>
             </div>
             <div className="border border-cream/10 p-6 bg-cream/[0.02]">
-              <p className="font-heading text-teal text-5xl mb-4">£900</p>
+              <p className="font-heading text-teal text-5xl mb-4">{COMMISSION_CAP_LABEL}</p>
               <h3 className="font-heading text-cream text-xl mb-2">cap per job</h3>
               <p className="font-mono text-cream/60 text-sm leading-relaxed">Win a £30,000 extension and you still pay £900 — not 7.5% of the lot. Big jobs reward the trade, not the platform.</p>
             </div>
@@ -253,11 +254,11 @@ const CheckatradeAlternative = () => {
             Stop paying<br />for <span className="text-teal">silence.</span>
           </h2>
           <p className="font-body text-cream/70 max-w-xl mx-auto mb-10 text-lg">
-            Free to register. Free to quote. 7.5% on completion only — capped at £900.
+             Free to apply and quote once verified. {COMMISSION_RATE_LABEL} on completion only — capped at {COMMISSION_CAP_LABEL}.
           </p>
           <Button asChild variant="cta" size="lg">
             <Link to="/register/trade">
-              Register as a Trade Free <ArrowRight className="ml-1" />
+               Apply to Join <ArrowRight className="ml-1" />
             </Link>
           </Button>
           <p className="font-mono text-cream/40 text-xs mt-6">

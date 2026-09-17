@@ -156,7 +156,7 @@ const PlatformTour = () => {
           {ROADMAP.map(({ icon: Icon, status, title, text }) => <article key={title} className="rounded-lg border border-cream/10 bg-cream/[0.04] p-6"><span className="font-mono text-[10px] uppercase tracking-[0.16em] text-teal">{status}</span><Icon className="mt-6 h-7 w-7 text-teal" /><h3 className="mt-4 font-body text-xl font-bold text-cream">{title}</h3><p className="mt-3 text-sm leading-relaxed text-cream/75">{text}</p></article>)}
         </div>
         <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-          <Button asChild variant="cta" size="lg"><Link to="/signup/trade">Join as a trade <ArrowRight /></Link></Button>
+          <Button asChild variant="cta" size="lg"><Link to="/signup/trade">Apply to join <ArrowRight /></Link></Button>
           <Button asChild variant="outline" size="lg" className="border-cream/30 bg-transparent text-cream hover:border-teal hover:bg-transparent hover:text-teal"><Link to="/pricing">See transparent pricing</Link></Button>
         </div>
       </div>

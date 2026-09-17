@@ -10,14 +10,14 @@ const CARDS = [
   },
   {
     icon: Search,
-    title: "Find A Trade",
-    desc: "Discover verified trades for your project, matched with care.",
+    title: "Start My Project",
+    desc: "Submit a brief for review and request up to three suitable verified matches where coverage allows.",
     href: "/post-job-brief",
   },
   {
     icon: Home,
     title: "Manage My Project",
-    desc: "Keep quotes, messages and milestones in one place.",
+    desc: "Log in to keep quotes, messages and milestones in one place.",
     href: "/dashboard/homeowner",
   },
   {
