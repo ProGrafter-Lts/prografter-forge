@@ -1152,7 +1152,7 @@ export default function PlanningPipeline() {
       toast({ title: "Nothing in the batch yet" });
       return;
     }
-    setPreviewHtml(buildLetterHtml(leadToBatchRow(first), templates, prografterLogo.url));
+    setPreviewHtml(buildLetterHtml(leadToBatchRow(first), templates, prografterLogo));
   };
 
   const printEnvelopes = () => {
@@ -1173,7 +1173,7 @@ export default function PlanningPipeline() {
       toast({ title: "Nothing ready to print", description: "Every queued lead is missing postal details." });
       return;
     }
-    setLetterHtml(readyLeads.map((l) => buildLetterHtml(leadToBatchRow(l), templates, prografterLogo.url)).join(""));
+    setLetterHtml(readyLeads.map((l) => buildLetterHtml(leadToBatchRow(l), templates, prografterLogo)).join(""));
     setPageRule("@page{size:A4;margin:0}");
     document.body.classList.remove("pg-mode-env");
     document.body.classList.add("pg-mode-letter");
