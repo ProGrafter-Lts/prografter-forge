@@ -1269,8 +1269,9 @@ export default function PlanningPipeline() {
         overflowX: "hidden",
       }}
     >
-      <style>{PRINT_CSS}</style>
-      <PrintSheet leads={batchLeads} />
+      <style>{LETTER_PRINT_CSS}</style>
+      <PrintSurfaces envelopeHtml={envelopeHtml} letterHtml={letterHtml} envVars={envVars} />
+      {previewHtml && <LetterPreview html={previewHtml} onClose={() => setPreviewHtml(null)} />}
 
       {/* Masthead — single compact line */}
       <div
