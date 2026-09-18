@@ -52,7 +52,7 @@ import {
 } from "@/components/admin/planning/LetterSheet";
 import { LetterSettingsPanel } from "@/components/admin/planning/LetterSettingsPanel";
 import { usePlanningLetterSettings } from "@/hooks/usePlanningLetterSettings";
-import prografterLogo from "@/assets/prografter-logo.png.asset.json";
+import prografterLogo from "@/assets/prografter-logo-v2.png";
 
 /* ------------------------------------------------------------------ */
 /* Small shared primitives                                             */
@@ -890,10 +890,14 @@ export const leadToBatchRow = (l: Lead): BatchRow => ({
   type: (l.application_type || l.proposal_type || l.description || "").trim(),
 });
 
+/** Scraper placeholders that are not a real addressee. */
+const PLACEHOLDER_NAMES = ["see source", "not stated", "unknown", "n/a", "the applicant"];
+
 /** What (if anything) stops this row from printing. */
 export const rowMissing = (l: Lead): string[] => {
   const missing: string[] = [];
-  if (!l.applicant_name?.trim()) missing.push("recipient name");
+  const name = (l.applicant_name || "").trim().toLowerCase();
+  if (!name || PLACEHOLDER_NAMES.includes(name)) missing.push("recipient name");
   if (!l.applicant_address?.trim()) missing.push("postal address");
   if (!l.postcode?.trim()) missing.push("postcode");
   return missing;
@@ -1148,7 +1152,7 @@ export default function PlanningPipeline() {
       toast({ title: "Nothing in the batch yet" });
       return;
     }
-    setPreviewHtml(buildLetterHtml(leadToBatchRow(first), templates, prografterLogo.url));
+    setPreviewHtml(buildLetterHtml(leadToBatchRow(first), templates, prografterLogo));
   };
 
   const printEnvelopes = () => {
@@ -1169,7 +1173,7 @@ export default function PlanningPipeline() {
       toast({ title: "Nothing ready to print", description: "Every queued lead is missing postal details." });
       return;
     }
-    setLetterHtml(readyLeads.map((l) => buildLetterHtml(leadToBatchRow(l), templates, prografterLogo.url)).join(""));
+    setLetterHtml(readyLeads.map((l) => buildLetterHtml(leadToBatchRow(l), templates, prografterLogo)).join(""));
     setPageRule("@page{size:A4;margin:0}");
     document.body.classList.remove("pg-mode-env");
     document.body.classList.add("pg-mode-letter");
