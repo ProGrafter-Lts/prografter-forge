@@ -297,7 +297,9 @@ export const buildToday = (leads: Lead[]): TodayQueue => {
   const live = leads.filter((l) => !isSkipped(l));
   const current = live.filter((l) => !isHistoric(l));
   const toReview = current.filter((l) => !l.reviewed_at && !isContacted(l) && isQualified(l)).length;
-  const lettersReady = live.filter((l) => l.letter_batch_status === "queued").length;
+  const lettersReady = live.filter(
+    (l) => l.letter_batch_status === "queued" || l.letter_batch_status === "printed",
+  ).length;
   const responsesToAction = live.filter(
     (l) => l.response_state === "interested" || l.response_state === "draftline_enquiry",
   ).length;
@@ -338,7 +340,7 @@ export const matchesView = (l: Lead, view: QuickView) => {
     case "review":
       return !l.reviewed_at && !isContacted(l) && !isHistoric(l);
     case "ready":
-      return l.letter_batch_status === "queued";
+      return l.letter_batch_status === "queued" || l.letter_batch_status === "printed";
     case "contacted":
       return isContacted(l);
     case "responses":
