@@ -33,14 +33,25 @@ import {
 } from "./planningPipelineModel";
 import {
   TEMPLATE_META,
-  composeLetterBody,
   fullLetterText,
-  letterDateLabel,
-  letterGreeting,
-  SENDER,
   type LetterRecipient,
   type LetterTemplateId,
 } from "@/lib/planningLetterTemplates";
+import {
+  ENVELOPE_SIZES,
+  buildEnvelopeHtml,
+  buildLetterHtml,
+  type BatchRow,
+  type LetterTemplateKey,
+} from "@/lib/planningLetterEngine";
+import {
+  LETTER_PRINT_CSS,
+  LetterPreview,
+  PrintSurfaces,
+  setPageRule,
+} from "@/components/admin/planning/LetterSheet";
+import { usePlanningLetterSettings } from "@/hooks/usePlanningLetterSettings";
+import prografterLogo from "@/assets/prografter-logo.png.asset.json";
 
 /* ------------------------------------------------------------------ */
 /* Small shared primitives                                             */
