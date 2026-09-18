@@ -866,49 +866,38 @@ const toRecipient = (l: Lead): LetterRecipient => ({
   description: l.description,
 });
 
-const PrintSheet = ({ leads }: { leads: Lead[] }) => (
-  <div className="pp-print">
-    {leads.map((l) => {
-      const r = toRecipient(l);
-      const t = ((l.homeowner_letter_template as LetterTemplateId) || "A") as LetterTemplateId;
-      return (
-        <div className="pp-letter" key={l.id}>
-          <div className="pp-letterhead">
-            <strong>{SENDER.line1}</strong>
-            <br />
-            {SENDER.email} · {SENDER.web}
-          </div>
-          <p className="pp-date">{letterDateLabel()}</p>
-          <p className="pp-addr">
-            {r.name || "The Homeowner"}
-            <br />
-            {r.address}
-            {r.postcode ? (
-              <>
-                <br />
-                {r.postcode}
-              </>
-            ) : null}
-          </p>
-          <p className="pp-greet">{letterGreeting(r)}</p>
-          {composeLetterBody(r, t).map((para, i) => (
-            <p key={i}>{para}</p>
-          ))}
-          <p className="pp-sign">
-            Kind regards,
-            <br />
-            <strong>{SENDER.name}</strong>
-            <br />
-            {SENDER.web}
-          </p>
-          <p className="pp-foot">
-            Ref: {r.reference} · {r.council} · {TEMPLATE_META[t].label}
-          </p>
-        </div>
-      );
-    })}
-  </div>
-);
+/** Address block for the letter/envelope — one line per line, name first. */
+export const leadAddressLines = (l: Lead): string[] => {
+  const lines: string[] = [];
+  lines.push((l.applicant_name || "").trim());
+  const raw = (l.applicant_address || "").trim();
+  raw
+    .split(/\n|,/)
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .forEach((s) => lines.push(s));
+  const pc = (l.postcode || "").trim();
+  if (pc && !lines.some((s) => s.toUpperCase() === pc.toUpperCase())) lines.push(pc.toUpperCase());
+  return lines;
+};
+
+export const leadToBatchRow = (l: Lead): BatchRow => ({
+  id: l.id,
+  address: leadAddressLines(l),
+  template: ((l.homeowner_letter_template as LetterTemplateKey) || "A") as LetterTemplateKey,
+  ref: l.application_ref || "",
+  type: (l.application_type || l.proposal_type || l.description || "").trim(),
+});
+
+/** What (if anything) stops this row from printing. */
+export const rowMissing = (l: Lead): string[] => {
+  const missing: string[] = [];
+  if (!l.applicant_name?.trim()) missing.push("recipient name");
+  if (!l.applicant_address?.trim()) missing.push("postal address");
+  if (!l.postcode?.trim()) missing.push("postcode");
+  return missing;
+};
+
 
 /* ------------------------------------------------------------------ */
 /* Page                                                                */
