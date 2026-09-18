@@ -51,4 +51,4 @@
 - [x] Make Find Work the consistent primary marketplace action on the Trade landing page
 - [x] Separate optional tools from marketplace access without changing routes or functionality
 - [x] Consolidate repeated marketplace, verification, matching and pricing explanations
-- [ ] Verify desktop and mobile presentation and retained destinations
+- [x] Verify desktop and mobile presentation and retained destinations
