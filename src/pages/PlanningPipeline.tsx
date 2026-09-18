@@ -900,19 +900,34 @@ export const leadPostcode = (l: Lead): string | null => {
 };
 
 /**
+ * Canonical mailing address: applicant correspondence address if we have one,
+ * otherwise the site / development address.
+ */
+export const leadMailingAddress = (
+  l: Lead,
+): { lines: string[]; source: "applicant" | "site" | null } => {
+  const split = (v: string | null) =>
+    (v || "")
+      .split(/\n|,/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+  const applicant = split(cleanField(l.applicant_address));
+  if (applicant.length) return { lines: applicant, source: "applicant" };
+  const site = split(cleanField(l.site_address));
+  if (site.length) return { lines: site, source: "site" };
+  return { lines: [], source: null };
+};
+
+/**
  * Address block for the letter/envelope — one line per line, name first.
- * Uses the APPLICANT correspondence address only (never the site address),
- * and never repeats the postcode.
+ * Never repeats the postcode.
  */
 export const leadAddressLines = (l: Lead): string[] => {
   const lines: string[] = [];
   const name = cleanField(l.applicant_name);
   if (name) lines.push(name);
-  cleanField(l.applicant_address)
-    ?.split(/\n|,/)
-    .map((s) => s.trim())
-    .filter(Boolean)
-    .forEach((s) => lines.push(s));
+  leadMailingAddress(l).lines.forEach((s) => lines.push(s));
   const pc = leadPostcode(l);
   if (pc) {
     const norm = (s: string) => s.toUpperCase().replace(/\s+/g, "");
@@ -934,7 +949,7 @@ export const leadToBatchRow = (l: Lead): BatchRow => ({
 export const rowMissing = (l: Lead): string[] => {
   const missing: string[] = [];
   if (!cleanField(l.applicant_name)) missing.push("applicant name");
-  if (!cleanField(l.applicant_address)) missing.push("applicant correspondence address");
+  if (!leadMailingAddress(l).lines.length) missing.push("mailing address");
   if (!leadPostcode(l)) missing.push("postcode");
   if (!leadProposal(l)) missing.push("proposal description");
   if (!cleanField(l.application_ref)) missing.push("planning reference");
@@ -980,6 +995,14 @@ export default function PlanningPipeline() {
   const [sortBy, setSortBy] = useState<string>(() => localStorage.getItem(LS_SORT) || "value_desc");
   const [showSkipped, setShowSkipped] = useState(false);
   const [batchBusy, setBatchBusy] = useState(false);
+  const [bulkEnrich, setBulkEnrich] = useState<{
+    total: number;
+    done: number;
+    found: number;
+    stillMissing: number;
+    failed: number;
+    running: boolean;
+  } | null>(null);
   const isMobile = useIsMobile();
 
   useEffect(() => localStorage.setItem(LS_BAND, valueBand), [valueBand]);
@@ -1280,6 +1303,54 @@ export default function PlanningPipeline() {
     toast({ title: "Batch marked sent", description: `${ids.length} letter(s) recorded as sent.` });
     void load();
   };
+
+  /** Bulk PDF enrichment for incomplete batch rows — mainly to find applicant names. */
+  const retryEnrichmentForIncomplete = async () => {
+    const targets = batchLeads.filter((l) => rowMissing(l).length > 0);
+    if (!targets.length) {
+      toast({ title: "Nothing to retry", description: "Every batch record is complete." });
+      return;
+    }
+    setBulkEnrich({ total: targets.length, done: 0, found: 0, stillMissing: 0, failed: 0, running: true });
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    const headers = session ? { Authorization: `Bearer ${session.access_token}` } : {};
+
+    let found = 0;
+    let stillMissing = 0;
+    let failed = 0;
+    for (let i = 0; i < targets.length; i++) {
+      const l = targets[i];
+      try {
+        const { error } = await supabase.functions.invoke("enrich-planning-lead-pdf", {
+          body: { lead_id: l.id },
+          headers,
+        });
+        if (error) failed++;
+        else {
+          const { data } = await supabase
+            .from("planning_leads")
+            .select("applicant_name")
+            .eq("id", l.id)
+            .maybeSingle();
+          if (cleanField((data as { applicant_name?: string } | null)?.applicant_name)) found++;
+          else stillMissing++;
+        }
+      } catch {
+        failed++;
+      }
+      setBulkEnrich({ total: targets.length, done: i + 1, found, stillMissing, failed, running: true });
+    }
+    setBulkEnrich({ total: targets.length, done: targets.length, found, stillMissing, failed, running: false });
+    toast({
+      title: "PDF enrichment finished",
+      description: `Applicant details found: ${found} · Still missing applicant name: ${stillMissing} · Failed: ${failed}`,
+    });
+    void load();
+  };
+
+
 
   const exportBatchCsv = () => {
     const rows = [
@@ -1706,6 +1777,13 @@ export default function PlanningPipeline() {
                   <span style={{ color: incompleteCount ? C.amberBright : C.dim }}>{incompleteCount} incomplete</span>.
                   Print all envelopes first, then all letters — the order is identical, so envelope 1 matches letter 1.
                 </p>
+                {bulkEnrich && (
+                  <p style={{ fontSize: 13.5, color: bulkEnrich.running ? C.amberBright : C.tealBright, margin: "8px 0 0" }}>
+                    {bulkEnrich.running
+                      ? `${bulkEnrich.done} / ${bulkEnrich.total} processed`
+                      : `${bulkEnrich.done} / ${bulkEnrich.total} processed · Applicant details found: ${bulkEnrich.found} · Still missing applicant name: ${bulkEnrich.stillMissing} · Failed: ${bulkEnrich.failed}`}
+                  </p>
+                )}
               </div>
               <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "flex-start" }}>
                 <button onClick={exportBatchCsv} disabled={!batchLeads.length} style={btn("quiet", { opacity: batchLeads.length ? 1 : 0.4 })}>
@@ -1713,6 +1791,13 @@ export default function PlanningPipeline() {
                 </button>
                 <button onClick={previewFirstLetter} disabled={!batchLeads.length} style={btn("quiet", { opacity: batchLeads.length ? 1 : 0.4 })}>
                   Preview first letter
+                </button>
+                <button
+                  onClick={retryEnrichmentForIncomplete}
+                  disabled={!incompleteCount || Boolean(bulkEnrich?.running)}
+                  style={btn("quiet", { opacity: incompleteCount && !bulkEnrich?.running ? 1 : 0.4 })}
+                >
+                  {bulkEnrich?.running ? "Reading PDFs…" : "Retry PDF enrichment for incomplete leads"}
                 </button>
                 <button onClick={printEnvelopes} disabled={!readyLeads.length} style={btn("ghost", { opacity: readyLeads.length ? 1 : 0.4 })}>
                   ① Print all envelopes
@@ -1750,7 +1835,14 @@ export default function PlanningPipeline() {
                             {cleanField(l.applicant_name) || "Applicant name required"}
                           </p>
                           <p style={{ fontSize: 14.5, color: C.cream, margin: "5px 0 0", lineHeight: 1.5 }}>
-                            {leadAddressLines(l).slice(1).join(", ") || "Applicant correspondence address required"}
+                            {leadAddressLines(l).slice(1).join(", ") || "Mailing address required"}
+                          </p>
+                          <p style={{ fontSize: 12.5, color: C.faint, margin: "3px 0 0" }}>
+                            {leadMailingAddress(l).source === "applicant"
+                              ? "Address source: applicant correspondence address"
+                              : leadMailingAddress(l).source === "site"
+                                ? "Address source: site address fallback"
+                                : ""}
                           </p>
                           <p style={{ fontSize: 13.5, color: C.dim, margin: "6px 0 0", lineHeight: 1.5 }}>
                             {l.council_name}
