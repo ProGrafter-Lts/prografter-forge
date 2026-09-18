@@ -867,18 +867,58 @@ const toRecipient = (l: Lead): LetterRecipient => ({
   description: l.description,
 });
 
-/** Address block for the letter/envelope — one line per line, name first. */
+/** Scraper / source placeholders that are NOT real data. */
+const PLACEHOLDER_VALUES = [
+  "see source",
+  "source",
+  "not stated",
+  "unknown",
+  "n/a",
+  "na",
+  "none",
+  "-",
+  "—",
+  "the applicant",
+];
+
+/** Returns a genuine value, or null when the field is empty or a source marker. */
+export const cleanField = (v: string | null | undefined): string | null => {
+  const s = (v || "").trim();
+  if (!s) return null;
+  if (PLACEHOLDER_VALUES.includes(s.toLowerCase())) return null;
+  return s;
+};
+
+/** The homeowner's project in plain English — never the planning category. */
+export const leadProposal = (l: Lead): string | null =>
+  cleanField(l.proposal_type) || cleanField(l.description);
+
+/** Postcode as held on the lead. */
+export const leadPostcode = (l: Lead): string | null => {
+  const pc = cleanField(l.postcode);
+  return pc ? pc.toUpperCase() : null;
+};
+
+/**
+ * Address block for the letter/envelope — one line per line, name first.
+ * Uses the APPLICANT correspondence address only (never the site address),
+ * and never repeats the postcode.
+ */
 export const leadAddressLines = (l: Lead): string[] => {
   const lines: string[] = [];
-  lines.push((l.applicant_name || "").trim());
-  const raw = (l.applicant_address || "").trim();
-  raw
-    .split(/\n|,/)
+  const name = cleanField(l.applicant_name);
+  if (name) lines.push(name);
+  cleanField(l.applicant_address)
+    ?.split(/\n|,/)
     .map((s) => s.trim())
     .filter(Boolean)
     .forEach((s) => lines.push(s));
-  const pc = (l.postcode || "").trim();
-  if (pc && !lines.some((s) => s.toUpperCase() === pc.toUpperCase())) lines.push(pc.toUpperCase());
+  const pc = leadPostcode(l);
+  if (pc) {
+    const norm = (s: string) => s.toUpperCase().replace(/\s+/g, "");
+    const already = lines.some((s) => norm(s).endsWith(norm(pc)));
+    if (!already) lines.push(pc);
+  }
   return lines;
 };
 
@@ -886,20 +926,18 @@ export const leadToBatchRow = (l: Lead): BatchRow => ({
   id: l.id,
   address: leadAddressLines(l),
   template: ((l.homeowner_letter_template as LetterTemplateKey) || "A") as LetterTemplateKey,
-  ref: l.application_ref || "",
-  type: (l.application_type || l.proposal_type || l.description || "").trim(),
+  ref: cleanField(l.application_ref) || "",
+  type: leadProposal(l) || "",
 });
-
-/** Scraper placeholders that are not a real addressee. */
-const PLACEHOLDER_NAMES = ["see source", "not stated", "unknown", "n/a", "the applicant"];
 
 /** What (if anything) stops this row from printing. */
 export const rowMissing = (l: Lead): string[] => {
   const missing: string[] = [];
-  const name = (l.applicant_name || "").trim().toLowerCase();
-  if (!name || PLACEHOLDER_NAMES.includes(name)) missing.push("recipient name");
-  if (!l.applicant_address?.trim()) missing.push("postal address");
-  if (!l.postcode?.trim()) missing.push("postcode");
+  if (!cleanField(l.applicant_name)) missing.push("applicant name");
+  if (!cleanField(l.applicant_address)) missing.push("applicant correspondence address");
+  if (!leadPostcode(l)) missing.push("postcode");
+  if (!leadProposal(l)) missing.push("proposal description");
+  if (!cleanField(l.application_ref)) missing.push("planning reference");
   return missing;
 };
 
