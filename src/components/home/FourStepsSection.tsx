@@ -10,8 +10,8 @@ const STEPS = [
   {
     num: "02",
     icon: Search,
-    title: "Check your quote or request matches",
-    desc: "Upload a quote for review or submit a brief for suitable verified matches where coverage allows.",
+    title: "Request suitable matches",
+    desc: "Your brief can be considered for suitable verified trades where coverage allows.",
   },
   {
     num: "03",

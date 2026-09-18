@@ -61,8 +61,8 @@ const HomeownerHero = () => {
           </h1>
 
           <p className="font-body text-cream/85 text-base craft:text-lg leading-relaxed max-w-xl mb-8">
-            Compare transparent quotes, request up to three verified trade matches and keep progress,
-            photos, decisions and milestones together. Not an open directory.
+            Tell us what work you need and request up to three verified trade matches where coverage allows.
+            Already have a quotation? Check it for clarity before you begin. Not an open directory.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 mb-5">
