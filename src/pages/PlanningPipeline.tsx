@@ -1746,23 +1746,28 @@ export default function PlanningPipeline() {
                     <Panel key={l.id}>
                       <div style={{ display: "flex", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
                         <div style={{ minWidth: 260, flex: 1 }}>
-                          <p style={{ fontSize: 17, fontWeight: 700, margin: 0 }}>{l.applicant_name || "The Homeowner"}</p>
+                          <p style={{ fontSize: 17, fontWeight: 700, margin: 0, color: cleanField(l.applicant_name) ? undefined : C.amberBright }}>
+                            {cleanField(l.applicant_name) || "Applicant name required"}
+                          </p>
                           <p style={{ fontSize: 14.5, color: C.cream, margin: "5px 0 0", lineHeight: 1.5 }}>
-                            {l.applicant_address || l.site_address}
-                            {l.postcode ? `, ${l.postcode}` : ""}
+                            {leadAddressLines(l).slice(1).join(", ") || "Applicant correspondence address required"}
                           </p>
                           <p style={{ fontSize: 13.5, color: C.dim, margin: "6px 0 0", lineHeight: 1.5 }}>
                             {l.council_name}
+                            {l.application_type ? ` · category: ${l.application_type}` : ""}
                             {l.letter_batch_status === "printed" ? " · PRINTED" : ""}
+                          </p>
+                          <p style={{ fontSize: 13.5, color: C.dim, margin: "4px 0 0", lineHeight: 1.5 }}>
+                            Site: {l.site_address}
                           </p>
                           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 10 }}>
                             <label style={{ fontSize: 12.5, color: C.faint, display: "grid", gap: 4, minWidth: 220, flex: 1 }}>
-                              Application type (from the lead)
+                              Proposal description (used in the letter)
                               <input
-                                defaultValue={l.application_type || l.proposal_type || l.description || ""}
+                                defaultValue={leadProposal(l) || ""}
                                 onBlur={(e) => {
                                   const v = e.target.value.trim();
-                                  if (v !== (l.application_type || "")) void patchLeadField(l, { application_type: v });
+                                  if (v && v !== leadProposal(l)) void patchLeadField(l, { proposal_type: v });
                                 }}
                                 style={inp()}
                               />
