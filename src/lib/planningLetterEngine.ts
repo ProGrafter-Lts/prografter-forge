@@ -245,5 +245,5 @@ export const buildEnvelopeHtml = (row: BatchRow) =>
 export const rowIsReady = (row: BatchRow) => {
   const name = (row.address[0] || "").trim();
   const rest = row.address.slice(1).filter((l) => l.trim().length > 0);
-  return Boolean(name && rest.length >= 2 && row.template && row.ref && row.type);
+  return Boolean(name && rest.length >= 1 && row.template && row.ref && row.type);
 };
