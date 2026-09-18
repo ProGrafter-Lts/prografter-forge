@@ -1296,6 +1296,54 @@ export default function PlanningPipeline() {
     void load();
   };
 
+  /** Bulk PDF enrichment for incomplete batch rows — mainly to find applicant names. */
+  const retryEnrichmentForIncomplete = async () => {
+    const targets = batchLeads.filter((l) => rowMissing(l).length > 0);
+    if (!targets.length) {
+      toast({ title: "Nothing to retry", description: "Every batch record is complete." });
+      return;
+    }
+    setBulkEnrich({ total: targets.length, done: 0, found: 0, stillMissing: 0, failed: 0, running: true });
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    const headers = session ? { Authorization: `Bearer ${session.access_token}` } : {};
+
+    let found = 0;
+    let stillMissing = 0;
+    let failed = 0;
+    for (let i = 0; i < targets.length; i++) {
+      const l = targets[i];
+      try {
+        const { error } = await supabase.functions.invoke("enrich-planning-lead-pdf", {
+          body: { lead_id: l.id },
+          headers,
+        });
+        if (error) failed++;
+        else {
+          const { data } = await supabase
+            .from("planning_leads")
+            .select("applicant_name")
+            .eq("id", l.id)
+            .maybeSingle();
+          if (cleanField((data as { applicant_name?: string } | null)?.applicant_name)) found++;
+          else stillMissing++;
+        }
+      } catch {
+        failed++;
+      }
+      setBulkEnrich({ total: targets.length, done: i + 1, found, stillMissing, failed, running: true });
+    }
+    setBulkEnrich({ total: targets.length, done: targets.length, found, stillMissing, failed, running: false });
+    toast({
+      title: "PDF enrichment finished",
+      description: `Applicant details found: ${found} · Still missing applicant name: ${stillMissing} · Failed: ${failed}`,
+    });
+    void load();
+  };
+
+
+
   const exportBatchCsv = () => {
     const rows = [
       ["applicant_name", "address", "postcode", "planning_ref", "council", "description", "template", "campaign", "letter_text"],
