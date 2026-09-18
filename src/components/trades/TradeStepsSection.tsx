@@ -1,5 +1,4 @@
 import { UserCheck, Bell, FileSignature, Banknote } from "lucide-react";
-import { COMMISSION_CAP_LABEL, COMMISSION_RATE_LABEL } from "@/lib/pricingTerms";
 
 const STEPS = [
   {
@@ -24,7 +23,7 @@ const STEPS = [
     num: "04",
     icon: Banknote,
     title: "Complete and get paid",
-    desc: `Job done and signed off. ${COMMISSION_RATE_LABEL} commission, capped at ${COMMISSION_CAP_LABEL} — you keep the rest.`,
+    desc: "Finish the work, record completion and keep the project history together.",
   },
 ];
 

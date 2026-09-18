@@ -27,7 +27,7 @@ const TradeCommissionBand = () => {
           </p>
           <Link
             to="/pricing#marketplace-pricing"
-            className="inline-flex items-center gap-3 bg-teal text-cream font-body text-sm font-semibold uppercase tracking-wide px-7 py-4 rounded-xl hover:bg-teal-hover transition-all shadow-lg shadow-teal/30 hover:-translate-y-0.5"
+            className="inline-flex items-center gap-2 font-body text-sm font-semibold uppercase tracking-wide text-cream underline decoration-teal underline-offset-4 transition-colors hover:text-teal"
           >
             See Full Pricing
             <ArrowRight className="w-4 h-4" />

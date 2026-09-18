@@ -30,19 +30,19 @@ const TradeCtaBand = () => {
 
       <div className="relative z-10 max-w-3xl mx-auto text-center">
         <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-cream/75 mb-4">
-          Ready For Better Work?
+          Ready To Find Work?
         </p>
         <h2 className="font-heading uppercase text-cream text-[32px] craft:text-[48px] leading-none mb-4">
-          Apply, get verified, then quote.
+          Find genuine homeowner work.
         </h2>
         <p className="font-body text-cream/85 text-base craft:text-lg mb-8">
-          Set up your profile and be ready as verified coverage and homeowner demand grow in your area.
+          Create your profile, complete verification and be ready for suitable projects in your area.
         </p>
         <Link
           to="/signup/trade"
           className="inline-flex items-center gap-3 bg-teal text-cream font-body text-sm font-semibold uppercase tracking-wide px-8 py-4 rounded-xl hover:bg-teal-hover transition-all shadow-lg shadow-teal/30 hover:-translate-y-0.5"
         >
-          Apply To Join
+          Find Work
           <ArrowRight className="w-4 h-4" />
         </Link>
         <p className="mt-6 font-body text-xs text-cream/60">
