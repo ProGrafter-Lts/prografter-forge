@@ -50,6 +50,7 @@ import {
   PrintSurfaces,
   setPageRule,
 } from "@/components/admin/planning/LetterSheet";
+import { LetterSettingsPanel } from "@/components/admin/planning/LetterSettingsPanel";
 import { usePlanningLetterSettings } from "@/hooks/usePlanningLetterSettings";
 import prografterLogo from "@/assets/prografter-logo.png.asset.json";
 
