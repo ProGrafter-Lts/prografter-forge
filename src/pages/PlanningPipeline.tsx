@@ -1096,7 +1096,91 @@ export default function PlanningPipeline() {
   const hotLeads = leads.filter((l) => l.pipeline_status === "new" && daysSince(l.submitted_date) <= 14).length;
   const funnel = useMemo(() => buildFunnel(leads), [leads]);
   const today = useMemo(() => buildToday(leads), [leads]);
-  const batchLeads = useMemo(() => leads.filter((l) => l.letter_batch_status === "queued"), [leads]);
+  const batchLeads = useMemo(
+    () =>
+      leads
+        .filter((l) => l.letter_batch_status === "queued" || l.letter_batch_status === "printed")
+        .sort((a, b) => (a.letter_batch_added_at || "").localeCompare(b.letter_batch_added_at || "")),
+    [leads],
+  );
+
+  /* ---- batch letter / envelope printer ---- */
+  const { templates, envelope, save: saveLetterSettings, saving: savingSettings } = usePlanningLetterSettings();
+  const [previewHtml, setPreviewHtml] = useState<string | null>(null);
+  const [envelopeHtml, setEnvelopeHtml] = useState("");
+  const [letterHtml, setLetterHtml] = useState("");
+
+  const envVars = useMemo(() => {
+    const [w, h] = envelope.size.split(",");
+    return {
+      "--env-w": `${w}mm`,
+      "--env-h": `${h}mm`,
+      "--addr-top": `${envelope.addrTop}mm`,
+      "--addr-left": `${envelope.addrLeft}mm`,
+      "--addr-size": `${envelope.addrSize}pt`,
+    } as CSSProperties;
+  }, [envelope]);
+
+  /** Single ordered list of printable rows — envelope N always matches letter N. */
+  const readyLeads = useMemo(() => batchLeads.filter((l) => rowMissing(l).length === 0), [batchLeads]);
+  const incompleteCount = batchLeads.length - readyLeads.length;
+
+  useEffect(() => {
+    const onAfter = () => document.body.classList.remove("pg-mode-env", "pg-mode-letter");
+    window.addEventListener("afterprint", onAfter);
+    return () => window.removeEventListener("afterprint", onAfter);
+  }, []);
+
+  const markPrinted = useCallback(async (ids: string[]) => {
+    if (!ids.length) return;
+    await supabase
+      .from("planning_leads")
+      .update({ letter_batch_status: "printed" } as never)
+      .in("id", ids)
+      .eq("letter_batch_status", "queued");
+    void load();
+  }, [load]);
+
+  const previewFirstLetter = () => {
+    const first = readyLeads[0] || batchLeads[0];
+    if (!first) {
+      toast({ title: "Nothing in the batch yet" });
+      return;
+    }
+    setPreviewHtml(buildLetterHtml(leadToBatchRow(first), templates, prografterLogo.url));
+  };
+
+  const printEnvelopes = () => {
+    if (!readyLeads.length) {
+      toast({ title: "Nothing ready to print", description: "Every queued lead is missing postal details." });
+      return;
+    }
+    setEnvelopeHtml(readyLeads.map((l) => buildEnvelopeHtml(leadToBatchRow(l))).join(""));
+    const [w, h] = envelope.size.split(",");
+    setPageRule(`@page{size:${w}mm ${h}mm;margin:0}`);
+    document.body.classList.remove("pg-mode-letter");
+    document.body.classList.add("pg-mode-env");
+    setTimeout(() => window.print(), 80);
+  };
+
+  const printLetters = () => {
+    if (!readyLeads.length) {
+      toast({ title: "Nothing ready to print", description: "Every queued lead is missing postal details." });
+      return;
+    }
+    setLetterHtml(readyLeads.map((l) => buildLetterHtml(leadToBatchRow(l), templates, prografterLogo.url)).join(""));
+    setPageRule("@page{size:A4;margin:0}");
+    document.body.classList.remove("pg-mode-env");
+    document.body.classList.add("pg-mode-letter");
+    setTimeout(() => window.print(), 80);
+    void markPrinted(readyLeads.map((l) => l.id));
+  };
+
+  const patchLeadField = async (l: Lead, patch: Record<string, string>) => {
+    const { error } = await supabase.from("planning_leads").update(patch as never).eq("id", l.id);
+    if (error) toast({ title: "Update failed", description: error.message, variant: "destructive" });
+    else void load();
+  };
 
   const setBatchTemplate = async (l: Lead, t: LetterTemplateId) => {
     const { error } = await supabase
