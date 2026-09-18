@@ -67,18 +67,18 @@ const HomeownerHero = () => {
 
           <div className="flex flex-col sm:flex-row gap-4 mb-5">
             <Link
-              to="/quote-checker"
+              to="/post-job-brief"
               className="inline-flex items-center justify-center gap-3 bg-teal text-cream font-body text-sm font-semibold uppercase tracking-wide px-7 py-4 rounded-xl hover:bg-teal-hover transition-all shadow-lg shadow-teal/30 hover:-translate-y-0.5"
             >
-              Check My Quote
+              Post a Job
               <ArrowRight className="w-4 h-4" />
             </Link>
             <Link
-              to="/post-job-brief"
-              className="inline-flex items-center justify-center gap-3 border border-cream/30 bg-navy/40 text-cream font-body text-sm font-semibold uppercase tracking-wide px-7 py-4 rounded-xl hover:border-teal hover:text-teal transition-colors backdrop-blur-sm"
+              to="/quote-checker"
+              className="inline-flex items-center justify-center gap-2 font-body text-xs font-semibold uppercase tracking-[0.18em] text-cream underline underline-offset-4 decoration-teal hover:text-teal transition-colors sm:px-3"
             >
-              Start My Project
-              <ArrowRight className="w-4 h-4" />
+              Already have a quote? Check it
+              <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
 
@@ -89,14 +89,6 @@ const HomeownerHero = () => {
             How It Works
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
-          <Link
-            to="/platform-tour#live-now"
-            className="ml-6 inline-flex items-center gap-2 font-body text-xs font-semibold uppercase tracking-[0.18em] text-cream underline underline-offset-4 decoration-teal hover:text-teal transition-colors"
-          >
-            Explore The Tools
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-
           <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-3xl">
             {INDICATORS.map(({ icon: Icon, title, desc }) => (
               <div key={title} className="flex items-start gap-3">

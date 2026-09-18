@@ -40,3 +40,9 @@
 - [x] Audit CTA promise-to-destination journeys
 - [x] Apply factual copy/routing corrections only
 - [x] Verify public routes and report findings
+
+## Homeowner landing page CTA consolidation (Sep 2026)
+- [ ] Make Post a Job the single primary homeowner action on the landing page
+- [ ] Keep Quote Checker secondary and contextual to existing quotations
+- [ ] Remove or de-emphasise duplicate action clusters without changing routes or other pages
+- [ ] Verify desktop and mobile presentation and retained destinations

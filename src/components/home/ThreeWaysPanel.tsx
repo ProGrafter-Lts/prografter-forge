@@ -3,27 +3,30 @@ import { FileText, Search, Home, ChevronRight, PanelsTopLeft } from "lucide-reac
 
 const CARDS = [
   {
-    icon: FileText,
-    title: "Check My Quote",
-    desc: "Upload and check your quote for clarity, fairness and red flags.",
-    href: "/quote-checker",
-  },
-  {
     icon: Search,
-    title: "Start My Project",
+    title: "Post a Job",
     desc: "Submit a brief for review and request up to three suitable verified matches where coverage allows.",
     href: "/post-job-brief",
+    primary: true,
   },
+  {
+    icon: FileText,
+    title: "Quote Checker",
+    desc: "Already have a quote? Check it for clarity, fairness and red flags.",
+    href: "/quote-checker",
+    primary: false,
+  },
+];
+
+const SUPPORTING_LINKS = [
   {
     icon: Home,
     title: "Manage My Project",
-    desc: "Log in to keep quotes, messages and milestones in one place.",
     href: "/dashboard/homeowner",
   },
   {
     icon: PanelsTopLeft,
     title: "Explore The Tools",
-    desc: "Preview quote comparison, project tracking and what is coming next.",
     href: "/platform-tour#live-now",
   },
 ];
@@ -48,12 +51,12 @@ const ThreeWaysPanel = () => {
           </p>
         </div>
 
-         <div className="grid grid-cols-1 sm:grid-cols-2 craft:grid-cols-4 gap-5">
-          {CARDS.map(({ icon: Icon, title, desc, href }) => (
+         <div className="grid grid-cols-1 craft:grid-cols-2 gap-5">
+          {CARDS.map(({ icon: Icon, title, desc, href, primary }) => (
             <Link
               key={title}
               to={href}
-              className="group flex items-start gap-4 rounded-xl border border-cream/10 bg-cream/[0.04] p-6 hover:border-teal/50 hover:bg-cream/[0.07] transition-all"
+              className={`group flex items-start gap-4 rounded-xl border p-6 transition-all ${primary ? "border-teal/40 bg-teal/10 hover:border-teal" : "border-cream/10 bg-cream/[0.04] hover:border-teal/50 hover:bg-cream/[0.07]"}`}
             >
               <span className="shrink-0 w-11 h-11 rounded-xl bg-teal/12 border border-teal/25 flex items-center justify-center">
                 <Icon className="w-5 h-5 text-teal" strokeWidth={1.5} />
@@ -63,6 +66,15 @@ const ThreeWaysPanel = () => {
                 <p className="font-body text-sm text-cream/65 leading-relaxed">{desc}</p>
               </div>
               <ChevronRight className="w-4 h-4 text-cream/40 group-hover:text-teal group-hover:translate-x-0.5 transition-all shrink-0 mt-1" />
+            </Link>
+          ))}
+        </div>
+        <div className="mt-6 flex flex-wrap gap-x-7 gap-y-3 border-t border-cream/10 pt-5">
+          {SUPPORTING_LINKS.map(({ icon: Icon, title, href }) => (
+            <Link key={title} to={href} className="group inline-flex items-center gap-2 font-body text-sm font-semibold text-cream/70 transition-colors hover:text-teal">
+              <Icon className="h-4 w-4 text-teal" strokeWidth={1.5} />
+              {title}
+              <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
             </Link>
           ))}
         </div>

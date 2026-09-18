@@ -62,6 +62,7 @@ const PublicHeader = () => {
 
   const secondaryActive = SECONDARY_LINKS.some(({ href }) => matchesPath(pathname, href));
   const tradesActive = matchesPath(pathname, "/for-trades");
+  const isHomeownerLanding = pathname === "/";
 
   // Merge into the hero at the top, then compact the fixed mobile bar after a meaningful scroll.
   useEffect(() => {
@@ -129,7 +130,7 @@ const PublicHeader = () => {
           ) : (
             <>
             <Button asChild variant="ghost" size="sm" className="font-mono text-[11px] font-bold uppercase tracking-[0.12em] text-cream hover:bg-cream/10 hover:text-cream"><Link to="/login">Log In</Link></Button>
-              <Button asChild variant="cta" size="sm"><Link to="/signup/homeowner">Sign Up</Link></Button>
+              <Button asChild variant="cta" size="sm"><Link to={isHomeownerLanding ? "/post-job-brief" : "/signup/homeowner"}>{isHomeownerLanding ? "Post a Job" : "Sign Up"}</Link></Button>
             </>
           )}
         </div>
@@ -156,7 +157,7 @@ const PublicHeader = () => {
             ) : (
               <>
                 <Button asChild variant="marketingOutline"><Link to="/login">Log In</Link></Button>
-                <Button asChild variant="cta" className="col-span-2"><Link to="/signup/homeowner">Sign Up</Link></Button>
+                <Button asChild variant="cta" className="col-span-2"><Link to={isHomeownerLanding ? "/post-job-brief" : "/signup/homeowner"}>{isHomeownerLanding ? "Post a Job" : "Sign Up"}</Link></Button>
               </>
             )}
           </div>

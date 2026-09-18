@@ -36,28 +36,21 @@ const FinalCtaBand = () => {
           Start with the right information.
         </h2>
         <p className="font-body text-cream/85 text-base craft:text-lg mb-8">
-          Check a quote, request up to three verified matches, or explore the platform before you begin.
+          Tell us what work you need. We’ll review your brief and help you request suitable verified matches where coverage allows.
         </p>
         <div className="flex flex-col items-center justify-center gap-3 sm:flex-row sm:flex-wrap">
           <Link
-            to="/quote-checker"
+            to="/post-job-brief"
             className="inline-flex items-center gap-3 bg-teal text-cream font-body text-sm font-semibold uppercase tracking-wide px-8 py-4 rounded-xl hover:bg-teal-hover transition-all shadow-lg shadow-teal/30 hover:-translate-y-0.5"
           >
-            Check A Quote
+            Post a Job
             <ArrowRight className="w-4 h-4" />
           </Link>
           <Link
-            to="/post-job-brief"
-            className="inline-flex items-center gap-3 border border-cream/30 bg-navy/40 text-cream font-body text-sm font-semibold uppercase tracking-wide px-8 py-4 rounded-xl hover:border-teal hover:text-teal transition-colors"
-          >
-            Start My Project
-            <ArrowRight className="w-4 h-4" />
-          </Link>
-          <Link
-            to="/platform-tour#live-now"
+            to="/quote-checker"
             className="font-body text-xs font-semibold uppercase tracking-[0.18em] text-cream underline decoration-teal underline-offset-4 transition-colors hover:text-teal"
           >
-            Explore The Platform
+            Already have a quote? Use Quote Checker
           </Link>
         </div>
       </div>
