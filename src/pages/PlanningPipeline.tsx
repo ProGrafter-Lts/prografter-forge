@@ -920,31 +920,6 @@ const SORT_OPTIONS = [
   { id: "deadline", label: "Oldest first" },
 ];
 
-const PRINT_CSS = `
-.pp-print { display: none; }
-@media print {
-  body * { visibility: hidden !important; }
-  .pp-print, .pp-print * { visibility: visible !important; }
-  .pp-print {
-    display: block !important;
-    position: absolute; left: 0; top: 0; width: 100%;
-    background: #fff; color: #111;
-    font-family: Georgia, 'Times New Roman', serif;
-  }
-  .pp-letter {
-    page-break-after: always;
-    padding: 22mm 20mm;
-    font-size: 11.5pt;
-    line-height: 1.6;
-  }
-  .pp-letter:last-child { page-break-after: auto; }
-  .pp-letterhead { font-size: 10.5pt; margin-bottom: 16mm; }
-  .pp-date, .pp-addr, .pp-greet, .pp-sign { margin: 0 0 6mm; }
-  .pp-letter p { margin: 0 0 5mm; }
-  .pp-foot { font-size: 9pt; color: #555; margin-top: 12mm; }
-  @page { size: A4; margin: 0; }
-}
-`;
 
 export default function PlanningPipeline() {
   const [tab, setTab] = useState<"leads" | "batch" | "agents" | "insights">("leads");
