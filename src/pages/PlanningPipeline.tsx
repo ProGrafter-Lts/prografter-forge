@@ -995,6 +995,14 @@ export default function PlanningPipeline() {
   const [sortBy, setSortBy] = useState<string>(() => localStorage.getItem(LS_SORT) || "value_desc");
   const [showSkipped, setShowSkipped] = useState(false);
   const [batchBusy, setBatchBusy] = useState(false);
+  const [bulkEnrich, setBulkEnrich] = useState<{
+    total: number;
+    done: number;
+    found: number;
+    stillMissing: number;
+    failed: number;
+    running: boolean;
+  } | null>(null);
   const isMobile = useIsMobile();
 
   useEffect(() => localStorage.setItem(LS_BAND, valueBand), [valueBand]);
