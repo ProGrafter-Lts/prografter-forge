@@ -50,10 +50,10 @@ const DifferentApproach = () => {
           </p>
           <Link
             to="/about"
-            className="inline-flex items-center gap-3 bg-teal text-cream font-body text-sm font-semibold uppercase tracking-wide px-7 py-3.5 rounded-xl hover:bg-teal-hover transition-all shadow-lg shadow-teal/25 hover:-translate-y-0.5"
+            className="inline-flex items-center gap-2 font-body text-xs font-semibold uppercase tracking-[0.18em] text-cream underline decoration-teal underline-offset-4 transition-colors hover:text-teal"
           >
             Find Out More
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
 
