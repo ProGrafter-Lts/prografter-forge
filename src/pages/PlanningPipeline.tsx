@@ -890,10 +890,14 @@ export const leadToBatchRow = (l: Lead): BatchRow => ({
   type: (l.application_type || l.proposal_type || l.description || "").trim(),
 });
 
+/** Scraper placeholders that are not a real addressee. */
+const PLACEHOLDER_NAMES = ["see source", "not stated", "unknown", "n/a", "the applicant"];
+
 /** What (if anything) stops this row from printing. */
 export const rowMissing = (l: Lead): string[] => {
   const missing: string[] = [];
-  if (!l.applicant_name?.trim()) missing.push("recipient name");
+  const name = (l.applicant_name || "").trim().toLowerCase();
+  if (!name || PLACEHOLDER_NAMES.includes(name)) missing.push("recipient name");
   if (!l.applicant_address?.trim()) missing.push("postal address");
   if (!l.postcode?.trim()) missing.push("postcode");
   return missing;
