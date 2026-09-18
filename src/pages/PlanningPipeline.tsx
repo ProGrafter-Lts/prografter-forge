@@ -1782,6 +1782,20 @@ export default function PlanningPipeline() {
                 })}
               </div>
             )}
+
+            <LetterSettingsPanel
+              templates={templates}
+              envelope={envelope}
+              saving={savingSettings}
+              onSave={async (next) => {
+                const err = await saveLetterSettings(next);
+                toast(
+                  err
+                    ? { title: "Save failed", description: err, variant: "destructive" }
+                    : { title: "Letter settings saved" },
+                );
+              }}
+            />
           </div>
         </div>
       ) : tab === "agents" ? (
