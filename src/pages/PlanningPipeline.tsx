@@ -1709,11 +1709,36 @@ export default function PlanningPipeline() {
                             {l.postcode ? `, ${l.postcode}` : ""}
                           </p>
                           <p style={{ fontSize: 13.5, color: C.dim, margin: "6px 0 0", lineHeight: 1.5 }}>
-                            {l.council_name} · {l.application_ref} · {l.description}
+                            {l.council_name}
+                            {l.letter_batch_status === "printed" ? " · PRINTED" : ""}
                           </p>
+                          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 10 }}>
+                            <label style={{ fontSize: 12.5, color: C.faint, display: "grid", gap: 4, minWidth: 220, flex: 1 }}>
+                              Application type (from the lead)
+                              <input
+                                defaultValue={l.application_type || l.proposal_type || l.description || ""}
+                                onBlur={(e) => {
+                                  const v = e.target.value.trim();
+                                  if (v !== (l.application_type || "")) void patchLeadField(l, { application_type: v });
+                                }}
+                                style={inp()}
+                              />
+                            </label>
+                            <label style={{ fontSize: 12.5, color: C.faint, display: "grid", gap: 4, minWidth: 180 }}>
+                              Application reference
+                              <input
+                                defaultValue={l.application_ref || ""}
+                                onBlur={(e) => {
+                                  const v = e.target.value.trim();
+                                  if (v && v !== l.application_ref) void patchLeadField(l, { application_ref: v });
+                                }}
+                                style={inp()}
+                              />
+                            </label>
+                          </div>
                           {noRecipient && (
                             <p style={{ fontSize: 13.5, color: C.amberBright, margin: "8px 0 0" }}>
-                              No applicant address on file — letter will be addressed to the site address.
+                              INCOMPLETE — missing {missing.join(", ")}. This letter will not print.
                             </p>
                           )}
                           {letterAlreadySent(l) && (
