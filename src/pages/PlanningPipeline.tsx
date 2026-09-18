@@ -900,19 +900,34 @@ export const leadPostcode = (l: Lead): string | null => {
 };
 
 /**
+ * Canonical mailing address: applicant correspondence address if we have one,
+ * otherwise the site / development address.
+ */
+export const leadMailingAddress = (
+  l: Lead,
+): { lines: string[]; source: "applicant" | "site" | null } => {
+  const split = (v: string | null) =>
+    (v || "")
+      .split(/\n|,/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+  const applicant = split(cleanField(l.applicant_address));
+  if (applicant.length) return { lines: applicant, source: "applicant" };
+  const site = split(cleanField(l.site_address));
+  if (site.length) return { lines: site, source: "site" };
+  return { lines: [], source: null };
+};
+
+/**
  * Address block for the letter/envelope — one line per line, name first.
- * Uses the APPLICANT correspondence address only (never the site address),
- * and never repeats the postcode.
+ * Never repeats the postcode.
  */
 export const leadAddressLines = (l: Lead): string[] => {
   const lines: string[] = [];
   const name = cleanField(l.applicant_name);
   if (name) lines.push(name);
-  cleanField(l.applicant_address)
-    ?.split(/\n|,/)
-    .map((s) => s.trim())
-    .filter(Boolean)
-    .forEach((s) => lines.push(s));
+  leadMailingAddress(l).lines.forEach((s) => lines.push(s));
   const pc = leadPostcode(l);
   if (pc) {
     const norm = (s: string) => s.toUpperCase().replace(/\s+/g, "");
@@ -934,7 +949,7 @@ export const leadToBatchRow = (l: Lead): BatchRow => ({
 export const rowMissing = (l: Lead): string[] => {
   const missing: string[] = [];
   if (!cleanField(l.applicant_name)) missing.push("applicant name");
-  if (!cleanField(l.applicant_address)) missing.push("applicant correspondence address");
+  if (!leadMailingAddress(l).lines.length) missing.push("mailing address");
   if (!leadPostcode(l)) missing.push("postcode");
   if (!leadProposal(l)) missing.push("proposal description");
   if (!cleanField(l.application_ref)) missing.push("planning reference");
