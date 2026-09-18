@@ -1657,9 +1657,11 @@ export default function PlanningPipeline() {
             <div style={{ display: "flex", justifyContent: "space-between", gap: 16, flexWrap: "wrap", marginBottom: 18 }}>
               <div>
                 <h2 style={{ fontSize: 26, fontWeight: 800, margin: 0, color: C.cream, fontFamily: "inherit", textTransform: "none" }}>Batch Letter Printer</h2>
-                <p style={{ fontSize: 14.5, color: C.dim, margin: "6px 0 0", maxWidth: 620, lineHeight: 1.55 }}>
-                  {batchLeads.length} lead{batchLeads.length === 1 ? "" : "s"} queued. Check the recipient details, choose a
-                  template per letter, print the batch, then mark it sent to record the outreach on every lead.
+                <p style={{ fontSize: 14.5, color: C.dim, margin: "6px 0 0", maxWidth: 640, lineHeight: 1.55 }}>
+                  <strong style={{ color: C.cream }}>{batchLeads.length} in batch</strong> ·{" "}
+                  <span style={{ color: C.tealBright }}>{readyLeads.length} ready</span> ·{" "}
+                  <span style={{ color: incompleteCount ? C.amberBright : C.dim }}>{incompleteCount} incomplete</span>.
+                  Print all envelopes first, then all letters — the order is identical, so envelope 1 matches letter 1.
                 </p>
               </div>
               <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "flex-start" }}>
