@@ -200,6 +200,8 @@ export const outreachChip = (
       s?.tone === "teal" ? C.tealBright : s?.tone === "purple" ? C.purple : s?.tone === "red" ? C.red : C.faint;
     return { label: (s?.label || l.response_state).toUpperCase(), color, date: l.response_at };
   }
+  if (l.letter_batch_status === "printed")
+    return { label: "LETTER PRINTED", color: C.amberBright, date: l.letter_batch_added_at };
   if (l.letter_batch_status === "queued")
     return { label: "IN LETTER BATCH", color: C.amberBright, date: l.letter_batch_added_at };
   if (isContacted(l)) {
@@ -227,6 +229,8 @@ export const nextActionFor = (l: Lead): NextAction => {
     return { key: "action_response", label: "ACTION RESPONSE", hint: "Homeowner is interested", tone: "teal" };
   if (l.response_state === "not_interested" || l.response_state === "closed" || l.response_state === "not_suitable")
     return { key: "closed", label: "CLOSED", tone: "grey" };
+  if (l.letter_batch_status === "printed")
+    return { key: "batch", label: "LETTER PRINTED — POST IT & MARK SENT", tone: "amber" };
   if (l.letter_batch_status === "queued")
     return { key: "batch", label: "IN LETTER BATCH — PRINT & SEND", tone: "amber" };
   if (isContacted(l)) {
@@ -293,7 +297,9 @@ export const buildToday = (leads: Lead[]): TodayQueue => {
   const live = leads.filter((l) => !isSkipped(l));
   const current = live.filter((l) => !isHistoric(l));
   const toReview = current.filter((l) => !l.reviewed_at && !isContacted(l) && isQualified(l)).length;
-  const lettersReady = live.filter((l) => l.letter_batch_status === "queued").length;
+  const lettersReady = live.filter(
+    (l) => l.letter_batch_status === "queued" || l.letter_batch_status === "printed",
+  ).length;
   const responsesToAction = live.filter(
     (l) => l.response_state === "interested" || l.response_state === "draftline_enquiry",
   ).length;
@@ -334,7 +340,7 @@ export const matchesView = (l: Lead, view: QuickView) => {
     case "review":
       return !l.reviewed_at && !isContacted(l) && !isHistoric(l);
     case "ready":
-      return l.letter_batch_status === "queued";
+      return l.letter_batch_status === "queued" || l.letter_batch_status === "printed";
     case "contacted":
       return isContacted(l);
     case "responses":
