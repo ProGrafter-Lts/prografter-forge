@@ -1785,9 +1785,20 @@ export default function PlanningPipeline() {
                             </label>
                           </div>
                           {noRecipient && (
-                            <p style={{ fontSize: 13.5, color: C.amberBright, margin: "8px 0 0" }}>
-                              INCOMPLETE — missing {missing.join(", ")}. This letter will not print.
-                            </p>
+                            <div style={{ margin: "8px 0 0" }}>
+                              <p style={{ fontSize: 13.5, color: C.amberBright, margin: 0 }}>
+                                INCOMPLETE — missing {missing.join(", ")}. This letter will not print.
+                              </p>
+                              <button
+                                onClick={() => {
+                                  setTab("leads");
+                                  setSelectedLeadId(l.id);
+                                }}
+                                style={{ ...btn("quiet"), marginTop: 8 }}
+                              >
+                                Open lead to fix / retry PDF enrichment
+                              </button>
+                            </div>
                           )}
                           {letterAlreadySent(l) && (
                             <p style={{ fontSize: 13.5, color: C.amberBright, margin: "6px 0 0" }}>
