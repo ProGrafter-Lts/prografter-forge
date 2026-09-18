@@ -397,18 +397,26 @@ serve(async (req) => {
       }
     }
 
+    // Never persist source/fallback markers as real applicant or agent data.
+    const PLACEHOLDERS = ["see source","source","not stated","unknown","n/a","na","none","-","the applicant"];
+    const realValue = (v: string | null | undefined) => {
+      const s = (v ?? "").trim();
+      if (!s || PLACEHOLDERS.includes(s.toLowerCase())) return undefined;
+      return s;
+    };
+
     // Step 5: update lead (including agent_id link)
     const { error: updErr } = await supabase
       .from("planning_leads")
       .update({
-        applicant_name: extracted.applicant_name ?? undefined,
-        applicant_address: extracted.applicant_address ?? undefined,
-        applicant_contact: extracted.applicant_contact ?? undefined,
-        agent_name: extracted.agent_name ?? undefined,
-        agent_address: extracted.agent_address ?? undefined,
-        agent_contact: extracted.agent_contact ?? undefined,
+        applicant_name: realValue(extracted.applicant_name),
+        applicant_address: realValue(extracted.applicant_address),
+        applicant_contact: realValue(extracted.applicant_contact),
+        agent_name: realValue(extracted.agent_name),
+        agent_address: realValue(extracted.agent_address),
+        agent_contact: realValue(extracted.agent_contact),
         agent_id: agentId ?? undefined,
-        proposal_type: extracted.proposal_type ?? undefined,
+        proposal_type: realValue(extracted.proposal_type),
         pdf_source_url: pdfUrl,
         pdf_enriched_at: new Date().toISOString(),
         form1app_extracted: true,

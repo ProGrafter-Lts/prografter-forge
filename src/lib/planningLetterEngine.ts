@@ -73,7 +73,7 @@ export const DEFAULT_PS =
 
 const TEMPLATE_A_BODY = `Dear {{name}}
 
-I noticed your planning application for **{{type}}**. Application reference **{{ref}}**. I wanted to contact you while your project is still at the planning stage, before you start collecting quotes and making decisions about who will carry out the work.
+I noticed your planning application relating to **{{type}}**, reference **{{ref}}**. I wanted to contact you while your project is still at the planning stage, before you start collecting quotes and making decisions about who will carry out the work.
 
 **Before you start collecting building quotes, make sure every builder is actually pricing the same job.**
 
@@ -91,7 +91,7 @@ There's nothing you need to buy or commit to today. **It's simply worth keeping 
 
 const TEMPLATE_B_BODY = `Dear {{name}}
 
-I wrote to you recently about your planning application for **{{type}}** (reference **{{ref}}**). I appreciate you may still be weighing things up, so this is just a short note in case it is useful now.
+I wrote to you recently about your planning application relating to **{{type}}** (reference **{{ref}}**). I appreciate you may still be weighing things up, so this is just a short note in case it is useful now.
 
 ProGrafter is a free service for homeowners running building work. We help you understand what a fair quote looks like, what should be included, and what to ask a builder before you commit any money.
 
@@ -101,7 +101,7 @@ There is nothing to pay to look, and no obligation. If it is helpful, visit prog
 
 const TEMPLATE_C_BODY = `Dear {{name}}
 
-I noticed your planning application for **{{type}}** (reference **{{ref}}**). If you are already collecting quotes from builders, this letter is intended to save you money and hassle.
+I noticed your planning application relating to **{{type}}** (reference **{{ref}}**). If you are already collecting quotes from builders, this letter is intended to save you money and hassle.
 
 Most homeowner disputes start with a vague quote. Missing scope, unclear payment stages, no allowance for materials, and no written specification are the usual causes.
 
@@ -163,7 +163,7 @@ export const fillPlaceholders = (tpl: string, row: BatchRow) => {
     .replace(/\{\{name\}\}/g, name || "Homeowner")
     .replace(/\{\{address\}\}/g, row.address.join("\n"))
     .replace(/\{\{ref\}\}/g, row.ref || "[reference]")
-    .replace(/\{\{type\}\}/g, row.type || "[application type]")
+    .replace(/\{\{type\}\}/g, row.type || "[proposal description]")
     .replace(/\{\{date\}\}/g, todayStr())
     .replace(/\{\{greeting\}\}/g, greeting);
 };
@@ -245,5 +245,5 @@ export const buildEnvelopeHtml = (row: BatchRow) =>
 export const rowIsReady = (row: BatchRow) => {
   const name = (row.address[0] || "").trim();
   const rest = row.address.slice(1).filter((l) => l.trim().length > 0);
-  return Boolean(name && rest.length >= 1 && row.template);
+  return Boolean(name && rest.length >= 2 && row.template && row.ref && row.type);
 };
