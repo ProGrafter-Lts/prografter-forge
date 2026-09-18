@@ -1,12 +1,11 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, BadgeCheck, MapPin, Wallet } from "lucide-react";
 import heroImage from "@/assets/home/trades-hero.jpg";
-import { COMMISSION_CAP_SENTENCE, COMMISSION_RATE_LABEL } from "@/lib/pricingTerms";
 
 const INDICATORS = [
-  { icon: Wallet, title: "Commission Only", desc: `${COMMISSION_RATE_LABEL} on completed paid work, ${COMMISSION_CAP_SENTENCE}.` },
-  { icon: MapPin, title: "Focused Locally", desc: "East Midlands density first." },
-  { icon: BadgeCheck, title: "Recorded Enquiries", desc: "Every brief is tied to contact details and reviewed before release." },
+  { icon: BadgeCheck, title: "Verified Network", desc: "Every trade is reviewed before joining." },
+  { icon: MapPin, title: "Focused Matching", desc: "Suitable trades are matched as local coverage allows." },
+  { icon: Wallet, title: "Genuine Opportunities", desc: "Every brief has homeowner contact details and is reviewed before release." },
 ];
 
 const TradeHero = () => {
@@ -53,8 +52,7 @@ const TradeHero = () => {
           </h1>
 
           <p className="font-body text-cream/85 text-base craft:text-lg leading-relaxed max-w-xl mb-8">
-            Spend less time paying for unsuitable leads. Apply and get matched without a subscription, then pay{" "}
-            {COMMISSION_RATE_LABEL} only when a completed job has been paid, {COMMISSION_CAP_SENTENCE}.
+            Find reviewed homeowner projects without paying for leads. Apply for verification, then get matched to suitable work as local coverage allows.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 mb-5">
@@ -62,7 +60,7 @@ const TradeHero = () => {
               to="/signup/trade"
               className="inline-flex items-center justify-center gap-3 bg-teal text-cream font-body text-sm font-semibold uppercase tracking-wide px-7 py-4 rounded-xl hover:bg-teal-hover transition-all shadow-lg shadow-teal/30 hover:-translate-y-0.5"
             >
-              Apply To Join
+              Find Work
               <ArrowRight className="w-4 h-4" />
             </Link>
             <Link

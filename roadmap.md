@@ -46,3 +46,9 @@
 - [x] Keep Quote Checker secondary and contextual to existing quotations
 - [x] Remove or de-emphasise duplicate action clusters without changing routes or other pages
 - [x] Verify desktop and mobile presentation and retained destinations
+
+## Trade landing page CTA consolidation (Sep 2026)
+- [x] Make Find Work the consistent primary marketplace action on the Trade landing page
+- [x] Separate optional tools from marketplace access without changing routes or functionality
+- [x] Consolidate repeated marketplace, verification, matching and pricing explanations
+- [ ] Verify desktop and mobile presentation and retained destinations
