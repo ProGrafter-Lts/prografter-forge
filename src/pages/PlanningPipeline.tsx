@@ -1777,6 +1777,13 @@ export default function PlanningPipeline() {
                   <span style={{ color: incompleteCount ? C.amberBright : C.dim }}>{incompleteCount} incomplete</span>.
                   Print all envelopes first, then all letters — the order is identical, so envelope 1 matches letter 1.
                 </p>
+                {bulkEnrich && (
+                  <p style={{ fontSize: 13.5, color: bulkEnrich.running ? C.amberBright : C.tealBright, margin: "8px 0 0" }}>
+                    {bulkEnrich.running
+                      ? `${bulkEnrich.done} / ${bulkEnrich.total} processed`
+                      : `${bulkEnrich.done} / ${bulkEnrich.total} processed · Applicant details found: ${bulkEnrich.found} · Still missing applicant name: ${bulkEnrich.stillMissing} · Failed: ${bulkEnrich.failed}`}
+                  </p>
+                )}
               </div>
               <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "flex-start" }}>
                 <button onClick={exportBatchCsv} disabled={!batchLeads.length} style={btn("quiet", { opacity: batchLeads.length ? 1 : 0.4 })}>
@@ -1784,6 +1791,13 @@ export default function PlanningPipeline() {
                 </button>
                 <button onClick={previewFirstLetter} disabled={!batchLeads.length} style={btn("quiet", { opacity: batchLeads.length ? 1 : 0.4 })}>
                   Preview first letter
+                </button>
+                <button
+                  onClick={retryEnrichmentForIncomplete}
+                  disabled={!incompleteCount || Boolean(bulkEnrich?.running)}
+                  style={btn("quiet", { opacity: incompleteCount && !bulkEnrich?.running ? 1 : 0.4 })}
+                >
+                  {bulkEnrich?.running ? "Reading PDFs…" : "Retry PDF enrichment for incomplete leads"}
                 </button>
                 <button onClick={printEnvelopes} disabled={!readyLeads.length} style={btn("ghost", { opacity: readyLeads.length ? 1 : 0.4 })}>
                   ① Print all envelopes
