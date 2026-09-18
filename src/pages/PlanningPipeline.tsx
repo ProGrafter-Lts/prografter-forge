@@ -1765,7 +1765,14 @@ export default function PlanningPipeline() {
                             {cleanField(l.applicant_name) || "Applicant name required"}
                           </p>
                           <p style={{ fontSize: 14.5, color: C.cream, margin: "5px 0 0", lineHeight: 1.5 }}>
-                            {leadAddressLines(l).slice(1).join(", ") || "Applicant correspondence address required"}
+                            {leadAddressLines(l).slice(1).join(", ") || "Mailing address required"}
+                          </p>
+                          <p style={{ fontSize: 12.5, color: C.faint, margin: "3px 0 0" }}>
+                            {leadMailingAddress(l).source === "applicant"
+                              ? "Address source: applicant correspondence address"
+                              : leadMailingAddress(l).source === "site"
+                                ? "Address source: site address fallback"
+                                : ""}
                           </p>
                           <p style={{ fontSize: 13.5, color: C.dim, margin: "6px 0 0", lineHeight: 1.5 }}>
                             {l.council_name}
