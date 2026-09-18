@@ -33,14 +33,25 @@ import {
 } from "./planningPipelineModel";
 import {
   TEMPLATE_META,
-  composeLetterBody,
   fullLetterText,
-  letterDateLabel,
-  letterGreeting,
-  SENDER,
   type LetterRecipient,
   type LetterTemplateId,
 } from "@/lib/planningLetterTemplates";
+import {
+  ENVELOPE_SIZES,
+  buildEnvelopeHtml,
+  buildLetterHtml,
+  type BatchRow,
+  type LetterTemplateKey,
+} from "@/lib/planningLetterEngine";
+import {
+  LETTER_PRINT_CSS,
+  LetterPreview,
+  PrintSurfaces,
+  setPageRule,
+} from "@/components/admin/planning/LetterSheet";
+import { usePlanningLetterSettings } from "@/hooks/usePlanningLetterSettings";
+import prografterLogo from "@/assets/prografter-logo.png.asset.json";
 
 /* ------------------------------------------------------------------ */
 /* Small shared primitives                                             */
@@ -855,49 +866,38 @@ const toRecipient = (l: Lead): LetterRecipient => ({
   description: l.description,
 });
 
-const PrintSheet = ({ leads }: { leads: Lead[] }) => (
-  <div className="pp-print">
-    {leads.map((l) => {
-      const r = toRecipient(l);
-      const t = ((l.homeowner_letter_template as LetterTemplateId) || "A") as LetterTemplateId;
-      return (
-        <div className="pp-letter" key={l.id}>
-          <div className="pp-letterhead">
-            <strong>{SENDER.line1}</strong>
-            <br />
-            {SENDER.email} · {SENDER.web}
-          </div>
-          <p className="pp-date">{letterDateLabel()}</p>
-          <p className="pp-addr">
-            {r.name || "The Homeowner"}
-            <br />
-            {r.address}
-            {r.postcode ? (
-              <>
-                <br />
-                {r.postcode}
-              </>
-            ) : null}
-          </p>
-          <p className="pp-greet">{letterGreeting(r)}</p>
-          {composeLetterBody(r, t).map((para, i) => (
-            <p key={i}>{para}</p>
-          ))}
-          <p className="pp-sign">
-            Kind regards,
-            <br />
-            <strong>{SENDER.name}</strong>
-            <br />
-            {SENDER.web}
-          </p>
-          <p className="pp-foot">
-            Ref: {r.reference} · {r.council} · {TEMPLATE_META[t].label}
-          </p>
-        </div>
-      );
-    })}
-  </div>
-);
+/** Address block for the letter/envelope — one line per line, name first. */
+export const leadAddressLines = (l: Lead): string[] => {
+  const lines: string[] = [];
+  lines.push((l.applicant_name || "").trim());
+  const raw = (l.applicant_address || "").trim();
+  raw
+    .split(/\n|,/)
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .forEach((s) => lines.push(s));
+  const pc = (l.postcode || "").trim();
+  if (pc && !lines.some((s) => s.toUpperCase() === pc.toUpperCase())) lines.push(pc.toUpperCase());
+  return lines;
+};
+
+export const leadToBatchRow = (l: Lead): BatchRow => ({
+  id: l.id,
+  address: leadAddressLines(l),
+  template: ((l.homeowner_letter_template as LetterTemplateKey) || "A") as LetterTemplateKey,
+  ref: l.application_ref || "",
+  type: (l.application_type || l.proposal_type || l.description || "").trim(),
+});
+
+/** What (if anything) stops this row from printing. */
+export const rowMissing = (l: Lead): string[] => {
+  const missing: string[] = [];
+  if (!l.applicant_name?.trim()) missing.push("recipient name");
+  if (!l.applicant_address?.trim()) missing.push("postal address");
+  if (!l.postcode?.trim()) missing.push("postcode");
+  return missing;
+};
+
 
 /* ------------------------------------------------------------------ */
 /* Page                                                                */
@@ -920,31 +920,6 @@ const SORT_OPTIONS = [
   { id: "deadline", label: "Oldest first" },
 ];
 
-const PRINT_CSS = `
-.pp-print { display: none; }
-@media print {
-  body * { visibility: hidden !important; }
-  .pp-print, .pp-print * { visibility: visible !important; }
-  .pp-print {
-    display: block !important;
-    position: absolute; left: 0; top: 0; width: 100%;
-    background: #fff; color: #111;
-    font-family: Georgia, 'Times New Roman', serif;
-  }
-  .pp-letter {
-    page-break-after: always;
-    padding: 22mm 20mm;
-    font-size: 11.5pt;
-    line-height: 1.6;
-  }
-  .pp-letter:last-child { page-break-after: auto; }
-  .pp-letterhead { font-size: 10.5pt; margin-bottom: 16mm; }
-  .pp-date, .pp-addr, .pp-greet, .pp-sign { margin: 0 0 6mm; }
-  .pp-letter p { margin: 0 0 5mm; }
-  .pp-foot { font-size: 9pt; color: #555; margin-top: 12mm; }
-  @page { size: A4; margin: 0; }
-}
-`;
 
 export default function PlanningPipeline() {
   const [tab, setTab] = useState<"leads" | "batch" | "agents" | "insights">("leads");
@@ -1121,7 +1096,91 @@ export default function PlanningPipeline() {
   const hotLeads = leads.filter((l) => l.pipeline_status === "new" && daysSince(l.submitted_date) <= 14).length;
   const funnel = useMemo(() => buildFunnel(leads), [leads]);
   const today = useMemo(() => buildToday(leads), [leads]);
-  const batchLeads = useMemo(() => leads.filter((l) => l.letter_batch_status === "queued"), [leads]);
+  const batchLeads = useMemo(
+    () =>
+      leads
+        .filter((l) => l.letter_batch_status === "queued" || l.letter_batch_status === "printed")
+        .sort((a, b) => (a.letter_batch_added_at || "").localeCompare(b.letter_batch_added_at || "")),
+    [leads],
+  );
+
+  /* ---- batch letter / envelope printer ---- */
+  const { templates, envelope, save: saveLetterSettings, saving: savingSettings } = usePlanningLetterSettings();
+  const [previewHtml, setPreviewHtml] = useState<string | null>(null);
+  const [envelopeHtml, setEnvelopeHtml] = useState("");
+  const [letterHtml, setLetterHtml] = useState("");
+
+  const envVars = useMemo(() => {
+    const [w, h] = envelope.size.split(",");
+    return {
+      "--env-w": `${w}mm`,
+      "--env-h": `${h}mm`,
+      "--addr-top": `${envelope.addrTop}mm`,
+      "--addr-left": `${envelope.addrLeft}mm`,
+      "--addr-size": `${envelope.addrSize}pt`,
+    } as CSSProperties;
+  }, [envelope]);
+
+  /** Single ordered list of printable rows — envelope N always matches letter N. */
+  const readyLeads = useMemo(() => batchLeads.filter((l) => rowMissing(l).length === 0), [batchLeads]);
+  const incompleteCount = batchLeads.length - readyLeads.length;
+
+  useEffect(() => {
+    const onAfter = () => document.body.classList.remove("pg-mode-env", "pg-mode-letter");
+    window.addEventListener("afterprint", onAfter);
+    return () => window.removeEventListener("afterprint", onAfter);
+  }, []);
+
+  const markPrinted = useCallback(async (ids: string[]) => {
+    if (!ids.length) return;
+    await supabase
+      .from("planning_leads")
+      .update({ letter_batch_status: "printed" } as never)
+      .in("id", ids)
+      .eq("letter_batch_status", "queued");
+    void load();
+  }, [load]);
+
+  const previewFirstLetter = () => {
+    const first = readyLeads[0] || batchLeads[0];
+    if (!first) {
+      toast({ title: "Nothing in the batch yet" });
+      return;
+    }
+    setPreviewHtml(buildLetterHtml(leadToBatchRow(first), templates, prografterLogo.url));
+  };
+
+  const printEnvelopes = () => {
+    if (!readyLeads.length) {
+      toast({ title: "Nothing ready to print", description: "Every queued lead is missing postal details." });
+      return;
+    }
+    setEnvelopeHtml(readyLeads.map((l) => buildEnvelopeHtml(leadToBatchRow(l))).join(""));
+    const [w, h] = envelope.size.split(",");
+    setPageRule(`@page{size:${w}mm ${h}mm;margin:0}`);
+    document.body.classList.remove("pg-mode-letter");
+    document.body.classList.add("pg-mode-env");
+    setTimeout(() => window.print(), 80);
+  };
+
+  const printLetters = () => {
+    if (!readyLeads.length) {
+      toast({ title: "Nothing ready to print", description: "Every queued lead is missing postal details." });
+      return;
+    }
+    setLetterHtml(readyLeads.map((l) => buildLetterHtml(leadToBatchRow(l), templates, prografterLogo.url)).join(""));
+    setPageRule("@page{size:A4;margin:0}");
+    document.body.classList.remove("pg-mode-env");
+    document.body.classList.add("pg-mode-letter");
+    setTimeout(() => window.print(), 80);
+    void markPrinted(readyLeads.map((l) => l.id));
+  };
+
+  const patchLeadField = async (l: Lead, patch: Record<string, string>) => {
+    const { error } = await supabase.from("planning_leads").update(patch as never).eq("id", l.id);
+    if (error) toast({ title: "Update failed", description: error.message, variant: "destructive" });
+    else void load();
+  };
 
   const setBatchTemplate = async (l: Lead, t: LetterTemplateId) => {
     const { error } = await supabase
@@ -1269,8 +1328,9 @@ export default function PlanningPipeline() {
         overflowX: "hidden",
       }}
     >
-      <style>{PRINT_CSS}</style>
-      <PrintSheet leads={batchLeads} />
+      <style>{LETTER_PRINT_CSS}</style>
+      <PrintSurfaces envelopeHtml={envelopeHtml} letterHtml={letterHtml} envVars={envVars} />
+      {previewHtml && <LetterPreview html={previewHtml} onClose={() => setPreviewHtml(null)} />}
 
       {/* Masthead — single compact line */}
       <div
@@ -1597,21 +1657,25 @@ export default function PlanningPipeline() {
             <div style={{ display: "flex", justifyContent: "space-between", gap: 16, flexWrap: "wrap", marginBottom: 18 }}>
               <div>
                 <h2 style={{ fontSize: 26, fontWeight: 800, margin: 0, color: C.cream, fontFamily: "inherit", textTransform: "none" }}>Batch Letter Printer</h2>
-                <p style={{ fontSize: 14.5, color: C.dim, margin: "6px 0 0", maxWidth: 620, lineHeight: 1.55 }}>
-                  {batchLeads.length} lead{batchLeads.length === 1 ? "" : "s"} queued. Check the recipient details, choose a
-                  template per letter, print the batch, then mark it sent to record the outreach on every lead.
+                <p style={{ fontSize: 14.5, color: C.dim, margin: "6px 0 0", maxWidth: 640, lineHeight: 1.55 }}>
+                  <strong style={{ color: C.cream }}>{batchLeads.length} in batch</strong> ·{" "}
+                  <span style={{ color: C.tealBright }}>{readyLeads.length} ready</span> ·{" "}
+                  <span style={{ color: incompleteCount ? C.amberBright : C.dim }}>{incompleteCount} incomplete</span>.
+                  Print all envelopes first, then all letters — the order is identical, so envelope 1 matches letter 1.
                 </p>
               </div>
               <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "flex-start" }}>
                 <button onClick={exportBatchCsv} disabled={!batchLeads.length} style={btn("quiet", { opacity: batchLeads.length ? 1 : 0.4 })}>
                   Export CSV
                 </button>
-                <button
-                  onClick={() => window.print()}
-                  disabled={!batchLeads.length}
-                  style={btn("ghost", { opacity: batchLeads.length ? 1 : 0.4 })}
-                >
-                  Print {batchLeads.length || ""} letter{batchLeads.length === 1 ? "" : "s"}
+                <button onClick={previewFirstLetter} disabled={!batchLeads.length} style={btn("quiet", { opacity: batchLeads.length ? 1 : 0.4 })}>
+                  Preview first letter
+                </button>
+                <button onClick={printEnvelopes} disabled={!readyLeads.length} style={btn("ghost", { opacity: readyLeads.length ? 1 : 0.4 })}>
+                  ① Print all envelopes
+                </button>
+                <button onClick={printLetters} disabled={!readyLeads.length} style={btn("ghost", { opacity: readyLeads.length ? 1 : 0.4 })}>
+                  ② Print all letters
                 </button>
                 <button
                   onClick={markBatchSent}
@@ -1633,7 +1697,8 @@ export default function PlanningPipeline() {
               <div style={{ display: "grid", gap: 12 }}>
                 {batchLeads.map((l) => {
                   const t = ((l.homeowner_letter_template as LetterTemplateId) || "A") as LetterTemplateId;
-                  const noRecipient = !l.applicant_name && !l.applicant_address;
+                  const missing = rowMissing(l);
+                  const noRecipient = missing.length > 0;
                   return (
                     <Panel key={l.id}>
                       <div style={{ display: "flex", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
@@ -1644,11 +1709,36 @@ export default function PlanningPipeline() {
                             {l.postcode ? `, ${l.postcode}` : ""}
                           </p>
                           <p style={{ fontSize: 13.5, color: C.dim, margin: "6px 0 0", lineHeight: 1.5 }}>
-                            {l.council_name} · {l.application_ref} · {l.description}
+                            {l.council_name}
+                            {l.letter_batch_status === "printed" ? " · PRINTED" : ""}
                           </p>
+                          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 10 }}>
+                            <label style={{ fontSize: 12.5, color: C.faint, display: "grid", gap: 4, minWidth: 220, flex: 1 }}>
+                              Application type (from the lead)
+                              <input
+                                defaultValue={l.application_type || l.proposal_type || l.description || ""}
+                                onBlur={(e) => {
+                                  const v = e.target.value.trim();
+                                  if (v !== (l.application_type || "")) void patchLeadField(l, { application_type: v });
+                                }}
+                                style={inp()}
+                              />
+                            </label>
+                            <label style={{ fontSize: 12.5, color: C.faint, display: "grid", gap: 4, minWidth: 180 }}>
+                              Application reference
+                              <input
+                                defaultValue={l.application_ref || ""}
+                                onBlur={(e) => {
+                                  const v = e.target.value.trim();
+                                  if (v && v !== l.application_ref) void patchLeadField(l, { application_ref: v });
+                                }}
+                                style={inp()}
+                              />
+                            </label>
+                          </div>
                           {noRecipient && (
                             <p style={{ fontSize: 13.5, color: C.amberBright, margin: "8px 0 0" }}>
-                              No applicant address on file — letter will be addressed to the site address.
+                              INCOMPLETE — missing {missing.join(", ")}. This letter will not print.
                             </p>
                           )}
                           {letterAlreadySent(l) && (
