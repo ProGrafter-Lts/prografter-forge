@@ -292,7 +292,7 @@ const LeadDetail = ({
   const na = nextActionFor(lead);
   const ds = daysSince(lead.submitted_date);
   const chip = outreachChip(lead);
-  const inBatch = lead.letter_batch_status === "queued";
+  const inBatch = lead.letter_batch_status === "queued" || lead.letter_batch_status === "printed";
 
   const markReviewed = async () => {
     if (await patch({ reviewed_at: new Date().toISOString() }, "Lead reviewed")) {
@@ -506,7 +506,7 @@ const LeadDetail = ({
               </a>
             )}
             <button onClick={addToBatch} disabled={busy} style={btn(inBatch ? "quiet" : "primary")}>
-              {inBatch ? "Remove from letter batch" : "Add to letter batch"}
+              {inBatch ? "In Batch ✓ — remove" : "Add to letter batch"}
             </button>
             {inBatch && (
               <button onClick={onOpenBatch} style={btn("quiet")}>
