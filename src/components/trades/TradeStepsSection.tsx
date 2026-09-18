@@ -1,5 +1,4 @@
 import { UserCheck, Bell, FileSignature, Banknote } from "lucide-react";
-import { COMMISSION_CAP_LABEL, COMMISSION_RATE_LABEL } from "@/lib/pricingTerms";
 
 const STEPS = [
   {

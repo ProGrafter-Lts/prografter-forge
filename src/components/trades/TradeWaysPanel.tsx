@@ -1,7 +1,14 @@
 import { Link } from "react-router-dom";
 import { Hammer, FileSignature, Radar, ChevronRight, PanelsTopLeft } from "lucide-react";
 
-const CARDS = [
+type TradeCard = {
+  icon: typeof Hammer;
+  title: string;
+  desc: string;
+  href?: string;
+};
+
+const CARDS: TradeCard[] = [
   {
     icon: Hammer,
     title: "Genuine Local Work",
