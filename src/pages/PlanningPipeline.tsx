@@ -1666,12 +1666,14 @@ export default function PlanningPipeline() {
                 <button onClick={exportBatchCsv} disabled={!batchLeads.length} style={btn("quiet", { opacity: batchLeads.length ? 1 : 0.4 })}>
                   Export CSV
                 </button>
-                <button
-                  onClick={() => window.print()}
-                  disabled={!batchLeads.length}
-                  style={btn("ghost", { opacity: batchLeads.length ? 1 : 0.4 })}
-                >
-                  Print {batchLeads.length || ""} letter{batchLeads.length === 1 ? "" : "s"}
+                <button onClick={previewFirstLetter} disabled={!batchLeads.length} style={btn("quiet", { opacity: batchLeads.length ? 1 : 0.4 })}>
+                  Preview first letter
+                </button>
+                <button onClick={printEnvelopes} disabled={!readyLeads.length} style={btn("ghost", { opacity: readyLeads.length ? 1 : 0.4 })}>
+                  ① Print all envelopes
+                </button>
+                <button onClick={printLetters} disabled={!readyLeads.length} style={btn("ghost", { opacity: readyLeads.length ? 1 : 0.4 })}>
+                  ② Print all letters
                 </button>
                 <button
                   onClick={markBatchSent}
