@@ -3555,6 +3555,30 @@ export type Database = {
           },
         ]
       }
+      planning_letter_settings: {
+        Row: {
+          envelope: Json
+          id: string
+          templates: Json
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          envelope?: Json
+          id?: string
+          templates?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          envelope?: Json
+          id?: string
+          templates?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       planning_opportunity_interactions: {
         Row: {
           created_at: string
