@@ -1697,7 +1697,8 @@ export default function PlanningPipeline() {
               <div style={{ display: "grid", gap: 12 }}>
                 {batchLeads.map((l) => {
                   const t = ((l.homeowner_letter_template as LetterTemplateId) || "A") as LetterTemplateId;
-                  const noRecipient = !l.applicant_name && !l.applicant_address;
+                  const missing = rowMissing(l);
+                  const noRecipient = missing.length > 0;
                   return (
                     <Panel key={l.id}>
                       <div style={{ display: "flex", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
