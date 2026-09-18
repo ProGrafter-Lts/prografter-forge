@@ -48,7 +48,7 @@ const FinalCtaBand = () => {
           </Link>
           <Link
             to="/quote-checker"
-            className="font-body text-xs font-semibold uppercase tracking-[0.18em] text-cream underline decoration-teal underline-offset-4 transition-colors hover:text-teal"
+            className="max-w-[230px] text-center font-body text-xs font-semibold uppercase tracking-[0.18em] text-cream underline decoration-teal underline-offset-4 transition-colors hover:text-teal sm:max-w-none"
           >
             Already have a quote? Use Quote Checker
           </Link>
